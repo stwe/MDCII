@@ -1,0 +1,31 @@
+# Directories
+.vs/
+.idea/
+/bin/
+/obj/
+/cmake-build-debug/
+/cmake-build-release/
+
+# Files
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.bat
+*.jpg
+*.jpeg
+*.png
+*.bmp
+*.mtl
+*.blend
+*.obj
+*.ttf
+*.ini
+*.lock
+*.json
+*.bsh
+
+conanbuildinfo.premake.lua
+conanbuildinfo.txt
+conaninfo.txt
+conanbuildinfo.cmake
