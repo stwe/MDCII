@@ -45,7 +45,7 @@ void mdcii::Game::Init()
     m_paletteFile = std::make_unique<file::PaletteFile>("STADTFLD.COL");
     m_paletteFile->ReadDataFromChunks();
 
-    m_bshFile = std::make_unique<file::BshFile>("Stadtfld.bsh", m_paletteFile->palette);
+    m_bshFile = std::make_unique<file::BshFile>("STADTFLD.BSH", m_paletteFile->palette);
     m_bshFile->ReadDataFromChunks();
 
     m_camera = std::make_unique<camera::Camera>(m_window, glm::vec2(0.0f, 0.0f));
@@ -83,12 +83,29 @@ void mdcii::Game::Render()
         return modelMatrix;
     };
 
-    m_renderer->Render(
-        getModelMatrix(glm::vec2(10.0f, 10.0f), glm::vec2(320.0f, 160.0f)),
-        758,
-        *m_window,
-        *m_camera
-        );
+    auto mapToScreen = [](const int t_x, const int t_y) -> glm::vec2
+    {
+        const auto x{ static_cast<float>(t_x) };
+        const auto y{ static_cast<float>(t_y) };
+
+        return {
+            (x - y) * 32.0f,
+            (x + y) * 16.0f
+        };
+    };
+
+    for (int y = 0; y < 4; ++y)
+    {
+        for (int x = 0; x < 4; ++x)
+        {
+            m_renderer->Render(
+                getModelMatrix(mapToScreen(x, y), glm::vec2(64.0f, 32.0f)),
+                758,
+                *m_window,
+                *m_camera
+            );
+        }
+    }
 
     m_window->SwapBuffersAndCallEvents();
 }

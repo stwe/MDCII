@@ -19,7 +19,7 @@ namespace mdcii::file
         // Types
         //-------------------------------------------------
 
-        using Color32Bit = int32_t;
+        using Color32Bit = uint32_t;
 
         //-------------------------------------------------
         // Member
