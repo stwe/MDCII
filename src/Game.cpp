@@ -1,10 +1,10 @@
 #include <sstream>
+#include <glm/ext/matrix_transform.hpp>
 #include "Game.h"
 #include "Log.h"
-#include "Palette.h"
-#include "ogl/Window.h"
 #include "ogl/OpenGL.h"
 #include "file/BshFile.h"
+#include "renderer/MeshRenderer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -42,8 +42,15 @@ void mdcii::Game::Init()
 
     m_window = std::make_shared<ogl::Window>();
 
-    m_bshFile = std::make_unique<file::BshFile>("Stadtfld.bsh");
+    m_paletteFile = std::make_unique<file::PaletteFile>("STADTFLD.COL");
+    m_paletteFile->ReadDataFromChunks();
+
+    m_bshFile = std::make_unique<file::BshFile>("Stadtfld.bsh", m_paletteFile->palette);
     m_bshFile->ReadDataFromChunks();
+
+    m_camera = std::make_unique<camera::Camera>(m_window, glm::vec2(0.0f, 0.0f));
+
+    m_renderer = std::make_unique<renderer::MeshRenderer>();
 
     Log::MDCII_LOG_DEBUG("[Game::Init()] The game was successfully initialized.");
 }
@@ -58,12 +65,30 @@ void mdcii::Game::Input()
 
 void mdcii::Game::Update()
 {
+    m_camera->Update();
 }
 
 void mdcii::Game::Render()
 {
     ogl::OpenGL::SetClearColor(0.39f, 0.58f, 0.93f, 1.0f);
     ogl::OpenGL::Clear();
+
+    auto getModelMatrix = [](const glm::vec2& t_screenPosition, const glm::vec2& t_size)
+    {
+        auto modelMatrix{ glm::mat4(1.0f) };
+
+        modelMatrix = translate(modelMatrix, glm::vec3(t_screenPosition.x, t_screenPosition.y, 0.0f));
+        modelMatrix = scale(modelMatrix, glm::vec3(t_size.x, t_size.y, 1.0f));
+
+        return modelMatrix;
+    };
+
+    m_renderer->Render(
+        getModelMatrix(glm::vec2(10.0f, 10.0f), glm::vec2(320.0f, 160.0f)),
+        758,
+        *m_window,
+        *m_camera
+        );
 
     m_window->SwapBuffersAndCallEvents();
 }

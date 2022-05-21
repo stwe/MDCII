@@ -1,6 +1,7 @@
 #pragma once
 
 #include "BinaryFile.h"
+#include "PaletteFile.h"
 
 namespace mdcii::file
 {
@@ -10,20 +11,10 @@ namespace mdcii::file
 
     struct BshTexture
     {
-        /**
-         * The pixel value that is an index of the palette that contains rgb values.
-         */
-        std::vector<uint8_t> paletteIndices;
-
-        /**
-         * The width of the texture.
-         */
+        std::vector<uint32_t> colors;
         uint32_t width{ 0 };
-
-        /**
-         * The height of the texture.
-         */
         uint32_t height{ 0 };
+        uint32_t textureId{ 0 };
     };
 
 
@@ -53,8 +44,9 @@ namespace mdcii::file
          * Constructs a new BshFile object.
          *
          * @param t_filePath The Path to the Bsh file.
+         * @param t_palette The palette containing the RGB values of each color.
          */
-        explicit BshFile(std::string t_filePath);
+        explicit BshFile(std::string t_filePath, std::vector<PaletteFile::Color32Bit> t_palette);
 
         BshFile(const BshFile& t_other) = delete;
         BshFile(BshFile&& t_other) noexcept = delete;
@@ -94,6 +86,11 @@ namespace mdcii::file
         //-------------------------------------------------
 
         /**
+         * The palette containing the RGB values of each color.
+         */
+        std::vector<PaletteFile::Color32Bit> m_palette;
+
+        /**
          * The offsets to the Bsh images.
          */
         std::vector<uint32_t> m_offsets;
@@ -109,5 +106,7 @@ namespace mdcii::file
          * @param t_offset The offset to a Bsh image.
          */
         void DecodePixelData(uint32_t t_offset);
+
+        void CreateGLTextures();
     };
 }

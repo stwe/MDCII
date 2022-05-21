@@ -2,13 +2,16 @@
 #include "Log.h"
 #include "MdciiException.h"
 #include "chunk/Chunk.h"
+#include "ogl/OpenGL.h"
+#include "ogl/resource/TextureUtils.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::file::BshFile::BshFile(std::string t_filePath)
+mdcii::file::BshFile::BshFile(std::string t_filePath, std::vector<PaletteFile::Color32Bit> t_palette)
     : BinaryFile(std::move(t_filePath))
+    , m_palette{ std::move(t_palette) }
 {
     Log::MDCII_LOG_DEBUG("[BshFile::BshFile()] Create BshFile.");
 }
@@ -24,7 +27,7 @@ mdcii::file::BshFile::~BshFile() noexcept
 
 void mdcii::file::BshFile::ReadDataFromChunks()
 {
-    Log::MDCII_LOG_DEBUG("[BshFile::ReadDataFromChunks()] Start reading BSH data from Chunks...");
+    Log::MDCII_LOG_DEBUG("[BshFile::ReadDataFromChunks()] Start reading BSH pixel data from Chunks...");
 
     // get pointer to the first element
     const auto* dataPtr{ reinterpret_cast<const uint32_t*>(chunks.at(0)->data.data()) };
@@ -49,6 +52,10 @@ void mdcii::file::BshFile::ReadDataFromChunks()
     {
         DecodePixelData(offset);
     }
+
+    CreateGLTextures();
+
+    Log::MDCII_LOG_DEBUG("[BshFile::ReadDataFromChunks()] BSH pixel data read successfully.");
 }
 
 //-------------------------------------------------
@@ -72,7 +79,7 @@ void mdcii::file::BshFile::DecodePixelData(const uint32_t t_offset)
     auto bshTexture{ std::make_unique<BshTexture>() };
     bshTexture->width = width;
     bshTexture->height = height;
-    bshTexture->paletteIndices.resize(static_cast<size_t>(width) * height);
+    bshTexture->colors.resize(static_cast<size_t>(width) * height);
 
     auto x{ 0 };
     auto y{ 0 };
@@ -97,19 +104,56 @@ void mdcii::file::BshFile::DecodePixelData(const uint32_t t_offset)
 
         for (auto i{ 0 }; i < numAlpha; ++i)
         {
-            bshTexture->paletteIndices[static_cast<size_t>(y) * width + x] = 0;
+            bshTexture->colors[static_cast<size_t>(y) * width + x] = (uint32_t)0x00000000;
             x++;
         }
 
         const auto numPixels{ static_cast<uint8_t>(*(offset += sizeof(uint8_t))) };
 
+        auto rgbToInt = [](const uint8_t t_red, const uint8_t t_green, const uint8_t t_blue) -> uint32_t
+        {
+            uint32_t alpha{ 255 };
+
+            return (alpha << 24) |
+                (t_red << 16) |
+                (t_green << 8) |
+                (t_blue << 0);
+        };
+
         for (auto i{ 0 }; i < numPixels; ++i)
         {
             const auto colorIndex{ static_cast<uint8_t>(*(offset += sizeof(uint8_t))) };
-            bshTexture->paletteIndices[static_cast<size_t>(y) * width + x] = colorIndex;
+            bshTexture->colors[static_cast<size_t>(y) * width + x] = m_palette[colorIndex];
             x++;
         }
     }
 
     bshTextures.push_back(std::move(bshTexture));
+}
+
+void mdcii::file::BshFile::CreateGLTextures()
+{
+    for (const auto& texture : bshTextures)
+    {
+        const auto textureId{ ogl::resource::TextureUtils::GenerateNewTextureId() };
+
+        ogl::resource::TextureUtils::Bind(textureId);
+        ogl::resource::TextureUtils::UseNoFilter();
+
+        texture->textureId = textureId;
+
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA8,
+            texture->width,
+            texture->height,
+            0,
+            GL_BGRA,
+            GL_UNSIGNED_INT_8_8_8_8_REV,
+            texture->colors.data()
+        );
+
+        ogl::resource::TextureUtils::Unbind();
+    }
 }

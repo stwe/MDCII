@@ -70,7 +70,7 @@ namespace mdcii::file
         void ReadChunksFromFile();
 
         //-------------------------------------------------
-        // Interface
+        // Override
         //-------------------------------------------------
 
         /**
