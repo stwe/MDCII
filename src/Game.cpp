@@ -85,21 +85,30 @@ void mdcii::Game::Render()
 
     auto mapToScreen = [](const int t_x, const int t_y) -> glm::vec2
     {
-        const auto x{ static_cast<float>(t_x) };
-        const auto y{ static_cast<float>(t_y) };
-
         return {
-            (x - y) * 32.0f,
-            (x + y) * 16.0f
+            (t_x - t_y) << 5,
+            (t_x + t_y) << 4
         };
     };
 
-    for (int y = 0; y < 4; ++y)
+    for (int y = 0; y < 350; ++y)
     {
-        for (int x = 0; x < 4; ++x)
+        for (int x = 0; x < 500; ++x)
         {
+            auto s = mapToScreen(x, y);
+
+            if (s.x < m_camera->position.x || s.y < m_camera->position.y)
+            {
+                continue;
+            }
+
+            if (s.x > m_camera->position.x + 640 - 64 || s.y > m_camera->position.y + 480 - 32)
+            {
+                continue;
+            }
+
             m_renderer->Render(
-                getModelMatrix(mapToScreen(x, y), glm::vec2(64.0f, 32.0f)),
+                getModelMatrix(s, glm::vec2(64.0f, 32.0f)),
                 758,
                 *m_window,
                 *m_camera
