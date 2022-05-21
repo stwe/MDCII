@@ -30,7 +30,7 @@ namespace mdcii::file
         //-------------------------------------------------
 
         /**
-         * The path to the file.
+         * The path to the file to load.
          */
         std::string filePath;
 
@@ -48,7 +48,7 @@ namespace mdcii::file
         /**
          * Constructs a new BinaryFile object from a given path.
          *
-         * @param t_filePath The path to the file.
+         * @param t_filePath The path to the file to load.
          */
         explicit BinaryFile(std::string t_filePath);
 

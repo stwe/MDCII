@@ -14,11 +14,18 @@ mdcii::file::BshFile::BshFile(std::string t_filePath, std::vector<PaletteFile::C
     , m_palette{ std::move(t_palette) }
 {
     Log::MDCII_LOG_DEBUG("[BshFile::BshFile()] Create BshFile.");
+
+    if (chunks.at(0)->id.c_str() != CHUNK_ID)
+    {
+        throw MDCII_EXCEPTION("[BshFile::BshFile()] Invalid Chunk Id.");
+    }
 }
 
 mdcii::file::BshFile::~BshFile() noexcept
 {
     Log::MDCII_LOG_DEBUG("[BshFile::~BshFile()] Destruct BshFile.");
+
+    CleanUp();
 }
 
 //-------------------------------------------------
@@ -79,7 +86,7 @@ void mdcii::file::BshFile::DecodePixelData(const uint32_t t_offset)
     auto bshTexture{ std::make_unique<BshTexture>() };
     bshTexture->width = width;
     bshTexture->height = height;
-    bshTexture->colors.resize(static_cast<size_t>(width) * height);
+    bshTexture->pixel.resize(static_cast<size_t>(width) * height);
 
     auto x{ 0 };
     auto y{ 0 };
@@ -104,26 +111,15 @@ void mdcii::file::BshFile::DecodePixelData(const uint32_t t_offset)
 
         for (auto i{ 0 }; i < numAlpha; ++i)
         {
-            bshTexture->colors[static_cast<size_t>(y) * width + x] = (uint32_t)0x00000000;
+            bshTexture->pixel[static_cast<size_t>(y) * width + x] = 0;
             x++;
         }
 
         const auto numPixels{ static_cast<uint8_t>(*(offset += sizeof(uint8_t))) };
-
-        auto rgbToInt = [](const uint8_t t_red, const uint8_t t_green, const uint8_t t_blue) -> uint32_t
-        {
-            uint32_t alpha{ 255 };
-
-            return (alpha << 24) |
-                (t_red << 16) |
-                (t_green << 8) |
-                (t_blue << 0);
-        };
-
         for (auto i{ 0 }; i < numPixels; ++i)
         {
             const auto colorIndex{ static_cast<uint8_t>(*(offset += sizeof(uint8_t))) };
-            bshTexture->colors[static_cast<size_t>(y) * width + x] = m_palette[colorIndex];
+            bshTexture->pixel[static_cast<size_t>(y) * width + x] = m_palette[colorIndex];
             x++;
         }
     }
@@ -131,7 +127,7 @@ void mdcii::file::BshFile::DecodePixelData(const uint32_t t_offset)
     bshTextures.push_back(std::move(bshTexture));
 }
 
-void mdcii::file::BshFile::CreateGLTextures()
+void mdcii::file::BshFile::CreateGLTextures() const
 {
     for (const auto& texture : bshTextures)
     {
@@ -146,14 +142,35 @@ void mdcii::file::BshFile::CreateGLTextures()
             GL_TEXTURE_2D,
             0,
             GL_RGBA8,
-            texture->width,
-            texture->height,
+            static_cast<int32_t>(texture->width),
+            static_cast<int32_t>(texture->height),
             0,
             GL_BGRA,
             GL_UNSIGNED_INT_8_8_8_8_REV,
-            texture->colors.data()
+            texture->pixel.data()
         );
 
         ogl::resource::TextureUtils::Unbind();
     }
+}
+
+//-------------------------------------------------
+// CleanUp
+//-------------------------------------------------
+
+void mdcii::file::BshFile::CleanUp() const
+{
+    Log::MDCII_LOG_DEBUG("[BshFile::CleanUp()] Clean up OpenGL textures.");
+
+    auto i{ 0 };
+    for (const auto& texture : bshTextures)
+    {
+        if (texture->textureId)
+        {
+            glDeleteTextures(1, &texture->textureId);
+            i++;
+        }
+    }
+
+    Log::MDCII_LOG_DEBUG("[BshFile::CleanUp()] {} OpenGL textures was deleted.", i);
 }

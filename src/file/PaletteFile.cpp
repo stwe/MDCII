@@ -1,5 +1,6 @@
 #include "PaletteFile.h"
 #include "MdciiAssert.h"
+#include "MdciiException.h"
 #include "chunk/Chunk.h"
 
 //-------------------------------------------------
@@ -10,6 +11,11 @@ mdcii::file::PaletteFile::PaletteFile(const std::string& t_filePath)
     : BinaryFile(t_filePath)
 {
     Log::MDCII_LOG_DEBUG("[PaletteFile::PaletteFile()] Create PaletteFile.");
+
+    if (chunks.at(0)->id.c_str() != CHUNK_ID)
+    {
+        throw MDCII_EXCEPTION("[PaletteFile::PaletteFile()] Invalid Chunk Id.");
+    }
 }
 
 mdcii::file::PaletteFile::~PaletteFile() noexcept
@@ -33,7 +39,7 @@ void mdcii::file::PaletteFile::ReadDataFromChunks()
         const auto green{ chunk0->data.at(i + 1) };
         const auto blue{ chunk0->data.at(i + 2) };
 
-        palette.push_back(RgbToInt(red, green, blue));
+        palette.push_back(RgbTo32BitInt(red, green, blue));
     }
 
     MDCII_ASSERT(palette.size() == NUMBER_OF_COLORS, "[PaletteFile::ReadDataFromChunks()] Invalid number of colors.")
@@ -45,7 +51,7 @@ void mdcii::file::PaletteFile::ReadDataFromChunks()
 // Helper
 //-------------------------------------------------
 
-mdcii::file::PaletteFile::Color32Bit mdcii::file::PaletteFile::RgbToInt(const uint8_t t_red, const uint8_t t_green, const uint8_t t_blue)
+mdcii::file::PaletteFile::Color32Bit mdcii::file::PaletteFile::RgbTo32BitInt(const uint8_t t_red, const uint8_t t_green, const uint8_t t_blue)
 {
     constexpr Color32Bit alpha{ 255 };
 

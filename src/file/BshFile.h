@@ -11,7 +11,7 @@ namespace mdcii::file
 
     struct BshTexture
     {
-        std::vector<uint32_t> colors;
+        std::vector<PaletteFile::Color32Bit> pixel;
         uint32_t width{ 0 };
         uint32_t height{ 0 };
         uint32_t textureId{ 0 };
@@ -22,6 +22,9 @@ namespace mdcii::file
     // BshFile
     //-------------------------------------------------
 
+    /**
+     * The class loads a Bsh file.
+     */
     class BshFile : public BinaryFile
     {
     public:
@@ -44,7 +47,7 @@ namespace mdcii::file
          * Constructs a new BshFile object.
          *
          * @param t_filePath The Path to the Bsh file.
-         * @param t_palette The palette containing the RGB values of each color.
+         * @param t_palette The palette containing the RGBA values as 32bit integer of each color.
          */
         explicit BshFile(std::string t_filePath, std::vector<PaletteFile::Color32Bit> t_palette);
 
@@ -81,12 +84,17 @@ namespace mdcii::file
          */
         static constexpr uint8_t END_OF_ROW{ 254 };
 
+        /**
+         * The file/chunk Id.
+         */
+        static constexpr std::string_view CHUNK_ID{ "BSH" };
+
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
         /**
-         * The palette containing the RGB values of each color.
+         * The palette containing the RGBA values as 32bit integer of each color.
          */
         std::vector<PaletteFile::Color32Bit> m_palette;
 
@@ -107,6 +115,18 @@ namespace mdcii::file
          */
         void DecodePixelData(uint32_t t_offset);
 
-        void CreateGLTextures();
+        /**
+         * Makes the BshTexture pixel data accessible to the GPU.
+         */
+        void CreateGLTextures() const;
+
+        //-------------------------------------------------
+        // CleanUp
+        //-------------------------------------------------
+
+        /**
+         * Clean up ogl textures.
+         */
+        void CleanUp() const;
     };
 }

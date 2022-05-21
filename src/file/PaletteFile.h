@@ -8,9 +8,17 @@
 
 namespace mdcii::file
 {
+    /**
+     * Represents a PaletteFile.
+     * The class loads the pallet values from the stadtfld.col file.
+     */
     class PaletteFile : public BinaryFile
     {
     public:
+        //-------------------------------------------------
+        // Types
+        //-------------------------------------------------
+
         using Color32Bit = int32_t;
 
         //-------------------------------------------------
@@ -18,7 +26,7 @@ namespace mdcii::file
         //-------------------------------------------------
 
         /**
-         * The palette RGB values as int.
+         * The palette RGBA values as int.
          */
         std::vector<Color32Bit> palette;
 
@@ -31,7 +39,7 @@ namespace mdcii::file
         /**
          * Constructs a new PaletteFile object.
          *
-         * @param t_filePath The Path to the file.
+         * @param t_filePath The path to the file.
          */
         explicit PaletteFile(const std::string& t_filePath);
 
@@ -58,12 +66,23 @@ namespace mdcii::file
         // Constants
         //-------------------------------------------------
 
+        /**
+         * The number of palette colors.
+         */
         static constexpr auto NUMBER_OF_COLORS{ 256 };
+
+        /**
+         * The file/chunk Id.
+         */
+        static constexpr std::string_view CHUNK_ID{ "COL" };
 
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
 
-        static Color32Bit RgbToInt(uint8_t t_red, uint8_t t_green, uint8_t t_blue);
+        /**
+         * Stores the 8bit RGBA values in a 32bit int.
+         */
+        static Color32Bit RgbTo32BitInt(uint8_t t_red, uint8_t t_green, uint8_t t_blue);
     };
 }
