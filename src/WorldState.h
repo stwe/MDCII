@@ -32,6 +32,20 @@ namespace mdcii
     {
     public:
         //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * The width of the world in tiles.
+         */
+        static constexpr auto WORLD_WIDTH = 500;
+
+        /**
+         * The height of the world in tiles.
+         */
+        static constexpr auto WORLD_HEIGHT = 350;
+
+        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 

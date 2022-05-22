@@ -30,3 +30,5 @@ conanbuildinfo.premake.lua
 conanbuildinfo.txt
 conaninfo.txt
 conanbuildinfo.cmake
+
+!/config.ini

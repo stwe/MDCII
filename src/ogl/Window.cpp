@@ -1,6 +1,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "Window.h"
-//#include "Game.h"
+#include "Game.h"
 #include "Log.h"
 #include "MdciiException.h"
 #include "event/EventManager.h"
@@ -129,7 +129,7 @@ void mdcii::ogl::Window::Init()
     InitWindow();
     InitProjectionMatrix();
     InitImGui();
-    InitInputCallbacks();
+    //InitInputCallbacks(); todo
 
     Log::MDCII_LOG_DEBUG("[Window::Init()] The window was successfully initialized.");
 }
@@ -138,15 +138,11 @@ void mdcii::ogl::Window::LoadConfig()
 {
     Log::MDCII_LOG_DEBUG("[Window::LoadConfig()] Load values from config file.");
 
-    //m_title = Game::INI.Get<std::string>("window", "title");
+    m_width = Game::INI.Get<int>("window", "width");
+    m_height = Game::INI.Get<int>("window", "height");
 
-    Log::MDCII_LOG_INFO("Game window title: {}", m_title);
-
-    //m_width = Game::INI.Get<int>("window", "width");
-    //m_height = Game::INI.Get<int>("window", "height");
-
-    //m_width = std::max(m_width, MIN_WIDTH);
-    //m_height = std::max(m_height, MIN_HEIGHT);
+    m_width = std::max(m_width, MIN_WIDTH);
+    m_height = std::max(m_height, MIN_HEIGHT);
 
     Log::MDCII_LOG_INFO("Game window width: {}", m_width);
     Log::MDCII_LOG_INFO("Game window height: {}", m_height);
@@ -239,7 +235,8 @@ void mdcii::ogl::Window::InitImGui() const
 
     // setup renderer bindings without callbacks
     // the callbacks from ImGui will later be integrated into our own
-    ImGui_ImplGlfw_InitForOpenGL(m_windowHandle, false);
+    // todo: custom callbacks
+    ImGui_ImplGlfw_InitForOpenGL(m_windowHandle, true);
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
     // setup style

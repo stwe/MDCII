@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include "ini/ini.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -33,6 +34,18 @@ namespace mdcii
          * 60 updates per second.
          */
         static constexpr auto FRAME_TIME{ 1.0 / 60.0 };
+
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+#if defined(_WIN64)
+        inline static const inih::INIReader INI{ "./config.ini" }; // NOLINT(cert-err58-cpp)
+        inline static const std::string RESOURCES_PATH{ INI.Get<std::string>("win64", "resources_path") }; // NOLINT(cert-err58-cpp)
+#else
+        inline static const inih::INIReader INI{ "/home/steffen/CLionProjects/MDCII/config.ini" }; // NOLINT(cert-err58-cpp)
+        inline static const std::string RESOURCES_PATH{ INI.Get<std::string>("linux", "resources_path") }; // NOLINT(cert-err58-cpp)
+#endif
 
         //-------------------------------------------------
         // Ctors. / Dtor.

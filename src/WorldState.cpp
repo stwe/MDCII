@@ -29,7 +29,15 @@ mdcii::WorldState::~WorldState() noexcept
 
 void mdcii::WorldState::Input()
 {
+    // todo
     // m_camera->Input()
+
+    /*
+    if (ImGui::GetIO().WantCaptureMouse)
+    {
+        return;
+    }
+    */
 
     // ESC for quit
     if (context->window->IsKeyPressed(GLFW_KEY_ESCAPE))
@@ -64,18 +72,20 @@ void mdcii::WorldState::Render()
         };
     };
 
-    for (int y = 0; y < 350; ++y)
+    for (int y = 0; y < WORLD_HEIGHT; ++y)
     {
-        for (int x = 0; x < 500; ++x)
+        for (int x = 0; x < WORLD_WIDTH; ++x)
         {
-            auto s = mapToScreen(x, y);
+            const auto s{ mapToScreen(x, y) };
 
             if (s.x < m_camera->position.x || s.y < m_camera->position.y)
             {
                 continue;
             }
 
-            if (s.x > m_camera->position.x + 640 - 64 || s.y > m_camera->position.y + 480 - 32)
+            if (s.x > m_camera->position.x + static_cast<float>(context->window->GetWidth()) - 64 ||
+                s.y > m_camera->position.y + static_cast<float>(context->window->GetHeight()) - 32
+                )
             {
                 continue;
             }
@@ -94,7 +104,7 @@ void mdcii::WorldState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    ImGui::Begin("World");
+    ImGui::Begin("World", nullptr, 0);
     ImGui::End();
 
     ogl::Window::ImGuiEnd();
