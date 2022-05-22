@@ -1,10 +1,9 @@
 #include <sstream>
-#include <glm/ext/matrix_transform.hpp>
 #include "Game.h"
-#include "Log.h"
+#include "WorldState.h"
+#include "state/StateStack.h"
+#include "ogl/Window.h"
 #include "ogl/OpenGL.h"
-#include "file/BshFile.h"
-#include "renderer/MeshRenderer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -42,81 +41,26 @@ void mdcii::Game::Init()
 
     m_window = std::make_shared<ogl::Window>();
 
-    m_paletteFile = std::make_unique<file::PaletteFile>("STADTFLD.COL");
-    m_paletteFile->ReadDataFromChunks();
-
-    m_bshFile = std::make_unique<file::BshFile>("STADTFLD.BSH", m_paletteFile->palette);
-    m_bshFile->ReadDataFromChunks();
-
-    m_camera = std::make_unique<camera::Camera>(m_window, glm::vec2(0.0f, 0.0f));
-
-    m_renderer = std::make_unique<renderer::MeshRenderer>();
+    m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::State::Context>(m_window));
+    m_stateStack->RegisterState<WorldState>(state::State::Id::WORLD);
+    m_stateStack->PushState(state::State::Id::WORLD);
 
     Log::MDCII_LOG_DEBUG("[Game::Init()] The game was successfully initialized.");
 }
 
 void mdcii::Game::Input()
 {
-    if (m_window->IsKeyPressed(GLFW_KEY_ESCAPE))
-    {
-        m_window->Close();
-    }
+    m_stateStack->Input();
 }
 
 void mdcii::Game::Update()
 {
-    m_camera->Update();
+    m_stateStack->Update();
 }
 
 void mdcii::Game::Render()
 {
-    ogl::OpenGL::SetClearColor(0.39f, 0.58f, 0.93f, 1.0f);
-    ogl::OpenGL::Clear();
-
-    auto getModelMatrix = [](const glm::vec2& t_screenPosition, const glm::vec2& t_size)
-    {
-        auto modelMatrix{ glm::mat4(1.0f) };
-
-        modelMatrix = translate(modelMatrix, glm::vec3(t_screenPosition.x, t_screenPosition.y, 0.0f));
-        modelMatrix = scale(modelMatrix, glm::vec3(t_size.x, t_size.y, 1.0f));
-
-        return modelMatrix;
-    };
-
-    auto mapToScreen = [](const int t_x, const int t_y) -> glm::vec2
-    {
-        return {
-            (t_x - t_y) << 5,
-            (t_x + t_y) << 4
-        };
-    };
-
-    for (int y = 0; y < 350; ++y)
-    {
-        for (int x = 0; x < 500; ++x)
-        {
-            auto s = mapToScreen(x, y);
-
-            if (s.x < m_camera->position.x || s.y < m_camera->position.y)
-            {
-                continue;
-            }
-
-            if (s.x > m_camera->position.x + 640 - 64 || s.y > m_camera->position.y + 480 - 32)
-            {
-                continue;
-            }
-
-            m_renderer->Render(
-                getModelMatrix(s, glm::vec2(64.0f, 32.0f)),
-                758,
-                *m_window,
-                *m_camera
-            );
-        }
-    }
-
-    m_window->SwapBuffersAndCallEvents();
+    m_stateStack->Render();
 }
 
 //-------------------------------------------------
@@ -147,6 +91,11 @@ void mdcii::Game::GameLoop()
             Update();
             updates++;
             dt--;
+        }
+
+        if (m_stateStack->IsEmpty())
+        {
+            m_window->Close();
         }
 
         Render();

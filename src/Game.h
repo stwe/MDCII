@@ -11,20 +11,9 @@ namespace mdcii::ogl
     class Window;
 }
 
-namespace mdcii::file
+namespace mdcii::state
 {
-    class PaletteFile;
-    class BshFile;
-}
-
-namespace mdcii::camera
-{
-    class Camera;
-}
-
-namespace mdcii::renderer
-{
-    class MeshRenderer;
+    class StateStack;
 }
 
 //-------------------------------------------------
@@ -72,10 +61,7 @@ namespace mdcii
         //-------------------------------------------------
 
         std::shared_ptr<ogl::Window> m_window;
-        std::unique_ptr<file::PaletteFile> m_paletteFile;
-        std::unique_ptr<file::BshFile> m_bshFile;
-        std::unique_ptr<camera::Camera> m_camera;
-        std::unique_ptr<renderer::MeshRenderer> m_renderer;
+        std::unique_ptr<state::StateStack> m_stateStack;
 
         //-------------------------------------------------
         // Logic
