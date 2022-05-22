@@ -46,7 +46,7 @@ namespace mdcii::file
         /**
          * Constructs a new BshFile object.
          *
-         * @param t_filePath The Path to the Bsh file.
+         * @param t_filePath The path to the Bsh file.
          * @param t_palette The palette containing the RGBA values as 32bit integer of each color.
          */
         explicit BshFile(std::string t_filePath, std::vector<PaletteFile::Color32Bit> t_palette);
@@ -125,7 +125,7 @@ namespace mdcii::file
         //-------------------------------------------------
 
         /**
-         * Clean up ogl textures.
+         * Clean up OpenGL / delete textures.
          */
         void CleanUp() const;
     };

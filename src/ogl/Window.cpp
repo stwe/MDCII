@@ -45,11 +45,6 @@ int mdcii::ogl::Window::GetHeight() const
     return m_height;
 }
 
-const glm::mat4& mdcii::ogl::Window::GetProjectionMatrix() const
-{
-    return m_projectionMatrix;
-}
-
 const glm::mat4& mdcii::ogl::Window::GetOrthographicProjectionMatrix() const
 {
     return m_orthographicProjectionMatrix;
@@ -234,16 +229,12 @@ void mdcii::ogl::Window::InitWindow()
 
     // Make the window visible.
     glfwShowWindow(GetWindowHandle());
-
-    // enable depth && stencil buffer
-    OpenGL::EnableDepthAndStencilTesting(); // todo
 }
 
 void mdcii::ogl::Window::InitProjectionMatrix()
 {
     Log::MDCII_LOG_DEBUG("[Window::InitProjectionMatrix()] Initializing projection.");
 
-    UpdateProjectionMatrix();
     UpdateOrthographicProjectionMatrix();
 }
 
@@ -277,18 +268,6 @@ void mdcii::ogl::Window::InitInputCallbacks() const
 //-------------------------------------------------
 // Projection matrix
 //-------------------------------------------------
-
-void mdcii::ogl::Window::UpdateProjectionMatrix()
-{
-    m_projectionMatrix = glm::perspectiveFov
-    (
-        glm::radians(fovDeg),
-        static_cast<float>(m_width),
-        static_cast<float>(m_height),
-        nearPlane,
-        farPlane
-    );
-}
 
 void mdcii::ogl::Window::UpdateOrthographicProjectionMatrix()
 {

@@ -9,6 +9,7 @@ workspace "MDCII"
     configurations
     {
         "Debug",
+        "FastDebug",
         "Release"
     }
 
@@ -51,6 +52,19 @@ project "MDCII"
         defines { "MDCII_DEBUG_BUILD", "GLFW_INCLUDE_NONE", "_CRT_SECURE_NO_WARNINGS" }
         runtime "Debug"
         symbols "On"
+
+    -- disable Basic Runtime Checks
+    -- debug with inlines (use /Ob1)
+    -- disable Edit And Continue (use /Zi)
+    -- disable Just My Code debugging
+    filter "configurations:FastDebug"
+        defines { "MDCII_DEBUG_BUILD", "GLFW_INCLUDE_NONE", "_CRT_SECURE_NO_WARNINGS" }
+        runtime "Debug"
+        symbols "On"
+        flags { "NoRuntimeChecks" }
+        buildoptions "/Ob1"
+        editandcontinue "Off"
+        justmycode "Off"
 
     filter "configurations:Release"
         defines { "GLFW_INCLUDE_NONE", "_CRT_SECURE_NO_WARNINGS" }

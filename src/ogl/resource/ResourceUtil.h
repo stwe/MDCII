@@ -13,6 +13,14 @@ namespace mdcii::ogl::resource
     class ResourceUtil
     {
     public:
+
+        /**
+         * Reads a shader file into a string.
+         *
+         * @param t_fileName The path to the shader file.
+         *
+         * @return A string with the shader code.
+         */
         static auto ReadShaderFile(const std::string& t_fileName)
         {
             std::string content;
@@ -44,6 +52,13 @@ namespace mdcii::ogl::resource
             return content;
         }
 
+        /**
+         * Find occurrences of a search value in another string.
+         *
+         * @param t_positions The results.
+         * @param t_data The string in which to search.
+         * @param t_toSearch The search string.
+         */
         static void FindAllOccurances(std::vector<size_t>& t_positions, const std::string& t_data, const std::string& t_toSearch)
         {
             // Get the first occurrence.
