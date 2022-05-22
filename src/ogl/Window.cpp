@@ -1,12 +1,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "Window.h"
-#include "Game.h"
-#include "OpenGL.h"
+//#include "Game.h"
 #include "Log.h"
 #include "MdciiException.h"
-//#include "imgui/imgui_impl_opengl3.h"
-//#include "imgui/imgui_impl_glfw.h"
-//#include "event/EventManager.h"
+#include "event/EventManager.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include "imgui/imgui_impl_glfw.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -107,19 +106,15 @@ glm::vec2 mdcii::ogl::Window::GetMousePosition() const
 
 void mdcii::ogl::Window::ImGuiBegin()
 {
-    /*
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    */
 }
 
 void mdcii::ogl::Window::ImGuiEnd()
 {
-    /*
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    */
 }
 
 //-------------------------------------------------
@@ -155,10 +150,6 @@ void mdcii::ogl::Window::LoadConfig()
 
     Log::MDCII_LOG_INFO("Game window width: {}", m_width);
     Log::MDCII_LOG_INFO("Game window height: {}", m_height);
-
-    //fovDeg = Game::INI.Get<float>("frustum", "fov_deg");
-    //nearPlane = Game::INI.Get<float>("frustum", "near");
-    //farPlane = Game::INI.Get<float>("frustum", "far");
 }
 
 void mdcii::ogl::Window::InitWindow()
@@ -242,7 +233,6 @@ void mdcii::ogl::Window::InitImGui() const
 {
     Log::MDCII_LOG_DEBUG("[Window::InitImGui()] Initializing ImGui.");
 
-    /*
     // setup ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -254,15 +244,14 @@ void mdcii::ogl::Window::InitImGui() const
 
     // setup style
     ImGui::StyleColorsDark();
-    */
 }
 
 void mdcii::ogl::Window::InitInputCallbacks() const
 {
     Log::MDCII_LOG_DEBUG("[Window::InitInputCallbacks()] Initializing input callbacks.");
 
-    //event::EventManager::SetKeyboardGlfwCallbacks(m_windowHandle);
-    //event::EventManager::SetMouseGlfwCallbacks(m_windowHandle);
+    event::EventManager::SetKeyboardGlfwCallbacks(m_windowHandle);
+    event::EventManager::SetMouseGlfwCallbacks(m_windowHandle);
 }
 
 //-------------------------------------------------
@@ -290,9 +279,9 @@ void mdcii::ogl::Window::CleanUp() const
 {
     Log::MDCII_LOG_DEBUG("[Window::CleanUp()] CleanUp window.");
 
-    //ImGui_ImplOpenGL3_Shutdown();
-    //ImGui_ImplGlfw_Shutdown();
-    //ImGui::DestroyContext();
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
 
     glfwDestroyWindow(m_windowHandle);
     glfwTerminate();

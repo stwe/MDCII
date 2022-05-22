@@ -13,7 +13,7 @@
 namespace mdcii::ogl::resource
 {
     /**
-     * The manager prevents the reloading of textures or shaders.
+     * The static manager prevents the reloading of textures or shaders.
      */
     class ResourceManager
     {
