@@ -71,26 +71,28 @@ void mdcii::Game::GameLoop()
 {
     Log::MDCII_LOG_DEBUG("[Game::GameLoop()] Starting the game loop.");
 
-    auto lastTime{ glfwGetTime() };
-    auto resetTimer{ lastTime };
+    auto previousTime{ glfwGetTime() };
+    auto lag{ 0.0 };
 
-    auto dt{ 0.0 };
-    auto fps{ 0 };
+    auto infoTimer{ previousTime };
+    auto render{ 0 };
     auto updates{ 0 };
 
     while (!m_window->WindowShouldClose())
     {
-        const auto now{ glfwGetTime() };
-        dt += (now - lastTime) / FRAME_TIME;
-        lastTime = now;
+        const auto currentTime{ glfwGetTime() };
+        const auto elapsedTime{ currentTime - previousTime };
+        previousTime = currentTime;
+
+        lag += elapsedTime;
 
         Input();
 
-        while (dt >= 1.0)
+        while (lag >= FRAME_TIME)
         {
             Update();
             updates++;
-            dt--;
+            lag -= FRAME_TIME;
         }
 
         if (m_stateStack->IsEmpty())
@@ -99,22 +101,22 @@ void mdcii::Game::GameLoop()
         }
 
         Render();
-        fps++;
+        render++;
 
-        if (glfwGetTime() - resetTimer > 1.0)
+        if (glfwGetTime() - infoTimer > 1.0)
         {
-            resetTimer++;
+            infoTimer++;
 
             std::stringstream ss;
 #ifdef MDCII_DEBUG_BUILD
-            ss << m_window->GetTitle() << " [DEBUG BUILD] " << "   |   Fps: " << fps << "   |   Updates: " << updates;
+            ss << m_window->GetTitle() << " [DEBUG BUILD] " << "   |   Render: " << render << "   |   Updates: " << updates;
 #else
-            ss << m_window->GetTitle() << " [RELEASE BUILD] " << "   |   Fps: " << fps << "   |   Updates: " << updates;
+            ss << m_window->GetTitle() << " [RELEASE BUILD] " << "   |   Render: " << render << "   |   Updates: " << updates;
 #endif
             glfwSetWindowTitle(m_window->GetWindowHandle(), ss.str().c_str());
 
             updates = 0;
-            fps = 0;
+            render = 0;
         }
     }
 
