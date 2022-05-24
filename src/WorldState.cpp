@@ -1,10 +1,11 @@
-#include <glm/ext/matrix_transform.hpp>
 #include <imgui.h>
 #include "WorldState.h"
 #include "Log.h"
 #include "renderer/MeshRenderer.h"
+#include "renderer/Utils.h"
 #include "file/BshFile.h"
 #include "ogl/OpenGL.h"
+#include "ogl/resource/ResourceManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -54,23 +55,44 @@ void mdcii::WorldState::Update()
 
 void mdcii::WorldState::Render()
 {
-    auto getModelMatrix = [](const glm::vec2& t_screenPosition, const glm::vec2& t_size)
+    const auto id{ ogl::resource::ResourceManager::LoadTexture("resources/textures/red.png").id };
+
+    for (int y = 0; y < 8; ++y)
     {
-        auto modelMatrix{ glm::mat4(1.0f) };
+        for (int x = 0; x < 4; ++x)
+        {
+            //auto newX{ 4 - t_y - 1 };
+            //auto newY{ t_x };
 
-        modelMatrix = translate(modelMatrix, glm::vec3(t_screenPosition.x, t_screenPosition.y, 0.0f));
-        modelMatrix = scale(modelMatrix, glm::vec3(t_size.x, t_size.y, 1.0f));
+            glm::vec2 s;
+            if (m_rotate90)
+            {
+                s = renderer::Utils::MapToIso(4 - y - 1, x);
+            }
+            else
+            {
+                s = renderer::Utils::MapToIso(x, y);
+            }
 
-        return modelMatrix;
-    };
+            m_renderer->Render(
+                renderer::Utils::GetModelMatrix(s, glm::vec2(64.0f, 32.0f)),
+                id,
+                *context->window,
+                *m_camera
+            );
 
-    auto mapToScreen = [](const int t_x, const int t_y) -> glm::vec2
-    {
-        return {
-            (t_x - t_y) << 5,
-            (t_x + t_y) << 4
-        };
-    };
+            if (m_rotate90)
+            {
+                RenderBuilding(1341, 4 - 0 - 1, 0);
+                RenderBuilding(1321, 4 - 7 - 1, 0);
+            }
+            else
+            {
+                RenderBuilding(1340, 0, 0);
+                RenderBuilding(1320, 0, 7);
+            }
+        }
+    }
 
     /*
     for (int y = 0; y < WORLD_HEIGHT; ++y)
@@ -125,6 +147,7 @@ void mdcii::WorldState::Render()
     );
     */
 
+    /*
     auto now = glfwGetTime();
     static double old = 0.0;
     auto diff = now - old;
@@ -148,6 +171,7 @@ void mdcii::WorldState::Render()
         *context->window,
         *m_camera
     );
+    */
 }
 
 void mdcii::WorldState::RenderImGui()
@@ -155,6 +179,12 @@ void mdcii::WorldState::RenderImGui()
     ogl::Window::ImGuiBegin();
 
     ImGui::Begin("World", nullptr, 0);
+
+    if (ImGui::Button("Rotate"))
+    {
+        m_rotate90 = !m_rotate90;
+    }
+
     ImGui::End();
 
     ogl::Window::ImGuiEnd();
@@ -163,6 +193,22 @@ void mdcii::WorldState::RenderImGui()
 //-------------------------------------------------
 // Init
 //-------------------------------------------------
+
+void mdcii::WorldState::RenderBuilding(const int t_id, const int t_mapX, const int t_mapY) const
+{
+    const auto w{ static_cast<float>(m_stdBshFile->bshTextures[t_id]->width) };
+    const auto h{ static_cast<float>(m_stdBshFile->bshTextures[t_id]->height) };
+
+    auto screenPosition{ renderer::Utils::MapToIso(t_mapX, t_mapY) };
+    screenPosition.y -= (h - 32.0f);
+
+    m_renderer->Render(
+        renderer::Utils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
+        m_stdBshFile->bshTextures[t_id]->textureId,
+        *context->window,
+        *m_camera
+    );
+}
 
 void mdcii::WorldState::Init()
 {

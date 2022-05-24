@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include "state/State.h"
 
 //-------------------------------------------------
@@ -90,7 +91,21 @@ namespace mdcii
         std::unique_ptr<camera::Camera> m_camera;
         std::unique_ptr<renderer::MeshRenderer> m_renderer;
 
+        // todo temp code
+        // -------------------
         int m_frame{ 0 };
+        bool m_rotate90{ false };
+
+        std::vector<int> m_map
+        {
+            1336, 0, 0, 0,
+               0, 0, 0, 0,
+               0, 0, 0, 0,
+               0, 0, 0, 1340
+        };
+        // -------------------
+
+        void RenderBuilding(int t_id, int t_mapX, int t_mapY) const;
 
         //-------------------------------------------------
         // Init
