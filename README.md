@@ -9,6 +9,7 @@
 * [GLM](https://github.com/g-truc/glm)
 * [spdlog](https://github.com/gabime/spdlog)
 * [Dear ImGui](https://github.com/ocornut/imgui)
+* [NLohmann Json](https://github.com/nlohmann/json)
 * C++ 17 Compiler
 
 ### Platforms
@@ -30,7 +31,8 @@ glfw/3.3.7
 glew/2.2.0
 glm/0.9.9.8
 spdlog/1.10.0
-imgui/1.87
+imgui/1.86
+nlohmann_json/3.10.5
 
 [generators]
 premake
@@ -77,7 +79,8 @@ glfw/3.3.7
 glew/2.2.0
 glm/0.9.9.8
 spdlog/1.10.0
-imgui/1.87
+imgui/1.86
+nlohmann_json/3.10.5
 
 [generators]
 cmake
