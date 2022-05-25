@@ -1,6 +1,7 @@
 #include <imgui.h>
 #include "WorldState.h"
 #include "Log.h"
+#include "data/HousesJsonFile.h"
 #include "renderer/MeshRenderer.h"
 #include "renderer/Utils.h"
 #include "file/BshFile.h"
@@ -226,6 +227,8 @@ void mdcii::WorldState::Init()
     m_camera = std::make_unique<camera::Camera>(context->window, glm::vec2(0.0f, 0.0f));
 
     m_renderer = std::make_unique<renderer::MeshRenderer>();
+
+    m_housesJsonFile = std::make_unique<data::HousesJsonFile>("resources/data/houses.json");
 
     Log::MDCII_LOG_DEBUG("[WorldState::Init()] The world state was successfully initialized.");
 }

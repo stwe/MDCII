@@ -7,6 +7,11 @@
 // Forward declarations
 //-------------------------------------------------
 
+namespace mdcii::data
+{
+    class HousesJsonFile;
+}
+
 namespace mdcii::file
 {
     class PaletteFile;
@@ -90,6 +95,7 @@ namespace mdcii
         std::unique_ptr<file::BshFile> m_traegerBshFile;
         std::unique_ptr<camera::Camera> m_camera;
         std::unique_ptr<renderer::MeshRenderer> m_renderer;
+        std::unique_ptr<data::HousesJsonFile> m_housesJsonFile;
 
         // todo temp code
         // -------------------
