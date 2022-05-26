@@ -1,36 +1,60 @@
 #pragma once
 
+#include <map>
 #include <string>
-#include "Building.h"
+#include "TileAssetProperties.h"
+
+//-------------------------------------------------
+// HousesJsonFile
+//-------------------------------------------------
 
 namespace mdcii::data
 {
+    /**
+     * Reads the HAUS objects from the houses.json file.
+     */
     class HousesJsonFile
     {
     public:
+        //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
 
-        std::unordered_map<int, Building> buildings;
+        /**
+         * The path to the houses.json file.
+         */
+        inline static const std::string HOUSES_JSON_FILE_PATH{ "resources/data/houses.json" };
+
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * The HAUS objects.
+         */
+        std::map<int, TileAssetProperties> tileAssetPropertiesMap;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        HousesJsonFile() = delete;
-
-        explicit HousesJsonFile(const std::string& t_filePath);
+        HousesJsonFile();
 
         HousesJsonFile(const HousesJsonFile& t_other) = delete;
         HousesJsonFile(HousesJsonFile&& t_other) noexcept = delete;
         HousesJsonFile& operator=(const HousesJsonFile& t_other) = delete;
         HousesJsonFile& operator=(HousesJsonFile&& t_other) noexcept = delete;
 
-        ~HousesJsonFile();
+        ~HousesJsonFile() noexcept;
 
         //-------------------------------------------------
         // Read
         //-------------------------------------------------
 
-        void ReadFileData(const std::string& t_filePath);
+        /**
+         * Reads the houses.json file and creates TileAssetProperties objects.
+         */
+        void ReadFileData();
 
     protected:
 

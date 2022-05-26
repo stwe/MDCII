@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <array>
-#include <string_view>
+#include <string>
 
 //-------------------------------------------------
 // Forward declarations
@@ -42,15 +42,16 @@ namespace mdcii::state
             MAIN_MENU,  // MainMenuState
             START,      // StartState
             WORLD,      // WorldState
+            EDITOR,     // EditorState
             ALL         // is used when all states are meant
         };
 
         /**
          * The unique identifiers of the states as string.
          */
-        static constexpr std::array<std::string_view, 4> STATE_IDS
+        static constexpr std::array<std::string_view, 5> STATE_IDS
         {
-            "MAIN_MENU", "START", "WORLD", "ALL"
+            "MAIN_MENU", "START", "WORLD", "EDITOR", "ALL"
         };
 
         /**

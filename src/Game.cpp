@@ -1,6 +1,6 @@
 #include <sstream>
 #include "Game.h"
-#include "WorldState.h"
+#include "EditorState.h"
 #include "state/StateStack.h"
 #include "ogl/Window.h"
 #include "ogl/OpenGL.h"
@@ -41,9 +41,14 @@ void mdcii::Game::Init()
 
     m_window = std::make_shared<ogl::Window>();
 
+    // create state stack
     m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::State::Context>(m_window));
-    m_stateStack->RegisterState<WorldState>(state::State::Id::WORLD);
-    m_stateStack->PushState(state::State::Id::WORLD);
+
+    // register EditorState only
+    m_stateStack->RegisterState<EditorState>(state::State::Id::EDITOR);
+
+    // start with EditorState
+    m_stateStack->PushState(state::State::Id::EDITOR);
 
     Log::MDCII_LOG_DEBUG("[Game::Init()] The game was successfully initialized.");
 }

@@ -228,7 +228,7 @@ void mdcii::WorldState::Init()
 
     m_renderer = std::make_unique<renderer::MeshRenderer>();
 
-    m_housesJsonFile = std::make_unique<data::HousesJsonFile>("resources/data/houses.json");
+    m_housesJsonFile = std::make_unique<data::HousesJsonFile>();
 
     Log::MDCII_LOG_DEBUG("[WorldState::Init()] The world state was successfully initialized.");
 }
