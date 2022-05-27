@@ -2,7 +2,7 @@
 #include "WorldState.h"
 #include "Log.h"
 #include "data/HousesJsonFile.h"
-#include "renderer/MeshRenderer.h"
+#include "renderer/TileRenderer.h"
 #include "renderer/Utils.h"
 #include "file/BshFile.h"
 #include "ogl/OpenGL.h"
@@ -75,7 +75,7 @@ void mdcii::WorldState::Render()
                 s = renderer::Utils::MapToIso(x, y);
             }
 
-            m_renderer->Render(
+            m_renderer->RenderTile(
                 renderer::Utils::GetModelMatrix(s, glm::vec2(64.0f, 32.0f)),
                 id,
                 *context->window,
@@ -203,7 +203,7 @@ void mdcii::WorldState::RenderBuilding(const int t_id, const int t_mapX, const i
     auto screenPosition{ renderer::Utils::MapToIso(t_mapX, t_mapY) };
     screenPosition.y -= (h - 32.0f);
 
-    m_renderer->Render(
+    m_renderer->RenderTile(
         renderer::Utils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
         m_stdBshFile->bshTextures[t_id]->textureId,
         *context->window,
@@ -226,7 +226,7 @@ void mdcii::WorldState::Init()
 
     m_camera = std::make_unique<camera::Camera>(context->window, glm::vec2(0.0f, 0.0f));
 
-    m_renderer = std::make_unique<renderer::MeshRenderer>();
+    m_renderer = std::make_unique<renderer::TileRenderer>();
 
     m_housesJsonFile = std::make_unique<data::HousesJsonFile>();
 

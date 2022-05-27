@@ -138,10 +138,7 @@ void mdcii::data::HousesJsonFile::ReadFileData()
             // destroyflg
         }
 
-        if (properties.id > 0)
-        {
-            tileAssetPropertiesMap.emplace(properties.id, properties);
-        }
+        tileAssetPropertiesMap.emplace(properties.id, properties);
     }
 
     Log::MDCII_LOG_DEBUG("[HousesJsonFile::ReadFileData()] {} TileAssetProperties objects created successfully.", tileAssetPropertiesMap.size());

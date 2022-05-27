@@ -1,11 +1,8 @@
 #include <imgui.h>
 #include "EditorState.h"
 #include "Log.h"
-#include "MdciiAssert.h"
 #include "data/HousesJsonFile.h"
-#include "renderer/MeshRenderer.h"
-#include "renderer/Utils.h"
-#include "file/BshFile.h"
+#include "renderer/TileRenderer.h"
 #include "ogl/OpenGL.h"
 
 //-------------------------------------------------
@@ -64,56 +61,12 @@ void mdcii::EditorState::RenderImGui()
     {
         for (const auto& [id, tileAssetProperties] : m_housesJsonFile->tileAssetPropertiesMap)
         {
-            const auto gfx{ tileAssetProperties.gfx + 1 };
+            const auto assetIdStr{ std::to_string(tileAssetProperties.id) };
 
-            const auto stadtfldTextureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(m_stdBshFile->bshTextures.at(gfx)->textureId)) };
-
-            const auto assetId{ std::to_string(tileAssetProperties.id) };
-
-            if (ImGui::TreeNode(assetId.c_str()))
+            if (ImGui::TreeNode(assetIdStr.c_str()))
             {
-                // stadtfld.bsh texture
-
-                MDCII_ASSERT(m_stdBshFile->bshTextures.at(gfx)->width, "Invalid width")
-                MDCII_ASSERT(m_stdBshFile->bshTextures.at(gfx)->height, "Invalid height")
-
-                ImGui::Text("Gfx: %d", gfx);
-
-
-                ImGui::Image(
-                    stadtfldTextureId,
-                    ImVec2(
-                        static_cast<float>(m_stdBshFile->bshTextures.at(gfx)->width),
-                        static_cast<float>(m_stdBshFile->bshTextures.at(gfx)->height)
-                    ),
-                    ImVec2(0.0f, 0.0f),
-                    ImVec2(1.0f, 1.0f),
-                    ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
-                    ImVec4(0.6f, 0.6f, 0.6f, 1.0f)
-                );
-
-
-                // bauhaus.bsh preview texture
-
-                const auto baugfx{ tileAssetProperties.baugfx + 1 };
-
-                MDCII_ASSERT(m_bauhausBshFile->bshTextures.at(baugfx)->width, "Invalid width")
-                MDCII_ASSERT(m_bauhausBshFile->bshTextures.at(baugfx)->height, "Invalid height")
-
-                ImGui::Text("BauGfx: %d", baugfx);
-
-                const auto bauhausTextureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(m_bauhausBshFile->bshTextures.at(baugfx)->textureId)) };
-                ImGui::Image(
-                    bauhausTextureId,
-                    ImVec2(
-                        static_cast<float>(m_bauhausBshFile->bshTextures.at(baugfx)->width),
-                        static_cast<float>(m_bauhausBshFile->bshTextures.at(baugfx)->height)
-                    ),
-                    ImVec2(0.0f, 0.0f),
-                    ImVec2(1.0f, 1.0f),
-                    ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
-                    ImVec4(0.6f, 0.6f, 0.6f, 1.0f)
-                );
+                m_renderer->RenderTileGfxImGui(tileAssetProperties, *m_stdBshFile);
+                m_renderer->RenderTileBauGfxImGui(tileAssetProperties, *m_bauhausBshFile);
 
                 ImGui::TreePop();
             }
@@ -151,11 +104,10 @@ void mdcii::EditorState::Init()
     m_camera = std::make_unique<camera::Camera>(context->window, glm::vec2(0.0f, 0.0f));
 
     // create a renderer
-    m_renderer = std::make_unique<renderer::MeshRenderer>();
+    m_renderer = std::make_unique<renderer::TileRenderer>();
 
     // load the properties of the assets
     m_housesJsonFile = std::make_unique<data::HousesJsonFile>();
 
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] The editor state was successfully initialized.");
-
 }

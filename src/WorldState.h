@@ -25,7 +25,7 @@ namespace mdcii::camera
 
 namespace mdcii::renderer
 {
-    class MeshRenderer;
+    class TileRenderer;
 }
 
 //-------------------------------------------------
@@ -94,7 +94,7 @@ namespace mdcii
         std::unique_ptr<file::BshFile> m_stdBshFile;
         std::unique_ptr<file::BshFile> m_traegerBshFile;
         std::unique_ptr<camera::Camera> m_camera;
-        std::unique_ptr<renderer::MeshRenderer> m_renderer;
+        std::unique_ptr<renderer::TileRenderer> m_renderer;
         std::unique_ptr<data::HousesJsonFile> m_housesJsonFile;
 
         // todo temp code

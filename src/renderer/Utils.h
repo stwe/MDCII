@@ -9,7 +9,7 @@
 namespace mdcii::renderer
 {
     /**
-     * Static render and tile utils.
+     * Static helper methods.
      */
     class Utils
     {
@@ -56,8 +56,7 @@ namespace mdcii::renderer
          */
         static auto MapToIso(const int t_mapX, const int t_mapY) -> glm::vec2
         {
-            return
-            {
+            return {
                 (t_mapX - t_mapY) << 5, // 32
                 (t_mapX + t_mapY) << 4  // 16
             };
