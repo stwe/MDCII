@@ -10,6 +10,7 @@
 * [spdlog](https://github.com/gabime/spdlog)
 * [Dear ImGui](https://github.com/ocornut/imgui)
 * [NLohmann Json](https://github.com/nlohmann/json)
+* [Magic Enum C++](https://github.com/Neargye/magic_enum)
 * C++ 17 Compiler
 
 ### Platforms
@@ -33,6 +34,7 @@ glm/0.9.9.8
 spdlog/1.10.0
 imgui/1.86
 nlohmann_json/3.10.5
+magic_enum/0.8.0
 
 [generators]
 premake
@@ -81,6 +83,7 @@ glm/0.9.9.8
 spdlog/1.10.0
 imgui/1.86
 nlohmann_json/3.10.5
+magic_enum/0.8.0
 
 [generators]
 cmake

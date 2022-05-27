@@ -1,5 +1,6 @@
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <magic_enum.hpp>
 #include "HousesJsonFile.h"
 #include "Log.h"
 #include "MdciiException.h"
@@ -70,7 +71,12 @@ void mdcii::data::HousesJsonFile::ReadFileData()
             }
             if (name == "Kind")
             {
-                properties.kind = var["valueString"];
+                const std::string str{ var["valueString"] };
+                const auto strOpt{ magic_enum::enum_cast<TileKind>(str) };
+                if (strOpt.has_value())
+                {
+                    properties.kind = strOpt.value();
+                }
             }
             if (name == "Posoffs")
             {
@@ -113,7 +119,6 @@ void mdcii::data::HousesJsonFile::ReadFileData()
             }
             if (name == "AnimAdd")
             {
-                // todo: sometimes missing
                 properties.animAdd = var["valueInt"];
             }
             if (name == "Baugfx")
@@ -139,6 +144,7 @@ void mdcii::data::HousesJsonFile::ReadFileData()
         }
 
         tileAssetPropertiesMap.emplace(properties.id, properties);
+        tileAssetPropertiesMultimap.emplace(properties.kind, properties);
     }
 
     Log::MDCII_LOG_DEBUG("[HousesJsonFile::ReadFileData()] {} TileAssetProperties objects created successfully.", tileAssetPropertiesMap.size());

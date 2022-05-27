@@ -1,4 +1,5 @@
 #include <imgui.h>
+#include <magic_enum.hpp>
 #include "EditorState.h"
 #include "Log.h"
 #include "data/HousesJsonFile.h"
@@ -59,18 +60,30 @@ void mdcii::EditorState::RenderImGui()
 
     if (ImGui::TreeNode("Objects"))
     {
-        for (const auto& [id, tileAssetProperties] : m_housesJsonFile->tileAssetPropertiesMap)
+        // for each TileKind ...
+        magic_enum::enum_for_each<data::TileKind>([&](const data::TileKind t_kind)
         {
-            const auto assetIdStr{ std::to_string(tileAssetProperties.id) };
+            const auto ret{ m_housesJsonFile->tileAssetPropertiesMultimap.equal_range(t_kind) };
+            const std::string str{ magic_enum::enum_name(t_kind) };
 
-            if (ImGui::TreeNode(assetIdStr.c_str()))
+            // create a tree node
+            if (ImGui::TreeNode(str.c_str()))
             {
-                m_renderer->RenderTileGfxImGui(tileAssetProperties, *m_stdBshFile);
-                m_renderer->RenderTileBauGfxImGui(tileAssetProperties, *m_bauhausBshFile);
+                for (auto it = ret.first; it != ret.second; ++it)
+                {
+                    // create a tree node for each Id of the TileKind
+                    if (ImGui::TreeNode(std::to_string(it->second.id).c_str()))
+                    {
+                        m_renderer->RenderTileGfxImGui(it->second, *m_stdBshFile);
+                        m_renderer->RenderTileBauGfxImGui(it->second, *m_bauhausBshFile);
+
+                        ImGui::TreePop();
+                    }
+                }
 
                 ImGui::TreePop();
             }
-        }
+        });
 
         ImGui::TreePop();
     }
