@@ -59,8 +59,10 @@ void mdcii::EditorState::RenderImGui()
 
     ImGui::Begin("Edit", nullptr, 0);
 
-    //TileMenuById();
-    TileMenuByGroup();
+    ImGui::Text("Current Id: %d", m_currentId);
+
+    TileMenuById();
+    //TileMenuByGroup();
 
     ImGui::End();
 
@@ -106,7 +108,7 @@ void mdcii::EditorState::Init()
 // ImGui
 //-------------------------------------------------
 
-void mdcii::EditorState::TileMenuById() const
+void mdcii::EditorState::TileMenuById()
 {
     if (ImGui::TreeNode("Objects"))
     {
@@ -114,7 +116,7 @@ void mdcii::EditorState::TileMenuById() const
         {
             if (tileAssetProperties.id >= 0)
             {
-                auto assetIdStr{ std::to_string(tileAssetProperties.id) };
+                auto idStr{ std::to_string(tileAssetProperties.id) };
 
                 std::string name{};
                 if (m_graphicsFileContent.count(tileAssetProperties.id))
@@ -122,8 +124,9 @@ void mdcii::EditorState::TileMenuById() const
                     name = m_graphicsFileContent.at(tileAssetProperties.id);
                 }
 
-                if (ImGui::TreeNode(assetIdStr.append(" ").append(name).c_str()))
+                if (ImGui::TreeNode(idStr.append(" ").append(name).c_str()))
                 {
+                    m_currentId = id;
                     m_renderer->RenderTileGfxImGui(tileAssetProperties, *m_stdBshFile);
                     m_renderer->RenderTileBauGfxImGui(tileAssetProperties, *m_bauhausBshFile);
 
@@ -136,7 +139,7 @@ void mdcii::EditorState::TileMenuById() const
     }
 }
 
-void mdcii::EditorState::TileMenuByGroup() const
+void mdcii::EditorState::TileMenuByGroup()
 {
     if (ImGui::TreeNode("Objects"))
     {
@@ -159,9 +162,10 @@ void mdcii::EditorState::TileMenuByGroup() const
                     }
 
                     // create a tree node for each Id of the TileKind
-                    const auto id{ std::to_string(it->second.id).append(" ").append(name) };
-                    if (ImGui::TreeNode(id.c_str()))
+                    const auto idStr{ std::to_string(it->second.id).append(" ").append(name) };
+                    if (ImGui::TreeNode(idStr.c_str()))
                     {
+                        m_currentId = it->second.id;
                         m_renderer->RenderTileGfxImGui(it->second, *m_stdBshFile);
                         m_renderer->RenderTileBauGfxImGui(it->second, *m_bauhausBshFile);
 

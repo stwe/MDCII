@@ -80,7 +80,9 @@ void mdcii::renderer::TileRenderer::RenderTileGfxImGui(
     }
     else
     {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
         ImGui::Text("Invalid Gfx: %d", gfx);
+        ImGui::PopStyleColor();
     }
 }
 
@@ -113,12 +115,16 @@ void mdcii::renderer::TileRenderer::RenderTileBauGfxImGui(const data::TileAssetP
         }
         else
         {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
             ImGui::Text("Invalid BauGfx: %d", baugfx);
+            ImGui::PopStyleColor();
         }
     }
     else
     {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
         ImGui::Text("Invalid Gfx: %d", gfx);
+        ImGui::PopStyleColor();
     }
 }
 

@@ -88,6 +88,8 @@ namespace mdcii
         std::unique_ptr<data::HousesJsonFile> m_housesJsonFile;
         std::map<int, std::string> m_graphicsFileContent;
 
+        int m_currentId{ -1 };
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -98,7 +100,7 @@ namespace mdcii
         // ImGui
         //-------------------------------------------------
 
-        void TileMenuById() const;
-        void TileMenuByGroup() const;
+        void TileMenuById();
+        void TileMenuByGroup();
     };
 }
