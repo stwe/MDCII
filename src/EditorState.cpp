@@ -8,6 +8,7 @@
 #include "ogl/OpenGL.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/ResourceUtil.h"
+#include "ogl/input/PickingTexture.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -52,9 +53,20 @@ void mdcii::EditorState::Update()
     m_camera->Update();
 }
 
+void mdcii::EditorState::PreRender()
+{
+    RenderForMousePicking();
+}
+
 void mdcii::EditorState::Render()
 {
     RenderMap();
+
+    auto res = m_pickingTexture->ReadMapIndex(context->window->GetMouseX(), context->window->GetMouseX());
+    if (res != 0xFFFFFF)
+    {
+        Log::MDCII_LOG_DEBUG("Res: {}", res);
+    }
 }
 
 void mdcii::EditorState::RenderImGui()
@@ -104,6 +116,9 @@ void mdcii::EditorState::Init()
 
     // load Grafiken.txt
     m_graphicsFileContent = ogl::resource::ResourceUtil::ReadGraphicsFile("E:/Dev/MDCII/resources/data/Grafiken.txt");
+
+    // for mouse picking
+    m_pickingTexture = std::make_unique<ogl::input::PickingTexture>(context->window->GetWidth(), context->window->GetHeight());
 
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] The editor state was successfully initialized.");
 }
@@ -196,12 +211,14 @@ void mdcii::EditorState::RenderMap()
             glm::vec2 s;
             s = renderer::Utils::MapToIso(x, y);
 
+            /*
             m_renderer->RenderTile(
                 renderer::Utils::GetModelMatrix(s, glm::vec2(64.0f, 32.0f)),
                 id,
                 *context->window,
                 *m_camera
             );
+            */
 
             auto idx{ y * 4 + x };
             auto gfx{ m_map.at(idx) };
@@ -232,4 +249,32 @@ void mdcii::EditorState::RenderBuilding(const int t_id, const int t_mapX, const 
         *context->window,
         *m_camera
     );
+}
+
+void mdcii::EditorState::RenderForMousePicking()
+{
+    m_pickingTexture->EnableWriting();
+
+    ogl::OpenGL::SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    ogl::OpenGL::Clear();
+
+    RenderMap();
+
+    /*
+    vao->Bind();
+
+    const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram(Game::RESOURCES_PATH + "shader/picking") };
+    shaderProgram.Bind();
+
+    shaderProgram.SetUniform("model", modelMatrix);
+    shaderProgram.SetUniform("view", t_camera.GetViewMatrix());
+    shaderProgram.SetUniform("projection", t_window.GetProjectionMatrix());
+
+    vao->DrawPrimitives();
+
+    ogl::resource::ShaderProgram::Unbind();
+    vao->Unbind();
+    */
+
+    m_pickingTexture->DisableWriting();
 }

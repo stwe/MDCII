@@ -29,6 +29,11 @@ namespace mdcii::renderer
     class TileRenderer;
 }
 
+namespace mdcii::ogl::input
+{
+    class PickingTexture;
+}
+
 //-------------------------------------------------
 // EditorState
 //-------------------------------------------------
@@ -70,7 +75,7 @@ namespace mdcii
 
         void Input() override;
         void Update() override;
-        void PreRender() override {}
+        void PreRender() override;
         void Render() override;
         void RenderImGui() override;
 
@@ -87,6 +92,7 @@ namespace mdcii
         std::unique_ptr<camera::Camera> m_camera;
         std::unique_ptr<renderer::TileRenderer> m_renderer;
         std::unique_ptr<data::HousesJsonFile> m_housesJsonFile;
+        std::unique_ptr<ogl::input::PickingTexture> m_pickingTexture;
         std::map<int, std::string> m_graphicsFileContent;
 
         int m_currentId{ -1 };
@@ -119,5 +125,7 @@ namespace mdcii
 
         void RenderMap();
         void RenderBuilding(int t_id, int t_mapX, int t_mapY) const;
+
+        void RenderForMousePicking();
     };
 }
