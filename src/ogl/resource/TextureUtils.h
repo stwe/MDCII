@@ -11,6 +11,15 @@ namespace mdcii::ogl::resource
     {
     public:
         //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        TextureUtils(TextureUtils&& t_other) noexcept = delete;
+        TextureUtils(const TextureUtils& t_other) = delete;
+        TextureUtils& operator=(const TextureUtils& t_other) = delete;
+        TextureUtils& operator=(TextureUtils&& t_other) noexcept = delete;
+
+        //-------------------------------------------------
         // Generate
         //-------------------------------------------------
 
@@ -91,6 +100,11 @@ namespace mdcii::ogl::resource
     protected:
 
     private:
+        //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
 
+        TextureUtils() = default;
+        ~TextureUtils() noexcept = default;
     };
 }

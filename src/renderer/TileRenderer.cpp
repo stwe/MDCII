@@ -27,7 +27,7 @@ mdcii::renderer::TileRenderer::~TileRenderer() noexcept
 
 void mdcii::renderer::TileRenderer::RenderTile(
     const glm::mat4& t_modelMatrix,
-    const uint32_t t_bshTextureId,
+    const uint32_t t_textureId,
     const ogl::Window& t_window,
     const camera::Camera& t_camera
 ) const
@@ -43,12 +43,43 @@ void mdcii::renderer::TileRenderer::RenderTile(
     shaderProgram.SetUniform("diffuseMap", 0);
 
     glBindVertexArray(m_vao);
-    ogl::resource::TextureUtils::BindForReading(t_bshTextureId, GL_TEXTURE0);
+    ogl::resource::TextureUtils::BindForReading(t_textureId, GL_TEXTURE0);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
     ogl::OpenGL::DisableBlending();
 }
+
+void mdcii::renderer::TileRenderer::RenderTileForMousePicking(
+    const glm::mat4& t_modelMatrix,
+    const uint32_t t_textureId,
+    const glm::vec3& t_color,
+    const ogl::Window& t_window,
+    const camera::Camera& t_camera
+) const
+{
+    ogl::OpenGL::EnableAlphaBlending();
+
+    const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram("resources/shader/picking") };
+    shaderProgram.Bind();
+
+    shaderProgram.SetUniform("model", t_modelMatrix);
+    shaderProgram.SetUniform("view", t_camera.GetViewMatrix());
+    shaderProgram.SetUniform("projection", t_window.GetOrthographicProjectionMatrix());
+    shaderProgram.SetUniform("diffuseMap", 0);
+    shaderProgram.SetUniform("color", t_color);
+
+    glBindVertexArray(m_vao);
+    ogl::resource::TextureUtils::BindForReading(t_textureId, GL_TEXTURE0);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    ogl::OpenGL::DisableBlending();
+}
+
+//-------------------------------------------------
+// Render ImGui
+//-------------------------------------------------
 
 void mdcii::renderer::TileRenderer::RenderTileGfxImGui(
     const data::TileAssetProperties& t_tileAssetProperties,

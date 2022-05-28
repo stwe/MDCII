@@ -124,6 +124,7 @@ namespace mdcii
         void TileMenuByGroup();
 
         void RenderMap();
+        void RenderMapCol();
         void RenderBuilding(int t_id, int t_mapX, int t_mapY) const;
 
         void RenderForMousePicking();

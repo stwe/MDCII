@@ -214,6 +214,8 @@ void mdcii::EditorState::RenderMap()
             glm::vec2 s;
             s = renderer::Utils::MapToIso(x, y);
 
+            const auto idx{ y * 4 + x };
+
             m_renderer->RenderTile(
                 renderer::Utils::GetModelMatrix(s, glm::vec2(64.0f, 32.0f)),
                 id,
@@ -221,12 +223,35 @@ void mdcii::EditorState::RenderMap()
                 *m_camera
             );
 
-            const auto idx{ y * 4 + x };
+            /*
             const auto gfx{ m_map.at(idx) };
             if (gfx > 0)
             {
                 RenderBuilding(m_map.at(idx), x, y);
             }
+            */
+        }
+    }
+}
+
+void mdcii::EditorState::RenderMapCol()
+{
+    const auto id{ ogl::resource::ResourceManager::LoadTexture("resources/textures/full.png").id };
+
+    for (int y = 0; y < 8; ++y)
+    {
+        for (int x = 0; x < 4; ++x)
+        {
+            const auto s{ renderer::Utils::MapToIso(x, y) };
+            const auto idx{ y * 4 + x };
+
+            m_renderer->RenderTileForMousePicking(
+                renderer::Utils::GetModelMatrix(s, glm::vec2(64.0f, 32.0f)),
+                id,
+                ogl::input::PickingTexture::CreateIdColor(idx),
+                *context->window,
+                *m_camera
+            );
         }
     }
 }
@@ -259,23 +284,7 @@ void mdcii::EditorState::RenderForMousePicking()
     ogl::OpenGL::SetClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     ogl::OpenGL::Clear();
 
-    RenderMap();
-
-    /*
-    vao->Bind();
-
-    const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram(Game::RESOURCES_PATH + "shader/picking") };
-    shaderProgram.Bind();
-
-    shaderProgram.SetUniform("model", modelMatrix);
-    shaderProgram.SetUniform("view", t_camera.GetViewMatrix());
-    shaderProgram.SetUniform("projection", t_window.GetProjectionMatrix());
-
-    vao->DrawPrimitives();
-
-    ogl::resource::ShaderProgram::Unbind();
-    vao->Unbind();
-    */
+    RenderMapCol();
 
     m_pickingTexture->DisableWriting();
 }

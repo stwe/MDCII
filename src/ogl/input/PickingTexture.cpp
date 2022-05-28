@@ -28,7 +28,7 @@ mdcii::ogl::input::PickingTexture::~PickingTexture() noexcept
 }
 
 //-------------------------------------------------
-// Write
+// Write / render to texture
 //-------------------------------------------------
 
 void mdcii::ogl::input::PickingTexture::EnableWriting() const
@@ -42,34 +42,44 @@ void mdcii::ogl::input::PickingTexture::DisableWriting()
 }
 
 //-------------------------------------------------
-// Read
+// Read from texture
 //-------------------------------------------------
 
 void mdcii::ogl::input::PickingTexture::EnableReading() const
 {
     glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fboId);
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
 }
 
 void mdcii::ogl::input::PickingTexture::DisableReading()
 {
+    glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 }
 
 int mdcii::ogl::input::PickingTexture::ReadMapIndex(const int t_x, const int t_y) const
 {
     EnableReading();
-    glReadBuffer(GL_COLOR_ATTACHMENT0);
 
     unsigned char rgbaData[4];
-    glReadPixels(t_x, m_height - t_y, 1, 1, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, rgbaData);
+    glReadPixels(t_x, m_height - t_y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
 
-    glReadBuffer(GL_NONE);
     DisableReading();
 
-    // convert the color back to an Id
+    // convert the color back to an Id/index
     return rgbaData[0] +
            rgbaData[1] * 256 +
            rgbaData[2] * 256 * 256;
+}
+
+glm::vec3 mdcii::ogl::input::PickingTexture::CreateIdColor(const int t_id)
+{
+    // convert Id/index into an RGB color
+    const int g{ (t_id & 0x0000FF00) >> 8 };
+    const int r{ (t_id & 0x000000FF) >> 0 };
+    const int b{ (t_id & 0x00FF0000) >> 16 };
+
+    return { static_cast<float>(r) / 255.0f, static_cast<float>(g) / 255.0f, static_cast<float>(b) / 255.0f };
 }
 
 //-------------------------------------------------
@@ -95,7 +105,7 @@ void mdcii::ogl::input::PickingTexture::Init()
 
     glDrawBuffer(GL_COLOR_ATTACHMENT0);
 
-    // verify that the FBO is correct
+    // verify that the Fbo is correct
     const auto status{ glCheckFramebufferStatus(GL_FRAMEBUFFER) };
     if (status != GL_FRAMEBUFFER_COMPLETE)
     {

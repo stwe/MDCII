@@ -11,17 +11,29 @@
 
 namespace mdcii::ogl::resource
 {
+    /**
+     * Static methods to read in files.
+     */
     class ResourceUtil
     {
     public:
+        //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        ResourceUtil(ResourceUtil&& t_other) noexcept = delete;
+        ResourceUtil(const ResourceUtil& t_other) = delete;
+        ResourceUtil& operator=(const ResourceUtil& t_other) = delete;
+        ResourceUtil& operator=(ResourceUtil&& t_other) noexcept = delete;
+
         //-------------------------------------------------
         // Utils
         //-------------------------------------------------
 
         /**
-         * Reads the Grafiken.txt file to show the assets names.
+         * Reads the Grafiken.txt file to show graphic names.
          *
-         * @param t_fileName The path to the shader file.
+         * @param t_fileName The path to the file.
          *
          * @return A std::map
          */
@@ -94,7 +106,7 @@ namespace mdcii::ogl::resource
         /**
          * Find occurrences of a search value in another string.
          *
-         * @param t_positions The results.
+         * @param t_positions The search results.
          * @param t_data The string in which to search.
          * @param t_toSearch The search string.
          */
@@ -117,5 +129,11 @@ namespace mdcii::ogl::resource
     protected:
 
     private:
+        //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        ResourceUtil() = default;
+        ~ResourceUtil() noexcept = default;
     };
 }
