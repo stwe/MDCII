@@ -5,6 +5,7 @@
 #include "data/HousesJsonFile.h"
 #include "renderer/TileRenderer.h"
 #include "ogl/OpenGL.h"
+#include "ogl/resource/ResourceUtil.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -58,35 +59,8 @@ void mdcii::EditorState::RenderImGui()
 
     ImGui::Begin("Edit", nullptr, 0);
 
-    if (ImGui::TreeNode("Objects"))
-    {
-        // for each TileKind ...
-        magic_enum::enum_for_each<data::TileKind>([&](const data::TileKind t_kind)
-        {
-            const auto ret{ m_housesJsonFile->tileAssetPropertiesMultimap.equal_range(t_kind) };
-            const std::string str{ magic_enum::enum_name(t_kind) };
-
-            // create a tree node
-            if (ImGui::TreeNode(str.c_str()))
-            {
-                for (auto it = ret.first; it != ret.second; ++it)
-                {
-                    // create a tree node for each Id of the TileKind
-                    if (ImGui::TreeNode(std::to_string(it->second.id).c_str()))
-                    {
-                        m_renderer->RenderTileGfxImGui(it->second, *m_stdBshFile);
-                        m_renderer->RenderTileBauGfxImGui(it->second, *m_bauhausBshFile);
-
-                        ImGui::TreePop();
-                    }
-                }
-
-                ImGui::TreePop();
-            }
-        });
-
-        ImGui::TreePop();
-    }
+    //TileMenuById();
+    TileMenuByGroup();
 
     ImGui::End();
 
@@ -122,5 +96,83 @@ void mdcii::EditorState::Init()
     // load the properties of the assets
     m_housesJsonFile = std::make_unique<data::HousesJsonFile>();
 
+    // load Grafiken.txt
+    m_graphicsFileContent = ogl::resource::ResourceUtil::ReadGraphicsFile("E:/Dev/MDCII/resources/data/Grafiken.txt");
+
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] The editor state was successfully initialized.");
+}
+
+//-------------------------------------------------
+// ImGui
+//-------------------------------------------------
+
+void mdcii::EditorState::TileMenuById() const
+{
+    if (ImGui::TreeNode("Objects"))
+    {
+        for (const auto& [id, tileAssetProperties] : m_housesJsonFile->tileAssetPropertiesMap)
+        {
+            if (tileAssetProperties.id >= 0)
+            {
+                auto assetIdStr{ std::to_string(tileAssetProperties.id) };
+
+                std::string name{};
+                if (m_graphicsFileContent.count(tileAssetProperties.id))
+                {
+                    name = m_graphicsFileContent.at(tileAssetProperties.id);
+                }
+
+                if (ImGui::TreeNode(assetIdStr.append(" ").append(name).c_str()))
+                {
+                    m_renderer->RenderTileGfxImGui(tileAssetProperties, *m_stdBshFile);
+                    m_renderer->RenderTileBauGfxImGui(tileAssetProperties, *m_bauhausBshFile);
+
+                    ImGui::TreePop();
+                }
+            }
+        }
+
+        ImGui::TreePop();
+    }
+}
+
+void mdcii::EditorState::TileMenuByGroup() const
+{
+    if (ImGui::TreeNode("Objects"))
+    {
+        // for each TileKind ...
+        magic_enum::enum_for_each<data::TileKind>([&](const data::TileKind t_kind)
+        {
+            const auto ret{ m_housesJsonFile->tileAssetPropertiesMultimap.equal_range(t_kind) };
+            const std::string kindStr{ magic_enum::enum_name(t_kind) };
+
+            // create a tree node
+            if (ImGui::TreeNode(kindStr.c_str()))
+            {
+                for (auto it = ret.first; it != ret.second; ++it)
+                {
+
+                    std::string name{};
+                    if (m_graphicsFileContent.count(it->second.id))
+                    {
+                        name = m_graphicsFileContent.at(it->second.id);
+                    }
+
+                    // create a tree node for each Id of the TileKind
+                    const auto id{ std::to_string(it->second.id).append(" ").append(name) };
+                    if (ImGui::TreeNode(id.c_str()))
+                    {
+                        m_renderer->RenderTileGfxImGui(it->second, *m_stdBshFile);
+                        m_renderer->RenderTileBauGfxImGui(it->second, *m_bauhausBshFile);
+
+                        ImGui::TreePop();
+                    }
+                }
+
+                ImGui::TreePop();
+            }
+        });
+
+        ImGui::TreePop();
+    }
 }

@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <vector>
+#include <map>
 #include "MdciiException.h"
 
 //-------------------------------------------------
@@ -13,6 +14,44 @@ namespace mdcii::ogl::resource
     class ResourceUtil
     {
     public:
+        //-------------------------------------------------
+        // Utils
+        //-------------------------------------------------
+
+        /**
+         * Reads the Grafiken.txt file to show the assets names.
+         *
+         * @param t_fileName The path to the shader file.
+         *
+         * @return A std::map
+         */
+        static auto ReadGraphicsFile(const std::string& t_fileName)
+        {
+            std::map<int, std::string> content;
+
+            int id{ 0 };
+            int gfx{ 0 };
+            std::string name{};
+
+            try
+            {
+                std::ifstream inFile;
+                inFile.open(t_fileName);
+
+                while (inFile >> id >> gfx >> name)
+                {
+                    content.emplace(id, name);
+                }
+
+                inFile.close();
+            }
+            catch (const std::ifstream::failure&)
+            {
+                throw MDCII_EXCEPTION("[ResourceUtil::ReadGraphicsFile()] Exception caught while loading of file " + t_fileName + ".");
+            }
+
+            return content;
+        }
 
         /**
          * Reads a shader file into a string.

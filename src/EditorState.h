@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include "state/State.h"
 
 //-------------------------------------------------
@@ -85,11 +86,19 @@ namespace mdcii
         std::unique_ptr<camera::Camera> m_camera;
         std::unique_ptr<renderer::TileRenderer> m_renderer;
         std::unique_ptr<data::HousesJsonFile> m_housesJsonFile;
+        std::map<int, std::string> m_graphicsFileContent;
 
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
 
         void Init();
+
+        //-------------------------------------------------
+        // ImGui
+        //-------------------------------------------------
+
+        void TileMenuById() const;
+        void TileMenuByGroup() const;
     };
 }
