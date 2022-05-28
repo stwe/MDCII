@@ -62,10 +62,13 @@ void mdcii::EditorState::Render()
 {
     RenderMap();
 
-    auto res = m_pickingTexture->ReadMapIndex(context->window->GetMouseX(), context->window->GetMouseX());
-    if (res != 0xFFFFFF)
+    const auto id{ m_pickingTexture->ReadMapIndex(
+        static_cast<int>(context->window->GetMouseX()),
+        static_cast<int>(context->window->GetMouseY())
+    ) };
+    if (id != 0xFFFFFF)
     {
-        Log::MDCII_LOG_DEBUG("Res: {}", res);
+        Log::MDCII_LOG_DEBUG("Id: {}", id);
     }
 }
 
@@ -211,17 +214,15 @@ void mdcii::EditorState::RenderMap()
             glm::vec2 s;
             s = renderer::Utils::MapToIso(x, y);
 
-            /*
             m_renderer->RenderTile(
                 renderer::Utils::GetModelMatrix(s, glm::vec2(64.0f, 32.0f)),
                 id,
                 *context->window,
                 *m_camera
             );
-            */
 
-            auto idx{ y * 4 + x };
-            auto gfx{ m_map.at(idx) };
+            const auto idx{ y * 4 + x };
+            const auto gfx{ m_map.at(idx) };
             if (gfx > 0)
             {
                 RenderBuilding(m_map.at(idx), x, y);
@@ -255,7 +256,7 @@ void mdcii::EditorState::RenderForMousePicking()
 {
     m_pickingTexture->EnableWriting();
 
-    ogl::OpenGL::SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    ogl::OpenGL::SetClearColor(1.0f, 1.0f, 1.0f, 1.0f);
     ogl::OpenGL::Clear();
 
     RenderMap();

@@ -61,7 +61,7 @@ int mdcii::ogl::input::PickingTexture::ReadMapIndex(const int t_x, const int t_y
     glReadBuffer(GL_COLOR_ATTACHMENT0);
 
     unsigned char rgbaData[4];
-    glReadPixels(t_x, m_height - t_y - 1, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, rgbaData);
+    glReadPixels(t_x, m_height - t_y, 1, 1, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, rgbaData);
 
     glReadBuffer(GL_NONE);
     DisableReading();
@@ -87,14 +87,8 @@ void mdcii::ogl::input::PickingTexture::Init()
     // create the texture object for the primitive information buffer
     glGenTextures(1, &m_pickingTextureId);
     glBindTexture(GL_TEXTURE_2D, m_pickingTextureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, m_width, m_height, 0, GL_RGB, GL_FLOAT, nullptr);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, m_width, m_height, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, nullptr);
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_pickingTextureId, 0);
-
-    // create the texture object for the depth buffer
-    glGenTextures(1, &m_depthTextureId);
-    glBindTexture(GL_TEXTURE_2D, m_depthTextureId);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, m_width, m_height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_depthTextureId, 0);
 
     // disable reading to avoid problems with older GPUs
     glReadBuffer(GL_NONE);
@@ -159,11 +153,5 @@ void mdcii::ogl::input::PickingTexture::CleanUp() const
     {
         glDeleteTextures(1, &m_pickingTextureId);
         Log::MDCII_LOG_DEBUG("[PickingTexture::CleanUp()] Picking texture Id {} was deleted.", m_pickingTextureId);
-    }
-
-    if (m_depthTextureId)
-    {
-        glDeleteTextures(1, &m_depthTextureId);
-        Log::MDCII_LOG_DEBUG("[PickingTexture::CleanUp()] Depth texture Id {} was deleted.", m_depthTextureId);
     }
 }

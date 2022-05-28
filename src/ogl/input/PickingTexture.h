@@ -21,8 +21,6 @@ namespace mdcii::ogl::input
 
         ~PickingTexture() noexcept;
 
-        [[nodiscard]] uint32_t GetTexture() const { return m_pickingTextureId; }
-
         //-------------------------------------------------
         // Write
         //-------------------------------------------------
@@ -64,11 +62,6 @@ namespace mdcii::ogl::input
          * The picking texture handle.
          */
         uint32_t m_pickingTextureId{ 0 };
-
-        /**
-         * The depth texture handle.
-         */
-        uint32_t m_depthTextureId{ 0 };
 
         //-------------------------------------------------
         // Init
