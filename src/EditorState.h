@@ -1,6 +1,7 @@
 #pragma once
 
 #include <map>
+#include <vector>
 #include "state/State.h"
 
 //-------------------------------------------------
@@ -90,6 +91,19 @@ namespace mdcii
 
         int m_currentId{ -1 };
 
+        // 4x8
+        std::vector<int> m_map
+        {
+            1165, 1094, 1094, 1166,
+            1093,    4, 0,    1095,
+            1093,    0, 0,    1095,
+            1093,    0, 0,    1095,
+            1093,    0, 0,    1095,
+            1093,    0, 0,    1095,
+            1093,    0, 0,    1095,
+            1164, 1092, 1092, 1167,
+        };
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -102,5 +116,8 @@ namespace mdcii
 
         void TileMenuById();
         void TileMenuByGroup();
+
+        void RenderMap();
+        void RenderBuilding(int t_id, int t_mapX, int t_mapY) const;
     };
 }

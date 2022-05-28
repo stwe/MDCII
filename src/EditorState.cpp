@@ -4,7 +4,9 @@
 #include "Log.h"
 #include "data/HousesJsonFile.h"
 #include "renderer/TileRenderer.h"
+#include "renderer/Utils.h"
 #include "ogl/OpenGL.h"
+#include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/ResourceUtil.h"
 
 //-------------------------------------------------
@@ -47,10 +49,12 @@ void mdcii::EditorState::Input()
 
 void mdcii::EditorState::Update()
 {
+    m_camera->Update();
 }
 
 void mdcii::EditorState::Render()
 {
+    RenderMap();
 }
 
 void mdcii::EditorState::RenderImGui()
@@ -179,4 +183,53 @@ void mdcii::EditorState::TileMenuByGroup()
 
         ImGui::TreePop();
     }
+}
+
+void mdcii::EditorState::RenderMap()
+{
+    const auto id{ ogl::resource::ResourceManager::LoadTexture("resources/textures/red.png").id };
+
+    for (int y = 0; y < 8; ++y)
+    {
+        for (int x = 0; x < 4; ++x)
+        {
+            glm::vec2 s;
+            s = renderer::Utils::MapToIso(x, y);
+
+            m_renderer->RenderTile(
+                renderer::Utils::GetModelMatrix(s, glm::vec2(64.0f, 32.0f)),
+                id,
+                *context->window,
+                *m_camera
+            );
+
+            auto idx{ y * 4 + x };
+            auto gfx{ m_map.at(idx) };
+            if (gfx > 0)
+            {
+                RenderBuilding(m_map.at(idx), x, y);
+            }
+        }
+    }
+}
+
+void mdcii::EditorState::RenderBuilding(const int t_id, const int t_mapX, const int t_mapY) const
+{
+    const auto w{ static_cast<float>(m_stdBshFile->bshTextures[t_id]->width) };
+    const auto h{ static_cast<float>(m_stdBshFile->bshTextures[t_id]->height) };
+
+    auto screenPosition{ renderer::Utils::MapToIso(t_mapX, t_mapY) };
+    screenPosition.y -= (h - 32.0f);
+
+    if (t_id == 4)
+    {
+        screenPosition.y -= 20.0f;
+    }
+
+    m_renderer->RenderTile(
+        renderer::Utils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
+        m_stdBshFile->bshTextures[t_id]->textureId,
+        *context->window,
+        *m_camera
+    );
 }
