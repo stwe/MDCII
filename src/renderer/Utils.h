@@ -9,6 +9,14 @@
 namespace mdcii::renderer
 {
     /**
+     * Represents the map rotation.
+     */
+    enum class Rotation
+    {
+        DEG0, DEG90, DEG180, DEG270
+    };
+
+    /**
      * Static helper methods.
      */
     class Utils
@@ -60,6 +68,41 @@ namespace mdcii::renderer
                 (t_mapX - t_mapY) << 5, // 32
                 (t_mapX + t_mapY) << 4  // 16
             };
+        }
+
+        /**
+         * Projects map coordinates in isometric view.
+         *
+         * @param t_mapX The map x position.
+         * @param t_mapY The map y position.
+         * @param t_rotation The current map rotation.
+         *
+         * @return The isometric coordinates.
+         */
+        static auto MapToIso(const int t_mapX, const int t_mapY, const Rotation t_rotation)
+        {
+            auto xr{ t_mapX };
+            auto yr{ t_mapY };
+
+            if (t_rotation == Rotation::DEG90)
+            {
+                xr = 4 - t_mapY - 1;
+                yr = t_mapX;
+            }
+
+            if (t_rotation == Rotation::DEG180)
+            {
+                xr = 4 - t_mapX - 1;
+                yr = 8 - t_mapY - 1;
+            }
+
+            if (t_rotation == Rotation::DEG270)
+            {
+                xr = t_mapY;
+                yr = 8 - t_mapX - 1;
+            }
+
+            return MapToIso(xr, yr);
         }
 
     protected:

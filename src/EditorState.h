@@ -27,11 +27,7 @@ namespace mdcii::camera
 namespace mdcii::renderer
 {
     class TileRenderer;
-}
-
-namespace mdcii::ogl::input
-{
-    class PickingTexture;
+    enum class Rotation;
 }
 
 //-------------------------------------------------
@@ -46,7 +42,6 @@ namespace mdcii
     class EditorState : public state::State
     {
     public:
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -92,8 +87,9 @@ namespace mdcii
         std::unique_ptr<camera::Camera> m_camera;
         std::unique_ptr<renderer::TileRenderer> m_renderer;
         std::unique_ptr<data::HousesJsonFile> m_housesJsonFile;
-        std::unique_ptr<ogl::input::PickingTexture> m_pickingTexture;
         std::map<int, std::string> m_graphicsFileContent;
+
+        renderer::Rotation m_rotation;
 
         int m_currentId{ -1 };
 
@@ -124,9 +120,8 @@ namespace mdcii
         void TileMenuByGroup();
 
         void RenderMap();
-        void RenderMapCol();
         void RenderBuilding(int t_id, int t_mapX, int t_mapY) const;
 
-        void RenderForMousePicking();
+        void Rotate();
     };
 }

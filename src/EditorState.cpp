@@ -8,7 +8,6 @@
 #include "ogl/OpenGL.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/ResourceUtil.h"
-#include "ogl/input/PickingTexture.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -16,6 +15,7 @@
 
 mdcii::EditorState::EditorState(const Id t_id, state::StateStack* t_stateStack, std::shared_ptr<Context> t_context)
     : State(t_id, t_stateStack, std::move(t_context))
+    , m_rotation{ renderer::Rotation::DEG0 }
 {
     Log::MDCII_LOG_DEBUG("[EditorState::EditorState()] Create EditorState.");
 
@@ -55,21 +55,11 @@ void mdcii::EditorState::Update()
 
 void mdcii::EditorState::PreRender()
 {
-    RenderForMousePicking();
 }
 
 void mdcii::EditorState::Render()
 {
     RenderMap();
-
-    const auto id{ m_pickingTexture->ReadMapIndex(
-        static_cast<int>(context->window->GetMouseX()),
-        static_cast<int>(context->window->GetMouseY())
-    ) };
-    if (id != 0xFFFFFF)
-    {
-        Log::MDCII_LOG_DEBUG("Id: {}", id);
-    }
 }
 
 void mdcii::EditorState::RenderImGui()
@@ -77,6 +67,12 @@ void mdcii::EditorState::RenderImGui()
     ogl::Window::ImGuiBegin();
 
     ImGui::Begin("Edit", nullptr, 0);
+
+    ImGui::Text("Current rotation: %s", magic_enum::enum_name(m_rotation).data());
+    if (ImGui::Button("Rotate"))
+    {
+        Rotate();
+    }
 
     ImGui::Text("Current Id: %d", m_currentId);
 
@@ -119,9 +115,6 @@ void mdcii::EditorState::Init()
 
     // load Grafiken.txt
     m_graphicsFileContent = ogl::resource::ResourceUtil::ReadGraphicsFile("E:/Dev/MDCII/resources/data/Grafiken.txt");
-
-    // for mouse picking
-    m_pickingTexture = std::make_unique<ogl::input::PickingTexture>(context->window->GetWidth(), context->window->GetHeight());
 
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] The editor state was successfully initialized.");
 }
@@ -212,9 +205,7 @@ void mdcii::EditorState::RenderMap()
         for (int x = 0; x < 4; ++x)
         {
             glm::vec2 s;
-            s = renderer::Utils::MapToIso(x, y);
-
-            const auto idx{ y * 4 + x };
+            s = renderer::Utils::MapToIso(x, y, m_rotation);
 
             m_renderer->RenderTile(
                 renderer::Utils::GetModelMatrix(s, glm::vec2(64.0f, 32.0f)),
@@ -223,35 +214,12 @@ void mdcii::EditorState::RenderMap()
                 *m_camera
             );
 
-            /*
+            const auto idx{ y * 4 + x };
             const auto gfx{ m_map.at(idx) };
             if (gfx > 0)
             {
                 RenderBuilding(m_map.at(idx), x, y);
             }
-            */
-        }
-    }
-}
-
-void mdcii::EditorState::RenderMapCol()
-{
-    const auto id{ ogl::resource::ResourceManager::LoadTexture("resources/textures/full.png").id };
-
-    for (int y = 0; y < 8; ++y)
-    {
-        for (int x = 0; x < 4; ++x)
-        {
-            const auto s{ renderer::Utils::MapToIso(x, y) };
-            const auto idx{ y * 4 + x };
-
-            m_renderer->RenderTileForMousePicking(
-                renderer::Utils::GetModelMatrix(s, glm::vec2(64.0f, 32.0f)),
-                id,
-                ogl::input::PickingTexture::CreateIdColor(idx),
-                *context->window,
-                *m_camera
-            );
         }
     }
 }
@@ -261,7 +229,7 @@ void mdcii::EditorState::RenderBuilding(const int t_id, const int t_mapX, const 
     const auto w{ static_cast<float>(m_stdBshFile->bshTextures[t_id]->width) };
     const auto h{ static_cast<float>(m_stdBshFile->bshTextures[t_id]->height) };
 
-    auto screenPosition{ renderer::Utils::MapToIso(t_mapX, t_mapY) };
+    auto screenPosition{ renderer::Utils::MapToIso(t_mapX, t_mapY, m_rotation) };
     screenPosition.y -= (h - 32.0f);
 
     if (t_id == 4)
@@ -269,22 +237,32 @@ void mdcii::EditorState::RenderBuilding(const int t_id, const int t_mapX, const 
         screenPosition.y -= 20.0f;
     }
 
+    auto gfx{ m_stdBshFile->bshTextures[t_id]->textureId };
+    const auto offset{ static_cast<int>(m_rotation) };
+    gfx += offset;
+
     m_renderer->RenderTile(
         renderer::Utils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
-        m_stdBshFile->bshTextures[t_id]->textureId,
+        gfx,
         *context->window,
         *m_camera
     );
 }
 
-void mdcii::EditorState::RenderForMousePicking()
+void mdcii::EditorState::Rotate()
 {
-    m_pickingTexture->EnableWriting();
-
-    ogl::OpenGL::SetClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    ogl::OpenGL::Clear();
-
-    RenderMapCol();
-
-    m_pickingTexture->DisableWriting();
+    if (m_rotation == renderer::Rotation::DEG0)
+    {
+        m_rotation = renderer::Rotation::DEG90;
+    }
+    else if (m_rotation == renderer::Rotation::DEG90)
+    {
+        m_rotation = renderer::Rotation::DEG180;
+    } else if (m_rotation == renderer::Rotation::DEG180)
+    {
+        m_rotation = renderer::Rotation::DEG270;
+    } else if (m_rotation == renderer::Rotation::DEG270)
+    {
+        m_rotation = renderer::Rotation::DEG0;
+    }
 }
