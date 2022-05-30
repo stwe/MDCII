@@ -289,7 +289,7 @@ void mdcii::EditorState::RenderBuilding(int t_id, const int t_mapX, const int t_
     auto screenPosition{ renderer::Utils::MapToIso(t_mapX, t_mapY, m_rotation) };
     screenPosition.y -= (h - 32.0f);
 
-    if (t_id == 4)
+    if (t_id >= 4 && t_id <= 7)
     {
         screenPosition.y -= 20.0f;
     }
