@@ -202,47 +202,87 @@ void mdcii::EditorState::TileMenuByGroup()
 
 void mdcii::EditorState::RenderMap()
 {
-    const auto id{ ogl::resource::ResourceManager::LoadTexture("resources/textures/red.png").id };
+    if (m_rotation == renderer::Rotation::DEG0)
+    {
+        for (int y = 0; y < 8; ++y)
+        {
+            for (int x = 0; x < 4; ++x)
+            {
+                RenderMapContent(x, y);
+            }
+        }
+    }
 
-    for (int y = 0; y < 8; ++y)
+    if (m_rotation == renderer::Rotation::DEG90)
     {
         for (int x = 0; x < 4; ++x)
         {
-            auto pos{ renderer::Utils::MapToIso(x, y, m_rotation) };
-
-            m_renderer->RenderTile(
-                renderer::Utils::GetModelMatrix(
-                    pos,
-                    glm::vec2(64.0f, 32.0f)
-                ),
-                id,
-                *context->window,
-                *m_camera
-            );
-
-            m_textRenderer->RenderText(
-                std::to_string(x).append(",  ").append(std::to_string(y)),
-                pos.x + 16, pos.y + 8,
-                0.25f,
-                glm::vec3(0.0f, 1.0f, 0.0f),
-                *context->window,
-                *m_camera
-            );
-
-            /*
-            const auto idx{ y * 4 + x };
-            const auto gfx{ m_map.at(idx) };
-            if (gfx > 0)
+            for (int y = 7; y >= 0; --y)
             {
-                RenderBuilding(m_map.at(idx), x, y);
+                RenderMapContent(x, y);
             }
-            */
+        }
+    }
+
+    if (m_rotation == renderer::Rotation::DEG180)
+    {
+        for (int y = 7; y >= 0; --y)
+        {
+            for (int x = 3; x >= 0; --x)
+            {
+                RenderMapContent(x, y);
+            }
+        }
+    }
+
+    if (m_rotation == renderer::Rotation::DEG270)
+    {
+        for (int x = 3; x >= 0; --x)
+        {
+            for (int y = 0; y < 8; ++y)
+            {
+                RenderMapContent(x, y);
+            }
         }
     }
 }
 
-void mdcii::EditorState::RenderBuilding(const int t_id, const int t_mapX, const int t_mapY) const
+void mdcii::EditorState::RenderMapContent(const int t_x, const int t_y)
 {
+    const auto id{ ogl::resource::ResourceManager::LoadTexture("resources/textures/red.png").id };
+    auto pos{ renderer::Utils::MapToIso(t_x, t_y, m_rotation) };
+
+    m_renderer->RenderTile(
+        renderer::Utils::GetModelMatrix(
+            pos,
+            glm::vec2(64.0f, 32.0f)
+        ),
+        id,
+        *context->window,
+        *m_camera
+    );
+
+    m_textRenderer->RenderText(
+        std::to_string(t_x).append(",  ").append(std::to_string(t_y)),
+        pos.x + 16, pos.y + 8,
+        0.25f,
+        glm::vec3(0.0f, 1.0f, 0.0f),
+        *context->window,
+        *m_camera
+    );
+
+    const auto idx{ t_y * 4 + t_x };
+    const auto gfx{ m_map.at(idx) };
+    if (gfx > 0)
+    {
+        RenderBuilding(m_map.at(idx), t_x, t_y);
+    }
+}
+
+void mdcii::EditorState::RenderBuilding(int t_id, const int t_mapX, const int t_mapY) const
+{
+    t_id += static_cast<int>(m_rotation);
+
     const auto w{ static_cast<float>(m_stdBshFile->bshTextures[t_id]->width) };
     const auto h{ static_cast<float>(m_stdBshFile->bshTextures[t_id]->height) };
 
@@ -254,13 +294,11 @@ void mdcii::EditorState::RenderBuilding(const int t_id, const int t_mapX, const 
         screenPosition.y -= 20.0f;
     }
 
-    auto gfx{ m_stdBshFile->bshTextures[t_id]->textureId };
-    const auto offset{ static_cast<int>(m_rotation) };
-    gfx += offset;
+    const auto openGLTextureId{ m_stdBshFile->bshTextures[t_id]->textureId };
 
     m_renderer->RenderTile(
         renderer::Utils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
-        gfx,
+        openGLTextureId,
         *context->window,
         *m_camera
     );

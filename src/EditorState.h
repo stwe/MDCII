@@ -96,8 +96,6 @@ namespace mdcii
         int m_currentId{ -1 };
 
         // 4x8
-
-        /*
         std::vector<int> m_map
         {
             1165, 1094, 1094, 1166,
@@ -108,19 +106,6 @@ namespace mdcii
             1093,    0, 0,    1095,
             1093,    0, 0,    1095,
             1164, 1092, 1092, 1167,
-        };
-        */
-
-        std::vector<int> m_map
-        {
-               0, 0, 0, 0,
-               0, 0, 0, 0,
-               0, 0, 0, 0,
-               0, 0, 0, 0,
-               0, 0, 0, 0,
-               0, 0, 0, 0,
-               0, 0, 0, 0,
-            1164, 0, 0, 0,
         };
 
         //-------------------------------------------------
@@ -137,6 +122,7 @@ namespace mdcii
         void TileMenuByGroup();
 
         void RenderMap();
+        void RenderMapContent(int t_x, int t_y);
         void RenderBuilding(int t_id, int t_mapX, int t_mapY) const;
 
         void Rotate();
