@@ -27,6 +27,7 @@ namespace mdcii::camera
 namespace mdcii::renderer
 {
     class TileRenderer;
+    class TextRenderer;
     enum class Rotation;
 }
 
@@ -88,12 +89,15 @@ namespace mdcii
         std::unique_ptr<renderer::TileRenderer> m_renderer;
         std::unique_ptr<data::HousesJsonFile> m_housesJsonFile;
         std::map<int, std::string> m_graphicsFileContent;
+        std::unique_ptr<renderer::TextRenderer> m_textRenderer;
 
         renderer::Rotation m_rotation;
 
         int m_currentId{ -1 };
 
         // 4x8
+
+        /*
         std::vector<int> m_map
         {
             1165, 1094, 1094, 1166,
@@ -104,6 +108,19 @@ namespace mdcii
             1093,    0, 0,    1095,
             1093,    0, 0,    1095,
             1164, 1092, 1092, 1167,
+        };
+        */
+
+        std::vector<int> m_map
+        {
+               0, 0, 0, 0,
+               0, 0, 0, 0,
+               0, 0, 0, 0,
+               0, 0, 0, 0,
+               0, 0, 0, 0,
+               0, 0, 0, 0,
+               0, 0, 0, 0,
+            1164, 0, 0, 0,
         };
 
         //-------------------------------------------------

@@ -11,6 +11,7 @@
 * [Dear ImGui](https://github.com/ocornut/imgui)
 * [NLohmann Json](https://github.com/nlohmann/json)
 * [Magic Enum C++](https://github.com/Neargye/magic_enum)
+* [FreeType](https://freetype.org/)
 * C++ 17 Compiler
 
 ### Platforms
@@ -35,6 +36,7 @@ spdlog/1.10.0
 imgui/1.86
 nlohmann_json/3.10.5
 magic_enum/0.8.0
+freetype/2.12.1
 
 [generators]
 premake
@@ -84,6 +86,7 @@ spdlog/1.10.0
 imgui/1.86
 nlohmann_json/3.10.5
 magic_enum/0.8.0
+freetype/2.12.1
 
 [generators]
 cmake

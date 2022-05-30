@@ -4,6 +4,7 @@
 #include "Log.h"
 #include "data/HousesJsonFile.h"
 #include "renderer/TileRenderer.h"
+#include "renderer/TextRenderer.h"
 #include "renderer/Utils.h"
 #include "ogl/OpenGL.h"
 #include "ogl/resource/ResourceManager.h"
@@ -116,6 +117,9 @@ void mdcii::EditorState::Init()
     // load Grafiken.txt
     m_graphicsFileContent = ogl::resource::ResourceUtil::ReadGraphicsFile("E:/Dev/MDCII/resources/data/Grafiken.txt");
 
+    // create text renderer
+    m_textRenderer = std::make_unique<renderer::TextRenderer>("E:/Dev/MDCII/resources/bitter/Bitter-Regular.otf");
+
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] The editor state was successfully initialized.");
 }
 
@@ -204,22 +208,35 @@ void mdcii::EditorState::RenderMap()
     {
         for (int x = 0; x < 4; ++x)
         {
-            glm::vec2 s;
-            s = renderer::Utils::MapToIso(x, y, m_rotation);
+            auto pos{ renderer::Utils::MapToIso(x, y, m_rotation) };
 
             m_renderer->RenderTile(
-                renderer::Utils::GetModelMatrix(s, glm::vec2(64.0f, 32.0f)),
+                renderer::Utils::GetModelMatrix(
+                    pos,
+                    glm::vec2(64.0f, 32.0f)
+                ),
                 id,
                 *context->window,
                 *m_camera
             );
 
+            m_textRenderer->RenderText(
+                std::to_string(x).append(",  ").append(std::to_string(y)),
+                pos.x + 16, pos.y + 8,
+                0.25f,
+                glm::vec3(0.0f, 1.0f, 0.0f),
+                *context->window,
+                *m_camera
+            );
+
+            /*
             const auto idx{ y * 4 + x };
             const auto gfx{ m_map.at(idx) };
             if (gfx > 0)
             {
                 RenderBuilding(m_map.at(idx), x, y);
             }
+            */
         }
     }
 }
