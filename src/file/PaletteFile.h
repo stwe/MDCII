@@ -10,7 +10,8 @@ namespace mdcii::file
 {
     /**
      * Represents a PaletteFile.
-     * The class loads the pallet values from the stadtfld.col file.
+     * The class loads the pallet values from the from the
+     * original game's stadtfld.col file.
      */
     class PaletteFile : public BinaryFile
     {

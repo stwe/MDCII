@@ -1,34 +1,20 @@
 #pragma once
 
 #include <map>
-#include <vector>
 #include "state/State.h"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::data
-{
-    class HousesJsonFile;
-}
-
-namespace mdcii::file
-{
-    class PaletteFile;
-    class BshFile;
-}
-
 namespace mdcii::camera
 {
     class Camera;
 }
 
-namespace mdcii::renderer
+namespace mdcii::map
 {
-    class TileRenderer;
-    class TextRenderer;
-    enum class Rotation;
+    class Map;
 }
 
 //-------------------------------------------------
@@ -52,8 +38,8 @@ namespace mdcii
         /**
          * Constructs a new EditorState object.
          *
-         * @param t_id The unique identifier.
-         * @param t_stateStack The parent StateStack object.
+         * @param t_id The unique identifier of the State.
+         * @param t_stateStack A pointer to the parent StateStack object.
          * @param t_context The holder of shared objects.
          */
         EditorState(Id t_id, state::StateStack* t_stateStack, std::shared_ptr<Context> t_context);
@@ -82,63 +68,42 @@ namespace mdcii
         // Member
         //-------------------------------------------------
 
-        std::unique_ptr<file::PaletteFile> m_paletteFile;
-        std::unique_ptr<file::BshFile> m_stdBshFile;
-        std::unique_ptr<file::BshFile> m_bauhausBshFile;
-        std::unique_ptr<camera::Camera> m_camera;
-        std::unique_ptr<renderer::TileRenderer> m_renderer;
-        std::unique_ptr<data::HousesJsonFile> m_housesJsonFile;
+        /**
+         * Text identifiers for gfx Ids.
+         */
         std::map<int, std::string> m_graphicsFileContent;
-        std::unique_ptr<renderer::TextRenderer> m_textRenderer;
 
-        renderer::Rotation m_rotation;
+        /**
+         * The orthographic camera.
+         */
+        std::unique_ptr<camera::Camera> m_camera;
 
-        int m_currentId{ -1 };
-
-        // 4x8
-        std::vector<int> m_map
-        {
-            1165, 1094, 1094, 1166,
-            1093,    4, 0,    1095,
-            1093,    0, 0,    1095,
-            1093,    0, 0,    1095,
-            1093,    0, 0,    1095,
-            1093,    0, 0,    1095,
-            1093,    0, 0,    1095,
-            1164, 1092, 1092, 1167,
-        };
-
-        /*
-        std::vector<int> m_map
-        {
-            0, 0, 0, 0,
-            0, 4, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-            0, 0, 0, 0,
-        };
-        */
+        /**
+         * The Map object to edit.
+         */
+        std::unique_ptr<map::Map> m_map;
 
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
 
+        /**
+         * Initializes the state.
+         */
         void Init();
 
         //-------------------------------------------------
         // ImGui
         //-------------------------------------------------
 
+        /**
+         * An ImGui tree view with a node for each Gfx Id.
+         */
         void TileMenuById();
+
+        /**
+         * An ImGui tree view. The entries are grouped by TileKind.
+         */
         void TileMenuByGroup();
-
-        void RenderMap();
-        void RenderMapContent(int t_x, int t_y);
-        void RenderBuilding(int t_id, int t_mapX, int t_mapY) const;
-
-        void Rotate();
     };
 }

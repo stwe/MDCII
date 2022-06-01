@@ -68,11 +68,11 @@ void mdcii::WorldState::Render()
             glm::vec2 s;
             if (m_rotate90)
             {
-                s = renderer::Utils::MapToIso(4 - y - 1, x);
+                //s = renderer::Utils::MapToIso(4 - y - 1, x);
             }
             else
             {
-                s = renderer::Utils::MapToIso(x, y);
+                //s = renderer::Utils::MapToIso(x, y);
             }
 
             m_renderer->RenderTile(
@@ -200,6 +200,7 @@ void mdcii::WorldState::RenderBuilding(const int t_id, const int t_mapX, const i
     const auto w{ static_cast<float>(m_stdBshFile->bshTextures[t_id]->width) };
     const auto h{ static_cast<float>(m_stdBshFile->bshTextures[t_id]->height) };
 
+    /*
     auto screenPosition{ renderer::Utils::MapToIso(t_mapX, t_mapY) };
     screenPosition.y -= (h - 32.0f);
 
@@ -209,6 +210,7 @@ void mdcii::WorldState::RenderBuilding(const int t_id, const int t_mapX, const i
         *context->window,
         *m_camera
     );
+    */
 }
 
 void mdcii::WorldState::Init()

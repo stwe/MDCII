@@ -12,6 +12,8 @@ namespace mdcii::data
 {
     /**
      * Reads the HAUS objects from the houses.json file.
+     * The houses.json file contains the content from the
+     * original game's haeuser.cod as json.
      */
     class HousesJsonFile
     {

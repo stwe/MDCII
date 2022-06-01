@@ -3,12 +3,10 @@
 #include "EditorState.h"
 #include "Log.h"
 #include "data/HousesJsonFile.h"
+#include "data/GraphicsFile.h"
+#include "map/Map.h"
 #include "renderer/TileRenderer.h"
-#include "renderer/TextRenderer.h"
-#include "renderer/Utils.h"
 #include "ogl/OpenGL.h"
-#include "ogl/resource/ResourceManager.h"
-#include "ogl/resource/ResourceUtil.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -16,7 +14,6 @@
 
 mdcii::EditorState::EditorState(const Id t_id, state::StateStack* t_stateStack, std::shared_ptr<Context> t_context)
     : State(t_id, t_stateStack, std::move(t_context))
-    , m_rotation{ renderer::Rotation::DEG0 }
 {
     Log::MDCII_LOG_DEBUG("[EditorState::EditorState()] Create EditorState.");
 
@@ -60,7 +57,7 @@ void mdcii::EditorState::PreRender()
 
 void mdcii::EditorState::Render()
 {
-    RenderMap();
+    m_map->Render(*context->window, *m_camera);
 }
 
 void mdcii::EditorState::RenderImGui()
@@ -69,13 +66,17 @@ void mdcii::EditorState::RenderImGui()
 
     ImGui::Begin("Edit", nullptr, 0);
 
-    ImGui::Text("Current rotation: %s", magic_enum::enum_name(m_rotation).data());
-    if (ImGui::Button("Rotate"))
+    ImGui::Text("Current rotation: %s", magic_enum::enum_name(m_map->rotation).data());
+    if (ImGui::Button("Rotate right"))
     {
-        Rotate();
+        ++m_map->rotation;
+    }
+    if (ImGui::Button("Rotate left"))
+    {
+        --m_map->rotation;
     }
 
-    ImGui::Text("Current Id: %d", m_currentId);
+    ImGui::Text("Current selected Id: %d", m_map->selectedId);
 
     TileMenuById();
     //TileMenuByGroup();
@@ -93,32 +94,14 @@ void mdcii::EditorState::Init()
 {
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] Initializing editor state.");
 
-    // load palette
-    m_paletteFile = std::make_unique<file::PaletteFile>("STADTFLD.COL");
-    m_paletteFile->ReadDataFromChunks();
+    // load Grafiken.txt
+    m_graphicsFileContent = data::GraphicsFile::ReadGraphicsFile("E:/Dev/MDCII/resources/data/Grafiken.txt");
 
-    // load stadtfld textures
-    m_stdBshFile = std::make_unique<file::BshFile>("STADTFLD.BSH", m_paletteFile->palette);
-    m_stdBshFile->ReadDataFromChunks();
-
-    // load texture previews
-    m_bauhausBshFile = std::make_unique<file::BshFile>("BAUHAUS.BSH", m_paletteFile->palette);
-    m_bauhausBshFile->ReadDataFromChunks();
-
-    // create a camera
+    // create camera
     m_camera = std::make_unique<camera::Camera>(context->window, glm::vec2(0.0f, 0.0f));
 
-    // create a renderer
-    m_renderer = std::make_unique<renderer::TileRenderer>();
-
-    // load the properties of the assets
-    m_housesJsonFile = std::make_unique<data::HousesJsonFile>();
-
-    // load Grafiken.txt
-    m_graphicsFileContent = ogl::resource::ResourceUtil::ReadGraphicsFile("E:/Dev/MDCII/resources/data/Grafiken.txt");
-
-    // create text renderer
-    m_textRenderer = std::make_unique<renderer::TextRenderer>("E:/Dev/MDCII/resources/bitter/Bitter-Regular.otf");
+    // create a Map object to edit
+    m_map = std::make_unique<map::Map>();
 
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] The editor state was successfully initialized.");
 }
@@ -131,7 +114,7 @@ void mdcii::EditorState::TileMenuById()
 {
     if (ImGui::TreeNode("Objects"))
     {
-        for (const auto& [id, tileAssetProperties] : m_housesJsonFile->tileAssetPropertiesMap)
+        for (const auto& [id, tileAssetProperties] : m_map->housesJsonFile->tileAssetPropertiesMap)
         {
             if (tileAssetProperties.id >= 0)
             {
@@ -145,9 +128,9 @@ void mdcii::EditorState::TileMenuById()
 
                 if (ImGui::TreeNode(idStr.append(" ").append(name).c_str()))
                 {
-                    m_currentId = id;
-                    m_renderer->RenderTileGfxImGui(tileAssetProperties, *m_stdBshFile);
-                    m_renderer->RenderTileBauGfxImGui(tileAssetProperties, *m_bauhausBshFile);
+                    m_map->selectedId = id;
+                    m_map->renderer->RenderTileGfxImGui(tileAssetProperties, *m_map->stdBshFile);
+                    m_map->renderer->RenderTileBauGfxImGui(tileAssetProperties, *m_map->bauhausBshFile);
 
                     ImGui::TreePop();
                 }
@@ -165,7 +148,7 @@ void mdcii::EditorState::TileMenuByGroup()
         // for each TileKind ...
         magic_enum::enum_for_each<data::TileKind>([&](const data::TileKind t_kind)
         {
-            const auto ret{ m_housesJsonFile->tileAssetPropertiesMultimap.equal_range(t_kind) };
+            const auto ret{ m_map->housesJsonFile->tileAssetPropertiesMultimap.equal_range(t_kind) };
             const std::string kindStr{ magic_enum::enum_name(t_kind) };
 
             // create a tree node
@@ -184,9 +167,9 @@ void mdcii::EditorState::TileMenuByGroup()
                     const auto idStr{ std::to_string(it->second.id).append(" ").append(name) };
                     if (ImGui::TreeNode(idStr.c_str()))
                     {
-                        m_currentId = it->second.id;
-                        m_renderer->RenderTileGfxImGui(it->second, *m_stdBshFile);
-                        m_renderer->RenderTileBauGfxImGui(it->second, *m_bauhausBshFile);
+                        m_map->selectedId = it->second.id;
+                        m_map->renderer->RenderTileGfxImGui(it->second, *m_map->stdBshFile);
+                        m_map->renderer->RenderTileBauGfxImGui(it->second, *m_map->bauhausBshFile);
 
                         ImGui::TreePop();
                     }
@@ -197,127 +180,5 @@ void mdcii::EditorState::TileMenuByGroup()
         });
 
         ImGui::TreePop();
-    }
-}
-
-void mdcii::EditorState::RenderMap()
-{
-    if (m_rotation == renderer::Rotation::DEG0)
-    {
-        for (int y = 0; y < 8; ++y)
-        {
-            for (int x = 0; x < 4; ++x)
-            {
-                RenderMapContent(x, y);
-            }
-        }
-    }
-
-    if (m_rotation == renderer::Rotation::DEG90)
-    {
-        for (int x = 0; x < 4; ++x)
-        {
-            for (int y = 7; y >= 0; --y)
-            {
-                RenderMapContent(x, y);
-            }
-        }
-    }
-
-    if (m_rotation == renderer::Rotation::DEG180)
-    {
-        for (int y = 7; y >= 0; --y)
-        {
-            for (int x = 3; x >= 0; --x)
-            {
-                RenderMapContent(x, y);
-            }
-        }
-    }
-
-    if (m_rotation == renderer::Rotation::DEG270)
-    {
-        for (int x = 3; x >= 0; --x)
-        {
-            for (int y = 0; y < 8; ++y)
-            {
-                RenderMapContent(x, y);
-            }
-        }
-    }
-}
-
-void mdcii::EditorState::RenderMapContent(const int t_x, const int t_y)
-{
-    const auto id{ ogl::resource::ResourceManager::LoadTexture("resources/textures/red.png").id };
-    auto pos{ renderer::Utils::MapToIso(t_x, t_y, m_rotation) };
-
-    m_renderer->RenderTile(
-        renderer::Utils::GetModelMatrix(
-            pos,
-            glm::vec2(64.0f, 32.0f)
-        ),
-        id,
-        *context->window,
-        *m_camera
-    );
-
-    m_textRenderer->RenderText(
-        std::to_string(t_x).append(",  ").append(std::to_string(t_y)),
-        pos.x + 16, pos.y + 8,
-        0.25f,
-        glm::vec3(0.0f, 1.0f, 0.0f),
-        *context->window,
-        *m_camera
-    );
-
-    const auto idx{ t_y * 4 + t_x };
-    const auto gfx{ m_map.at(idx) };
-    if (gfx > 0)
-    {
-        RenderBuilding(m_map.at(idx), t_x, t_y);
-    }
-}
-
-void mdcii::EditorState::RenderBuilding(int t_id, const int t_mapX, const int t_mapY) const
-{
-    t_id += static_cast<int>(m_rotation);
-
-    const auto w{ static_cast<float>(m_stdBshFile->bshTextures[t_id]->width) };
-    const auto h{ static_cast<float>(m_stdBshFile->bshTextures[t_id]->height) };
-
-    auto screenPosition{ renderer::Utils::MapToIso(t_mapX, t_mapY, m_rotation) };
-    screenPosition.y -= (h - 32.0f);
-
-    if (t_id >= 4 && t_id <= 7)
-    {
-        screenPosition.y -= 20.0f;
-    }
-
-    const auto openGLTextureId{ m_stdBshFile->bshTextures[t_id]->textureId };
-
-    m_renderer->RenderTile(
-        renderer::Utils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
-        openGLTextureId,
-        *context->window,
-        *m_camera
-    );
-}
-
-void mdcii::EditorState::Rotate()
-{
-    if (m_rotation == renderer::Rotation::DEG0)
-    {
-        m_rotation = renderer::Rotation::DEG90;
-    }
-    else if (m_rotation == renderer::Rotation::DEG90)
-    {
-        m_rotation = renderer::Rotation::DEG180;
-    } else if (m_rotation == renderer::Rotation::DEG180)
-    {
-        m_rotation = renderer::Rotation::DEG270;
-    } else if (m_rotation == renderer::Rotation::DEG270)
-    {
-        m_rotation = renderer::Rotation::DEG0;
     }
 }

@@ -9,11 +9,30 @@ namespace mdcii::file
     // BshTexture
     //-------------------------------------------------
 
+    /**
+     * A bsh graphic of the original game.
+     */
     struct BshTexture
     {
+        /**
+         * The pixels of the graphic or the palette index.
+         */
         std::vector<PaletteFile::Color32Bit> pixel;
+
+        /**
+         * The gfx width.
+         */
         uint32_t width{ 0 };
+
+        /**
+         * The gfx height.
+         */
         uint32_t height{ 0 };
+
+        /**
+         * The OpenGL texture handle of this gfx.
+         * So this graphic is accessible to the GPU.
+         */
         uint32_t textureId{ 0 };
     };
 
