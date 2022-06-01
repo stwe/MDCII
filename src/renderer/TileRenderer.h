@@ -2,8 +2,6 @@
 
 #include "ogl/Window.h"
 #include "camera/Camera.h"
-#include "data/TileAssetProperties.h"
-#include "file/BshFile.h"
 
 //-------------------------------------------------
 // TileRenderer
@@ -65,32 +63,6 @@ namespace mdcii::renderer
             const ogl::Window& t_window,
             const camera::Camera& t_camera
         ) const;
-
-        //-------------------------------------------------
-        // Render ImGui
-        //-------------------------------------------------
-
-        /**
-         * Renders a single textured tile.
-         *
-         * @param t_tileAssetProperties All properties of a tile.The gfx value is used for rendering.
-         * @param t_bshFile A BshFile object holding multiple textures.
-         */
-        static void RenderTileGfxImGui(
-            const data::TileAssetProperties& t_tileAssetProperties,
-            const file::BshFile& t_bshFile
-        );
-
-        /**
-         * Renders a single textured tile for preview.
-         *
-         * @param t_tileAssetProperties All properties of a tile.The baugfx value is used for rendering.
-         * @param t_bshFile A BshFile object holding multiple textures for preview.
-         */
-        static void RenderTileBauGfxImGui(
-            const data::TileAssetProperties& t_tileAssetProperties,
-            const file::BshFile& t_bshFile
-        );
 
     protected:
 

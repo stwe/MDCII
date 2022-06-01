@@ -1,6 +1,7 @@
 #include "Map.h"
 #include "Log.h"
 #include "data/HousesJsonFile.h"
+#include "file/BshFile.h"
 #include "renderer/TileRenderer.h"
 #include "renderer/TextRenderer.h"
 #include "renderer/Utils.h"

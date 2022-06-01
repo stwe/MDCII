@@ -6,6 +6,7 @@
 #include "data/GraphicsFile.h"
 #include "map/Map.h"
 #include "renderer/TileRenderer.h"
+#include "renderer/ImGuiTileRenderer.h"
 #include "ogl/OpenGL.h"
 
 //-------------------------------------------------
@@ -129,8 +130,8 @@ void mdcii::EditorState::TileMenuById()
                 if (ImGui::TreeNode(idStr.append(" ").append(name).c_str()))
                 {
                     m_map->selectedId = id;
-                    m_map->renderer->RenderTileGfxImGui(tileAssetProperties, *m_map->stdBshFile);
-                    m_map->renderer->RenderTileBauGfxImGui(tileAssetProperties, *m_map->bauhausBshFile);
+                    renderer::ImGuiTileRenderer::RenderTileGfxImGui(tileAssetProperties, *m_map->stdBshFile);
+                    renderer::ImGuiTileRenderer::RenderTileBauGfxImGui(tileAssetProperties, *m_map->bauhausBshFile);
 
                     ImGui::TreePop();
                 }
@@ -168,8 +169,8 @@ void mdcii::EditorState::TileMenuByGroup()
                     if (ImGui::TreeNode(idStr.c_str()))
                     {
                         m_map->selectedId = it->second.id;
-                        m_map->renderer->RenderTileGfxImGui(it->second, *m_map->stdBshFile);
-                        m_map->renderer->RenderTileBauGfxImGui(it->second, *m_map->bauhausBshFile);
+                        renderer::ImGuiTileRenderer::RenderTileGfxImGui(it->second, *m_map->stdBshFile);
+                        renderer::ImGuiTileRenderer::RenderTileBauGfxImGui(it->second, *m_map->bauhausBshFile);
 
                         ImGui::TreePop();
                     }
