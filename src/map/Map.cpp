@@ -179,8 +179,7 @@ void mdcii::map::Map::RenderGridTile(const int t_mapX, const int t_mapY, const o
 
 void mdcii::map::Map::RenderBuildingTile(const int t_mapX, const int t_mapY, const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
-    const auto mapIndex{ t_mapY * 4 + t_mapX };
-    auto gfx{ m_map.at(mapIndex) };
+    auto gfx{ m_map.at(GetMapIndex(t_mapX, t_mapY)) };
 
     gfx += static_cast<int>(rotation);
 
