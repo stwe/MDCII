@@ -19,23 +19,42 @@ namespace mdcii::ogl
 
 namespace mdcii::camera
 {
+    /**
+     * Represents an orthographic camera.
+     */
     class Camera
     {
     public:
+        //-------------------------------------------------
+        // Types
+        //-------------------------------------------------
+
+        /**
+         * The movement possibilities of the camera.
+         */
         enum class Direction { LEFT, RIGHT, UP, DOWN };
 
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
+        /**
+         * The position of the camera.
+         */
         glm::vec2 position{ 0.0f };
-        float velocity{ 2.0f };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
         Camera() = delete;
+
+        /**
+         * Constructs a new Camera object.
+         *
+         * @param t_window The Window object.
+         * @param t_position The camera position.
+         */
         Camera(std::shared_ptr<ogl::Window> t_window, const glm::vec2& t_position);
 
         Camera(const Camera& t_other) = delete;
@@ -49,12 +68,20 @@ namespace mdcii::camera
         // View matrix
         //-------------------------------------------------
 
+        /**
+         * Creates the view matrix.
+         *
+         * @return The created view matrix.
+         */
         [[nodiscard]] glm::mat4 GetViewMatrix() const noexcept;
 
         //-------------------------------------------------
         // Logic
         //-------------------------------------------------
 
+        /**
+         * Update camera position.
+         */
         void Update();
 
     protected:
@@ -64,12 +91,18 @@ namespace mdcii::camera
         // Member
         //-------------------------------------------------
 
+        /**
+         * The Window object.
+         */
         std::shared_ptr<ogl::Window> m_window;
 
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
 
+        /**
+         * Handle key input.
+         */
         void ProcessKeyboard(Direction t_direction);
     };
 }

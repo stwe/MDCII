@@ -17,6 +17,11 @@ namespace mdcii::map
     class Map;
 }
 
+namespace mdcii::map
+{
+    class MousePicker;
+}
+
 //-------------------------------------------------
 // EditorState
 //-------------------------------------------------
@@ -83,6 +88,11 @@ namespace mdcii
          */
         std::unique_ptr<map::Map> m_map;
 
+        /**
+         * A MousePicker object to select tiles.
+         */
+        std::unique_ptr<map::MousePicker> m_mousePicker;
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -99,11 +109,11 @@ namespace mdcii
         /**
          * An ImGui tree view with a node for each Gfx Id.
          */
-        void TileMenuById();
+        void TileMenuById() const;
 
         /**
          * An ImGui tree view. The entries are grouped by TileKind.
          */
-        void TileMenuByGroup();
+        void TileMenuByGroup() const;
     };
 }

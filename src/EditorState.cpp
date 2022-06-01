@@ -5,7 +5,7 @@
 #include "data/HousesJsonFile.h"
 #include "data/GraphicsFile.h"
 #include "map/Map.h"
-#include "renderer/TileRenderer.h"
+#include "map/MousePicker.h"
 #include "renderer/ImGuiTileRenderer.h"
 #include "ogl/OpenGL.h"
 
@@ -59,13 +59,25 @@ void mdcii::EditorState::PreRender()
 void mdcii::EditorState::Render()
 {
     m_map->Render(*context->window, *m_camera);
+    m_mousePicker->Render(*context->window, *m_camera);
 }
 
 void mdcii::EditorState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
+    m_mousePicker->RenderImGui();
+
     ImGui::Begin("Edit", nullptr, 0);
+
+    ImGui::Separator();
+
+    // todo: map->RenderImGui();
+    ImGui::Checkbox("Render grid", &m_map->renderGrid);
+    ImGui::Checkbox("Render buildings", &m_map->renderBuildings);
+    ImGui::Checkbox("Render text", &m_map->renderText);
+
+    ImGui::Separator();
 
     ImGui::Text("Current rotation: %s", magic_enum::enum_name(m_map->rotation).data());
     if (ImGui::Button("Rotate right"))
@@ -77,7 +89,18 @@ void mdcii::EditorState::RenderImGui()
         --m_map->rotation;
     }
 
-    ImGui::Text("Current selected Id: %d", m_map->selectedId);
+    ImGui::Separator();
+
+    if (m_map->selectedId == map::Map::INVALID_GFX_ID)
+    {
+        ImGui::Text("Current selected Id: nothing selected");
+    }
+    else
+    {
+        ImGui::Text("Current selected Id: %d", m_map->selectedId);
+    }
+
+    ImGui::Separator();
 
     TileMenuById();
     //TileMenuByGroup();
@@ -104,6 +127,9 @@ void mdcii::EditorState::Init()
     // create a Map object to edit
     m_map = std::make_unique<map::Map>();
 
+    // create the MousePicker to select tiles
+    m_mousePicker = std::make_unique<map::MousePicker>();
+
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] The editor state was successfully initialized.");
 }
 
@@ -111,7 +137,7 @@ void mdcii::EditorState::Init()
 // ImGui
 //-------------------------------------------------
 
-void mdcii::EditorState::TileMenuById()
+void mdcii::EditorState::TileMenuById() const
 {
     if (ImGui::TreeNode("Objects"))
     {
@@ -142,7 +168,7 @@ void mdcii::EditorState::TileMenuById()
     }
 }
 
-void mdcii::EditorState::TileMenuByGroup()
+void mdcii::EditorState::TileMenuByGroup() const
 {
     if (ImGui::TreeNode("Objects"))
     {

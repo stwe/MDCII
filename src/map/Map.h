@@ -84,7 +84,7 @@ namespace mdcii::map
         std::unique_ptr<file::BshFile> bauhausBshFile;
 
         /**
-         * A tile renderer to render bsh graphics as GPU texture.
+         * A tile renderer to render bsh graphics as Gpu texture.
          */
         std::unique_ptr<renderer::TileRenderer> renderer;
 
@@ -92,6 +92,12 @@ namespace mdcii::map
          * Lets OpenGL render a text string.
          */
         std::unique_ptr<renderer::TextRenderer> textRenderer;
+
+        // render options which can enable or disable
+
+        bool renderGrid{ true };
+        bool renderBuildings{ false };
+        bool renderText{ false };
 
         //-------------------------------------------------
         // Ctors. / Dtor.

@@ -160,9 +160,20 @@ glm::vec2 mdcii::map::Map::MapToIso(const int t_mapX, const int t_mapY, const Ro
 
 void mdcii::map::Map::RenderMapContent(const int t_mapX, const int t_mapY, const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
-    RenderGridTile(t_mapX, t_mapY, t_window, t_camera);
-    RenderBuildingTile(t_mapX, t_mapY, t_window, t_camera);
-    RenderText(t_mapX, t_mapY, t_window, t_camera);
+    if (renderGrid)
+    {
+        RenderGridTile(t_mapX, t_mapY, t_window, t_camera);
+    }
+
+    if (renderBuildings)
+    {
+        RenderBuildingTile(t_mapX, t_mapY, t_window, t_camera);
+    }
+
+    if (renderText)
+    {
+        RenderText(t_mapX, t_mapY, t_window, t_camera);
+    }
 }
 
 void mdcii::map::Map::RenderGridTile(const int t_mapX, const int t_mapY, const ogl::Window& t_window, const camera::Camera& t_camera) const

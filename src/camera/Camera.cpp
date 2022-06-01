@@ -66,8 +66,8 @@ void mdcii::camera::Camera::Update()
 
 void mdcii::camera::Camera::ProcessKeyboard(const Direction t_direction)
 {
-    const auto right{ glm::vec2(0.0f, 1.0f) * velocity };
-    const auto left{ glm::vec2(1.0f, 0.0f) * velocity };
+    const auto right{ glm::vec2(0.0f, 32.0f) };
+    const auto left{ glm::vec2(64.0f, 0.0f) };
 
     if (t_direction == Direction::UP)
     {
