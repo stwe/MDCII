@@ -5,6 +5,7 @@
 #include "renderer/TileRenderer.h"
 #include "renderer/Utils.h"
 #include "ogl/resource/ResourceManager.h"
+#include "ogl/resource/stb_image.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -21,6 +22,8 @@ mdcii::map::MousePicker::MousePicker(std::shared_ptr<Map> t_map)
 mdcii::map::MousePicker::~MousePicker() noexcept
 {
     Log::MDCII_LOG_DEBUG("[MousePicker::~MousePicker()] Destruct MousePicker.");
+
+    CleanUp();
 }
 
 //-------------------------------------------------
@@ -31,12 +34,17 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
 {
     m_mouse = glm::ivec2(t_window.GetMouseX(), t_window.GetMouseY());
     m_cell = glm::ivec2(m_mouse.x / 64, m_mouse.y / 32);
-    m_offsetIntoCell = glm::ivec2( m_mouse.x % 64, m_mouse.y % 32 );
+    m_offsetIntoCell = glm::ivec2(m_mouse.x % 64, m_mouse.y % 32);
 
     const glm::ivec2 origin{
         static_cast<int>(t_camera.position.x) / 64,
     static_cast<int>(t_camera.position.y) / 32
     };
+
+    const auto* offset{ m_cornerImage + (4 * (m_offsetIntoCell.y * 64 + m_offsetIntoCell.x)) };
+    const auto r = offset[0];
+    const auto g = offset[1];
+    const auto b = offset[2];
 
     if (m_map->rotation == Rotation::DEG0)
     {
@@ -44,6 +52,23 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
             (m_cell.y + origin.y) + (m_cell.x + origin.x),
             (m_cell.y + origin.y) - (m_cell.x + origin.x)
         );
+
+        if (r == 255 && g == 0 && b == 0)
+        {
+            m_selected.x -= 1;
+        }
+        else if (r == 0 && g == 255 && b == 0)
+        {
+            m_selected.y -= 1;
+        }
+        else  if (r == 0 && g == 0 && b == 255)
+        {
+            m_selected.y += 1;
+        }
+        else if (r == 255 && g == 255 && b == 0)
+        {
+            m_selected.x += 1;
+        }
     }
 
     if (m_map->rotation == Rotation::DEG90)
@@ -99,6 +124,15 @@ void mdcii::map::MousePicker::RenderImGui()
     ImGui::Text("Cell x: %d, y: %d", m_cell.x, m_cell.y);
     ImGui::Text("Selected x: %d, y: %d", m_selected.x, m_selected.y);
 
+    const auto* offset{ m_cornerImage + (4 * (m_offsetIntoCell.y * 64 + m_offsetIntoCell.x)) };
+    const auto r = offset[0];
+    const auto g = offset[1];
+    const auto b = offset[2];
+
+    ImGui::Text("r: %d", r);
+    ImGui::Text("g: %d", g);
+    ImGui::Text("b: %d", b);
+
     ImGui::End();
 }
 
@@ -112,5 +146,20 @@ void mdcii::map::MousePicker::Init()
 
     m_renderer = std::make_unique<renderer::TileRenderer>();
 
+    const std::string path{ "E:/Dev/MDCII/resources/textures/corner.png" };
+    int width, height, channels;
+    m_cornerImage = stbi_load(path.c_str(), &width, &height, &channels, 0);
+
     Log::MDCII_LOG_DEBUG("[MousePicker::Init()] The mouse picker was successfully initialized.");
+}
+
+//-------------------------------------------------
+// Clean up
+//-------------------------------------------------
+
+void mdcii::map::MousePicker::CleanUp() const
+{
+    Log::MDCII_LOG_DEBUG("[MousePicker::CleanUp()] Clean up MousePicker.");
+
+    stbi_image_free(m_cornerImage);
 }

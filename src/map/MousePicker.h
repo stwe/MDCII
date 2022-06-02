@@ -65,10 +65,18 @@ namespace mdcii::map
 
         std::unique_ptr<renderer::TileRenderer> m_renderer;
 
+        unsigned char* m_cornerImage{ nullptr };
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
 
         void Init();
+
+        //-------------------------------------------------
+        // Clean up
+        //-------------------------------------------------
+
+        void CleanUp() const;
     };
 }
