@@ -77,6 +77,23 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
             (m_cell.y + origin.y) - (m_cell.x + origin.x),
             m_map->width - 1 - ((m_cell.x + origin.x) + (m_cell.y + origin.y))
         );
+
+        if (r == 255 && g == 0 && b == 0)
+        {
+            m_selected.y += 1;
+        }
+        else if (r == 0 && g == 255 && b == 0)
+        {
+            m_selected.x -= 1;
+        }
+        else  if (r == 0 && g == 0 && b == 255)
+        {
+            m_selected.x += 1;
+        }
+        else if (r == 255 && g == 255 && b == 0)
+        {
+            m_selected.y -= 1;
+        }
     }
 
     if (m_map->rotation == Rotation::DEG180)
@@ -85,6 +102,23 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
             m_map->width - 1 - ((m_cell.y + origin.y) + (m_cell.x + origin.x)),
             m_map->height - 1 - ((m_cell.y + origin.y) - (m_cell.x + origin.x))
         );
+
+        if (r == 255 && g == 0 && b == 0)
+        {
+            m_selected.x += 1;
+        }
+        else if (r == 0 && g == 255 && b == 0)
+        {
+            m_selected.y += 1;
+        }
+        else  if (r == 0 && g == 0 && b == 255)
+        {
+            m_selected.y -= 1;
+        }
+        else if (r == 255 && g == 255 && b == 0)
+        {
+            m_selected.x -= 1;
+        }
     }
 
     if (m_map->rotation == Rotation::DEG270)
@@ -93,6 +127,23 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
             m_map->height - 1 - ((m_cell.y + origin.y) - (m_cell.x + origin.x)),
             (m_cell.y + origin.y) + (m_cell.x + origin.x)
         );
+
+        if (r == 255 && g == 0 && b == 0)
+        {
+            m_selected.y -= 1;
+        }
+        else if (r == 0 && g == 255 && b == 0)
+        {
+            m_selected.x += 1;
+        }
+        else  if (r == 0 && g == 0 && b == 255)
+        {
+            m_selected.x -= 1;
+        }
+        else if (r == 255 && g == 255 && b == 0)
+        {
+            m_selected.y += 1;
+        }
     }
 
     m_renderer->RenderTile(
