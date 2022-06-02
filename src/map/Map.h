@@ -25,12 +25,12 @@ namespace mdcii::renderer
     class TextRenderer;
 }
 
-//-------------------------------------------------
-// Map
-//-------------------------------------------------
-
 namespace mdcii::map
 {
+    //-------------------------------------------------
+    // Rotation
+    //-------------------------------------------------
+
     /**
      * Represents the possible map rotations.
      */
@@ -38,6 +38,10 @@ namespace mdcii::map
     {
         DEG0, DEG90, DEG180, DEG270
     };
+
+    //-------------------------------------------------
+    // Map
+    //-------------------------------------------------
 
     /**
      * Represents a map with one or many islands.
@@ -62,6 +66,16 @@ namespace mdcii::map
          * The currently selected gfx Id.
          */
         int selectedId{ INVALID_GFX_ID };
+
+        /**
+         * The width of the map in tiles.
+         */
+        int width{ 4 };
+
+        /**
+         * The height of the map in tiles.
+         */
+        int height{ 8 };
 
         /**
          * The map rotation.
@@ -124,6 +138,11 @@ namespace mdcii::map
          */
         void Render(const ogl::Window& t_window, const camera::Camera& t_camera) const;
 
+        /**
+         * Renders ImGui menus.
+         */
+        void RenderImGui();
+
         //-------------------------------------------------
         // Rotate map
         //-------------------------------------------------
@@ -171,7 +190,7 @@ namespace mdcii::map
          *
          * @return The map index.
          */
-        [[nodiscard]] int GetMapIndex(const int t_mapX, const int t_mapY) const { return t_mapY * m_width + t_mapX; }
+        [[nodiscard]] int GetMapIndex(const int t_mapX, const int t_mapY) const { return t_mapY * width + t_mapX; }
 
     protected:
 
@@ -180,19 +199,21 @@ namespace mdcii::map
         // Member
         //-------------------------------------------------
 
-        /**
-         * The map width.
-         */
+        std::vector<int> m_map
+        {
+            1165, 1094, 1094, 1166,
+            1093,    4, 0,    1095,
+            1093,    0, 0,    1095,
+            1093,    0, 0,    1095,
+            1093,    0, 0,    1095,
+            1093,    0, 0,    1095,
+            1093,    0, 0,    1095,
+            1164, 1092, 1092, 1167,
+        };
+
+        /*
         int m_width{ 16 };
-
-        /**
-         * The map height.
-         */
         int m_height{ 24 };
-
-        /**
-         * The map content.
-         */
         std::vector<int> m_map
         {
             //(x)
@@ -222,6 +243,7 @@ namespace mdcii::map
             1093,    4,    4,    4,    4,    4,    4,    4,    4,    4,    4,    4,    4,    4,    4, 1095, // 23
             1164, 1092, 1092, 1092, 1092, 1092, 1092, 1092, 1092, 1092, 1092, 1092, 1092, 1092, 1092, 1167, // 24
         };
+        */
 
         /**
          * Pallet values from the from the stadtfld.col file.

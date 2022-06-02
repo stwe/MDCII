@@ -66,46 +66,16 @@ void mdcii::EditorState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    m_mousePicker->RenderImGui();
+    m_map->RenderImGui();
 
-    ImGui::Begin("Edit", nullptr, 0);
-
-    ImGui::Separator();
-
-    // todo: map->RenderImGui();
-    ImGui::Checkbox("Render grid", &m_map->renderGrid);
-    ImGui::Checkbox("Render buildings", &m_map->renderBuildings);
-    ImGui::Checkbox("Render text", &m_map->renderText);
-
-    ImGui::Separator();
-
-    ImGui::Text("Current rotation: %s", magic_enum::enum_name(m_map->rotation).data());
-    if (ImGui::Button("Rotate right"))
-    {
-        ++m_map->rotation;
-    }
-    if (ImGui::Button("Rotate left"))
-    {
-        --m_map->rotation;
-    }
-
-    ImGui::Separator();
-
-    if (m_map->selectedId == map::Map::INVALID_GFX_ID)
-    {
-        ImGui::Text("Current selected Id: nothing selected");
-    }
-    else
-    {
-        ImGui::Text("Current selected Id: %d", m_map->selectedId);
-    }
-
-    ImGui::Separator();
+    ImGui::Begin("EditorState", nullptr, 0);
 
     TileMenuById();
     //TileMenuByGroup();
 
     ImGui::End();
+
+    m_mousePicker->RenderImGui();
 
     ogl::Window::ImGuiEnd();
 }
@@ -118,17 +88,17 @@ void mdcii::EditorState::Init()
 {
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] Initializing editor state.");
 
-    // load Grafiken.txt
+    // load Grafiken.txt for ImGui menus
     m_graphicsFileContent = data::GraphicsFile::ReadGraphicsFile("E:/Dev/MDCII/resources/data/Grafiken.txt");
 
     // create camera
     m_camera = std::make_unique<camera::Camera>(context->window, glm::vec2(0.0f, 0.0f));
 
     // create a Map object to edit
-    m_map = std::make_unique<map::Map>();
+    m_map = std::make_shared<map::Map>();
 
     // create the MousePicker to select tiles
-    m_mousePicker = std::make_unique<map::MousePicker>();
+    m_mousePicker = std::make_unique<map::MousePicker>(m_map);
 
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] The editor state was successfully initialized.");
 }

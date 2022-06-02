@@ -1,17 +1,31 @@
 #include <imgui.h>
 #include "MousePicker.h"
+#include "Map.h"
+#include "Log.h"
 #include "renderer/TileRenderer.h"
 #include "renderer/Utils.h"
 #include "ogl/resource/ResourceManager.h"
 
-mdcii::map::MousePicker::MousePicker()
+//-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
+mdcii::map::MousePicker::MousePicker(std::shared_ptr<Map> t_map)
+    : m_map{ std::move(t_map) }
 {
+    Log::MDCII_LOG_DEBUG("[MousePicker::MousePicker()] Create MousePicker.");
+
     Init();
 }
 
 mdcii::map::MousePicker::~MousePicker() noexcept
 {
+    Log::MDCII_LOG_DEBUG("[MousePicker::~MousePicker()] Destruct MousePicker.");
 }
+
+//-------------------------------------------------
+// Logic
+//-------------------------------------------------
 
 void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::Camera& t_camera)
 {
@@ -24,22 +38,41 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
     static_cast<int>(t_camera.position.y) / 32
     };
 
-    m_selected = glm::ivec2(
-        (m_cell.y + origin.y) + (m_cell.x + origin.x),
-        (m_cell.y + origin.y) - (m_cell.x + origin.x)
-    );
-
-    auto MapToIso = [](const int t_mapX, const int t_mapY)
+    if (m_map->rotation == Rotation::DEG0)
     {
-        return glm::vec2{
-            (t_mapX - t_mapY) << 5, // 32
-            (t_mapX + t_mapY) << 4  // 16
-        };
-    };
+        m_selected = glm::ivec2(
+            (m_cell.y + origin.y) + (m_cell.x + origin.x),
+            (m_cell.y + origin.y) - (m_cell.x + origin.x)
+        );
+    }
+
+    if (m_map->rotation == Rotation::DEG90)
+    {
+        m_selected = glm::ivec2(
+            (m_cell.y + origin.y) - (m_cell.x + origin.x),
+            m_map->width - 1 - ((m_cell.x + origin.x) + (m_cell.y + origin.y))
+        );
+    }
+
+    if (m_map->rotation == Rotation::DEG180)
+    {
+        m_selected = glm::ivec2(
+            m_map->width - 1 - ((m_cell.y + origin.y) + (m_cell.x + origin.x)),
+            m_map->height - 1 - ((m_cell.y + origin.y) - (m_cell.x + origin.x))
+        );
+    }
+
+    if (m_map->rotation == Rotation::DEG270)
+    {
+        m_selected = glm::ivec2(
+            m_map->height - 1 - ((m_cell.y + origin.y) - (m_cell.x + origin.x)),
+            (m_cell.y + origin.y) + (m_cell.x + origin.x)
+        );
+    }
 
     m_renderer->RenderTile(
         renderer::Utils::GetModelMatrix(
-            MapToIso(m_selected.x, m_selected.y),
+            m_map->MapToIso(m_selected.x, m_selected.y, m_map->rotation), // todo: rotation remove arg.
             glm::vec2(64.0f, 32.0f)
         ),
         ogl::resource::ResourceManager::LoadTexture("resources/textures/frame.png").id,
@@ -69,7 +102,15 @@ void mdcii::map::MousePicker::RenderImGui()
     ImGui::End();
 }
 
+//-------------------------------------------------
+// Init
+//-------------------------------------------------
+
 void mdcii::map::MousePicker::Init()
 {
+    Log::MDCII_LOG_DEBUG("[MousePicker::Init()] Initializing mouse picker.");
+
     m_renderer = std::make_unique<renderer::TileRenderer>();
+
+    Log::MDCII_LOG_DEBUG("[MousePicker::Init()] The mouse picker was successfully initialized.");
 }

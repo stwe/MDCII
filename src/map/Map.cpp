@@ -1,3 +1,5 @@
+#include <imgui.h>
+#include <magic_enum.hpp>
 #include "Map.h"
 #include "Log.h"
 #include "data/HousesJsonFile.h"
@@ -31,9 +33,9 @@ void mdcii::map::Map::Render(const ogl::Window& t_window, const camera::Camera& 
 {
     if (rotation == Rotation::DEG0)
     {
-        for (int y = 0; y < m_height; ++y)
+        for (int y = 0; y < height; ++y)
         {
-            for (int x = 0; x < m_width; ++x)
+            for (int x = 0; x < width; ++x)
             {
                 RenderMapContent(x, y, t_window, t_camera);
             }
@@ -42,9 +44,9 @@ void mdcii::map::Map::Render(const ogl::Window& t_window, const camera::Camera& 
 
     if (rotation == Rotation::DEG90)
     {
-        for (int x = 0; x < m_width; ++x)
+        for (int x = 0; x < width; ++x)
         {
-            for (int y = m_height - 1; y >= 0; --y)
+            for (int y = height - 1; y >= 0; --y)
             {
                 RenderMapContent(x, y, t_window, t_camera);
             }
@@ -53,9 +55,9 @@ void mdcii::map::Map::Render(const ogl::Window& t_window, const camera::Camera& 
 
     if (rotation == Rotation::DEG180)
     {
-        for (int y = m_height - 1; y >= 0; --y)
+        for (int y = height - 1; y >= 0; --y)
         {
-            for (int x = m_width - 1; x >= 0; --x)
+            for (int x = width - 1; x >= 0; --x)
             {
                 RenderMapContent(x, y, t_window, t_camera);
             }
@@ -64,14 +66,54 @@ void mdcii::map::Map::Render(const ogl::Window& t_window, const camera::Camera& 
 
     if (rotation == Rotation::DEG270)
     {
-        for (int x = m_width - 1; x >= 0; --x)
+        for (int x = width - 1; x >= 0; --x)
         {
-            for (int y = 0; y < m_height; ++y)
+            for (int y = 0; y < height; ++y)
             {
                 RenderMapContent(x, y, t_window, t_camera);
             }
         }
     }
+}
+
+void mdcii::map::Map::RenderImGui()
+{
+    ImGui::Begin("Map", nullptr, 0);
+
+    // render options
+
+    ImGui::Checkbox("Render grid", &renderGrid);
+    ImGui::Checkbox("Render buildings", &renderBuildings);
+    ImGui::Checkbox("Render text", &renderText);
+
+    ImGui::Separator();
+
+    // rotation
+
+    ImGui::Text("Current rotation: %s", magic_enum::enum_name(rotation).data());
+    if (ImGui::Button("Rotate right"))
+    {
+        ++rotation;
+    }
+    if (ImGui::Button("Rotate left"))
+    {
+        --rotation;
+    }
+
+    ImGui::Separator();
+
+    // selected
+
+    if (selectedId == INVALID_GFX_ID)
+    {
+        ImGui::Text("Current selected Id: nothing selected");
+    }
+    else
+    {
+        ImGui::Text("Current selected Id: %d", selectedId);
+    }
+
+    ImGui::End();
 }
 
 //-------------------------------------------------
@@ -135,20 +177,20 @@ glm::vec2 mdcii::map::Map::MapToIso(const int t_mapX, const int t_mapY, const Ro
 
     if (t_rotation == Rotation::DEG90)
     {
-        xr = m_width - t_mapY - 1;
+        xr = width - t_mapY - 1;
         yr = t_mapX;
     }
 
     if (t_rotation == Rotation::DEG180)
     {
-        xr = m_width - t_mapX - 1;
-        yr = m_height - t_mapY - 1;
+        xr = width - t_mapX - 1;
+        yr = height - t_mapY - 1;
     }
 
     if (t_rotation == Rotation::DEG270)
     {
         xr = t_mapY;
-        yr = m_height - t_mapX - 1;
+        yr = height - t_mapX - 1;
     }
 
     return MapToIso(xr, yr);

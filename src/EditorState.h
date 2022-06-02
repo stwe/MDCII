@@ -15,10 +15,6 @@ namespace mdcii::camera
 namespace mdcii::map
 {
     class Map;
-}
-
-namespace mdcii::map
-{
     class MousePicker;
 }
 
@@ -86,7 +82,7 @@ namespace mdcii
         /**
          * The Map object to edit.
          */
-        std::unique_ptr<map::Map> m_map;
+        std::shared_ptr<map::Map> m_map;
 
         /**
          * A MousePicker object to select tiles.
