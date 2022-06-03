@@ -243,9 +243,10 @@ void mdcii::map::Map::RenderBuildingTile(const int t_mapX, const int t_mapY, con
     auto screenPosition{ MapToIso(t_mapX, t_mapY, rotation) };
     screenPosition.y -= (h - TILE_HEIGHT);
 
+    // todo: temp hardcoded
     if (gfx >= 4 && gfx <= 7)
     {
-        screenPosition.y -= 20.0f;
+        screenPosition.y -= ELEVATION;
     }
 
     renderer->RenderTile(

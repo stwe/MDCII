@@ -35,8 +35,8 @@ mdcii::map::MousePicker::~MousePicker() noexcept
 void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::Camera& t_camera)
 {
     m_mouse = glm::ivec2(t_window.GetMouseX(), t_window.GetMouseY());
-    m_cell = glm::ivec2(m_mouse.x / Map::TILE_WIDTH, m_mouse.y / Map::TILE_HEIGHT);
-    m_offsetIntoCell = glm::ivec2(m_mouse.x % Map::TILE_WIDTH, m_mouse.y % Map::TILE_HEIGHT);
+    m_cell = glm::ivec2(m_mouse.x / Map::TILE_WIDTH, (m_mouse.y + Map::ELEVATION) / Map::TILE_HEIGHT);
+    m_offsetIntoCell = glm::ivec2(m_mouse.x % Map::TILE_WIDTH, (m_mouse.y + Map::ELEVATION) % Map::TILE_HEIGHT);
 
     const glm::ivec2 origin{
         static_cast<int>(t_camera.position.x) / Map::TILE_WIDTH,
@@ -148,9 +148,12 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
         }
     }
 
+    auto selected{ m_map->MapToIso(m_selected.x, m_selected.y, m_map->rotation) }; // todo: rotation remove arg.
+    selected.y -= Map::ELEVATION;
+
     m_renderer->RenderTile(
         renderer::Utils::GetModelMatrix(
-            m_map->MapToIso(m_selected.x, m_selected.y, m_map->rotation), // todo: rotation remove arg.
+            selected,
             glm::vec2(Map::TILE_WIDTH, Map::TILE_HEIGHT)
         ),
         ogl::resource::ResourceManager::LoadTexture("resources/textures/frame.png").id,
@@ -160,7 +163,10 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
     /*
     m_renderer->RenderTile(
         renderer::Utils::GetModelMatrix(
-            glm::vec2(m_cell.x * Map::TILE_WIDTH, m_cell.y * Map::TILE_HEIGHT),
+            glm::vec2(
+                (m_cell.x + origin.x) * Map::TILE_WIDTH,
+                (m_cell.y + origin.y) * Map::TILE_HEIGHT - Map::ELEVATION
+            ),
             glm::vec2(Map::TILE_WIDTH, Map::TILE_HEIGHT)
         ),
         ogl::resource::ResourceManager::LoadTexture("resources/textures/frame.png").id,
@@ -175,6 +181,7 @@ void mdcii::map::MousePicker::RenderImGui() const
 
     ImGui::Text("Mouse x: %d, y: %d", m_mouse.x, m_mouse.y);
     ImGui::Text("Cell x: %d, y: %d", m_cell.x, m_cell.y);
+    ImGui::Text("Offset into cell x: %d, y: %d", m_offsetIntoCell.x, m_offsetIntoCell.y);
     ImGui::Text("Selected x: %d, y: %d", m_selected.x, m_selected.y);
 
     ImGui::End();
