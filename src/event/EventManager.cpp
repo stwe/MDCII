@@ -82,6 +82,12 @@ void mdcii::event::EventManager::SetMouseGlfwCallbacks(GLFWwindow* t_windowHandl
         t_windowHandle,
         [](GLFWwindow* t_window, const double t_xOffset, const double t_yOffset)
         {
+            // stuff needed by ImGui
+            ImGuiIO& io = ImGui::GetIO();
+            io.MouseWheelH += static_cast<float>(t_xOffset);
+            io.MouseWheel += static_cast<float>(t_yOffset);
+
+            // MDCII
             eventDispatcher.dispatch(
                 MdciiEventType::MOUSE_SCROLLED,
                 MouseScrolledEvent(
