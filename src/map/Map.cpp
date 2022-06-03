@@ -1,6 +1,7 @@
 #include <imgui.h>
 #include <magic_enum.hpp>
 #include "Map.h"
+#include "Game.h"
 #include "Log.h"
 #include "data/HousesJsonFile.h"
 #include "file/BshFile.h"
@@ -296,7 +297,7 @@ void mdcii::map::Map::Init()
     renderer = std::make_unique<renderer::TileRenderer>();
 
     // create text renderer
-    textRenderer = std::make_unique<renderer::TextRenderer>("E:/Dev/MDCII/resources/bitter/Bitter-Regular.otf");
+    textRenderer = std::make_unique<renderer::TextRenderer>(Game::RESOURCES_PATH + "bitter/Bitter-Regular.otf");
 
     Log::MDCII_LOG_DEBUG("[Map::Init()] The map was successfully initialized.");
 }

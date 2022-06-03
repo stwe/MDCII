@@ -1,6 +1,7 @@
 #include <imgui.h>
 #include <magic_enum.hpp>
 #include "EditorState.h"
+#include "Game.h"
 #include "Log.h"
 #include "data/HousesJsonFile.h"
 #include "data/GraphicsFile.h"
@@ -89,10 +90,10 @@ void mdcii::EditorState::Init()
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] Initializing editor state.");
 
     // load Grafiken.txt for ImGui menus
-    m_graphicsFileContent = data::GraphicsFile::ReadGraphicsFile("E:/Dev/MDCII/resources/data/Grafiken.txt");
+    m_graphicsFileContent = data::GraphicsFile::ReadGraphicsFile(Game::RESOURCES_PATH + "data/Grafiken.txt");
 
     // create camera
-    m_camera = std::make_unique<camera::Camera>(context->window, glm::vec2(0.0f, 0.0f));
+    m_camera = std::make_unique<camera::Camera>(context->window);
 
     // create a Map object to edit
     m_map = std::make_shared<map::Map>();

@@ -1,4 +1,5 @@
 #include <glm/gtc/matrix_transform.hpp>
+#include "Game.h"
 #include "Camera.h"
 #include "Log.h"
 #include "map/Map.h"
@@ -15,6 +16,15 @@ mdcii::camera::Camera::Camera(std::shared_ptr<ogl::Window> t_window, const glm::
     Log::MDCII_LOG_DEBUG("[Camera::Camera()] Create Camera.");
 
     position = t_position;
+}
+
+mdcii::camera::Camera::Camera(std::shared_ptr<ogl::Window> t_window)
+    : m_window{ std::move(t_window) }
+{
+    Log::MDCII_LOG_DEBUG("[Camera::Camera()] Create Camera.");
+
+    const auto pos{ Game::INI.GetVector<float>("camera", "position") };
+    position = glm::vec2(pos[0], pos[1]);
 }
 
 mdcii::camera::Camera::~Camera() noexcept

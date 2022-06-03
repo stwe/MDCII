@@ -57,6 +57,13 @@ namespace mdcii::camera
          */
         Camera(std::shared_ptr<ogl::Window> t_window, const glm::vec2& t_position);
 
+        /**
+         * Constructs a new Camera object.
+         *
+         * @param t_window The Window object.
+         */
+        explicit Camera(std::shared_ptr<ogl::Window> t_window);
+
         Camera(const Camera& t_other) = delete;
         Camera(Camera&& t_other) noexcept = delete;
         Camera& operator=(const Camera& t_other) = delete;
