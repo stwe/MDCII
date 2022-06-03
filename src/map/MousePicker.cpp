@@ -148,7 +148,7 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
         }
     }
 
-    auto selected{ m_map->MapToIso(m_selected.x, m_selected.y, m_map->rotation) }; // todo: rotation remove arg.
+    auto selected{ m_map->MapToIso(m_selected.x, m_selected.y) };
     selected.y -= Map::ELEVATION;
 
     m_renderer->RenderTile(

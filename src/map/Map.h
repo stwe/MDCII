@@ -194,18 +194,7 @@ namespace mdcii::map
          *
          * @return The isometric coordinates.
          */
-        [[nodiscard]] static glm::vec2 MapToIso(int t_mapX, int t_mapY);
-
-        /**
-         * Projects map coordinates in isometric view.
-         *
-         * @param t_mapX The map x position.
-         * @param t_mapY The map y position.
-         * @param t_rotation The current map rotation.
-         *
-         * @return The isometric coordinates.
-         */
-        [[nodiscard]] glm::vec2 MapToIso(int t_mapX, int t_mapY, Rotation t_rotation) const;
+        [[nodiscard]] glm::vec2 MapToIso(int t_mapX, int t_mapY) const;
 
         /**
          * 2D/1D - mapping.

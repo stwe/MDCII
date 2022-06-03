@@ -163,38 +163,33 @@ void mdcii::map::Map::RotateMapCcw()
 // Utils
 //-------------------------------------------------
 
-glm::vec2 mdcii::map::Map::MapToIso(const int t_mapX, const int t_mapY)
-{
-    return {
-        (t_mapX - t_mapY) * TILE_WIDTH_HALF,
-        (t_mapX + t_mapY) * TILE_HEIGHT_HALF
-    };
-}
-
-glm::vec2 mdcii::map::Map::MapToIso(const int t_mapX, const int t_mapY, const Rotation t_rotation) const
+glm::vec2 mdcii::map::Map::MapToIso(const int t_mapX, const int t_mapY) const
 {
     auto xr{ t_mapX };
     auto yr{ t_mapY };
 
-    if (t_rotation == Rotation::DEG90)
+    if (rotation == Rotation::DEG90)
     {
         xr = width - t_mapY - 1;
         yr = t_mapX;
     }
 
-    if (t_rotation == Rotation::DEG180)
+    if (rotation == Rotation::DEG180)
     {
         xr = width - t_mapX - 1;
         yr = height - t_mapY - 1;
     }
 
-    if (t_rotation == Rotation::DEG270)
+    if (rotation == Rotation::DEG270)
     {
         xr = t_mapY;
         yr = height - t_mapX - 1;
     }
 
-    return MapToIso(xr, yr);
+    return {
+        (xr - yr) * TILE_WIDTH_HALF,
+        (xr + yr) * TILE_HEIGHT_HALF
+    };
 }
 
 //-------------------------------------------------
@@ -223,7 +218,7 @@ void mdcii::map::Map::RenderGridTile(const int t_mapX, const int t_mapY, const o
 {
     renderer->RenderTile(
         renderer::Utils::GetModelMatrix(
-            MapToIso(t_mapX, t_mapY, rotation),
+            MapToIso(t_mapX, t_mapY),
             glm::vec2(TILE_WIDTH, TILE_HEIGHT)
         ),
         ogl::resource::ResourceManager::LoadTexture("resources/textures/red.png").id,
@@ -240,7 +235,7 @@ void mdcii::map::Map::RenderBuildingTile(const int t_mapX, const int t_mapY, con
     const auto w{ static_cast<float>(stdBshFile->bshTextures[gfx]->width) };
     const auto h{ static_cast<float>(stdBshFile->bshTextures[gfx]->height) };
 
-    auto screenPosition{ MapToIso(t_mapX, t_mapY, rotation) };
+    auto screenPosition{ MapToIso(t_mapX, t_mapY) };
     screenPosition.y -= (h - TILE_HEIGHT);
 
     // todo: temp hardcoded
@@ -259,7 +254,7 @@ void mdcii::map::Map::RenderBuildingTile(const int t_mapX, const int t_mapY, con
 
 void mdcii::map::Map::RenderText(const int t_mapX, const int t_mapY, const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
-    const auto screenPosition{ MapToIso(t_mapX, t_mapY, rotation) };
+    const auto screenPosition{ MapToIso(t_mapX, t_mapY) };
 
     textRenderer->RenderText(
         std::to_string(t_mapX).append(",  ").append(std::to_string(t_mapY)),
