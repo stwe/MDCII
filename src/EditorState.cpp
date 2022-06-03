@@ -121,7 +121,7 @@ void mdcii::EditorState::TileMenuById() const
 {
     if (ImGui::TreeNode("Objects"))
     {
-        for (const auto& [id, tileAssetProperties] : m_map->housesJsonFile->tileAssetPropertiesMap)
+        for (const auto& [id, tileAssetProperties] : m_map->housesJsonFile->tileAssets)
         {
             if (tileAssetProperties.id >= 0)
             {
@@ -155,7 +155,7 @@ void mdcii::EditorState::TileMenuByGroup() const
         // for each TileKind ...
         magic_enum::enum_for_each<data::TileKind>([&](const data::TileKind t_kind)
         {
-            const auto ret{ m_map->housesJsonFile->tileAssetPropertiesMultimap.equal_range(t_kind) };
+            const auto ret{ m_map->housesJsonFile->tileAssetsByKind.equal_range(t_kind) };
             const std::string kindStr{ magic_enum::enum_name(t_kind) };
 
             // create a tree node

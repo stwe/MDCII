@@ -3,7 +3,7 @@
 #include "MdciiAssert.h"
 
 void mdcii::renderer::ImGuiTileRenderer::RenderTileGfxImGui(
-    const data::TileAssetProperties& t_tileAssetProperties,
+    const data::TileAsset& t_tileAssetProperties,
     const file::BshFile& t_bshFile
 )
 {
@@ -38,7 +38,7 @@ void mdcii::renderer::ImGuiTileRenderer::RenderTileGfxImGui(
     }
 }
 
-void mdcii::renderer::ImGuiTileRenderer::RenderTileBauGfxImGui(const data::TileAssetProperties& t_tileAssetProperties, const file::BshFile& t_bshFile)
+void mdcii::renderer::ImGuiTileRenderer::RenderTileBauGfxImGui(const data::TileAsset& t_tileAssetProperties, const file::BshFile& t_bshFile)
 {
     if (const auto gfx{ t_tileAssetProperties.gfx }; gfx >= 0)
     {

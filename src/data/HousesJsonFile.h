@@ -2,7 +2,7 @@
 
 #include <map>
 #include <string>
-#include "TileAssetProperties.h"
+#include "TileAsset.h"
 
 //-------------------------------------------------
 // HousesJsonFile
@@ -34,12 +34,12 @@ namespace mdcii::data
         /**
          * The HAUS objects sorted by Id.
          */
-        std::map<int, TileAssetProperties> tileAssetPropertiesMap;
+        std::map<int, TileAsset> tileAssets;
 
         /**
          * The HAUS objects sorted by TileKind (e.g. BODEN, WALD, HANG, FELS etc).
          */
-        std::multimap<TileKind, TileAssetProperties> tileAssetPropertiesMultimap;
+        std::multimap<TileKind, TileAsset> tileAssetsByKind;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

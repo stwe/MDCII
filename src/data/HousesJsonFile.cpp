@@ -49,7 +49,7 @@ void mdcii::data::HousesJsonFile::ReadFileData()
 
     for (auto& node : nodes)
     {
-        TileAssetProperties properties;
+        TileAsset tileAsset;
 
         auto& vars = node["variables"]["variable"];
 
@@ -58,16 +58,16 @@ void mdcii::data::HousesJsonFile::ReadFileData()
             auto& name = var["name"];
             if (name == "Id")
             {
-                properties.id = var["valueInt"];
-                properties.id -= 20000;
+                tileAsset.id = var["valueInt"];
+                tileAsset.id -= 20000;
             }
             if (name == "Gfx")
             {
-                properties.gfx = var["valueInt"];
+                tileAsset.gfx = var["valueInt"];
             }
             if (name == "Blocknr")
             {
-                properties.blocknr = var["valueInt"];
+                tileAsset.blocknr = var["valueInt"];
             }
             if (name == "Kind")
             {
@@ -75,16 +75,16 @@ void mdcii::data::HousesJsonFile::ReadFileData()
                 const auto strOpt{ magic_enum::enum_cast<TileKind>(str) };
                 if (strOpt.has_value())
                 {
-                    properties.kind = strOpt.value();
+                    tileAsset.kind = strOpt.value();
                 }
             }
             if (name == "Posoffs")
             {
-                properties.posoffs = var["valueInt"];
+                tileAsset.posoffs = var["valueInt"];
             }
             if (name == "Highflg")
             {
-                properties.highflg = var["valueInt"];
+                tileAsset.highflg = var["valueInt"];
             }
 
             // einhoffs
@@ -94,12 +94,12 @@ void mdcii::data::HousesJsonFile::ReadFileData()
             if (name == "Size")
             {
                 auto& values = var["valueArray"]["value"];
-                properties.width = values[0]["valueInt"];
-                properties.height = values[1]["valueInt"];
+                tileAsset.width = values[0]["valueInt"];
+                tileAsset.height = values[1]["valueInt"];
             }
             if (name == "Rotate")
             {
-                properties.rotate = var["valueInt"];
+                tileAsset.rotate = var["valueInt"];
             }
 
             // randAnz
@@ -110,27 +110,27 @@ void mdcii::data::HousesJsonFile::ReadFileData()
                 // skip TIMENEVER string nodes
                 if (var["valueInt"].is_number())
                 {
-                    properties.animTime = var["valueInt"];
+                    tileAsset.animTime = var["valueInt"];
                 }
             }
             if (name == "AnimFrame")
             {
-                properties.animFrame = var["valueInt"];
+                tileAsset.animFrame = var["valueInt"];
             }
             if (name == "AnimAdd")
             {
-                properties.animAdd = var["valueInt"];
+                tileAsset.animAdd = var["valueInt"];
             }
             if (name == "Baugfx")
             {
-                properties.baugfx = var["valueInt"];
+                tileAsset.baugfx = var["valueInt"];
             }
 
             // placeFlg
 
             if (name == "AnimAnz")
             {
-                properties.animAnz = var["valueInt"];
+                tileAsset.animAnz = var["valueInt"];
             }
 
             // randwachs
@@ -143,9 +143,9 @@ void mdcii::data::HousesJsonFile::ReadFileData()
             // destroyflg
         }
 
-        tileAssetPropertiesMap.emplace(properties.id, properties);
-        tileAssetPropertiesMultimap.emplace(properties.kind, properties);
+        tileAssets.emplace(tileAsset.id, tileAsset);
+        tileAssetsByKind.emplace(tileAsset.kind, tileAsset);
     }
 
-    Log::MDCII_LOG_DEBUG("[HousesJsonFile::ReadFileData()] {} TileAssetProperties objects created successfully.", tileAssetPropertiesMap.size());
+    Log::MDCII_LOG_DEBUG("[HousesJsonFile::ReadFileData()] {} TileAsset objects created successfully.", tileAssets.size());
 }

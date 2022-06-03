@@ -1,7 +1,7 @@
 #pragma once
 
 //-------------------------------------------------
-// TileAssetProperties
+// TileAsset
 //-------------------------------------------------
 
 namespace mdcii::data
@@ -49,10 +49,10 @@ namespace mdcii::data
     };
 
     /**
-     * Represents tile asset properties.
+     * Represents a Tile-Asset.
      * Values read from the houses.json file.
      */
-    struct TileAssetProperties
+    struct TileAsset
     {
         static constexpr auto INVALID{ -1 };
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "data/TileAssetProperties.h"
+#include "data/TileAsset.h"
 #include "file/BshFile.h"
 
 //-------------------------------------------------
@@ -31,22 +31,22 @@ namespace mdcii::renderer
         /**
          * Renders a single textured tile.
          *
-         * @param t_tileAssetProperties All properties of a tile.The gfx value is used for rendering.
+         * @param t_tileAsset A tile asset. The gfx value is used for rendering.
          * @param t_bshFile A BshFile object holding multiple textures.
          */
         static void RenderTileGfxImGui(
-            const data::TileAssetProperties& t_tileAssetProperties,
+            const data::TileAsset& t_tileAsset,
             const file::BshFile& t_bshFile
         );
 
         /**
          * Renders a single textured tile for preview.
          *
-         * @param t_tileAssetProperties All properties of a tile.The baugfx value is used for rendering.
+         * @param t_tileAsset A tile asset. The baugfx value is used for rendering.
          * @param t_bshFile A BshFile object holding multiple textures for preview.
          */
         static void RenderTileBauGfxImGui(
-            const data::TileAssetProperties& t_tileAssetProperties,
+            const data::TileAsset& t_tileAsset,
             const file::BshFile& t_bshFile
         );
 
