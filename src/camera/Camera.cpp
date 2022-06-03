@@ -1,6 +1,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "Camera.h"
 #include "Log.h"
+#include "map/Map.h"
 #include "ogl/Window.h"
 #include "ogl/OpenGL.h"
 
@@ -66,26 +67,26 @@ void mdcii::camera::Camera::Update()
 
 void mdcii::camera::Camera::ProcessKeyboard(const Direction t_direction)
 {
-    const auto right{ glm::vec2(0.0f, 32.0f) };
-    const auto left{ glm::vec2(64.0f, 0.0f) };
+    const auto yOff{ glm::vec2(0.0f, map::Map::TILE_HEIGHT) };
+    const auto xOff{ glm::vec2(map::Map::TILE_WIDTH, 0.0f) };
 
     if (t_direction == Direction::UP)
     {
-        position += right;
+        position += yOff;
     }
 
     if (t_direction == Direction::DOWN)
     {
-        position -= right;
+        position -= yOff;
     }
 
     if (t_direction == Direction::LEFT)
     {
-        position -= left;
+        position -= xOff;
     }
 
     if (t_direction == Direction::RIGHT)
     {
-        position += left;
+        position += xOff;
     }
 }

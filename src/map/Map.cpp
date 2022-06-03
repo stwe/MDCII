@@ -165,8 +165,8 @@ void mdcii::map::Map::RotateMapCcw()
 glm::vec2 mdcii::map::Map::MapToIso(const int t_mapX, const int t_mapY)
 {
     return {
-        (t_mapX - t_mapY) << 5, // 32
-        (t_mapX + t_mapY) << 4  // 16
+        (t_mapX - t_mapY) * TILE_WIDTH_HALF,
+        (t_mapX + t_mapY) * TILE_HEIGHT_HALF
     };
 }
 
@@ -223,7 +223,7 @@ void mdcii::map::Map::RenderGridTile(const int t_mapX, const int t_mapY, const o
     renderer->RenderTile(
         renderer::Utils::GetModelMatrix(
             MapToIso(t_mapX, t_mapY, rotation),
-            glm::vec2(64.0f, 32.0f)
+            glm::vec2(TILE_WIDTH, TILE_HEIGHT)
         ),
         ogl::resource::ResourceManager::LoadTexture("resources/textures/red.png").id,
         t_window, t_camera
@@ -240,7 +240,7 @@ void mdcii::map::Map::RenderBuildingTile(const int t_mapX, const int t_mapY, con
     const auto h{ static_cast<float>(stdBshFile->bshTextures[gfx]->height) };
 
     auto screenPosition{ MapToIso(t_mapX, t_mapY, rotation) };
-    screenPosition.y -= (h - 32.0f);
+    screenPosition.y -= (h - TILE_HEIGHT);
 
     if (gfx >= 4 && gfx <= 7)
     {

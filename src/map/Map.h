@@ -58,6 +58,26 @@ namespace mdcii::map
          */
         static constexpr auto INVALID_GFX_ID{ -1 };
 
+        /**
+         * The width of a tile.
+         */
+        static constexpr auto TILE_WIDTH{ 64 };
+
+        /**
+         * The half width of a tile.
+         */
+        static constexpr auto TILE_WIDTH_HALF{ 32 };
+
+        /**
+         * The height of a tile.
+         */
+        static constexpr auto TILE_HEIGHT{ 32 };
+
+        /**
+         * The half height of a tile.
+         */
+        static constexpr auto TILE_HEIGHT_HALF{ 16 };
+
         //-------------------------------------------------
         // Member
         //-------------------------------------------------

@@ -1,7 +1,8 @@
 #include <imgui.h>
 #include "MousePicker.h"
 #include "Map.h"
-#include "Log.h"
+#include "MdciiAssert.h"
+#include "MdciiException.h"
 #include "renderer/TileRenderer.h"
 #include "renderer/Utils.h"
 #include "ogl/resource/ResourceManager.h"
@@ -33,18 +34,18 @@ mdcii::map::MousePicker::~MousePicker() noexcept
 void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::Camera& t_camera)
 {
     m_mouse = glm::ivec2(t_window.GetMouseX(), t_window.GetMouseY());
-    m_cell = glm::ivec2(m_mouse.x / 64, m_mouse.y / 32);
-    m_offsetIntoCell = glm::ivec2(m_mouse.x % 64, m_mouse.y % 32);
+    m_cell = glm::ivec2(m_mouse.x / Map::TILE_WIDTH, m_mouse.y / Map::TILE_HEIGHT);
+    m_offsetIntoCell = glm::ivec2(m_mouse.x % Map::TILE_WIDTH, m_mouse.y % Map::TILE_HEIGHT);
 
     const glm::ivec2 origin{
-        static_cast<int>(t_camera.position.x) / 64,
-    static_cast<int>(t_camera.position.y) / 32
+        static_cast<int>(t_camera.position.x) / Map::TILE_WIDTH,
+    static_cast<int>(t_camera.position.y) / Map::TILE_HEIGHT
     };
 
-    const auto* offset{ m_cornerImage + (4 * (m_offsetIntoCell.y * 64 + m_offsetIntoCell.x)) };
-    const auto r = offset[0];
-    const auto g = offset[1];
-    const auto b = offset[2];
+    const auto* pixelCol{ m_cornerImage + (4ULL * (static_cast<size_t>(m_offsetIntoCell.y) * Map::TILE_WIDTH + m_offsetIntoCell.x)) };
+    const auto r = pixelCol[0];
+    const auto g = pixelCol[1];
+    const auto b = pixelCol[2];
 
     if (m_map->rotation == Rotation::DEG0)
     {
@@ -149,7 +150,7 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
     m_renderer->RenderTile(
         renderer::Utils::GetModelMatrix(
             m_map->MapToIso(m_selected.x, m_selected.y, m_map->rotation), // todo: rotation remove arg.
-            glm::vec2(64.0f, 32.0f)
+            glm::vec2(Map::TILE_WIDTH, Map::TILE_HEIGHT)
         ),
         ogl::resource::ResourceManager::LoadTexture("resources/textures/frame.png").id,
         t_window, t_camera
@@ -158,8 +159,8 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
     /*
     m_renderer->RenderTile(
         renderer::Utils::GetModelMatrix(
-            glm::vec2(m_cell.x * 64, m_cell.y * 32),
-            glm::vec2(64.0f, 32.0f)
+            glm::vec2(m_cell.x * Map::TILE_WIDTH, m_cell.y * Map::TILE_HEIGHT),
+            glm::vec2(Map::TILE_WIDTH, Map::TILE_HEIGHT)
         ),
         ogl::resource::ResourceManager::LoadTexture("resources/textures/frame.png").id,
         t_window, t_camera
@@ -167,22 +168,13 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
     */
 }
 
-void mdcii::map::MousePicker::RenderImGui()
+void mdcii::map::MousePicker::RenderImGui() const
 {
     ImGui::Begin("MousePicker", nullptr, 0);
 
     ImGui::Text("Mouse x: %d, y: %d", m_mouse.x, m_mouse.y);
     ImGui::Text("Cell x: %d, y: %d", m_cell.x, m_cell.y);
     ImGui::Text("Selected x: %d, y: %d", m_selected.x, m_selected.y);
-
-    const auto* offset{ m_cornerImage + (4 * (m_offsetIntoCell.y * 64 + m_offsetIntoCell.x)) };
-    const auto r = offset[0];
-    const auto g = offset[1];
-    const auto b = offset[2];
-
-    ImGui::Text("r: %d", r);
-    ImGui::Text("g: %d", g);
-    ImGui::Text("b: %d", b);
 
     ImGui::End();
 }
@@ -200,6 +192,13 @@ void mdcii::map::MousePicker::Init()
     const std::string path{ "E:/Dev/MDCII/resources/textures/corner.png" };
     int width, height, channels;
     m_cornerImage = stbi_load(path.c_str(), &width, &height, &channels, 0);
+    if (!m_cornerImage)
+    {
+        throw MDCII_EXCEPTION("[MousePicker::Init()] Mouse picker corner image failed to load at path: " + path);
+    }
+
+    MDCII_ASSERT(width == Map::TILE_WIDTH, "[MousePicker::Init()] Invalid width.")
+    MDCII_ASSERT(height == Map::TILE_HEIGHT, "[MousePicker::Init()] Invalid height.")
 
     Log::MDCII_LOG_DEBUG("[MousePicker::Init()] The mouse picker was successfully initialized.");
 }
@@ -210,7 +209,7 @@ void mdcii::map::MousePicker::Init()
 
 void mdcii::map::MousePicker::CleanUp() const
 {
-    Log::MDCII_LOG_DEBUG("[MousePicker::CleanUp()] Clean up MousePicker.");
+    Log::MDCII_LOG_DEBUG("[MousePicker::CleanUp()] CleanUp MousePicker.");
 
     stbi_image_free(m_cornerImage);
 }

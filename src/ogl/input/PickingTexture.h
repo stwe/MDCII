@@ -27,7 +27,7 @@ namespace mdcii::ogl::input
          * @param t_width The window width.
          * @param t_height The window height.
          */
-        PickingTexture(int t_width, int t_height);
+        [[deprecated]] PickingTexture(int t_width, int t_height);
 
         PickingTexture(const PickingTexture& t_other) = delete;
         PickingTexture(PickingTexture&& t_other) noexcept = delete;
