@@ -239,7 +239,7 @@ void mdcii::map::Map::RenderBuildingTile(const int t_mapX, const int t_mapY, con
     screenPosition.y -= (h - TILE_HEIGHT);
 
     // todo: temp hardcoded
-    if (gfx >= 4 && gfx <= 7)
+    if ((gfx >= 4 && gfx <= 7) || gfx > 3700)
     {
         screenPosition.y -= ELEVATION;
     }
