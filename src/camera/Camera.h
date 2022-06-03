@@ -103,6 +103,11 @@ namespace mdcii::camera
          */
         std::shared_ptr<ogl::Window> m_window;
 
+        /**
+         * Info whether the mouse is in the window.
+         */
+        bool m_inWindow{ false };
+
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
@@ -111,5 +116,11 @@ namespace mdcii::camera
          * Handle key input.
          */
         void ProcessKeyboard(Direction t_direction);
+
+        //-------------------------------------------------
+        // Listeners
+        //-------------------------------------------------
+
+        void AddListeners();
     };
 }

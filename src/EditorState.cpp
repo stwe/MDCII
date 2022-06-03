@@ -34,6 +34,7 @@ mdcii::EditorState::~EditorState() noexcept
 void mdcii::EditorState::Input()
 {
     /*
+    // do nothing (return) when the mouse is over the ImGui window
     if (ImGui::GetIO().WantCaptureMouse)
     {
         return;
@@ -50,6 +51,14 @@ void mdcii::EditorState::Input()
 
 void mdcii::EditorState::Update()
 {
+    /*
+    // do nothing (return) when the mouse is over the ImGui window
+    if (ImGui::GetIO().WantCaptureMouse)
+    {
+        return;
+    }
+    */
+
     m_camera->Update();
 }
 

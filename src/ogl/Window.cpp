@@ -129,7 +129,7 @@ void mdcii::ogl::Window::Init()
     InitWindow();
     InitProjectionMatrix();
     InitImGui();
-    //InitInputCallbacks(); todo
+    InitInputCallbacks();
 
     Log::MDCII_LOG_DEBUG("[Window::Init()] The window was successfully initialized.");
 }
@@ -235,8 +235,7 @@ void mdcii::ogl::Window::InitImGui() const
 
     // setup renderer bindings without callbacks
     // the callbacks from ImGui will later be integrated into our own
-    // todo: custom callbacks
-    ImGui_ImplGlfw_InitForOpenGL(m_windowHandle, true);
+    ImGui_ImplGlfw_InitForOpenGL(m_windowHandle, false);
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
     // setup style

@@ -5,6 +5,8 @@
 #include "map/Map.h"
 #include "ogl/Window.h"
 #include "ogl/OpenGL.h"
+#include "event/EventManager.h"
+#include "eventpp/utilities/argumentadapter.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -16,6 +18,8 @@ mdcii::camera::Camera::Camera(std::shared_ptr<ogl::Window> t_window, const glm::
     Log::MDCII_LOG_DEBUG("[Camera::Camera()] Create Camera.");
 
     position = t_position;
+
+    AddListeners();
 }
 
 mdcii::camera::Camera::Camera(std::shared_ptr<ogl::Window> t_window)
@@ -25,6 +29,8 @@ mdcii::camera::Camera::Camera(std::shared_ptr<ogl::Window> t_window)
 
     const auto pos{ Game::INI.GetVector<float>("camera", "position") };
     position = glm::vec2(pos[0], pos[1]);
+
+    AddListeners();
 }
 
 mdcii::camera::Camera::~Camera() noexcept
@@ -50,6 +56,7 @@ glm::mat4 mdcii::camera::Camera::GetViewMatrix() const noexcept
 
 void mdcii::camera::Camera::Update()
 {
+    /*
     if (m_window->IsKeyPressed(GLFW_KEY_W) || m_window->IsKeyPressed(GLFW_KEY_UP))
     {
         ProcessKeyboard(Direction::UP);
@@ -69,6 +76,7 @@ void mdcii::camera::Camera::Update()
     {
         ProcessKeyboard(Direction::RIGHT);
     }
+    */
 }
 
 //-------------------------------------------------
@@ -99,4 +107,51 @@ void mdcii::camera::Camera::ProcessKeyboard(const Direction t_direction)
     {
         position += xOff;
     }
+}
+
+//-------------------------------------------------
+// Listeners
+//-------------------------------------------------
+
+void mdcii::camera::Camera::AddListeners()
+{
+    Log::MDCII_LOG_DEBUG("[Camera::AddListeners()] Append listeners.");
+
+    event::EventManager::eventDispatcher.appendListener(
+        event::MdciiEventType::MOUSE_ENTER,
+        eventpp::argumentAdapter<void(const event::MouseEnterEvent&)>(
+            [&](const event::MouseEnterEvent& t_event)
+            {
+                m_inWindow = t_event.enter;
+            }
+        )
+    );
+
+    event::EventManager::eventDispatcher.appendListener(
+        event::MdciiEventType::KEY_PRESSED,
+        eventpp::argumentAdapter<void(const event::KeyPressedEvent&)>(
+            [&](const event::KeyPressedEvent& t_event)
+            {
+                if (t_event.key == GLFW_KEY_W || t_event.key == GLFW_KEY_UP)
+                {
+                    ProcessKeyboard(Direction::UP);
+                }
+
+                if (t_event.key == GLFW_KEY_S || t_event.key == GLFW_KEY_DOWN)
+                {
+                    ProcessKeyboard(Direction::DOWN);
+                }
+
+                if (t_event.key == GLFW_KEY_A || t_event.key == GLFW_KEY_LEFT)
+                {
+                    ProcessKeyboard(Direction::LEFT);
+                }
+
+                if (t_event.key == GLFW_KEY_D || t_event.key == GLFW_KEY_RIGHT)
+                {
+                    ProcessKeyboard(Direction::RIGHT);
+                }
+            }
+        )
+    );
 }
