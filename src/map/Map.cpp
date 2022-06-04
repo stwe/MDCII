@@ -95,10 +95,54 @@ void mdcii::map::Map::RenderImGui()
     if (ImGui::Button("Rotate right"))
     {
         ++rotation;
+
+        // ------------- rotate tiles gfx ------------------
+        for (int y{ 0 }; y < height; ++y)
+        {
+            for (int x{ 0 }; x < width; ++x)
+            {
+                auto& tile{ m_map.at(GetMapIndex(x, y)) };
+                if (tile.rotation != rotation)
+                {
+                    // rotate tiles right to 90 deg
+                    int xr, yr;
+                    xr = 2 - tile.y - 1; // 2 = width of bakery (2 tiles)
+                    yr = tile.x;
+                    tile.x = xr;
+                    tile.y = yr;
+
+                    // rotate gfx
+                    CalcGfx(tile);
+                }
+            }
+        }
+        // ------------- rotate tiles gfx ------------------
     }
     if (ImGui::Button("Rotate left"))
     {
         --rotation;
+
+        // ------------- rotate tiles gfx ------------------
+        for (int y{ 0 }; y < height; ++y)
+        {
+            for (int x{ 0 }; x < width; ++x)
+            {
+                auto& tile{ m_map.at(GetMapIndex(x, y)) };
+                if (tile.rotation != rotation)
+                {
+                    // rotate tiles left to 270 deg
+                    int xr, yr;
+                    xr = tile.y;
+                    yr = 2 - tile.x - 1; // 2 = height of bakery (2 tiles)
+                    tile.x = xr;
+                    tile.y = yr;
+
+                    // rotate gfx
+                    CalcGfx(tile);
+                }
+            }
+        }
+        // ------------- rotate tiles gfx ------------------
     }
 
     ImGui::Separator();
@@ -228,25 +272,20 @@ void mdcii::map::Map::RenderGridTile(const int t_mapX, const int t_mapY, const o
 
 void mdcii::map::Map::RenderBuildingTile(const int t_mapX, const int t_mapY, const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
-    auto gfx{ m_map.at(GetMapIndex(t_mapX, t_mapY)) };
+    const auto& tile{ m_map.at(GetMapIndex(t_mapX, t_mapY)) };
 
-    gfx += static_cast<int>(rotation);
-
-    const auto w{ static_cast<float>(stdBshFile->bshTextures[gfx]->width) };
-    const auto h{ static_cast<float>(stdBshFile->bshTextures[gfx]->height) };
+    const auto w{ static_cast<float>(stdBshFile->bshTextures[tile.gfx]->width) };
+    const auto h{ static_cast<float>(stdBshFile->bshTextures[tile.gfx]->height) };
 
     auto screenPosition{ MapToIso(t_mapX, t_mapY) };
     screenPosition.y -= (h - TILE_HEIGHT);
 
     // todo: temp hardcoded
-    if ((gfx >= 4 && gfx <= 7) || gfx > 3700)
-    {
-        screenPosition.y -= ELEVATION;
-    }
+    screenPosition.y -= ELEVATION;
 
     renderer->RenderTile(
         renderer::Utils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
-        stdBshFile->bshTextures[gfx]->textureId,
+        stdBshFile->bshTextures[tile.gfx]->textureId,
         t_window,
         t_camera
     );
@@ -264,6 +303,43 @@ void mdcii::map::Map::RenderText(const int t_mapX, const int t_mapY, const ogl::
         t_window,
         t_camera
     );
+}
+
+void mdcii::map::Map::CalcGfx(Tile& t_tile)
+{
+    t_tile.rotation = rotation;
+
+    const auto& tileAsset{ housesJsonFile->tileAssets.at(t_tile.id) };
+    auto gfx{ tileAsset.gfx };
+
+    auto possibleRotations{ 1 };
+    if (tileAsset.rotate > 0)
+    {
+        possibleRotations = 4;
+    }
+
+    gfx += tileAsset.rotate * (magic_enum::enum_integer(t_tile.rotation) % possibleRotations);
+
+    switch (t_tile.rotation)
+    {
+    case Rotation::DEG0:
+        gfx += t_tile.y * tileAsset.width + t_tile.x;
+        t_tile.gfx = gfx;
+        break;
+    case Rotation::DEG90:
+        gfx += (tileAsset.height - t_tile.x - 1) * tileAsset.width + t_tile.y;
+        t_tile.gfx = gfx;
+        break;
+    case Rotation::DEG180:
+        gfx += (tileAsset.height - t_tile.y - 1) * tileAsset.width + (tileAsset.width - t_tile.x - 1);
+        t_tile.gfx = gfx;
+        break;
+    case Rotation::DEG270:
+        gfx += t_tile.x * tileAsset.width + (tileAsset.width - t_tile.y - 1);
+        t_tile.gfx = gfx;
+        break;
+    default:;
+    }
 }
 
 //-------------------------------------------------
