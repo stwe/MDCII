@@ -1,5 +1,9 @@
 # MDCII
 
+Ein weiteres 1602 Projekt. Der Fokus liegt hier jedoch nicht in dem 
+Einlesen der Originaldateien, sondern darin, eine editierbare isometrische
+Spielewelt zu erschaffen.
+
 ## Build
 
 ### Requirements

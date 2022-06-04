@@ -30,6 +30,15 @@ namespace mdcii::map
     {
     public:
         //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * The selected cell.
+         */
+        glm::ivec2 selected{ 0 };
+
+        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
@@ -80,11 +89,6 @@ namespace mdcii::map
          * The mouse offset into cell.
          */
         glm::ivec2 m_offsetIntoCell{ 0 };
-
-        /**
-         * The selected cell.
-         */
-        glm::ivec2 m_selected{ 0 };
 
         /**
          * A renderer for highlighting tiles.
