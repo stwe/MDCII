@@ -32,6 +32,7 @@ conaninfo.txt
 conanbuildinfo.cmake
 
 !/config.ini
+!/resources/devlog/*
 !/resources/textures/corner.png
 !/resources/textures/frame.png
 !/resources/textures/full.png
