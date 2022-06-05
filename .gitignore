@@ -25,6 +25,7 @@
 *.json
 *.bsh
 *.col
+*.cod
 
 conanbuildinfo.premake.lua
 conanbuildinfo.txt

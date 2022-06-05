@@ -23,6 +23,7 @@ Spielewelt zu erschaffen.
 * [NLohmann Json](https://github.com/nlohmann/json)
 * [Magic Enum C++](https://github.com/Neargye/magic_enum)
 * [FreeType](https://freetype.org/)
+* [Protocol Buffers](https://github.com/protocolbuffers/protobuf)
 * C++ 17 Compiler
 
 ### Platforms
@@ -48,6 +49,7 @@ imgui/1.86
 nlohmann_json/3.10.5
 magic_enum/0.8.0
 freetype/2.12.1
+protobuf/3.21.1
 
 [generators]
 premake
@@ -98,6 +100,7 @@ imgui/1.86
 nlohmann_json/3.10.5
 magic_enum/0.8.0
 freetype/2.12.1
+protobuf/3.21.1
 
 [generators]
 cmake

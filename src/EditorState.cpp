@@ -9,6 +9,7 @@
 #include "map/MousePicker.h"
 #include "renderer/ImGuiTileRenderer.h"
 #include "ogl/OpenGL.h"
+#include "cod/CodParser.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -109,6 +110,13 @@ void mdcii::EditorState::Init()
 
     // create the MousePicker to select tiles
     m_mousePicker = std::make_unique<map::MousePicker>(m_map);
+
+    // --------------------------
+
+    // todo test cod reader:
+    auto h{ cod::CodParser("h.cod", true) };
+
+    // --------------------------
 
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] The editor state was successfully initialized.");
 }
