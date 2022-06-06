@@ -15,7 +15,7 @@ mdcii::cod::CodParser::CodParser(std::string t_codFilePath, const bool t_decode)
 bool mdcii::cod::CodParser::ReadFile(const bool t_decode)
 {
     std::ifstream input(m_path, std::ios::binary);
-    std::vector<unsigned char> buffer(std::istreambuf_iterator(input), {});
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(input), {});
 
     if (t_decode)
     {

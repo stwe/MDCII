@@ -4,19 +4,19 @@ Ein weiteres 1602 Projekt. Der Fokus liegt hier jedoch nicht in dem
 Einlesen der Originaldateien, sondern darin, eine editierbare isometrische
 Spielewelt zu erschaffen.
 
-Es wird das original Spiel benötigt. Es müssen folgende Dateien in das
+Es wird das Originalspiel benÃ¶tigt. Es mÃ¼ssen folgende Dateien in das
 Hauptverzeichnis von `MDCII` kopiert werden:
 
 * BAUHAUS.BSH
-* STADTFLD.BSH
+* STADTFLD.BSH (GFX Variante)
 * STADTFLD.COL
 * haeuser.cod
 
-**Der erste Start dauert länger, da die `haeuser.cod` eingelesen wird.**
+**Der erste Start dauert lÃ¤nger, da die `haeuser.cod` eingelesen wird.**
 
 Momentan gibt es noch nicht viel zu sehen. Es wird eine sehr kleine Map erstellt.
-Darauf befindet sich die Bäckerei (Asset ID 503). Die Map kann nach links und rechts
-rotiert werden. Man kann mit der Maus einzelne Tiles auswählen.
+Darauf befindet sich die BÃ¤ckerei (Asset ID 503). Die Map kann nach links und rechts
+rotiert werden. Man kann mit der Maus einzelne Tiles auswÃ¤hlen.
 
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ffb066523c4064ab513bef2f8d4628)](https://www.codacy.com/gh/stwe/MDCII/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stwe/MDCII&amp;utm_campaign=Badge_Grade)
