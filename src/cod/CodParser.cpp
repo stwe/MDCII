@@ -1,8 +1,9 @@
 #include <fstream>
 #include <regex>
+#include <google/protobuf/util/json_util.h>
 #include "CodParser.h"
 #include "CodHelper.h"
-#include <google/protobuf/util/json_util.h>
+#include "Game.h"
 
 mdcii::cod::CodParser::CodParser(std::string t_codFilePath, const bool t_decode)
     : m_path{ std::move(t_codFilePath) }
@@ -503,7 +504,7 @@ void mdcii::cod::CodParser::ParseFile()
     }
 
     //std::cout << objects.DebugString() << std::endl;
-    //Json();
+    Json();
 }
 
 void mdcii::cod::CodParser::Json() const
@@ -516,8 +517,9 @@ void mdcii::cod::CodParser::Json() const
 
     // ---------------------
     // todo
-    freopen("json_out.json", "w", stdout);
-    std::cout << jsonString << std::endl;
+    std::ofstream outFile(Game::RESOURCES_PATH + "data/houses.json");
+    outFile << jsonString << std::endl;
+    outFile.close();
     // ---------------------
 }
 

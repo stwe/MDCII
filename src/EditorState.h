@@ -98,6 +98,11 @@ namespace mdcii
          */
         void Init();
 
+        /**
+         * Creates a houses.json from the haeuser.cod.
+         */
+        void CreateHousesJsonFile() const;
+
         //-------------------------------------------------
         // ImGui
         //-------------------------------------------------

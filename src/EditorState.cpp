@@ -1,5 +1,6 @@
 #include <imgui.h>
 #include <magic_enum.hpp>
+#include <filesystem>
 #include "EditorState.h"
 #include "Game.h"
 #include "Log.h"
@@ -99,6 +100,9 @@ void mdcii::EditorState::Init()
 {
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] Initializing editor state.");
 
+    // create houses.json
+    CreateHousesJsonFile();
+
     // load Grafiken.txt for ImGui menus
     m_graphicsFileContent = data::GraphicsFile::ReadGraphicsFile(Game::RESOURCES_PATH + "data/Grafiken.txt");
 
@@ -111,14 +115,19 @@ void mdcii::EditorState::Init()
     // create the MousePicker to select tiles
     m_mousePicker = std::make_unique<map::MousePicker>(m_map);
 
-    // --------------------------
-
-    // todo test cod reader:
-    auto h{ cod::CodParser("h.cod", true) };
-
-    // --------------------------
-
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] The editor state was successfully initialized.");
+}
+
+void mdcii::EditorState::CreateHousesJsonFile() const
+{
+    if (std::filesystem::exists(Game::RESOURCES_PATH + "data/houses.json"))
+    {
+        return;
+    }
+
+    Log::MDCII_LOG_INFO("[EditorState::CreateHousesJsonFile()] Start building the houses.json...");
+    auto parser{ cod::CodParser("haeuser.cod", true) };
+    Log::MDCII_LOG_INFO("[EditorState::CreateHousesJsonFile()] The houses.json was created successfully.");
 }
 
 //-------------------------------------------------
