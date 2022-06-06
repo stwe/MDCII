@@ -126,7 +126,7 @@ void mdcii::EditorState::CreateHousesJsonFile() const
     }
 
     Log::MDCII_LOG_INFO("[EditorState::CreateHousesJsonFile()] Start building the houses.json...");
-    auto parser{ cod::CodParser("haeuser.cod", true) };
+    auto parser{ cod::CodParser(Game::RESOURCES_PATH + "haeuser.cod", true) };
     Log::MDCII_LOG_INFO("[EditorState::CreateHousesJsonFile()] The houses.json was created successfully.");
 }
 
