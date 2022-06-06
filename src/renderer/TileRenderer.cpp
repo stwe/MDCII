@@ -33,7 +33,7 @@ void mdcii::renderer::TileRenderer::RenderTile(
 {
     ogl::OpenGL::EnableAlphaBlending();
 
-    const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram("resources/shader/mesh") };
+    const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram("shader/mesh") };
     shaderProgram.Bind();
 
     shaderProgram.SetUniform("model", t_modelMatrix);
@@ -59,7 +59,7 @@ void mdcii::renderer::TileRenderer::RenderTileForMousePicking(
 {
     ogl::OpenGL::EnableAlphaBlending();
 
-    const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram("resources/shader/picking") };
+    const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram("shader/picking") };
     shaderProgram.Bind();
 
     shaderProgram.SetUniform("model", t_modelMatrix);

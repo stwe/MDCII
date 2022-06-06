@@ -265,7 +265,7 @@ void mdcii::map::Map::RenderGridTile(const int t_mapX, const int t_mapY, const o
             MapToIso(t_mapX, t_mapY),
             glm::vec2(TILE_WIDTH, TILE_HEIGHT)
         ),
-        ogl::resource::ResourceManager::LoadTexture("resources/textures/red.png").id,
+        ogl::resource::ResourceManager::LoadTexture("textures/red.png").id,
         t_window, t_camera
     );
 }
@@ -354,15 +354,15 @@ void mdcii::map::Map::Init()
     housesJsonFile = std::make_unique<data::HousesJsonFile>();
 
     // load palette from stadtfld.col
-    m_paletteFile = std::make_unique<file::PaletteFile>("STADTFLD.COL");
+    m_paletteFile = std::make_unique<file::PaletteFile>(Game::RESOURCES_PATH + "STADTFLD.COL");
     m_paletteFile->ReadDataFromChunks();
 
     // load bsh graphics from stadtfld.bsh
-    stdBshFile = std::make_unique<file::BshFile>("STADTFLD.BSH", m_paletteFile->palette);
+    stdBshFile = std::make_unique<file::BshFile>(Game::RESOURCES_PATH + "STADTFLD.BSH", m_paletteFile->palette);
     stdBshFile->ReadDataFromChunks();
 
     // load bsh graphics from bauhaus.bsh
-    bauhausBshFile = std::make_unique<file::BshFile>("BAUHAUS.BSH", m_paletteFile->palette);
+    bauhausBshFile = std::make_unique<file::BshFile>(Game::RESOURCES_PATH + "BAUHAUS.BSH", m_paletteFile->palette);
     bauhausBshFile->ReadDataFromChunks();
 
     // create tile renderer

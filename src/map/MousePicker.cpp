@@ -156,7 +156,7 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
             s,
             glm::vec2(Map::TILE_WIDTH, Map::TILE_HEIGHT)
         ),
-        ogl::resource::ResourceManager::LoadTexture("resources/textures/frame.png").id,
+        ogl::resource::ResourceManager::LoadTexture("textures/frame.png").id,
         t_window, t_camera
     );
 
@@ -169,7 +169,7 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
             ),
             glm::vec2(Map::TILE_WIDTH, Map::TILE_HEIGHT)
         ),
-        ogl::resource::ResourceManager::LoadTexture("resources/textures/frame.png").id,
+        ogl::resource::ResourceManager::LoadTexture("textures/frame.png").id,
         t_window, t_camera
     );
     */

@@ -56,7 +56,7 @@ void mdcii::WorldState::Update()
 
 void mdcii::WorldState::Render()
 {
-    const auto id{ ogl::resource::ResourceManager::LoadTexture("resources/textures/red.png").id };
+    const auto id{ ogl::resource::ResourceManager::LoadTexture("textures/red.png").id };
 
     for (int y = 0; y < 8; ++y)
     {

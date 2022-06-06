@@ -25,7 +25,7 @@ namespace mdcii::data
         /**
          * The path to the houses.json file.
          */
-        inline static const std::string HOUSES_JSON_FILE_PATH{ "resources/data/houses.json" };
+        inline static const std::string HOUSES_JSON_FILE_PATH{ "data/houses.json" };
 
         //-------------------------------------------------
         // Member

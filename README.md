@@ -4,8 +4,8 @@ Ein weiteres 1602 Projekt. Der Fokus liegt hier jedoch nicht in dem
 Einlesen der Originaldateien, sondern darin, eine editierbare isometrische
 Spielewelt zu erschaffen.
 
-Es wird das Originalspiel benötigt. Es müssen folgende Dateien in das
-Hauptverzeichnis von `MDCII` kopiert werden:
+Es wird das Originalspiel benötigt. Es müssen folgende Dateien nach
+`MDCII/resources` kopiert werden:
 
 * BAUHAUS.BSH
 * STADTFLD.BSH (GFX Variante)

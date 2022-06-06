@@ -1,4 +1,5 @@
 #include "Texture.h"
+#include "Game.h"
 #include "MdciiAssert.h"
 #include "MdciiException.h"
 #include "ogl/OpenGL.h"
@@ -15,6 +16,8 @@ mdcii::ogl::resource::Texture::Texture(std::string t_path, const bool t_loadVert
     , m_loadVerticalFlipped{ t_loadVerticalFlipped }
 {
     Log::MDCII_LOG_DEBUG("[Texture::Texture()] Create Texture.");
+
+    m_path = Game::RESOURCES_PATH + m_path;
 
     CreateId();
     LoadFromFile();

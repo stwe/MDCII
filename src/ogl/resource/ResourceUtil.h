@@ -3,6 +3,7 @@
 #include <fstream>
 #include <vector>
 #include "MdciiException.h"
+#include "Game.h"
 
 //-------------------------------------------------
 // ResourceUtil
@@ -47,7 +48,7 @@ namespace mdcii::ogl::resource
             try
             {
                 // Open file.
-                shaderFile.open(t_fileName);
+                shaderFile.open(Game::RESOURCES_PATH + t_fileName);
                 std::stringstream shaderStream;
 
                 // Read file buffer content into stream.

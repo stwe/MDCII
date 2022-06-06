@@ -2,6 +2,7 @@
 #include <nlohmann/json.hpp>
 #include <magic_enum.hpp>
 #include "HousesJsonFile.h"
+#include "Game.h"
 #include "Log.h"
 #include "MdciiException.h"
 
@@ -36,7 +37,7 @@ void mdcii::data::HousesJsonFile::ReadFileData()
 
     try
     {
-        jsonFile.open(HOUSES_JSON_FILE_PATH);
+        jsonFile.open(Game::RESOURCES_PATH + HOUSES_JSON_FILE_PATH);
         json = nlohmann::json::parse(jsonFile);
         jsonFile.close();
     }

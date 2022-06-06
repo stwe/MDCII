@@ -41,7 +41,7 @@ void mdcii::renderer::TextRenderer::RenderText(
     ogl::OpenGL::EnableAlphaBlending();
 
     // bind shader program && update uniforms
-    const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram("resources/shader/text") };
+    const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram("shader/text") };
     shaderProgram.Bind();
     shaderProgram.SetUniform("projection", t_window.GetOrthographicProjectionMatrix());
     shaderProgram.SetUniform("view", t_camera.GetViewMatrix());
