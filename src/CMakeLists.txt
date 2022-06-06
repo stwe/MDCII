@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 file(GLOB_RECURSE SRC_FILES
         "*.h"
         "*.cpp"
+        "*.cc"
         )
 
 include(../conanbuildinfo.cmake)
