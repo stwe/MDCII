@@ -5,7 +5,7 @@
 #include "MdciiAssert.h"
 #include "MdciiException.h"
 #include "renderer/TileRenderer.h"
-#include "renderer/Utils.h"
+#include "renderer/RenderUtils.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/stb_image.h"
 
@@ -152,7 +152,7 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
     s.y -= Map::ELEVATION;
 
     m_renderer->RenderTile(
-        renderer::Utils::GetModelMatrix(
+        renderer::RenderUtils::GetModelMatrix(
             s,
             glm::vec2(Map::TILE_WIDTH, Map::TILE_HEIGHT)
         ),

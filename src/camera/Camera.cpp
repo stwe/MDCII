@@ -3,8 +3,6 @@
 #include "Camera.h"
 #include "Log.h"
 #include "map/Map.h"
-#include "ogl/Window.h"
-#include "ogl/OpenGL.h"
 #include "event/EventManager.h"
 #include "eventpp/utilities/argumentadapter.h"
 
@@ -12,23 +10,14 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::camera::Camera::Camera(std::shared_ptr<ogl::Window> t_window, const glm::vec2& t_position)
-    : m_window{ std::move(t_window) }
-{
-    Log::MDCII_LOG_DEBUG("[Camera::Camera()] Create Camera.");
-
-    position = t_position;
-
-    AddListeners();
-}
-
-mdcii::camera::Camera::Camera(std::shared_ptr<ogl::Window> t_window)
-    : m_window{ std::move(t_window) }
+mdcii::camera::Camera::Camera()
 {
     Log::MDCII_LOG_DEBUG("[Camera::Camera()] Create Camera.");
 
     const auto pos{ Game::INI.GetVector<float>("camera", "position") };
     position = glm::vec2(pos[0], pos[1]);
+
+    Log::MDCII_LOG_DEBUG("[Camera::Camera()] Set the camera position to (x: {}, y: {}).", position.x, position.y);
 
     AddListeners();
 }
@@ -48,35 +37,6 @@ glm::mat4 mdcii::camera::Camera::GetViewMatrix() const noexcept
     transformMatrix = translate(transformMatrix, glm::vec3(position.x, position.y, 0.0f));
 
     return inverse(transformMatrix);
-}
-
-//-------------------------------------------------
-// Logic
-//-------------------------------------------------
-
-void mdcii::camera::Camera::Update()
-{
-    /*
-    if (m_window->IsKeyPressed(GLFW_KEY_W) || m_window->IsKeyPressed(GLFW_KEY_UP))
-    {
-        ProcessKeyboard(Direction::UP);
-    }
-
-    if (m_window->IsKeyPressed(GLFW_KEY_S) || m_window->IsKeyPressed(GLFW_KEY_DOWN))
-    {
-        ProcessKeyboard(Direction::DOWN);
-    }
-
-    if (m_window->IsKeyPressed(GLFW_KEY_A) || m_window->IsKeyPressed(GLFW_KEY_LEFT))
-    {
-        ProcessKeyboard(Direction::LEFT);
-    }
-
-    if (m_window->IsKeyPressed(GLFW_KEY_D) || m_window->IsKeyPressed(GLFW_KEY_RIGHT))
-    {
-        ProcessKeyboard(Direction::RIGHT);
-    }
-    */
 }
 
 //-------------------------------------------------
@@ -115,17 +75,7 @@ void mdcii::camera::Camera::ProcessKeyboard(const Direction t_direction)
 
 void mdcii::camera::Camera::AddListeners()
 {
-    Log::MDCII_LOG_DEBUG("[Camera::AddListeners()] Append listeners.");
-
-    event::EventManager::eventDispatcher.appendListener(
-        event::MdciiEventType::MOUSE_ENTER,
-        eventpp::argumentAdapter<void(const event::MouseEnterEvent&)>(
-            [&](const event::MouseEnterEvent& t_event)
-            {
-                m_inWindow = t_event.enter;
-            }
-        )
-    );
+    Log::MDCII_LOG_DEBUG("[Camera::AddListeners()] Add listeners.");
 
     event::EventManager::eventDispatcher.appendListener(
         event::MdciiEventType::KEY_PRESSED,

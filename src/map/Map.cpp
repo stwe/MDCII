@@ -7,7 +7,7 @@
 #include "file/BshFile.h"
 #include "renderer/TileRenderer.h"
 #include "renderer/TextRenderer.h"
-#include "renderer/Utils.h"
+#include "renderer/RenderUtils.h"
 #include "ogl/resource/ResourceManager.h"
 
 //-------------------------------------------------
@@ -261,7 +261,7 @@ void mdcii::map::Map::RenderMapContent(const int t_mapX, const int t_mapY, const
 void mdcii::map::Map::RenderGridTile(const int t_mapX, const int t_mapY, const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
     renderer->RenderTile(
-        renderer::Utils::GetModelMatrix(
+        renderer::RenderUtils::GetModelMatrix(
             MapToIso(t_mapX, t_mapY),
             glm::vec2(TILE_WIDTH, TILE_HEIGHT)
         ),
@@ -284,7 +284,7 @@ void mdcii::map::Map::RenderBuildingTile(const int t_mapX, const int t_mapY, con
     screenPosition.y -= ELEVATION;
 
     renderer->RenderTile(
-        renderer::Utils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
+        renderer::RenderUtils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
         stdBshFile->bshTextures[tile.gfx]->textureId,
         t_window,
         t_camera

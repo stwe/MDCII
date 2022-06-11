@@ -53,15 +53,6 @@ void mdcii::EditorState::Input()
 
 void mdcii::EditorState::Update()
 {
-    /*
-    // do nothing (return) when the mouse is over the ImGui window
-    if (ImGui::GetIO().WantCaptureMouse)
-    {
-        return;
-    }
-    */
-
-    m_camera->Update();
 }
 
 void mdcii::EditorState::PreRender()
@@ -70,8 +61,8 @@ void mdcii::EditorState::PreRender()
 
 void mdcii::EditorState::Render()
 {
-    m_map->Render(*context->window, *m_camera);
-    m_mousePicker->Render(*context->window, *m_camera);
+    m_map->Render(*context->window, *context->camera);
+    m_mousePicker->Render(*context->window, *context->camera);
 }
 
 void mdcii::EditorState::RenderImGui()
@@ -105,9 +96,6 @@ void mdcii::EditorState::Init()
 
     // load Grafiken.txt for ImGui menus
     m_graphicsFileContent = data::GraphicsFile::ReadGraphicsFile(Game::RESOURCES_PATH + "data/Grafiken.txt");
-
-    // create camera
-    m_camera = std::make_unique<camera::Camera>(context->window);
 
     // create a Map object to edit
     m_map = std::make_shared<map::Map>();

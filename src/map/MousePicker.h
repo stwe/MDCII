@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "ogl/Window.h"
 #include "camera/Camera.h"
 

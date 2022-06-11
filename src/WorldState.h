@@ -1,32 +1,6 @@
 #pragma once
 
-#include <vector>
 #include "state/State.h"
-
-//-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii::data
-{
-    class HousesJsonFile;
-}
-
-namespace mdcii::file
-{
-    class PaletteFile;
-    class BshFile;
-}
-
-namespace mdcii::camera
-{
-    class Camera;
-}
-
-namespace mdcii::renderer
-{
-    class TileRenderer;
-}
 
 //-------------------------------------------------
 // WorldState
@@ -38,20 +12,6 @@ namespace mdcii
     {
     public:
         //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        /**
-         * The width of the world in tiles.
-         */
-        static constexpr auto WORLD_WIDTH = 500;
-
-        /**
-         * The height of the world in tiles.
-         */
-        static constexpr auto WORLD_HEIGHT = 350;
-
-        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
@@ -60,8 +20,8 @@ namespace mdcii
         /**
          * Constructs a new WorldState object.
          *
-         * @param t_id The unique identifier.
-         * @param t_stateStack The parent StateStack object.
+         * @param t_id The unique identifier of the State.
+         * @param t_stateStack A pointer to the parent StateStack object.
          * @param t_context The holder of shared objects.
          */
         WorldState(Id t_id, state::StateStack* t_stateStack, std::shared_ptr<Context> t_context);
@@ -86,33 +46,6 @@ namespace mdcii
     protected:
 
     private:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        std::unique_ptr<file::PaletteFile> m_paletteFile;
-        std::unique_ptr<file::BshFile> m_stdBshFile;
-        std::unique_ptr<file::BshFile> m_traegerBshFile;
-        std::unique_ptr<camera::Camera> m_camera;
-        std::unique_ptr<renderer::TileRenderer> m_renderer;
-        std::unique_ptr<data::HousesJsonFile> m_housesJsonFile;
-
-        // todo temp code
-        // -------------------
-        int m_frame{ 0 };
-        bool m_rotate90{ false };
-
-        std::vector<int> m_map
-        {
-            1336, 0, 0, 0,
-               0, 0, 0, 0,
-               0, 0, 0, 0,
-               0, 0, 0, 1340
-        };
-        // -------------------
-
-        void RenderBuilding(int t_id, int t_mapX, int t_mapY) const;
-
         //-------------------------------------------------
         // Init
         //-------------------------------------------------

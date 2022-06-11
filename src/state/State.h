@@ -13,6 +13,11 @@ namespace mdcii::ogl
     class Window;
 }
 
+namespace mdcii::camera
+{
+    class Camera;
+}
+
 //-------------------------------------------------
 // State
 //-------------------------------------------------
@@ -43,15 +48,16 @@ namespace mdcii::state
             START,      // StartState
             WORLD,      // WorldState
             EDITOR,     // EditorState
+            SANDBOX,    // SandboxState
             ALL         // is used when all states are meant
         };
 
         /**
          * The unique identifiers of the states as string.
          */
-        static constexpr std::array<std::string_view, 5> STATE_IDS
+        static constexpr std::array<std::string_view, 6> STATE_IDS
         {
-            "MAIN_MENU", "START", "WORLD", "EDITOR", "ALL"
+            "MAIN_MENU", "START", "WORLD", "EDITOR", "SANDBOX", "ALL"
         };
 
         /**
@@ -59,11 +65,13 @@ namespace mdcii::state
          */
         struct Context
         {
-            explicit Context(std::shared_ptr<ogl::Window> t_window)
+            explicit Context(std::shared_ptr<ogl::Window> t_window, std::shared_ptr<camera::Camera> t_camera)
                 : window{ std::move(t_window) }
+                , camera{ std::move(t_camera) }
             {}
 
             std::shared_ptr<ogl::Window> window;
+            std::shared_ptr<camera::Camera> camera;
         };
 
         //-------------------------------------------------

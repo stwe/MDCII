@@ -7,11 +7,6 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::camera
-{
-    class Camera;
-}
-
 namespace mdcii::map
 {
     class Map;
@@ -73,11 +68,6 @@ namespace mdcii
          * Text identifiers for gfx Ids.
          */
         std::map<int, std::string> m_graphicsFileContent;
-
-        /**
-         * The orthographic camera.
-         */
-        std::unique_ptr<camera::Camera> m_camera;
 
         /**
          * The Map object to edit.

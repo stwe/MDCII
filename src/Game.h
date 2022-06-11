@@ -12,6 +12,11 @@ namespace mdcii::ogl
     class Window;
 }
 
+namespace mdcii::camera
+{
+    class Camera;
+}
+
 namespace mdcii::state
 {
     class StateStack;
@@ -74,6 +79,7 @@ namespace mdcii
         //-------------------------------------------------
 
         std::shared_ptr<ogl::Window> m_window;
+        std::shared_ptr<camera::Camera> m_camera;
         std::unique_ptr<state::StateStack> m_stateStack;
 
         //-------------------------------------------------

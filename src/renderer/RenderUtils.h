@@ -3,28 +3,28 @@
 #include <glm/ext/matrix_transform.hpp>
 
 //-------------------------------------------------
-// Utils
+// RenderUtils
 //-------------------------------------------------
 
 namespace mdcii::renderer
 {
     /**
-     * Static helper methods.
+     * Static helper methods for rendering.
      */
-    class Utils
+    class RenderUtils
     {
     public:
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        Utils(Utils&& t_other) noexcept = delete;
-        Utils(const Utils& t_other) = delete;
-        Utils& operator=(const Utils& t_other) = delete;
-        Utils& operator=(Utils&& t_other) noexcept = delete;
+        RenderUtils(RenderUtils&& t_other) noexcept = delete;
+        RenderUtils(const RenderUtils& t_other) = delete;
+        RenderUtils& operator=(const RenderUtils& t_other) = delete;
+        RenderUtils& operator=(RenderUtils&& t_other) noexcept = delete;
 
         //-------------------------------------------------
-        // Tiles
+        // Transform
         //-------------------------------------------------
 
         /**
@@ -53,7 +53,7 @@ namespace mdcii::renderer
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        Utils() = default;
-        ~Utils() noexcept = default;
+        RenderUtils() = default;
+        ~RenderUtils() noexcept = default;
     };
 }

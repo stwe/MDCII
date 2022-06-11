@@ -2,16 +2,6 @@
 
 #include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
-#include <memory>
-
-//-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii::ogl
-{
-    class Window;
-}
 
 //-------------------------------------------------
 // Camera
@@ -47,22 +37,7 @@ namespace mdcii::camera
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        Camera() = delete;
-
-        /**
-         * Constructs a new Camera object.
-         *
-         * @param t_window The Window object.
-         * @param t_position The camera position.
-         */
-        Camera(std::shared_ptr<ogl::Window> t_window, const glm::vec2& t_position);
-
-        /**
-         * Constructs a new Camera object.
-         *
-         * @param t_window The Window object.
-         */
-        explicit Camera(std::shared_ptr<ogl::Window> t_window);
+        Camera();
 
         Camera(const Camera& t_other) = delete;
         Camera(Camera&& t_other) noexcept = delete;
@@ -82,32 +57,9 @@ namespace mdcii::camera
          */
         [[nodiscard]] glm::mat4 GetViewMatrix() const noexcept;
 
-        //-------------------------------------------------
-        // Logic
-        //-------------------------------------------------
-
-        /**
-         * Update camera position.
-         */
-        void Update();
-
     protected:
 
     private:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * The Window object.
-         */
-        std::shared_ptr<ogl::Window> m_window;
-
-        /**
-         * Info whether the mouse is in the window.
-         */
-        bool m_inWindow{ false };
-
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
@@ -121,6 +73,9 @@ namespace mdcii::camera
         // Listeners
         //-------------------------------------------------
 
+        /**
+         * Adds listeners to change camera position.
+         */
         void AddListeners();
     };
 }
