@@ -1,5 +1,6 @@
 #include <sstream>
 #include "Game.h"
+#include "EditorState.h"
 #include "SandboxState.h"
 #include "camera/Camera.h"
 #include "state/StateStack.h"
@@ -40,18 +41,27 @@ void mdcii::Game::Init()
 {
     Log::MDCII_LOG_DEBUG("[Game::Init()] Initializing game.");
 
-    // create objects for context
     m_window = std::make_shared<ogl::Window>();
     m_camera = std::make_shared<camera::Camera>();
 
-    // create state stack
     m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::State::Context>(m_window, m_camera));
 
-    // register SandboxState only
+    m_stateStack->RegisterState<EditorState>(state::State::Id::EDITOR);
     m_stateStack->RegisterState<SandboxState>(state::State::Id::SANDBOX);
 
-    // start with WorldState
-    m_stateStack->PushState(state::State::Id::SANDBOX);
+    const std::string startState{ INI.Get<std::string>("game", "start") };
+    if (startState == "sandbox")
+    {
+        m_stateStack->PushState(state::State::Id::SANDBOX);
+    }
+    else if (startState == "editor")
+    {
+        m_stateStack->PushState(state::State::Id::EDITOR);
+    }
+    else
+    {
+        m_stateStack->PushState(state::State::Id::SANDBOX);
+    }
 
     Log::MDCII_LOG_DEBUG("[Game::Init()] The game was successfully initialized.");
 }
