@@ -4,7 +4,6 @@
 #include "Game.h"
 #include "Log.h"
 #include "ogl/OpenGL.h"
-#include "data/HousesJsonFile.h"
 #include "file/BshFile.h"
 #include "renderer/RenderUtils.h"
 #include "renderer/TileRenderer.h"
@@ -127,8 +126,6 @@ void mdcii::SandboxState::RenderImGui()
 void mdcii::SandboxState::Init()
 {
     Log::MDCII_LOG_DEBUG("[SandboxState::Init()] Initializing sandbox state.");
-
-    m_housesJsonFile = std::make_unique<data::HousesJsonFile>();
 
     m_paletteFile = std::make_unique<file::PaletteFile>(Game::RESOURCES_PATH + "STADTFLD.COL");
     m_paletteFile->ReadDataFromChunks();

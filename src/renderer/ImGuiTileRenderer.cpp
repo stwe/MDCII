@@ -3,11 +3,11 @@
 #include "MdciiAssert.h"
 
 void mdcii::renderer::ImGuiTileRenderer::RenderTileGfxImGui(
-    const data::TileAsset& t_tileAssetProperties,
+    const data::Building& t_building,
     const file::BshFile& t_bshFile
 )
 {
-    if (const auto gfx{ t_tileAssetProperties.gfx }; gfx >= 0)
+    if (const auto gfx{ t_building.gfx }; gfx >= 0)
     {
         MDCII_ASSERT(static_cast<size_t>(gfx) < t_bshFile.bshTextures.size(), "[ImGuiTileRenderer::RenderTileGfxImGui()] Invalid arguments given.")
 
@@ -38,11 +38,14 @@ void mdcii::renderer::ImGuiTileRenderer::RenderTileGfxImGui(
     }
 }
 
-void mdcii::renderer::ImGuiTileRenderer::RenderTileBauGfxImGui(const data::TileAsset& t_tileAssetProperties, const file::BshFile& t_bshFile)
+void mdcii::renderer::ImGuiTileRenderer::RenderTileBauGfxImGui(
+    const data::Building& t_building,
+    const file::BshFile& t_bshFile
+)
 {
-    if (const auto gfx{ t_tileAssetProperties.gfx }; gfx >= 0)
+    if (const auto gfx{ t_building.gfx }; gfx >= 0)
     {
-        if (const auto baugfx{ t_tileAssetProperties.baugfx }; baugfx >= 0)
+        if (const auto baugfx{ t_building.baugfx }; baugfx >= 0)
         {
             MDCII_ASSERT(static_cast<size_t>(baugfx) < t_bshFile.bshTextures.size(), "[ImGuiTileRenderer::RenderTileBauGfxImGui()] Invalid arguments given.")
 

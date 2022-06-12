@@ -8,11 +8,6 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::data
-{
-    class HousesJsonFile;
-}
-
 namespace mdcii::file
 {
     class PaletteFile;
@@ -126,9 +121,8 @@ namespace mdcii
             1164, 1092, 1092, 1167,
         };
 
-        map::Rotation m_rotation{map::Rotation::DEG0 };
+        map::Rotation m_rotation{ map::Rotation::DEG0 };
 
-        std::unique_ptr<data::HousesJsonFile> m_housesJsonFile;
         std::unique_ptr<file::PaletteFile> m_paletteFile;
         std::unique_ptr<file::BshFile> m_stdBshFile;
         std::unique_ptr<renderer::TileRenderer> m_renderer;

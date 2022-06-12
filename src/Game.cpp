@@ -1,11 +1,14 @@
-#include <sstream>
+#include <magic_enum.hpp>
 #include "Game.h"
+#include "MdciiException.h"
 #include "EditorState.h"
 #include "SandboxState.h"
 #include "camera/Camera.h"
+#include "cod/CodParser.h"
 #include "state/StateStack.h"
 #include "ogl/Window.h"
 #include "ogl/OpenGL.h"
+#include "data/Buildings.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -41,27 +44,8 @@ void mdcii::Game::Init()
 {
     Log::MDCII_LOG_DEBUG("[Game::Init()] Initializing game.");
 
-    m_window = std::make_shared<ogl::Window>();
-    m_camera = std::make_shared<camera::Camera>();
-
-    m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::State::Context>(m_window, m_camera));
-
-    m_stateStack->RegisterState<EditorState>(state::State::Id::EDITOR);
-    m_stateStack->RegisterState<SandboxState>(state::State::Id::SANDBOX);
-
-    const std::string startState{ INI.Get<std::string>("game", "start") };
-    if (startState == "sandbox")
-    {
-        m_stateStack->PushState(state::State::Id::SANDBOX);
-    }
-    else if (startState == "editor")
-    {
-        m_stateStack->PushState(state::State::Id::EDITOR);
-    }
-    else
-    {
-        m_stateStack->PushState(state::State::Id::SANDBOX);
-    }
+    CreateSharedObjects();
+    Start();
 
     Log::MDCII_LOG_DEBUG("[Game::Init()] The game was successfully initialized.");
 }
@@ -139,4 +123,48 @@ void mdcii::Game::GameLoop()
     }
 
     Log::MDCII_LOG_DEBUG("[Game::GameLoop()] The game loop has ended.");
+}
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+void mdcii::Game::CreateSharedObjects()
+{
+    Log::MDCII_LOG_DEBUG("[Game::CreateSharedObjects()] Create shared objects.");
+
+    m_window = std::make_shared<ogl::Window>();
+    m_camera = std::make_shared<camera::Camera>();
+    m_buildingsCod = std::make_shared<cod::CodParser>(RESOURCES_PATH + "haeuser.cod");
+    m_buildings = std::make_shared<data::Buildings>(m_buildingsCod);
+}
+
+void mdcii::Game::Start()
+{
+    Log::MDCII_LOG_DEBUG("[Game::Start()] Starts the game.");
+
+    m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::State::Context>(m_window, m_camera, m_buildings));
+    m_stateStack->RegisterState<EditorState>(state::State::Id::EDITOR);
+    m_stateStack->RegisterState<SandboxState>(state::State::Id::SANDBOX);
+
+    const auto startStateName{ INI.Get<std::string>("game", "start") };
+    const auto startStateId{ magic_enum::enum_cast<state::State::Id>(startStateName) };
+    if (startStateId.has_value())
+    {
+        switch (startStateId.value()) // NOLINT(clang-diagnostic-switch-enum)
+        {
+        case state::State::Id::EDITOR:
+            m_stateStack->PushState(state::State::Id::EDITOR);
+            break;
+        case state::State::Id::SANDBOX:
+            m_stateStack->PushState(state::State::Id::SANDBOX);
+            break;
+        default:
+            m_stateStack->PushState(state::State::Id::SANDBOX);
+        }
+    }
+    else
+    {
+        throw MDCII_EXCEPTION("[Game::Start()] Invalid state name given.");
+    }
 }

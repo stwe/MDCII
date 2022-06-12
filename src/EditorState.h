@@ -88,11 +88,6 @@ namespace mdcii
          */
         void Init();
 
-        /**
-         * Creates a houses.json from the haeuser.cod.
-         */
-        void CreateHousesJsonFile() const;
-
         //-------------------------------------------------
         // ImGui
         //-------------------------------------------------
@@ -101,10 +96,5 @@ namespace mdcii
          * An ImGui tree view with a node for each Gfx Id.
          */
         void TileMenuById() const;
-
-        /**
-         * An ImGui tree view. The entries are grouped by TileKind.
-         */
-        void TileMenuByGroup() const;
     };
 }

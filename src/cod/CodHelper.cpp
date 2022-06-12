@@ -1,86 +1,22 @@
-#include <fstream>
+// This file is part of the MDCII Game Engine.
+// Copyright (C) 2019  Armin Schlegel
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 #include <regex>
 #include "CodHelper.h"
-#include "StringHelper.h"
-
-std::vector<std::string> mdcii::cod::CodHelper::ReadFile(const std::string& t_path, const bool t_decode, const bool t_filterEmptyLines)
-{
-    std::ifstream input(t_path, std::ios::binary);
-    std::vector<std::string> codTxt;
-    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(input), {});
-
-    if (t_decode)
-    {
-        for (auto& c : buffer)
-        {
-            c = -c;
-        }
-    }
-
-    std::string line;
-    for (size_t i{ 0 }; i < buffer.size() - 1; ++i)
-    {
-        if (buffer[i + 1] != '\n' && buffer[i] != '\r')
-        {
-            line.append(1, buffer[i]);
-        }
-        else
-        {
-            auto res{ TrimCommentFromLine(TabsToSpaces(line)) };
-            if (res.empty())
-            {
-                line = "";
-            }
-            else
-            {
-                line = res[0];
-            }
-
-            if (t_filterEmptyLines == false)
-            {
-                codTxt.push_back(iso_8859_1_to_utf8(line));
-            }
-            line = "";
-            i++; // hop over '\n'
-        }
-    }
-
-    return codTxt;
-}
-
-std::vector<std::string> mdcii::cod::CodHelper::ReadFileAsString(const std::string& t_buffer, bool t_filterEmptyLines)
-{
-    std::string line;
-    std::vector<std::string> codTxt;
-    for (size_t i{ 0 }; i < t_buffer.size() - 1; ++i)
-    {
-        if (t_buffer[i + 1] != '\n' && t_buffer[i] != '\r')
-        {
-            line.append(1, t_buffer[i]);
-        }
-        else
-        {
-            auto res{ TrimCommentFromLine(TabsToSpaces(line)) };
-            if (res.empty())
-            {
-                line = "";
-            }
-            else
-            {
-                line = res[0];
-            }
-
-            if (t_filterEmptyLines == false)
-            {
-                codTxt.push_back(line);
-            }
-            line = "";
-            i++; // hop over '\n'
-        }
-    }
-
-    return codTxt;
-}
 
 std::vector<std::string> mdcii::cod::CodHelper::RegexMatch(const std::string& t_regex, const std::string& t_str)
 {
@@ -146,22 +82,6 @@ int mdcii::cod::CodHelper::CountFrontSpaces(const std::string& t_str)
     return numberOfSpaces;
 }
 
-std::string mdcii::cod::CodHelper::RemoveTrailingCharacters(const std::string& t_str, const char t_charToRemove)
-{
-    auto ret = t_str;
-    ret.erase(ret.find_last_not_of(t_charToRemove) + 1, std::string::npos);
-
-    return ret;
-}
-
-std::string mdcii::cod::CodHelper::RemoveLeadingCharacters(const std::string& t_str, const char t_charToRemove)
-{
-    auto ret = t_str;
-    ret.erase(0, std::min(ret.find_first_not_of(t_charToRemove), ret.size() - 1));
-
-    return ret;
-}
-
 std::string mdcii::cod::CodHelper::TrimSpacesLeadingTrailing(const std::string& t_s)
 {
     auto start = t_s.begin();
@@ -220,24 +140,4 @@ std::vector<std::string> mdcii::cod::CodHelper::SplitByDelimiter(const std::stri
 std::vector<std::string> mdcii::cod::CodHelper::TrimCommentFromLine(const std::string& t_str)
 {
     return SplitByDelimiter(t_str, ";");
-}
-
-bool mdcii::cod::CodHelper::BeginsWith(const std::string& t_str, const std::string& t_begin)
-{
-    if (t_str.rfind(t_begin, 0) == 0)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-std::string mdcii::cod::CodHelper::RemoveDigits(const std::string& t_str)
-{
-    std::string ret{ t_str };
-    ret.erase(std::remove_if(std::begin(ret), std::end(ret),
-        [](auto t_ch) { return std::isdigit(t_ch); }),
-        ret.end());
-
-    return ret;
 }

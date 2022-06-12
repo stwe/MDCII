@@ -17,6 +17,16 @@ namespace mdcii::camera
     class Camera;
 }
 
+namespace mdcii::cod
+{
+    class CodParser;
+}
+
+namespace mdcii::data
+{
+    class Buildings;
+}
+
 namespace mdcii::state
 {
     class StateStack;
@@ -80,6 +90,8 @@ namespace mdcii
 
         std::shared_ptr<ogl::Window> m_window;
         std::shared_ptr<camera::Camera> m_camera;
+        std::shared_ptr<cod::CodParser> m_buildingsCod;
+        std::shared_ptr<data::Buildings> m_buildings;
         std::unique_ptr<state::StateStack> m_stateStack;
 
         //-------------------------------------------------
@@ -96,5 +108,12 @@ namespace mdcii
         //-------------------------------------------------
 
         void GameLoop();
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        void CreateSharedObjects();
+        void Start();
     };
 }

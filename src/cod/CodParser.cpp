@@ -1,15 +1,51 @@
-#include <fstream>
+// This file is part of the MDCII Game Engine.
+// Copyright (C) 2019  Armin Schlegel
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+#include <filesystem>
 #include <regex>
 #include <google/protobuf/util/json_util.h>
 #include "CodParser.h"
 #include "CodHelper.h"
 #include "Game.h"
+#include "Log.h"
+#include "MdciiException.h"
 
-mdcii::cod::CodParser::CodParser(std::string t_codFilePath, const bool t_decode)
+mdcii::cod::CodParser::CodParser(std::string t_codFilePath)
     : m_path{ std::move(t_codFilePath) }
 {
-    ReadFile(t_decode);
+    Log::MDCII_LOG_DEBUG("[CodParser::CodParser()] Create CodParser.");
+
+    const std::filesystem::path p{ m_path };
+    auto filenameOnly{ p.stem().string() };
+    m_jsonPath = Game::RESOURCES_PATH + filenameOnly.append(".json");
+
+    if (std::filesystem::exists(m_jsonPath))
+    {
+        Deserialize();
+        return;
+    }
+
+    ReadFile(true);
     ParseFile();
+}
+
+mdcii::cod::CodParser::~CodParser() noexcept
+{
+    Log::MDCII_LOG_DEBUG("[CodParser::~CodParser()] Destruct CodParser.");
 }
 
 bool mdcii::cod::CodParser::ReadFile(const bool t_decode)
@@ -19,11 +55,17 @@ bool mdcii::cod::CodParser::ReadFile(const bool t_decode)
 
     if (t_decode)
     {
+        Log::MDCII_LOG_DEBUG("[CodParser::ReadFile()] Start decoding {}...", m_path);
+
         for (auto& c : buffer)
         {
             c = -c;
         }
+
+        Log::MDCII_LOG_DEBUG("[CodParser::ReadFile()] Cod file successfully decoded.");
     }
+
+    Log::MDCII_LOG_DEBUG("[CodParser::ReadFile()] Start reading in decoded data...");
 
     std::string line;
     for (size_t i{ 0 }; i < buffer.size() - 1; ++i)
@@ -53,6 +95,8 @@ bool mdcii::cod::CodParser::ReadFile(const bool t_decode)
         }
     }
 
+    Log::MDCII_LOG_DEBUG("[CodParser::ReadFile()] Decoded data read successfully.");
+
     return true;
 }
 
@@ -60,6 +104,8 @@ void mdcii::cod::CodParser::ParseFile()
 {
     std::map<std::string, int> variableNumbers;
     std::map<std::string, std::vector<int>> variableNumbersArray;
+
+    Log::MDCII_LOG_DEBUG("[CodParser::ParseFile()] Start creating Cod objects...");
 
     for (unsigned int lineIndex{ 0 }; lineIndex < m_codTxt.size(); ++lineIndex)
     {
@@ -497,30 +543,78 @@ void mdcii::cod::CodParser::ParseFile()
                     m_currentObject = CreateObject(true, spaces, true);
                     m_currentObject->set_name(result[1]);
                     m_objectMap[result[1]] = m_currentObject;
-                    continue;
                 }
             }
         }
     }
 
-    //std::cout << objects.DebugString() << std::endl;
+    Log::MDCII_LOG_DEBUG("[CodParser::ParseFile()] Cod objects created successfully.");
+
     Json();
 }
 
 void mdcii::cod::CodParser::Json() const
 {
-    std::string jsonString;
+    Log::MDCII_LOG_DEBUG("[CodParser::Json()] Start building the {}...", m_jsonPath);
+
+    // options
     google::protobuf::util::JsonPrintOptions options;
     options.add_whitespace = true;
     options.always_print_primitive_fields = true;
-    MessageToJsonString(objects, &jsonString, options);
 
-    // ---------------------
-    // todo
-    std::ofstream outFile(Game::RESOURCES_PATH + "data/houses.json");
-    outFile << jsonString << std::endl;
+    // convert
+    std::string jsonString;
+    if (MessageToJsonString(objects, &jsonString, options).ok())
+    {
+        Log::MDCII_LOG_DEBUG("[CodParser::Json()] Successfully converted Protobuf to Json.");
+    }
+    else
+    {
+        throw MDCII_EXCEPTION("[CodParser::Json()] Error while converting Protobuf to Json.");
+    }
+
+    // write
+    std::ofstream outFile(m_jsonPath);
+    if (!outFile.is_open())
+    {
+        throw MDCII_EXCEPTION("[CodParser::Json()] The Json file could not be created.");
+    }
+    outFile << jsonString;
     outFile.close();
-    // ---------------------
+
+    Log::MDCII_LOG_DEBUG("[CodParser::Json()] The Json file was created successfully.");
+}
+
+void mdcii::cod::CodParser::Deserialize()
+{
+    Log::MDCII_LOG_DEBUG("[CodParser::Deserialize()] Start reading the {}...", m_jsonPath);
+
+    // read
+    std::ifstream file(m_jsonPath);
+    std::stringstream buffer;
+    if (!file.is_open())
+    {
+        throw MDCII_EXCEPTION("[CodParser::Deserialize()] The Json file could not be opened.");
+    }
+    buffer << file.rdbuf();
+    const std::string jsonString{ buffer.str() };
+    file.close();
+
+    // options
+    google::protobuf::util::JsonParseOptions options;
+    options.ignore_unknown_fields = false;
+
+    // convert
+    if (JsonStringToMessage(jsonString, &objects, options).ok())
+    {
+        Log::MDCII_LOG_DEBUG("[CodParser::Deserialize()] Successfully converted Json to Protobuf.");
+    }
+    else
+    {
+        throw MDCII_EXCEPTION("[CodParser::Deserialize()] Error while converting Json to Protobuf.");
+    }
+
+    Log::MDCII_LOG_DEBUG("[CodParser::Deserialize()] The Json file was readed successfully.");
 }
 
 cod_pb::Object* mdcii::cod::CodParser::CreateObject(const bool t_numberObject, const int t_spaces, const bool t_addToStack)
@@ -669,17 +763,17 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
                     ret.set_value_int(oldValue.value_int() + std::stoi(result[3]));
                     return ret;
                 }
-                else if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueFloat)
+
+                if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueFloat)
                 {
                     ret.set_value_int(static_cast<int>(oldValue.value_float() + std::stof(result[3])));
                     return ret;
                 }
-                else
-                {
-                    std::string o = oldValue.value_string();
-                    ret.set_value_int(std::stoi(o) + std::stoi(result[3]));
-                    return ret;
-                }
+
+                const auto& o{ oldValue.value_string() };
+                ret.set_value_int(std::stoi(o) + std::stoi(result[3]));
+
+                return ret;
             }
 
             if (result[2] == "-")
@@ -689,16 +783,16 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
                     ret.set_value_int(oldValue.value_int() - std::stoi(result[3]));
                     return ret;
                 }
-                else if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueFloat)
+
+                if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueFloat)
                 {
                     ret.set_value_int(static_cast<int>(oldValue.value_float() - std::stof(result[3])));
                     return ret;
                 }
-                else
-                {
-                    ret.set_value_int(std::stoi(oldValue.value_string()) - std::stoi(result[3]));
-                    return ret;
-                }
+
+                ret.set_value_int(std::stoi(oldValue.value_string()) - std::stoi(result[3]));
+
+                return ret;
             }
         }
     }
@@ -739,11 +833,10 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
                 ret.set_name(t_key);
                 return ret;
             }
-            else
-            {
-                ret.set_value_string(t_value);
-                return ret;
-            }
+
+            ret.set_value_string(t_value);
+
+            return ret;
         }
     }
 
@@ -773,8 +866,7 @@ cod_pb::Variable* mdcii::cod::CodParser::CreateOrReuseVariable(const std::string
 {
     if (m_currentObject)
     {
-        auto optionalVar{ GetVariable(m_currentObject, t_name) };
-        if (optionalVar)
+        if (const auto optionalVar{ GetVariable(m_currentObject, t_name) })
         {
             return optionalVar.value();
         }
@@ -862,12 +954,11 @@ mdcii::cod::CodParser::CodValueType mdcii::cod::CodParser::CheckType(const std::
     {
         return CodValueType::INT;
     }
-    else if (std::regex_match(t_s, std::regex("[-|+]?[0-9]+.[0-9]+")))
+
+    if (std::regex_match(t_s, std::regex("[-|+]?[0-9]+.[0-9]+")))
     {
         return CodValueType::FLOAT;
     }
-    else
-    {
-        return CodValueType::STRING;
-    }
+
+    return CodValueType::STRING;
 }

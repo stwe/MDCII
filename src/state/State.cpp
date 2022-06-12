@@ -3,6 +3,7 @@
 #include "MdciiAssert.h"
 #include "ogl/Window.h"
 #include "ogl/OpenGL.h"
+#include "data/Buildings.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

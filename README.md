@@ -14,10 +14,6 @@ Es wird das Originalspiel benötigt. Es müssen folgende Dateien nach
 
 **Der erste Start dauert länger, da die `haeuser.cod` eingelesen wird.**
 
-Momentan gibt es noch nicht viel zu sehen. Es wird eine sehr kleine Map erstellt.
-Darauf befindet sich die Bäckerei (Asset ID 503). Die Map kann nach links und rechts
-rotiert werden. Man kann mit der Maus einzelne Tiles auswählen.
-
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ffb066523c4064ab513bef2f8d4628)](https://www.codacy.com/gh/stwe/MDCII/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stwe/MDCII&amp;utm_campaign=Badge_Grade)
 
@@ -34,7 +30,6 @@ rotiert werden. Man kann mit der Maus einzelne Tiles auswählen.
 * [GLM](https://github.com/g-truc/glm)
 * [spdlog](https://github.com/gabime/spdlog)
 * [Dear ImGui](https://github.com/ocornut/imgui)
-* [NLohmann Json](https://github.com/nlohmann/json)
 * [Magic Enum C++](https://github.com/Neargye/magic_enum)
 * [FreeType](https://freetype.org/)
 * [Protocol Buffers](https://github.com/protocolbuffers/protobuf)
@@ -60,7 +55,6 @@ glew/2.2.0
 glm/0.9.9.8
 spdlog/1.10.0
 imgui/1.86
-nlohmann_json/3.10.5
 magic_enum/0.8.0
 freetype/2.12.1
 protobuf/3.21.1
@@ -111,7 +105,6 @@ glew/2.2.0
 glm/0.9.9.8
 spdlog/1.10.0
 imgui/1.86
-nlohmann_json/3.10.5
 magic_enum/0.8.0
 freetype/2.12.1
 protobuf/3.21.1

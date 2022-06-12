@@ -37,7 +37,9 @@ project "MDCII"
     files
     {
         "/Dev/MDCII/src/**.h",
-        "/Dev/MDCII/src/**.cpp"
+        "/Dev/MDCII/src/**.cpp",
+        "/Dev/MDCII/src/**.cc",
+        "/Dev/MDCII/src/**.proto"
     }
 
     includedirs

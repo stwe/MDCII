@@ -10,11 +10,6 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::data
-{
-    class HousesJsonFile;
-}
-
 namespace mdcii::file
 {
     class PaletteFile;
@@ -108,11 +103,6 @@ namespace mdcii::map
          * The map rotation.
          */
         Rotation rotation{ Rotation::DEG0 };
-
-        /**
-         * Content from the haeuser.cod file as json.
-         */
-        std::unique_ptr<data::HousesJsonFile> housesJsonFile;
 
         /**
          * The bsh graphics from the stadtfld.bsh file.

@@ -3,7 +3,6 @@
 #include "Map.h"
 #include "Game.h"
 #include "Log.h"
-#include "data/HousesJsonFile.h"
 #include "file/BshFile.h"
 #include "renderer/TileRenderer.h"
 #include "renderer/TextRenderer.h"
@@ -307,6 +306,7 @@ void mdcii::map::Map::RenderText(const int t_mapX, const int t_mapY, const ogl::
 
 void mdcii::map::Map::CalcGfx(Tile& t_tile)
 {
+    /*
     t_tile.rotation = rotation;
 
     const auto& tileAsset{ housesJsonFile->tileAssets.at(t_tile.id) };
@@ -340,6 +340,7 @@ void mdcii::map::Map::CalcGfx(Tile& t_tile)
         break;
     default:;
     }
+    */
 }
 
 //-------------------------------------------------
@@ -349,9 +350,6 @@ void mdcii::map::Map::CalcGfx(Tile& t_tile)
 void mdcii::map::Map::Init()
 {
     Log::MDCII_LOG_DEBUG("[Map::Init()] Initializing map.");
-
-    // load houses.json file content
-    housesJsonFile = std::make_unique<data::HousesJsonFile>();
 
     // load palette from stadtfld.col
     m_paletteFile = std::make_unique<file::PaletteFile>(Game::RESOURCES_PATH + "STADTFLD.COL");

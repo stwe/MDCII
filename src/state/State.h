@@ -18,6 +18,11 @@ namespace mdcii::camera
     class Camera;
 }
 
+namespace mdcii::data
+{
+    class Buildings;
+}
+
 //-------------------------------------------------
 // State
 //-------------------------------------------------
@@ -65,13 +70,19 @@ namespace mdcii::state
          */
         struct Context
         {
-            explicit Context(std::shared_ptr<ogl::Window> t_window, std::shared_ptr<camera::Camera> t_camera)
+            explicit Context(
+                std::shared_ptr<ogl::Window> t_window,
+                std::shared_ptr<camera::Camera> t_camera,
+                std::shared_ptr<data::Buildings> t_buildings
+            )
                 : window{ std::move(t_window) }
                 , camera{ std::move(t_camera) }
+                , buildings{ std::move(t_buildings) }
             {}
 
             std::shared_ptr<ogl::Window> window;
             std::shared_ptr<camera::Camera> camera;
+            std::shared_ptr<data::Buildings> buildings;
         };
 
         //-------------------------------------------------
