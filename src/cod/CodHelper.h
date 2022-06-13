@@ -20,11 +20,27 @@
 #include <string>
 #include <vector>
 
+//-------------------------------------------------
+// CodHelper
+//-------------------------------------------------
+
 namespace mdcii::cod
 {
     class CodHelper
     {
     public:
+        //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        CodHelper(CodHelper&& t_other) noexcept = delete;
+        CodHelper(const CodHelper& t_other) = delete;
+        CodHelper& operator=(const CodHelper& t_other) = delete;
+        CodHelper& operator=(CodHelper&& t_other) noexcept = delete;
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
 
         static std::vector<std::string> RegexMatch(const std::string& t_regex, const std::string& t_str);
         static std::vector<std::string> RegexSearch(const std::string& t_regex, const std::string& t_str);
@@ -39,6 +55,11 @@ namespace mdcii::cod
     protected:
 
     private:
+        //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
 
+        CodHelper() = default;
+        ~CodHelper() noexcept = default;
     };
 }

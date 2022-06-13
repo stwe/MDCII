@@ -37,6 +37,7 @@ project "MDCII"
     files
     {
         "/Dev/MDCII/src/**.h",
+        "/Dev/MDCII/src/**.hpp",
         "/Dev/MDCII/src/**.cpp",
         "/Dev/MDCII/src/**.cc",
         "/Dev/MDCII/src/**.proto"

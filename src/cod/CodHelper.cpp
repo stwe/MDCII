@@ -18,6 +18,10 @@
 #include <regex>
 #include "CodHelper.h"
 
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
 std::vector<std::string> mdcii::cod::CodHelper::RegexMatch(const std::string& t_regex, const std::string& t_str)
 {
     std::vector<std::string> ret;

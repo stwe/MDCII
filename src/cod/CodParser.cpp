@@ -24,6 +24,10 @@
 #include "Log.h"
 #include "MdciiException.h"
 
+//-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
 mdcii::cod::CodParser::CodParser(std::string t_codFilePath)
     : m_path{ std::move(t_codFilePath) }
 {
@@ -47,6 +51,10 @@ mdcii::cod::CodParser::~CodParser() noexcept
 {
     Log::MDCII_LOG_DEBUG("[CodParser::~CodParser()] Destruct CodParser.");
 }
+
+//-------------------------------------------------
+// Input/Output
+//-------------------------------------------------
 
 bool mdcii::cod::CodParser::ReadFile(const bool t_decode)
 {
@@ -617,6 +625,10 @@ void mdcii::cod::CodParser::Deserialize()
     Log::MDCII_LOG_DEBUG("[CodParser::Deserialize()] The Json file was readed successfully.");
 }
 
+//-------------------------------------------------
+// Object related functions
+//-------------------------------------------------
+
 cod_pb::Object* mdcii::cod::CodParser::CreateObject(const bool t_numberObject, const int t_spaces, const bool t_addToStack)
 {
     cod_pb::Object* ret;
@@ -712,6 +724,10 @@ void mdcii::cod::CodParser::ResetObjfillPrefill()
     m_objFillRange.filling = false;
     m_objFillRange.stacksize = 0;
 }
+
+//-------------------------------------------------
+// Constants related functions
+//-------------------------------------------------
 
 int mdcii::cod::CodParser::ConstantExists(const std::string& t_key) const
 {
@@ -845,6 +861,10 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
     return ret;
 }
 
+//-------------------------------------------------
+// Variables related functions
+//-------------------------------------------------
+
 int mdcii::cod::CodParser::ExistsInCurrentObject(const std::string& t_variableName) const
 {
     if (m_currentObject)
@@ -920,6 +940,10 @@ int mdcii::cod::CodParser::CalculateOperation(const int t_oldValue, const std::s
 
     return currentValue;
 }
+
+//-------------------------------------------------
+// Object stack related functions
+//-------------------------------------------------
 
 bool mdcii::cod::CodParser::TopIsNumberObject()
 {

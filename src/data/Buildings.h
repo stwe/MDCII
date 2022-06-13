@@ -4,6 +4,10 @@
 #include <vector>
 #include <memory>
 
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
 namespace cod_pb
 {
     class Object;
@@ -16,7 +20,11 @@ namespace mdcii::cod
 
 namespace mdcii::data
 {
-    enum class ObjectKindType
+    //-------------------------------------------------
+    // Kind
+    //-------------------------------------------------
+
+    enum class KindType
     {
         UNSET = 0,
         WALD,
@@ -54,6 +62,10 @@ namespace mdcii::data
         PLATZ
     };
 
+    //-------------------------------------------------
+    // Ruinenr
+    //-------------------------------------------------
+
     enum class RuinenrType
     {
         UNSET = 0,
@@ -68,6 +80,10 @@ namespace mdcii::data
         RUINE_ROAD_STEIN,
         RUINE_ROAD_FELD
     };
+
+    //-------------------------------------------------
+    // Bausample
+    //-------------------------------------------------
 
     enum class BausampleType
     {
@@ -103,6 +119,10 @@ namespace mdcii::data
         WAV_THEATER
     };
 
+    //-------------------------------------------------
+    // Workstoff
+    //-------------------------------------------------
+
     enum class WorkstoffType
     {
         UNSET = 0,
@@ -110,12 +130,20 @@ namespace mdcii::data
         STOFFE
     };
 
+    //-------------------------------------------------
+    // Erzbergnr
+    //-------------------------------------------------
+
     enum class ErzbergnrType
     {
         UNSET = 0,
         ERZBERG_KLEIN,
         ERZBERG_GROSS
     };
+
+    //-------------------------------------------------
+    // HAUS_PRODTYP - Kind
+    //-------------------------------------------------
 
     enum class ProdtypKindType
     {
@@ -153,6 +181,10 @@ namespace mdcii::data
         KIRCHE,
         MILITAR,
     };
+
+    //-------------------------------------------------
+    // Ware
+    //-------------------------------------------------
 
     enum class WareType
     {
@@ -196,6 +228,10 @@ namespace mdcii::data
         MUSKETEN,
     };
 
+    //-------------------------------------------------
+    // Rohstoff
+    //-------------------------------------------------
+
     enum class RohstoffType
     {
         UNSET = 0,
@@ -226,11 +262,19 @@ namespace mdcii::data
         ZUCKERROHR,
     };
 
+    //-------------------------------------------------
+    // Maxprodcnt
+    //-------------------------------------------------
+
     enum class MaxprodcntType
     {
         UNSET = 0,
         MAXPRODCNT
     };
+
+    //-------------------------------------------------
+    // BAUINFRA
+    //-------------------------------------------------
 
     enum class BauinfraType
     {
@@ -262,6 +306,10 @@ namespace mdcii::data
         INFRA_HOCHSCHULE
     };
 
+    //-------------------------------------------------
+    // Figurnr
+    //-------------------------------------------------
+
     enum class FigurnrType
     {
         UNSET = 0,
@@ -286,6 +334,10 @@ namespace mdcii::data
         SPEER1
     };
 
+    //-------------------------------------------------
+    // Rauchfignr
+    //-------------------------------------------------
+
     enum class RauchfignrType
     {
         UNSET = 0,
@@ -308,6 +360,13 @@ namespace mdcii::data
         FAHNETURM1
     };
 
+    //-------------------------------------------------
+    // Building
+    //-------------------------------------------------
+
+    /**
+     * Represents a graphic object on the isometric map.
+     */
     struct Building
     {
         int id{ -1 };
@@ -336,9 +395,9 @@ namespace mdcii::data
         int tuerflg{ -1 };
         int destroyflg{ -1 };
 
-        ObjectKindType kind{ ObjectKindType::UNSET };
-        BausampleType bausample{ BausampleType::UNSET };
-        RuinenrType ruinenr{ RuinenrType::UNSET };
+        KindType kind{ KindType::UNSET };                // WALD, RUINE, STRANDHAUS, MEER, FLUSS etc.
+        BausampleType bausample{ BausampleType::UNSET }; // Wav samples
+        RuinenrType ruinenr{ RuinenrType::UNSET };       // RUINE_KONTOR_N1, RUINE_MARKT, RUINE_ROAD_FELD etc.
         std::vector<int> wegspeed = {};
 
         struct
@@ -367,15 +426,15 @@ namespace mdcii::data
             int arbeiter{ -1 };
             int figuranz{ -1 };
             int interval{ -1 };
-            WorkstoffType workstoff{ WorkstoffType::UNSET };
-            ErzbergnrType erzbergnr{ ErzbergnrType::UNSET };
-            ProdtypKindType kind{ ProdtypKindType::UNSET };
-            WareType ware{ WareType::UNSET };
-            RohstoffType rohstoff{ RohstoffType::UNSET };
-            MaxprodcntType maxprodcnt{ MaxprodcntType::UNSET };
-            BauinfraType bauinfra{ BauinfraType::UNSET };
-            FigurnrType figurnr{ FigurnrType::UNSET };
-            RauchfignrType rauchfignr{ RauchfignrType::UNSET };
+            WorkstoffType workstoff{ WorkstoffType::UNSET };    // or HOLZ, STOFFE
+            ErzbergnrType erzbergnr{ ErzbergnrType::UNSET };    // or ERZBERG_KLEIN, ERZBERG_GROSS
+            ProdtypKindType kind{ ProdtypKindType::UNSET };     // BRUNNEN, THEATER, KLINIK, BERGWERK etc.
+            WareType ware{ WareType::UNSET };                   // MEHL, GOLD, ERZE, ZIEGEL, MUSKETEN etc.
+            RohstoffType rohstoff{ RohstoffType::UNSET };       // MEHL, GOLD, WILD, STEINE etc.
+            MaxprodcntType maxprodcnt{ MaxprodcntType::UNSET }; // or MAXPRODCNT
+            BauinfraType bauinfra{ BauinfraType::UNSET };       // INFRA_STUFE_1A, INFRA_STUFE_2A, INFRA_STUFE_2B etc.
+            FigurnrType figurnr{ FigurnrType::UNSET };          // HOLZFAELLER, PFLUECKER, ARZT, JAEGER etc.
+            RauchfignrType rauchfignr{ RauchfignrType::UNSET }; // FAHNETURM3, RAUCHGOLD, RAUCHBAECK etc.
             std::vector<int> maxware = {};
             std::vector<int> kosten = {};
         } houseProductionType;
@@ -390,19 +449,49 @@ namespace mdcii::data
         } houseBuildCosts;
     };
 
+    //-------------------------------------------------
+    // Buildings
+    //-------------------------------------------------
+
+    /**
+     * Parses the haeuser.cod and creates building objects from it.
+     */
     class Buildings
     {
     public:
+        /**
+         * The map with all building objects.
+         * The building ID is the key for each building.
+         */
         std::map<int, Building> buildingsMap;
 
+        /**
+         * Constructs a new Buildings object.
+         *
+         * @param t_cod The Cod objects of the haeuser.cod.
+         */
         explicit Buildings(std::shared_ptr<cod::CodParser> t_cod);
 
     protected:
 
     private:
+        /**
+         * The Cod objects of the haeuser.cod.
+         */
         std::shared_ptr<cod::CodParser> m_cod;
 
+        /**
+         * Creates the Building objects.
+         */
         void GenerateBuildings();
+
+        /**
+         * Creates a single Building object.
+         *
+         * @param t_obj A Cod object.
+         *
+         * @return a Building object.
+         */
         Building GenerateBuilding(const cod_pb::Object* t_obj) const;
     };
 }
