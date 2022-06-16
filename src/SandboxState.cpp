@@ -45,49 +45,35 @@ void mdcii::SandboxState::Update()
 
 void mdcii::SandboxState::Render()
 {
-    const auto view{ m_registry.view<PositionComponent, GfxComponent>() };
+    const auto view{ m_registry.view<BuildingComponent, PositionComponent>() };
 
-    for (auto [entity, pc, gc] : view.each())
+    for (const entt::entity entity: view.use<PositionComponent>())
     {
-        auto w{ 0.0f };
-        auto h{ 0.0f };
-        auto screenPosition{ glm::vec2() };
-        uint32_t textureId{ 0 };
+        auto [bc, pc] = view.get(entity);
 
-        switch (m_rotation)
+        // get gfx in the right direction for the current map rotation
+        const auto rotation{ magic_enum::enum_integer(m_rotation) };
+        auto direction{ bc.tileAsset.direction };
+        if (bc.building.rotate > 0)
         {
-        case map::Rotation::DEG0:
-            w = static_cast<float>(m_stdBshFile->bshTextures[gc.gfx0]->width);
-            h = static_cast<float>(m_stdBshFile->bshTextures[gc.gfx0]->height);
-            screenPosition = pc.s0;
-            textureId = m_stdBshFile->bshTextures[gc.gfx0]->textureId;
-            break;
-        case map::Rotation::DEG90:
-            w = static_cast<float>(m_stdBshFile->bshTextures[gc.gfx90]->width);
-            h = static_cast<float>(m_stdBshFile->bshTextures[gc.gfx90]->height);
-            screenPosition = pc.s90;
-            textureId = m_stdBshFile->bshTextures[gc.gfx90]->textureId;
-            break;
-        case map::Rotation::DEG180:
-            w = static_cast<float>(m_stdBshFile->bshTextures[gc.gfx180]->width);
-            h = static_cast<float>(m_stdBshFile->bshTextures[gc.gfx180]->height);
-            screenPosition = pc.s180;
-            textureId = m_stdBshFile->bshTextures[gc.gfx180]->textureId;
-            break;
-        case map::Rotation::DEG270:
-            w = static_cast<float>(m_stdBshFile->bshTextures[gc.gfx270]->width);
-            h = static_cast<float>(m_stdBshFile->bshTextures[gc.gfx270]->height);
-            screenPosition = pc.s270;
-            textureId = m_stdBshFile->bshTextures[gc.gfx270]->textureId;
-            break;
+            direction = (direction + rotation) % 4;
         }
+        const auto gfx{ pc.gfx[direction] };
 
+        // get width, height and texture of the gfx
+        const auto w{ static_cast<float>(m_stdBshFile->bshTextures[gfx]->width) };
+        const auto h{ static_cast<float>(m_stdBshFile->bshTextures[gfx]->height) };
+        const auto textureId{ m_stdBshFile->bshTextures[gfx]->textureId };
+
+        // get the screen position of the gfx, which is different for each map rotation
+        auto screenPosition{ pc.screenPositions[magic_enum::enum_integer(m_rotation)] };
         screenPosition.y -= h - TILE_HEIGHT;
-        if (pc.higher)
+        if (bc.building.posoffs == 20)
         {
             screenPosition.y -= 20.0f;
         }
 
+        // render tile
         m_renderer->RenderTile(
             renderer::RenderUtils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
             textureId,
@@ -160,36 +146,58 @@ void mdcii::SandboxState::CreateMapEntities()
     {
         for (auto x{ 0 }; x < WIDTH; ++x)
         {
+            // create entity
             const auto entity{ m_registry.create() };
 
-            auto idx0{ getMapIndex(x, y) };
-            auto idx90{ getMapIndex(WIDTH - y - 1, x) };
-            auto idx180{ getMapIndex(WIDTH - x - 1, HEIGHT - y - 1) };
-            auto idx270{ getMapIndex(y, HEIGHT - x - 1) };
+            // an index for each rotation for sorting
+            const auto idx0{ getMapIndex(x, y) };
+            const auto idx90{ getMapIndex(WIDTH - y - 1, x) };
+            const auto idx180{ getMapIndex(WIDTH - x - 1, HEIGHT - y - 1) };
+            const auto idx270{ getMapIndex(y, HEIGHT - x - 1) };
 
-            auto s0{ mapToIso(x, y) };
-            auto s90{ mapToIso(WIDTH - y - 1, x) };
-            auto s180{ mapToIso(WIDTH - x - 1, HEIGHT - y - 1) };
-            auto s270{ mapToIso(y, HEIGHT - x - 1) };
+            // a screen position for each rotation
+            const auto s0{ mapToIso(x, y) };
+            const auto s90{ mapToIso(WIDTH - y - 1, x) };
+            const auto s180{ mapToIso(WIDTH - x - 1, HEIGHT - y - 1) };
+            const auto s270{ mapToIso(y, HEIGHT - x - 1) };
 
-            auto gfx{ m_map.at(idx0) };
-            auto higher{ false };
+            // get tile asset from map
+            auto tileAsset{ m_map.at(idx0) };
 
-            // todo: hard coded
-            if (gfx == 1320 || gfx == 4)
+            // ---------------- building component
+
+            if (tileAsset.buildingId == -1)
             {
-                higher = true;
+                continue;
+            }
+
+            m_registry.emplace<BuildingComponent>(
+                entity,
+                tileAsset,
+                context->buildings->buildingsMap.at(tileAsset.buildingId)
+            );
+
+            // ---------------- position component
+
+            const auto building{ context->buildings->buildingsMap.at(tileAsset.buildingId) };
+            const auto gfx0{ building.gfx };
+
+            std::vector i{ idx0, idx90, idx180, idx270 };
+            std::vector s{ s0, s90, s180, s270 };
+            std::vector<int> g;
+            g.push_back(gfx0);
+            if (building.rotate > 0)
+            {
+                g.push_back(gfx0 + 1);
+                g.push_back(gfx0 + 2);
+                g.push_back(gfx0 + 3);
             }
 
             m_registry.emplace<PositionComponent>(
                 entity,
                 x, y,
-                idx0, idx90, idx180, idx270,
-                s0, s90, s180, s270,
-                higher
+                i, s, g
             );
-
-            m_registry.emplace<GfxComponent>(entity, gfx, gfx + 1, gfx + 2, gfx + 3);
         }
     }
 
@@ -198,31 +206,10 @@ void mdcii::SandboxState::CreateMapEntities()
 
 void mdcii::SandboxState::SortEntities()
 {
-    switch (m_rotation)
+    auto i{ magic_enum::enum_integer(m_rotation) };
+
+    m_registry.sort<PositionComponent>([i](const auto& t_lhs, const auto& t_rhs)
     {
-    case map::Rotation::DEG0:
-        m_registry.sort<PositionComponent>([](const auto& t_lhs, const auto& t_rhs)
-        {
-            return t_lhs.idx0 < t_rhs.idx0;
-        });
-        break;
-    case map::Rotation::DEG90:
-        m_registry.sort<PositionComponent>([](const auto& t_lhs, const auto& t_rhs)
-        {
-            return t_lhs.idx90 < t_rhs.idx90;
-        });
-        break;
-    case map::Rotation::DEG180:
-        m_registry.sort<PositionComponent>([](const auto& t_lhs, const auto& t_rhs)
-        {
-            return t_lhs.idx180 < t_rhs.idx180;
-        });
-        break;
-    case map::Rotation::DEG270:
-        m_registry.sort<PositionComponent>([](const auto& t_lhs, const auto& t_rhs)
-        {
-            return t_lhs.idx270 < t_rhs.idx270;
-        });
-        break;
-    }
+        return t_lhs.indices[i] < t_rhs.indices[i];
+    });
 }

@@ -3,6 +3,7 @@
 #include "state/State.h"
 #include "entt/entt.hpp"
 #include "map/Map.h"
+#include "data/Buildings.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -20,44 +21,44 @@ namespace mdcii::renderer
     class TextRenderer;
 }
 
-//-------------------------------------------------
-// SandboxState
-//-------------------------------------------------
-
 namespace mdcii
 {
+    //-------------------------------------------------
+    // Types
+    //-------------------------------------------------
+
+    struct TileAsset
+    {
+        int buildingId{ -1 };
+        int direction{ 0 };
+    };
+
     //-------------------------------------------------
     // Components
     //-------------------------------------------------
 
+    struct BuildingComponent
+    {
+        TileAsset tileAsset;
+        data::Building building;
+    };
+
     struct PositionComponent
     {
-        int x;
-        int y;
+        int mapX{ 0 };
+        int mapY{ 0 };
 
-        int idx0;
-        int idx90;
-        int idx180;
-        int idx270;
-
-        glm::vec2 s0;
-        glm::vec2 s90;
-        glm::vec2 s180;
-        glm::vec2 s270;
-
-        bool higher;
+        std::vector<int> indices;
+        std::vector<glm::vec2> screenPositions;
+        std::vector<int> gfx;
     };
 
-    struct GfxComponent
-    {
-        int gfx0;
-        int gfx90;
-        int gfx180;
-        int gfx270;
-    };
+    //-------------------------------------------------
+    // SandboxState
+    //-------------------------------------------------
 
     /**
-     * State to try out an Entity Component System.
+     * State to try out an Entity-Component-System (EnTT ECS).
      */
     class SandboxState : public state::State
     {
@@ -109,16 +110,29 @@ namespace mdcii
 
         entt::registry m_registry;
 
-        const std::vector<int> m_map
+        TileAsset m_c0{ 1051, 0 };
+        TileAsset m_c1{ 1051, 1 };
+        TileAsset m_c2{ 1051, 2 };
+        TileAsset m_c3{ 1051, 3 };
+
+        TileAsset m_s0{ 1011, 0 };
+        TileAsset m_s1{ 1011, 1 };
+        TileAsset m_s2{ 1011, 2 };
+        TileAsset m_s3{ 1011, 3 };
+
+        TileAsset m_b{ 101, 0 };
+        TileAsset m_f{ 1075, 0 };
+
+        const std::vector<TileAsset> m_map
         {
-            1165, 1094, 1094, 1166,
-            1093,    4, 0,    1095,
-            1093,    0, 0,    1095,
-            1093,    0, 0,    1095,
-            1093,    0, 0,    1095,
-            1093,    0, 0,    1095,
-            1093, 1320, 0,    1095,
-            1164, 1092, 1092, 1167,
+            m_c1, m_s2, m_s2, m_c2,
+            m_s1,  m_b,  m_b, m_s3,
+            m_s1,  m_b,  m_b, m_s3,
+            m_s1,  m_b,  m_b, m_s3,
+            m_s1,  m_b,  m_b, m_s3,
+            m_s1,  m_b,  m_b, m_s3,
+            m_s1,  m_f,  m_b, m_s3,
+            m_c0, m_s0, m_s0, m_c3,
         };
 
         map::Rotation m_rotation{ map::Rotation::DEG0 };
