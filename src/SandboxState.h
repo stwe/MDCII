@@ -37,6 +37,19 @@ namespace mdcii
     // Components
     //-------------------------------------------------
 
+    struct GridComponent
+    {
+        int mapX{ 0 };
+        int mapY{ 0 };
+
+        int tileWidth{ 0 };
+        int tileHeight{ 0 };
+
+        uint32_t textureId{ 0 };
+
+        std::vector<glm::vec2> screenPositions;
+    };
+
     struct BuildingComponent
     {
         TileAsset tileAsset;
@@ -141,6 +154,10 @@ namespace mdcii
         std::unique_ptr<file::BshFile> m_stdBshFile;
         std::unique_ptr<renderer::TileRenderer> m_renderer;
         std::unique_ptr<renderer::TextRenderer> m_textRenderer;
+
+        bool m_renderGrid{ false };
+        bool m_renderText{ false };
+        bool m_renderBuildings{ true };
 
         //-------------------------------------------------
         // Init

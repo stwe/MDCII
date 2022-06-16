@@ -4,6 +4,7 @@
 #include "Game.h"
 #include "Log.h"
 #include "ogl/OpenGL.h"
+#include "ogl/resource/ResourceManager.h"
 #include "file/BshFile.h"
 #include "renderer/RenderUtils.h"
 #include "renderer/TileRenderer.h"
@@ -45,40 +46,74 @@ void mdcii::SandboxState::Update()
 
 void mdcii::SandboxState::Render()
 {
-    const auto view{ m_registry.view<BuildingComponent, PositionComponent>() };
-
-    for (const entt::entity entity: view.use<PositionComponent>())
+    const auto view0{ m_registry.view<GridComponent>() };
+    for (const entt::entity entity : view0)
     {
-        auto [bc, pc] = view.get(entity);
+        const auto& gc{ view0.get<GridComponent>(entity) };
+        const auto screenPosition{ gc.screenPositions[magic_enum::enum_integer(m_rotation)] };
 
-        // get gfx in the right direction for the current map rotation
-        const auto rotation{ magic_enum::enum_integer(m_rotation) };
-        auto direction{ bc.tileAsset.direction };
-        if (bc.building.rotate > 0)
+        if (m_renderGrid)
         {
-            direction = (direction + rotation) % 4;
-        }
-        const auto gfx{ pc.gfx[direction] };
-
-        // get width, height and texture of the gfx
-        const auto w{ static_cast<float>(m_stdBshFile->bshTextures[gfx]->width) };
-        const auto h{ static_cast<float>(m_stdBshFile->bshTextures[gfx]->height) };
-        const auto textureId{ m_stdBshFile->bshTextures[gfx]->textureId };
-
-        // get the screen position of the gfx, which is different for each map rotation
-        auto screenPosition{ pc.screenPositions[magic_enum::enum_integer(m_rotation)] };
-        screenPosition.y -= h - TILE_HEIGHT;
-        if (bc.building.posoffs == 20)
-        {
-            screenPosition.y -= 20.0f;
+            m_renderer->RenderTile(
+                renderer::RenderUtils::GetModelMatrix(
+                    screenPosition,
+                    glm::vec2(gc.tileWidth, gc.tileHeight)
+                ),
+                gc.textureId,
+                *context->window, *context->camera
+            );
         }
 
-        // render tile
-        m_renderer->RenderTile(
-            renderer::RenderUtils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
-            textureId,
-            *context->window, *context->camera
-        );
+        if (m_renderText)
+        {
+            m_textRenderer->RenderText(
+                std::to_string(gc.mapX).append(", ").append(std::to_string(gc.mapY)),
+                screenPosition.x + static_cast<float>(gc.tileWidth) / 4.0f,
+                screenPosition.y + static_cast<float>(gc.tileHeight) / 4.0f,
+                0.25f,
+                glm::vec3(1.0f, 0.0f, 0.0f),
+                *context->window, *context->camera
+            );
+        }
+    }
+
+
+    if (m_renderBuildings)
+    {
+        const auto view1{ m_registry.view<BuildingComponent, PositionComponent>() };
+        for (const entt::entity entity : view1.use<PositionComponent>())
+        {
+            auto [bc, pc] = view1.get(entity);
+
+            // get gfx in the right direction for the current map rotation
+            const auto rotation{ magic_enum::enum_integer(m_rotation) };
+            auto direction{ bc.tileAsset.direction };
+            if (bc.building.rotate > 0)
+            {
+                direction = (direction + rotation) % 4;
+            }
+            const auto gfx{ pc.gfx[direction] };
+
+            // get width, height and texture of the gfx
+            const auto w{ static_cast<float>(m_stdBshFile->bshTextures[gfx]->width) };
+            const auto h{ static_cast<float>(m_stdBshFile->bshTextures[gfx]->height) };
+            const auto textureId{ m_stdBshFile->bshTextures[gfx]->textureId };
+
+            // get the screen position of the gfx, which is different for each map rotation
+            auto screenPosition{ pc.screenPositions[magic_enum::enum_integer(m_rotation)] };
+            screenPosition.y -= h - TILE_HEIGHT;
+            if (bc.building.posoffs == 20)
+            {
+                screenPosition.y -= 20.0f;
+            }
+
+            // render tile
+            m_renderer->RenderTile(
+                renderer::RenderUtils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
+                textureId,
+                *context->window, *context->camera
+            );
+        }
     }
 }
 
@@ -87,6 +122,14 @@ void mdcii::SandboxState::RenderImGui()
     ogl::Window::ImGuiBegin();
 
     ImGui::Begin("SandboxState");
+
+    ImGui::Separator();
+
+    ImGui::Checkbox("Render grid", &m_renderGrid);
+    ImGui::Checkbox("Render text", &m_renderText);
+    ImGui::Checkbox("Render buildings", &m_renderBuildings);
+
+    ImGui::Separator();
 
     ImGui::Text("Current rotation: %s", magic_enum::enum_name(m_rotation).data());
     if (ImGui::Button("Rotate right"))
@@ -141,6 +184,35 @@ void mdcii::SandboxState::CreateMapEntities()
             (t_x + t_y) * TILE_HEIGHT_HALF
         );
     };
+
+    // grid entities
+
+    for (auto y{ 0 }; y < HEIGHT; ++y)
+    {
+        for (auto x{ 0 }; x < WIDTH; ++x)
+        {
+            // create entity
+            const auto entity{ m_registry.create() };
+
+            // a screen position for each rotation
+            const auto s0{ mapToIso(x, y) };
+            const auto s90{ mapToIso(WIDTH - y - 1, x) };
+            const auto s180{ mapToIso(WIDTH - x - 1, HEIGHT - y - 1) };
+            const auto s270{ mapToIso(y, HEIGHT - x - 1) };
+
+            std::vector s{ s0, s90, s180, s270 };
+
+            m_registry.emplace<GridComponent>(
+                entity,
+                x, y,
+                TILE_WIDTH, TILE_HEIGHT,
+                ogl::resource::ResourceManager::LoadTexture("textures/red.png").id,
+                s
+            );
+        }
+    }
+
+    // building entities
 
     for (auto y{ 0 }; y < HEIGHT; ++y)
     {
