@@ -83,7 +83,7 @@ void mdcii::SandboxState::Render()
         const auto view1{ m_registry.view<BuildingComponent, PositionComponent>() };
         for (const entt::entity entity : view1.use<PositionComponent>())
         {
-            auto [bc, pc] = view1.get(entity);
+            auto [bc, pc] { view1.get(entity) };
 
             // get gfx in the right direction for the current map rotation
             const auto rotation{ magic_enum::enum_integer(m_rotation) };
@@ -92,7 +92,14 @@ void mdcii::SandboxState::Render()
             {
                 direction = (direction + rotation) % 4;
             }
-            const auto gfx{ pc.gfx[direction] };
+            auto gfx{ pc.gfx[direction] };
+
+            if (bc.tileAsset.width > 1)
+            {
+                // t_y * WIDTH + t_x
+                const auto offset{ bc.tileAsset.y * bc.tileAsset.width + bc.tileAsset.x };
+                gfx += offset;
+            }
 
             // get width, height and texture of the gfx
             const auto w{ static_cast<float>(m_stdBshFile->bshTextures[gfx]->width) };
@@ -257,12 +264,13 @@ void mdcii::SandboxState::CreateMapEntities()
             std::vector i{ idx0, idx90, idx180, idx270 };
             std::vector s{ s0, s90, s180, s270 };
             std::vector<int> g;
+
             g.push_back(gfx0);
             if (building.rotate > 0)
             {
-                g.push_back(gfx0 + 1);
-                g.push_back(gfx0 + 2);
-                g.push_back(gfx0 + 3);
+                g.push_back(gfx0 + building.rotate);
+                g.push_back(gfx0 + (2 * building.rotate));
+                g.push_back(gfx0 + (3 * building.rotate));
             }
 
             m_registry.emplace<PositionComponent>(

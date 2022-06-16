@@ -31,6 +31,12 @@ namespace mdcii
     {
         int buildingId{ -1 };
         int direction{ 0 };
+
+        int width{ 1 };
+        int height{ 1 };
+
+        int x{ 0 };
+        int y{ 0 };
     };
 
     //-------------------------------------------------
@@ -114,8 +120,8 @@ namespace mdcii
         static constexpr auto TILE_WIDTH_HALF{ 32 };
         static constexpr auto TILE_HEIGHT_HALF{ 16 };
 
-        static constexpr auto WIDTH{ 4 };
-        static constexpr auto HEIGHT{ 8 };
+        static constexpr auto WIDTH{ 8 };
+        static constexpr auto HEIGHT{ 12 };
 
         //-------------------------------------------------
         // Member
@@ -136,16 +142,26 @@ namespace mdcii
         TileAsset m_b{ 101, 0 };
         TileAsset m_f{ 1075, 0 };
 
+        // bakery 2x2 tiles
+        TileAsset m_k0{ 503, 0, 2, 2, 0, 0 };
+        TileAsset m_k1{ 503, 0, 2, 2, 1, 0 };
+        TileAsset m_k2{ 503, 0, 2, 2, 0, 1 };
+        TileAsset m_k3{ 503, 0, 2, 2, 1, 1 };
+
         const std::vector<TileAsset> m_map
         {
-            m_c1, m_s2, m_s2, m_c2,
-            m_s1,  m_b,  m_b, m_s3,
-            m_s1,  m_b,  m_b, m_s3,
-            m_s1,  m_b,  m_b, m_s3,
-            m_s1,  m_b,  m_b, m_s3,
-            m_s1,  m_b,  m_b, m_s3,
-            m_s1,  m_f,  m_b, m_s3,
-            m_c0, m_s0, m_s0, m_c3,
+            m_c1, m_s2, m_s2, m_s2, m_s2, m_s2, m_s2, m_c2,
+            m_s1,  m_b,  m_b,  m_b,  m_b,  m_b,  m_b, m_s3,
+            m_s1,  m_b,  m_b,  m_b,  m_b, m_k0, m_k1, m_s3,
+            m_s1,  m_b,  m_b,  m_b,  m_b, m_k2, m_k3, m_s3,
+            m_s1,  m_b,  m_b,  m_b,  m_b,  m_b,  m_b, m_s3,
+            m_s1,  m_b,  m_b,  m_b,  m_b,  m_b,  m_b, m_s3,
+            m_s1,  m_b,  m_b,  m_b,  m_b,  m_b,  m_b, m_s3,
+            m_s1,  m_b,  m_b,  m_b,  m_b,  m_b,  m_b, m_s3,
+            m_s1,  m_b,  m_b,  m_b,  m_b,  m_b,  m_b, m_s3,
+            m_s1,  m_b,  m_b,  m_b,  m_b,  m_b,  m_b, m_s3,
+            m_s1,  m_b,  m_b,  m_b,  m_b,  m_b,  m_b, m_s3,
+            m_c0,  m_f, m_s0, m_s0, m_s0, m_s0, m_s0, m_c3,
         };
 
         map::Rotation m_rotation{ map::Rotation::DEG0 };
