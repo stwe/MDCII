@@ -1,9 +1,7 @@
 #include <imgui.h>
-#include <magic_enum.hpp>
 #include "EditorState.h"
 #include "Game.h"
 #include "Log.h"
-#include "data/Buildings.h"
 #include "data/GraphicsFile.h"
 #include "map/Map.h"
 #include "map/MousePicker.h"
@@ -68,7 +66,7 @@ void mdcii::EditorState::RenderImGui()
 
     m_map->RenderImGui();
 
-    ImGui::Begin("EditorState", nullptr, 0);
+    ImGui::Begin("EditorState");
     TileMenuById();
     ImGui::End();
 
@@ -88,8 +86,12 @@ void mdcii::EditorState::Init()
     // load Grafiken.txt for ImGui menus
     m_graphicsFileContent = data::GraphicsFile::ReadGraphicsFile(Game::RESOURCES_PATH + "data/Grafiken.txt");
 
-    // create a Map object to edit
-    m_map = std::make_shared<map::Map>();
+    // create the Map object to edit
+    m_map = std::make_shared<map::Map>(
+        map::EXAMPLE_ISLAND,
+        map::EXAMPLE_WIDTH, map::EXAMPLE_HEIGHT,
+        context->buildings
+    );
 
     // create the MousePicker to select tiles
     m_mousePicker = std::make_unique<map::MousePicker>(m_map);

@@ -2,13 +2,19 @@
 
 #include <memory>
 #include <vector>
-#include "Tile.h"
+#include "MapTile.h"
 #include "ogl/Window.h"
 #include "camera/Camera.h"
+#include "ecs/entt.hpp"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
+
+namespace mdcii::data
+{
+    class Buildings;
+}
 
 namespace mdcii::file
 {
@@ -41,7 +47,7 @@ namespace mdcii::map
     //-------------------------------------------------
 
     /**
-     * Represents a map with one or many islands.
+     * Represents a map.
      */
     class Map
     {
@@ -51,9 +57,9 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * No Id selected.
+         * Something is invalid.
          */
-        static constexpr auto INVALID_GFX_ID{ -1 };
+        static constexpr auto INVALID{ -1 };
 
         /**
          * The width of a tile.
@@ -85,19 +91,24 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * The currently selected gfx Id.
+         * The MapTile objects.
          */
-        int selectedId{ INVALID_GFX_ID };
+        std::vector<MapTile> mapTiles;
 
         /**
          * The width of the map in tiles.
          */
-        int width{ 4 };
+        int width{ 0 };
 
         /**
          * The height of the map in tiles.
          */
-        int height{ 8 };
+        int height{ 0 };
+
+        /**
+         * The currently selected gfx Id.
+         */
+        int selectedId{ INVALID };
 
         /**
          * The map rotation.
@@ -124,17 +135,40 @@ namespace mdcii::map
          */
         std::unique_ptr<renderer::TextRenderer> textRenderer;
 
-        // render options which can enable or disable
+        /**
+         * Shows the isometric grid.
+         */
+        bool renderGrid{ true };
 
-        bool renderGrid{ false };
-        bool renderBuildings{ true };
-        bool renderText{ false };
+        /**
+         * Shows all buildings.
+         */
+        bool renderBuildings{ false };
+
+        /**
+         * Shows the coordinates.
+         */
+        bool renderText{ true };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        Map();
+        Map() = delete;
+
+        /**
+         * Constructs a new Map object.
+         *
+         * @param t_mapTiles The MapTile objects.
+         * @param t_width The width of the map in tiles.
+         * @param t_height The height of the map in tiles.
+         * @param t_buildings The Buildings object.
+         */
+        Map(
+            std::vector<MapTile> t_mapTiles,
+            int t_width, int t_height,
+            std::shared_ptr<data::Buildings> t_buildings
+        );
 
         Map(const Map& t_other) = delete;
         Map(Map&& t_other) noexcept = delete;
@@ -148,7 +182,7 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * Renders the map with the correct rotation.
+         * Renders the map.
          *
          * @param t_window The Window object to get the orthographic projection matrix.
          * @param t_camera The Camera object to get the view matrix.
@@ -161,42 +195,41 @@ namespace mdcii::map
         void RenderImGui();
 
         //-------------------------------------------------
-        // Rotate map
-        //-------------------------------------------------
-
-        /**
-         * Rotate map clockwise.
-         */
-        [[deprecated]] void RotateMapCw();
-
-        /**
-         * Rotate map counterclockwise.
-         */
-        [[deprecated]] void RotateMapCcw();
-
-        //-------------------------------------------------
         // Utils
         //-------------------------------------------------
+
+        /**
+         * Rotates a map position.
+         *
+         * @param t_mapX The x position of the map to rotate.
+         * @param t_mapY The y position of the map to rotate.
+         * @param t_rotation The rotation.
+         *
+         * @return The rotated map position.
+         */
+        [[nodiscard]] glm::ivec2 RotateMapPosition(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
 
         /**
          * Projects map coordinates in isometric view.
          *
          * @param t_mapX The map x position.
          * @param t_mapY The map y position.
+         * @param t_rotation The map rotation.
          *
          * @return The isometric coordinates.
          */
-        [[nodiscard]] glm::vec2 MapToIso(int t_mapX, int t_mapY) const;
+        [[nodiscard]] glm::vec2 MapToIso(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
 
         /**
          * 2D/1D - mapping.
          *
          * @param t_mapX The map x position.
          * @param t_mapY The map y position.
+         * @param t_rotation The map rotation.
          *
          * @return The map index.
          */
-        [[nodiscard]] int GetMapIndex(const int t_mapX, const int t_mapY) const { return t_mapY * width + t_mapX; }
+        [[nodiscard]] int GetMapIndex(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
 
     protected:
 
@@ -205,96 +238,20 @@ namespace mdcii::map
         // Member
         //-------------------------------------------------
 
-        // grass
-
-        Tile t{ 0,0, Rotation::DEG0, 101, 4 };
-
-        // bakery
-
-        Tile t0{ 0, 0, Rotation::DEG0, 503, 3760 };
-        Tile t1{ 1, 0, Rotation::DEG0, 503, 3761 };
-        Tile t2{ 0, 1, Rotation::DEG0, 503, 3762 };
-        Tile t3{ 1, 1, Rotation::DEG0, 503, 3763 };
-
-        std::vector<Tile> m_map
-        {
-            t,  t,  t, t,
-            t,  t,  t, t,
-            t,  t,  t, t,
-            t,  t,  t, t,
-            t, t0, t1, t,
-            t, t2, t3, t,
-            t,  t,  t, t,
-            t,  t,  t, t,
-        };
-
-        /*
-        std::vector<int> m_map
-        {
-            1165, 1094, 1094, 1166,
-            1093,    4, 0,    1095,
-            1093,    0, 0,    1095,
-            1093,    0, 0,    1095,
-            1093,    4, 4,    1095,
-            1093,    4, 4,    1095,
-            1093,    4, 4,    1095,
-            1164, 1092, 1092, 1167,
-        };
-        */
+        /**
+         * The content from the haeuser.cod.
+         */
+        std::shared_ptr<data::Buildings> m_buildings;
 
         /**
          * Pallet values from the from the stadtfld.col file.
          */
         std::unique_ptr<file::PaletteFile> m_paletteFile;
 
-        //-------------------------------------------------
-        // Render helper
-        //-------------------------------------------------
-
         /**
-         * Renders the map content.
-         *
-         * @param t_mapX The map x position.
-         * @param t_mapY The map y position.
-         * @param t_window The Window object to get the orthographic projection matrix.
-         * @param t_camera The Camera object to get the view matrix.
+         * The ECS.
          */
-        void RenderMapContent(int t_mapX, int t_mapY, const ogl::Window& t_window, const camera::Camera& t_camera) const;
-
-        /**
-         * Renders a grid tile.
-         *
-         * @param t_mapX The map x position.
-         * @param t_mapY The map y position.
-         * @param t_window The Window object to get the orthographic projection matrix.
-         * @param t_camera The Camera object to get the view matrix.
-         */
-        void RenderGridTile(int t_mapX, int t_mapY, const ogl::Window& t_window, const camera::Camera& t_camera) const;
-
-        /**
-         * Renders a building tile.
-         *
-         * @param t_mapX The map x position.
-         * @param t_mapY The map y position.
-         * @param t_window The Window object to get the orthographic projection matrix.
-         * @param t_camera The Camera object to get the view matrix.
-         */
-        void RenderBuildingTile(int t_mapX, int t_mapY, const ogl::Window& t_window, const camera::Camera& t_camera) const;
-
-        /**
-         * Renders the text.
-         *
-         * @param t_mapX The map x position.
-         * @param t_mapY The map y position.
-         * @param t_window The Window object to get the orthographic projection matrix.
-         * @param t_camera The Camera object to get the view matrix.
-         */
-        void RenderText(int t_mapX, int t_mapY, const ogl::Window& t_window, const camera::Camera& t_camera) const;
-
-        /**
-         * @see Island5.java -> setGfxInfo()
-         */
-        void CalcGfx(Tile& t_tile);
+        entt::registry m_registry;
 
         //-------------------------------------------------
         // Init
@@ -304,6 +261,32 @@ namespace mdcii::map
          * Create objects.
          */
         void Init();
+
+        //-------------------------------------------------
+        // Entities
+        //-------------------------------------------------
+
+        /**
+         * Create entities for an isometric grid.
+         */
+        void CreateGridEntities();
+
+        /**
+         * Create all entities needed to represent the island.
+         */
+        void CreateBuildingEntities();
+
+        /**
+         * Renders the grid.
+         */
+        void RenderGridEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+
+        /**
+         * Renders all buildings.
+         */
+        void RenderBuildingEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+
+        void SortEntities();
     };
 
     //-------------------------------------------------

@@ -2,7 +2,6 @@
 #include "Game.h"
 #include "MdciiException.h"
 #include "EditorState.h"
-#include "SandboxState.h"
 #include "camera/Camera.h"
 #include "cod/CodParser.h"
 #include "state/StateStack.h"
@@ -145,7 +144,6 @@ void mdcii::Game::Start()
 
     m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::State::Context>(m_window, m_camera, m_buildings));
     m_stateStack->RegisterState<EditorState>(state::State::Id::EDITOR);
-    m_stateStack->RegisterState<SandboxState>(state::State::Id::SANDBOX);
 
     const auto startStateName{ INI.Get<std::string>("game", "start") };
     const auto startStateId{ magic_enum::enum_cast<state::State::Id>(startStateName) };
@@ -156,11 +154,8 @@ void mdcii::Game::Start()
         case state::State::Id::EDITOR:
             m_stateStack->PushState(state::State::Id::EDITOR);
             break;
-        case state::State::Id::SANDBOX:
-            m_stateStack->PushState(state::State::Id::SANDBOX);
-            break;
         default:
-            m_stateStack->PushState(state::State::Id::SANDBOX);
+            m_stateStack->PushState(state::State::Id::EDITOR);
         }
     }
     else
