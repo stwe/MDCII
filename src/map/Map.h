@@ -286,6 +286,9 @@ namespace mdcii::map
          */
         void RenderBuildingEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
 
+        /**
+         * Sorts entities for rendering.
+         */
         void SortEntities();
     };
 

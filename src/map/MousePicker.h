@@ -101,6 +101,11 @@ namespace mdcii::map
          */
         unsigned char* m_cornerImage{ nullptr };
 
+        /**
+         * Indicates whether the mouse is in the window.
+         */
+        bool m_inWindow{ false };
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -109,6 +114,11 @@ namespace mdcii::map
          * Initializing class.
          */
         void Init();
+
+        /**
+         * Adds event listeners.
+         */
+        void AddListeners();
 
         //-------------------------------------------------
         // Clean up

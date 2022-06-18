@@ -4,6 +4,8 @@
 #include "Map.h"
 #include "MdciiAssert.h"
 #include "MdciiException.h"
+#include "event/EventManager.h"
+#include "eventpp/utilities/argumentadapter.h"
 #include "renderer/TileRenderer.h"
 #include "renderer/RenderUtils.h"
 #include "ogl/resource/ResourceManager.h"
@@ -19,6 +21,7 @@ mdcii::map::MousePicker::MousePicker(std::shared_ptr<Map> t_map)
     Log::MDCII_LOG_DEBUG("[MousePicker::MousePicker()] Create MousePicker.");
 
     Init();
+    AddListeners();
 }
 
 mdcii::map::MousePicker::~MousePicker() noexcept
@@ -34,13 +37,18 @@ mdcii::map::MousePicker::~MousePicker() noexcept
 
 void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::Camera& t_camera)
 {
+    if (!m_inWindow)
+    {
+        return;
+    }
+
     m_mouse = glm::ivec2(t_window.GetMouseX(), t_window.GetMouseY());
     m_cell = glm::ivec2(m_mouse.x / Map::TILE_WIDTH, (m_mouse.y + Map::ELEVATION) / Map::TILE_HEIGHT);
     m_offsetIntoCell = glm::ivec2(m_mouse.x % Map::TILE_WIDTH, (m_mouse.y + Map::ELEVATION) % Map::TILE_HEIGHT);
 
     const glm::ivec2 origin{
         static_cast<int>(t_camera.position.x) / Map::TILE_WIDTH,
-    static_cast<int>(t_camera.position.y) / Map::TILE_HEIGHT
+        static_cast<int>(t_camera.position.y) / Map::TILE_HEIGHT
     };
 
     const auto* pixelCol{ m_cornerImage + (4ULL * (static_cast<size_t>(m_offsetIntoCell.y) * Map::TILE_WIDTH + m_offsetIntoCell.x)) };
@@ -148,7 +156,7 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
         }
     }
 
-    auto s{ m_map->MapToIso(selected.x, selected.y) };
+    auto s{ m_map->MapToIso(selected.x, selected.y, m_map->rotation) };
     s.y -= Map::ELEVATION;
 
     m_renderer->RenderTile(
@@ -159,27 +167,13 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
         ogl::resource::ResourceManager::LoadTexture("textures/frame.png").id,
         t_window, t_camera
     );
-
-    /*
-    m_renderer->RenderTile(
-        renderer::Utils::GetModelMatrix(
-            glm::vec2(
-                (m_cell.x + origin.x) * Map::TILE_WIDTH,
-                (m_cell.y + origin.y) * Map::TILE_HEIGHT - Map::ELEVATION
-            ),
-            glm::vec2(Map::TILE_WIDTH, Map::TILE_HEIGHT)
-        ),
-        ogl::resource::ResourceManager::LoadTexture("textures/frame.png").id,
-        t_window, t_camera
-    );
-    */
 }
 
 void mdcii::map::MousePicker::RenderImGui() const
 {
-    ImGui::Begin("MousePicker", nullptr, 0);
+    ImGui::Begin("MousePicker");
 
-    ImGui::Text("Mouse x: %d, y: %d", m_mouse.x, m_mouse.y);
+    ImGui::Text("Mouse x: %d, y: %d, in window: %s", m_mouse.x, m_mouse.y, m_inWindow ? "yes" : "no");
     ImGui::Text("Cell x: %d, y: %d", m_cell.x, m_cell.y);
     ImGui::Text("Offset into cell x: %d, y: %d", m_offsetIntoCell.x, m_offsetIntoCell.y);
     ImGui::Text("Selected x: %d, y: %d", selected.x, selected.y);
@@ -209,6 +203,20 @@ void mdcii::map::MousePicker::Init()
     MDCII_ASSERT(height == Map::TILE_HEIGHT, "[MousePicker::Init()] Invalid height.")
 
     Log::MDCII_LOG_DEBUG("[MousePicker::Init()] The mouse picker was successfully initialized.");
+}
+
+void mdcii::map::MousePicker::AddListeners()
+{
+    event::EventManager::eventDispatcher.appendListener(
+        event::MdciiEventType::MOUSE_ENTER,
+        eventpp::argumentAdapter<void(const event::MouseEnterEvent&)>
+        (
+            [&](const event::MouseEnterEvent& t_event)
+            {
+                m_inWindow = t_event.enter;
+            }
+        )
+    );
 }
 
 //-------------------------------------------------

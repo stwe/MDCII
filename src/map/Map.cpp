@@ -2,7 +2,7 @@
 #include <magic_enum.hpp>
 #include "Map.h"
 #include "Game.h"
-#include "Log.h"
+#include "MdciiAssert.h"
 #include "ecs/Components.h"
 #include "file/BshFile.h"
 #include "ogl/resource/ResourceManager.h"
@@ -25,6 +25,11 @@ mdcii::map::Map::Map(
     , m_buildings{ std::move(t_buildings) }
 {
     Log::MDCII_LOG_DEBUG("[Map::Map()] Create Map.");
+
+    MDCII_ASSERT(!mapTiles.empty(), "[Map::Map()] Empty map given.")
+    MDCII_ASSERT(width, "[Map::Map()] Invalid width.")
+    MDCII_ASSERT(height, "[Map::Map()] Invalid height.")
+    MDCII_ASSERT((static_cast<size_t>(width) * static_cast<size_t>(height)) == mapTiles.size(), "[Map::Map()] Invalid size.")
 
     Init();
 
@@ -327,7 +332,7 @@ void mdcii::map::Map::RenderBuildingEntities(const ogl::Window& t_window, const 
 
             if (bc.mapTile.width > 1)
             {
-                // t_y * WIDTH + t_x
+                // y * width + x
                 const auto offset{ bc.mapTile.y * bc.mapTile.width + bc.mapTile.x };
                 gfx += offset;
             }
