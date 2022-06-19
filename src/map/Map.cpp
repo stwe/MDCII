@@ -83,10 +83,9 @@ void mdcii::map::Map::RenderImGui()
 
     if (selectedIndex > INVALID)
     {
-        // todo: render bauGfx
-        renderer::ImGuiTileRenderer::RenderTileGfxImGui(
+        renderer::ImGuiTileRenderer::RenderTileBauGfxImGui(
             m_buildings->buildingsMap.at(mapTiles.at(selectedIndex).buildingId),
-            *stdBshFile
+            *bauhausBshFile
         );
     }
 

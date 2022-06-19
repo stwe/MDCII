@@ -13,7 +13,11 @@ void main()
 
     if (selected > 0.5)
     {
-        fragColor /= 2.0;
+        fragColor.r *= 2;
+        fragColor.g *= 2;
+
+        fragColor.r = clamp(fragColor.r, 0.0, 1.0);
+        fragColor.g = clamp(fragColor.g, 0.0, 1.0);
     }
 
     if (fragColor.a == 0)
