@@ -50,10 +50,7 @@ void mdcii::EditorState::Update()
 {
     if (m_mousePicker->selected.lastChanged)
     {
-        m_map->SelectTile(
-            m_mousePicker->selected.lastPosition,
-            m_mousePicker->selected.lastIndex
-        );
+        m_map->SelectTile(m_mousePicker->selected.lastPosition);
     }
 }
 

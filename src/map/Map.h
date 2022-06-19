@@ -138,17 +138,17 @@ namespace mdcii::map
         /**
          * Shows the isometric grid.
          */
-        bool renderGrid{ true };
+        bool renderGrid{ false };
 
         /**
          * Shows all buildings.
          */
-        bool renderBuildings{ false };
+        bool renderBuildings{ true };
 
         /**
          * Shows the coordinates.
          */
-        bool renderText{ true };
+        bool renderText{ false };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -232,12 +232,11 @@ namespace mdcii::map
         [[nodiscard]] int GetMapIndex(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
 
         /**
-         * Checks the map position, the index and adds the SelectedComponet to the entity.
+         * Checks the map position and adds the SelectedComponent to the entity.
          *
          * @param t_position The tile position on the map returned by the MousePicker.
-         * @param t_index The map index returned by the MousePicker.
          */
-        void SelectTile(const glm::ivec2& t_position, int t_index);
+        void SelectTile(const glm::ivec2& t_position);
 
     protected:
 

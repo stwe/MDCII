@@ -141,17 +141,17 @@ int mdcii::map::Map::GetMapIndex(const int t_mapX, const int t_mapY, const Rotat
     return position.y * width + position.x;
 }
 
-void mdcii::map::Map::SelectTile(const glm::ivec2& t_position, const int t_index)
+void mdcii::map::Map::SelectTile(const glm::ivec2& t_position)
 {
     if (t_position.x >= 0 && t_position.x < width &&
-        t_position.y >= 0 && t_position.y < height &&
-        t_index > INVALID)
+        t_position.y >= 0 && t_position.y < height)
     {
-        selectedIndex = t_index;
+        // get the right index for mapTiles with DEG0
+        selectedIndex = GetMapIndex(t_position.x, t_position.y, Rotation::DEG0);
         const auto& mapTile{ mapTiles.at(selectedIndex) };
         if (!m_registry.all_of<ecs::SelectedComponent>(mapTile.entity))
         {
-            m_registry.emplace<ecs::SelectedComponent>(mapTile.entity, t_index);
+            m_registry.emplace<ecs::SelectedComponent>(mapTile.entity, selectedIndex);
         }
     }
     else

@@ -156,8 +156,6 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
         }
     }
 
-    selected.currentIndex = m_map->GetMapIndex(selected.currentPosition.x, selected.currentPosition.y, m_map->rotation);
-
     auto screenPosition{ m_map->MapToIso(selected.currentPosition.x, selected.currentPosition.y, m_map->rotation) };
     screenPosition.y -= Map::ELEVATION;
 
@@ -179,9 +177,7 @@ void mdcii::map::MousePicker::RenderImGui() const
     ImGui::Text("Cell x: %d, y: %d", m_cell.x, m_cell.y);
     ImGui::Text("Offset into cell x: %d, y: %d", m_offsetIntoCell.x, m_offsetIntoCell.y);
     ImGui::Text("Current tile position x: %d, y: %d", selected.currentPosition.x, selected.currentPosition.y);
-    ImGui::Text("Current tile map index: %d", selected.currentIndex);
     ImGui::Text("Last tile position x: %d, y: %d", selected.lastPosition.x, selected.lastPosition.y);
-    ImGui::Text("Last tile map index: %d", selected.lastIndex);
 
     ImGui::End();
 }
@@ -234,7 +230,6 @@ void mdcii::map::MousePicker::AddListeners()
                 if (t_event.button == 0) // left mouse button pressed
                 {
                     selected.lastPosition = selected.currentPosition;
-                    selected.lastIndex = selected.currentIndex;
                     selected.lastChanged = true;
                 }
             }

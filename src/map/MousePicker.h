@@ -40,24 +40,14 @@ namespace mdcii::map
         struct Selected
         {
             /**
-             * The current tile position under the mouse.
+             * The current tile map position under the mouse.
              */
-            glm::ivec2 currentPosition{ 0 };
+            glm::ivec2 currentPosition{ -1 };
 
             /**
-             * The current tile map index under the mouse.
+             * The last tilemap  position under the mouse after mouse button is pressed.
              */
-            int currentIndex{ -1 };
-
-            /**
-             * The last tile position under the mouse after mouse button is pressed.
-             */
-            glm::ivec2 lastPosition{ 0 };
-
-            /**
-             * The last tile map index under the mouse after mouse buttin is pressed.
-             */
-            int lastIndex{ -1 };
+            glm::ivec2 lastPosition{ -1 };
 
             /**
              * Flag for lastSelected.
