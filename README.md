@@ -12,6 +12,8 @@ Es wird das Originalspiel benötigt. Es müssen folgende Dateien nach
 * STADTFLD.COL
 * haeuser.cod
 
+In der `config.ini` müssen die Pfade angepasst werden.
+
 **Der erste Start dauert länger, da die `haeuser.cod` eingelesen wird.**
 
 

@@ -38,4 +38,9 @@ namespace mdcii::ecs
         std::vector<glm::vec2> screenPositions;
         std::vector<int> gfx;
     };
+
+    struct SelectedComponent
+    {
+        int index{ -1 };
+    };
 }

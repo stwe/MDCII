@@ -39,12 +39,14 @@ namespace mdcii::renderer
          * @param t_textureId The OpenGL texture handle.
          * @param t_window The Window object to get the orthographic projection matrix.
          * @param t_camera The Camera object to get the view matrix.
+         * @param t_selected True if the tile is selected.
          */
         void RenderTile(
             const glm::mat4& t_modelMatrix,
             uint32_t t_textureId,
             const ogl::Window& t_window,
-            const camera::Camera& t_camera
+            const camera::Camera& t_camera,
+            bool t_selected = false
         ) const;
 
         /**

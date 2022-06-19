@@ -48,6 +48,13 @@ void mdcii::EditorState::Input()
 
 void mdcii::EditorState::Update()
 {
+    if (m_mousePicker->selected.lastChanged)
+    {
+        m_map->SelectTile(
+            m_mousePicker->selected.lastPosition,
+            m_mousePicker->selected.lastIndex
+        );
+    }
 }
 
 void mdcii::EditorState::PreRender()
@@ -88,8 +95,8 @@ void mdcii::EditorState::Init()
 
     // create the Map object to edit
     m_map = std::make_shared<map::Map>(
-        map::EXAMPLE_ISLAND,
-        map::EXAMPLE_WIDTH, map::EXAMPLE_HEIGHT,
+        map::ExampleMap::EXAMPLE_ISLAND,
+        map::ExampleMap::EXAMPLE_WIDTH, map::ExampleMap::EXAMPLE_HEIGHT,
         context->buildings
     );
 
@@ -121,7 +128,6 @@ void mdcii::EditorState::TileMenuById() const
 
                 if (ImGui::TreeNode(idStr.append(" ").append(name).c_str()))
                 {
-                    m_map->selectedId = id;
                     renderer::ImGuiTileRenderer::RenderTileGfxImGui(building, *m_map->stdBshFile);
                     renderer::ImGuiTileRenderer::RenderTileBauGfxImGui(building, *m_map->bauhausBshFile);
 

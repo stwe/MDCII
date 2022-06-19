@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 #include "MapTile.h"
+#include "ecs/Components.h"
 #include "ogl/Window.h"
 #include "camera/Camera.h"
-#include "ecs/entt.hpp"
 
 //-------------------------------------------------
 // Forward declarations
@@ -106,9 +106,9 @@ namespace mdcii::map
         int height{ 0 };
 
         /**
-         * The currently selected gfx Id.
+         * The currently selected map index.
          */
-        int selectedId{ INVALID };
+        int selectedIndex{ INVALID };
 
         /**
          * The map rotation.
@@ -231,6 +231,14 @@ namespace mdcii::map
          */
         [[nodiscard]] int GetMapIndex(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
 
+        /**
+         * Checks the map position, the index and adds the SelectedComponet to the entity.
+         *
+         * @param t_position The tile position on the map returned by the MousePicker.
+         * @param t_index The map index returned by the MousePicker.
+         */
+        void SelectTile(const glm::ivec2& t_position, int t_index);
+
     protected:
 
     private:
@@ -267,24 +275,47 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * Create entities for an isometric grid.
+         * Creates entities from the MapTile objects to show an isometric grid.
          */
         void CreateGridEntities();
 
         /**
-         * Create all entities needed to represent the island.
+         * Creates entities from the MapTile objects to show an island.
          */
         void CreateBuildingEntities();
 
         /**
-         * Renders the grid.
+         * Renders the isometric grid.
+         *
+         * @param t_window The Window object to get the orthographic projection matrix.
+         * @param t_camera The Camera object to get the view matrix.
          */
         void RenderGridEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
 
         /**
-         * Renders all buildings.
+         * Renders all buildings to show an island.
+         *
+         * @param t_window The Window object to get the orthographic projection matrix.
+         * @param t_camera The Camera object to get the view matrix.
          */
         void RenderBuildingEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+
+        /**
+         * Renders a building.
+         *
+         * @param t_window The Window object to get the orthographic projection matrix.
+         * @param t_camera The Camera object to get the view matrix.
+         * @param t_positionComponent A position component.
+         * @param t_buildingComponent A building component.
+         * @param t_selected Determines if the building is selected and rendered a little darker.
+         */
+        void RenderBuildingEntity(
+            const ogl::Window& t_window,
+            const camera::Camera& t_camera,
+            const ecs::PositionComponent& t_positionComponent,
+            const ecs::BuildingComponent& t_buildingComponent,
+            bool t_selected = false
+        ) const;
 
         /**
          * Sorts entities for rendering.

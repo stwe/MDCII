@@ -3,9 +3,8 @@
 #include "Map.h"
 #include "Game.h"
 #include "MdciiAssert.h"
-#include "ecs/Components.h"
-#include "file/BshFile.h"
 #include "ogl/resource/ResourceManager.h"
+#include "renderer/ImGuiTileRenderer.h"
 #include "renderer/RenderUtils.h"
 #include "renderer/TileRenderer.h"
 #include "renderer/TextRenderer.h"
@@ -82,13 +81,13 @@ void mdcii::map::Map::RenderImGui()
 
     // selected
 
-    if (selectedId == INVALID)
+    if (selectedIndex > INVALID)
     {
-        ImGui::Text("Current selected Id: nothing selected");
-    }
-    else
-    {
-        ImGui::Text("Current selected Id: %d", selectedId);
+        // todo: render bauGfx
+        renderer::ImGuiTileRenderer::RenderTileGfxImGui(
+            m_buildings->buildingsMap.at(mapTiles.at(selectedIndex).buildingId),
+            *stdBshFile
+        );
     }
 
     ImGui::End();
@@ -143,6 +142,25 @@ int mdcii::map::Map::GetMapIndex(const int t_mapX, const int t_mapY, const Rotat
     return position.y * width + position.x;
 }
 
+void mdcii::map::Map::SelectTile(const glm::ivec2& t_position, const int t_index)
+{
+    if (t_position.x >= 0 && t_position.x < width &&
+        t_position.y >= 0 && t_position.y < height &&
+        t_index > INVALID)
+    {
+        selectedIndex = t_index;
+        const auto& mapTile{ mapTiles.at(selectedIndex) };
+        if (!m_registry.all_of<ecs::SelectedComponent>(mapTile.entity))
+        {
+            m_registry.emplace<ecs::SelectedComponent>(mapTile.entity, t_index);
+        }
+    }
+    else
+    {
+        selectedIndex = INVALID;
+    }
+}
+
 //-------------------------------------------------
 // Init
 //-------------------------------------------------
@@ -182,7 +200,14 @@ void mdcii::map::Map::CreateGridEntities()
     {
         for (auto x{ 0 }; x < width; ++x)
         {
-            const auto entity{ m_registry.create() };
+            // create entity
+            const entt::entity entity{ m_registry.create() };
+
+            // get map tile
+            auto& mapTile{ mapTiles.at(GetMapIndex(x, y, Rotation::DEG0)) };
+
+            // store entity handle also in the MapTile
+            mapTile.gridEntity = entity;
 
             // a screen position for each rotation
             const auto s0{ MapToIso(x, y, Rotation::DEG0) };
@@ -191,6 +216,7 @@ void mdcii::map::Map::CreateGridEntities()
             const auto s270{ MapToIso(x, y, Rotation::DEG270) };
             std::vector screenPositions{ s0, s90, s180, s270 };
 
+            // add GridComponent
             m_registry.emplace<ecs::GridComponent>(
                 entity,
                 x, y,
@@ -226,7 +252,10 @@ void mdcii::map::Map::CreateBuildingEntities()
             std::vector screenPositions{ s0, s90, s180, s270 };
 
             // get map tile
-            const auto& mapTile{ mapTiles.at(idx0) };
+            auto& mapTile{ mapTiles.at(idx0) };
+
+            // store entity handle also in the MapTile
+            mapTile.entity = entity;
 
             // get building
             const auto building{ m_buildings->buildingsMap.at(mapTile.buildingId) };
@@ -316,48 +345,85 @@ void mdcii::map::Map::RenderBuildingEntities(const ogl::Window& t_window, const 
 {
     if (renderBuildings)
     {
-        const auto view{ m_registry.view<const ecs::BuildingComponent, const ecs::PositionComponent>() };
+        // render tile
+        const auto view{ m_registry.view<
+            const ecs::PositionComponent,
+            const ecs::BuildingComponent>()
+        };
         for (const auto entity : view.use<const ecs::PositionComponent>())
         {
-            const auto& [bc, pc] { view.get(entity) };
+            const auto& [positionComponent, buildingComponent] { view.get(entity) };
 
-            // get gfx in the right direction for the current map rotation
-            const auto rot{ magic_enum::enum_integer(rotation) };
-            auto orientation{ bc.mapTile.orientation };
-            if (bc.building.rotate > 0)
-            {
-                orientation = (orientation + rot) % 4;
-            }
-            auto gfx{ pc.gfx[orientation] };
+            RenderBuildingEntity(
+                t_window, t_camera,
+                positionComponent, buildingComponent,
+                false
+            );
+        }
 
-            if (bc.mapTile.width > 1)
-            {
-                // y * width + x
-                const auto offset{ bc.mapTile.y * bc.mapTile.width + bc.mapTile.x };
-                gfx += offset;
-            }
+        // render tile as selected
+        const auto viewSelected{ m_registry.view<
+            const ecs::PositionComponent,
+            const ecs::BuildingComponent,
+            const ecs::SelectedComponent>()
+        };
+        for (const auto entity : viewSelected.use<const ecs::PositionComponent>())
+        {
+            const auto& [positionComponent, buildingComponent, selectedComponent] { viewSelected.get(entity) };
 
-            // get width, height and texture of the gfx
-            const auto w{ static_cast<float>(stdBshFile->bshTextures[gfx]->width) };
-            const auto h{ static_cast<float>(stdBshFile->bshTextures[gfx]->height) };
-            const auto textureId{ stdBshFile->bshTextures[gfx]->textureId };
-
-            // get the screen position of the gfx, which is different for each map rotation
-            auto screenPosition{ pc.screenPositions[rot] };
-            screenPosition.y -= h - TILE_HEIGHT;
-            if (bc.building.posoffs == 20)
-            {
-                screenPosition.y -= 20.0f;
-            }
-
-            // render tile
-            renderer->RenderTile(
-                renderer::RenderUtils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
-                textureId,
-                t_window, t_camera
+            RenderBuildingEntity(
+                t_window, t_camera,
+                positionComponent, buildingComponent,
+                true
             );
         }
     }
+}
+
+void mdcii::map::Map::RenderBuildingEntity(
+    const ogl::Window& t_window,
+    const camera::Camera& t_camera,
+    const ecs::PositionComponent& t_positionComponent,
+    const ecs::BuildingComponent& t_buildingComponent,
+    const bool t_selected
+) const
+{
+    // get gfx in the right direction for the current map rotation
+    const auto rot{ magic_enum::enum_integer(rotation) };
+    auto orientation{ t_buildingComponent.mapTile.orientation };
+    if (t_buildingComponent.building.rotate > 0)
+    {
+        orientation = (orientation + rot) % 4;
+    }
+    auto gfx{ t_positionComponent.gfx[orientation] };
+
+    if (t_buildingComponent.mapTile.width > 1)
+    {
+        // y * width + x
+        const auto offset{ t_buildingComponent.mapTile.y * t_buildingComponent.mapTile.width + t_buildingComponent.mapTile.x };
+        gfx += offset;
+    }
+
+    // get width, height and texture of the gfx
+    const auto w{ static_cast<float>(stdBshFile->bshTextures[gfx]->width) };
+    const auto h{ static_cast<float>(stdBshFile->bshTextures[gfx]->height) };
+    const auto textureId{ stdBshFile->bshTextures[gfx]->textureId };
+
+    // get the screen position of the gfx, which is different for each map rotation
+    auto screenPosition{ t_positionComponent.screenPositions[rot] };
+    screenPosition.y -= h - TILE_HEIGHT;
+    if (t_buildingComponent.building.posoffs == ELEVATION)
+    {
+        screenPosition.y -= ELEVATION;
+    }
+
+    // render tile
+    renderer->RenderTile(
+        renderer::RenderUtils::GetModelMatrix(screenPosition, glm::vec2(w, h)),
+        textureId,
+        t_window, t_camera,
+        t_selected
+    );
 }
 
 void mdcii::map::Map::SortEntities()

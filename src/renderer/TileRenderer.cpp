@@ -28,7 +28,8 @@ void mdcii::renderer::TileRenderer::RenderTile(
     const glm::mat4& t_modelMatrix,
     const uint32_t t_textureId,
     const ogl::Window& t_window,
-    const camera::Camera& t_camera
+    const camera::Camera& t_camera,
+    const bool t_selected
 ) const
 {
     ogl::OpenGL::EnableAlphaBlending();
@@ -40,6 +41,7 @@ void mdcii::renderer::TileRenderer::RenderTile(
     shaderProgram.SetUniform("view", t_camera.GetViewMatrix());
     shaderProgram.SetUniform("projection", t_window.GetOrthographicProjectionMatrix());
     shaderProgram.SetUniform("diffuseMap", 0);
+    shaderProgram.SetUniform("selected", t_selected);
 
     glBindVertexArray(m_vao);
     ogl::resource::TextureUtils::BindForReading(t_textureId, GL_TEXTURE0);

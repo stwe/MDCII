@@ -31,13 +31,48 @@ namespace mdcii::map
     {
     public:
         //-------------------------------------------------
+        // Types
+        //-------------------------------------------------
+
+        /**
+         * The tile under the mouse.
+         */
+        struct Selected
+        {
+            /**
+             * The current tile position under the mouse.
+             */
+            glm::ivec2 currentPosition{ 0 };
+
+            /**
+             * The current tile map index under the mouse.
+             */
+            int currentIndex{ -1 };
+
+            /**
+             * The last tile position under the mouse after mouse button is pressed.
+             */
+            glm::ivec2 lastPosition{ 0 };
+
+            /**
+             * The last tile map index under the mouse after mouse buttin is pressed.
+             */
+            int lastIndex{ -1 };
+
+            /**
+             * Flag for lastSelected.
+             */
+            bool lastChanged{ false };
+        };
+
+        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
         /**
-         * The selected cell.
+         * The selected tile.
          */
-        glm::ivec2 selected{ 0 };
+        Selected selected;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
