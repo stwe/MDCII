@@ -2,7 +2,7 @@
 #include "EditorState.h"
 #include "Game.h"
 #include "Log.h"
-#include "data/GraphicsFile.h"
+#include "data/Text.h"
 #include "map/Map.h"
 #include "map/MousePicker.h"
 #include "renderer/ImGuiTileRenderer.h"
@@ -71,7 +71,7 @@ void mdcii::EditorState::RenderImGui()
     m_map->RenderImGui();
 
     ImGui::Begin("EditorState");
-    TileMenuById();
+    EditMenu();
     ImGui::End();
 
     m_mousePicker->RenderImGui();
@@ -87,8 +87,11 @@ void mdcii::EditorState::Init()
 {
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] Initializing editor state.");
 
-    // load Grafiken.txt for ImGui menus
-    m_graphicsFileContent = data::GraphicsFile::ReadGraphicsFile(Game::RESOURCES_PATH + "data/Grafiken.txt");
+    // set lang
+    m_lang = Game::INI.Get<std::string>("locale", "lang");
+
+    // read menu texts
+    m_text = std::make_unique<data::Text>();
 
     // create the Map object to edit
     m_map = std::make_shared<map::Map>(
@@ -107,32 +110,27 @@ void mdcii::EditorState::Init()
 // ImGui
 //-------------------------------------------------
 
-void mdcii::EditorState::TileMenuById() const
+void mdcii::EditorState::EditMenu() const
 {
-    if (ImGui::TreeNode("Objects"))
+    if (ImGui::TreeNode(m_text->GetMenuText(m_lang, "Workshops").c_str()))
     {
-        for (auto& [id, building] : context->buildings->buildingsMap)
+        const auto& shops{ m_text->GetBuildingsTexts(data::Text::Section::WORKSHOPS, m_lang) };
+
+        for (const auto& [k, v] : shops)
         {
-            if (id >= 0)
+            if (ImGui::TreeNode(v.c_str()))
             {
-                auto idStr{ std::to_string(id) };
+                const auto& building{ context->buildings->buildingsMap.at(std::stoi(k)) };
+                renderer::ImGuiTileRenderer::RenderTileBauGfxImGui(building, *m_map->bauhausBshFile);
 
-                std::string name{};
-                if (m_graphicsFileContent.count(id))
-                {
-                    name = m_graphicsFileContent.at(id);
-                }
-
-                if (ImGui::TreeNode(idStr.append(" ").append(name).c_str()))
-                {
-                    renderer::ImGuiTileRenderer::RenderTileGfxImGui(building, *m_map->stdBshFile);
-                    renderer::ImGuiTileRenderer::RenderTileBauGfxImGui(building, *m_map->bauhausBshFile);
-
-                    ImGui::TreePop();
-                }
+                ImGui::TreePop();
             }
         }
 
         ImGui::TreePop();
     }
+
+    // todo:
+    // todo: bei select: Gebäude oben anzeigen und bei weiteren Klicks drehen
+    // todo:
 }

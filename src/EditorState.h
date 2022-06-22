@@ -1,11 +1,15 @@
 #pragma once
 
-#include <map>
 #include "state/State.h"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
+
+namespace mdcii::data
+{
+    class Text;
+}
 
 namespace mdcii::map
 {
@@ -65,9 +69,14 @@ namespace mdcii
         //-------------------------------------------------
 
         /**
-         * Text identifiers for gfx Ids.
+         * Language value from the config.ini.
          */
-        std::map<int, std::string> m_graphicsFileContent;
+        std::string m_lang;
+
+        /**
+         * Texts in different languages.
+         */
+        std::unique_ptr<data::Text> m_text;
 
         /**
          * The Map object to edit.
@@ -93,8 +102,8 @@ namespace mdcii
         //-------------------------------------------------
 
         /**
-         * An ImGui tree view with a node for each Gfx Id.
+         * Creates an menu to edit the map content.
          */
-        void TileMenuById() const;
+        void EditMenu() const;
     };
 }

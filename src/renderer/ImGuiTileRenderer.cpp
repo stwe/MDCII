@@ -49,7 +49,7 @@ void mdcii::renderer::ImGuiTileRenderer::RenderTileBauGfxImGui(
         {
             MDCII_ASSERT(static_cast<size_t>(baugfx) < t_bshFile.bshTextures.size(), "[ImGuiTileRenderer::RenderTileBauGfxImGui()] Invalid arguments given.")
 
-            ImGui::Text("BauGfx: %d", baugfx);
+            //ImGui::Text("BauGfx: %d", baugfx);
 
             const auto textureWidth{ t_bshFile.bshTextures.at(baugfx)->width };
             MDCII_ASSERT(textureWidth, "[ImGuiTileRenderer::RenderTileBauGfxImGui()] Invalid texture width.")
