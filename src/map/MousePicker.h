@@ -45,7 +45,7 @@ namespace mdcii::map
             glm::ivec2 currentPosition{ -1 };
 
             /**
-             * The last tilemap  position under the mouse after mouse button is pressed.
+             * The last tilemap position under the mouse after mouse button is pressed.
              */
             glm::ivec2 lastPosition{ -1 };
 
@@ -86,6 +86,10 @@ namespace mdcii::map
         // Logic
         //-------------------------------------------------
 
+        void Render(
+            const ogl::Window& t_window, const camera::Camera& t_camera,
+            uint32_t t_textureId, float t_width, float t_height
+        );
         void Render(const ogl::Window& t_window, const camera::Camera& t_camera);
         void RenderImGui() const;
 

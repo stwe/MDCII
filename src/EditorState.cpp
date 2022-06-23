@@ -61,7 +61,24 @@ void mdcii::EditorState::PreRender()
 void mdcii::EditorState::Render()
 {
     m_map->Render(*context->window, *context->camera);
-    m_mousePicker->Render(*context->window, *context->camera);
+
+    if (m_currentId > -1)
+    {
+        const auto& building{ context->buildings->buildingsMap.at(m_currentId) };
+
+        const auto textureWidth{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->width };
+        const auto textureHeight{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->height };
+
+        m_mousePicker->Render(
+            *context->window, *context->camera,
+            m_map->bauhausBshFile->bshTextures.at(building.baugfx + m_orientation)->textureId,
+            static_cast<float>(textureWidth), static_cast<float>(textureHeight)
+        );
+    }
+    else
+    {
+        m_mousePicker->Render(*context->window, *context->camera);
+    }
 }
 
 void mdcii::EditorState::RenderImGui()

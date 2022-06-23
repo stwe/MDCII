@@ -35,7 +35,10 @@ mdcii::map::MousePicker::~MousePicker() noexcept
 // Logic
 //-------------------------------------------------
 
-void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::Camera& t_camera)
+void mdcii::map::MousePicker::Render(
+    const ogl::Window& t_window, const camera::Camera& t_camera,
+    const uint32_t t_textureId, const float t_width, const float t_height
+)
 {
     if (!m_inWindow)
     {
@@ -162,11 +165,16 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
     m_renderer->RenderTile(
         renderer::RenderUtils::GetModelMatrix(
             screenPosition,
-            glm::vec2(Map::TILE_WIDTH, Map::TILE_HEIGHT)
+            glm::vec2(t_width, t_height)
         ),
-        ogl::resource::ResourceManager::LoadTexture("textures/frame.png").id,
+        t_textureId,
         t_window, t_camera
     );
+}
+
+void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::Camera& t_camera)
+{
+    Render(t_window, t_camera, ogl::resource::ResourceManager::LoadTexture("textures/frame.png").id, Map::TILE_WIDTH, Map::TILE_HEIGHT);
 }
 
 void mdcii::map::MousePicker::RenderImGui() const
