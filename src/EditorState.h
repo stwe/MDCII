@@ -88,6 +88,21 @@ namespace mdcii
          */
         std::unique_ptr<map::MousePicker> m_mousePicker;
 
+        /**
+         * The current bauGfx Id.
+         */
+        int m_currentId{ -1 };
+
+        /**
+         * The current bauGfx orientation.
+         */
+        int m_orientation{ 0 };
+
+        /**
+         * The name of the current building.
+         */
+        std::string m_buildingName;
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -104,6 +119,6 @@ namespace mdcii
         /**
          * Creates an menu to edit the map content.
          */
-        void EditMenu() const;
+        void EditMenu();
     };
 }

@@ -2,10 +2,10 @@
 #include "EditorState.h"
 #include "Game.h"
 #include "Log.h"
+#include "file/BshFile.h"
 #include "data/Text.h"
 #include "map/Map.h"
 #include "map/MousePicker.h"
-#include "renderer/ImGuiTileRenderer.h"
 #include "ogl/OpenGL.h"
 
 //-------------------------------------------------
@@ -110,8 +110,54 @@ void mdcii::EditorState::Init()
 // ImGui
 //-------------------------------------------------
 
-void mdcii::EditorState::EditMenu() const
+void mdcii::EditorState::EditMenu()
 {
+    if (m_currentId > -1)
+    {
+        ImGui::Text(m_buildingName.c_str());
+
+        ImGui::Separator();
+
+        const auto& building{ context->buildings->buildingsMap.at(m_currentId) };
+
+        const auto textureWidth{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->width };
+        const auto textureHeight{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->height };
+        const auto textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(m_map->bauhausBshFile->bshTextures.at(building.baugfx + m_orientation)->textureId)) };
+
+        if (ImGui::Button(m_text->GetMenuText(m_lang, "RotateBuildingRight").c_str()))
+        {
+            ++m_orientation;
+            if (m_orientation > 3)
+            {
+                m_orientation = 0;
+            }
+        }
+
+        ImGui::SameLine();
+
+        ImGui::Image(
+            textureId,
+            ImVec2(static_cast<float>(textureWidth), static_cast<float>(textureHeight)),
+            ImVec2(0.0f, 0.0f),
+            ImVec2(1.0f, 1.0f),
+            ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
+            ImVec4(0.6f, 0.6f, 0.6f, 1.0f)
+        );
+
+        ImGui::SameLine();
+
+        if (ImGui::Button(m_text->GetMenuText(m_lang, "RotateBuildingLeft").c_str()))
+        {
+            --m_orientation;
+            if (m_orientation < 0)
+            {
+                m_orientation = 3;
+            }
+        }
+    }
+
+    ImGui::Separator();
+
     if (ImGui::TreeNode(m_text->GetMenuText(m_lang, "Workshops").c_str()))
     {
         const auto& shops{ m_text->GetBuildingsTexts(data::Text::Section::WORKSHOPS, m_lang) };
@@ -121,7 +167,24 @@ void mdcii::EditorState::EditMenu() const
             if (ImGui::TreeNode(v.c_str()))
             {
                 const auto& building{ context->buildings->buildingsMap.at(std::stoi(k)) };
-                renderer::ImGuiTileRenderer::RenderTileBauGfxImGui(building, *m_map->bauhausBshFile);
+
+                const auto textureWidth{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->width };
+                const auto textureHeight{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->height };
+                const auto textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(m_map->bauhausBshFile->bshTextures.at(building.baugfx)->textureId)) };
+
+                if (ImGui::ImageButton(
+                    textureId,
+                    ImVec2(static_cast<float>(textureWidth), static_cast<float>(textureHeight)),
+                    ImVec2(0.0f, 0.0f),
+                    ImVec2(1.0f, 1.0f),
+                    -1,
+                    ImVec4(0.6f, 0.6f, 0.6f, 1.0f)
+                ))
+                {
+                    m_currentId = std::stoi(k);
+                    m_orientation = 0;
+                    m_buildingName = v;
+                }
 
                 ImGui::TreePop();
             }
@@ -129,8 +192,4 @@ void mdcii::EditorState::EditMenu() const
 
         ImGui::TreePop();
     }
-
-    // todo:
-    // todo: bei select: Gebäude oben anzeigen und bei weiteren Klicks drehen
-    // todo:
 }
