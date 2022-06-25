@@ -20,7 +20,7 @@ In der `config.ini` müssen die Pfade angepasst werden.
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ffb066523c4064ab513bef2f8d4628)](https://www.codacy.com/gh/stwe/MDCII/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stwe/MDCII&amp;utm_campaign=Badge_Grade)
 
 
-<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/first.png" width="500" height="400" />
+<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/25-06-2022.png" width="500" height="400" />
 
 
 ## Build

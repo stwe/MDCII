@@ -36,6 +36,9 @@ namespace mdcii::map
     // MapContent
     //-------------------------------------------------
 
+    /**
+     * Loads all tiles from a json file.
+     */
     class MapContent
     {
     public:
@@ -64,6 +67,11 @@ namespace mdcii::map
 
         MapContent() = delete;
 
+        /**
+         * Constructs a new MapContent object.
+         *
+         * @param t_filePath The path to the map file.
+         */
         explicit MapContent(const std::string& t_filePath);
 
         MapContent(const MapContent& t_other) = delete;
@@ -80,12 +88,22 @@ namespace mdcii::map
         // Read
         //-------------------------------------------------
 
+        /**
+         * Create tiles from the json data.
+         *
+         * @param t_filePath The path to the json map file.
+         */
         void CreateTiles(const std::string& t_filePath);
 
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
 
+        /**
+         * Read file and deserialize json.
+         *
+         * @param t_filePath The path to the json map file.
+         */
         [[nodiscard]] nlohmann::json ReadJsonFromFile(const std::string& t_filePath) const;
     };
 }
