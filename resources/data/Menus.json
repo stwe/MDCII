@@ -1,0 +1,16 @@
+{
+  "de": {
+    "Workshops": "Handwerk",
+    "RotateBuildingLeft": "Bauwerk linksherum drehen",
+    "RotateBuildingRight": "Bauwerk rechtsherum drehen",
+    "RotateMapLeft": "Karte linksherum drehen",
+    "RotateMapRight": "Karte rechtsherum drehen"
+  },
+  "en": {
+    "Workshops": "Workshops",
+    "RotateBuildingLeft": "Rotate building left",
+    "RotateBuildingRight": "Rotate building right",
+    "RotateMapLeft": "Rotate map left",
+    "RotateMapRight": "Rotate map right"
+  }
+}

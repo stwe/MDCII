@@ -1,10 +1,10 @@
 #include <magic_enum.hpp>
 #include "Buildings.h"
+#include "Game.h"
 #include "Log.h"
 #include "cod/CodParser.h"
 
-mdcii::data::Buildings::Buildings(std::shared_ptr<cod::CodParser> t_cod)
-    : m_cod{ std::move(t_cod) }
+mdcii::data::Buildings::Buildings()
 {
     Log::MDCII_LOG_DEBUG("[Buildings::Buildings()] Create Buildings.");
 
@@ -15,9 +15,11 @@ void mdcii::data::Buildings::GenerateBuildings()
 {
     Log::MDCII_LOG_DEBUG("[Buildings::GenerateBuildings()] Generate buildings...");
 
-    for (auto i{ 0 }; i < m_cod->objects.object_size(); ++i)
+    const auto cod{ cod::CodParser(Game::RESOURCES_PATH + "haeuser.cod") };
+
+    for (auto i{ 0 }; i < cod.objects.object_size(); ++i)
     {
-        const auto& obj{ m_cod->objects.object(i) };
+        const auto& obj{ cod.objects.object(i) };
         if (obj.name() == "HAUS")
         {
             for (auto j{ 0 }; j < obj.objects_size(); ++j)

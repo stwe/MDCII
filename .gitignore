@@ -41,3 +41,6 @@ conanbuildinfo.cmake
 !/resources/textures/frame.png
 !/resources/textures/full.png
 !/resources/textures/red.png
+!/resources/data/ExampleMap.json
+!/resources/data/Menus.json
+!/resources/data/Texts.json

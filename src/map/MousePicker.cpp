@@ -2,6 +2,7 @@
 #include "MousePicker.h"
 #include "Game.h"
 #include "Map.h"
+#include "MapContent.h"
 #include "MdciiAssert.h"
 #include "MdciiException.h"
 #include "event/EventManager.h"
@@ -88,7 +89,7 @@ void mdcii::map::MousePicker::Render(
     {
         selected.currentPosition = glm::ivec2(
             (m_cell.y + origin.y) - (m_cell.x + origin.x),
-            m_map->width - 1 - ((m_cell.x + origin.x) + (m_cell.y + origin.y))
+            m_map->mapContent->width - 1 - ((m_cell.x + origin.x) + (m_cell.y + origin.y))
         );
 
         if (r == 255 && g == 0 && b == 0)
@@ -112,8 +113,8 @@ void mdcii::map::MousePicker::Render(
     if (m_map->rotation == Rotation::DEG180)
     {
         selected.currentPosition = glm::ivec2(
-            m_map->width - 1 - ((m_cell.y + origin.y) + (m_cell.x + origin.x)),
-            m_map->height - 1 - ((m_cell.y + origin.y) - (m_cell.x + origin.x))
+            m_map->mapContent->width - 1 - ((m_cell.y + origin.y) + (m_cell.x + origin.x)),
+            m_map->mapContent->height - 1 - ((m_cell.y + origin.y) - (m_cell.x + origin.x))
         );
 
         if (r == 255 && g == 0 && b == 0)
@@ -137,7 +138,7 @@ void mdcii::map::MousePicker::Render(
     if (m_map->rotation == Rotation::DEG270)
     {
         selected.currentPosition = glm::ivec2(
-            m_map->height - 1 - ((m_cell.y + origin.y) - (m_cell.x + origin.x)),
+            m_map->mapContent->height - 1 - ((m_cell.y + origin.y) - (m_cell.x + origin.x)),
             (m_cell.y + origin.y) + (m_cell.x + origin.x)
         );
 

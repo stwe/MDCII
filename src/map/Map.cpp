@@ -2,7 +2,8 @@
 #include <magic_enum.hpp>
 #include "Map.h"
 #include "Game.h"
-#include "MdciiAssert.h"
+#include "MapContent.h"
+#include "Log.h"
 #include "ogl/resource/ResourceManager.h"
 #include "renderer/ImGuiTileRenderer.h"
 #include "renderer/RenderUtils.h"
@@ -13,24 +14,12 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::map::Map::Map(
-    std::vector<MapTile> t_mapTiles,
-    const int t_width, const int t_height,
-    std::shared_ptr<data::Buildings> t_buildings
-)
-    : mapTiles{ std::move(t_mapTiles) }
-    , width{ t_width }
-    , height{ t_height }
-    , m_buildings{ std::move(t_buildings) }
+mdcii::map::Map::Map(const std::string& t_filePath, std::shared_ptr<data::Buildings> t_buildings)
+    : m_buildings{ std::move(t_buildings) }
 {
     Log::MDCII_LOG_DEBUG("[Map::Map()] Create Map.");
 
-    MDCII_ASSERT(!mapTiles.empty(), "[Map::Map()] Empty map given.")
-    MDCII_ASSERT(width, "[Map::Map()] Invalid width.")
-    MDCII_ASSERT(height, "[Map::Map()] Invalid height.")
-    MDCII_ASSERT((static_cast<size_t>(width) * static_cast<size_t>(height)) == mapTiles.size(), "[Map::Map()] Invalid size.")
-
-    Init();
+    Init(t_filePath);
 
     CreateGridEntities();
     CreateBuildingEntities();
@@ -84,7 +73,7 @@ void mdcii::map::Map::RenderImGui()
     if (selectedIndex > INVALID)
     {
         renderer::ImGuiTileRenderer::RenderTileBauGfxImGui(
-            m_buildings->buildingsMap.at(mapTiles.at(selectedIndex).buildingId),
+            m_buildings->buildingsMap.at(mapContent->mapTiles.at(selectedIndex).buildingId),
             *bauhausBshFile
         );
     }
@@ -108,16 +97,16 @@ glm::ivec2 mdcii::map::Map::RotateMapPosition(const int t_mapX, const int t_mapY
         y = t_mapY;
         break;
     case Rotation::DEG90:
-        x = width - t_mapY - 1;
+        x = mapContent->width - t_mapY - 1;
         y = t_mapX;
         break;
     case Rotation::DEG180:
-        x = width - t_mapX - 1;
-        y = height - t_mapY - 1;
+        x = mapContent->width - t_mapX - 1;
+        y = mapContent->height - t_mapY - 1;
         break;
     case Rotation::DEG270:
         x = t_mapY;
-        y = height - t_mapX - 1;
+        y = mapContent->height - t_mapX - 1;
         break;
     }
 
@@ -138,17 +127,17 @@ int mdcii::map::Map::GetMapIndex(const int t_mapX, const int t_mapY, const Rotat
 {
     const auto position{ RotateMapPosition(t_mapX, t_mapY, t_rotation) };
 
-    return position.y * width + position.x;
+    return position.y * mapContent->width + position.x;
 }
 
 void mdcii::map::Map::SelectTile(const glm::ivec2& t_position)
 {
-    if (t_position.x >= 0 && t_position.x < width &&
-        t_position.y >= 0 && t_position.y < height)
+    if (t_position.x >= 0 && t_position.x < mapContent->width &&
+        t_position.y >= 0 && t_position.y < mapContent->height)
     {
         // get the right index for mapTiles with DEG0
         selectedIndex = GetMapIndex(t_position.x, t_position.y, Rotation::DEG0);
-        const auto& mapTile{ mapTiles.at(selectedIndex) };
+        const auto& mapTile{ mapContent->mapTiles.at(selectedIndex) };
         if (!m_registry.all_of<ecs::SelectedComponent>(mapTile.entity))
         {
             m_registry.emplace<ecs::SelectedComponent>(mapTile.entity, selectedIndex);
@@ -164,9 +153,12 @@ void mdcii::map::Map::SelectTile(const glm::ivec2& t_position)
 // Init
 //-------------------------------------------------
 
-void mdcii::map::Map::Init()
+void mdcii::map::Map::Init(const std::string& t_filePath)
 {
     Log::MDCII_LOG_DEBUG("[Map::Init()] Initializing map.");
+
+    // load map content
+    mapContent = std::make_unique<MapContent>(t_filePath);
 
     // load palette from stadtfld.col
     m_paletteFile = std::make_unique<file::PaletteFile>(Game::RESOURCES_PATH + "STADTFLD.COL");
@@ -195,15 +187,15 @@ void mdcii::map::Map::Init()
 
 void mdcii::map::Map::CreateGridEntities()
 {
-    for (auto y{ 0 }; y < height; ++y)
+    for (auto y{ 0 }; y < mapContent->height; ++y)
     {
-        for (auto x{ 0 }; x < width; ++x)
+        for (auto x{ 0 }; x < mapContent->width; ++x)
         {
             // create entity
             const entt::entity entity{ m_registry.create() };
 
             // get map tile
-            auto& mapTile{ mapTiles.at(GetMapIndex(x, y, Rotation::DEG0)) };
+            auto& mapTile{ mapContent->mapTiles.at(GetMapIndex(x, y, Rotation::DEG0)) };
 
             // store entity handle also in the MapTile
             mapTile.gridEntity = entity;
@@ -229,9 +221,9 @@ void mdcii::map::Map::CreateGridEntities()
 
 void mdcii::map::Map::CreateBuildingEntities()
 {
-    for (auto y{ 0 }; y < height; ++y)
+    for (auto y{ 0 }; y < mapContent->height; ++y)
     {
-        for (auto x{ 0 }; x < width; ++x)
+        for (auto x{ 0 }; x < mapContent->width; ++x)
         {
             // create an entity
             const auto entity{ m_registry.create() };
@@ -251,7 +243,7 @@ void mdcii::map::Map::CreateBuildingEntities()
             std::vector screenPositions{ s0, s90, s180, s270 };
 
             // get map tile
-            auto& mapTile{ mapTiles.at(idx0) };
+            auto& mapTile{ mapContent->mapTiles.at(idx0) };
 
             // store entity handle also in the MapTile
             mapTile.entity = entity;

@@ -111,11 +111,7 @@ void mdcii::EditorState::Init()
     m_text = std::make_unique<data::Text>();
 
     // create the Map object to edit
-    m_map = std::make_shared<map::Map>(
-        map::ExampleMap::EXAMPLE_ISLAND,
-        map::ExampleMap::EXAMPLE_WIDTH, map::ExampleMap::EXAMPLE_HEIGHT,
-        context->buildings
-    );
+    m_map = std::make_shared<map::Map>("data/ExampleMap.json", context->buildings);
 
     // create the MousePicker to select tiles
     m_mousePicker = std::make_unique<map::MousePicker>(m_map);

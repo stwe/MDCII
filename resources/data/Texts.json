@@ -1,0 +1,40 @@
+{
+  "WORKSHOPS": {
+    "de": {
+      "501": "Getreidemühle",
+      "503": "Bäckerei",
+      "505": "Schneiderei",
+      "507": "Webstube",
+      "509": "Wassermühle",
+      "511": "Fleischerei",
+      "513": "Steinmetz",
+      "515": "Werkzeugschmiede",
+      "517": "Schwertschmiede",
+      "519": "Rumbrennerei",
+      "521": "Erzschmelze",
+      "525": "Tabakwaren",
+      "527": "Kanonengießerei",
+      "529": "Musketenbauer",
+      "531": "Weberei",
+      "533": "Goldschmiede"
+    },
+    "en": {
+      "501": "Wind mill",
+      "503": "Bakery",
+      "505": "Taylor",
+      "507": "Weaving hut",
+      "509": "Water mill",
+      "511": "Butcher",
+      "513": "Stonemason",
+      "515": "Tool smithy",
+      "517": "Swordsmith",
+      "519": "Rum distillery",
+      "521": "Ore refinery",
+      "525": "Tobacco products",
+      "527": "Cannon foundry",
+      "529": "Gunsmith",
+      "531": "Weaving mill",
+      "533": "Goldsmith"
+    }
+  }
+}

@@ -1,11 +1,10 @@
 #pragma once
 
 #include <memory>
-#include <vector>
-#include "MapTile.h"
 #include "ecs/Components.h"
 #include "ogl/Window.h"
 #include "camera/Camera.h"
+#include "ecs/entt.hpp"
 
 //-------------------------------------------------
 // Forward declarations
@@ -30,6 +29,11 @@ namespace mdcii::renderer
 
 namespace mdcii::map
 {
+    /**
+     * Forward declaration class MapContent.
+     */
+    class MapContent;
+
     //-------------------------------------------------
     // Rotation
     //-------------------------------------------------
@@ -91,19 +95,9 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * The MapTile objects.
+         * The map content read from a file.
          */
-        std::vector<MapTile> mapTiles;
-
-        /**
-         * The width of the map in tiles.
-         */
-        int width{ 0 };
-
-        /**
-         * The height of the map in tiles.
-         */
-        int height{ 0 };
+        std::unique_ptr<MapContent> mapContent;
 
         /**
          * The currently selected map index.
@@ -159,16 +153,10 @@ namespace mdcii::map
         /**
          * Constructs a new Map object.
          *
-         * @param t_mapTiles The MapTile objects.
-         * @param t_width The width of the map in tiles.
-         * @param t_height The height of the map in tiles.
+         * @param t_filePath The path to the map file.
          * @param t_buildings The Buildings object.
          */
-        Map(
-            std::vector<MapTile> t_mapTiles,
-            int t_width, int t_height,
-            std::shared_ptr<data::Buildings> t_buildings
-        );
+        Map(const std::string& t_filePath, std::shared_ptr<data::Buildings> t_buildings);
 
         Map(const Map& t_other) = delete;
         Map(Map&& t_other) noexcept = delete;
@@ -267,7 +255,7 @@ namespace mdcii::map
         /**
          * Create objects.
          */
-        void Init();
+        void Init(const std::string& t_filePath);
 
         //-------------------------------------------------
         // Entities

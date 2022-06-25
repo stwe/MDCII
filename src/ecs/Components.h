@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
 #include <glm/vec2.hpp>
 #include "data/Buildings.h"
+#include "map/MapTile.h"
 
 //-------------------------------------------------
 // Components

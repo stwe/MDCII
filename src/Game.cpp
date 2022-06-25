@@ -3,7 +3,6 @@
 #include "MdciiException.h"
 #include "EditorState.h"
 #include "camera/Camera.h"
-#include "cod/CodParser.h"
 #include "state/StateStack.h"
 #include "ogl/Window.h"
 #include "ogl/OpenGL.h"
@@ -134,8 +133,7 @@ void mdcii::Game::CreateSharedObjects()
 
     m_window = std::make_shared<ogl::Window>();
     m_camera = std::make_shared<camera::Camera>();
-    m_buildingsCod = std::make_shared<cod::CodParser>(RESOURCES_PATH + "haeuser.cod");
-    m_buildings = std::make_shared<data::Buildings>(m_buildingsCod);
+    m_buildings = std::make_shared<data::Buildings>();
 }
 
 void mdcii::Game::Start()

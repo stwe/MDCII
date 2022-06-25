@@ -99,7 +99,7 @@ nlohmann::json mdcii::data::Text::ReadJsonFromFile(const std::string& t_filePath
     }
     catch (const std::ifstream::failure&)
     {
-        throw MDCII_EXCEPTION("[Text::ReadMenus()] Exception caught while loading file " + t_filePath + ".");
+        throw MDCII_EXCEPTION("[Text::ReadJsonFromFile()] Exception caught while loading file " + t_filePath + ".");
     }
 
     return j;

@@ -2,7 +2,6 @@
 
 #include <map>
 #include <vector>
-#include <memory>
 
 //-------------------------------------------------
 // Forward declarations
@@ -11,11 +10,6 @@
 namespace cod_pb
 {
     class Object;
-}
-
-namespace mdcii::cod
-{
-    class CodParser;
 }
 
 namespace mdcii::data
@@ -467,19 +461,12 @@ namespace mdcii::data
 
         /**
          * Constructs a new Buildings object.
-         *
-         * @param t_cod The Cod objects of the haeuser.cod.
          */
-        explicit Buildings(std::shared_ptr<cod::CodParser> t_cod);
+        Buildings();
 
     protected:
 
     private:
-        /**
-         * The Cod objects of the haeuser.cod.
-         */
-        std::shared_ptr<cod::CodParser> m_cod;
-
         /**
          * Creates the Building objects.
          */

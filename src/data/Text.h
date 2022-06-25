@@ -74,6 +74,6 @@ namespace mdcii::data
         // Helper
         //-------------------------------------------------
 
-        nlohmann::json ReadJsonFromFile(const std::string& t_filePath) const;
+        [[nodiscard]] nlohmann::json ReadJsonFromFile(const std::string& t_filePath) const;
     };
 }
