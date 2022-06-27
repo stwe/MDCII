@@ -31,7 +31,7 @@ mdcii::map::Map::~Map() noexcept
 }
 
 //-------------------------------------------------
-// Logic
+// Render
 //-------------------------------------------------
 
 void mdcii::map::Map::Render(const ogl::Window& t_window, const camera::Camera& t_camera) const
@@ -54,16 +54,14 @@ void mdcii::map::Map::RenderImGui()
 
     // rotation
 
-    ImGui::Text("Current rotation: %s", magic_enum::enum_name(rotation).data());
+    ImGui::Text("Current rotation: %s", ShowCurrentRotation());
     if (ImGui::Button("Rotate right"))
     {
-        ++rotation;
-        SortEntities();
+        Rotate(ChangeRotation::RIGHT);
     }
     if (ImGui::Button("Rotate left"))
     {
-        --rotation;
-        SortEntities();
+        Rotate(ChangeRotation::LEFT);
     }
 
     ImGui::Separator();
@@ -82,61 +80,39 @@ void mdcii::map::Map::RenderImGui()
 }
 
 //-------------------------------------------------
-// Utils
+// Rotate
 //-------------------------------------------------
 
-glm::ivec2 mdcii::map::Map::RotateMapPosition(const int t_mapX, const int t_mapY, const Rotation t_rotation) const
+void mdcii::map::Map::Rotate(const ChangeRotation t_changeRotation)
 {
-    int x{ t_mapX };
-    int y{ t_mapY };
-
-    switch (t_rotation)
+    switch (t_changeRotation)
     {
-    case Rotation::DEG0:
-        x = t_mapX;
-        y = t_mapY;
+    case ChangeRotation::LEFT:
+        --rotation;
+        SortEntities();
         break;
-    case Rotation::DEG90:
-        x = mapContent->width - t_mapY - 1;
-        y = t_mapX;
-        break;
-    case Rotation::DEG180:
-        x = mapContent->width - t_mapX - 1;
-        y = mapContent->height - t_mapY - 1;
-        break;
-    case Rotation::DEG270:
-        x = t_mapY;
-        y = mapContent->height - t_mapX - 1;
+    case ChangeRotation::RIGHT:
+        ++rotation;
+        SortEntities();
         break;
     }
-
-    return { x, y };
 }
 
-glm::vec2 mdcii::map::Map::MapToIso(const int t_mapX, const int t_mapY, const Rotation t_rotation) const
+const char* mdcii::map::Map::ShowCurrentRotation() const
 {
-    const auto position{ RotateMapPosition(t_mapX, t_mapY, t_rotation) };
-
-    return {
-        (position.x - position.y) * TILE_WIDTH_HALF,
-        (position.x + position.y) * TILE_HEIGHT_HALF
-    };
+    return magic_enum::enum_name(rotation).data();
 }
 
-int mdcii::map::Map::GetMapIndex(const int t_mapX, const int t_mapY, const Rotation t_rotation) const
-{
-    const auto position{ RotateMapPosition(t_mapX, t_mapY, t_rotation) };
-
-    return position.y * mapContent->width + position.x;
-}
+//-------------------------------------------------
+// Select
+//-------------------------------------------------
 
 void mdcii::map::Map::SelectTile(const glm::ivec2& t_position)
 {
     if (t_position.x >= 0 && t_position.x < mapContent->width &&
         t_position.y >= 0 && t_position.y < mapContent->height)
     {
-        // get the right index for mapTiles with DEG0
-        selectedIndex = GetMapIndex(t_position.x, t_position.y, Rotation::DEG0);
+        selectedIndex = GetMapIndex(t_position.x, t_position.y);
         const auto& mapTile{ mapContent->mapTiles.at(selectedIndex) };
         if (!m_registry.all_of<ecs::SelectedComponent>(mapTile.entity))
         {
@@ -147,6 +123,20 @@ void mdcii::map::Map::SelectTile(const glm::ivec2& t_position)
     {
         selectedIndex = INVALID;
     }
+}
+
+//-------------------------------------------------
+// Utils
+//-------------------------------------------------
+
+glm::vec2 mdcii::map::Map::MapToIso(const int t_mapX, const int t_mapY, const Rotation t_rotation) const
+{
+    const auto position{ RotateMapPosition(t_mapX, t_mapY, t_rotation) };
+
+    return {
+        (position.x - position.y) * TILE_WIDTH_HALF,
+        (position.x + position.y) * TILE_HEIGHT_HALF
+    };
 }
 
 //-------------------------------------------------
@@ -182,6 +172,43 @@ void mdcii::map::Map::Init(const std::string& t_filePath)
 }
 
 //-------------------------------------------------
+// Map helper
+//-------------------------------------------------
+
+glm::ivec2 mdcii::map::Map::RotateMapPosition(const int t_mapX, const int t_mapY, const Rotation t_rotation) const
+{
+    auto x{ t_mapX };
+    auto y{ t_mapY };
+
+    switch (t_rotation)
+    {
+    case Rotation::DEG0:
+        break;
+    case Rotation::DEG90:
+        x = mapContent->width - t_mapY - 1;
+        y = t_mapX;
+        break;
+    case Rotation::DEG180:
+        x = mapContent->width - t_mapX - 1;
+        y = mapContent->height - t_mapY - 1;
+        break;
+    case Rotation::DEG270:
+        x = t_mapY;
+        y = mapContent->height - t_mapX - 1;
+        break;
+    }
+
+    return { x, y };
+}
+
+int mdcii::map::Map::GetMapIndex(const int t_mapX, const int t_mapY, const Rotation t_rotation) const
+{
+    const auto position{ RotateMapPosition(t_mapX, t_mapY, t_rotation) };
+
+    return position.y * mapContent->width + position.x;
+}
+
+//-------------------------------------------------
 // Entities
 //-------------------------------------------------
 
@@ -195,7 +222,7 @@ void mdcii::map::Map::CreateGridEntities()
             const entt::entity entity{ m_registry.create() };
 
             // get map tile
-            auto& mapTile{ mapContent->mapTiles.at(GetMapIndex(x, y, Rotation::DEG0)) };
+            auto& mapTile{ mapContent->mapTiles.at(GetMapIndex(x, y)) };
 
             // store entity handle also in the MapTile
             mapTile.gridEntity = entity;
@@ -300,6 +327,11 @@ void mdcii::map::Map::CreateBuildingEntities()
 
 void mdcii::map::Map::RenderGridEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
+    if (!renderGrid && !renderText)
+    {
+        return;
+    }
+
     const auto view{ m_registry.view<const ecs::GridComponent>() };
     for (const auto entity : view)
     {

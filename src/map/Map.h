@@ -46,6 +46,14 @@ namespace mdcii::map
         DEG0, DEG90, DEG180, DEG270
     };
 
+    /**
+     * Rotate left or right.
+     */
+    enum class ChangeRotation
+    {
+        LEFT, RIGHT
+    };
+
     //-------------------------------------------------
     // Map
     //-------------------------------------------------
@@ -166,7 +174,7 @@ namespace mdcii::map
         ~Map() noexcept;
 
         //-------------------------------------------------
-        // Logic
+        // Render
         //-------------------------------------------------
 
         /**
@@ -183,19 +191,37 @@ namespace mdcii::map
         void RenderImGui();
 
         //-------------------------------------------------
-        // Utils
+        // Rotate
         //-------------------------------------------------
 
         /**
-         * Rotates a map position.
+         * The change in direction of rotation.
          *
-         * @param t_mapX The x position of the map to rotate.
-         * @param t_mapY The y position of the map to rotate.
-         * @param t_rotation The rotation.
-         *
-         * @return The rotated map position.
+         * @param t_changeRotation left or right
          */
-        [[nodiscard]] glm::ivec2 RotateMapPosition(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
+        void Rotate(ChangeRotation t_changeRotation);
+
+        /**
+         * Get the current map rotation as string.
+         *
+         * @return the rotation as string
+         */
+        [[nodiscard]] const char* ShowCurrentRotation() const;
+
+        //-------------------------------------------------
+        // Select
+        //-------------------------------------------------
+
+        /**
+         * Checks the map position and adds the SelectedComponent to the entity.
+         *
+         * @param t_position The map position returned by the MousePicker.
+         */
+        void SelectTile(const glm::ivec2& t_position);
+
+        //-------------------------------------------------
+        // Utils
+        //-------------------------------------------------
 
         /**
          * Projects map coordinates in isometric view.
@@ -207,24 +233,6 @@ namespace mdcii::map
          * @return The isometric coordinates.
          */
         [[nodiscard]] glm::vec2 MapToIso(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
-
-        /**
-         * 2D/1D - mapping.
-         *
-         * @param t_mapX The map x position.
-         * @param t_mapY The map y position.
-         * @param t_rotation The map rotation.
-         *
-         * @return The map index.
-         */
-        [[nodiscard]] int GetMapIndex(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
-
-        /**
-         * Checks the map position and adds the SelectedComponent to the entity.
-         *
-         * @param t_position The tile position on the map returned by the MousePicker.
-         */
-        void SelectTile(const glm::ivec2& t_position);
 
     protected:
 
@@ -256,6 +264,32 @@ namespace mdcii::map
          * Create objects.
          */
         void Init(const std::string& t_filePath);
+
+        //-------------------------------------------------
+        // Map helper
+        //-------------------------------------------------
+
+        /**
+         * Rotates a map position.
+         *
+         * @param t_mapX The x position of the map to rotate.
+         * @param t_mapY The y position of the map to rotate.
+         * @param t_rotation The rotation.
+         *
+         * @return The rotated map position.
+         */
+        [[nodiscard]] glm::ivec2 RotateMapPosition(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
+
+        /**
+         * 2D/1D - mapping.
+         *
+         * @param t_mapX The map x position.
+         * @param t_mapY The map y position.
+         * @param t_rotation The map rotation.
+         *
+         * @return The map index.
+         */
+        [[nodiscard]] int GetMapIndex(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
 
         //-------------------------------------------------
         // Entities
