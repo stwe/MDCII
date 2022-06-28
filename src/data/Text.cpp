@@ -32,7 +32,7 @@ void mdcii::data::Text::ReadTexts()
 
     nlohmann::json j{ ReadJsonFromFile(Game::RESOURCES_PATH + "data/Texts.json") };
 
-    for (const auto& [s, v] : j.items())
+    for (const auto& [s, v] : j[0].items())
     {
         // e.g.: s = WORKSHOPS
         auto section{ magic_enum::enum_cast<Section>(s) };
@@ -65,7 +65,7 @@ void mdcii::data::Text::ReadMenus()
 
     nlohmann::json j{ ReadJsonFromFile(Game::RESOURCES_PATH + "data/Menus.json") };
 
-    for (const auto& [l, o] : j.items())
+    for (const auto& [l, o] : j[0].items())
     {
         std::map<std::string, std::string> e;
 

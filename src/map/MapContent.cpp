@@ -30,7 +30,7 @@ void mdcii::map::MapContent::CreateTiles(const std::string& t_filePath)
 
     nlohmann::json j{ ReadJsonFromFile(Game::RESOURCES_PATH + t_filePath) };
 
-    for (const auto& [k, v] : j.items())
+    for (const auto& [k, v] : j[0].items())
     {
         if (k == "width")
         {
