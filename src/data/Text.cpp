@@ -30,9 +30,9 @@ void mdcii::data::Text::ReadTexts()
 {
     Log::MDCII_LOG_DEBUG("[Text::ReadFileData()] Start reading Json data...");
 
-    nlohmann::json j{ ReadJsonFromFile(Game::RESOURCES_PATH + "data/Texts.json") };
+    nlohmann::json j = ReadJsonFromFile(Game::RESOURCES_PATH + "data/Texts.json");
 
-    for (const auto& [s, v] : j[0].items())
+    for (const auto& [s, v] : j.items())
     {
         // e.g.: s = WORKSHOPS
         auto section{ magic_enum::enum_cast<Section>(s) };
@@ -63,9 +63,9 @@ void mdcii::data::Text::ReadMenus()
 {
     Log::MDCII_LOG_DEBUG("[Text::ReadMenus()] Start reading Json data...");
 
-    nlohmann::json j{ ReadJsonFromFile(Game::RESOURCES_PATH + "data/Menus.json") };
+    nlohmann::json j = ReadJsonFromFile(Game::RESOURCES_PATH + "data/Menus.json");
 
-    for (const auto& [l, o] : j[0].items())
+    for (const auto& [l, o] : j.items())
     {
         std::map<std::string, std::string> e;
 
@@ -84,7 +84,7 @@ void mdcii::data::Text::ReadMenus()
 // Helper
 //-------------------------------------------------
 
-nlohmann::json mdcii::data::Text::ReadJsonFromFile(const std::string& t_filePath) const
+nlohmann::json mdcii::data::Text::ReadJsonFromFile(const std::string& t_filePath)
 {
     nlohmann::json j;
 

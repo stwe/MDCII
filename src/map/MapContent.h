@@ -104,6 +104,6 @@ namespace mdcii::map
          *
          * @param t_filePath The path to the json map file.
          */
-        [[nodiscard]] nlohmann::json ReadJsonFromFile(const std::string& t_filePath) const;
+        [[nodiscard]] static nlohmann::json ReadJsonFromFile(const std::string& t_filePath);
     };
 }

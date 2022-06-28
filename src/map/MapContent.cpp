@@ -28,9 +28,9 @@ void mdcii::map::MapContent::CreateTiles(const std::string& t_filePath)
 {
     Log::MDCII_LOG_DEBUG("[MapContent::CreateTiles()] Start reading Json data...");
 
-    nlohmann::json j{ ReadJsonFromFile(Game::RESOURCES_PATH + t_filePath) };
+    nlohmann::json j = ReadJsonFromFile(Game::RESOURCES_PATH + t_filePath);
 
-    for (const auto& [k, v] : j[0].items())
+    for (const auto& [k, v] : j.items())
     {
         if (k == "width")
         {
@@ -57,7 +57,7 @@ void mdcii::map::MapContent::CreateTiles(const std::string& t_filePath)
     Log::MDCII_LOG_DEBUG("[MapContent::CreateTiles()] Json data read successfully.");
 }
 
-nlohmann::json mdcii::map::MapContent::ReadJsonFromFile(const std::string& t_filePath) const
+nlohmann::json mdcii::map::MapContent::ReadJsonFromFile(const std::string& t_filePath)
 {
     nlohmann::json j;
 
