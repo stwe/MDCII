@@ -36,16 +36,22 @@ project "MDCII"
 
     files
     {
-        "/Dev/MDCII/src/**.h",
-        "/Dev/MDCII/src/**.hpp",
-        "/Dev/MDCII/src/**.cpp",
-        "/Dev/MDCII/src/**.cc",
-        "/Dev/MDCII/src/**.proto"
+        "src/**.h",
+        "src/**.hpp",
+        "src/**.cpp",
+        "src/**.cc",
+        "src/**.proto"
     }
 
     includedirs
     {
-        "/Dev/MDCII/src"
+        "src"
+    }
+
+    postbuildcommands
+    {
+        "{COPY} config.ini %{cfg.targetdir}",
+        "{COPY} resources/ %{cfg.targetdir}/resources"
     }
 
     filter "system:windows"
