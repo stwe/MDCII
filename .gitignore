@@ -5,6 +5,7 @@
 /obj/
 /cmake-build-debug/
 /cmake-build-release/
+build
 
 # Files
 *.sln
@@ -44,3 +45,4 @@ conanbuildinfo.cmake
 !/resources/data/ExampleMap.json
 !/resources/data/Menus.json
 !/resources/data/Texts.json
+
