@@ -53,7 +53,7 @@ namespace mdcii
         inline static const inih::INIReader INI{ "./config.ini" }; // NOLINT(cert-err58-cpp)
         inline static const std::string RESOURCES_PATH{ INI.Get<std::string>("win64", "resources_path") }; // NOLINT(cert-err58-cpp)
 #else
-        inline static const inih::INIReader INI{ "/home/steffen/CLionProjects/MDCII/config.ini" }; // NOLINT(cert-err58-cpp)
+        inline static const inih::INIReader INI{ "./config.ini" }; // NOLINT(cert-err58-cpp)
         inline static const std::string RESOURCES_PATH{ INI.Get<std::string>("linux", "resources_path") }; // NOLINT(cert-err58-cpp)
 #endif
 
