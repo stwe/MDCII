@@ -2,6 +2,7 @@
 
 #include <map>
 #include <vector>
+#include <cstdint>
 
 //-------------------------------------------------
 // Forward declarations
