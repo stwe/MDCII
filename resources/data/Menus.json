@@ -1,5 +1,6 @@
-{
+﻿{
   "de": {
+    "Menu": "Menü",
     "Workshops": "Handwerk",
     "RotateBuildingLeft": "Bauwerk linksherum drehen",
     "RotateBuildingRight": "Bauwerk rechtsherum drehen",
@@ -7,6 +8,7 @@
     "RotateMapRight": "Karte rechtsherum drehen"
   },
   "en": {
+    "Menu": "Menu",
     "Workshops": "Workshops",
     "RotateBuildingLeft": "Rotate building left",
     "RotateBuildingRight": "Rotate building right",

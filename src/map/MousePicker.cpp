@@ -11,13 +11,15 @@
 #include "renderer/RenderUtils.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/stb_image.h"
+#include "file/BshFile.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::map::MousePicker::MousePicker(std::shared_ptr<Map> t_map)
+mdcii::map::MousePicker::MousePicker(std::shared_ptr<Map> t_map, std::shared_ptr<data::Buildings> t_buildings)
     : m_map{ std::move(t_map) }
+    , m_buildings{ std::move(t_buildings) }
 {
     Log::MDCII_LOG_DEBUG("[MousePicker::MousePicker()] Create MousePicker.");
 
@@ -37,8 +39,9 @@ mdcii::map::MousePicker::~MousePicker() noexcept
 //-------------------------------------------------
 
 void mdcii::map::MousePicker::Render(
-    const ogl::Window& t_window, const camera::Camera& t_camera,
-    const uint32_t t_textureId, const float t_width, const float t_height
+    const ogl::Window& t_window,
+    const camera::Camera& t_camera,
+    const event::SelectedBauGfx& t_selectedBauGfx
 )
 {
     if (!m_inWindow)
@@ -160,22 +163,7 @@ void mdcii::map::MousePicker::Render(
         }
     }
 
-    auto screenPosition{ m_map->MapToIso(selected.currentPosition.x, selected.currentPosition.y, m_map->rotation) };
-    screenPosition.y -= Map::ELEVATION;
-
-    m_renderer->RenderTile(
-        renderer::RenderUtils::GetModelMatrix(
-            screenPosition,
-            glm::vec2(t_width, t_height)
-        ),
-        t_textureId,
-        t_window, t_camera
-    );
-}
-
-void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::Camera& t_camera)
-{
-    Render(t_window, t_camera, ogl::resource::ResourceManager::LoadTexture("textures/frame.png").id, Map::TILE_WIDTH, Map::TILE_HEIGHT);
+    RenderCursor(t_window, t_camera, t_selectedBauGfx);
 }
 
 void mdcii::map::MousePicker::RenderImGui() const
@@ -189,6 +177,55 @@ void mdcii::map::MousePicker::RenderImGui() const
     ImGui::Text("Last tile position x: %d, y: %d", selected.lastPosition.x, selected.lastPosition.y);
 
     ImGui::End();
+}
+
+//-------------------------------------------------
+// Cursor
+//-------------------------------------------------
+
+void mdcii::map::MousePicker::RenderCursor(
+    const ogl::Window& t_window,
+    const camera::Camera& t_camera,
+    const event::SelectedBauGfx& t_selectedBauGfx
+) const
+{
+    if (m_map->IsPositionInMap(selected.currentPosition))
+    {
+        auto screenPosition{ m_map->MapToIso(selected.currentPosition.x, selected.currentPosition.y, m_map->rotation) };
+
+        if (t_selectedBauGfx.IsValid())
+        {
+            const auto& building{ m_buildings->buildingsMap.at(t_selectedBauGfx.gfxId) };
+
+            const auto w{ static_cast<float>(m_map->bauhausBshFile->bshTextures.at(building.baugfx)->width) };
+            const auto h{ static_cast<float>(m_map->bauhausBshFile->bshTextures.at(building.baugfx)->height) };
+
+            screenPosition.y -= h - Map::TILE_HEIGHT;
+            screenPosition.y -= Map::ELEVATION;
+
+            m_renderer->RenderTile(
+                renderer::RenderUtils::GetModelMatrix(
+                    screenPosition,
+                    glm::vec2(w, h)
+                ),
+                m_map->bauhausBshFile->bshTextures.at(static_cast<size_t>(building.baugfx) + t_selectedBauGfx.orientation)->textureId,
+                t_window, t_camera
+            );
+        }
+        else
+        {
+            screenPosition.y -= Map::ELEVATION;
+
+            m_renderer->RenderTile(
+                renderer::RenderUtils::GetModelMatrix(
+                    screenPosition,
+                    glm::vec2(Map::TILE_WIDTH, Map::TILE_HEIGHT)
+                ),
+                ogl::resource::ResourceManager::LoadTexture("textures/frame.png").id,
+                t_window, t_camera
+            );
+        }
+    }
 }
 
 //-------------------------------------------------
@@ -217,6 +254,8 @@ void mdcii::map::MousePicker::Init()
 
 void mdcii::map::MousePicker::AddListeners()
 {
+    Log::MDCII_LOG_DEBUG("[MousePicker::AddListeners()] Add listeners.");
+
     // mouse enter
     event::EventManager::eventDispatcher.appendListener(
         event::MdciiEventType::MOUSE_ENTER,
@@ -236,7 +275,7 @@ void mdcii::map::MousePicker::AddListeners()
         (
             [&](const event::MouseButtonPressedEvent& t_event)
             {
-                if (t_event.button == 0) // left mouse button pressed
+                if (t_event.button == 0)
                 {
                     selected.lastPosition = selected.currentPosition;
                     selected.lastChanged = true;
@@ -252,7 +291,7 @@ void mdcii::map::MousePicker::AddListeners()
         (
             [&](const event::MouseButtonReleasedEvent& t_event)
             {
-                if (t_event.button == 0) // left mouse button released
+                if (t_event.button == 0)
                 {
                     selected.lastChanged = false;
                 }

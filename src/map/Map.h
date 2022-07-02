@@ -234,6 +234,15 @@ namespace mdcii::map
          */
         [[nodiscard]] glm::vec2 MapToIso(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
 
+        /**
+         * Checks whether a position is in map.
+         *
+         * @param t_position The position to check.
+         *
+         * @return True if position is in map.
+         */
+        [[nodiscard]] bool IsPositionInMap(const glm::ivec2& t_position) const;
+
     protected:
 
     private:

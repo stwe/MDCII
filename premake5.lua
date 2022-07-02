@@ -24,6 +24,7 @@ project "MDCII"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++17"
+    characterset "Unicode"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("obj/" .. outputdir .. "/%{prj.name}")

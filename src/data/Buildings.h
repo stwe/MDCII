@@ -363,63 +363,63 @@ namespace mdcii::data
      */
     struct Building
     {
-        int id{ -1 };
-        int gfx{ -1 };
-        int blocknr{ -1 };
-        int posoffs{ -1 };
-        int highflg{ -1 };
-        int einhoffs{ -1 };
-        int maxenergy{ -1 };
-        int maxbrand{ -1 };
-        int rotate{ -1 };
-        int randAnz{ -1 };
-        int animAnz{ 0 };
-        int animTime{ -1 };
-        int animFrame{ 0 };
-        int animAdd{ 0 };
-        int baugfx{ -1 };
-        int kreuzBase{ -1 };
-        int randwachs{ -1 };
-        int randAdd{ -1 };
-        int strandoff{ -1 };
-        int placeFlg{ -1 };
-        int noShotFlg{ -1 };
-        int strandflg{ -1 };
-        int ausbauflg{ -1 };
-        int tuerflg{ -1 };
-        int destroyflg{ -1 };
+        int32_t id{ -1 };
+        int32_t gfx{ -1 };
+        int32_t blocknr{ -1 };
+        int32_t posoffs{ -1 };
+        int32_t highflg{ -1 };
+        int32_t einhoffs{ -1 };
+        int32_t maxenergy{ -1 };
+        int32_t maxbrand{ -1 };
+        int32_t rotate{ -1 };
+        int32_t randAnz{ -1 };
+        int32_t animAnz{ 0 };
+        int32_t animTime{ -1 };
+        int32_t animFrame{ 0 };
+        int32_t animAdd{ 0 };
+        int32_t baugfx{ -1 };
+        int32_t kreuzBase{ -1 };
+        int32_t randwachs{ -1 };
+        int32_t randAdd{ -1 };
+        int32_t strandoff{ -1 };
+        int32_t placeFlg{ -1 };
+        int32_t noShotFlg{ -1 };
+        int32_t strandflg{ -1 };
+        int32_t ausbauflg{ -1 };
+        int32_t tuerflg{ -1 };
+        int32_t destroyflg{ -1 };
 
         KindType kind{ KindType::UNSET };                // WALD, RUINE, STRANDHAUS, MEER, FLUSS etc.
         BausampleType bausample{ BausampleType::UNSET }; // Wav samples
         RuinenrType ruinenr{ RuinenrType::UNSET };       // RUINE_KONTOR_N1, RUINE_MARKT, RUINE_ROAD_FELD etc.
-        std::vector<int> wegspeed = {};
+        std::vector<int32_t> wegspeed = {};
 
         struct
         {
-            int w{ 0 };
-            int h{ 0 };
+            int32_t w{ 0 };
+            int32_t h{ 0 };
         } size;
 
         struct
         {
-            int bGruppe{ -1 };
-            int anicontflg{ -1 };
-            int makLagFlg{ -1 };
-            int nativflg{ -1 };
-            int lagAniFlg{ -1 };
-            int doerrflg{ -1 };
-            int noMoreWork{ -1 };
-            int workmenge{ -1 };
-            int noLagVoll{ -1 };
-            int radius{ -1 };
-            int rohmenge{ -1 };
-            int prodmenge{ -1 };
-            int randwachs{ -1 };
-            int maxlager{ -1 };
-            int maxnorohst{ -1 };
-            int arbeiter{ -1 };
-            int figuranz{ -1 };
-            int interval{ -1 };
+            int32_t bGruppe{ -1 };
+            int32_t anicontflg{ -1 };
+            int32_t makLagFlg{ -1 };
+            int32_t nativflg{ -1 };
+            int32_t lagAniFlg{ -1 };
+            int32_t doerrflg{ -1 };
+            int32_t noMoreWork{ -1 };
+            int32_t workmenge{ -1 };
+            int32_t noLagVoll{ -1 };
+            int32_t radius{ -1 };
+            int32_t rohmenge{ -1 };
+            int32_t prodmenge{ -1 };
+            int32_t randwachs{ -1 };
+            int32_t maxlager{ -1 };
+            int32_t maxnorohst{ -1 };
+            int32_t arbeiter{ -1 };
+            int32_t figuranz{ -1 };
+            int32_t interval{ -1 };
             WorkstoffType workstoff{ WorkstoffType::UNSET };    // or HOLZ, STOFFE
             ErzbergnrType erzbergnr{ ErzbergnrType::UNSET };    // or ERZBERG_KLEIN, ERZBERG_GROSS
             ProdtypKindType kind{ ProdtypKindType::UNSET };     // BRUNNEN, THEATER, KLINIK, BERGWERK etc.
@@ -429,17 +429,17 @@ namespace mdcii::data
             BauinfraType bauinfra{ BauinfraType::UNSET };       // INFRA_STUFE_1A, INFRA_STUFE_2A, INFRA_STUFE_2B etc.
             FigurnrType figurnr{ FigurnrType::UNSET };          // HOLZFAELLER, PFLUECKER, ARZT, JAEGER etc.
             RauchfignrType rauchfignr{ RauchfignrType::UNSET }; // FAHNETURM3, RAUCHGOLD, RAUCHBAECK etc.
-            std::vector<int> maxware = {};
-            std::vector<int> kosten = {};
+            std::vector<int32_t> maxware = {};
+            std::vector<int32_t> kosten = {};
         } houseProductionType;
 
         struct
         {
-            int money{ -1 };
-            int werkzeug{ -1 };
-            int holz{ -1 };
-            int ziegel{ -1 };
-            int kanon{ -1 };
+            int32_t money{ -1 };
+            int32_t werkzeug{ -1 };
+            int32_t holz{ -1 };
+            int32_t ziegel{ -1 };
+            int32_t kanon{ -1 };
         } houseBuildCosts;
     };
 
@@ -457,7 +457,7 @@ namespace mdcii::data
          * The map with all building objects.
          * The building ID is the key for each building.
          */
-        std::map<int, Building> buildingsMap;
+        std::map<int32_t, Building> buildingsMap;
 
         /**
          * Constructs a new Buildings object.

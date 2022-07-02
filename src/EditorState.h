@@ -1,6 +1,7 @@
 #pragma once
 
 #include "state/State.h"
+#include "event/Event.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -23,6 +24,11 @@ namespace mdcii::map
 
 namespace mdcii
 {
+    /**
+     * Forward declaration class EditorGui.
+     */
+    class EditorGui;
+
     /**
      * Represents a map editor.
      */
@@ -69,6 +75,11 @@ namespace mdcii
         //-------------------------------------------------
 
         /**
+         * Different menus for the editor.
+         */
+        std::unique_ptr<EditorGui> m_editorGui;
+
+        /**
          * Language value from the config.ini.
          */
         std::string m_lang;
@@ -76,7 +87,7 @@ namespace mdcii
         /**
          * Texts in different languages.
          */
-        std::unique_ptr<data::Text> m_text;
+        std::shared_ptr<data::Text> m_text;
 
         /**
          * The Map object to edit.
@@ -89,19 +100,9 @@ namespace mdcii
         std::unique_ptr<map::MousePicker> m_mousePicker;
 
         /**
-         * The current bauGfx Id.
+         * Current selected building.
          */
-        int m_currentId{ -1 };
-
-        /**
-         * The current bauGfx orientation.
-         */
-        int m_orientation{ 0 };
-
-        /**
-         * The name of the current building.
-         */
-        std::string m_buildingName;
+        event::SelectedBauGfx m_selectedBauGfx;
 
         //-------------------------------------------------
         // Init
@@ -112,13 +113,9 @@ namespace mdcii
          */
         void Init();
 
-        //-------------------------------------------------
-        // ImGui
-        //-------------------------------------------------
-
         /**
-         * Creates an menu to edit the map content.
+         * Adds event listeners.
          */
-        void EditMenu();
+        void AddListeners();
     };
 }

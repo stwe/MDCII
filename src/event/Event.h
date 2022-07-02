@@ -1,21 +1,55 @@
 #pragma once
 
+#include <string>
+
 namespace mdcii::event
 {
     //-------------------------------------------------
-    // Event types
+    // Types
     //-------------------------------------------------
+
+    /**
+     * Represents the BauGfx after a selection from
+     * the menu or map.
+     */
+    struct SelectedBauGfx
+    {
+        /**
+         * The bauGfx Id.
+         */
+        int32_t gfxId{ -1 };
+
+        /**
+         * The bauGfx orientation.
+         */
+        int32_t orientation{ 0 };
+
+        /**
+         * The translated label.
+         */
+        std::string name;
+
+        /**
+         * Checks whether a valid Id is present.
+         *
+         * @return True if a valid Id is present.
+         */
+        [[nodiscard]] bool IsValid() const { return gfxId >= 0; }
+    };
 
     enum class MdciiEventType
     {
         // default
         NONE,
 
-        // keyboard
+        // keyboard events
         KEY_PRESSED, KEY_RELEASED,
 
-        // mouse
+        // mouse events
         MOUSE_BUTTON_PRESSED, MOUSE_BUTTON_RELEASED, MOUSE_MOVED, MOUSE_SCROLLED, MOUSE_ENTER,
+
+        // menu events
+        BAUGFX_SELECTED,
     };
 
     //-------------------------------------------------
@@ -31,7 +65,7 @@ namespace mdcii::event
     };
 
     //-------------------------------------------------
-    // Keyboard
+    // Keyboard events
     //-------------------------------------------------
 
     struct KeyPressedEvent : MdciiEvent
@@ -59,7 +93,7 @@ namespace mdcii::event
     };
 
     //-------------------------------------------------
-    // Mouse
+    // Mouse events
     //-------------------------------------------------
 
     struct MouseButtonPressedEvent : MdciiEvent
@@ -118,6 +152,21 @@ namespace mdcii::event
             : enter{ t_enter }
         {
             type = MdciiEventType::MOUSE_ENTER;
+        }
+    };
+
+    //-------------------------------------------------
+    // Menu events
+    //-------------------------------------------------
+
+    struct BauGfxSelectedEvent : MdciiEvent
+    {
+        SelectedBauGfx selectedBauGfx;
+
+        explicit BauGfxSelectedEvent(SelectedBauGfx t_selectedBauGfx)
+            : selectedBauGfx{ std::move(t_selectedBauGfx) }
+        {
+            type = MdciiEventType::BAUGFX_SELECTED;
         }
     };
 }

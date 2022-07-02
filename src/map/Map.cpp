@@ -44,28 +44,6 @@ void mdcii::map::Map::RenderImGui()
 {
     ImGui::Begin("Map");
 
-    // render options
-
-    ImGui::Checkbox("Render grid", &renderGrid);
-    ImGui::Checkbox("Render buildings", &renderBuildings);
-    ImGui::Checkbox("Render text", &renderText);
-
-    ImGui::Separator();
-
-    // rotation
-
-    ImGui::Text("Current rotation: %s", ShowCurrentRotation());
-    if (ImGui::Button("Rotate right"))
-    {
-        Rotate(ChangeRotation::RIGHT);
-    }
-    if (ImGui::Button("Rotate left"))
-    {
-        Rotate(ChangeRotation::LEFT);
-    }
-
-    ImGui::Separator();
-
     // selected
 
     if (selectedIndex > INVALID)
@@ -109,8 +87,7 @@ const char* mdcii::map::Map::ShowCurrentRotation() const
 
 void mdcii::map::Map::SelectTile(const glm::ivec2& t_position)
 {
-    if (t_position.x >= 0 && t_position.x < mapContent->width &&
-        t_position.y >= 0 && t_position.y < mapContent->height)
+    if (IsPositionInMap(t_position))
     {
         selectedIndex = GetMapIndex(t_position.x, t_position.y);
         const auto& mapTile{ mapContent->mapTiles.at(selectedIndex) };
@@ -137,6 +114,17 @@ glm::vec2 mdcii::map::Map::MapToIso(const int t_mapX, const int t_mapY, const Ro
         (position.x - position.y) * TILE_WIDTH_HALF,
         (position.x + position.y) * TILE_HEIGHT_HALF
     };
+}
+
+bool mdcii::map::Map::IsPositionInMap(const glm::ivec2& t_position) const
+{
+    if (t_position.x >= 0 && t_position.x < mapContent->width &&
+        t_position.y >= 0 && t_position.y < mapContent->height)
+    {
+        return true;
+    }
+
+    return false;
 }
 
 //-------------------------------------------------
