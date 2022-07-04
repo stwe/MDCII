@@ -2,10 +2,10 @@
 #include "EditorGui.h"
 #include "Game.h"
 #include "Log.h"
-#include "data/Text.h"
 #include "map/Map.h"
 #include "file/BshFile.h"
 #include "data/Buildings.h"
+#include "data/Text.h"
 #include "event/EventManager.h"
 
 //-------------------------------------------------
@@ -100,13 +100,13 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
 
     ImGui::Separator();
 
-    const auto& building{ m_buildings->buildingsMap.at(t_selectedBauGfx.gfxId) };
+    const auto& building{ m_buildings->buildingsMap.at(t_selectedBauGfx.buildingId) };
 
     const auto textureWidth{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->width };
     const auto textureHeight{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->height };
     const auto textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(
         m_map->bauhausBshFile->bshTextures.at(static_cast<size_t>(building.baugfx) + t_selectedBauGfx.orientation)->textureId)
-        ) };
+    ) };
 
     if (ImGui::Button(m_text->GetMenuText(m_lang, "RotateBuildingRight").c_str()))
     {

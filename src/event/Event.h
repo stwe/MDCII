@@ -15,9 +15,9 @@ namespace mdcii::event
     struct SelectedBauGfx
     {
         /**
-         * The bauGfx Id.
+         * The building Id.
          */
-        int32_t gfxId{ -1 };
+        int32_t buildingId{ -1 };
 
         /**
          * The bauGfx orientation.
@@ -34,7 +34,7 @@ namespace mdcii::event
          *
          * @return True if a valid Id is present.
          */
-        [[nodiscard]] bool IsValid() const { return gfxId >= 0; }
+        [[nodiscard]] bool IsValid() const { return buildingId >= 0; }
     };
 
     enum class MdciiEventType

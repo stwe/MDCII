@@ -3,6 +3,7 @@
 #include <memory>
 #include "ogl/Window.h"
 #include "camera/Camera.h"
+#include "data/Buildings.h"
 #include "event/Event.h"
 
 //-------------------------------------------------
@@ -101,6 +102,8 @@ namespace mdcii::map
 
         void RenderImGui() const;
 
+        void CreateMouseCursorEntity(const data::Building& t_building, int t_orientation) const;
+
     protected:
 
     private:
@@ -152,7 +155,7 @@ namespace mdcii::map
         // Cursor
         //-------------------------------------------------
 
-        void RenderCursor(
+        void RenderMouseCursor(
             const ogl::Window& t_window,
             const camera::Camera& t_camera,
             const event::SelectedBauGfx& t_selectedBauGfx

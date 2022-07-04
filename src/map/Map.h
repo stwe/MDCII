@@ -152,6 +152,11 @@ namespace mdcii::map
          */
         bool renderText{ false };
 
+        /**
+         * The EnTT Entity Component System.
+         */
+        entt::registry registry;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -189,6 +194,25 @@ namespace mdcii::map
          * Renders ImGui menus.
          */
         void RenderImGui();
+
+        /**
+         * Renders a gfx from the stadtfld.bsh file.
+         *
+         * @param t_window The Window object to get the orthographic projection matrix.
+         * @param t_camera The Camera object to get the view matrix.
+         * @param t_gfx The gfx to render.
+         * @param t_screenPosition The isometric coordinates on the screen.
+         * @param t_elevation Either 0 or 20 - equals the posoffs value of the building.
+         * @param t_selected Determines if the building is selected and rendered a little darker.
+         */
+        void RenderBuilding(
+            const ogl::Window& t_window,
+            const camera::Camera& t_camera,
+            int t_gfx,
+            glm::vec2 t_screenPosition,
+            float t_elevation,
+            bool t_selected
+        ) const;
 
         //-------------------------------------------------
         // Rotate
@@ -260,11 +284,6 @@ namespace mdcii::map
          */
         std::unique_ptr<file::PaletteFile> m_paletteFile;
 
-        /**
-         * The ECS.
-         */
-        entt::registry m_registry;
-
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -314,6 +333,24 @@ namespace mdcii::map
          */
         void CreateBuildingEntities();
 
+        //-------------------------------------------------
+        // Create Entity
+        //-------------------------------------------------
+
+        /**
+         * Creates a grid entity.
+         */
+        void CreateGridEntity(int t_mapX, int t_mapY);
+
+        /**
+         * Creates a building entity.
+         */
+        void CreateBuildingEntity(int t_mapX, int t_mapY);
+
+        //-------------------------------------------------
+        // Render Entities
+        //-------------------------------------------------
+
         /**
          * Renders the isometric grid.
          *
@@ -346,6 +383,10 @@ namespace mdcii::map
             const ecs::BuildingComponent& t_buildingComponent,
             bool t_selected = false
         ) const;
+
+        //-------------------------------------------------
+        // Sort Entities
+        //-------------------------------------------------
 
         /**
          * Sorts entities for rendering.

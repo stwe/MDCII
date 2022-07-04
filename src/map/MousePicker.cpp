@@ -11,7 +11,6 @@
 #include "renderer/RenderUtils.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/stb_image.h"
-#include "file/BshFile.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -163,7 +162,7 @@ void mdcii::map::MousePicker::Render(
         }
     }
 
-    RenderCursor(t_window, t_camera, t_selectedBauGfx);
+    RenderMouseCursor(t_window, t_camera, t_selectedBauGfx);
 }
 
 void mdcii::map::MousePicker::RenderImGui() const
@@ -179,11 +178,36 @@ void mdcii::map::MousePicker::RenderImGui() const
     ImGui::End();
 }
 
+void mdcii::map::MousePicker::CreateMouseCursorEntity(const data::Building& t_building, const int t_orientation) const
+{
+    // create an entity
+    const auto entity{ m_map->registry.create() };
+
+    // create gfx map
+    std::vector<int> gfx;
+    const auto w{ t_building.size.w };
+    const auto h{ t_building.size.h };
+
+    for (auto y{ 0 }; y < h; ++y)
+    {
+        for (auto x{ 0 }; x < w; ++x)
+        {
+            // y * width + x
+            auto gfx0{ t_building.gfx };
+            const auto offset{ y * t_building.size.w + x };
+            gfx0 += offset;
+            gfx.push_back(gfx0);
+        }
+    }
+
+    m_map->registry.emplace<ecs::MouseCursorComponent>(entity, gfx, t_building);
+}
+
 //-------------------------------------------------
 // Cursor
 //-------------------------------------------------
 
-void mdcii::map::MousePicker::RenderCursor(
+void mdcii::map::MousePicker::RenderMouseCursor(
     const ogl::Window& t_window,
     const camera::Camera& t_camera,
     const event::SelectedBauGfx& t_selectedBauGfx
@@ -191,29 +215,40 @@ void mdcii::map::MousePicker::RenderCursor(
 {
     if (m_map->IsPositionInMap(selected.currentPosition))
     {
-        auto screenPosition{ m_map->MapToIso(selected.currentPosition.x, selected.currentPosition.y, m_map->rotation) };
-
         if (t_selectedBauGfx.IsValid())
         {
-            const auto& building{ m_buildings->buildingsMap.at(t_selectedBauGfx.gfxId) };
+            // render mouse cursor entity
+            const auto view{ m_map->registry.view<const ecs::MouseCursorComponent>() };
+            auto e{ 0 };
+            for (const auto entity : view)
+            {
+                const auto& mouseCursorComponent{ view.get<const ecs::MouseCursorComponent>(entity) };
 
-            const auto w{ static_cast<float>(m_map->bauhausBshFile->bshTextures.at(building.baugfx)->width) };
-            const auto h{ static_cast<float>(m_map->bauhausBshFile->bshTextures.at(building.baugfx)->height) };
+                auto i{ 0 };
+                for (auto y{ 0 }; y < mouseCursorComponent.building.size.h; ++y)
+                {
+                    for (auto x{ 0 }; x < mouseCursorComponent.building.size.w; ++x)
+                    {
+                        m_map->RenderBuilding(
+                            t_window, t_camera,
+                            mouseCursorComponent.gfx[i],
+                            m_map->MapToIso(selected.currentPosition.x + x, selected.currentPosition.y + y),
+                            static_cast<float>(mouseCursorComponent.building.posoffs), false
+                        );
 
-            screenPosition.y -= h - Map::TILE_HEIGHT;
-            screenPosition.y -= Map::ELEVATION;
+                        i++;
+                    }
+                }
 
-            m_renderer->RenderTile(
-                renderer::RenderUtils::GetModelMatrix(
-                    screenPosition,
-                    glm::vec2(w, h)
-                ),
-                m_map->bauhausBshFile->bshTextures.at(static_cast<size_t>(building.baugfx) + t_selectedBauGfx.orientation)->textureId,
-                t_window, t_camera
-            );
+                e++;
+            }
+
+            MDCII_ASSERT(e == 1, "[MousePicker::RenderCursor()] Invalid number of mouse cursor entities.")
         }
         else
         {
+            // render default cursor
+            auto screenPosition{ m_map->MapToIso(selected.currentPosition.x, selected.currentPosition.y, m_map->rotation) };
             screenPosition.y -= Map::ELEVATION;
 
             m_renderer->RenderTile(

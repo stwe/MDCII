@@ -43,4 +43,10 @@ namespace mdcii::ecs
     {
         int32_t index{ -1 };
     };
+
+    struct MouseCursorComponent
+    {
+        std::vector<int> gfx;
+        data::Building building;
+    };
 }

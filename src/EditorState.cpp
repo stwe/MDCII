@@ -142,7 +142,18 @@ void mdcii::EditorState::AddListeners()
             {
                 if (t_event.selectedBauGfx.IsValid())
                 {
+                    // destroy the existing mouse cursor entity
+                    const auto view{ m_map->registry.view<ecs::MouseCursorComponent>() };
+                    m_map->registry.destroy(view.begin(), view.end());
+
+                    // store selected bauGfx info
                     m_selectedBauGfx = t_event.selectedBauGfx;
+
+                    // create a new mouse cursor entity
+                    m_mousePicker->CreateMouseCursorEntity(
+                        context->buildings->buildingsMap.at(m_selectedBauGfx.buildingId),
+                        0
+                    );
                 }
             }
         )
