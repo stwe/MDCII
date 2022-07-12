@@ -2,9 +2,9 @@
 #include "Game.h"
 #include "Camera.h"
 #include "Log.h"
-#include "map/Map.h"
 #include "event/EventManager.h"
 #include "eventpp/utilities/argumentadapter.h"
+#include "map/MapTile.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -45,8 +45,8 @@ glm::mat4 mdcii::camera::Camera::GetViewMatrix() const noexcept
 
 void mdcii::camera::Camera::ProcessKeyboard(const Direction t_direction)
 {
-    const auto yOff{ glm::vec2(0.0f, map::Map::TILE_HEIGHT) };
-    const auto xOff{ glm::vec2(map::Map::TILE_WIDTH, 0.0f) };
+    const auto yOff{ glm::vec2(0.0f, map::MapTile::TILE_HEIGHT) };
+    const auto xOff{ glm::vec2(map::MapTile::TILE_WIDTH, 0.0f) };
 
     if (t_direction == Direction::UP)
     {

@@ -30,11 +30,11 @@ namespace mdcii::event
         std::string name;
 
         /**
-         * Checks whether a valid Id is present.
+         * For better readability/convenience.
          *
-         * @return True if a valid Id is present.
+         * @return True if a valid building Id is present.
          */
-        [[nodiscard]] bool IsValid() const { return buildingId >= 0; }
+        [[nodiscard]] bool HasBuilding() const { return buildingId >= 0; }
     };
 
     enum class MdciiEventType

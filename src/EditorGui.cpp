@@ -91,7 +91,7 @@ void mdcii::EditorGui::AllWorkshopsGui() const
 
 void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) const
 {
-    if (!t_selectedBauGfx.IsValid())
+    if (!t_selectedBauGfx.HasBuilding())
     {
         return;
     }
@@ -144,7 +144,8 @@ void mdcii::EditorGui::DebugGui() const
 {
     ImGui::Text("Current map rotation: %s", m_map->ShowCurrentRotation());
 
-    ImGui::Checkbox("Render map grid", &m_map->renderGrid);
-    ImGui::Checkbox("Render map buildings", &m_map->renderBuildings);
-    ImGui::Checkbox("Render map text", &m_map->renderText);
+    ImGui::Checkbox("Render grid", &m_map->renderGrid);
+    ImGui::Checkbox("Render coords", &m_map->renderText);
+    ImGui::Checkbox("Render terrain layer", &m_map->renderTerrainLayer);
+    ImGui::Checkbox("Render buildings layer", &m_map->renderBuildingsLayer);
 }

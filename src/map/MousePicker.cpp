@@ -16,9 +16,8 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::map::MousePicker::MousePicker(std::shared_ptr<Map> t_map, std::shared_ptr<data::Buildings> t_buildings)
+mdcii::map::MousePicker::MousePicker(std::shared_ptr<Map> t_map)
     : m_map{ std::move(t_map) }
-    , m_buildings{ std::move(t_buildings) }
 {
     Log::MDCII_LOG_DEBUG("[MousePicker::MousePicker()] Create MousePicker.");
 
@@ -37,11 +36,7 @@ mdcii::map::MousePicker::~MousePicker() noexcept
 // Logic
 //-------------------------------------------------
 
-void mdcii::map::MousePicker::Render(
-    const ogl::Window& t_window,
-    const camera::Camera& t_camera,
-    const event::SelectedBauGfx& t_selectedBauGfx
-)
+void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::Camera& t_camera)
 {
     if (!m_inWindow)
     {
@@ -49,20 +44,20 @@ void mdcii::map::MousePicker::Render(
     }
 
     m_mouse = glm::ivec2(t_window.GetMouseX(), t_window.GetMouseY());
-    m_cell = glm::ivec2(m_mouse.x / Map::TILE_WIDTH, (m_mouse.y + Map::ELEVATION) / Map::TILE_HEIGHT);
-    m_offsetIntoCell = glm::ivec2(m_mouse.x % Map::TILE_WIDTH, (m_mouse.y + Map::ELEVATION) % Map::TILE_HEIGHT);
+    m_cell = glm::ivec2(m_mouse.x / MapTile::TILE_WIDTH, (m_mouse.y + Map::ELEVATION) / MapTile::TILE_HEIGHT);
+    m_offsetIntoCell = glm::ivec2(m_mouse.x % MapTile::TILE_WIDTH, (m_mouse.y + Map::ELEVATION) % MapTile::TILE_HEIGHT);
 
     const glm::ivec2 origin{
-        static_cast<int>(t_camera.position.x) / Map::TILE_WIDTH,
-        static_cast<int>(t_camera.position.y) / Map::TILE_HEIGHT
+        static_cast<int>(t_camera.position.x) / MapTile::TILE_WIDTH,
+        static_cast<int>(t_camera.position.y) / MapTile::TILE_HEIGHT
     };
 
-    const auto* pixelCol{ m_cornerImage + (4ULL * (static_cast<size_t>(m_offsetIntoCell.y) * Map::TILE_WIDTH + m_offsetIntoCell.x)) };
+    const auto* pixelCol{ m_cornerImage + (4ULL * (static_cast<size_t>(m_offsetIntoCell.y) * MapTile::TILE_WIDTH + m_offsetIntoCell.x)) };
     const auto r = pixelCol[0];
     const auto g = pixelCol[1];
     const auto b = pixelCol[2];
 
-    if (m_map->rotation == Rotation::DEG0)
+    if (m_map->mapContent->rotation == Rotation::DEG0)
     {
         selected.currentPosition = glm::ivec2(
             (m_cell.y + origin.y) + (m_cell.x + origin.x),
@@ -87,7 +82,7 @@ void mdcii::map::MousePicker::Render(
         }
     }
 
-    if (m_map->rotation == Rotation::DEG90)
+    if (m_map->mapContent->rotation == Rotation::DEG90)
     {
         selected.currentPosition = glm::ivec2(
             (m_cell.y + origin.y) - (m_cell.x + origin.x),
@@ -112,7 +107,7 @@ void mdcii::map::MousePicker::Render(
         }
     }
 
-    if (m_map->rotation == Rotation::DEG180)
+    if (m_map->mapContent->rotation == Rotation::DEG180)
     {
         selected.currentPosition = glm::ivec2(
             m_map->mapContent->width - 1 - ((m_cell.y + origin.y) + (m_cell.x + origin.x)),
@@ -137,7 +132,7 @@ void mdcii::map::MousePicker::Render(
         }
     }
 
-    if (m_map->rotation == Rotation::DEG270)
+    if (m_map->mapContent->rotation == Rotation::DEG270)
     {
         selected.currentPosition = glm::ivec2(
             m_map->mapContent->height - 1 - ((m_cell.y + origin.y) - (m_cell.x + origin.x)),
@@ -162,7 +157,7 @@ void mdcii::map::MousePicker::Render(
         }
     }
 
-    RenderMouseCursor(t_window, t_camera, t_selectedBauGfx);
+    RenderMouseCursor(t_window, t_camera);
 }
 
 void mdcii::map::MousePicker::RenderImGui() const
@@ -178,89 +173,28 @@ void mdcii::map::MousePicker::RenderImGui() const
     ImGui::End();
 }
 
-void mdcii::map::MousePicker::CreateMouseCursorEntity(const data::Building& t_building, const int t_orientation) const
-{
-    // create an entity
-    const auto entity{ m_map->registry.create() };
-
-    // create gfx map
-    std::vector<int> gfx;
-    const auto w{ t_building.size.w };
-    const auto h{ t_building.size.h };
-
-    for (auto y{ 0 }; y < h; ++y)
-    {
-        for (auto x{ 0 }; x < w; ++x)
-        {
-            // y * width + x
-            auto gfx0{ t_building.gfx };
-            const auto offset{ y * t_building.size.w + x };
-            gfx0 += offset;
-            gfx.push_back(gfx0);
-        }
-    }
-
-    m_map->registry.emplace<ecs::MouseCursorComponent>(entity, gfx, t_building);
-}
-
 //-------------------------------------------------
 // Cursor
 //-------------------------------------------------
 
-void mdcii::map::MousePicker::RenderMouseCursor(
-    const ogl::Window& t_window,
-    const camera::Camera& t_camera,
-    const event::SelectedBauGfx& t_selectedBauGfx
-) const
+void mdcii::map::MousePicker::RenderMouseCursor(const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
-    if (m_map->IsPositionInMap(selected.currentPosition))
+    if (!m_map->mapContent->IsPositionInMap(selected.currentPosition))
     {
-        if (t_selectedBauGfx.IsValid())
-        {
-            // render mouse cursor entity
-            const auto view{ m_map->registry.view<const ecs::MouseCursorComponent>() };
-            auto e{ 0 };
-            for (const auto entity : view)
-            {
-                const auto& mouseCursorComponent{ view.get<const ecs::MouseCursorComponent>(entity) };
-
-                auto i{ 0 };
-                for (auto y{ 0 }; y < mouseCursorComponent.building.size.h; ++y)
-                {
-                    for (auto x{ 0 }; x < mouseCursorComponent.building.size.w; ++x)
-                    {
-                        m_map->RenderBuilding(
-                            t_window, t_camera,
-                            mouseCursorComponent.gfx[i],
-                            m_map->MapToIso(selected.currentPosition.x + x, selected.currentPosition.y + y),
-                            static_cast<float>(mouseCursorComponent.building.posoffs), false
-                        );
-
-                        i++;
-                    }
-                }
-
-                e++;
-            }
-
-            MDCII_ASSERT(e == 1, "[MousePicker::RenderCursor()] Invalid number of mouse cursor entities.")
-        }
-        else
-        {
-            // render default cursor
-            auto screenPosition{ m_map->MapToIso(selected.currentPosition.x, selected.currentPosition.y, m_map->rotation) };
-            screenPosition.y -= Map::ELEVATION;
-
-            m_renderer->RenderTile(
-                renderer::RenderUtils::GetModelMatrix(
-                    screenPosition,
-                    glm::vec2(Map::TILE_WIDTH, Map::TILE_HEIGHT)
-                ),
-                ogl::resource::ResourceManager::LoadTexture("textures/frame.png").id,
-                t_window, t_camera
-            );
-        }
+        return;
     }
+
+    auto screenPosition{ m_map->mapContent->MapToScreen(selected.currentPosition.x, selected.currentPosition.y, m_map->mapContent->rotation) };
+    screenPosition.y -= Map::ELEVATION;
+
+    m_renderer->RenderTile(
+        renderer::RenderUtils::GetModelMatrix(
+            screenPosition,
+            glm::vec2(MapTile::TILE_WIDTH, MapTile::TILE_HEIGHT)
+        ),
+        ogl::resource::ResourceManager::LoadTexture("textures/frame.png").id,
+        t_window, t_camera
+    );
 }
 
 //-------------------------------------------------
@@ -281,8 +215,8 @@ void mdcii::map::MousePicker::Init()
         throw MDCII_EXCEPTION("[MousePicker::Init()] Mouse picker corner image failed to load at path: " + path);
     }
 
-    MDCII_ASSERT(width == Map::TILE_WIDTH, "[MousePicker::Init()] Invalid width.")
-    MDCII_ASSERT(height == Map::TILE_HEIGHT, "[MousePicker::Init()] Invalid height.")
+    MDCII_ASSERT(width == MapTile::TILE_WIDTH, "[MousePicker::Init()] Invalid width.")
+    MDCII_ASSERT(height == MapTile::TILE_HEIGHT, "[MousePicker::Init()] Invalid height.")
 
     Log::MDCII_LOG_DEBUG("[MousePicker::Init()] The mouse picker was successfully initialized.");
 }

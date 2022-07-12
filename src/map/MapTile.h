@@ -1,5 +1,8 @@
 #pragma once
 
+#include <array>
+#include <vector>
+#include <glm/vec2.hpp>
 #include "ecs/entt.hpp"
 
 namespace mdcii::map
@@ -9,10 +12,30 @@ namespace mdcii::map
     //-------------------------------------------------
 
     /**
-     * MapTile represents a single part of the map.
+     * MapTile represents a part of a layer.
      */
     struct MapTile
     {
+        /**
+         * The width of a tile.
+         */
+        static constexpr auto TILE_WIDTH{ 64 };
+
+        /**
+         * The half width of a tile.
+         */
+        static constexpr auto TILE_WIDTH_HALF{ 32 };
+
+        /**
+         * The height of a tile.
+         */
+        static constexpr auto TILE_HEIGHT{ 32 };
+
+        /**
+         * The half height of a tile.
+         */
+        static constexpr auto TILE_HEIGHT_HALF{ 16 };
+
         /**
          * The building Id from the haeuser.cod.
          */
@@ -37,24 +60,41 @@ namespace mdcii::map
          */
 
         /**
-         * Specifies the size of the building in x direction in tiles.
-         */
-        int32_t width{ 1 };
-
-        /**
-         * Specifies the size of the building in y direction in tiles.
-         */
-        int32_t height{ 1 };
-
-        /**
-         * The x position of the tile in object space.
+         * The x position of the tile in local/object space.
          */
         int32_t x{ 0 };
 
         /**
-         * The y position of the tile in object space.
+         * The y position of the tile in local/object space.
          */
         int32_t y{ 0 };
+
+        /**
+         * The x position on the world map.
+         */
+        int32_t mapX{ -1 };
+
+        /**
+         * The y position on the world map.
+         */
+        int32_t mapY{ -1 };
+
+        /**
+         * An isometric position on the screen for each
+         * rotation (world space).
+         */
+        std::array<glm::vec2, 4> screenPositions{};
+
+        /**
+         * The index for each rotation is needed for sorting.
+         */
+        std::array<int, 4> indices{};
+
+        /**
+         * The Bsh graphic for each rotation.
+         * In some cases the same gfx is used for all rotations.
+         */
+        std::vector<int> gfxs{};
 
         /**
          * Stores the entity handle created for this tile.
@@ -62,9 +102,16 @@ namespace mdcii::map
         entt::entity entity{ entt::null };
 
         /**
-         * Stores the entity handle created for this tile
-         * to show a grid for debugging purposes.
+         * Stores another entity handle created for this tile.
+         * This is needed to show a grid for debugging purposes.
          */
         entt::entity gridEntity{ entt::null };
+
+        /**
+         * For better readability/convenience.
+         *
+         * @return True if a valid building Id is present.
+         */
+        [[nodiscard]] bool HasBuilding() const { return buildingId >= 0; }
     };
 }

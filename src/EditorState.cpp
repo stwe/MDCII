@@ -50,10 +50,6 @@ void mdcii::EditorState::Input()
 
 void mdcii::EditorState::Update()
 {
-    if (m_mousePicker->selected.lastChanged)
-    {
-        m_map->SelectTile(m_mousePicker->selected.lastPosition);
-    }
 }
 
 void mdcii::EditorState::PreRender()
@@ -63,7 +59,7 @@ void mdcii::EditorState::PreRender()
 void mdcii::EditorState::Render()
 {
     m_map->Render(*context->window, *context->camera);
-    m_mousePicker->Render(*context->window, *context->camera, m_selectedBauGfx);
+    m_mousePicker->Render(*context->window, *context->camera);
 }
 
 void mdcii::EditorState::RenderImGui()
@@ -86,7 +82,7 @@ void mdcii::EditorState::RenderImGui()
 
     // the selected workshop
     m_editorGui->WorkshopGui(m_selectedBauGfx);
-    if (m_selectedBauGfx.IsValid())
+    if (m_selectedBauGfx.HasBuilding())
     {
         ImGui::Separator();
     }
@@ -122,7 +118,7 @@ void mdcii::EditorState::Init()
     m_map = std::make_shared<map::Map>("data/ExampleMap.json", context->buildings);
 
     // create the MousePicker to select tiles
-    m_mousePicker = std::make_unique<map::MousePicker>(m_map, context->buildings);
+    m_mousePicker = std::make_unique<map::MousePicker>(m_map);
 
     // create the menus
     m_editorGui = std::make_unique<EditorGui>(m_text, m_map, context->buildings);
@@ -140,20 +136,9 @@ void mdcii::EditorState::AddListeners()
         eventpp::argumentAdapter<void(const event::BauGfxSelectedEvent&)>(
             [&](const event::BauGfxSelectedEvent& t_event)
             {
-                if (t_event.selectedBauGfx.IsValid())
+                if (t_event.selectedBauGfx.HasBuilding())
                 {
-                    // destroy the existing mouse cursor entity
-                    const auto view{ m_map->registry.view<ecs::MouseCursorComponent>() };
-                    m_map->registry.destroy(view.begin(), view.end());
-
-                    // store selected bauGfx info
                     m_selectedBauGfx = t_event.selectedBauGfx;
-
-                    // create a new mouse cursor entity
-                    m_mousePicker->CreateMouseCursorEntity(
-                        context->buildings->buildingsMap.at(m_selectedBauGfx.buildingId),
-                        0
-                    );
                 }
             }
         )

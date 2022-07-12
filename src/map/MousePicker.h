@@ -3,17 +3,10 @@
 #include <memory>
 #include "ogl/Window.h"
 #include "camera/Camera.h"
-#include "data/Buildings.h"
-#include "event/Event.h"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
-
-namespace mdcii::data
-{
-    class Buildings;
-}
 
 namespace mdcii::renderer
 {
@@ -79,9 +72,8 @@ namespace mdcii::map
          * Constructs a new MousePicker object.
          *
          * @param t_map The parent Map object.
-         * @param t_buildings Access to all building objects.
          */
-        MousePicker(std::shared_ptr<Map> t_map, std::shared_ptr<data::Buildings> t_buildings);
+        explicit MousePicker(std::shared_ptr<Map> t_map);
 
         MousePicker(const MousePicker& t_other) = delete;
         MousePicker(MousePicker&& t_other) noexcept = delete;
@@ -94,15 +86,8 @@ namespace mdcii::map
         // Logic
         //-------------------------------------------------
 
-        void Render(
-            const ogl::Window& t_window,
-            const camera::Camera& t_camera,
-            const event::SelectedBauGfx& t_selectedBauGfx
-        );
-
+        void Render(const ogl::Window& t_window, const camera::Camera& t_camera);
         void RenderImGui() const;
-
-        void CreateMouseCursorEntity(const data::Building& t_building, int t_orientation) const;
 
     protected:
 
@@ -115,11 +100,6 @@ namespace mdcii::map
          * The parent Map object.
          */
         std::shared_ptr<Map> m_map;
-
-        /**
-         * Access to all building objects.
-         */
-        std::shared_ptr<data::Buildings> m_buildings;
 
         /**
          * The current mouse position.
@@ -155,11 +135,7 @@ namespace mdcii::map
         // Cursor
         //-------------------------------------------------
 
-        void RenderMouseCursor(
-            const ogl::Window& t_window,
-            const camera::Camera& t_camera,
-            const event::SelectedBauGfx& t_selectedBauGfx
-        ) const;
+        void RenderMouseCursor(const ogl::Window& t_window, const camera::Camera& t_camera) const;
 
         //-------------------------------------------------
         // Init

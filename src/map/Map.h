@@ -4,7 +4,6 @@
 #include "ecs/Components.h"
 #include "ogl/Window.h"
 #include "camera/Camera.h"
-#include "ecs/entt.hpp"
 
 //-------------------------------------------------
 // Forward declarations
@@ -39,14 +38,6 @@ namespace mdcii::map
     //-------------------------------------------------
 
     /**
-     * Represents the possible map rotations.
-     */
-    enum class Rotation
-    {
-        DEG0, DEG90, DEG180, DEG270
-    };
-
-    /**
      * Rotate left or right.
      */
     enum class ChangeRotation
@@ -69,31 +60,6 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * Something is invalid.
-         */
-        static constexpr auto INVALID{ -1 };
-
-        /**
-         * The width of a tile.
-         */
-        static constexpr auto TILE_WIDTH{ 64 };
-
-        /**
-         * The half width of a tile.
-         */
-        static constexpr auto TILE_WIDTH_HALF{ 32 };
-
-        /**
-         * The height of a tile.
-         */
-        static constexpr auto TILE_HEIGHT{ 32 };
-
-        /**
-         * The half height of a tile.
-         */
-        static constexpr auto TILE_HEIGHT_HALF{ 16 };
-
-        /**
          * The height of the island.
          */
         static constexpr auto ELEVATION{ 20 };
@@ -103,19 +69,9 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * The map content read from a file.
+         * The map content (layers with tiles) read from a json file.
          */
         std::unique_ptr<MapContent> mapContent;
-
-        /**
-         * The currently selected map index.
-         */
-        int selectedIndex{ INVALID };
-
-        /**
-         * The map rotation.
-         */
-        Rotation rotation{ Rotation::DEG0 };
 
         /**
          * The bsh graphics from the stadtfld.bsh file.
@@ -140,22 +96,22 @@ namespace mdcii::map
         /**
          * Shows the isometric grid.
          */
-        bool renderGrid{ false };
-
-        /**
-         * Shows all buildings.
-         */
-        bool renderBuildings{ true };
+        bool renderGrid{ true };
 
         /**
          * Shows the coordinates.
          */
-        bool renderText{ false };
+        bool renderText{ true };
 
         /**
-         * The EnTT Entity Component System.
+         * Shows the terrain layer.
          */
-        entt::registry registry;
+        bool renderTerrainLayer{ false };
+
+        /**
+         * Shows the buildings layer.
+         */
+        bool renderBuildingsLayer{ false };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -166,8 +122,8 @@ namespace mdcii::map
         /**
          * Constructs a new Map object.
          *
-         * @param t_filePath The path to the map file.
-         * @param t_buildings The Buildings object.
+         * @param t_filePath The path to the json map file.
+         * @param t_buildings Access to all building objects.
          */
         Map(const std::string& t_filePath, std::shared_ptr<data::Buildings> t_buildings);
 
@@ -219,11 +175,11 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * The change in direction of rotation.
+         * Changes the rotation of the map left or right.
          *
          * @param t_changeRotation left or right
          */
-        void Rotate(ChangeRotation t_changeRotation);
+        void Rotate(ChangeRotation t_changeRotation) const;
 
         /**
          * Get the current map rotation as string.
@@ -231,41 +187,6 @@ namespace mdcii::map
          * @return the rotation as string
          */
         [[nodiscard]] const char* ShowCurrentRotation() const;
-
-        //-------------------------------------------------
-        // Select
-        //-------------------------------------------------
-
-        /**
-         * Checks the map position and adds the SelectedComponent to the entity.
-         *
-         * @param t_position The map position returned by the MousePicker.
-         */
-        void SelectTile(const glm::ivec2& t_position);
-
-        //-------------------------------------------------
-        // Utils
-        //-------------------------------------------------
-
-        /**
-         * Projects map coordinates in isometric view.
-         *
-         * @param t_mapX The map x position.
-         * @param t_mapY The map y position.
-         * @param t_rotation The map rotation.
-         *
-         * @return The isometric coordinates.
-         */
-        [[nodiscard]] glm::vec2 MapToIso(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
-
-        /**
-         * Checks whether a position is in map.
-         *
-         * @param t_position The position to check.
-         *
-         * @return True if position is in map.
-         */
-        [[nodiscard]] bool IsPositionInMap(const glm::ivec2& t_position) const;
 
     protected:
 
@@ -294,60 +215,6 @@ namespace mdcii::map
         void Init(const std::string& t_filePath);
 
         //-------------------------------------------------
-        // Map helper
-        //-------------------------------------------------
-
-        /**
-         * Rotates a map position.
-         *
-         * @param t_mapX The x position of the map to rotate.
-         * @param t_mapY The y position of the map to rotate.
-         * @param t_rotation The rotation.
-         *
-         * @return The rotated map position.
-         */
-        [[nodiscard]] glm::ivec2 RotateMapPosition(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
-
-        /**
-         * 2D/1D - mapping.
-         *
-         * @param t_mapX The map x position.
-         * @param t_mapY The map y position.
-         * @param t_rotation The map rotation.
-         *
-         * @return The map index.
-         */
-        [[nodiscard]] int GetMapIndex(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
-
-        //-------------------------------------------------
-        // Entities
-        //-------------------------------------------------
-
-        /**
-         * Creates entities from the MapTile objects to show an isometric grid.
-         */
-        void CreateGridEntities();
-
-        /**
-         * Creates entities from the MapTile objects to show an island.
-         */
-        void CreateBuildingEntities();
-
-        //-------------------------------------------------
-        // Create Entity
-        //-------------------------------------------------
-
-        /**
-         * Creates a grid entity.
-         */
-        void CreateGridEntity(int t_mapX, int t_mapY);
-
-        /**
-         * Creates a building entity.
-         */
-        void CreateBuildingEntity(int t_mapX, int t_mapY);
-
-        //-------------------------------------------------
         // Render Entities
         //-------------------------------------------------
 
@@ -360,69 +227,26 @@ namespace mdcii::map
         void RenderGridEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
 
         /**
-         * Renders all buildings to show an island.
+         * Renders the entities from all layers.
          *
          * @param t_window The Window object to get the orthographic projection matrix.
          * @param t_camera The Camera object to get the view matrix.
          */
-        void RenderBuildingEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+        void RenderEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
 
         /**
-         * Renders a building.
+         * Renders an entity.
          *
          * @param t_window The Window object to get the orthographic projection matrix.
          * @param t_camera The Camera object to get the view matrix.
-         * @param t_positionComponent A position component.
-         * @param t_buildingComponent A building component.
+         * @param t_tileComponent A tile component.
          * @param t_selected Determines if the building is selected and rendered a little darker.
          */
-        void RenderBuildingEntity(
+        void RenderEntity(
             const ogl::Window& t_window,
             const camera::Camera& t_camera,
-            const ecs::PositionComponent& t_positionComponent,
-            const ecs::BuildingComponent& t_buildingComponent,
+            const ecs::TileComponent& t_tileComponent,
             bool t_selected = false
         ) const;
-
-        //-------------------------------------------------
-        // Sort Entities
-        //-------------------------------------------------
-
-        /**
-         * Sorts entities for rendering.
-         */
-        void SortEntities();
     };
-
-    //-------------------------------------------------
-    // Operators
-    //-------------------------------------------------
-
-    inline Rotation& operator++(Rotation& t_rotation)
-    {
-        if (t_rotation == Rotation::DEG270)
-        {
-            t_rotation = Rotation::DEG0;
-        }
-        else
-        {
-            t_rotation = static_cast<Rotation>(static_cast<std::underlying_type_t<Rotation>>(t_rotation) + 1);
-        }
-
-        return t_rotation;
-    }
-
-    inline Rotation& operator--(Rotation& t_rotation)
-    {
-        if (t_rotation == Rotation::DEG0)
-        {
-            t_rotation = Rotation::DEG270;
-        }
-        else
-        {
-            t_rotation = static_cast<Rotation>(static_cast<std::underlying_type_t<Rotation>>(t_rotation) - 1);
-        }
-
-        return t_rotation;
-    }
 }

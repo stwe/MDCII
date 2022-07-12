@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "ini/ini.h"
+#include "ecs/entt.hpp"
 
 //-------------------------------------------------
 // Forward declarations
@@ -48,6 +49,8 @@ namespace mdcii
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
+
+        inline static entt::registry ecs;
 
         inline static const inih::INIReader INI{ "./config.ini" }; // NOLINT(cert-err58-cpp)
 
