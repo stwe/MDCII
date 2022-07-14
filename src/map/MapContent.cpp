@@ -1,4 +1,5 @@
 #include <fstream>
+#include <magic_enum.hpp>
 #include "MapContent.h"
 #include "Game.h"
 #include "MdciiAssert.h"
@@ -10,7 +11,7 @@
 //-------------------------------------------------
 
 mdcii::map::MapContent::MapContent(const std::string& t_filePath, std::shared_ptr<data::Buildings> t_buildings)
-    : m_buildings{ std::move(t_buildings) }
+    : buildings{ std::move(t_buildings) }
 {
     Log::MDCII_LOG_DEBUG("[MapContent::MapContent()] Create MapContent.");
 
@@ -26,6 +27,15 @@ mdcii::map::MapContent::~MapContent() noexcept
 }
 
 //-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
+const mdcii::map::MapLayer& mdcii::map::MapContent::GetLayer(const LayerType t_layerType) const
+{
+    return *mapLayers.at(magic_enum::enum_integer(t_layerType));
+}
+
+//-------------------------------------------------
 // Sort
 //-------------------------------------------------
 
@@ -35,6 +45,22 @@ void mdcii::map::MapContent::SortEntitiesOfAllLayers() const
     {
         layer->SortEntities(rotation);
     }
+}
+
+//-------------------------------------------------
+// Rotate
+//-------------------------------------------------
+
+void mdcii::map::MapContent::RotateLeft()
+{
+    --rotation;
+    SortEntitiesOfAllLayers();
+}
+
+void mdcii::map::MapContent::RotateRight()
+{
+    ++rotation;
+    SortEntitiesOfAllLayers();
 }
 
 //-------------------------------------------------
@@ -125,7 +151,7 @@ void mdcii::map::MapContent::CreateContent(const std::string& t_filePath)
         {
             for (const auto& [a, o] : v.items())
             {
-                auto mapLayer{ std::make_unique<MapLayer>(width, height, m_buildings) };
+                auto mapLayer{ std::make_unique<MapLayer>(this) };
 
                 for (const auto& [layerName, layerTiles] : o.items())
                 {
@@ -187,6 +213,21 @@ void mdcii::map::MapContent::CreateEntitiesOfAllLayers() const
 {
     for (const auto& layer : mapLayers)
     {
-        layer->CreateEntities();
+        for (auto y{ 0 }; y < height; ++y)
+        {
+            for (auto x{ 0 }; x < width; ++x)
+            {
+                if (layer->layerType == LayerType::TERRAIN)
+                {
+                    layer->CreateGridEntity(x, y);
+                    layer->CreateTerrainLayerEntity(x, y);
+                }
+
+                if (layer->layerType == LayerType::BUILDINGS)
+                {
+                    layer->AddBuildingsLayerComponent(x, y);
+                }
+            }
+        }
     }
 }

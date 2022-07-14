@@ -28,6 +28,10 @@ namespace mdcii::renderer
 
 namespace mdcii::map
 {
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
     /**
      * Forward declaration class MapContent.
      */
@@ -96,22 +100,22 @@ namespace mdcii::map
         /**
          * Shows the isometric grid.
          */
-        bool renderGrid{ true };
+        bool renderGrid{ false };
 
         /**
          * Shows the coordinates.
          */
-        bool renderText{ true };
+        bool renderText{ false };
 
         /**
          * Shows the terrain layer.
          */
-        bool renderTerrainLayer{ false };
+        bool renderTerrainLayer{ true };
 
         /**
          * Shows the buildings layer.
          */
-        bool renderBuildingsLayer{ false };
+        bool renderBuildingsLayer{ true };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -239,13 +243,15 @@ namespace mdcii::map
          *
          * @param t_window The Window object to get the orthographic projection matrix.
          * @param t_camera The Camera object to get the view matrix.
-         * @param t_tileComponent A tile component.
+         * @param t_mapTile A MapTile object.
+         * @param t_building A Building object.
          * @param t_selected Determines if the building is selected and rendered a little darker.
          */
         void RenderEntity(
             const ogl::Window& t_window,
             const camera::Camera& t_camera,
-            const ecs::TileComponent& t_tileComponent,
+            const MapTile& t_mapTile,
+            const data::Building& t_building,
             bool t_selected = false
         ) const;
     };

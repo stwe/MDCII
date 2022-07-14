@@ -14,7 +14,7 @@ mdcii::state::State::State(const Id t_id, StateStack* t_stateStack, std::shared_
     , m_id{ t_id }
     , m_stateStack{ t_stateStack }
 {
-    MDCII_ASSERT(t_stateStack, "[State::State()] Null pointer")
+    MDCII_ASSERT(m_stateStack, "[State::State()] Null pointer")
 
     Log::MDCII_LOG_DEBUG("[State::State()] Create State.");
 }

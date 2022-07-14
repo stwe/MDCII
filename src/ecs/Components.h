@@ -15,19 +15,15 @@ namespace mdcii::ecs
         uint32_t textureId{ 0 };
     };
 
-    struct TileComponent
+    struct TerrainLayerTileComponent
     {
         map::MapTile mapTile;
         data::Building building;
     };
 
-    struct TerrainLayerComponent
+    struct BuildingsLayerTileComponent
     {
-        int i{ 0 };
-    };
-
-    struct BuildingsLayerComponent
-    {
-        int i{ 0 };
+        map::MapTile mapTile;
+        data::Building building;
     };
 }

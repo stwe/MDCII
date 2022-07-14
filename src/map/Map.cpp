@@ -76,12 +76,10 @@ void mdcii::map::Map::Rotate(const ChangeRotation t_changeRotation) const
     switch (t_changeRotation)
     {
     case ChangeRotation::LEFT:
-        --mapContent->rotation;
-        mapContent->SortEntitiesOfAllLayers();
+        mapContent->RotateLeft();
         break;
     case ChangeRotation::RIGHT:
-        ++mapContent->rotation;
-        mapContent->SortEntitiesOfAllLayers();
+        mapContent->RotateRight();
         break;
     }
 }
@@ -168,23 +166,48 @@ void mdcii::map::Map::RenderGridEntities(const ogl::Window& t_window, const came
 
 void mdcii::map::Map::RenderEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
-    if (renderTerrainLayer)
+    if (!renderTerrainLayer && !renderBuildingsLayer)
     {
-        const auto view{ Game::ecs.view<const ecs::TileComponent, const ecs::TerrainLayerComponent>() };
-        for (const auto entity : view.use<const ecs::TileComponent>())
-        {
-            const auto& [tileComponent, tc] { view.get(entity) };
-            RenderEntity(t_window, t_camera, tileComponent, false);
-        }
+        return;
     }
 
-    if (renderBuildingsLayer)
+    if (renderTerrainLayer && !renderBuildingsLayer)
     {
-        const auto view{ Game::ecs.view<const ecs::TileComponent, const ecs::BuildingsLayerComponent>() };
-        for (const auto entity : view.use<const ecs::TileComponent>())
+        const auto view{ Game::ecs.view<const ecs::TerrainLayerTileComponent>() };
+        for (const auto entity : view)
         {
-            const auto& [tileComponent, bc] { view.get(entity) };
-            RenderEntity(t_window, t_camera, tileComponent, false);
+            const auto& [tileComponent] { view.get(entity) };
+            RenderEntity(t_window, t_camera, tileComponent.mapTile, tileComponent.building, false);
+        }
+
+        return;
+    }
+
+    if (!renderTerrainLayer && renderBuildingsLayer)
+    {
+        const auto view{ Game::ecs.view<const ecs::BuildingsLayerTileComponent>() };
+        for (const auto entity : view)
+        {
+            const auto& [buildingsComponent] { view.get(entity) };
+            RenderEntity(t_window, t_camera, buildingsComponent.mapTile, buildingsComponent.building, false);
+        }
+
+        return;
+    }
+
+    const auto view{ Game::ecs.view<const ecs::TerrainLayerTileComponent>() };
+    for (const auto entity : view)
+    {
+        const auto& [tileComponent] { view.get(entity) };
+
+        if (Game::ecs.all_of<const ecs::BuildingsLayerTileComponent>(entity))
+        {
+            const auto& buildingsComponent{ Game::ecs.get<const ecs::BuildingsLayerTileComponent>(entity) };
+            RenderEntity(t_window, t_camera, buildingsComponent.mapTile, buildingsComponent.building, false);
+        }
+        else
+        {
+            RenderEntity(t_window, t_camera, tileComponent.mapTile, tileComponent.building, false);
         }
     }
 }
@@ -192,23 +215,24 @@ void mdcii::map::Map::RenderEntities(const ogl::Window& t_window, const camera::
 void mdcii::map::Map::RenderEntity(
     const ogl::Window& t_window,
     const camera::Camera& t_camera,
-    const ecs::TileComponent& t_tileComponent,
+    const MapTile& t_mapTile,
+    const data::Building& t_building,
     const bool t_selected
 ) const
 {
     // get gfx in the right direction for the current map rotation
     const auto rot{ magic_enum::enum_integer(mapContent->rotation) };
-    auto orientation{ t_tileComponent.mapTile.orientation };
-    if (t_tileComponent.building.rotate > 0)
+    auto orientation{ t_mapTile.orientation };
+    if (t_building.rotate > 0)
     {
         orientation = (orientation + rot) % 4;
     }
-    auto gfx{ t_tileComponent.mapTile.gfxs[orientation] };
+    auto gfx{ t_mapTile.gfxs[orientation] };
 
-    if (t_tileComponent.building.size.w > 1)
+    if (t_building.size.w > 1)
     {
         // y * width + x
-        const auto offset{ t_tileComponent.mapTile.y * t_tileComponent.building.size.w + t_tileComponent.mapTile.x };
+        const auto offset{ t_mapTile.y * t_building.size.w + t_mapTile.x };
         gfx += offset;
     }
 
@@ -216,8 +240,8 @@ void mdcii::map::Map::RenderEntity(
         t_window,
         t_camera,
         gfx,
-        t_tileComponent.mapTile.screenPositions[rot],
-        static_cast<float>(t_tileComponent.building.posoffs),
+        t_mapTile.screenPositions[rot],
+        static_cast<float>(t_building.posoffs),
         t_selected
     );
 }

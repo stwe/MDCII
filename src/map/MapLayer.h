@@ -15,6 +15,15 @@ namespace mdcii::data
 namespace mdcii::map
 {
     //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
+    /**
+     * Forward declaration class MapContent.
+     */
+    class MapContent;
+
+    //-------------------------------------------------
     // Types, Types conversions && Operators
     //-------------------------------------------------
 
@@ -92,11 +101,9 @@ namespace mdcii::map
         /**
          * Constructs a new MapLayer object.
          *
-         * @param t_width The width of the layer in tiles.
-         * @param t_height The height of the layer in tiles.
-         * @param t_buildings Access to all building objects.
+         * @param t_mapContent The parent MapContent object.
          */
-        MapLayer(int t_width, int t_height, std::shared_ptr<data::Buildings> t_buildings);
+        explicit MapLayer(MapContent* t_mapContent);
 
         MapLayer(const MapLayer& t_other) = delete;
         MapLayer(MapLayer&& t_other) noexcept = delete;
@@ -172,12 +179,34 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * Creates all entities.
+         * Creates a Grid-Entity from the MapTile object at the
+         * specified location.
+         *
+         * @param t_mapX The x position of the layer.
+         * @param t_mapY The y position of the layer.
          */
-        void CreateEntities();
+        void CreateGridEntity(int t_mapX, int t_mapY);
 
         /**
-         * Sorts entities with TileComponent for rendering.
+         * Creates an Entity from the MapTile object at the
+         * specified location to show a terrain tile.
+         *
+         * @param t_mapX The x position of the layer.
+         * @param t_mapY The y position of the layer.
+         */
+        void CreateTerrainLayerEntity(int t_mapX, int t_mapY);
+
+        /**
+         * A BuildingsLayerTileComponent is added to the entity
+         * in case the terrain layer was modified by a building.
+         *
+         * @param t_mapX The x position of the layer.
+         * @param t_mapY The y position of the layer.
+         */
+        void AddBuildingsLayerComponent(int t_mapX, int t_mapY);
+
+        /**
+         * Sorts entities with TerrainLayerTileComponent for rendering.
          *
          * @param t_rotation The rotation to sort for.
          */
@@ -186,38 +215,6 @@ namespace mdcii::map
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
-
-        /**
-         * Projects layer coordinates into an isometric position
-         * on the screen (world space).
-         *
-         * @param t_mapX The x position of the layer.
-         * @param t_mapY The y position of the layer.
-         * @param t_rotation The position is previously rotated by the specified value.
-         *
-         * @return The isometric coordinates on the screen.
-         */
-        [[nodiscard]] glm::vec2 LayerToScreen(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
-
-        /**
-         * Checks whether a layer position is in layer.
-         *
-         * @param t_position The position to check.
-         *
-         * @return True or false depending on the position in the layer.
-         */
-        [[nodiscard]] bool IsPositionInLayer(const glm::ivec2& t_position) const;
-
-        /**
-         * Rotates a layer position.
-         *
-         * @param t_mapX The x position of the layer to rotate.
-         * @param t_mapY The y position of the layer to rotate.
-         * @param t_rotation The rotation.
-         *
-         * @return The rotated position.
-         */
-        [[nodiscard]] glm::ivec2 RotatePosition(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
 
         /**
          * 2D/1D - mapping.
@@ -248,19 +245,9 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * The width of the layer in tiles.
+         * The parent MapContent object.
          */
-        int m_width{ 0 };
-
-        /**
-         * The height of the layer in tiles.
-         */
-        int m_height{ 0 };
-
-        /**
-         * The content from the haeuser.cod.
-         */
-        std::shared_ptr<data::Buildings> m_buildings;
+        MapContent* m_mapContent{ nullptr };
 
         //-------------------------------------------------
         // Ecs
@@ -272,24 +259,6 @@ namespace mdcii::map
          * @return The created EnTT entity.
          */
         static entt::entity CreatePlainEntity();
-
-        /**
-         * Creates a Grid-Entity from the MapTile object at the
-         * specified location.
-         *
-         * @param t_mapX The x position of the layer.
-         * @param t_mapY The y position of the layer.
-         */
-        void CreateGridEntity(int t_mapX, int t_mapY);
-
-        /**
-         * Creates an Entity from the MapTile object at the
-         * specified location.
-         *
-         * @param t_mapX The x position of the layer.
-         * @param t_mapY The y position of the layer.
-         */
-        void CreateEntity(int t_mapX, int t_mapY);
 
         //-------------------------------------------------
         // Precalculations

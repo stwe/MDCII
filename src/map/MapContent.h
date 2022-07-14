@@ -29,12 +29,12 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * The width of the world map in tiles.
+         * The width of the map in tiles.
          */
         int width{ 0 };
 
         /**
-         * The height of the world map in tiles.
+         * The height of the map in tiles.
          */
         int height{ 0 };
 
@@ -44,9 +44,14 @@ namespace mdcii::map
         std::vector<std::unique_ptr<MapLayer>> mapLayers;
 
         /**
-         * The world map rotation.
+         * The map rotation.
          */
         Rotation rotation{ Rotation::DEG0 };
+
+        /**
+         * The content from the haeuser.cod.
+         */
+        std::shared_ptr<data::Buildings> buildings;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -70,6 +75,17 @@ namespace mdcii::map
         ~MapContent() noexcept;
 
         //-------------------------------------------------
+        // Getter
+        //-------------------------------------------------
+
+        /**
+         * For convenience: Get MapLayer object by type.
+         *
+         * @param t_layerType The type of the layer.
+         */
+        [[nodiscard]] const MapLayer& GetLayer(LayerType t_layerType) const;
+
+        //-------------------------------------------------
         // Sort
         //-------------------------------------------------
 
@@ -79,15 +95,29 @@ namespace mdcii::map
         void SortEntitiesOfAllLayers() const;
 
         //-------------------------------------------------
+        // Rotate
+        //-------------------------------------------------
+
+        /**
+         * Rotate map content left.
+         */
+        void RotateLeft();
+
+        /**
+         * Rotate map content right.
+         */
+        void RotateRight();
+
+        //-------------------------------------------------
         // Helper
         //-------------------------------------------------
 
         /**
-         * Checks whether a position is in world map.
+         * Checks whether a position is in map.
          *
          * @param t_position The position to check.
          *
-         * @return True or false depending on the position in the world map.
+         * @return True or false depending on the position in the map.
          */
         [[nodiscard]] bool IsPositionInMap(const glm::ivec2& t_position) const;
 
@@ -117,15 +147,6 @@ namespace mdcii::map
     protected:
 
     private:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * The content from the haeuser.cod.
-         */
-        std::shared_ptr<data::Buildings> m_buildings;
-
         //-------------------------------------------------
         // Read
         //-------------------------------------------------
