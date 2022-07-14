@@ -143,4 +143,19 @@ void mdcii::EditorState::AddListeners()
             }
         )
     );
+
+    // right mouse button pressed
+    event::EventManager::eventDispatcher.appendListener(
+        event::MdciiEventType::MOUSE_BUTTON_PRESSED,
+        eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>
+        (
+            [&](const event::MouseButtonPressedEvent& t_event)
+            {
+                if (t_event.button == 1)
+                {
+                    m_selectedBauGfx = {};
+                }
+            }
+        )
+    );
 }
