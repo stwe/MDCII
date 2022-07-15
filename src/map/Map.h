@@ -4,6 +4,7 @@
 #include "ecs/Components.h"
 #include "ogl/Window.h"
 #include "camera/Camera.h"
+#include "event/Event.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -128,9 +129,9 @@ namespace mdcii::map
         bool renderBuildingsLayer{ true };
 
         /**
-         * Indicates whether a bauGfx is selected to build.
+         * Current selected building.
          */
-        bool bauGfxSelected{ false };
+        event::SelectedBauGfx selectedBauGfx;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

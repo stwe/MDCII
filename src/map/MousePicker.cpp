@@ -292,18 +292,20 @@ void mdcii::map::MousePicker::AddListeners(const ogl::Window& t_window, const ca
                 if (m_map->mapContent->IsPositionInMap(currentPosition.x, currentPosition.y) &&
                     m_map->mapContent->IsPositionInMap(lastPosition.x, lastPosition.y))
                 {
-                    if (m_map->bauGfxSelected)
+                    if (m_map->selectedBauGfx.HasBuilding())
                     {
                         m_map->mapContent->RemoveBuilding(
                             lastPosition.x,
-                            lastPosition.y
+                            lastPosition.y,
+                            m_map->selectedBauGfx.buildingId
                         );
 
+                        // todo pass event::SelectedBauGfx type
                         m_map->mapContent->AddBuilding(
                             currentPosition.x,
                             currentPosition.y,
-                            305, 0, 0, 0
-                        ); // 305 = Turm
+                            m_map->selectedBauGfx.buildingId, m_map->selectedBauGfx.orientation
+                        );
                     }
                 }
             }

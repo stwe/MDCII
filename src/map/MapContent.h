@@ -174,18 +174,17 @@ namespace mdcii::map
          * @param t_mapY The y position of the tile on the world map.
          * @param t_buildingId The Id of the building to add.
          * @param t_orientation The orientation of the building.
-         * @param t_x The x position of the tile in local/object space of the building.
-         * @param t_y The y position of the tile in local/object space of the building.
          */
-        void AddBuilding(int t_mapX, int t_mapY, int t_buildingId, int t_orientation, int t_x, int t_y);
+        void AddBuilding(int t_mapX, int t_mapY, int t_buildingId, int t_orientation);
 
         /**
          * Removes a tile from the building layer and the component from the entity.
          *
          * @param t_mapX The map x position of the tile.
          * @param t_mapY The map y position of the tile.
+         * @param t_buildingId The Id of the building to remove.
          */
-        void RemoveBuilding(int t_mapX, int t_mapY);
+        void RemoveBuilding(int t_mapX, int t_mapY, int t_buildingId);
 
     protected:
 

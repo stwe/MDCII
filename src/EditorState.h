@@ -1,7 +1,6 @@
 #pragma once
 
 #include "state/State.h"
-#include "event/Event.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -93,11 +92,6 @@ namespace mdcii
          */
         std::shared_ptr<map::Map> m_map;
 
-        /**
-         * Current selected building.
-         */
-        event::SelectedBauGfx m_selectedBauGfx;
-
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -110,6 +104,6 @@ namespace mdcii
         /**
          * Adds event listeners.
          */
-        void AddListeners();
+        void AddListeners() const;
     };
 }

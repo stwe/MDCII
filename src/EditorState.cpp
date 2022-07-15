@@ -80,8 +80,8 @@ void mdcii::EditorState::RenderImGui()
     ImGui::Separator();
 
     // the selected workshop
-    m_editorGui->WorkshopGui(m_selectedBauGfx);
-    if (m_selectedBauGfx.HasBuilding())
+    m_editorGui->WorkshopGui(m_map->selectedBauGfx);
+    if (m_map->selectedBauGfx.HasBuilding())
     {
         ImGui::Separator();
     }
@@ -122,7 +122,7 @@ void mdcii::EditorState::Init()
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] The editor state was successfully initialized.");
 }
 
-void mdcii::EditorState::AddListeners()
+void mdcii::EditorState::AddListeners() const
 {
     Log::MDCII_LOG_DEBUG("[EditorState::AddListeners()] Add listeners.");
 
@@ -134,8 +134,7 @@ void mdcii::EditorState::AddListeners()
             {
                 if (t_event.selectedBauGfx.HasBuilding())
                 {
-                    m_selectedBauGfx = t_event.selectedBauGfx;
-                    m_map->bauGfxSelected = true;
+                    m_map->selectedBauGfx = t_event.selectedBauGfx;
                 }
             }
         )
@@ -150,8 +149,7 @@ void mdcii::EditorState::AddListeners()
             {
                 if (t_event.button == 1)
                 {
-                    m_selectedBauGfx = {};
-                    m_map->bauGfxSelected = false;
+                    m_map->selectedBauGfx = {};
                 }
             }
         )
