@@ -1,9 +1,12 @@
 #include <imgui.h>
 #include <magic_enum.hpp>
 #include "Map.h"
+#include "MousePicker.h"
 #include "Game.h"
 #include "MapContent.h"
 #include "Log.h"
+#include "event/EventManager.h"
+#include "eventpp/utilities/argumentadapter.h"
 #include "renderer/ImGuiTileRenderer.h"
 #include "renderer/RenderUtils.h"
 #include "renderer/TileRenderer.h"
@@ -19,6 +22,7 @@ mdcii::map::Map::Map(const std::string& t_filePath, std::shared_ptr<data::Buildi
     Log::MDCII_LOG_DEBUG("[Map::Map()] Create Map.");
 
     Init(t_filePath);
+    AddListeners();
 }
 
 mdcii::map::Map::~Map() noexcept
@@ -34,6 +38,8 @@ void mdcii::map::Map::Render(const ogl::Window& t_window, const camera::Camera& 
 {
     RenderGridEntities(t_window, t_camera);
     RenderEntities(t_window, t_camera);
+
+    mousePicker->Render(t_window, t_camera);
 }
 
 void mdcii::map::Map::RenderImGui()
@@ -96,6 +102,9 @@ const char* mdcii::map::Map::ShowCurrentRotation() const
 void mdcii::map::Map::Init(const std::string& t_filePath)
 {
     Log::MDCII_LOG_DEBUG("[Map::Init()] Initializing map.");
+
+    // create the MousePicker to select tiles
+    mousePicker = std::make_unique<MousePicker>(this);
 
     // load map content
     mapContent = std::make_unique<MapContent>(t_filePath, m_buildings);
@@ -243,5 +252,33 @@ void mdcii::map::Map::RenderEntity(
         t_mapTile.screenPositions[rot],
         static_cast<float>(t_building.posoffs),
         t_selected
+    );
+}
+
+void mdcii::map::Map::AddListeners()
+{
+    Log::MDCII_LOG_DEBUG("[Map::AddListeners()] Add listeners.");
+
+    // todo: MouseOverMap Event (Mouse in Map with selected BauGfx)
+
+    // a bauGfx is selected from the menu
+    event::EventManager::eventDispatcher.appendListener(
+        event::MdciiEventType::BAUGFX_SELECTED,
+        eventpp::argumentAdapter<void(const event::BauGfxSelectedEvent&)>(
+            [&](const event::BauGfxSelectedEvent& t_event)
+            {
+                if (t_event.selectedBauGfx.HasBuilding())
+                {
+                    // todo mousepicker get pos
+                    /*
+                    mapContent->AddBuilding(
+                        mousePicker->selected.lastPosition.x,
+                        mousePicker->selected.lastPosition.y,
+                        305, 0, 0, 0
+                    ); // 305 = Turm
+                    */
+                }
+            }
+        )
     );
 }

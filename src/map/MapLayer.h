@@ -73,7 +73,7 @@ namespace mdcii::map
     //-------------------------------------------------
 
     /**
-     * Represents a layer. A layer consists of many tiles.
+     * Represents a layer with many tiles.
      */
     class MapLayer
     {
@@ -212,31 +212,6 @@ namespace mdcii::map
          */
         static void SortEntities(Rotation t_rotation);
 
-        //-------------------------------------------------
-        // Helper
-        //-------------------------------------------------
-
-        /**
-         * 2D/1D - mapping.
-         *
-         * @param t_mapX The x position of the layer.
-         * @param t_mapY The y position of the layer.
-         * @param t_rotation The position is previously rotated by the specified value.
-         *
-         * @return The index.
-         */
-        [[nodiscard]] int GetMapIndex(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
-
-        //-------------------------------------------------
-        // Precalculations
-        //-------------------------------------------------
-
-        /**
-         * Adds some pre-calculations to the tile objects,
-         * which are necessary for the display on the screen.
-         */
-        void PreCalcTiles();
-
     protected:
 
     private:
@@ -259,19 +234,5 @@ namespace mdcii::map
          * @return The created EnTT entity.
          */
         static entt::entity CreatePlainEntity();
-
-        //-------------------------------------------------
-        // Precalculations
-        //-------------------------------------------------
-
-        /**
-         * Adds some pre-calculations to the tile object,
-         * which are necessary for the display on the screen.
-         *
-         * @param t_mapTile The tile object.
-         * @param t_mapX The x position of the layer.
-         * @param t_mapY The y position of the layer.
-         */
-        void PreCalcTile(MapTile& t_mapTile, int t_mapX, int t_mapY) const;
     };
 }

@@ -16,10 +16,12 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::map::MousePicker::MousePicker(std::shared_ptr<Map> t_map)
-    : m_map{ std::move(t_map) }
+mdcii::map::MousePicker::MousePicker(Map* t_map)
+    : m_map{ t_map }
 {
     Log::MDCII_LOG_DEBUG("[MousePicker::MousePicker()] Create MousePicker.");
+
+    MDCII_ASSERT(m_map, "[MousePicker::MousePicker()] Null pointer.")
 
     Init();
     AddListeners();
@@ -179,7 +181,7 @@ void mdcii::map::MousePicker::RenderImGui() const
 
 void mdcii::map::MousePicker::RenderMouseCursor(const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
-    if (!m_map->mapContent->IsPositionInMap(selected.currentPosition))
+    if (!m_map->mapContent->IsPositionInMap(selected.currentPosition.x, selected.currentPosition.y))
     {
         return;
     }

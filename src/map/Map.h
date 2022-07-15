@@ -33,6 +33,11 @@ namespace mdcii::map
     //-------------------------------------------------
 
     /**
+     * Forward declaration class MousePicker.
+     */
+    class MousePicker;
+
+    /**
      * Forward declaration class MapContent.
      */
     class MapContent;
@@ -71,6 +76,11 @@ namespace mdcii::map
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
+
+        /**
+         * A MousePicker object to select tiles.
+         */
+        std::unique_ptr<MousePicker> mousePicker;
 
         /**
          * The map content (layers with tiles) read from a json file.
@@ -254,5 +264,7 @@ namespace mdcii::map
             const data::Building& t_building,
             bool t_selected = false
         ) const;
+
+        void AddListeners();
     };
 }

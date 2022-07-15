@@ -4,7 +4,7 @@
 #include "Game.h"
 #include "MdciiAssert.h"
 #include "MdciiException.h"
-#include "data/Buildings.h"
+#include "ecs/Components.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -16,6 +16,7 @@ mdcii::map::MapContent::MapContent(const std::string& t_filePath, std::shared_pt
     Log::MDCII_LOG_DEBUG("[MapContent::MapContent()] Create MapContent.");
 
     CreateContent(t_filePath);
+    PreCalcTiles();
 
     CreateEntitiesOfAllLayers();
     SortEntitiesOfAllLayers();
@@ -31,6 +32,11 @@ mdcii::map::MapContent::~MapContent() noexcept
 //-------------------------------------------------
 
 const mdcii::map::MapLayer& mdcii::map::MapContent::GetLayer(const LayerType t_layerType) const
+{
+    return *mapLayers.at(magic_enum::enum_integer(t_layerType));
+}
+
+mdcii::map::MapLayer& mdcii::map::MapContent::GetLayer(const LayerType t_layerType)
 {
     return *mapLayers.at(magic_enum::enum_integer(t_layerType));
 }
@@ -67,10 +73,10 @@ void mdcii::map::MapContent::RotateRight()
 // Helper
 //-------------------------------------------------
 
-bool mdcii::map::MapContent::IsPositionInMap(const glm::ivec2& t_position) const
+bool mdcii::map::MapContent::IsPositionInMap(const int t_mapX, const int t_mapY) const
 {
-    if (t_position.x >= 0 && t_position.x < width &&
-        t_position.y >= 0 && t_position.y < height)
+    if (t_mapX >= 0 && t_mapX < width &&
+        t_mapY >= 0 && t_mapY < height)
     {
         return true;
     }
@@ -78,10 +84,18 @@ bool mdcii::map::MapContent::IsPositionInMap(const glm::ivec2& t_position) const
     return false;
 }
 
+int mdcii::map::MapContent::GetMapIndex(const int t_mapX, const int t_mapY, const Rotation t_rotation) const
+{
+    MDCII_ASSERT(IsPositionInMap(t_mapX, t_mapY), "[MapContent::GetMapIndex()] Invalid map position given.")
+
+    const auto position{ RotatePosition(t_mapX, t_mapY, t_rotation) };
+
+    return position.y * width + position.x;
+}
+
 glm::vec2 mdcii::map::MapContent::MapToScreen(const int t_mapX, const int t_mapY, const Rotation t_rotation) const
 {
-    MDCII_ASSERT(t_mapX >= 0, "[MapContent::MapToScreen()] Invalid x position given.")
-    MDCII_ASSERT(t_mapY >= 0, "[MapContent::MapToScreen()] Invalid y position given.")
+    MDCII_ASSERT(IsPositionInMap(t_mapX, t_mapY), "[MapContent::MapToScreen()] Invalid map position given.")
 
     const auto position{ RotatePosition(t_mapX, t_mapY, t_rotation) };
 
@@ -118,7 +132,49 @@ glm::ivec2 mdcii::map::MapContent::RotatePosition(const int t_mapX, const int t_
 }
 
 //-------------------------------------------------
-// Read
+// Edit
+//-------------------------------------------------
+
+void mdcii::map::MapContent::AddBuilding(const int t_mapX, const int t_mapY, const int t_buildingId, int t_orientation, int t_x, int t_y)
+{
+    const auto& terrainTile{ GetLayer(LayerType::TERRAIN).GetTile(t_mapX, t_mapY) };
+    if (!terrainTile.HasBuilding())
+    {
+        return;
+    }
+
+    // create a new MapTile object
+    MapTile mapTile;
+    mapTile.buildingId = t_buildingId;
+    mapTile.orientation = t_orientation;
+    mapTile.x = t_x;
+    mapTile.y = t_y;
+
+    // add pre calcs
+    PreCalcTile(mapTile, t_mapX, t_mapY);
+
+    // replace the tile in the building layer with the newly created tile
+    GetLayer(LayerType::BUILDINGS).ReplaceTile(t_mapX, t_mapY, mapTile);
+
+    // remove existing building component, if already exists
+    const auto result{ Game::ecs.remove<ecs::BuildingsLayerTileComponent>(terrainTile.entity) };
+    if (result)
+    {
+        Log::MDCII_LOG_DEBUG("[MapContent::AddBuilding()] Remove BuildingsLayerTileComponent from entity at x: {}, y: {}.", t_mapX, t_mapY);
+    }
+
+    // add a (new) BuildingsLayerTileComponent to the terrain entity
+    Game::ecs.emplace<ecs::BuildingsLayerTileComponent>(
+        terrainTile.entity,
+        mapTile,
+        buildings->buildingsMap.at(mapTile.buildingId)
+    );
+
+    Log::MDCII_LOG_DEBUG("[MapContent::AddBuilding()] Add BuildingsLayerTileComponent to entity at x: {}, y: {}.", t_mapX, t_mapY);
+}
+
+//-------------------------------------------------
+// Init
 //-------------------------------------------------
 
 void mdcii::map::MapContent::CreateContent(const std::string& t_filePath)
@@ -163,8 +219,6 @@ void mdcii::map::MapContent::CreateContent(const std::string& t_filePath)
                         mapLayer->AddTileFromJson(tile);
                     }
                 }
-
-                mapLayer->PreCalcTiles();
 
                 mapLayers.emplace_back(std::move(mapLayer));
             }
@@ -211,6 +265,8 @@ nlohmann::json mdcii::map::MapContent::ReadJsonFromFile(const std::string& t_fil
 
 void mdcii::map::MapContent::CreateEntitiesOfAllLayers() const
 {
+    Log::MDCII_LOG_DEBUG("[MapContent::CreateEntitiesOfAllLayers()] Create entities with components for each layer.");
+
     for (const auto& layer : mapLayers)
     {
         for (auto y{ 0 }; y < height; ++y)
@@ -228,6 +284,60 @@ void mdcii::map::MapContent::CreateEntitiesOfAllLayers() const
                     layer->AddBuildingsLayerComponent(x, y);
                 }
             }
+        }
+    }
+}
+
+//-------------------------------------------------
+// Pre-calculations
+//-------------------------------------------------
+
+void mdcii::map::MapContent::PreCalcTiles() const
+{
+    Log::MDCII_LOG_DEBUG("[MapContent::PreCalcTiles()] Add some pre-calculations to each layer tile.");
+
+    for (const auto& layer : mapLayers)
+    {
+        for (auto y{ 0 }; y < height; ++y)
+        {
+            for (auto x{ 0 }; x < width; ++x)
+            {
+                PreCalcTile(layer->GetTile(x, y), x, y);
+            }
+        }
+    }
+}
+
+void mdcii::map::MapContent::PreCalcTile(MapTile& t_mapTile, const int t_mapX, const int t_mapY) const
+{
+    // set layer/map position
+    t_mapTile.mapX = t_mapX;
+    t_mapTile.mapY = t_mapY;
+
+    // pre-calculate the position on the screen for each rotation
+    t_mapTile.screenPositions[0] = MapToScreen(t_mapX, t_mapY, Rotation::DEG0);
+    t_mapTile.screenPositions[1] = MapToScreen(t_mapX, t_mapY, Rotation::DEG90);
+    t_mapTile.screenPositions[2] = MapToScreen(t_mapX, t_mapY, Rotation::DEG180);
+    t_mapTile.screenPositions[3] = MapToScreen(t_mapX, t_mapY, Rotation::DEG270);
+
+    // pre-calculate the index for each rotation for sorting
+    t_mapTile.indices[0] = GetMapIndex(t_mapX, t_mapY, Rotation::DEG0);
+    t_mapTile.indices[1] = GetMapIndex(t_mapX, t_mapY, Rotation::DEG90);
+    t_mapTile.indices[2] = GetMapIndex(t_mapX, t_mapY, Rotation::DEG180);
+    t_mapTile.indices[3] = GetMapIndex(t_mapX, t_mapY, Rotation::DEG270);
+
+    // pre-calculate a gfx for each rotation
+    if (t_mapTile.HasBuilding())
+    {
+        const auto building{ buildings->buildingsMap.at(t_mapTile.buildingId) };
+        const auto gfx0{ building.gfx };
+
+        t_mapTile.gfxs.push_back(gfx0);
+        if (building.rotate > 0)
+        {
+            t_mapTile.gfxs.push_back(gfx0 + (1 * building.rotate));
+            t_mapTile.gfxs.push_back(gfx0 + (2 * building.rotate));
+            t_mapTile.gfxs.push_back(gfx0 + (3 * building.rotate));
         }
     }
 }

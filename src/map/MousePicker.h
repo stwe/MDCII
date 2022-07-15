@@ -73,7 +73,7 @@ namespace mdcii::map
          *
          * @param t_map The parent Map object.
          */
-        explicit MousePicker(std::shared_ptr<Map> t_map);
+        explicit MousePicker(Map* t_map);
 
         MousePicker(const MousePicker& t_other) = delete;
         MousePicker(MousePicker&& t_other) noexcept = delete;
@@ -99,7 +99,7 @@ namespace mdcii::map
         /**
          * The parent Map object.
          */
-        std::shared_ptr<Map> m_map;
+        Map* m_map{ nullptr };
 
         /**
          * The current mouse position.

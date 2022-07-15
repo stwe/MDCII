@@ -98,7 +98,7 @@ void mdcii::map::MapLayer::AddTile(const MapTile& t_mapTile)
 
 void mdcii::map::MapLayer::ReplaceTile(const int t_mapX, const int t_mapY, const MapTile& t_mapTile)
 {
-    mapTiles.at(GetMapIndex(t_mapX, t_mapY)) = t_mapTile;
+    mapTiles.at(m_mapContent->GetMapIndex(t_mapX, t_mapY)) = t_mapTile;
 }
 
 //-------------------------------------------------
@@ -107,12 +107,12 @@ void mdcii::map::MapLayer::ReplaceTile(const int t_mapX, const int t_mapY, const
 
 const mdcii::map::MapTile& mdcii::map::MapLayer::GetTile(const int t_mapX, const int t_mapY) const
 {
-    return mapTiles.at(GetMapIndex(t_mapX, t_mapY));
+    return mapTiles.at(m_mapContent->GetMapIndex(t_mapX, t_mapY));
 }
 
 mdcii::map::MapTile& mdcii::map::MapLayer::GetTile(const int t_mapX, const int t_mapY)
 {
-    return mapTiles.at(GetMapIndex(t_mapX, t_mapY));
+    return mapTiles.at(m_mapContent->GetMapIndex(t_mapX, t_mapY));
 }
 
 //-------------------------------------------------
@@ -121,6 +121,8 @@ mdcii::map::MapTile& mdcii::map::MapLayer::GetTile(const int t_mapX, const int t
 
 void mdcii::map::MapLayer::CreateGridEntity(const int t_mapX, const int t_mapY)
 {
+    MDCII_ASSERT(layerType == LayerType::TERRAIN, "[MapLayer::CreateGridEntity()] Wrong layer type.")
+
     // skip tiles without building Id
     if (!GetTile(t_mapX, t_mapY).HasBuilding())
     {
@@ -143,6 +145,8 @@ void mdcii::map::MapLayer::CreateGridEntity(const int t_mapX, const int t_mapY)
 
 void mdcii::map::MapLayer::CreateTerrainLayerEntity(const int t_mapX, const int t_mapY)
 {
+    MDCII_ASSERT(layerType == LayerType::TERRAIN, "[MapLayer::CreateTerrainLayerEntity()] Wrong layer type.")
+
     // skip tiles without building Id
     if (!GetTile(t_mapX, t_mapY).HasBuilding())
     {
@@ -165,6 +169,8 @@ void mdcii::map::MapLayer::CreateTerrainLayerEntity(const int t_mapX, const int 
 
 void mdcii::map::MapLayer::AddBuildingsLayerComponent(const int t_mapX, const int t_mapY)
 {
+    MDCII_ASSERT(layerType == LayerType::BUILDINGS, "[MapLayer::AddBuildingsLayerComponent()] Wrong layer type.")
+
     const auto& terrainTile{ m_mapContent->GetLayer(LayerType::TERRAIN).GetTile(t_mapX, t_mapY) };
     if (!terrainTile.HasBuilding())
     {
@@ -196,77 +202,10 @@ void mdcii::map::MapLayer::SortEntities(const Rotation t_rotation)
 }
 
 //-------------------------------------------------
-// Helper
-//-------------------------------------------------
-
-int mdcii::map::MapLayer::GetMapIndex(const int t_mapX, const int t_mapY, const Rotation t_rotation) const
-{
-    MDCII_ASSERT(t_mapX >= 0, "[MapLayer::GetMapIndex()] Invalid x position given.")
-    MDCII_ASSERT(t_mapY >= 0, "[MapLayer::GetMapIndex()] Invalid y position given.")
-
-    const auto position{ m_mapContent->RotatePosition(t_mapX, t_mapY, t_rotation) };
-
-    return position.y * m_mapContent->width + position.x;
-}
-
-//-------------------------------------------------
-// Precalculations
-//-------------------------------------------------
-
-void mdcii::map::MapLayer::PreCalcTiles()
-{
-    for (auto y{ 0 }; y < m_mapContent->height; ++y)
-    {
-        for (auto x{ 0 }; x < m_mapContent->width; ++x)
-        {
-            PreCalcTile(mapTiles.at(GetMapIndex(x, y)), x, y);
-        }
-    }
-}
-
-//-------------------------------------------------
 // Ecs
 //-------------------------------------------------
 
 entt::entity mdcii::map::MapLayer::CreatePlainEntity()
 {
     return Game::ecs.create();
-}
-
-//-------------------------------------------------
-// Precalculations
-//-------------------------------------------------
-
-void mdcii::map::MapLayer::PreCalcTile(MapTile& t_mapTile, const int t_mapX, const int t_mapY) const
-{
-    // set layer/map position
-    t_mapTile.mapX = t_mapX;
-    t_mapTile.mapY = t_mapY;
-
-    // pre-calculate the position on the screen for each rotation
-    t_mapTile.screenPositions[0] = m_mapContent->MapToScreen(t_mapX, t_mapY, Rotation::DEG0);
-    t_mapTile.screenPositions[1] = m_mapContent->MapToScreen(t_mapX, t_mapY, Rotation::DEG90);
-    t_mapTile.screenPositions[2] = m_mapContent->MapToScreen(t_mapX, t_mapY, Rotation::DEG180);
-    t_mapTile.screenPositions[3] = m_mapContent->MapToScreen(t_mapX, t_mapY, Rotation::DEG270);
-
-    // pre-calculate the index for each rotation for sorting
-    t_mapTile.indices[0] = GetMapIndex(t_mapX, t_mapY, Rotation::DEG0);
-    t_mapTile.indices[1] = GetMapIndex(t_mapX, t_mapY, Rotation::DEG90);
-    t_mapTile.indices[2] = GetMapIndex(t_mapX, t_mapY, Rotation::DEG180);
-    t_mapTile.indices[3] = GetMapIndex(t_mapX, t_mapY, Rotation::DEG270);
-
-    // pre-calculate a gfx for each rotation
-    if (t_mapTile.HasBuilding())
-    {
-        const auto building{ m_mapContent->buildings->buildingsMap.at(t_mapTile.buildingId) };
-        const auto gfx0{ building.gfx };
-
-        t_mapTile.gfxs.push_back(gfx0);
-        if (building.rotate > 0)
-        {
-            t_mapTile.gfxs.push_back(gfx0 + (1 * building.rotate));
-            t_mapTile.gfxs.push_back(gfx0 + (2 * building.rotate));
-            t_mapTile.gfxs.push_back(gfx0 + (3 * building.rotate));
-        }
-    }
 }

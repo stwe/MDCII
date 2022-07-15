@@ -19,7 +19,7 @@ namespace mdcii::data
 namespace mdcii::map
 {
     /**
-     * Creates all tile layers from a json file.
+     * Creates and manages all layers.
      */
     class MapContent
     {
@@ -29,22 +29,22 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * The width of the map in tiles.
+         * The width of each layer in tiles.
          */
         int width{ 0 };
 
         /**
-         * The height of the map in tiles.
+         * The height of each layer in tiles.
          */
         int height{ 0 };
 
         /**
-         * The map layers.
+         * The layers of the map.
          */
         std::vector<std::unique_ptr<MapLayer>> mapLayers;
 
         /**
-         * The map rotation.
+         * The rotation of each layer.
          */
         Rotation rotation{ Rotation::DEG0 };
 
@@ -85,12 +85,19 @@ namespace mdcii::map
          */
         [[nodiscard]] const MapLayer& GetLayer(LayerType t_layerType) const;
 
+        /**
+         * For convenience: Get MapLayer object by type.
+         *
+         * @param t_layerType The type of the layer.
+         */
+        MapLayer& GetLayer(LayerType t_layerType);
+
         //-------------------------------------------------
         // Sort
         //-------------------------------------------------
 
         /**
-         * Sorts the entities of all layers.
+         * Sorts the entities of each layer for rendering.
          */
         void SortEntitiesOfAllLayers() const;
 
@@ -99,12 +106,12 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * Rotate map content left.
+         * Rotate all layers left.
          */
         void RotateLeft();
 
         /**
-         * Rotate map content right.
+         * Rotate all layers right.
          */
         void RotateRight();
 
@@ -115,11 +122,23 @@ namespace mdcii::map
         /**
          * Checks whether a position is in map.
          *
-         * @param t_position The position to check.
+         * @param t_mapX The x position of the map to check.
+         * @param t_mapY The y position of the map to check.
          *
          * @return True or false depending on the position in the map.
          */
-        [[nodiscard]] bool IsPositionInMap(const glm::ivec2& t_position) const;
+        [[nodiscard]] bool IsPositionInMap(int t_mapX, int t_mapY) const;
+
+        /**
+         * 2D/1D - mapping.
+         *
+         * @param t_mapX The x position of the map.
+         * @param t_mapY The y position of the map.
+         * @param t_rotation The position is previously rotated by the specified value.
+         *
+         * @return The index.
+         */
+        [[nodiscard]] int GetMapIndex(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
 
         /**
          * Projects map coordinates into an isometric position
@@ -144,11 +163,19 @@ namespace mdcii::map
          */
         [[nodiscard]] glm::ivec2 RotatePosition(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
 
+        //-------------------------------------------------
+        // Edit
+        //-------------------------------------------------
+
+        // todo
+
+        void AddBuilding(int t_mapX, int t_mapY, int t_buildingId, int t_orientation, int t_x, int t_y);
+
     protected:
 
     private:
         //-------------------------------------------------
-        // Read
+        // Init
         //-------------------------------------------------
 
         /**
@@ -170,8 +197,28 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * Creates the entities of all layers.
+         * Creates entities with components for each layer.
          */
         void CreateEntitiesOfAllLayers() const;
+
+        //-------------------------------------------------
+        // Pre-calculations
+        //-------------------------------------------------
+
+        /**
+         * Adds some pre-calculations to each layer tile,
+         * which are necessary for the display on the screen.
+         */
+        void PreCalcTiles() const;
+
+        /**
+         * Adds some pre-calculations to a tile object,
+         * which are necessary for the display on the screen.
+         *
+         * @param t_mapTile The tile object.
+         * @param t_mapX The x position of the map.
+         * @param t_mapY The y position of the map.
+         */
+        void PreCalcTile(MapTile& t_mapTile, int t_mapX, int t_mapY) const;
     };
 }

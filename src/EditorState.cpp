@@ -59,7 +59,6 @@ void mdcii::EditorState::PreRender()
 void mdcii::EditorState::Render()
 {
     m_map->Render(*context->window, *context->camera);
-    m_mousePicker->Render(*context->window, *context->camera);
 }
 
 void mdcii::EditorState::RenderImGui()
@@ -93,7 +92,7 @@ void mdcii::EditorState::RenderImGui()
     ImGui::End();
 
     // MousePicker Gui
-    m_mousePicker->RenderImGui();
+    m_map->mousePicker->RenderImGui();
 
     ogl::Window::ImGuiEnd();
 }
@@ -116,9 +115,6 @@ void mdcii::EditorState::Init()
 
     // create the Map object to edit
     m_map = std::make_shared<map::Map>("data/ExampleMap.json", context->buildings);
-
-    // create the MousePicker to select tiles
-    m_mousePicker = std::make_unique<map::MousePicker>(m_map);
 
     // create the menus
     m_editorGui = std::make_unique<EditorGui>(m_text, m_map, context->buildings);

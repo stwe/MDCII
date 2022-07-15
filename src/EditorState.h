@@ -15,7 +15,6 @@ namespace mdcii::data
 namespace mdcii::map
 {
     class Map;
-    class MousePicker;
 }
 
 //-------------------------------------------------
@@ -93,11 +92,6 @@ namespace mdcii
          * The Map object to edit.
          */
         std::shared_ptr<map::Map> m_map;
-
-        /**
-         * A MousePicker object to select tiles.
-         */
-        std::unique_ptr<map::MousePicker> m_mousePicker;
 
         /**
          * Current selected building.
