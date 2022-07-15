@@ -135,7 +135,14 @@ glm::ivec2 mdcii::map::MapContent::RotatePosition(const int t_mapX, const int t_
 // Edit
 //-------------------------------------------------
 
-void mdcii::map::MapContent::AddBuilding(const int t_mapX, const int t_mapY, const int t_buildingId, int t_orientation, int t_x, int t_y)
+void mdcii::map::MapContent::AddBuilding(
+    const int t_mapX,
+    const int t_mapY,
+    const int t_buildingId,
+    const int t_orientation,
+    const int t_x,
+    const int t_y
+)
 {
     const auto& terrainTile{ GetLayer(LayerType::TERRAIN).GetTile(t_mapX, t_mapY) };
     if (!terrainTile.HasBuilding())
@@ -160,7 +167,7 @@ void mdcii::map::MapContent::AddBuilding(const int t_mapX, const int t_mapY, con
     const auto result{ Game::ecs.remove<ecs::BuildingsLayerTileComponent>(terrainTile.entity) };
     if (result)
     {
-        Log::MDCII_LOG_DEBUG("[MapContent::AddBuilding()] Remove BuildingsLayerTileComponent from entity at x: {}, y: {}.", t_mapX, t_mapY);
+        //Log::MDCII_LOG_DEBUG("[MapContent::AddBuilding()] Remove BuildingsLayerTileComponent from entity at x: {}, y: {}.", t_mapX, t_mapY);
     }
 
     // add a (new) BuildingsLayerTileComponent to the terrain entity
@@ -170,7 +177,26 @@ void mdcii::map::MapContent::AddBuilding(const int t_mapX, const int t_mapY, con
         buildings->buildingsMap.at(mapTile.buildingId)
     );
 
-    Log::MDCII_LOG_DEBUG("[MapContent::AddBuilding()] Add BuildingsLayerTileComponent to entity at x: {}, y: {}.", t_mapX, t_mapY);
+    //Log::MDCII_LOG_DEBUG("[MapContent::AddBuilding()] Add BuildingsLayerTileComponent to entity at x: {}, y: {}.", t_mapX, t_mapY);
+}
+
+void mdcii::map::MapContent::RemoveBuilding(const int t_mapX, const int t_mapY)
+{
+    const auto& terrainTile{ GetLayer(LayerType::TERRAIN).GetTile(t_mapX, t_mapY) };
+    if (!terrainTile.HasBuilding())
+    {
+        return;
+    }
+
+    // replace the tile in the building layer with an empty newly created tile
+    GetLayer(LayerType::BUILDINGS).ReplaceTile(t_mapX, t_mapY, {});
+
+    // remove existing building component, if already exists
+    const auto result{ Game::ecs.remove<ecs::BuildingsLayerTileComponent>(terrainTile.entity) };
+    if (result)
+    {
+        //Log::MDCII_LOG_DEBUG("[MapContent::RemoveBuilding()] Remove BuildingsLayerTileComponent from entity at x: {}, y: {}.", t_mapX, t_mapY);
+    }
 }
 
 //-------------------------------------------------

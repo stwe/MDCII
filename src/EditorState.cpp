@@ -114,7 +114,7 @@ void mdcii::EditorState::Init()
     m_text = std::make_shared<data::Text>();
 
     // create the Map object to edit
-    m_map = std::make_shared<map::Map>("data/ExampleMap.json", context->buildings);
+    m_map = std::make_shared<map::Map>("data/ExampleMap.json", context->buildings, *context->window, *context->camera);
 
     // create the menus
     m_editorGui = std::make_unique<EditorGui>(m_text, m_map, context->buildings);
@@ -135,6 +135,7 @@ void mdcii::EditorState::AddListeners()
                 if (t_event.selectedBauGfx.HasBuilding())
                 {
                     m_selectedBauGfx = t_event.selectedBauGfx;
+                    m_map->bauGfxSelected = true;
                 }
             }
         )
@@ -150,6 +151,7 @@ void mdcii::EditorState::AddListeners()
                 if (t_event.button == 1)
                 {
                     m_selectedBauGfx = {};
+                    m_map->bauGfxSelected = false;
                 }
             }
         )

@@ -127,6 +127,11 @@ namespace mdcii::map
          */
         bool renderBuildingsLayer{ true };
 
+        /**
+         * Indicates whether a bauGfx is selected to build.
+         */
+        bool bauGfxSelected{ false };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -138,8 +143,15 @@ namespace mdcii::map
          *
          * @param t_filePath The path to the json map file.
          * @param t_buildings Access to all building objects.
+         * @param t_window The Window object.
+         * @param t_camera The Camera object.
          */
-        Map(const std::string& t_filePath, std::shared_ptr<data::Buildings> t_buildings);
+        Map(
+            const std::string& t_filePath,
+            std::shared_ptr<data::Buildings> t_buildings,
+            const ogl::Window& t_window,
+            const camera::Camera& t_camera
+        );
 
         Map(const Map& t_other) = delete;
         Map(Map&& t_other) noexcept = delete;
@@ -224,9 +236,13 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * Create objects.
+         * Initialize objects.
+         *
+         * @param t_filePath The path to the json map file.
+         * @param t_window The Window object.
+         * @param t_camera The Camera object.
          */
-        void Init(const std::string& t_filePath);
+        void Init(const std::string& t_filePath, const ogl::Window& t_window, const camera::Camera& t_camera);
 
         //-------------------------------------------------
         // Render Entities
@@ -264,7 +280,5 @@ namespace mdcii::map
             const data::Building& t_building,
             bool t_selected = false
         ) const;
-
-        void AddListeners();
     };
 }

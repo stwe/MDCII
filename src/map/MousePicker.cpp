@@ -16,7 +16,7 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::map::MousePicker::MousePicker(Map* t_map)
+mdcii::map::MousePicker::MousePicker(Map* t_map, const ogl::Window& t_window, const camera::Camera& t_camera)
     : m_map{ t_map }
 {
     Log::MDCII_LOG_DEBUG("[MousePicker::MousePicker()] Create MousePicker.");
@@ -24,7 +24,7 @@ mdcii::map::MousePicker::MousePicker(Map* t_map)
     MDCII_ASSERT(m_map, "[MousePicker::MousePicker()] Null pointer.")
 
     Init();
-    AddListeners();
+    AddListeners(t_window, t_camera);
 }
 
 mdcii::map::MousePicker::~MousePicker() noexcept
@@ -45,120 +45,6 @@ void mdcii::map::MousePicker::Render(const ogl::Window& t_window, const camera::
         return;
     }
 
-    m_mouse = glm::ivec2(t_window.GetMouseX(), t_window.GetMouseY());
-    m_cell = glm::ivec2(m_mouse.x / MapTile::TILE_WIDTH, (m_mouse.y + Map::ELEVATION) / MapTile::TILE_HEIGHT);
-    m_offsetIntoCell = glm::ivec2(m_mouse.x % MapTile::TILE_WIDTH, (m_mouse.y + Map::ELEVATION) % MapTile::TILE_HEIGHT);
-
-    const glm::ivec2 origin{
-        static_cast<int>(t_camera.position.x) / MapTile::TILE_WIDTH,
-        static_cast<int>(t_camera.position.y) / MapTile::TILE_HEIGHT
-    };
-
-    const auto* pixelCol{ m_cornerImage + (4ULL * (static_cast<size_t>(m_offsetIntoCell.y) * MapTile::TILE_WIDTH + m_offsetIntoCell.x)) };
-    const auto r = pixelCol[0];
-    const auto g = pixelCol[1];
-    const auto b = pixelCol[2];
-
-    if (m_map->mapContent->rotation == Rotation::DEG0)
-    {
-        selected.currentPosition = glm::ivec2(
-            (m_cell.y + origin.y) + (m_cell.x + origin.x),
-            (m_cell.y + origin.y) - (m_cell.x + origin.x)
-        );
-
-        if (r == 255 && g == 0 && b == 0)
-        {
-            selected.currentPosition.x -= 1;
-        }
-        else if (r == 0 && g == 255 && b == 0)
-        {
-            selected.currentPosition.y -= 1;
-        }
-        else  if (r == 0 && g == 0 && b == 255)
-        {
-            selected.currentPosition.y += 1;
-        }
-        else if (r == 255 && g == 255 && b == 0)
-        {
-            selected.currentPosition.x += 1;
-        }
-    }
-
-    if (m_map->mapContent->rotation == Rotation::DEG90)
-    {
-        selected.currentPosition = glm::ivec2(
-            (m_cell.y + origin.y) - (m_cell.x + origin.x),
-            m_map->mapContent->width - 1 - ((m_cell.x + origin.x) + (m_cell.y + origin.y))
-        );
-
-        if (r == 255 && g == 0 && b == 0)
-        {
-            selected.currentPosition.y += 1;
-        }
-        else if (r == 0 && g == 255 && b == 0)
-        {
-            selected.currentPosition.x -= 1;
-        }
-        else  if (r == 0 && g == 0 && b == 255)
-        {
-            selected.currentPosition.x += 1;
-        }
-        else if (r == 255 && g == 255 && b == 0)
-        {
-            selected.currentPosition.y -= 1;
-        }
-    }
-
-    if (m_map->mapContent->rotation == Rotation::DEG180)
-    {
-        selected.currentPosition = glm::ivec2(
-            m_map->mapContent->width - 1 - ((m_cell.y + origin.y) + (m_cell.x + origin.x)),
-            m_map->mapContent->height - 1 - ((m_cell.y + origin.y) - (m_cell.x + origin.x))
-        );
-
-        if (r == 255 && g == 0 && b == 0)
-        {
-            selected.currentPosition.x += 1;
-        }
-        else if (r == 0 && g == 255 && b == 0)
-        {
-            selected.currentPosition.y += 1;
-        }
-        else  if (r == 0 && g == 0 && b == 255)
-        {
-            selected.currentPosition.y -= 1;
-        }
-        else if (r == 255 && g == 255 && b == 0)
-        {
-            selected.currentPosition.x -= 1;
-        }
-    }
-
-    if (m_map->mapContent->rotation == Rotation::DEG270)
-    {
-        selected.currentPosition = glm::ivec2(
-            m_map->mapContent->height - 1 - ((m_cell.y + origin.y) - (m_cell.x + origin.x)),
-            (m_cell.y + origin.y) + (m_cell.x + origin.x)
-        );
-
-        if (r == 255 && g == 0 && b == 0)
-        {
-            selected.currentPosition.y -= 1;
-        }
-        else if (r == 0 && g == 255 && b == 0)
-        {
-            selected.currentPosition.x += 1;
-        }
-        else  if (r == 0 && g == 0 && b == 255)
-        {
-            selected.currentPosition.x -= 1;
-        }
-        else if (r == 255 && g == 255 && b == 0)
-        {
-            selected.currentPosition.y += 1;
-        }
-    }
-
     RenderMouseCursor(t_window, t_camera);
 }
 
@@ -166,13 +52,135 @@ void mdcii::map::MousePicker::RenderImGui() const
 {
     ImGui::Begin("MousePicker");
 
-    ImGui::Text("Mouse x: %d, y: %d, in window: %s", m_mouse.x, m_mouse.y, m_inWindow ? "yes" : "no");
-    ImGui::Text("Cell x: %d, y: %d", m_cell.x, m_cell.y);
-    ImGui::Text("Offset into cell x: %d, y: %d", m_offsetIntoCell.x, m_offsetIntoCell.y);
-    ImGui::Text("Current tile position x: %d, y: %d", selected.currentPosition.x, selected.currentPosition.y);
-    ImGui::Text("Last tile position x: %d, y: %d", selected.lastPosition.x, selected.lastPosition.y);
+    ImGui::Text("Current position x: %d, y: %d", currentPosition.x, currentPosition.y);
+    ImGui::Text("Old position x: %d, y: %d", lastPosition.x, lastPosition.y);
 
     ImGui::End();
+}
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+glm::ivec2 mdcii::map::MousePicker::GetMapPosition(const ogl::Window& t_window, const camera::Camera& t_camera) const
+{
+    const auto mouse{ glm::ivec2(t_window.GetMouseX(), t_window.GetMouseY()) };
+    const auto cell{ glm::ivec2(mouse.x / MapTile::TILE_WIDTH, (mouse.y + Map::ELEVATION) / MapTile::TILE_HEIGHT) };
+    const auto offsetIntoCell{ glm::ivec2(mouse.x % MapTile::TILE_WIDTH, (mouse.y + Map::ELEVATION) % MapTile::TILE_HEIGHT) };
+
+    const glm::ivec2 origin{
+        static_cast<int>(t_camera.position.x) / MapTile::TILE_WIDTH,
+        static_cast<int>(t_camera.position.y) / MapTile::TILE_HEIGHT
+    };
+
+    const auto* pixelCol{ m_cornerImage + (4ULL * (static_cast<size_t>(offsetIntoCell.y) * MapTile::TILE_WIDTH + offsetIntoCell.x)) };
+    const auto r = pixelCol[0];
+    const auto g = pixelCol[1];
+    const auto b = pixelCol[2];
+
+    auto result{ glm::ivec2(-1) };
+
+    if (m_map->mapContent->rotation == Rotation::DEG0)
+    {
+        result = glm::ivec2(
+            (cell.y + origin.y) + (cell.x + origin.x),
+            (cell.y + origin.y) - (cell.x + origin.x)
+        );
+
+        if (r == 255 && g == 0 && b == 0)
+        {
+            result.x -= 1;
+        }
+        else if (r == 0 && g == 255 && b == 0)
+        {
+            result.y -= 1;
+        }
+        else  if (r == 0 && g == 0 && b == 255)
+        {
+            result.y += 1;
+        }
+        else if (r == 255 && g == 255 && b == 0)
+        {
+            result.x += 1;
+        }
+    }
+
+    if (m_map->mapContent->rotation == Rotation::DEG90)
+    {
+        result = glm::ivec2(
+            (cell.y + origin.y) - (cell.x + origin.x),
+            m_map->mapContent->width - 1 - ((cell.x + origin.x) + (cell.y + origin.y))
+        );
+
+        if (r == 255 && g == 0 && b == 0)
+        {
+            result.y += 1;
+        }
+        else if (r == 0 && g == 255 && b == 0)
+        {
+            result.x -= 1;
+        }
+        else  if (r == 0 && g == 0 && b == 255)
+        {
+            result.x += 1;
+        }
+        else if (r == 255 && g == 255 && b == 0)
+        {
+            result.y -= 1;
+        }
+    }
+
+    if (m_map->mapContent->rotation == Rotation::DEG180)
+    {
+        result = glm::ivec2(
+            m_map->mapContent->width - 1 - ((cell.y + origin.y) + (cell.x + origin.x)),
+            m_map->mapContent->height - 1 - ((cell.y + origin.y) - (cell.x + origin.x))
+        );
+
+        if (r == 255 && g == 0 && b == 0)
+        {
+            result.x += 1;
+        }
+        else if (r == 0 && g == 255 && b == 0)
+        {
+            result.y += 1;
+        }
+        else  if (r == 0 && g == 0 && b == 255)
+        {
+            result.y -= 1;
+        }
+        else if (r == 255 && g == 255 && b == 0)
+        {
+            result.x -= 1;
+        }
+    }
+
+    if (m_map->mapContent->rotation == Rotation::DEG270)
+    {
+        result = glm::ivec2(
+            m_map->mapContent->height - 1 - ((cell.y + origin.y) - (cell.x + origin.x)),
+            (cell.y + origin.y) + (cell.x + origin.x)
+        );
+
+        if (r == 255 && g == 0 && b == 0)
+        {
+            result.y -= 1;
+        }
+        else if (r == 0 && g == 255 && b == 0)
+        {
+            result.x += 1;
+        }
+        else  if (r == 0 && g == 0 && b == 255)
+        {
+            result.x -= 1;
+        }
+        else if (r == 255 && g == 255 && b == 0)
+        {
+            result.y += 1;
+        }
+    }
+
+    return result;
 }
 
 //-------------------------------------------------
@@ -181,12 +189,12 @@ void mdcii::map::MousePicker::RenderImGui() const
 
 void mdcii::map::MousePicker::RenderMouseCursor(const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
-    if (!m_map->mapContent->IsPositionInMap(selected.currentPosition.x, selected.currentPosition.y))
+    if (!m_map->mapContent->IsPositionInMap(currentPosition.x, currentPosition.y))
     {
         return;
     }
 
-    auto screenPosition{ m_map->mapContent->MapToScreen(selected.currentPosition.x, selected.currentPosition.y, m_map->mapContent->rotation) };
+    auto screenPosition{ m_map->mapContent->MapToScreen(currentPosition.x, currentPosition.y, m_map->mapContent->rotation) };
     screenPosition.y -= Map::ELEVATION;
 
     m_renderer->RenderTile(
@@ -223,7 +231,7 @@ void mdcii::map::MousePicker::Init()
     Log::MDCII_LOG_DEBUG("[MousePicker::Init()] The mouse picker was successfully initialized.");
 }
 
-void mdcii::map::MousePicker::AddListeners()
+void mdcii::map::MousePicker::AddListeners(const ogl::Window& t_window, const camera::Camera& t_camera)
 {
     Log::MDCII_LOG_DEBUG("[MousePicker::AddListeners()] Add listeners.");
 
@@ -248,8 +256,6 @@ void mdcii::map::MousePicker::AddListeners()
             {
                 if (t_event.button == 0)
                 {
-                    selected.lastPosition = selected.currentPosition;
-                    selected.lastChanged = true;
                 }
             }
         )
@@ -264,7 +270,41 @@ void mdcii::map::MousePicker::AddListeners()
             {
                 if (t_event.button == 0)
                 {
-                    selected.lastChanged = false;
+                }
+            }
+        )
+    );
+
+    // mouse moved
+    event::EventManager::eventDispatcher.appendListener(
+        event::MdciiEventType::MOUSE_MOVED,
+        eventpp::argumentAdapter<void(const event::MouseMovedEvent&)>
+        (
+            [&](const event::MouseMovedEvent& t_event)
+            {
+                const auto newPosition{ GetMapPosition(t_window, t_camera) };
+                if (newPosition != currentPosition)
+                {
+                    lastPosition = currentPosition;
+                    currentPosition = newPosition;
+                }
+
+                if (m_map->mapContent->IsPositionInMap(currentPosition.x, currentPosition.y) &&
+                    m_map->mapContent->IsPositionInMap(lastPosition.x, lastPosition.y))
+                {
+                    if (m_map->bauGfxSelected)
+                    {
+                        m_map->mapContent->RemoveBuilding(
+                            lastPosition.x,
+                            lastPosition.y
+                        );
+
+                        m_map->mapContent->AddBuilding(
+                            currentPosition.x,
+                            currentPosition.y,
+                            305, 0, 0, 0
+                        ); // 305 = Turm
+                    }
                 }
             }
         )

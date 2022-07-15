@@ -60,12 +60,12 @@ namespace mdcii::map
          */
 
         /**
-         * The x position of the tile in local/object space.
+         * The x position of the tile in local/object space of the building.
          */
         int32_t x{ 0 };
 
         /**
-         * The y position of the tile in local/object space.
+         * The y position of the tile in local/object space of the building.
          */
         int32_t y{ 0 };
 
