@@ -157,7 +157,7 @@ void mdcii::EditorState::AddListeners() const
                     const auto view{ Game::ecs.view<const ecs::BuildingUpdatedComponent, const ecs::BuildingsLayerTileComponent>() };
                     for (const auto entity : view)
                     {
-                        auto& [uc, bc] { view.get(entity) };
+                        const auto& [uc, bc] { view.get(entity) };
                         m_map->mapContent->GetLayer(map::LayerType::BUILDINGS).ReplaceTile(bc.mapTile);
 
                         Game::ecs.remove<ecs::BuildingUpdatedComponent>(entity);
