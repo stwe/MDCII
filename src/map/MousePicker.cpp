@@ -52,10 +52,24 @@ void mdcii::map::MousePicker::RenderImGui() const
 {
     ImGui::Begin("MousePicker");
 
-    ImGui::Text("Current position x: %d, y: %d", currentPosition.x, currentPosition.y);
-    ImGui::Text("Old position x: %d, y: %d", lastPosition.x, lastPosition.y);
+    ImGui::Text("Current position x: %d, y: %d", m_currentPosition.x, m_currentPosition.y);
+    ImGui::Text("Old position x: %d, y: %d", m_lastPosition.x, m_lastPosition.y);
 
     ImGui::End();
+}
+
+//-------------------------------------------------
+// Logic
+//-------------------------------------------------
+
+void mdcii::map::MousePicker::UpdatePositions(const ogl::Window& t_window, const camera::Camera& t_camera)
+{
+    const auto newPosition{ GetMapPosition(t_window, t_camera) };
+    if (newPosition != m_currentPosition)
+    {
+        m_lastPosition = m_currentPosition;
+        m_currentPosition = newPosition;
+    }
 }
 
 //-------------------------------------------------
@@ -183,18 +197,28 @@ glm::ivec2 mdcii::map::MousePicker::GetMapPosition(const ogl::Window& t_window, 
     return result;
 }
 
+bool mdcii::map::MousePicker::IsCurrentMouseInMap() const
+{
+    return m_map->mapContent->IsPositionInMap(m_currentPosition.x, m_currentPosition.y);
+}
+
+bool mdcii::map::MousePicker::IsLastMouseInMap() const
+{
+    return m_map->mapContent->IsPositionInMap(m_lastPosition.x, m_lastPosition.y);
+}
+
 //-------------------------------------------------
 // Cursor
 //-------------------------------------------------
 
 void mdcii::map::MousePicker::RenderMouseCursor(const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
-    if (!m_map->mapContent->IsPositionInMap(currentPosition.x, currentPosition.y))
+    if (!m_map->mapContent->IsPositionInMap(m_currentPosition.x, m_currentPosition.y))
     {
         return;
     }
 
-    auto screenPosition{ m_map->mapContent->MapToScreen(currentPosition.x, currentPosition.y, m_map->mapContent->rotation) };
+    auto screenPosition{ m_map->mapContent->MapToScreen(m_currentPosition.x, m_currentPosition.y, m_map->mapContent->rotation) };
     screenPosition.y -= Map::ELEVATION;
 
     m_renderer->RenderTile(
@@ -282,30 +306,14 @@ void mdcii::map::MousePicker::AddListeners(const ogl::Window& t_window, const ca
         (
             [&](const event::MouseMovedEvent& t_event)
             {
-                const auto newPosition{ GetMapPosition(t_window, t_camera) };
-                if (newPosition != currentPosition)
-                {
-                    lastPosition = currentPosition;
-                    currentPosition = newPosition;
-                }
+                UpdatePositions(t_window, t_camera);
 
-                if (m_map->mapContent->IsPositionInMap(currentPosition.x, currentPosition.y) &&
-                    m_map->mapContent->IsPositionInMap(lastPosition.x, lastPosition.y))
+                if (IsCurrentMouseInMap() && IsLastMouseInMap())
                 {
                     if (m_map->selectedBauGfx.HasBuilding())
                     {
-                        m_map->mapContent->RemoveBuilding(
-                            lastPosition.x,
-                            lastPosition.y,
-                            m_map->selectedBauGfx.buildingId
-                        );
-
-                        // todo pass event::SelectedBauGfx type
-                        m_map->mapContent->AddBuilding(
-                            currentPosition.x,
-                            currentPosition.y,
-                            m_map->selectedBauGfx.buildingId, m_map->selectedBauGfx.orientation
-                        );
+                        m_map->mapContent->RemoveBuilding(m_lastPosition.x, m_lastPosition.y, m_map->selectedBauGfx);
+                        m_map->mapContent->AddBuilding(m_currentPosition.x, m_currentPosition.y, m_map->selectedBauGfx);
                     }
                 }
             }

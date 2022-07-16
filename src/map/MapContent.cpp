@@ -135,14 +135,9 @@ glm::ivec2 mdcii::map::MapContent::RotatePosition(const int t_mapX, const int t_
 // Edit
 //-------------------------------------------------
 
-void mdcii::map::MapContent::AddBuilding(
-    const int t_mapX,
-    const int t_mapY,
-    const int t_buildingId,
-    const int t_orientation
-)
+void mdcii::map::MapContent::AddBuilding(const int t_mapX, const int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx)
 {
-    const auto& building{ buildings->buildingsMap.at(t_buildingId) };
+    const auto& building{ buildings->buildingsMap.at(t_selectedBauGfx.buildingId) };
 
     // check all positions before
     for (auto y{ 0 }; y < building.size.h; ++y)
@@ -176,8 +171,8 @@ void mdcii::map::MapContent::AddBuilding(
 
             // create a new MapTile object
             MapTile mapTile;
-            mapTile.buildingId = t_buildingId;
-            mapTile.orientation = t_orientation;
+            mapTile.buildingId = t_selectedBauGfx.buildingId;
+            mapTile.orientation = t_selectedBauGfx.orientation;
             mapTile.x = x;
             mapTile.y = y;
 
@@ -200,9 +195,9 @@ void mdcii::map::MapContent::AddBuilding(
     }
 }
 
-void mdcii::map::MapContent::RemoveBuilding(const int t_mapX, const int t_mapY, const int t_buildingId)
+void mdcii::map::MapContent::RemoveBuilding(const int t_mapX, const int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx)
 {
-    const auto& building{ buildings->buildingsMap.at(t_buildingId) };
+    const auto& building{ buildings->buildingsMap.at(t_selectedBauGfx.buildingId) };
 
     // check all positions before
     for (auto y{ 0 }; y < building.size.h; ++y)

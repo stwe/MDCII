@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "MapLayer.h"
+#include "event/Event.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -172,19 +173,18 @@ namespace mdcii::map
          *
          * @param t_mapX The x position of the tile on the world map.
          * @param t_mapY The y position of the tile on the world map.
-         * @param t_buildingId The Id of the building to add.
-         * @param t_orientation The orientation of the building.
+         * @param t_selectedBauGfx Information about the building to be built.
          */
-        void AddBuilding(int t_mapX, int t_mapY, int t_buildingId, int t_orientation);
+        void AddBuilding(int t_mapX, int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx);
 
         /**
          * Removes a tile from the building layer and the component from the entity.
          *
          * @param t_mapX The map x position of the tile.
          * @param t_mapY The map y position of the tile.
-         * @param t_buildingId The Id of the building to remove.
+         * @param t_selectedBauGfx Information about the building to be remove.
          */
-        void RemoveBuilding(int t_mapX, int t_mapY, int t_buildingId);
+        void RemoveBuilding(int t_mapX, int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx);
 
     protected:
 
