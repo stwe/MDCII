@@ -312,8 +312,9 @@ void mdcii::map::MousePicker::AddListeners(const ogl::Window& t_window, const ca
                 {
                     if (m_map->selectedBauGfx.HasBuilding())
                     {
-                        m_map->mapContent->RemoveBuilding(m_lastPosition.x, m_lastPosition.y, m_map->selectedBauGfx);
-                        m_map->mapContent->AddBuilding(m_currentPosition.x, m_currentPosition.y, m_map->selectedBauGfx);
+                        // update terrain tile entities
+                        m_map->mapContent->RemoveBuildingsLayerComponent(m_lastPosition.x, m_lastPosition.y, m_map->selectedBauGfx);
+                        m_map->mapContent->AddBuildingsLayerComponent(m_currentPosition.x, m_currentPosition.y, m_map->selectedBauGfx);
                     }
                 }
             }

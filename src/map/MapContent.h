@@ -2,16 +2,8 @@
 
 #include <memory>
 #include "MapLayer.h"
+#include "data/Buildings.h"
 #include "event/Event.h"
-
-//-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii::data
-{
-    class Buildings;
-}
 
 //-------------------------------------------------
 // MapContent
@@ -169,22 +161,22 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * Adds a tile to the building layer and a component to the entity.
+         * Adds the BuildingsLayerTileComponent to the terrain tile entity.
          *
-         * @param t_mapX The x position of the tile on the world map.
-         * @param t_mapY The y position of the tile on the world map.
-         * @param t_selectedBauGfx Information about the building to be built.
+         * @param t_mapX The start map x position of a building.
+         * @param t_mapY The start map y position of a building.
+         * @param t_selectedBauGfx Information about the building to be add.
          */
-        void AddBuilding(int t_mapX, int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx);
+        void AddBuildingsLayerComponent(int t_mapX, int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx);
 
         /**
-         * Removes a tile from the building layer and the component from the entity.
+         * Removes the BuildingsLayerTileComponent from the terrain tile entity.
          *
-         * @param t_mapX The map x position of the tile.
-         * @param t_mapY The map y position of the tile.
+         * @param t_mapX The start map x position of a building.
+         * @param t_mapY The start map y position of a building.
          * @param t_selectedBauGfx Information about the building to be remove.
          */
-        void RemoveBuilding(int t_mapX, int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx);
+        void RemoveBuildingsLayerComponent(int t_mapX, int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx);
 
     protected:
 
@@ -206,6 +198,44 @@ namespace mdcii::map
          * @param t_filePath The path to the json map file.
          */
         [[nodiscard]] static nlohmann::json ReadJsonFromFile(const std::string& t_filePath);
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        /**
+         * Checks if the building is outside the map.
+         *
+         * @param t_mapX The start map x position of the building.
+         * @param t_mapY The start map y position of the building.
+         * @param t_building The Building object to check.
+         *
+         * @return True or false depending on whether the building is outside.
+         */
+        [[nodiscard]] bool IsBuildingOutsideTheMap(int t_mapX, int t_mapY, const data::Building& t_building) const;
+
+        /**
+         * Checks whether there is already a building at the given position in the layer.
+         *
+         * @param t_mapX The start map x position of the building in the layer.
+         * @param t_mapY The start map y position of the building in the layer.
+         * @param t_building The Building object to check.
+         * @param t_layerType The Layer object to check.
+         *
+         * @return True or false, depending on whether a building already exists.
+         */
+        [[nodiscard]] bool IsAlreadyBuildingOnLayer(int t_mapX, int t_mapY, const data::Building& t_building, LayerType t_layerType) const;
+
+        /**
+         * Checks if the building is over the coast.
+         *
+         * @param t_mapX The start map x position of the building in the layer.
+         * @param t_mapY The start map y position of the building in the layer.
+         * @param t_building The Building object to check.
+         *
+         * @return True or false, depending on whether the building is over the coast.
+         */
+        [[nodiscard]] bool IsBuildingOnWaterOrCoast(int t_mapX, int t_mapY, const data::Building& t_building) const;
 
         //-------------------------------------------------
         // Ecs

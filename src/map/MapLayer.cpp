@@ -91,14 +91,9 @@ void mdcii::map::MapLayer::AddTileFromJson(const nlohmann::json& t_json)
     mapTiles.emplace_back(t_json.get<MapTile>());
 }
 
-void mdcii::map::MapLayer::AddTile(const MapTile& t_mapTile)
+void mdcii::map::MapLayer::ReplaceTile(const MapTile& t_mapTile)
 {
-    mapTiles.emplace_back(t_mapTile);
-}
-
-void mdcii::map::MapLayer::ReplaceTile(const int t_mapX, const int t_mapY, const MapTile& t_mapTile)
-{
-    mapTiles.at(m_mapContent->GetMapIndex(t_mapX, t_mapY)) = t_mapTile;
+    mapTiles.at(m_mapContent->GetMapIndex(t_mapTile.mapX, t_mapTile.mapY)) = t_mapTile;
 }
 
 //-------------------------------------------------

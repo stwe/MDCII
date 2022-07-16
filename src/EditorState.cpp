@@ -7,6 +7,7 @@
 #include "event/EventManager.h"
 #include "eventpp/utilities/argumentadapter.h"
 #include "map/Map.h"
+#include "map/MapContent.h"
 #include "map/MousePicker.h"
 
 //-------------------------------------------------
@@ -149,7 +150,18 @@ void mdcii::EditorState::AddListeners() const
             {
                 if (t_event.button == 1)
                 {
+                    // clear the selection
                     m_map->selectedBauGfx = {};
+
+                    // update buildings layer
+                    const auto view{ Game::ecs.view<const ecs::BuildingUpdatedComponent, const ecs::BuildingsLayerTileComponent>() };
+                    for (const auto entity : view)
+                    {
+                        auto& [uc, bc] { view.get(entity) };
+                        m_map->mapContent->GetLayer(map::LayerType::BUILDINGS).ReplaceTile(bc.mapTile);
+
+                        Game::ecs.remove<ecs::BuildingUpdatedComponent>(entity);
+                    }
                 }
             }
         )

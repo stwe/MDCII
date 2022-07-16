@@ -26,4 +26,9 @@ namespace mdcii::ecs
         map::MapTile mapTile;
         data::Building building;
     };
+
+    struct BuildingUpdatedComponent
+    {
+        bool writtenToLayer{ false };
+    };
 }

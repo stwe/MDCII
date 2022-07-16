@@ -135,27 +135,26 @@ glm::ivec2 mdcii::map::MapContent::RotatePosition(const int t_mapX, const int t_
 // Edit
 //-------------------------------------------------
 
-void mdcii::map::MapContent::AddBuilding(const int t_mapX, const int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx)
+void mdcii::map::MapContent::AddBuildingsLayerComponent(const int t_mapX, const int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx)
 {
     const auto& building{ buildings->buildingsMap.at(t_selectedBauGfx.buildingId) };
 
-    // check all positions before
-    for (auto y{ 0 }; y < building.size.h; ++y)
+    // only add if the entire building fits on the map
+    if (IsBuildingOutsideTheMap(t_mapX, t_mapY, building))
     {
-        for (auto x{ 0 }; x < building.size.w; ++x)
-        {
-            if (!IsPositionInMap(t_mapX + x, t_mapY + y))
-            {
-                return;
-            }
+        return;
+    }
 
-            /*
-            if (GetLayer(LayerType::BUILDINGS).GetTile(t_mapX + x, t_mapY + y).HasBuilding())
-            {
-                return;
-            }
-            */
-        }
+    // only add it if there is no other building on the position
+    if (IsAlreadyBuildingOnLayer(t_mapX, t_mapY, building, LayerType::BUILDINGS))
+    {
+        return;
+    }
+
+    // don't build on the coast
+    if (IsBuildingOnWaterOrCoast(t_mapX, t_mapY, building))
+    {
+        return;
     }
 
     // add
@@ -163,12 +162,6 @@ void mdcii::map::MapContent::AddBuilding(const int t_mapX, const int t_mapY, con
     {
         for (auto x{ 0 }; x < building.size.w; ++x)
         {
-            const auto& terrainTile{ GetLayer(LayerType::TERRAIN).GetTile(t_mapX + x, t_mapY + y) };
-            if (!terrainTile.HasBuilding())
-            {
-                return;
-            }
-
             // create a new MapTile object
             MapTile mapTile;
             mapTile.buildingId = t_selectedBauGfx.buildingId;
@@ -176,39 +169,45 @@ void mdcii::map::MapContent::AddBuilding(const int t_mapX, const int t_mapY, con
             mapTile.x = x;
             mapTile.y = y;
 
-            // add pre calcs
+            // run pre-calcs
             PreCalcTile(mapTile, t_mapX + x, t_mapY + y);
 
-            // replace the tile in the building layer with the newly created tile
-            GetLayer(LayerType::BUILDINGS).ReplaceTile(t_mapX + x, t_mapY + y, mapTile);
+            // get terrain tile
+            const auto& terrainTile{ GetLayer(LayerType::TERRAIN).GetTile(t_mapX + x, t_mapY + y) };
 
-            // remove existing building component, if already exists
-            Game::ecs.remove<ecs::BuildingsLayerTileComponent>(terrainTile.entity);
-
-            // add a (new) BuildingsLayerTileComponent to the terrain entity
-            Game::ecs.emplace<ecs::BuildingsLayerTileComponent>(
+            // add/replace BuildingsLayerTileComponent
+            Game::ecs.emplace_or_replace<ecs::BuildingsLayerTileComponent>(
                 terrainTile.entity,
                 mapTile,
                 buildings->buildingsMap.at(mapTile.buildingId)
             );
+
+            // add/replace BuildingUpdatedComponent
+            Game::ecs.emplace_or_replace<ecs::BuildingUpdatedComponent>(terrainTile.entity);
         }
     }
 }
 
-void mdcii::map::MapContent::RemoveBuilding(const int t_mapX, const int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx)
+void mdcii::map::MapContent::RemoveBuildingsLayerComponent(const int t_mapX, const int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx)
 {
     const auto& building{ buildings->buildingsMap.at(t_selectedBauGfx.buildingId) };
 
-    // check all positions before
-    for (auto y{ 0 }; y < building.size.h; ++y)
+    // nothing was built outside the map
+    if (IsBuildingOutsideTheMap(t_mapX, t_mapY, building))
     {
-        for (auto x{ 0 }; x < building.size.w; ++x)
-        {
-            if (!IsPositionInMap(t_mapX + x, t_mapY + y))
-            {
-                return;
-            }
-        }
+        return;
+    }
+
+    // nothing was overbuilt
+    if (IsAlreadyBuildingOnLayer(t_mapX, t_mapY, building, LayerType::BUILDINGS))
+    {
+        return;
+    }
+
+    // nothing was built on the coast
+    if (IsBuildingOnWaterOrCoast(t_mapX, t_mapY, building))
+    {
+        return;
     }
 
     // remove
@@ -216,17 +215,14 @@ void mdcii::map::MapContent::RemoveBuilding(const int t_mapX, const int t_mapY, 
     {
         for (auto x{ 0 }; x < building.size.w; ++x)
         {
+            // get terrain tile
             const auto& terrainTile{ GetLayer(LayerType::TERRAIN).GetTile(t_mapX + x, t_mapY + y) };
-            if (!terrainTile.HasBuilding())
-            {
-                return;
-            }
 
-            // replace the tile in the building layer with an empty newly created tile
-            GetLayer(LayerType::BUILDINGS).ReplaceTile(t_mapX + x, t_mapY + y, {});
-
-            // remove existing building component, if already exists
+            // remove BuildingsLayerTileComponent from the terrain tile entity
             Game::ecs.remove<ecs::BuildingsLayerTileComponent>(terrainTile.entity);
+
+            // remove BuildingUpdatedComponent from the terrain tile entity
+            Game::ecs.remove<ecs::BuildingUpdatedComponent>(terrainTile.entity);
         }
     }
 }
@@ -315,6 +311,61 @@ nlohmann::json mdcii::map::MapContent::ReadJsonFromFile(const std::string& t_fil
     }
 
     return j;
+}
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+bool mdcii::map::MapContent::IsBuildingOutsideTheMap(const int t_mapX, const int t_mapY, const data::Building& t_building) const
+{
+    for (auto y{ 0 }; y < t_building.size.h; ++y)
+    {
+        for (auto x{ 0 }; x < t_building.size.w; ++x)
+        {
+            if (!IsPositionInMap(t_mapX + x, t_mapY + y))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool mdcii::map::MapContent::IsAlreadyBuildingOnLayer(const int t_mapX, const int t_mapY, const data::Building& t_building, const LayerType t_layerType) const
+{
+    for (auto y{ 0 }; y < t_building.size.h; ++y)
+    {
+        for (auto x{ 0 }; x < t_building.size.w; ++x)
+        {
+            const auto& tile{ GetLayer(t_layerType).GetTile(t_mapX + x, t_mapY + y) };
+            if (tile.HasBuilding())
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool mdcii::map::MapContent::IsBuildingOnWaterOrCoast(const int t_mapX, const int t_mapY, const data::Building& t_building) const
+{
+    for (auto y{ 0 }; y < t_building.size.h; ++y)
+    {
+        for (auto x{ 0 }; x < t_building.size.w; ++x)
+        {
+            const auto& terrainTile{ GetLayer(LayerType::TERRAIN).GetTile(t_mapX + x, t_mapY + y) };
+            const auto& terrainBuilding{ buildings->buildingsMap.at(terrainTile.buildingId) };
+            if (terrainBuilding.posoffs == 0)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 //-------------------------------------------------

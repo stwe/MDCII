@@ -135,20 +135,11 @@ namespace mdcii::map
         void AddTileFromJson(const nlohmann::json& t_json);
 
         /**
-         * Adds a MapTile object to the layer.
+         * Replaces a MapTile object.
          *
-         * @param t_mapTile The MapTile object to add.
-         */
-        void AddTile(const MapTile& t_mapTile);
-
-        /**
-         * Replaces a MapTile object at a specified position.
-         *
-         * @param t_mapX The x position of the layer.
-         * @param t_mapY The y position of the layer.
          * @param t_mapTile The new MapTile object.
          */
-        void ReplaceTile(int t_mapX, int t_mapY, const MapTile& t_mapTile);
+        void ReplaceTile(const MapTile& t_mapTile);
 
         //-------------------------------------------------
         // Get tile
