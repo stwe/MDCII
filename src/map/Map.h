@@ -299,5 +299,13 @@ namespace mdcii::map
             const data::Building& t_building,
             bool t_selected = false
         ) const;
+
+        void RenderPreEntity(
+            const ogl::Window& t_window,
+            const camera::Camera& t_camera,
+            const MapTile& t_mapTile,
+            const data::Building& t_building,
+            bool t_selected = false
+        ) const;
     };
 }

@@ -125,6 +125,11 @@ glm::vec2 mdcii::map::MapContent::MapToScreen(const int t_mapX, const int t_mapY
 
 glm::ivec2 mdcii::map::MapContent::RotatePosition(const int t_mapX, const int t_mapY, const Rotation t_rotation) const
 {
+    return RotatePosition(t_mapX, t_mapY, width, height, t_rotation);
+}
+
+glm::ivec2 mdcii::map::MapContent::RotatePosition(const int t_mapX, const int t_mapY, const int t_width, const int t_height, const Rotation t_rotation)
+{
     auto x{ t_mapX };
     auto y{ t_mapY };
 
@@ -133,16 +138,16 @@ glm::ivec2 mdcii::map::MapContent::RotatePosition(const int t_mapX, const int t_
     case Rotation::DEG0:
         break;
     case Rotation::DEG90:
-        x = width - t_mapY - 1;
+        x = t_width - t_mapY - 1;
         y = t_mapX;
         break;
     case Rotation::DEG180:
-        x = width - t_mapX - 1;
-        y = height - t_mapY - 1;
+        x = t_width - t_mapX - 1;
+        y = t_height - t_mapY - 1;
         break;
     case Rotation::DEG270:
         x = t_mapY;
-        y = height - t_mapX - 1;
+        y = t_height - t_mapX - 1;
         break;
     }
 
@@ -187,8 +192,20 @@ void mdcii::map::MapContent::AddBuildingsLayerComponent(const int t_mapX, const 
             mapTile.x = x;
             mapTile.y = y;
 
+            // rotate
+            const auto rot{ magic_enum::enum_cast<Rotation>(t_selectedBauGfx.orientation) };
+            auto rp{ glm::ivec2(0) };
+            if (rot.has_value())
+            {
+                rp = RotatePosition(
+                    x, y,
+                    building.size.w, building.size.h,
+                    rot.value()
+                );
+            }
+
             // run pre-calcs
-            PreCalcTile(mapTile, t_mapX + x, t_mapY + y);
+            PreCalcTile(mapTile, t_mapX + rp.x, t_mapY + rp.y);
 
             // get terrain tile
             const auto& terrainTile{ GetLayer(LayerType::TERRAIN).GetTile(t_mapX + x, t_mapY + y) };

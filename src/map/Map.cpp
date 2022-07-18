@@ -224,6 +224,17 @@ void mdcii::map::Map::RenderEntities(const ogl::Window& t_window, const camera::
         return;
     }
 
+    //---------------
+
+    const auto viewUpdated{ Game::ecs.view<const ecs::BuildingsLayerTileComponent, const ecs::BuildingUpdatedComponent>() };
+    for (const auto entity : viewUpdated)
+    {
+        const auto& [b, u] { viewUpdated.get(entity) };
+        RenderPreEntity(t_window, t_camera, b.mapTile, b.building, false);
+    }
+
+    //---------------
+
     const auto view{ Game::ecs.view<const ecs::TerrainLayerTileComponent>() };
     for (const auto entity : view)
     {
@@ -264,6 +275,35 @@ void mdcii::map::Map::RenderEntity(
         const auto offset{ t_mapTile.y * t_building.size.w + t_mapTile.x };
         gfx += offset;
     }
+
+    RenderBuilding(
+        t_window,
+        t_camera,
+        gfx,
+        t_mapTile.screenPositions[rot],
+        static_cast<float>(t_building.posoffs),
+        t_selected
+    );
+}
+
+void mdcii::map::Map::RenderPreEntity(
+    const ogl::Window& t_window,
+    const camera::Camera& t_camera,
+    const MapTile& t_mapTile,
+    const data::Building& t_building,
+    const bool t_selected
+) const
+{
+    auto gfx{ t_mapTile.gfxs[t_mapTile.orientation] };
+
+    if (t_building.size.w > 1)
+    {
+        // y * width + x
+        const auto offset{ t_mapTile.y * t_building.size.w + t_mapTile.x };
+        gfx += offset;
+    }
+
+    const auto rot{ magic_enum::enum_integer(mapContent->rotation) };
 
     RenderBuilding(
         t_window,
