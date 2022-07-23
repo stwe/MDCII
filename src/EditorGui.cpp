@@ -17,12 +17,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <imgui.h>
+#include <magic_enum.hpp>
 #include "EditorGui.h"
 #include "Game.h"
 #include "Log.h"
 #include "map/Map.h"
+#include "map/MapLayer.h"
 #include "file/BshFile.h"
-#include "data/Buildings.h"
 #include "data/Text.h"
 #include "event/EventManager.h"
 
@@ -55,6 +56,12 @@ mdcii::EditorGui::~EditorGui() noexcept
 
 void mdcii::EditorGui::RotateMapGui() const
 {
+    std::string rotStr{ m_text->GetMenuText(m_lang, "CurrentMapRotation") };
+    rotStr.append(std::string(": %s"));
+    ImGui::Text(rotStr.c_str(), m_map->ShowCurrentRotation());
+
+    ImGui::Separator();
+
     if (ImGui::Button(m_text->GetMenuText(m_lang, "RotateMapRight").c_str()))
     {
         m_map->Rotate(map::ChangeRotation::RIGHT);
@@ -116,6 +123,15 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
 
     ImGui::TextUnformatted(t_selectedBauGfx.name.c_str());
 
+    const auto rot{ magic_enum::enum_cast<map::Rotation>(t_selectedBauGfx.orientation) };
+    if (rot.has_value())
+    {
+        std::string rotStr{ m_text->GetMenuText(m_lang, "CurrentBuildingRotation") };
+        rotStr.append(std::string(": %s"));
+
+        ImGui::Text(rotStr.c_str(), magic_enum::enum_name(rot.value()).data());
+    }
+
     ImGui::Separator();
 
     const auto& building{ m_buildings->buildingsMap.at(t_selectedBauGfx.buildingId) };
@@ -156,14 +172,4 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
             t_selectedBauGfx.orientation = 3;
         }
     }
-}
-
-void mdcii::EditorGui::DebugGui() const
-{
-    ImGui::Text("Current map rotation: %s", m_map->ShowCurrentRotation());
-
-    ImGui::Checkbox("Render grid", &m_map->renderGrid);
-    ImGui::Checkbox("Render coords", &m_map->renderText);
-    ImGui::Checkbox("Render terrain layer", &m_map->renderTerrainLayer);
-    ImGui::Checkbox("Render buildings layer", &m_map->renderBuildingsLayer);
 }

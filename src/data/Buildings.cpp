@@ -16,6 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#include <imgui.h>
 #include <magic_enum.hpp>
 #include "Buildings.h"
 #include "Game.h"
@@ -414,4 +415,48 @@ mdcii::data::Building mdcii::data::Buildings::GenerateBuilding(const cod_pb::Obj
     }
 
     return building;
+}
+
+void mdcii::data::Building::RenderImGui() const
+{
+    ImGui::Separator();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0, 255, 0)));
+    ImGui::Text("Building");
+    ImGui::PopStyleColor();
+
+    ImGui::Separator();
+
+    ImGui::Text("Building Id: %d", id);
+    ImGui::Text("Gfx: %d", gfx);
+    ImGui::Text("Blocknr: %d", blocknr);
+    ImGui::Text("Posoffs: %d", posoffs);
+    ImGui::Text("Highflg: %d", highflg);
+    ImGui::Text("Einhoffs: %d", einhoffs);
+    ImGui::Text("Maxenergy: %d", maxenergy);
+    ImGui::Text("Maxbrand: %d", maxbrand);
+    ImGui::Text("Rotate: %d", rotate);
+    ImGui::Text("RandAnz: %d", randAnz);
+    ImGui::Text("AnimAnz: %d", animAnz);
+    ImGui::Text("AnimTime: %d", animTime);
+    ImGui::Text("AnimFrame: %d", animFrame);
+    ImGui::Text("AnimAdd: %d", animAdd);
+    ImGui::Text("Baugfx: %d", baugfx);
+    ImGui::Text("KreuzBase: %d", kreuzBase);
+    ImGui::Text("Randwachs: %d", randwachs);
+    ImGui::Text("RandAdd: %d", randAdd);
+    ImGui::Text("Strandoff: %d", strandoff);
+    ImGui::Text("PlaceFlg: %d", placeFlg);
+    ImGui::Text("NoShotFlg: %d", noShotFlg);
+    ImGui::Text("Strandflg: %d", strandflg);
+    ImGui::Text("Ausbauflg: %d", ausbauflg);
+    ImGui::Text("Tuerflg: %d", tuerflg);
+    ImGui::Text("Destroyflg: %d", destroyflg);
+
+    ImGui::Text("Kind type: %s", magic_enum::enum_name(kind).data());
+    ImGui::Text("Bausample type: %s", magic_enum::enum_name(bausample).data());
+    ImGui::Text("Ruinenr type: %s", magic_enum::enum_name(ruinenr).data());
+
+    ImGui::Text("w: %d", size.w);
+    ImGui::Text("h: %d", size.h);
 }

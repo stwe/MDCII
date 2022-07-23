@@ -43,7 +43,7 @@ namespace mdcii::map
 namespace mdcii
 {
     /**
-     * Different menus for the editor.
+     * Different menus for the game editor.
      */
     class EditorGui
     {
@@ -73,7 +73,7 @@ namespace mdcii
         ~EditorGui() noexcept;
 
         //-------------------------------------------------
-        // Gui
+        // GUIs
         //-------------------------------------------------
 
         /**
@@ -91,11 +91,6 @@ namespace mdcii
          * Shows a single selected workshop.
          */
         void WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) const;
-
-        /**
-         * Shows some debug values.
-         */
-        void DebugGui() const;
 
     protected:
 

@@ -34,6 +34,10 @@ namespace mdcii::map
      */
     struct MapTile
     {
+        //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
         /**
          * The width of a tile.
          */
@@ -53,6 +57,10 @@ namespace mdcii::map
          * The half height of a tile.
          */
         static constexpr auto TILE_HEIGHT_HALF{ 16 };
+
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
 
         /**
          * The building Id from the haeuser.cod.
@@ -131,5 +139,25 @@ namespace mdcii::map
          * @return True if a valid building Id is present.
          */
         [[nodiscard]] bool HasBuilding() const { return buildingId >= 0; }
+
+        //-------------------------------------------------
+        // Render
+        //-------------------------------------------------
+
+        /**
+         * Renders ImGui menus.
+         */
+        void RenderImGui() const;
+
+        //-------------------------------------------------
+        // Orientation
+        //-------------------------------------------------
+
+        /**
+         * Get the current tile orientation as string.
+         *
+         * @return The orientation as string.
+         */
+        [[nodiscard]] const char* ShowCurrentOrientation() const;
     };
 }

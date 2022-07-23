@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <memory>
 #include "ecs/Components.h"
 #include "ogl/Window.h"
 #include "camera/Camera.h"
@@ -229,7 +228,7 @@ namespace mdcii::map
         /**
          * Get the current map rotation as string.
          *
-         * @return the rotation as string
+         * @return The rotation as string.
          */
         [[nodiscard]] const char* ShowCurrentRotation() const;
 
@@ -300,6 +299,15 @@ namespace mdcii::map
             bool t_selected = false
         ) const;
 
+        /**
+         * Renders an entity.
+         *
+         * @param t_window The Window object to get the orthographic projection matrix.
+         * @param t_camera The Camera object to get the view matrix.
+         * @param t_mapTile A MapTile object.
+         * @param t_building A Building object.
+         * @param t_selected Determines if the building is selected and rendered a little darker.
+         */
         void RenderPreEntity(
             const ogl::Window& t_window,
             const camera::Camera& t_camera,

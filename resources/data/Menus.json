@@ -2,16 +2,20 @@
   "de": {
     "Menu": "Menü",
     "Workshops": "Handwerk",
+    "CurrentBuildingRotation": "Aktuelle Drehung des Bauwerks",
     "RotateBuildingLeft": "Bauwerk linksherum drehen",
     "RotateBuildingRight": "Bauwerk rechtsherum drehen",
+    "CurrentMapRotation": "Aktuelle Drehung der Karte",
     "RotateMapLeft": "Karte linksherum drehen",
     "RotateMapRight": "Karte rechtsherum drehen"
   },
   "en": {
     "Menu": "Menu",
     "Workshops": "Workshops",
+    "CurrentBuildingRotation": "Current building rotation",
     "RotateBuildingLeft": "Rotate building left",
     "RotateBuildingRight": "Rotate building right",
+    "CurrentMapRotation": "Current map rotation",
     "RotateMapLeft": "Rotate map left",
     "RotateMapRight": "Rotate map right"
   }

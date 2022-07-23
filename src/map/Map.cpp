@@ -17,16 +17,15 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <imgui.h>
-#include <magic_enum.hpp>
 #include "Map.h"
 #include "MousePicker.h"
-#include "Game.h"
 #include "MapContent.h"
 #include "Log.h"
 #include "renderer/ImGuiTileRenderer.h"
 #include "renderer/RenderUtils.h"
 #include "renderer/TileRenderer.h"
 #include "renderer/TextRenderer.h"
+#include "ecs/EcsUtils.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -64,9 +63,21 @@ void mdcii::map::Map::Render(const ogl::Window& t_window, const camera::Camera& 
 
 void mdcii::map::Map::RenderImGui()
 {
+    // Map stuff
     ImGui::Begin("Map");
 
+    ImGui::Checkbox("Render grid", &renderGrid);
+    ImGui::Checkbox("Render grid coords", &renderText);
+    ImGui::Checkbox("Render terrain layer", &renderTerrainLayer);
+    ImGui::Checkbox("Render buildings layer", &renderBuildingsLayer);
+
     ImGui::End();
+
+    // MapContent entities
+    mapContent->RenderImGui();
+
+    // MousePicker Gui
+    mousePicker->RenderImGui();
 }
 
 void mdcii::map::Map::RenderBuilding(

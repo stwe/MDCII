@@ -16,13 +16,12 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include <magic_enum.hpp>
 #include "MapLayer.h"
 #include "MapContent.h"
-#include "Game.h"
 #include "MdciiAssert.h"
 #include "MdciiException.h"
 #include "ecs/Components.h"
+#include "ecs/EcsUtils.h"
 #include "ogl/resource/ResourceManager.h"
 
 //-------------------------------------------------
@@ -143,7 +142,7 @@ void mdcii::map::MapLayer::CreateGridEntity(const int t_mapX, const int t_mapY)
     }
 
     // create an EnTT entity
-    const auto entity{ CreatePlainEntity() };
+    const auto entity{ ecs::EcsUtils::CreatePlainEntity() };
 
     // store entity handle
     GetTile(t_mapX, t_mapY).gridEntity = entity;
@@ -167,7 +166,7 @@ void mdcii::map::MapLayer::CreateTerrainLayerEntity(const int t_mapX, const int 
     }
 
     // create an EnTT entity
-    const auto entity{ CreatePlainEntity() };
+    const auto entity{ ecs::EcsUtils::CreatePlainEntity() };
 
     // store entity handle
     GetTile(t_mapX, t_mapY).entity = entity;
@@ -202,23 +201,4 @@ void mdcii::map::MapLayer::AddBuildingsLayerComponent(const int t_mapX, const in
         GetTile(t_mapX, t_mapY),
         m_mapContent->buildings->buildingsMap.at(GetTile(t_mapX, t_mapY).buildingId)
     );
-}
-
-void mdcii::map::MapLayer::SortEntities(const Rotation t_rotation)
-{
-    auto i{ magic_enum::enum_integer(t_rotation) };
-
-    Game::ecs.sort<ecs::TerrainLayerTileComponent>([i](const ecs::TerrainLayerTileComponent& t_lhs, const ecs::TerrainLayerTileComponent& t_rhs)
-    {
-        return t_lhs.mapTile.indices[i] < t_rhs.mapTile.indices[i];
-    });
-}
-
-//-------------------------------------------------
-// Ecs
-//-------------------------------------------------
-
-entt::entity mdcii::map::MapLayer::CreatePlainEntity()
-{
-    return Game::ecs.create();
 }

@@ -26,7 +26,6 @@
 #include "eventpp/utilities/argumentadapter.h"
 #include "map/Map.h"
 #include "map/MapContent.h"
-#include "map/MousePicker.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -84,15 +83,10 @@ void mdcii::EditorState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    // todo
-    //m_map->RenderImGui();
+    // ---------------- Game menu ----------------
 
     // title
     ImGui::Begin(m_text->GetMenuText(m_lang, "Menu").c_str());
-
-    // debug stuff
-    m_editorGui->DebugGui();
-    ImGui::Separator();
 
     // rotate map buttons
     m_editorGui->RotateMapGui();
@@ -110,8 +104,15 @@ void mdcii::EditorState::RenderImGui()
 
     ImGui::End();
 
-    // MousePicker Gui
-    m_map->mousePicker->RenderImGui();
+    // -------------------------------------------
+
+
+
+    // ---------------- Debug menus --------------
+
+    m_map->RenderImGui();
+
+    // -------------------------------------------
 
     ogl::Window::ImGuiEnd();
 }

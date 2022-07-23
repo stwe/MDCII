@@ -460,6 +460,8 @@ namespace mdcii::data
             int32_t ziegel{ -1 };
             int32_t kanon{ -1 };
         } houseBuildCosts;
+
+        void RenderImGui() const;
     };
 
     //-------------------------------------------------

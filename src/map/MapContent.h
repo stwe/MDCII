@@ -104,6 +104,15 @@ namespace mdcii::map
         MapLayer& GetLayer(LayerType t_layerType);
 
         //-------------------------------------------------
+        // Render
+        //-------------------------------------------------
+
+        /**
+         * Renders ImGui menus.
+         */
+        void RenderImGui() const;
+
+        //-------------------------------------------------
         // Sort
         //-------------------------------------------------
 
@@ -192,7 +201,7 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * Adds the BuildingsLayerTileComponent to the terrain tile entity.
+         * Adds the BuildingsLayerTileComponent to the tile entity.
          *
          * @param t_mapX The start map x position of a building.
          * @param t_mapY The start map y position of a building.
@@ -201,7 +210,7 @@ namespace mdcii::map
         void AddBuildingsLayerComponent(int t_mapX, int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx);
 
         /**
-         * Removes the BuildingsLayerTileComponent from the terrain tile entity.
+         * Removes the BuildingsLayerTileComponent from the tile entity.
          *
          * @param t_mapX The start map x position of a building.
          * @param t_mapY The start map y position of a building.

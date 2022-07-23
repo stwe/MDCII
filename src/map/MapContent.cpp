@@ -16,13 +16,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#include <imgui.h>
 #include <fstream>
-#include <magic_enum.hpp>
 #include "MapContent.h"
-#include "Game.h"
 #include "MdciiAssert.h"
 #include "MdciiException.h"
 #include "ecs/Components.h"
+#include "ecs/EcsUtils.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -60,15 +60,131 @@ mdcii::map::MapLayer& mdcii::map::MapContent::GetLayer(const LayerType t_layerTy
 }
 
 //-------------------------------------------------
+// Render
+//-------------------------------------------------
+
+void mdcii::map::MapContent::RenderImGui() const
+{
+    ImGui::Begin("MapContent Entities");
+
+    ImGui::Separator();
+
+    // Entities to show an isometric grid
+    // Entities with the GridComponent
+
+    if (ImGui::TreeNode(ecs::EcsUtils::EntityCounterLabel<const ecs::GridComponent>("Grid Entities").c_str()))
+    {
+        const auto view{ Game::ecs.view<const ecs::GridComponent>() };
+        for (const auto entity : view)
+        {
+            const auto& gc{ view.get<const ecs::GridComponent>(entity) };
+            auto x{ std::to_string(gc.mapTile.mapX) };
+            auto y{ std::to_string(gc.mapTile.mapY) };
+
+            if (ImGui::TreeNode(x.append(", ").append(y).c_str()))
+            {
+                gc.mapTile.RenderImGui();
+                ImGui::TreePop();
+            }
+        }
+
+        ImGui::TreePop();
+    }
+
+    ImGui::Separator();
+
+    // Entities to show the terrain
+    // Entities with the TerrainLayerTileComponent
+
+    if (ImGui::TreeNode(ecs::EcsUtils::EntityCounterLabel<const ecs::TerrainLayerTileComponent>("Terrain Layer Entities").c_str()))
+    {
+        const auto view{ Game::ecs.view<const ecs::TerrainLayerTileComponent>() };
+        for (const auto entity : view)
+        {
+            const auto& tc{ view.get<const ecs::TerrainLayerTileComponent>(entity) };
+            auto x{ std::to_string(tc.mapTile.mapX) };
+            auto y{ std::to_string(tc.mapTile.mapY) };
+
+            if (ImGui::TreeNode(x.append(", ").append(y).c_str()))
+            {
+                tc.mapTile.RenderImGui();
+                tc.building.RenderImGui();
+
+                ImGui::TreePop();
+            }
+        }
+
+        ImGui::TreePop();
+    }
+
+    ImGui::Separator();
+
+    // Building Layer Entities
+    // Entities with the TerrainLayerTileComponent && BuildingsLayerTileComponent
+
+    if (ImGui::TreeNode(ecs::EcsUtils::EntityCounterLabel<ecs::TerrainLayerTileComponent, ecs::BuildingsLayerTileComponent>("Building Layer Entities").c_str()))
+    {
+        const auto view{ Game::ecs.view<const ecs::TerrainLayerTileComponent, const ecs::BuildingsLayerTileComponent>() };
+        for (const auto entity : view)
+        {
+            const auto& bc{ view.get<const ecs::BuildingsLayerTileComponent>(entity) };
+            auto x{ std::to_string(bc.mapTile.mapX) };
+            auto y{ std::to_string(bc.mapTile.mapY) };
+
+            if (ImGui::TreeNode(x.append(", ").append(y).c_str()))
+            {
+                bc.mapTile.RenderImGui();
+                bc.building.RenderImGui();
+
+                ImGui::TreePop();
+            }
+        }
+
+        ImGui::TreePop();
+    }
+
+    ImGui::Separator();
+
+    // Building Layer Entities to add
+    // Entities with the TerrainLayerTileComponent, BuildingsLayerTileComponent && BuildingUpdatedComponent
+
+    if (ImGui::TreeNode(ecs::EcsUtils::EntityCounterLabel<ecs::TerrainLayerTileComponent, ecs::BuildingsLayerTileComponent, ecs::BuildingUpdatedComponent>("Building Layer Entities to add").c_str()))
+    {
+        /*
+        const auto view{ Game::ecs.view<const ecs::TerrainLayerTileComponent, const ecs::BuildingsLayerTileComponent, ecs::BuildingUpdatedComponent>() };
+        for (const auto entity : view)
+        {
+            const auto& bc{ view.get<const ecs::BuildingsLayerTileComponent>(entity) };
+            auto x{ std::to_string(bc.mapTile.mapX) };
+            auto y{ std::to_string(bc.mapTile.mapY) };
+
+            //auto& uc{ view.get<ecs::BuildingUpdatedComponent>(entity) };
+
+            if (ImGui::TreeNode(x.append(", ").append(y).c_str()))
+            {
+                bc.mapTile.RenderImGui();
+                bc.building.RenderImGui();
+
+                ImGui::TreePop();
+            }
+        }
+        */
+
+        ImGui::TreePop();
+    }
+
+    ImGui::Separator();
+
+    ImGui::End();
+}
+
+//-------------------------------------------------
 // Sort
 //-------------------------------------------------
 
 void mdcii::map::MapContent::SortEntitiesOfAllLayers() const
 {
-    for (const auto& layer : mapLayers)
-    {
-        layer->SortEntities(rotation);
-    }
+    ecs::EcsUtils::SortEntities<ecs::TerrainLayerTileComponent>(rotation);
 }
 
 //-------------------------------------------------

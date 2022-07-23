@@ -214,13 +214,6 @@ namespace mdcii::map
          */
         void AddBuildingsLayerComponent(int t_mapX, int t_mapY);
 
-        /**
-         * Sorts entities with TerrainLayerTileComponent for rendering.
-         *
-         * @param t_rotation The rotation to sort for.
-         */
-        static void SortEntities(Rotation t_rotation);
-
     protected:
 
     private:
@@ -232,16 +225,5 @@ namespace mdcii::map
          * The parent MapContent object.
          */
         MapContent* m_mapContent{ nullptr };
-
-        //-------------------------------------------------
-        // Ecs
-        //-------------------------------------------------
-
-        /**
-         * Creates a new entity.
-         *
-         * @return The created EnTT entity.
-         */
-        static entt::entity CreatePlainEntity();
     };
 }
