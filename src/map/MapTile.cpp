@@ -18,7 +18,9 @@
 
 #include <imgui.h>
 #include <magic_enum.hpp>
+#include "Game.h"
 #include "MapLayer.h"
+#include "data/Text.h"
 
 //-------------------------------------------------
 // Render
@@ -26,10 +28,6 @@
 
 void mdcii::map::MapTile::RenderImGui() const
 {
-    // todo: get name
-    //const auto& shops{ m_text->GetBuildingsTexts(data::Text::Section::WORKSHOPS, m_lang) };
-
-
     ImGui::Separator();
 
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0, 255, 0)));
@@ -37,6 +35,8 @@ void mdcii::map::MapTile::RenderImGui() const
     ImGui::PopStyleColor();
 
     ImGui::Separator();
+
+    ImGui::Text("Name: %s", data::Text::GetTextForBuildingId(data::Text::Section::WORKSHOPS, buildingId, Game::INI.Get<std::string>("locale", "lang")).c_str());
 
     ImGui::Text("Building Id: %d", buildingId);
     ImGui::Text("Orientation: %s", ShowCurrentOrientation());

@@ -48,27 +48,39 @@ namespace mdcii::data
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        Text();
-
         Text(const Text& t_other) = delete;
         Text(Text&& t_other) noexcept = delete;
         Text& operator=(const Text& t_other) = delete;
         Text& operator=(Text&& t_other) noexcept = delete;
 
-        ~Text() noexcept;
+        //-------------------------------------------------
+        // Init
+        //-------------------------------------------------
+
+        static void Init();
 
         //-------------------------------------------------
         // Getter
         //-------------------------------------------------
 
-        [[nodiscard]] const std::map<key, translation>& GetBuildingsTexts(Section t_section, const language& t_language) const
+        static const std::map<key, translation>& GetBuildingsTexts(const Section t_section, const language& t_language)
         {
             return m_buildings.find({ t_section, t_language })->second;
         }
 
-        [[nodiscard]] const translation& GetMenuText(const language& t_language, const key& t_key) const
+        static const translation& GetMenuText(const language& t_language, const key& t_key)
         {
             return m_menus.find(t_language)->second.at(t_key);
+        }
+
+        static std::string GetTextForBuildingId(const Section t_section, const int t_buildingId, const language& t_language)
+        {
+            if (GetBuildingsTexts(t_section, t_language).count(std::to_string(t_buildingId)))
+            {
+                return GetBuildingsTexts(t_section, t_language).at(std::to_string(t_buildingId));
+            }
+
+            return { "Translation is missing." };
         }
 
     protected:
@@ -78,15 +90,22 @@ namespace mdcii::data
         // Member
         //-------------------------------------------------
 
-        std::multimap<std::pair<Section, language>, std::map<key, translation>> m_buildings;
-        std::multimap<language, std::map<key, translation>> m_menus;
+        inline static std::multimap<std::pair<Section, language>, std::map<key, translation>> m_buildings;
+        inline static std::multimap<language, std::map<key, translation>> m_menus;
+
+        //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        Text() = default;
+        ~Text() noexcept = default;
 
         //-------------------------------------------------
         // Read
         //-------------------------------------------------
 
-        void ReadTexts();
-        void ReadMenus();
+        static void ReadTexts();
+        static void ReadMenus();
 
         //-------------------------------------------------
         // Helper

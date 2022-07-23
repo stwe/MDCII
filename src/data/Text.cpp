@@ -24,20 +24,17 @@
 #include "MdciiException.h"
 
 //-------------------------------------------------
-// Ctors. / Dtor.
+// Init
 //-------------------------------------------------
 
-mdcii::data::Text::Text()
+void mdcii::data::Text::Init()
 {
-    Log::MDCII_LOG_DEBUG("[Text::Text()] Create Text.");
+    Log::MDCII_LOG_DEBUG("[Text::Init()] Start initializing the Text class...");
 
     ReadTexts();
     ReadMenus();
-}
 
-mdcii::data::Text::~Text() noexcept
-{
-    Log::MDCII_LOG_DEBUG("[Text::~Text()] Destruct Text.");
+    Log::MDCII_LOG_DEBUG("[Text::Init()] Text class successfully initialized.");
 }
 
 //-------------------------------------------------

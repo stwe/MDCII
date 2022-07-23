@@ -21,6 +21,7 @@
 #include "Buildings.h"
 #include "Game.h"
 #include "Log.h"
+#include "Text.h"
 #include "cod/CodParser.h"
 
 mdcii::data::Buildings::Buildings()
@@ -426,6 +427,8 @@ void mdcii::data::Building::RenderImGui() const
     ImGui::PopStyleColor();
 
     ImGui::Separator();
+
+    ImGui::Text("Name: %s", Text::GetTextForBuildingId(Text::Section::WORKSHOPS, id, Game::INI.Get<std::string>("locale", "lang")).c_str());
 
     ImGui::Text("Building Id: %d", id);
     ImGui::Text("Gfx: %d", gfx);

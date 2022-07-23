@@ -24,11 +24,6 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::data
-{
-    class Text;
-}
-
 namespace mdcii::map
 {
     class Map;
@@ -99,11 +94,6 @@ namespace mdcii
          * Language value from the config.ini.
          */
         std::string m_lang;
-
-        /**
-         * Texts in different languages.
-         */
-        std::shared_ptr<data::Text> m_text;
 
         /**
          * The Map object to edit.

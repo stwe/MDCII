@@ -86,7 +86,7 @@ void mdcii::EditorState::RenderImGui()
     // ---------------- Game menu ----------------
 
     // title
-    ImGui::Begin(m_text->GetMenuText(m_lang, "Menu").c_str());
+    ImGui::Begin(data::Text::GetMenuText(m_lang, "Menu").c_str());
 
     // rotate map buttons
     m_editorGui->RotateMapGui();
@@ -130,14 +130,14 @@ void mdcii::EditorState::Init()
 
     Log::MDCII_LOG_INFO("[EditorState::Init()] Locale is set to: {}.", m_lang);
 
-    // read menu texts
-    m_text = std::make_shared<data::Text>();
+    // init menu texts
+    data::Text::Init();
 
     // create the Map object to edit
     m_map = std::make_shared<map::Map>("data/ExampleMap.json", context->buildings, *context->window, *context->camera);
 
     // create the menus
-    m_editorGui = std::make_unique<EditorGui>(m_text, m_map, context->buildings);
+    m_editorGui = std::make_unique<EditorGui>(m_map, context->buildings);
 
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] The editor state was successfully initialized.");
 }

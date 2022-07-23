@@ -31,18 +31,11 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::EditorGui::EditorGui(
-    std::shared_ptr<data::Text> t_text,
-    std::shared_ptr<map::Map> t_map,
-    std::shared_ptr<data::Buildings> t_buildings
-)
-    : m_text{ std::move(t_text) }
-    , m_map{ std::move(t_map) }
+mdcii::EditorGui::EditorGui(std::shared_ptr<map::Map> t_map, std::shared_ptr<data::Buildings> t_buildings)
+    : m_map{ std::move(t_map) }
     , m_buildings{ std::move(t_buildings) }
 {
     Log::MDCII_LOG_DEBUG("[EditorGui::EditorGui()] Create EditorGui.");
-
-    m_lang = Game::INI.Get<std::string>("locale", "lang");
 }
 
 mdcii::EditorGui::~EditorGui() noexcept
@@ -56,20 +49,20 @@ mdcii::EditorGui::~EditorGui() noexcept
 
 void mdcii::EditorGui::RotateMapGui() const
 {
-    std::string rotStr{ m_text->GetMenuText(m_lang, "CurrentMapRotation") };
+    std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentMapRotation") };
     rotStr.append(std::string(": %s"));
     ImGui::Text(rotStr.c_str(), m_map->ShowCurrentRotation());
 
     ImGui::Separator();
 
-    if (ImGui::Button(m_text->GetMenuText(m_lang, "RotateMapRight").c_str()))
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateMapRight").c_str()))
     {
         m_map->Rotate(map::ChangeRotation::RIGHT);
     }
 
     ImGui::SameLine();
 
-    if (ImGui::Button(m_text->GetMenuText(m_lang, "RotateMapLeft").c_str()))
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateMapLeft").c_str()))
     {
         m_map->Rotate(map::ChangeRotation::LEFT);
     }
@@ -77,9 +70,9 @@ void mdcii::EditorGui::RotateMapGui() const
 
 void mdcii::EditorGui::AllWorkshopsGui() const
 {
-    if (ImGui::TreeNode(m_text->GetMenuText(m_lang, "Workshops").c_str()))
+    if (ImGui::TreeNode(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Workshops").c_str()))
     {
-        const auto& shops{ m_text->GetBuildingsTexts(data::Text::Section::WORKSHOPS, m_lang) };
+        const auto& shops{ data::Text::GetBuildingsTexts(data::Text::Section::WORKSHOPS, Game::INI.Get<std::string>("locale", "lang")) };
 
         for (const auto& [k, v] : shops)
         {
@@ -126,7 +119,7 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
     const auto rot{ magic_enum::enum_cast<map::Rotation>(t_selectedBauGfx.orientation) };
     if (rot.has_value())
     {
-        std::string rotStr{ m_text->GetMenuText(m_lang, "CurrentBuildingRotation") };
+        std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentBuildingRotation") };
         rotStr.append(std::string(": %s"));
 
         ImGui::Text(rotStr.c_str(), magic_enum::enum_name(rot.value()).data());
@@ -142,7 +135,7 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
         m_map->bauhausBshFile->bshTextures.at(static_cast<size_t>(building.baugfx) + t_selectedBauGfx.orientation)->textureId)
     ) };
 
-    if (ImGui::Button(m_text->GetMenuText(m_lang, "RotateBuildingRight").c_str()))
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingRight").c_str()))
     {
         ++t_selectedBauGfx.orientation;
         if (t_selectedBauGfx.orientation > 3)
@@ -164,7 +157,7 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
 
     ImGui::SameLine();
 
-    if (ImGui::Button(m_text->GetMenuText(m_lang, "RotateBuildingLeft").c_str()))
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingLeft").c_str()))
     {
         --t_selectedBauGfx.orientation;
         if (t_selectedBauGfx.orientation < 0)
