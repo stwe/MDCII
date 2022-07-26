@@ -21,6 +21,7 @@
 #include "MousePicker.h"
 #include "MapContent.h"
 #include "Log.h"
+#include "MdciiAssert.h"
 #include "renderer/ImGuiTileRenderer.h"
 #include "renderer/RenderUtils.h"
 #include "renderer/TileRenderer.h"
@@ -68,7 +69,11 @@ void mdcii::map::Map::RenderImGui()
 
     ImGui::Checkbox("Render grid", &renderGrid);
     ImGui::Checkbox("Render grid coords", &renderText);
+    ImGui::Separator();
     ImGui::Checkbox("Render terrain layer", &renderTerrainLayer);
+    ImGui::SameLine();
+    ImGui::Checkbox("Skip buildings layer tiles", &skipBuildingsLayerTiles);
+    ImGui::Separator();
     ImGui::Checkbox("Render buildings layer", &renderBuildingsLayer);
 
     ImGui::End();
@@ -206,60 +211,38 @@ void mdcii::map::Map::RenderGridEntities(const ogl::Window& t_window, const came
 
 void mdcii::map::Map::RenderEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
+    // render nothing
     if (!renderTerrainLayer && !renderBuildingsLayer)
     {
         return;
     }
 
+    // render terrain only
     if (renderTerrainLayer && !renderBuildingsLayer)
     {
-        const auto view{ Game::ecs.view<const ecs::TerrainLayerTileComponent>() };
-        for (const auto entity : view)
-        {
-            const auto& [tileComponent] { view.get(entity) };
-            RenderEntity(t_window, t_camera, tileComponent.mapTile, tileComponent.building, false);
-        }
-
+        //RenderTerrainLayerEntities(t_window, t_camera, skipBuildingsLayerTiles);
         return;
     }
 
+    // render buildings only
     if (!renderTerrainLayer && renderBuildingsLayer)
     {
-        const auto view{ Game::ecs.view<const ecs::BuildingsLayerTileComponent>() };
-        for (const auto entity : view)
-        {
-            const auto& [buildingsComponent] { view.get(entity) };
-            RenderEntity(t_window, t_camera, buildingsComponent.mapTile, buildingsComponent.building, false);
-        }
-
+        //RenderBuildingsLayerEntities(t_window, t_camera);
         return;
     }
 
-    //---------------
+    // render terrain or buildings
+    //RenderTerrainOrBuildingsEntities(t_window, t_camera);
 
-    const auto viewUpdated{ Game::ecs.view<const ecs::BuildingsLayerTileComponent, const ecs::BuildingUpdatedComponent>() };
-    for (const auto entity : viewUpdated)
-    {
-        const auto& [b, u] { viewUpdated.get(entity) };
-        RenderPreEntity(t_window, t_camera, b.mapTile, b.building, false);
-    }
 
-    //---------------
+    // todo -------------------------------
 
-    const auto view{ Game::ecs.view<const ecs::TerrainLayerTileComponent>() };
+    // render new buildings
+    const auto view{ Game::ecs.view<const ecs::BuildingsLayerTileComponent, const ecs::BuildingUpdatedComponent>() };
     for (const auto entity : view)
     {
-        const auto& [tileComponent] { view.get(entity) };
-
-        if (Game::ecs.all_of<const ecs::BuildingsLayerTileComponent>(entity))
-        {
-            const auto& buildingsComponent{ Game::ecs.get<const ecs::BuildingsLayerTileComponent>(entity) };
-            RenderEntity(t_window, t_camera, buildingsComponent.mapTile, buildingsComponent.building, false);
-        }
-        else
-        {
-            RenderEntity(t_window, t_camera, tileComponent.mapTile, tileComponent.building, false);
-        }
+        const auto& [b, u] { view.get(entity) };
+        RenderE(t_window, t_camera, b.mapTile, b.building);
     }
 }
 
@@ -297,24 +280,21 @@ void mdcii::map::Map::RenderEntity(
     );
 }
 
-void mdcii::map::Map::RenderPreEntity(
+void mdcii::map::Map::RenderE(
     const ogl::Window& t_window,
     const camera::Camera& t_camera,
     const MapTile& t_mapTile,
-    const data::Building& t_building,
-    const bool t_selected
+    const data::Building& t_building
 ) const
 {
+    const auto rot{ magic_enum::enum_integer(mapContent->rotation) };
     auto gfx{ t_mapTile.gfxs[t_mapTile.orientation] };
 
     if (t_building.size.w > 1)
     {
-        // y * width + x
         const auto offset{ t_mapTile.y * t_building.size.w + t_mapTile.x };
         gfx += offset;
     }
-
-    const auto rot{ magic_enum::enum_integer(mapContent->rotation) };
 
     RenderBuilding(
         t_window,
@@ -322,6 +302,75 @@ void mdcii::map::Map::RenderPreEntity(
         gfx,
         t_mapTile.screenPositions[rot],
         static_cast<float>(t_building.posoffs),
-        t_selected
+        false
     );
+}
+
+void mdcii::map::Map::RenderTerrainLayerEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const
+{
+#ifdef MDCII_DEBUG_BUILD
+    auto t{ 0 }; // terrain tiles expected result = width * height
+#endif
+
+    const auto view{ Game::ecs.view<const ecs::TerrainLayerTileComponent>() };
+    for (const auto entity : view)
+    {
+        if (skipBuildingsLayerTiles)
+        {
+            if (Game::ecs.all_of<const ecs::BuildingsLayerTileComponent>(entity))
+            {
+#ifdef MDCII_DEBUG_BUILD
+                t++;
+#endif
+                continue;
+            }
+        }
+
+        const auto& [tileComponent] { view.get(entity) };
+        RenderEntity(t_window, t_camera, tileComponent.mapTile, tileComponent.building, false);
+#ifdef MDCII_DEBUG_BUILD
+        t++;
+#endif
+    }
+
+    MDCII_ASSERT(t == mapContent->width * mapContent->height, "[Map::RenderTerrainLayerEntities()] Invalid number of entities.")
+}
+
+void mdcii::map::Map::RenderBuildingsLayerEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const
+{
+#ifdef MDCII_DEBUG_BUILD
+    auto b{ 0 }; // building tiles expected result = 5
+#endif
+
+    const auto view{ Game::ecs.view<ecs::BuildingsLayerTileComponent>(entt::exclude<ecs::BuildingUpdatedComponent>) };
+    for (const auto entity : view)
+    {
+        const auto& [buildingsComponent] { view.get(entity) };
+        RenderEntity(t_window, t_camera, buildingsComponent.mapTile, buildingsComponent.building, false);
+#ifdef MDCII_DEBUG_BUILD
+        b++;
+#endif
+    }
+
+    // todo: currently there are 5 building tiles in the map
+    MDCII_ASSERT(b == 5, "[Map::RenderBuildingsLayerEntities()] Invalid number of entities.")
+}
+
+void mdcii::map::Map::RenderTerrainOrBuildingsEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const
+{
+    const auto view{ Game::ecs.view<const ecs::TerrainLayerTileComponent>(entt::exclude<ecs::BuildingUpdatedComponent>) };
+    for (const auto entity : view)
+    {
+        const auto& [tileComponent] { view.get(entity) };
+
+        if (Game::ecs.all_of<const ecs::BuildingsLayerTileComponent>(entity))
+        {
+            const auto& buildingsComponent{ Game::ecs.get<const ecs::BuildingsLayerTileComponent>(entity) };
+            RenderEntity(t_window, t_camera, buildingsComponent.mapTile, buildingsComponent.building, false);
+        }
+        else
+        {
+            RenderEntity(t_window, t_camera, tileComponent.mapTile, tileComponent.building, false);
+        }
+    }
 }

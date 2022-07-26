@@ -128,17 +128,22 @@ namespace mdcii::map
         /**
          * Shows the isometric grid.
          */
-        bool renderGrid{ false };
+        bool renderGrid{ true };
 
         /**
-         * Shows the coordinates.
+         * Shows the isometric grid coordinates.
          */
-        bool renderText{ false };
+        bool renderText{ true };
 
         /**
          * Shows the terrain layer.
          */
         bool renderTerrainLayer{ true };
+
+        /**
+         * Skip buildings layer objects when rendering the terrain layer.
+         */
+        bool skipBuildingsLayerTiles{ false };
 
         /**
          * Shows the buildings layer.
@@ -299,21 +304,19 @@ namespace mdcii::map
             bool t_selected = false
         ) const;
 
-        /**
-         * Renders an entity.
-         *
-         * @param t_window The Window object to get the orthographic projection matrix.
-         * @param t_camera The Camera object to get the view matrix.
-         * @param t_mapTile A MapTile object.
-         * @param t_building A Building object.
-         * @param t_selected Determines if the building is selected and rendered a little darker.
-         */
-        void RenderPreEntity(
+
+
+        // todo
+
+        void RenderE(
             const ogl::Window& t_window,
             const camera::Camera& t_camera,
             const MapTile& t_mapTile,
-            const data::Building& t_building,
-            bool t_selected = false
+            const data::Building& t_building
         ) const;
+
+        void RenderTerrainLayerEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+        void RenderBuildingsLayerEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+        void RenderTerrainOrBuildingsEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
     };
 }

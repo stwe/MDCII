@@ -39,7 +39,8 @@ void mdcii::map::MapTile::RenderImGui() const
     ImGui::Text("Name: %s", data::Text::GetTextForBuildingId(data::Text::Section::WORKSHOPS, buildingId, Game::INI.Get<std::string>("locale", "lang")).c_str());
 
     ImGui::Text("Building Id: %d", buildingId);
-    ImGui::Text("Orientation: %s", ShowCurrentOrientation());
+    ImGui::Text("Orientation name: %s", ShowCurrentOrientation());
+    ImGui::Text("Orientation value: %d", orientation);
     ImGui::Text("X: %d", x);
     ImGui::Text("Y: %d", y);
     ImGui::Text("Map x: %d", mapX);

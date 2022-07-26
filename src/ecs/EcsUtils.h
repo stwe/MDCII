@@ -57,16 +57,17 @@ namespace mdcii::ecs
         /**
          * Counts the number of entities for the given list of types.
          *
-         * @tparam Component List of types.
+         * @tparam Component List of component types.
+         * @tparam Exclude List of exclude types.
          *
          * @return The number of entities.
          */
-        template<typename... Component>
-        static int CountEntities()
+        template<typename... Component, typename... Exclude>
+        static int CountEntities(entt::exclude_t<Exclude...> = {})
         {
             auto c{ 0 };
             (
-                [&c](entt::view<entt::get_t<Component...>> t_view)
+                [&c](entt::view<entt::get_t<Component...>, entt::exclude_t<Exclude...>> t_view)
                 {
                     for (auto e : t_view)
                     {
@@ -81,15 +82,17 @@ namespace mdcii::ecs
         /**
          * Counts the number of entities and creates a label for output.
          * 
-         * @tparam Component List of types.
+         * @tparam Component List of component types.
+         * @tparam Exclude List of exclude types.
          * @param t_label Used as a label for the entity counter.
+         * @param t_exclude List of excludes.
          *
          * @return The created label.
          */
-        template<typename... Component>
-        static std::string EntityCounterLabel(const std::string& t_label)
+        template<typename... Component, typename... Exclude>
+        static std::string EntityCounterLabel(const std::string& t_label, entt::exclude_t<Exclude...> t_exclude = {})
         {
-            return t_label + " (" + std::to_string(CountEntities<Component...>()).append(")");
+            return t_label + " (" + std::to_string(CountEntities<Component...>(t_exclude)).append(")");
         }
 
         /**

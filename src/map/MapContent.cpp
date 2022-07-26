@@ -69,7 +69,6 @@ void mdcii::map::MapContent::RenderImGui() const
 
     ImGui::Separator();
 
-    // Entities to show an isometric grid
     // Entities with the GridComponent
 
     if (ImGui::TreeNode(ecs::EcsUtils::EntityCounterLabel<const ecs::GridComponent>("Grid Entities").c_str()))
@@ -93,7 +92,6 @@ void mdcii::map::MapContent::RenderImGui() const
 
     ImGui::Separator();
 
-    // Entities to show the terrain
     // Entities with the TerrainLayerTileComponent
 
     if (ImGui::TreeNode(ecs::EcsUtils::EntityCounterLabel<const ecs::TerrainLayerTileComponent>("Terrain Layer Entities").c_str()))
@@ -119,12 +117,12 @@ void mdcii::map::MapContent::RenderImGui() const
 
     ImGui::Separator();
 
-    // Building Layer Entities
-    // Entities with the TerrainLayerTileComponent && BuildingsLayerTileComponent
+    // Entities with the BuildingsLayerTileComponent but not with the BuildingUpdatedComponent
 
-    if (ImGui::TreeNode(ecs::EcsUtils::EntityCounterLabel<ecs::TerrainLayerTileComponent, ecs::BuildingsLayerTileComponent>("Building Layer Entities").c_str()))
+    if (ImGui::TreeNode(ecs::EcsUtils::EntityCounterLabel<const ecs::BuildingsLayerTileComponent>
+        ("Buildings Layer Entities", entt::exclude<ecs::BuildingUpdatedComponent>).c_str()))
     {
-        const auto view{ Game::ecs.view<const ecs::TerrainLayerTileComponent, const ecs::BuildingsLayerTileComponent>() };
+        const auto view{ Game::ecs.view<const ecs::BuildingsLayerTileComponent>(entt::exclude<ecs::BuildingUpdatedComponent>) };
         for (const auto entity : view)
         {
             const auto& bc{ view.get<const ecs::BuildingsLayerTileComponent>(entity) };
@@ -145,34 +143,20 @@ void mdcii::map::MapContent::RenderImGui() const
 
     ImGui::Separator();
 
-    // Building Layer Entities to add
-    // Entities with the TerrainLayerTileComponent, BuildingsLayerTileComponent && BuildingUpdatedComponent
+    // Entities with the BuildingsLayerTileComponent and the BuildingUpdatedComponent
 
-    if (ImGui::TreeNode(ecs::EcsUtils::EntityCounterLabel<ecs::TerrainLayerTileComponent, ecs::BuildingsLayerTileComponent, ecs::BuildingUpdatedComponent>("Building Layer Entities to add").c_str()))
+    auto c{ ecs::EcsUtils::EntityCounterLabel<const ecs::BuildingsLayerTileComponent, const ecs::BuildingUpdatedComponent>("Buildings Layer Entities to add") };
+    ImGui::TextUnformatted(c.c_str());
+
+    const auto view{ Game::ecs.view<const ecs::BuildingsLayerTileComponent, const ecs::BuildingUpdatedComponent>() };
+    for (const auto entity : view)
     {
-        /*
-        const auto view{ Game::ecs.view<const ecs::TerrainLayerTileComponent, const ecs::BuildingsLayerTileComponent, ecs::BuildingUpdatedComponent>() };
-        for (const auto entity : view)
-        {
-            const auto& bc{ view.get<const ecs::BuildingsLayerTileComponent>(entity) };
-            auto x{ std::to_string(bc.mapTile.mapX) };
-            auto y{ std::to_string(bc.mapTile.mapY) };
+        const auto& bc{ view.get<const ecs::BuildingsLayerTileComponent>(entity) };
+        //const auto& uc{ view.get<ecs::BuildingUpdatedComponent>(entity) };
 
-            //auto& uc{ view.get<ecs::BuildingUpdatedComponent>(entity) };
-
-            if (ImGui::TreeNode(x.append(", ").append(y).c_str()))
-            {
-                bc.mapTile.RenderImGui();
-                bc.building.RenderImGui();
-
-                ImGui::TreePop();
-            }
-        }
-        */
-
-        ImGui::TreePop();
+        ImGui::Text("mx: %d, my: %d", bc.mapTile.mapX, bc.mapTile.mapY);
     }
-
+ 
     ImGui::Separator();
 
     ImGui::End();
@@ -323,7 +307,7 @@ void mdcii::map::MapContent::AddBuildingsLayerComponent(const int t_mapX, const 
             // run pre-calcs
             PreCalcTile(mapTile, t_mapX + rp.x, t_mapY + rp.y);
 
-            // get terrain tile
+            // get terrain layer map tile
             const auto& terrainTile{ GetLayer(LayerType::TERRAIN).GetTile(t_mapX + x, t_mapY + y) };
 
             // add/replace BuildingsLayerTileComponent
