@@ -148,13 +148,11 @@ void mdcii::map::MapContent::RenderImGui() const
     auto c{ ecs::EcsUtils::EntityCounterLabel<const ecs::BuildingsLayerTileComponent, const ecs::BuildingUpdatedComponent>("Buildings Layer Entities to add") };
     ImGui::TextUnformatted(c.c_str());
 
-    const auto view{ Game::ecs.view<const ecs::BuildingsLayerTileComponent, const ecs::BuildingUpdatedComponent>() };
-    for (const auto entity : view)
+    const auto view{ Game::ecs.view<ecs::TerrainLayerTileComponent, ecs::BuildingsLayerTileComponent, ecs::BuildingUpdatedComponent>() };
+    for (const auto entity : view.use<ecs::TerrainLayerTileComponent>())
     {
-        const auto& bc{ view.get<const ecs::BuildingsLayerTileComponent>(entity) };
-        //const auto& uc{ view.get<ecs::BuildingUpdatedComponent>(entity) };
-
-        ImGui::Text("mx: %d, my: %d", bc.mapTile.mapX, bc.mapTile.mapY);
+        const auto& [t, b, u]{ view.get(entity) };
+        ImGui::Text("mx: %d, my: %d, x: %d, y: %d, id: %d", b.mapTile.mapX, b.mapTile.mapY, b.mapTile.x, b.mapTile.y, b.building.id);
     }
  
     ImGui::Separator();
@@ -292,20 +290,8 @@ void mdcii::map::MapContent::AddBuildingsLayerComponent(const int t_mapX, const 
             mapTile.x = x;
             mapTile.y = y;
 
-            // rotate
-            const auto rot{ magic_enum::enum_cast<Rotation>(t_selectedBauGfx.orientation) };
-            auto rp{ glm::ivec2(0) };
-            if (rot.has_value())
-            {
-                rp = RotatePosition(
-                    x, y,
-                    building.size.w, building.size.h,
-                    rot.value()
-                );
-            }
-
             // run pre-calcs
-            PreCalcTile(mapTile, t_mapX + rp.x, t_mapY + rp.y);
+            PreCalcTile(mapTile, t_mapX + x, t_mapY + y);
 
             // get terrain layer map tile
             const auto& terrainTile{ GetLayer(LayerType::TERRAIN).GetTile(t_mapX + x, t_mapY + y) };

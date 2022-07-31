@@ -220,30 +220,19 @@ void mdcii::map::Map::RenderEntities(const ogl::Window& t_window, const camera::
     // render terrain only
     if (renderTerrainLayer && !renderBuildingsLayer)
     {
-        //RenderTerrainLayerEntities(t_window, t_camera, skipBuildingsLayerTiles);
+        RenderTerrainLayerEntities(t_window, t_camera);
         return;
     }
 
     // render buildings only
     if (!renderTerrainLayer && renderBuildingsLayer)
     {
-        //RenderBuildingsLayerEntities(t_window, t_camera);
+        RenderBuildingsLayerEntities(t_window, t_camera);
         return;
     }
 
     // render terrain or buildings
-    //RenderTerrainOrBuildingsEntities(t_window, t_camera);
-
-
-    // todo -------------------------------
-
-    // render new buildings
-    const auto view{ Game::ecs.view<const ecs::BuildingsLayerTileComponent, const ecs::BuildingUpdatedComponent>() };
-    for (const auto entity : view)
-    {
-        const auto& [b, u] { view.get(entity) };
-        RenderE(t_window, t_camera, b.mapTile, b.building);
-    }
+    RenderTerrainOrBuildingsEntities(t_window, t_camera);
 }
 
 void mdcii::map::Map::RenderEntity(
@@ -255,26 +244,111 @@ void mdcii::map::Map::RenderEntity(
 ) const
 {
     // get gfx in the right direction for the current map rotation
-    const auto rot{ magic_enum::enum_integer(mapContent->rotation) };
-    auto orientation{ t_mapTile.orientation };
+    const auto mapRotation{ magic_enum::enum_integer(mapContent->rotation) };
+    auto buildingRotation{ t_mapTile.orientation };
     if (t_building.rotate > 0)
     {
-        orientation = (orientation + rot) % 4;
+        buildingRotation = (buildingRotation + mapRotation) % 4;
     }
-    auto gfx{ t_mapTile.gfxs[orientation] };
+
+    auto gfx{ t_mapTile.gfxs[buildingRotation] };
 
     if (t_building.size.w > 1)
     {
-        // y * width + x
-        const auto offset{ t_mapTile.y * t_building.size.w + t_mapTile.x };
+        // default: orientation 0
+        auto rp{ glm::ivec2(t_mapTile.x, t_mapTile.y) };
+
+        if (t_mapTile.orientation == 3)
+        {
+            rp = mapContent->RotatePosition(
+                t_mapTile.x, t_mapTile.y,
+                t_building.size.w, t_building.size.h,
+                Rotation::DEG90
+            );
+        }
+
+        if (t_mapTile.orientation == 2)
+        {
+            rp = mapContent->RotatePosition(
+                t_mapTile.x, t_mapTile.y,
+                t_building.size.w, t_building.size.h,
+                Rotation::DEG180
+            );
+        }
+
+        if (t_mapTile.orientation == 1)
+        {
+            rp = mapContent->RotatePosition(
+                t_mapTile.x, t_mapTile.y,
+                t_building.size.w, t_building.size.h,
+                Rotation::DEG270
+            );
+        }
+
+        const auto offset{ rp.y * t_building.size.w + rp.x };
         gfx += offset;
     }
+
+    // Example 503: Bakery
+
+    // DEG0   = 0, 1, 2, 3 -> orient 0
+    // DEG90  = 1, 3, 0, 2 -> orient 3
+    // DEG180 = 3, 2, 1, 0 -> orient 2
+    // DEG270 = 2, 0, 3, 1 -> orient 1
+
+    //0
+    /*
+    if (gfx == 3760 && t_mapTile.x == 0 && t_mapTile.y == 0)
+        gfx = 3760;
+    if (gfx == 3760 && t_mapTile.x == 1 && t_mapTile.y == 0)
+        gfx = 3761;
+    if (gfx == 3760 && t_mapTile.x == 0 && t_mapTile.y == 1)
+        gfx = 3762;
+    if (gfx == 3760 && t_mapTile.x == 1 && t_mapTile.y == 1)
+        gfx = 3763;
+    */
+
+    // 1
+    /*
+    if (gfx == 3764 && t_mapTile.x == 0 && t_mapTile.y == 0)
+        gfx = 3766;                                           // + 2
+    if (gfx == 3764 && t_mapTile.x == 1 && t_mapTile.y == 0)
+        gfx = 3764;                                           // + 0
+    if (gfx == 3764 && t_mapTile.x == 0 && t_mapTile.y == 1)
+        gfx = 3767;                                           // + 3
+    if (gfx == 3764 && t_mapTile.x == 1 && t_mapTile.y == 1)
+        gfx = 3765;                                           // + 1
+    */
+
+    // 2
+    /*
+    if (gfx == 3768 && t_mapTile.x == 0 && t_mapTile.y == 0)
+        gfx = 3771;                                           // + 3
+    if (gfx == 3768 && t_mapTile.x == 1 && t_mapTile.y == 0)
+        gfx = 3770;                                           // + 2
+    if (gfx == 3768 && t_mapTile.x == 0 && t_mapTile.y == 1)
+        gfx = 3769;                                           // + 1
+    if (gfx == 3768 && t_mapTile.x == 1 && t_mapTile.y == 1)
+        gfx = 3768;                                           // + 0
+    */
+
+    // 3
+    /*
+    if (gfx == 3772 && t_mapTile.x == 0 && t_mapTile.y == 0)
+        gfx = 3773;                                           // + 1
+    if (gfx == 3772 && t_mapTile.x == 1 && t_mapTile.y == 0)
+        gfx = 3775;                                           // + 3
+    if (gfx == 3772 && t_mapTile.x == 0 && t_mapTile.y == 1)
+        gfx = 3772;                                           // + 0
+    if (gfx == 3772 && t_mapTile.x == 1 && t_mapTile.y == 1)
+        gfx = 3774;                                           // + 2
+    */
 
     RenderBuilding(
         t_window,
         t_camera,
         gfx,
-        t_mapTile.screenPositions[rot],
+        t_mapTile.screenPositions[mapRotation],
         static_cast<float>(t_building.posoffs),
         t_selected
     );
@@ -326,8 +400,8 @@ void mdcii::map::Map::RenderTerrainLayerEntities(const ogl::Window& t_window, co
             }
         }
 
-        const auto& [tileComponent] { view.get(entity) };
-        RenderEntity(t_window, t_camera, tileComponent.mapTile, tileComponent.building, false);
+        const auto& [terrainLayerTileComponent] { view.get(entity) };
+        RenderEntity(t_window, t_camera, terrainLayerTileComponent.mapTile, terrainLayerTileComponent.building, false);
 #ifdef MDCII_DEBUG_BUILD
         t++;
 #endif
@@ -338,39 +412,30 @@ void mdcii::map::Map::RenderTerrainLayerEntities(const ogl::Window& t_window, co
 
 void mdcii::map::Map::RenderBuildingsLayerEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
-#ifdef MDCII_DEBUG_BUILD
-    auto b{ 0 }; // building tiles expected result = 5
-#endif
-
     const auto view{ Game::ecs.view<ecs::BuildingsLayerTileComponent>(entt::exclude<ecs::BuildingUpdatedComponent>) };
     for (const auto entity : view)
     {
         const auto& [buildingsComponent] { view.get(entity) };
         RenderEntity(t_window, t_camera, buildingsComponent.mapTile, buildingsComponent.building, false);
-#ifdef MDCII_DEBUG_BUILD
-        b++;
-#endif
     }
-
-    // todo: currently there are 5 building tiles in the map
-    MDCII_ASSERT(b == 5, "[Map::RenderBuildingsLayerEntities()] Invalid number of entities.")
 }
 
 void mdcii::map::Map::RenderTerrainOrBuildingsEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
-    const auto view{ Game::ecs.view<const ecs::TerrainLayerTileComponent>(entt::exclude<ecs::BuildingUpdatedComponent>) };
+    const auto view{ Game::ecs.view<ecs::TerrainLayerTileComponent>(/*entt::exclude<ecs::BuildingUpdatedComponent>*/)};
     for (const auto entity : view)
     {
-        const auto& [tileComponent] { view.get(entity) };
+        const auto& terrainLayerTileComponent { view.get<ecs::TerrainLayerTileComponent>(entity) };
 
         if (Game::ecs.all_of<const ecs::BuildingsLayerTileComponent>(entity))
         {
-            const auto& buildingsComponent{ Game::ecs.get<const ecs::BuildingsLayerTileComponent>(entity) };
-            RenderEntity(t_window, t_camera, buildingsComponent.mapTile, buildingsComponent.building, false);
+            const auto& buildingsLayerTileComponent{ Game::ecs.get<const ecs::BuildingsLayerTileComponent>(entity) };
+
+            RenderEntity(t_window, t_camera, buildingsLayerTileComponent.mapTile, buildingsLayerTileComponent.building, false);
         }
         else
         {
-            RenderEntity(t_window, t_camera, tileComponent.mapTile, tileComponent.building, false);
+            RenderEntity(t_window, t_camera, terrainLayerTileComponent.mapTile, terrainLayerTileComponent.building, false);
         }
     }
 }
