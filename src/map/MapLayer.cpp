@@ -19,20 +19,19 @@
 #include "MapLayer.h"
 #include "MapContent.h"
 #include "MdciiAssert.h"
-#include "MdciiException.h"
 #include "ecs/Components.h"
 #include "ecs/EcsUtils.h"
 #include "ogl/resource/ResourceManager.h"
 
 //-------------------------------------------------
-// Types, Types conversions && Operators
+// Json
 //-------------------------------------------------
 
 void mdcii::map::to_json(nlohmann::json& t_json, const MapTile& t_mapTile)
 {
     t_json = nlohmann::json{
         { "id", t_mapTile.buildingId },
-        { "orientation", t_mapTile.orientation },
+        { "rotation", rotation_to_int(t_mapTile.rotation) },
         { "x", t_mapTile.x },
         { "y", t_mapTile.y }
     };
@@ -45,9 +44,11 @@ void mdcii::map::from_json(const nlohmann::json& t_json, MapTile& t_mapTile)
         t_json.at("id").get_to(t_mapTile.buildingId);
     }
 
-    if (t_json.count("orientation"))
+    if (t_json.count("rotation"))
     {
-        t_json.at("orientation").get_to(t_mapTile.orientation);
+        auto r{ 0 };
+        t_json.at("rotation").get_to(r);
+        t_mapTile.rotation = int_to_rotation(r);
     }
 
     if (t_json.count("x"))

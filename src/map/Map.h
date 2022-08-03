@@ -230,13 +230,6 @@ namespace mdcii::map
          */
         void Rotate(ChangeRotation t_changeRotation) const;
 
-        /**
-         * Get the current map rotation as string.
-         *
-         * @return The rotation as string.
-         */
-        [[nodiscard]] const char* ShowCurrentRotation() const;
-
     protected:
 
     private:
@@ -304,19 +297,28 @@ namespace mdcii::map
             bool t_selected = false
         ) const;
 
-
-
-        // todo
-
-        void RenderE(
-            const ogl::Window& t_window,
-            const camera::Camera& t_camera,
-            const MapTile& t_mapTile,
-            const data::Building& t_building
-        ) const;
-
+        /**
+         * Iterates over all entities and renders tiles of the TerrainLayer.
+         *
+         * @param t_window The Window object to get the orthographic projection matrix.
+         * @param t_camera The Camera object to get the view matrix.
+         */
         void RenderTerrainLayerEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+
+        /**
+         * Iterates over all entities and renders tiles of the BuildingsLayer.
+         *
+         * @param t_window The Window object to get the orthographic projection matrix.
+         * @param t_camera The Camera object to get the view matrix.
+         */
         void RenderBuildingsLayerEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+
+        /**
+         * Iterates over all entities and renders tiles of the TerrainLayer or the BuildingsLayer.
+         *
+         * @param t_window The Window object to get the orthographic projection matrix.
+         * @param t_camera The Camera object to get the view matrix.
+         */
         void RenderTerrainOrBuildingsEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
     };
 }

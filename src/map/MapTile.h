@@ -20,8 +20,8 @@
 
 #include <array>
 #include <vector>
-#include <glm/vec2.hpp>
 #include "ecs/entt.hpp"
+#include "Rotation.h"
 
 namespace mdcii::map
 {
@@ -68,9 +68,9 @@ namespace mdcii::map
         int32_t buildingId{ -1 };
 
         /**
-         * The orientation of the building.
+         * The rotation of the building.
          */
-        int32_t orientation{ 0 };
+        Rotation rotation{ Rotation::DEG0 };
 
         /**
          * Example: Bakery
@@ -148,16 +148,5 @@ namespace mdcii::map
          * Renders ImGui menus.
          */
         void RenderImGui() const;
-
-        //-------------------------------------------------
-        // Orientation
-        //-------------------------------------------------
-
-        /**
-         * Get the current tile orientation as string.
-         *
-         * @return The orientation as string.
-         */
-        [[nodiscard]] const char* ShowCurrentOrientation() const;
     };
 }

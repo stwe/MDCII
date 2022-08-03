@@ -126,11 +126,6 @@ void mdcii::map::Map::Rotate(const ChangeRotation t_changeRotation) const
     }
 }
 
-const char* mdcii::map::Map::ShowCurrentRotation() const
-{
-    return magic_enum::enum_name(mapContent->rotation).data();
-}
-
 //-------------------------------------------------
 // Init
 //-------------------------------------------------
@@ -181,7 +176,7 @@ void mdcii::map::Map::RenderGridEntities(const ogl::Window& t_window, const came
     for (const auto entity : view)
     {
         const auto& gc{ view.get<const ecs::GridComponent>(entity) };
-        const auto screenPosition{ gc.mapTile.screenPositions[magic_enum::enum_integer(mapContent->rotation)] };
+        const auto screenPosition{ gc.mapTile.screenPositions[rotation_to_int(mapContent->rotation)] };
 
         if (renderGrid)
         {
@@ -243,42 +238,40 @@ void mdcii::map::Map::RenderEntity(
     const bool t_selected
 ) const
 {
-    // get gfx in the right direction for the current map rotation
-    const auto mapRotation{ magic_enum::enum_integer(mapContent->rotation) };
-    auto buildingRotation{ t_mapTile.orientation };
+    auto buildingRotation{ t_mapTile.rotation };
     if (t_building.rotate > 0)
     {
-        buildingRotation = (buildingRotation + mapRotation) % 4;
+        buildingRotation = buildingRotation + mapContent->rotation;
     }
 
-    auto gfx{ t_mapTile.gfxs[buildingRotation] };
+    auto gfx{ t_mapTile.gfxs[rotation_to_int(buildingRotation)] };
 
     if (t_building.size.w > 1)
     {
         // default: orientation 0
         auto rp{ glm::ivec2(t_mapTile.x, t_mapTile.y) };
 
-        if (t_mapTile.orientation == 3)
+        if (t_mapTile.rotation == Rotation::DEG270)
         {
-            rp = mapContent->RotatePosition(
+            rp = rotate_position(
                 t_mapTile.x, t_mapTile.y,
                 t_building.size.w, t_building.size.h,
                 Rotation::DEG90
             );
         }
 
-        if (t_mapTile.orientation == 2)
+        if (t_mapTile.rotation == Rotation::DEG180)
         {
-            rp = mapContent->RotatePosition(
+            rp = rotate_position(
                 t_mapTile.x, t_mapTile.y,
                 t_building.size.w, t_building.size.h,
                 Rotation::DEG180
             );
         }
 
-        if (t_mapTile.orientation == 1)
+        if (t_mapTile.rotation == Rotation::DEG90)
         {
-            rp = mapContent->RotatePosition(
+            rp = rotate_position(
                 t_mapTile.x, t_mapTile.y,
                 t_building.size.w, t_building.size.h,
                 Rotation::DEG270
@@ -348,35 +341,9 @@ void mdcii::map::Map::RenderEntity(
         t_window,
         t_camera,
         gfx,
-        t_mapTile.screenPositions[mapRotation],
+        t_mapTile.screenPositions[rotation_to_int(mapContent->rotation)],
         static_cast<float>(t_building.posoffs),
         t_selected
-    );
-}
-
-void mdcii::map::Map::RenderE(
-    const ogl::Window& t_window,
-    const camera::Camera& t_camera,
-    const MapTile& t_mapTile,
-    const data::Building& t_building
-) const
-{
-    const auto rot{ magic_enum::enum_integer(mapContent->rotation) };
-    auto gfx{ t_mapTile.gfxs[t_mapTile.orientation] };
-
-    if (t_building.size.w > 1)
-    {
-        const auto offset{ t_mapTile.y * t_building.size.w + t_mapTile.x };
-        gfx += offset;
-    }
-
-    RenderBuilding(
-        t_window,
-        t_camera,
-        gfx,
-        t_mapTile.screenPositions[rot],
-        static_cast<float>(t_building.posoffs),
-        false
     );
 }
 

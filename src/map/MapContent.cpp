@@ -20,7 +20,6 @@
 #include <fstream>
 #include "MapContent.h"
 #include "MdciiAssert.h"
-#include "MdciiException.h"
 #include "ecs/Components.h"
 #include "ecs/EcsUtils.h"
 
@@ -223,33 +222,7 @@ glm::vec2 mdcii::map::MapContent::MapToScreen(const int t_mapX, const int t_mapY
 
 glm::ivec2 mdcii::map::MapContent::RotatePosition(const int t_mapX, const int t_mapY, const Rotation t_rotation) const
 {
-    return RotatePosition(t_mapX, t_mapY, width, height, t_rotation);
-}
-
-glm::ivec2 mdcii::map::MapContent::RotatePosition(const int t_mapX, const int t_mapY, const int t_width, const int t_height, const Rotation t_rotation)
-{
-    auto x{ t_mapX };
-    auto y{ t_mapY };
-
-    switch (t_rotation)
-    {
-    case Rotation::DEG0:
-        break;
-    case Rotation::DEG90:
-        x = t_width - t_mapY - 1;
-        y = t_mapX;
-        break;
-    case Rotation::DEG180:
-        x = t_width - t_mapX - 1;
-        y = t_height - t_mapY - 1;
-        break;
-    case Rotation::DEG270:
-        x = t_mapY;
-        y = t_height - t_mapX - 1;
-        break;
-    }
-
-    return { x, y };
+    return rotate_position(t_mapX, t_mapY, width, height, t_rotation);
 }
 
 //-------------------------------------------------
@@ -286,7 +259,7 @@ void mdcii::map::MapContent::AddBuildingsLayerComponent(const int t_mapX, const 
             // create a new MapTile object
             MapTile mapTile;
             mapTile.buildingId = t_selectedBauGfx.buildingId;
-            mapTile.orientation = t_selectedBauGfx.orientation;
+            mapTile.rotation = t_selectedBauGfx.rotation;
             mapTile.x = x;
             mapTile.y = y;
 

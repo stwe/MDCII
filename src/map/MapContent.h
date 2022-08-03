@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <memory>
 #include "MapLayer.h"
 #include "data/Buildings.h"
 #include "event/Event.h"
@@ -182,19 +181,6 @@ namespace mdcii::map
          * @return The rotated position.
          */
         [[nodiscard]] glm::ivec2 RotatePosition(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
-
-        /**
-         * Rotates the position of any size map.
-         *
-         * @param t_mapX The x position to rotate.
-         * @param t_mapY The y position to rotate.
-         * @param t_width The width of the map.
-         * @param t_height The height of the map.
-         * @param t_rotation The rotation.
-         *
-         * @return The rotated position.
-         */
-        [[nodiscard]] static glm::ivec2 RotatePosition(int t_mapX, int t_mapY, int t_width, int t_height, Rotation t_rotation = Rotation::DEG0);
 
         //-------------------------------------------------
         // Edit

@@ -42,7 +42,7 @@ namespace mdcii::map
     class MapContent;
 
     //-------------------------------------------------
-    // Types, Types conversions && Operators
+    // Types
     //-------------------------------------------------
 
     enum class LayerType
@@ -50,38 +50,9 @@ namespace mdcii::map
         TERRAIN, BUILDINGS, NONE
     };
 
-    enum class Rotation
-    {
-        DEG0, DEG90, DEG180, DEG270
-    };
-
-    inline Rotation& operator++(Rotation& t_rotation)
-    {
-        if (t_rotation == Rotation::DEG270)
-        {
-            t_rotation = Rotation::DEG0;
-        }
-        else
-        {
-            t_rotation = static_cast<Rotation>(static_cast<std::underlying_type_t<Rotation>>(t_rotation) + 1);
-        }
-
-        return t_rotation;
-    }
-
-    inline Rotation& operator--(Rotation& t_rotation)
-    {
-        if (t_rotation == Rotation::DEG0)
-        {
-            t_rotation = Rotation::DEG270;
-        }
-        else
-        {
-            t_rotation = static_cast<Rotation>(static_cast<std::underlying_type_t<Rotation>>(t_rotation) - 1);
-        }
-
-        return t_rotation;
-    }
+    //-------------------------------------------------
+    // Json
+    //-------------------------------------------------
 
     void to_json(nlohmann::json& t_json, const MapTile& t_mapTile);
     void from_json(const nlohmann::json& t_json, MapTile& t_mapTile);

@@ -17,15 +17,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <imgui.h>
-#include <magic_enum.hpp>
 #include "EditorGui.h"
 #include "Game.h"
 #include "Log.h"
 #include "map/Map.h"
-#include "map/MapLayer.h"
 #include "file/BshFile.h"
 #include "data/Text.h"
 #include "event/EventManager.h"
+#include "map/MapContent.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -51,7 +50,7 @@ void mdcii::EditorGui::RotateMapGui() const
 {
     std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentMapRotation") };
     rotStr.append(std::string(": %s"));
-    ImGui::Text(rotStr.c_str(), m_map->ShowCurrentRotation());
+    ImGui::Text(rotStr.c_str(), rotation_to_string(m_map->mapContent->rotation));
 
     ImGui::Separator();
 
@@ -95,7 +94,7 @@ void mdcii::EditorGui::AllWorkshopsGui() const
                 {
                     event::EventManager::eventDispatcher.dispatch(
                         event::MdciiEventType::BAUGFX_SELECTED,
-                        event::BauGfxSelectedEvent({ std::stoi(k), 0, v })
+                        event::BauGfxSelectedEvent({ std::stoi(k), map::Rotation::DEG0, v })
                     );
                 }
 
@@ -116,14 +115,10 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
 
     ImGui::TextUnformatted(t_selectedBauGfx.name.c_str());
 
-    const auto rot{ magic_enum::enum_cast<map::Rotation>(t_selectedBauGfx.orientation) };
-    if (rot.has_value())
-    {
-        std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentBuildingRotation") };
-        rotStr.append(std::string(": %s"));
+    std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentBuildingRotation") };
+    rotStr.append(std::string(": %s"));
 
-        ImGui::Text(rotStr.c_str(), magic_enum::enum_name(rot.value()).data());
-    }
+    ImGui::Text(rotStr.c_str(), rotation_to_string(t_selectedBauGfx.rotation));
 
     ImGui::Separator();
 
@@ -132,16 +127,12 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
     const auto textureWidth{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->width };
     const auto textureHeight{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->height };
     const auto textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(
-        m_map->bauhausBshFile->bshTextures.at(static_cast<size_t>(building.baugfx) + t_selectedBauGfx.orientation)->textureId)
+        m_map->bauhausBshFile->bshTextures.at(static_cast<size_t>(building.baugfx) + rotation_to_int(t_selectedBauGfx.rotation))->textureId)
     ) };
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingRight").c_str()))
     {
-        ++t_selectedBauGfx.orientation;
-        if (t_selectedBauGfx.orientation > 3)
-        {
-            t_selectedBauGfx.orientation = 0;
-        }
+        ++t_selectedBauGfx.rotation;
     }
 
     ImGui::SameLine();
@@ -159,10 +150,6 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingLeft").c_str()))
     {
-        --t_selectedBauGfx.orientation;
-        if (t_selectedBauGfx.orientation < 0)
-        {
-            t_selectedBauGfx.orientation = 3;
-        }
+        --t_selectedBauGfx.rotation;
     }
 }

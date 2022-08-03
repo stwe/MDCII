@@ -19,6 +19,7 @@
 #pragma once
 
 #include <string>
+#include "map/Rotation.h"
 
 namespace mdcii::event
 {
@@ -38,9 +39,9 @@ namespace mdcii::event
         int32_t buildingId{ -1 };
 
         /**
-         * The bauGfx orientation.
+         * The bauGfx rotation.
          */
-        int32_t orientation{ 0 };
+        map::Rotation rotation{ map::Rotation::DEG0 };
 
         /**
          * The translated label.

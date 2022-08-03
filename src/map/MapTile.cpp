@@ -17,9 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <imgui.h>
-#include <magic_enum.hpp>
 #include "Game.h"
-#include "MapLayer.h"
+#include "MapTile.h"
 #include "data/Text.h"
 
 //-------------------------------------------------
@@ -39,8 +38,8 @@ void mdcii::map::MapTile::RenderImGui() const
     ImGui::Text("Name: %s", data::Text::GetTextForBuildingId(data::Text::Section::WORKSHOPS, buildingId, Game::INI.Get<std::string>("locale", "lang")).c_str());
 
     ImGui::Text("Building Id: %d", buildingId);
-    ImGui::Text("Orientation name: %s", ShowCurrentOrientation());
-    ImGui::Text("Orientation value: %d", orientation);
+    ImGui::Text("Rotation name: %s", rotation_to_string(rotation));
+    ImGui::Text("Rotation value: %d", rotation);
     ImGui::Text("X: %d", x);
     ImGui::Text("Y: %d", y);
     ImGui::Text("Map x: %d", mapX);
@@ -51,7 +50,7 @@ void mdcii::map::MapTile::RenderImGui() const
         auto r{ Rotation::DEG0 };
         for (const auto& position : screenPositions)
         {
-            if (ImGui::TreeNode(magic_enum::enum_name(r).data()))
+            if (ImGui::TreeNode(rotation_to_string(r)))
             {
                 ImGui::Text("Screen x: %f", static_cast<double>(position.x));
                 ImGui::Text("Screen y: %f", static_cast<double>(position.y));
@@ -69,7 +68,7 @@ void mdcii::map::MapTile::RenderImGui() const
         auto r{ Rotation::DEG0 };
         for (const auto index : indices)
         {
-            if (ImGui::TreeNode(magic_enum::enum_name(r).data()))
+            if (ImGui::TreeNode(rotation_to_string(r)))
             {
                 ImGui::Text("Index: %d", index);
                 ImGui::TreePop();
@@ -86,7 +85,7 @@ void mdcii::map::MapTile::RenderImGui() const
         auto r{ Rotation::DEG0 };
         for (const auto gfx : gfxs)
         {
-            if (ImGui::TreeNode(magic_enum::enum_name(r).data()))
+            if (ImGui::TreeNode(rotation_to_string(r)))
             {
                 ImGui::Text("Gfx: %d", gfx);
                 ImGui::TreePop();
@@ -100,19 +99,4 @@ void mdcii::map::MapTile::RenderImGui() const
 
     ImGui::Text("Entity handle: %d", entity);
     ImGui::Text("Debug grid entity handle: %d", gridEntity);
-}
-
-//-------------------------------------------------
-// Orientation
-//-------------------------------------------------
-
-const char* mdcii::map::MapTile::ShowCurrentOrientation() const
-{
-    const auto rotation{ magic_enum::enum_cast<Rotation>(orientation) };
-    if (rotation.has_value())
-    {
-        return magic_enum::enum_name(rotation.value()).data();
-    }
-
-    return nullptr;
 }
