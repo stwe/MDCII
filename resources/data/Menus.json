@@ -7,7 +7,10 @@
     "RotateBuildingRight": "Bauwerk rechtsherum drehen",
     "CurrentMapRotation": "Aktuelle Drehung der Karte",
     "RotateMapLeft": "Karte linksherum drehen",
-    "RotateMapRight": "Karte rechtsherum drehen"
+    "RotateMapRight": "Karte rechtsherum drehen",
+    "Build": "Bauen",
+    "Status": "Status",
+    "Options":  "Optionen"
   },
   "en": {
     "Menu": "Menu",
@@ -17,6 +20,9 @@
     "RotateBuildingRight": "Rotate building right",
     "CurrentMapRotation": "Current map rotation",
     "RotateMapLeft": "Rotate map left",
-    "RotateMapRight": "Rotate map right"
+    "RotateMapRight": "Rotate map right",
+    "Build": "Build",
+    "Status": "Status",
+    "Options": "Options"
   }
 }

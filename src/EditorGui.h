@@ -19,6 +19,8 @@
 #pragma once
 
 #include <memory>
+#include <vector>
+#include <array>
 #include "event/Event.h"
 
 //-------------------------------------------------
@@ -48,6 +50,27 @@ namespace mdcii
     {
     public:
         //-------------------------------------------------
+        // Types
+        //-------------------------------------------------
+
+        /**
+         * The possible actions.
+         */
+        enum class Action
+        {
+            BUILD, STATUS, OPTIONS
+        };
+
+        //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * The labels of the action buttons.
+         */
+        static constexpr std::array<std::string_view, magic_enum::enum_count<Action>()> ACTION_NAMES{ "Build", "Status", "Options" };
+
+        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
@@ -76,6 +99,12 @@ namespace mdcii
         void RotateMapGui() const;
 
         /**
+         * Shows a menu with the action buttons.
+         * These can be used to switch between Build, Status or Options.
+         */
+        void ShowActionsGui();
+
+        /**
          * Shows a list of all workshops.
          * When a building is selected, an event (BauGfxSelectedEvent) is created.
          */
@@ -102,5 +131,15 @@ namespace mdcii
          * Access to all building objects.
          */
         std::shared_ptr<data::Buildings> m_buildings;
+
+        /**
+         * Indicates which action button is currently active.
+         */
+        std::vector<bool> m_actionButtons{ true, false, false, };
+
+        /**
+         * The current action.
+         */
+        Action m_currentAction{ Action::STATUS };
     };
 }

@@ -128,12 +128,12 @@ namespace mdcii::map
         /**
          * Shows the isometric grid.
          */
-        bool renderGrid{ true };
+        bool renderGrid{ false };
 
         /**
          * Shows the isometric grid coordinates.
          */
-        bool renderText{ true };
+        bool renderText{ false };
 
         /**
          * Shows the terrain layer.

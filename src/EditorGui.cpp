@@ -48,11 +48,11 @@ mdcii::EditorGui::~EditorGui() noexcept
 
 void mdcii::EditorGui::RotateMapGui() const
 {
+    ImGui::Separator();
+
     std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentMapRotation") };
     rotStr.append(std::string(": %s"));
     ImGui::Text(rotStr.c_str(), rotation_to_string(m_map->mapContent->rotation));
-
-    ImGui::Separator();
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateMapRight").c_str()))
     {
@@ -65,6 +65,45 @@ void mdcii::EditorGui::RotateMapGui() const
     {
         m_map->Rotate(map::ChangeRotation::LEFT);
     }
+}
+
+void mdcii::EditorGui::ShowActionsGui()
+{
+    magic_enum::enum_for_each<Action>([&](auto t_val)
+    {
+        constexpr Action action{ t_val };
+        constexpr int i{ magic_enum::enum_integer(action) };
+
+        if (m_actionButtons[i])
+        {
+            ImGui::PushID(i);
+            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.6f, 0.6f)));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.7f, 0.7f)));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.8f, 0.8f)));
+
+            ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), ACTION_NAMES[i].data()).c_str());
+            if (ImGui::IsItemClicked(0))
+            {
+                m_actionButtons[i] = !m_actionButtons[i];
+            }
+
+            ImGui::PopStyleColor(3);
+            ImGui::PopID();
+
+            ImGui::SameLine();
+        }
+        else
+        {
+            if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), ACTION_NAMES[i].data()).c_str()))
+            {
+                std::fill(m_actionButtons.begin(), m_actionButtons.end(), false);
+                m_actionButtons[i] = true;
+                m_currentAction = action;
+            }
+
+            ImGui::SameLine();
+        }
+    });
 }
 
 void mdcii::EditorGui::AllWorkshopsGui() const

@@ -88,6 +88,10 @@ void mdcii::EditorState::RenderImGui()
     // title
     ImGui::Begin(data::Text::GetMenuText(m_lang, "Menu").c_str());
 
+    // show action buttons
+    m_editorGui->ShowActionsGui();
+    ImGui::Separator();
+
     // rotate map buttons
     m_editorGui->RotateMapGui();
     ImGui::Separator();
@@ -109,9 +113,9 @@ void mdcii::EditorState::RenderImGui()
 
 
     // ---------------- Debug menus --------------
-
+#ifdef MDCII_DEBUG_BUILD
     m_map->RenderImGui();
-
+#endif
     // -------------------------------------------
 
     ogl::Window::ImGuiEnd();
