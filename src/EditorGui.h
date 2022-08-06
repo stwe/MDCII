@@ -102,6 +102,18 @@ namespace mdcii
          */
         void CurrentSelectedMapTileGui(const map::MapTile& t_mapTile) const;
 
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        /**
+         * Creates a toggle button.
+         *
+         * @param t_str An Id.
+         * @param t_v Pointer to a bool.
+         */
+        static void ToggleButton(const char* t_str, bool* t_v);
+
     protected:
 
     private:

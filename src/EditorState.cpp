@@ -110,7 +110,14 @@ void mdcii::EditorState::RenderImGui()
         }
 
         // list all workshops
-        m_editorGui->AllWorkshopsGui();
+        if (!m_map->demolitionMode)
+        {
+            m_editorGui->AllWorkshopsGui();
+        }
+
+        // toggle button to enable/disable demolition mode
+        ImGui::TextUnformatted(data::Text::GetMenuText(m_lang, "Demolish").c_str());
+        EditorGui::ToggleButton("_demolish", &m_map->demolitionMode);
     }
 
     // action: status
@@ -185,14 +192,15 @@ void mdcii::EditorState::AddListeners() const
         )
     );
 
-    // right mouse button pressed
+    // mouse button pressed
     event::EventManager::eventDispatcher.appendListener(
         event::MdciiEventType::MOUSE_BUTTON_PRESSED,
         eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>
         (
             [&](const event::MouseButtonPressedEvent& t_event)
             {
-                if (t_event.button == map::MousePicker::RIGHT_MOUSE_BUTTON)
+                // right mouse button && build action
+                if (t_event.button == map::MousePicker::RIGHT_MOUSE_BUTTON && m_map->currentAction == map::Map::Action::BUILD)
                 {
                     // clear the selection
                     m_map->currentSelectedBauGfx = {};

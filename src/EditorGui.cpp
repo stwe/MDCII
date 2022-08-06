@@ -207,3 +207,47 @@ void mdcii::EditorGui::CurrentSelectedMapTileGui(const map::MapTile& t_mapTile) 
 
     t_mapTile.RenderImGui(false);
 }
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+void mdcii::EditorGui::ToggleButton(const char* t_str, bool* t_v)
+{
+    const auto p{ ImGui::GetCursorScreenPos() };
+    auto* drawList{ ImGui::GetWindowDrawList() };
+
+    const auto height{ ImGui::GetFrameHeight() };
+    const auto width{ height * 2.0f };
+    const auto radius{ height * 0.5f };
+
+    if (ImGui::InvisibleButton(t_str, ImVec2(width, height)))
+    {
+        *t_v = !*t_v;
+    }
+
+    constexpr auto offset{ 20 };
+
+    // enable
+    constexpr auto r{ 153 };
+    constexpr auto g{ 61 };
+    constexpr auto b{ 61 };
+
+    // disable
+    constexpr auto rd{ 145 };
+    constexpr auto gd{ 211 };
+    constexpr auto bd{ 68 };
+
+    ImU32 colBg;
+    if (ImGui::IsItemHovered())
+    {
+        colBg = *t_v ? IM_COL32(r + offset, g, b + offset, 255) : IM_COL32(rd - offset, gd - offset, bd - offset, 255);
+    }
+    else
+    {
+        colBg = *t_v ? IM_COL32(r, g, b, 255) : IM_COL32(rd, gd, bd, 255);
+    }
+
+    drawList->AddRectFilled(p, ImVec2(p.x + width, p.y + height), colBg, height * 0.5f);
+    drawList->AddCircleFilled(ImVec2(*t_v ? (p.x + width - radius) : (p.x + radius), p.y + radius), radius - 1.5f, IM_COL32(255, 255, 255, 255));
+}

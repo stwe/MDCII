@@ -10,7 +10,8 @@
     "RotateMapRight": "Karte rechtsherum drehen",
     "Build": "Bauen",
     "Status": "Status",
-    "Options":  "Optionen"
+    "Options": "Optionen",
+    "Demolish": "Zerstören"
   },
   "en": {
     "Menu": "Menu",
@@ -23,6 +24,7 @@
     "RotateMapRight": "Rotate map right",
     "Build": "Build",
     "Status": "Status",
-    "Options": "Options"
+    "Options": "Options",
+    "Demolish": "Demolish"
   }
 }

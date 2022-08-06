@@ -176,6 +176,11 @@ namespace mdcii::map
          */
         event::SelectedBauGfx currentSelectedBauGfx;
 
+        /**
+         * Enable/disable demolition mode.
+         */
+        bool demolitionMode{ false };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
