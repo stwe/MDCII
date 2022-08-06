@@ -61,18 +61,6 @@ namespace mdcii::map
     class MapContent;
 
     //-------------------------------------------------
-    // Rotation
-    //-------------------------------------------------
-
-    /**
-     * Rotate left or right.
-     */
-    enum class ChangeRotation
-    {
-        LEFT, RIGHT
-    };
-
-    //-------------------------------------------------
     // Map
     //-------------------------------------------------
 
@@ -83,8 +71,25 @@ namespace mdcii::map
     {
     public:
         //-------------------------------------------------
+        // Types
+        //-------------------------------------------------
+
+        /**
+         * The possible map actions.
+         */
+        enum class Action
+        {
+            BUILD, STATUS, OPTIONS
+        };
+
+        //-------------------------------------------------
         // Constants
         //-------------------------------------------------
+
+        /**
+         * The (untranslated) labels of the map action buttons.
+         */
+        static constexpr std::array<std::string_view, magic_enum::enum_count<Action>()> ACTION_NAMES{ "Build", "Status", "Options" };
 
         /**
          * The height of the island.
@@ -151,9 +156,25 @@ namespace mdcii::map
         bool renderBuildingsLayer{ true };
 
         /**
-         * Current selected building.
+         * Indicates which action button is currently active.
          */
-        event::SelectedBauGfx selectedBauGfx;
+        std::array<bool, magic_enum::enum_count<Action>()> actionButtons{ false, true, false };
+
+        /**
+         * The current action.
+         */
+        Action currentAction{ Action::STATUS };
+
+        /**
+         * The current selected map tile.
+         * todo: pointer
+         */
+        MapTile currentSelectedMapTile;
+
+        /**
+         * The building selected to build.
+         */
+        event::SelectedBauGfx currentSelectedBauGfx;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

@@ -48,8 +48,6 @@ mdcii::EditorGui::~EditorGui() noexcept
 
 void mdcii::EditorGui::RotateMapGui() const
 {
-    ImGui::Separator();
-
     std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentMapRotation") };
     rotStr.append(std::string(": %s"));
     ImGui::Text(rotStr.c_str(), rotation_to_string(m_map->mapContent->rotation));
@@ -69,22 +67,25 @@ void mdcii::EditorGui::RotateMapGui() const
 
 void mdcii::EditorGui::ShowActionsGui()
 {
-    magic_enum::enum_for_each<Action>([&](auto t_val)
+    magic_enum::enum_for_each<map::Map::Action>([&](auto t_val)
     {
-        constexpr Action action{ t_val };
+        constexpr map::Map::Action action{ t_val };
         constexpr int i{ magic_enum::enum_integer(action) };
 
-        if (m_actionButtons[i])
+        if (m_map->actionButtons[i])
         {
             ImGui::PushID(i);
             ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.6f, 0.6f)));
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.7f, 0.7f)));
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.8f, 0.8f)));
 
-            ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), ACTION_NAMES[i].data()).c_str());
+            ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), map::Map::ACTION_NAMES[i].data()).c_str());
             if (ImGui::IsItemClicked(0))
             {
-                m_actionButtons[i] = !m_actionButtons[i];
+                if (action != m_map->currentAction)
+                {
+                    m_map->actionButtons[i] = !m_map->actionButtons[i];
+                }
             }
 
             ImGui::PopStyleColor(3);
@@ -94,16 +95,20 @@ void mdcii::EditorGui::ShowActionsGui()
         }
         else
         {
-            if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), ACTION_NAMES[i].data()).c_str()))
+            if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), map::Map::ACTION_NAMES[i].data()).c_str()))
             {
-                std::fill(m_actionButtons.begin(), m_actionButtons.end(), false);
-                m_actionButtons[i] = true;
-                m_currentAction = action;
+                std::fill(m_map->actionButtons.begin(), m_map->actionButtons.end(), false);
+                m_map->actionButtons[i] = true;
+                m_map->currentAction = action;
+
+                Log::MDCII_LOG_DEBUG("[EditorGui::ShowActionsGui()] Change to action: {}", magic_enum::enum_name(m_map->currentAction));
             }
 
             ImGui::SameLine();
         }
     });
+
+    ImGui::NewLine();
 }
 
 void mdcii::EditorGui::AllWorkshopsGui() const
@@ -191,4 +196,14 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
     {
         --t_selectedBauGfx.rotation;
     }
+}
+
+void mdcii::EditorGui::CurrentSelectedMapTileGui(const map::MapTile& t_mapTile) const
+{
+    if (!t_mapTile.HasBuilding())
+    {
+        return;
+    }
+
+    t_mapTile.RenderImGui(false);
 }

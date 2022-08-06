@@ -289,30 +289,40 @@ void mdcii::map::MousePicker::AddListeners(const ogl::Window& t_window, const ca
         )
     );
 
-    // left mouse button pressed
+    // mouse button pressed
     event::EventManager::eventDispatcher.appendListener(
         event::MdciiEventType::MOUSE_BUTTON_PRESSED,
         eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>
         (
             [&](const event::MouseButtonPressedEvent& t_event)
             {
-                if (t_event.button == 0)
+                if (t_event.button == LEFT_MOUSE_BUTTON)
                 {
+                    if (m_map->currentAction == Map::Action::STATUS)
+                    {
+                        if (IsCurrentMouseInMap())
+                        {
+                            m_map->currentSelectedMapTile = m_map->mapContent->GetLayer(LayerType::BUILDINGS).GetTile(m_currentPosition.x, m_currentPosition.y);
+
+                            // fallback
+                            if (!m_map->currentSelectedMapTile.HasBuilding())
+                            {
+                                m_map->currentSelectedMapTile = m_map->mapContent->GetLayer(LayerType::TERRAIN).GetTile(m_currentPosition.x, m_currentPosition.y);
+                            }
+                        }
+                    }
                 }
             }
         )
     );
 
-    // left mouse button released
+    // mouse button released
     event::EventManager::eventDispatcher.appendListener(
         event::MdciiEventType::MOUSE_BUTTON_RELEASED,
         eventpp::argumentAdapter<void(const event::MouseButtonReleasedEvent&)>
         (
             [&](const event::MouseButtonReleasedEvent& t_event)
             {
-                if (t_event.button == 0)
-                {
-                }
             }
         )
     );
@@ -326,13 +336,15 @@ void mdcii::map::MousePicker::AddListeners(const ogl::Window& t_window, const ca
             {
                 UpdatePositions(t_window, t_camera);
 
-                if (IsCurrentMouseInMap() && IsLastMouseInMap())
+                if (m_map->currentAction == Map::Action::BUILD)
                 {
-                    if (m_map->selectedBauGfx.HasBuilding())
+                    if (IsCurrentMouseInMap() && IsLastMouseInMap())
                     {
-                        // update terrain tile entities
-                        m_map->mapContent->RemoveBuildingsLayerComponent(m_lastPosition.x, m_lastPosition.y, m_map->selectedBauGfx);
-                        m_map->mapContent->AddBuildingsLayerComponent(m_currentPosition.x, m_currentPosition.y, m_map->selectedBauGfx);
+                        if (m_map->currentSelectedBauGfx.HasBuilding())
+                        {
+                            m_map->mapContent->RemoveBuildingsLayerComponent(m_lastPosition.x, m_lastPosition.y, m_map->currentSelectedBauGfx);
+                            m_map->mapContent->AddBuildingsLayerComponent(m_currentPosition.x, m_currentPosition.y, m_map->currentSelectedBauGfx);
+                        }
                     }
                 }
             }

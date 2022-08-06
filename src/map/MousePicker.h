@@ -49,6 +49,13 @@ namespace mdcii::map
     {
     public:
         //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        static constexpr auto LEFT_MOUSE_BUTTON{ 0 };
+        static constexpr auto RIGHT_MOUSE_BUTTON{ 1 };
+
+        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 

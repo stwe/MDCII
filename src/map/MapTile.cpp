@@ -25,17 +25,20 @@
 // Render
 //-------------------------------------------------
 
-void mdcii::map::MapTile::RenderImGui() const
+void mdcii::map::MapTile::RenderImGui(const bool t_heading) const
 {
-    ImGui::Separator();
+    if (t_heading)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0, 255, 0)));
+        ImGui::Text("MapTile");
+        ImGui::PopStyleColor();
 
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0, 255, 0)));
-    ImGui::Text("MapTile");
-    ImGui::PopStyleColor();
+        ImGui::Separator();
+    }
 
-    ImGui::Separator();
-
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(4, 217, 255)));
     ImGui::Text("Name: %s", data::Text::GetTextForBuildingId(data::Text::Section::WORKSHOPS, buildingId, Game::INI.Get<std::string>("locale", "lang")).c_str());
+    ImGui::PopStyleColor();
 
     ImGui::Text("Building Id: %d", buildingId);
     ImGui::Text("Rotation name: %s", rotation_to_string(rotation));

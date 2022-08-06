@@ -81,6 +81,7 @@ void mdcii::map::MapContent::RenderImGui() const
 
             if (ImGui::TreeNode(x.append(", ").append(y).c_str()))
             {
+                ImGui::Separator();
                 gc.mapTile.RenderImGui();
                 ImGui::TreePop();
             }
@@ -104,6 +105,7 @@ void mdcii::map::MapContent::RenderImGui() const
 
             if (ImGui::TreeNode(x.append(", ").append(y).c_str()))
             {
+                ImGui::Separator();
                 tc.mapTile.RenderImGui();
                 tc.building.RenderImGui();
 
@@ -130,6 +132,7 @@ void mdcii::map::MapContent::RenderImGui() const
 
             if (ImGui::TreeNode(x.append(", ").append(y).c_str()))
             {
+                ImGui::Separator();
                 bc.mapTile.RenderImGui();
                 bc.building.RenderImGui();
 
@@ -311,6 +314,12 @@ void mdcii::map::MapContent::RemoveBuildingsLayerComponent(const int t_mapX, con
         {
             // get terrain tile
             const auto& terrainTile{ GetLayer(LayerType::TERRAIN).GetTile(t_mapX + x, t_mapY + y) };
+
+            // skip removing if the components do not exist
+            if (!Game::ecs.all_of<ecs::BuildingsLayerTileComponent, ecs::BuildingUpdatedComponent>(terrainTile.entity))
+            {
+                continue;
+            }
 
             // remove BuildingsLayerTileComponent from the terrain tile entity
             Game::ecs.remove<ecs::BuildingsLayerTileComponent>(terrainTile.entity);

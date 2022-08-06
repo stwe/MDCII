@@ -24,6 +24,11 @@
 
 namespace mdcii::map
 {
+    enum class ChangeRotation
+    {
+        LEFT, RIGHT
+    };
+
     enum class Rotation
     {
         DEG0, DEG90, DEG180, DEG270

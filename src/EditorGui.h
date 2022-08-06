@@ -19,9 +19,8 @@
 #pragma once
 
 #include <memory>
-#include <vector>
-#include <array>
 #include "event/Event.h"
+#include "map/MapTile.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -49,27 +48,6 @@ namespace mdcii
     class EditorGui
     {
     public:
-        //-------------------------------------------------
-        // Types
-        //-------------------------------------------------
-
-        /**
-         * The possible actions.
-         */
-        enum class Action
-        {
-            BUILD, STATUS, OPTIONS
-        };
-
-        //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        /**
-         * The labels of the action buttons.
-         */
-        static constexpr std::array<std::string_view, magic_enum::enum_count<Action>()> ACTION_NAMES{ "Build", "Status", "Options" };
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -112,8 +90,17 @@ namespace mdcii
 
         /**
          * Shows a single selected workshop.
+         *
+         * @parm t_selectedBauGfx The selected building to build.
          */
         void WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) const;
+
+        /**
+         * Shows a mouse clicked MapTile object.
+         *
+         * @param t_mapTile The MapTile object to show.
+         */
+        void CurrentSelectedMapTileGui(const map::MapTile& t_mapTile) const;
 
     protected:
 
@@ -131,15 +118,5 @@ namespace mdcii
          * Access to all building objects.
          */
         std::shared_ptr<data::Buildings> m_buildings;
-
-        /**
-         * Indicates which action button is currently active.
-         */
-        std::vector<bool> m_actionButtons{ true, false, false, };
-
-        /**
-         * The current action.
-         */
-        Action m_currentAction{ Action::STATUS };
     };
 }

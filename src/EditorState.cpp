@@ -26,6 +26,7 @@
 #include "eventpp/utilities/argumentadapter.h"
 #include "map/Map.h"
 #include "map/MapContent.h"
+#include "map/MousePicker.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -96,15 +97,35 @@ void mdcii::EditorState::RenderImGui()
     m_editorGui->RotateMapGui();
     ImGui::Separator();
 
-    // the selected workshop
-    m_editorGui->WorkshopGui(m_map->selectedBauGfx);
-    if (m_map->selectedBauGfx.HasBuilding())
+    // todo: Wechsel mgl. obwohl Build zB noch nicht abgeschlossen ist
+
+    // action: build
+    if (m_map->currentAction == map::Map::Action::BUILD)
     {
-        ImGui::Separator();
+        // possible selected workshop
+        m_editorGui->WorkshopGui(m_map->currentSelectedBauGfx);
+        if (m_map->currentSelectedBauGfx.HasBuilding())
+        {
+            ImGui::Separator();
+        }
+
+        // list all workshops
+        m_editorGui->AllWorkshopsGui();
     }
 
-    // list all workshops
-    m_editorGui->AllWorkshopsGui();
+    // action: status
+    if (m_map->currentAction == map::Map::Action::STATUS)
+    {
+        m_editorGui->CurrentSelectedMapTileGui(m_map->currentSelectedMapTile);
+
+        // todo general info about the map
+    }
+
+    // action: options
+    if (m_map->currentAction == map::Map::Action::OPTIONS)
+    {
+        // todo: Spiel speichern, laden, beenden; Einstellungen lesen, schreiben
+    }
 
     ImGui::End();
 
@@ -158,7 +179,7 @@ void mdcii::EditorState::AddListeners() const
             {
                 if (t_event.selectedBauGfx.HasBuilding())
                 {
-                    m_map->selectedBauGfx = t_event.selectedBauGfx;
+                    m_map->currentSelectedBauGfx = t_event.selectedBauGfx;
                 }
             }
         )
@@ -171,17 +192,17 @@ void mdcii::EditorState::AddListeners() const
         (
             [&](const event::MouseButtonPressedEvent& t_event)
             {
-                if (t_event.button == 1)
+                if (t_event.button == map::MousePicker::RIGHT_MOUSE_BUTTON)
                 {
                     // clear the selection
-                    m_map->selectedBauGfx = {};
+                    m_map->currentSelectedBauGfx = {};
 
                     // update buildings layer
                     const auto view{ Game::ecs.view<const ecs::BuildingUpdatedComponent, const ecs::BuildingsLayerTileComponent>() };
                     for (const auto entity : view)
                     {
-                        const auto& [uc, bc] { view.get(entity) };
-                        m_map->mapContent->GetLayer(map::LayerType::BUILDINGS).ReplaceTile(bc.mapTile);
+                        const auto& buildingsLayerTileComponent{ view.get<const ecs::BuildingsLayerTileComponent>(entity) };
+                        m_map->mapContent->GetLayer(map::LayerType::BUILDINGS).ReplaceTile(buildingsLayerTileComponent.mapTile);
 
                         Game::ecs.remove<ecs::BuildingUpdatedComponent>(entity);
                     }

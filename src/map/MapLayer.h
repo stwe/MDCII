@@ -78,6 +78,7 @@ namespace mdcii::map
 
         /**
          * The MapTile objects.
+         * todo: pointer
          */
         std::vector<MapTile> mapTiles;
 

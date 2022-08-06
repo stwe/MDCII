@@ -146,7 +146,9 @@ namespace mdcii::map
 
         /**
          * Renders ImGui menus.
+         *
+         * @param t_heading Shows the heading.
          */
-        void RenderImGui() const;
+        void RenderImGui(bool t_heading = true) const;
     };
 }
