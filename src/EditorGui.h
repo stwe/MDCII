@@ -102,6 +102,11 @@ namespace mdcii
          */
         void CurrentSelectedMapTileGui(const map::MapTile& t_mapTile) const;
 
+        /**
+         * Shows a menu to save the game, specifically the map.
+         */
+        void SaveGameGui();
+
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
@@ -130,5 +135,10 @@ namespace mdcii
          * Access to all building objects.
          */
         std::shared_ptr<data::Buildings> m_buildings;
+
+        /**
+         * Used as a flag to print out an info text.
+         */
+        bool m_info{ false };
     };
 }

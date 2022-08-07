@@ -20,6 +20,7 @@
 #include "EditorGui.h"
 #include "Game.h"
 #include "Log.h"
+#include "MdciiException.h"
 #include "map/Map.h"
 #include "file/BshFile.h"
 #include "data/Text.h"
@@ -102,6 +103,8 @@ void mdcii::EditorGui::ShowActionsGui()
                 m_map->currentAction = action;
 
                 Log::MDCII_LOG_DEBUG("[EditorGui::ShowActionsGui()] Change to action: {}", magic_enum::enum_name(m_map->currentAction));
+
+                m_info = false;
             }
 
             ImGui::SameLine();
@@ -206,6 +209,53 @@ void mdcii::EditorGui::CurrentSelectedMapTileGui(const map::MapTile& t_mapTile) 
     }
 
     t_mapTile.RenderImGui(false);
+}
+
+void mdcii::EditorGui::SaveGameGui()
+{
+    const auto fileName{ Game::RESOURCES_PATH + Game::INI.Get<std::string>("content", "save_map") };
+
+    //static char str[128] = "";
+    //ImGui::InputTextWithHint("input filename", "enter filename here", str, IM_ARRAYSIZE(str));
+
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame").c_str()))
+    {
+        Log::MDCII_LOG_DEBUG("[EditorGui::SaveGameGui()] Start saving the game...");
+
+        nlohmann::json j;
+        nlohmann::json t = nlohmann::json::object();
+        nlohmann::json b = nlohmann::json::object();
+        std::ofstream file{ fileName };
+        if (!file)
+        {
+            throw MDCII_EXCEPTION("[EditorGui::SaveGameGui()] Error while opening file " + fileName + ".");
+        }
+
+        j["width"] = m_map->mapContent->width;
+        j["height"] = m_map->mapContent->height;
+        j["layers"] = nlohmann::json::array();
+        t["terrain"] = m_map->mapContent->GetLayer(map::LayerType::TERRAIN).mapTiles;
+        b["buildings"] = m_map->mapContent->GetLayer(map::LayerType::BUILDINGS).mapTiles;
+        j["layers"].push_back(t);
+        j["layers"].push_back(b);
+
+        file << j;
+
+        m_info = true;
+
+        Log::MDCII_LOG_DEBUG("[EditorGui::SaveGameGui()] The game has been successfully saved.");
+    }
+
+    if (m_info)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0, 255, 0)));
+
+        auto success{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGameSuccess") };
+        success.append(" %s.");
+
+        ImGui::Text(success.c_str(), fileName.c_str());
+        ImGui::PopStyleColor();
+    }
 }
 
 //-------------------------------------------------

@@ -282,61 +282,6 @@ void mdcii::map::Map::RenderEntity(
         gfx += offset;
     }
 
-    // Example 503: Bakery
-
-    // DEG0   = 0, 1, 2, 3 -> orient 0
-    // DEG90  = 1, 3, 0, 2 -> orient 3
-    // DEG180 = 3, 2, 1, 0 -> orient 2
-    // DEG270 = 2, 0, 3, 1 -> orient 1
-
-    //0
-    /*
-    if (gfx == 3760 && t_mapTile.x == 0 && t_mapTile.y == 0)
-        gfx = 3760;
-    if (gfx == 3760 && t_mapTile.x == 1 && t_mapTile.y == 0)
-        gfx = 3761;
-    if (gfx == 3760 && t_mapTile.x == 0 && t_mapTile.y == 1)
-        gfx = 3762;
-    if (gfx == 3760 && t_mapTile.x == 1 && t_mapTile.y == 1)
-        gfx = 3763;
-    */
-
-    // 1
-    /*
-    if (gfx == 3764 && t_mapTile.x == 0 && t_mapTile.y == 0)
-        gfx = 3766;                                           // + 2
-    if (gfx == 3764 && t_mapTile.x == 1 && t_mapTile.y == 0)
-        gfx = 3764;                                           // + 0
-    if (gfx == 3764 && t_mapTile.x == 0 && t_mapTile.y == 1)
-        gfx = 3767;                                           // + 3
-    if (gfx == 3764 && t_mapTile.x == 1 && t_mapTile.y == 1)
-        gfx = 3765;                                           // + 1
-    */
-
-    // 2
-    /*
-    if (gfx == 3768 && t_mapTile.x == 0 && t_mapTile.y == 0)
-        gfx = 3771;                                           // + 3
-    if (gfx == 3768 && t_mapTile.x == 1 && t_mapTile.y == 0)
-        gfx = 3770;                                           // + 2
-    if (gfx == 3768 && t_mapTile.x == 0 && t_mapTile.y == 1)
-        gfx = 3769;                                           // + 1
-    if (gfx == 3768 && t_mapTile.x == 1 && t_mapTile.y == 1)
-        gfx = 3768;                                           // + 0
-    */
-
-    // 3
-    /*
-    if (gfx == 3772 && t_mapTile.x == 0 && t_mapTile.y == 0)
-        gfx = 3773;                                           // + 1
-    if (gfx == 3772 && t_mapTile.x == 1 && t_mapTile.y == 0)
-        gfx = 3775;                                           // + 3
-    if (gfx == 3772 && t_mapTile.x == 0 && t_mapTile.y == 1)
-        gfx = 3772;                                           // + 0
-    if (gfx == 3772 && t_mapTile.x == 1 && t_mapTile.y == 1)
-        gfx = 3774;                                           // + 2
-    */
-
     RenderBuilding(
         t_window,
         t_camera,

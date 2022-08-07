@@ -11,7 +11,9 @@
     "Build": "Bauen",
     "Status": "Status",
     "Options": "Optionen",
-    "Demolish": "Zerstören"
+    "Demolish": "Zerstören",
+    "SaveGame": "Spiel speichern",
+    "SaveGameSuccess": "Das Spiel wurde erfolgreich gespeichert in"
   },
   "en": {
     "Menu": "Menu",
@@ -25,6 +27,8 @@
     "Build": "Build",
     "Status": "Status",
     "Options": "Options",
-    "Demolish": "Demolish"
+    "Demolish": "Demolish",
+    "SaveGame": "Save game",
+    "SaveGameSuccess": "Game successfully saved to"
   }
 }

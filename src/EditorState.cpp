@@ -125,13 +125,15 @@ void mdcii::EditorState::RenderImGui()
     {
         m_editorGui->CurrentSelectedMapTileGui(m_map->currentSelectedMapTile);
 
-        // todo general info about the map
+        // todo: general info about the map
     }
 
     // action: options
     if (m_map->currentAction == map::Map::Action::OPTIONS)
     {
-        // todo: Spiel speichern, laden, beenden; Einstellungen lesen, schreiben
+        m_editorGui->SaveGameGui();
+
+        // todo: load game, quit game; change config
     }
 
     ImGui::End();
@@ -166,7 +168,7 @@ void mdcii::EditorState::Init()
     data::Text::Init();
 
     // create the Map object to edit
-    m_map = std::make_shared<map::Map>("data/ExampleMap.json", context->buildings, *context->window, *context->camera);
+    m_map = std::make_shared<map::Map>(Game::INI.Get<std::string>("content", "start_map"), context->buildings, *context->window, *context->camera);
 
     // create the menus
     m_editorGui = std::make_unique<EditorGui>(m_map, context->buildings);
