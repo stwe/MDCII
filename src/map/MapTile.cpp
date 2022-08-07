@@ -48,6 +48,23 @@ void mdcii::map::MapTile::RenderImGui(const bool t_heading) const
     ImGui::Text("Map x: %d", mapX);
     ImGui::Text("Map y: %d", mapY);
 
+    if (connectedMapTiles.empty())
+    {
+        ImGui::Text("Connected tiles: none");
+    }
+    else
+    {
+        if (ImGui::TreeNode("Connected tiles"))
+        {
+            for (const auto tileIndex : connectedMapTiles)
+            {
+                ImGui::Text("Connected tile index: %d", tileIndex);
+            }
+
+            ImGui::TreePop();
+        }
+    }
+
     if (ImGui::TreeNode("Screen positions"))
     {
         auto r{ Rotation::DEG0 };

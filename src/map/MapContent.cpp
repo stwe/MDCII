@@ -255,6 +255,8 @@ void mdcii::map::MapContent::AddBuildingsLayerComponent(const int t_mapX, const 
     }
 
     // add
+    std::vector<int> connectedMapTiles;
+    std::vector<entt::entity> entities;
     for (auto y{ 0 }; y < building.size.h; ++y)
     {
         for (auto x{ 0 }; x < building.size.w; ++x)
@@ -272,16 +274,34 @@ void mdcii::map::MapContent::AddBuildingsLayerComponent(const int t_mapX, const 
             // get terrain layer map tile
             const auto& terrainTile{ GetLayer(LayerType::TERRAIN).GetTile(t_mapX + x, t_mapY + y) };
 
+            // store entity handle
+            mapTile.entity = terrainTile.entity;
+            mapTile.gridEntity = terrainTile.gridEntity;
+
             // add/replace BuildingsLayerTileComponent
             Game::ecs.emplace_or_replace<ecs::BuildingsLayerTileComponent>(
-                terrainTile.entity,
+                mapTile.entity,
                 mapTile,
                 buildings->buildingsMap.at(mapTile.buildingId)
             );
 
             // add/replace BuildingUpdatedComponent
             Game::ecs.emplace_or_replace<ecs::BuildingUpdatedComponent>(terrainTile.entity);
+
+            // to store connected tiles
+            if (building.size.h > 1 || building.size.w > 1)
+            {
+                entities.push_back(mapTile.entity);
+                connectedMapTiles.push_back(GetMapIndex(t_mapX + x, t_mapY + y));
+            }
         }
+    }
+
+    // store connected tiles
+    for (const auto entity : entities)
+    {
+        auto& tileComponent{ Game::ecs.get<ecs::BuildingsLayerTileComponent>(entity) };
+        tileComponent.mapTile.connectedMapTiles = connectedMapTiles;
     }
 }
 

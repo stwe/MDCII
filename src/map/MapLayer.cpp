@@ -33,7 +33,8 @@ void mdcii::map::to_json(nlohmann::json& t_json, const MapTile& t_mapTile)
         { "id", t_mapTile.buildingId },
         { "rotation", rotation_to_int(t_mapTile.rotation) },
         { "x", t_mapTile.x },
-        { "y", t_mapTile.y }
+        { "y", t_mapTile.y },
+        { "connected", t_mapTile.connectedMapTiles }
     };
 }
 
@@ -59,6 +60,11 @@ void mdcii::map::from_json(const nlohmann::json& t_json, MapTile& t_mapTile)
     if (t_json.count("y"))
     {
         t_json.at("y").get_to(t_mapTile.y);
+    }
+
+    if (t_json.count("connected"))
+    {
+        t_json.at("connected").get_to(t_mapTile.connectedMapTiles);
     }
 }
 
@@ -185,6 +191,8 @@ void mdcii::map::MapLayer::AddBuildingsLayerComponent(const int t_mapX, const in
     MDCII_ASSERT(layerType == LayerType::BUILDINGS, "[MapLayer::AddBuildingsLayerComponent()] Wrong layer type.")
 
     const auto& terrainTile{ m_mapContent->GetLayer(LayerType::TERRAIN).GetTile(t_mapX, t_mapY) };
+
+    // mandatory
     if (!terrainTile.HasBuilding())
     {
         return;
@@ -196,9 +204,13 @@ void mdcii::map::MapLayer::AddBuildingsLayerComponent(const int t_mapX, const in
         return;
     }
 
+    // store entity handle
+    GetTile(t_mapX, t_mapY).entity = terrainTile.entity;
+    GetTile(t_mapX, t_mapY).gridEntity = terrainTile.gridEntity;
+
     // add BuildingsLayerTileComponent
     Game::ecs.emplace<ecs::BuildingsLayerTileComponent>(
-        terrainTile.entity,
+        GetTile(t_mapX, t_mapY).entity,
         GetTile(t_mapX, t_mapY),
         m_mapContent->buildings->buildingsMap.at(GetTile(t_mapX, t_mapY).buildingId)
     );

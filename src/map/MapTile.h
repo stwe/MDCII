@@ -134,6 +134,11 @@ namespace mdcii::map
         entt::entity gridEntity{ entt::null };
 
         /**
+         * If a building requires more than 1x1 tiles, all indices are stored here.
+         */
+        std::vector<int> connectedMapTiles;
+
+        /**
          * For better readability/convenience.
          *
          * @return True if a valid building Id is present.

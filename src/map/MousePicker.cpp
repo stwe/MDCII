@@ -314,23 +314,36 @@ void mdcii::map::MousePicker::AddListeners(const ogl::Window& t_window, const ca
 
                     if (m_map->currentAction == Map::Action::BUILD && m_map->demolitionMode)
                     {
-                        auto& buildingMapTile{ m_map->mapContent->GetLayer(LayerType::BUILDINGS).GetTile(m_currentPosition.x, m_currentPosition.y) };
-                        if (buildingMapTile.HasBuilding())
+                        if (IsCurrentMouseInMap())
                         {
-                            // todo: store entity in all buildingMapTiles
-                            // todo: find connected entities of a given building
-                            // todo: refactor replace/remove map tiles from layer
+                            auto& buildingMapTile{ m_map->mapContent->GetLayer(LayerType::BUILDINGS).GetTile(m_currentPosition.x, m_currentPosition.y) };
+                            if (buildingMapTile.HasBuilding())
+                            {
+                                const MapTile mapTile;
 
+                                if (buildingMapTile.connectedMapTiles.empty())
+                                {
+                                    // remove BuildingsLayerTileComponent from entity
+                                    Game::ecs.remove<ecs::BuildingsLayerTileComponent>(buildingMapTile.entity);
 
-                            // to get the entity
-                            const auto& terrainMapTile{ m_map->mapContent->GetLayer(LayerType::TERRAIN).GetTile(m_currentPosition.x, m_currentPosition.y) };
+                                    // remove map tile from buildings layer / override
+                                    buildingMapTile = mapTile;
+                                }
+                                else
+                                {
+                                    for (const auto tileIndex : buildingMapTile.connectedMapTiles)
+                                    {
+                                        // get tile
+                                        auto& tile{ m_map->mapContent->GetLayer(LayerType::BUILDINGS).mapTiles.at(tileIndex) };
 
-                            // remove BuildingsLayerTileComponent from entity
-                            Game::ecs.remove<ecs::BuildingsLayerTileComponent>(terrainMapTile.entity);
+                                        // remove BuildingsLayerTileComponent from entity
+                                        Game::ecs.remove<ecs::BuildingsLayerTileComponent>(tile.entity);
 
-                            // remove map tile from buildings layer
-                            MapTile mapTile;
-                            buildingMapTile = mapTile;
+                                        // remove map tile from buildings layer / override
+                                        tile = mapTile;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
