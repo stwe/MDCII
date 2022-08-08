@@ -68,12 +68,12 @@ void mdcii::camera::Camera::ProcessKeyboard(const Direction t_direction)
 
     if (t_direction == Direction::UP)
     {
-        position += yOff;
+        position -= yOff;
     }
 
     if (t_direction == Direction::DOWN)
     {
-        position -= yOff;
+        position += yOff;
     }
 
     if (t_direction == Direction::LEFT)
