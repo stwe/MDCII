@@ -21,6 +21,16 @@
 #include "MapLayer.h"
 #include "data/Buildings.h"
 #include "event/Event.h"
+#include "Zoom.h"
+
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::state
+{
+    struct Context;
+}
 
 //-------------------------------------------------
 // MapContent
@@ -37,6 +47,11 @@ namespace mdcii::map
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
+
+        /**
+         * Shared objects (Window, Camera, original assets) between all states.
+         */
+        std::shared_ptr<state::Context> context;
 
         /**
          * The width of each layer in tiles.
@@ -59,9 +74,9 @@ namespace mdcii::map
         Rotation rotation{ Rotation::DEG0 };
 
         /**
-         * The content from the haeuser.cod.
+         * The zoom of each layer.
          */
-        std::shared_ptr<data::Buildings> buildings;
+        Zoom zoom{ Zoom::GFX };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -72,10 +87,10 @@ namespace mdcii::map
         /**
          * Constructs a new MapContent object.
          *
-         * @param t_filePath The path to the json map file.
-         * @param t_buildings Access to all building objects.
+         * @param t_mapFilePath The path to the json map file.
+         * @param t_context Shared objects between all states.
          */
-        MapContent(const std::string& t_filePath, std::shared_ptr<data::Buildings> t_buildings);
+        MapContent(const std::string& t_mapFilePath, std::shared_ptr<state::Context> t_context);
 
         MapContent(const MapContent& t_other) = delete;
         MapContent(MapContent&& t_other) noexcept = delete;
@@ -121,7 +136,7 @@ namespace mdcii::map
         void SortEntitiesOfAllLayers() const;
 
         //-------------------------------------------------
-        // Rotate
+        // Rotate && Zoom
         //-------------------------------------------------
 
         /**
@@ -133,6 +148,16 @@ namespace mdcii::map
          * Rotate all layers right.
          */
         void RotateRight();
+
+        /**
+         * Zoom all layers in.
+         */
+        void ZoomIn();
+
+        /**
+         * Zoom all layers out.
+         */
+        void ZoomOut();
 
         //-------------------------------------------------
         // Helper

@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <memory>
 #include "ini/ini.h"
 #include "ecs/entt.hpp"
 
@@ -36,9 +35,9 @@ namespace mdcii::camera
     class Camera;
 }
 
-namespace mdcii::data
+namespace mdcii::file
 {
-    class Buildings;
+    class OriginalResourcesManager;
 }
 
 namespace mdcii::state
@@ -73,9 +72,11 @@ namespace mdcii
         inline static const inih::INIReader INI{ "./config.ini" }; // NOLINT(cert-err58-cpp)
 
 #if defined(_WIN64)
-        inline static const std::string RESOURCES_PATH{ INI.Get<std::string>("win64", "resources_path") }; // NOLINT(cert-err58-cpp)
+        inline static const std::string ORIGINAL_RESOURCES_FULL_PATH{ INI.Get<std::string>("win64", "original_resources_full_path") }; // NOLINT(cert-err58-cpp)
+        inline static const std::string RESOURCES_REL_PATH{ INI.Get<std::string>("win64", "resources_rel_path") }; // NOLINT(cert-err58-cpp)
 #else
-        inline static const std::string RESOURCES_PATH{ INI.Get<std::string>("linux", "resources_path") }; // NOLINT(cert-err58-cpp)
+        inline static const std::string ORIGINAL_RESOURCES_FULL_PATH{ INI.Get<std::string>("linux", "original_resources_full_path") }; // NOLINT(cert-err58-cpp)
+        inline static const std::string RESOURCES_REL_PATH{ INI.Get<std::string>("linux", "resources_rel_path") }; // NOLINT(cert-err58-cpp)
 #endif
 
         //-------------------------------------------------
@@ -104,9 +105,24 @@ namespace mdcii
         // Member
         //-------------------------------------------------
 
+        /**
+         * A window with OpenGL context.
+         */
         std::shared_ptr<ogl::Window> m_window;
+
+        /**
+         * An orthographic camera.
+         */
         std::shared_ptr<camera::Camera> m_camera;
-        std::shared_ptr<data::Buildings> m_buildings;
+
+        /**
+         * Resources of the original game needed here.
+         */
+        std::shared_ptr<file::OriginalResourcesManager> m_originalResourcesManager;
+
+        /**
+         * This game is organized with states.
+         */
         std::unique_ptr<state::StateStack> m_stateStack;
 
         //-------------------------------------------------

@@ -24,19 +24,23 @@
 #include "Text.h"
 #include "cod/CodParser.h"
 
-mdcii::data::Buildings::Buildings()
+mdcii::data::Buildings::Buildings(const std::string& t_codFilePath)
 {
     Log::MDCII_LOG_DEBUG("[Buildings::Buildings()] Create Buildings.");
 
-    GenerateBuildings();
+    GenerateBuildings(t_codFilePath);
 }
 
-void mdcii::data::Buildings::GenerateBuildings()
+mdcii::data::Buildings::~Buildings() noexcept
+{
+    Log::MDCII_LOG_DEBUG("[Buildings::~Buildings()] Destruct Buildings.");
+}
+
+void mdcii::data::Buildings::GenerateBuildings(const std::string& t_codFilePath)
 {
     Log::MDCII_LOG_DEBUG("[Buildings::GenerateBuildings()] Generate buildings...");
 
-    const auto cod{ cod::CodParser(Game::RESOURCES_PATH + "haeuser.cod") };
-
+    const auto cod{ cod::CodParser(t_codFilePath) };
     for (auto i{ 0 }; i < cod.objects.object_size(); ++i)
     {
         const auto& obj{ cod.objects.object(i) };

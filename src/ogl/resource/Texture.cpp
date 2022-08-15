@@ -35,7 +35,7 @@ mdcii::ogl::resource::Texture::Texture(std::string t_path, const bool t_loadVert
 {
     Log::MDCII_LOG_DEBUG("[Texture::Texture()] Create Texture.");
 
-    m_path = Game::RESOURCES_PATH + m_path;
+    m_path = Game::RESOURCES_REL_PATH + m_path;
 
     CreateId();
     LoadFromFile();

@@ -17,22 +17,23 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <imgui.h>
-#include <fstream>
 #include "MapContent.h"
 #include "MdciiAssert.h"
+#include "state/State.h"
 #include "ecs/Components.h"
 #include "ecs/EcsUtils.h"
+#include "file/OriginalResourcesManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::map::MapContent::MapContent(const std::string& t_filePath, std::shared_ptr<data::Buildings> t_buildings)
-    : buildings{ std::move(t_buildings) }
+mdcii::map::MapContent::MapContent(const std::string& t_mapFilePath, std::shared_ptr<state::Context> t_context)
+    : context{ std::move(t_context) }
 {
     Log::MDCII_LOG_DEBUG("[MapContent::MapContent()] Create MapContent.");
 
-    CreateContent(t_filePath);
+    CreateContent(t_mapFilePath);
     PreCalcTiles();
 
     CreateEntitiesOfAllLayers();
@@ -172,7 +173,7 @@ void mdcii::map::MapContent::SortEntitiesOfAllLayers() const
 }
 
 //-------------------------------------------------
-// Rotate
+// Rotate && Zoom
 //-------------------------------------------------
 
 void mdcii::map::MapContent::RotateLeft()
@@ -185,6 +186,16 @@ void mdcii::map::MapContent::RotateRight()
 {
     ++rotation;
     SortEntitiesOfAllLayers();
+}
+
+void mdcii::map::MapContent::ZoomIn()
+{
+    ++zoom;
+}
+
+void mdcii::map::MapContent::ZoomOut()
+{
+    --zoom;
 }
 
 //-------------------------------------------------
@@ -234,7 +245,7 @@ glm::ivec2 mdcii::map::MapContent::RotatePosition(const int t_mapX, const int t_
 
 void mdcii::map::MapContent::AddBuildingsLayerComponent(const int t_mapX, const int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx)
 {
-    const auto& building{ buildings->buildingsMap.at(t_selectedBauGfx.buildingId) };
+    const auto& building{ context->originalResourcesManager->GetBuildingById(t_selectedBauGfx.buildingId) };
 
     // only add if the entire building fits on the map
     if (IsBuildingOutsideTheMap(t_mapX, t_mapY, building))
@@ -282,7 +293,7 @@ void mdcii::map::MapContent::AddBuildingsLayerComponent(const int t_mapX, const 
             Game::ecs.emplace_or_replace<ecs::BuildingsLayerTileComponent>(
                 mapTile.entity,
                 mapTile,
-                buildings->buildingsMap.at(mapTile.buildingId)
+                context->originalResourcesManager->GetBuildingById(mapTile.buildingId)
             );
 
             // add/replace BuildingUpdatedComponent
@@ -307,7 +318,7 @@ void mdcii::map::MapContent::AddBuildingsLayerComponent(const int t_mapX, const 
 
 void mdcii::map::MapContent::RemoveBuildingsLayerComponent(const int t_mapX, const int t_mapY, const event::SelectedBauGfx& t_selectedBauGfx)
 {
-    const auto& building{ buildings->buildingsMap.at(t_selectedBauGfx.buildingId) };
+    const auto& building{ context->originalResourcesManager->GetBuildingById(t_selectedBauGfx.buildingId) };
 
     // nothing was built outside the map
     if (IsBuildingOutsideTheMap(t_mapX, t_mapY, building))
@@ -358,7 +369,7 @@ void mdcii::map::MapContent::CreateContent(const std::string& t_filePath)
 {
     Log::MDCII_LOG_DEBUG("[MapContent::CreateContent()] Start reading Json data...");
 
-    nlohmann::json j = ReadJsonFromFile(Game::RESOURCES_PATH + t_filePath);
+    nlohmann::json j = ReadJsonFromFile(Game::RESOURCES_REL_PATH + t_filePath);
 
     for (const auto& [k, v] : j.items())
     {
@@ -480,7 +491,7 @@ bool mdcii::map::MapContent::IsBuildingOnWaterOrCoast(const int t_mapX, const in
         for (auto x{ 0 }; x < t_building.size.w; ++x)
         {
             const auto& terrainTile{ GetLayer(LayerType::TERRAIN).GetTile(t_mapX + x, t_mapY + y) };
-            const auto& terrainBuilding{ buildings->buildingsMap.at(terrainTile.buildingId) };
+            const auto& terrainBuilding{ context->originalResourcesManager->GetBuildingById(terrainTile.buildingId) };
             if (terrainBuilding.posoffs == 0)
             {
                 return true;
@@ -561,7 +572,7 @@ void mdcii::map::MapContent::PreCalcTile(MapTile& t_mapTile, const int t_mapX, c
     // pre-calculate a gfx for each rotation
     if (t_mapTile.HasBuilding())
     {
-        const auto building{ buildings->buildingsMap.at(t_mapTile.buildingId) };
+        const auto building{ context->originalResourcesManager->GetBuildingById(t_mapTile.buildingId) };
         const auto gfx0{ building.gfx };
 
         t_mapTile.gfxs.push_back(gfx0);

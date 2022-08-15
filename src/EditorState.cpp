@@ -22,6 +22,7 @@
 #include "Game.h"
 #include "Log.h"
 #include "data/Text.h"
+#include "ecs/Components.h"
 #include "event/EventManager.h"
 #include "eventpp/utilities/argumentadapter.h"
 #include "map/Map.h"
@@ -32,7 +33,7 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::EditorState::EditorState(const Id t_id, state::StateStack* t_stateStack, std::shared_ptr<Context> t_context)
+mdcii::EditorState::EditorState(const Id t_id, state::StateStack* t_stateStack, std::shared_ptr<state::Context> t_context)
     : State(t_id, t_stateStack, std::move(t_context))
 {
     Log::MDCII_LOG_DEBUG("[EditorState::EditorState()] Create EditorState.");
@@ -77,7 +78,7 @@ void mdcii::EditorState::PreRender()
 
 void mdcii::EditorState::Render()
 {
-    m_map->Render(*context->window, *context->camera);
+    m_map->Render();
 }
 
 void mdcii::EditorState::RenderImGui()
@@ -87,7 +88,7 @@ void mdcii::EditorState::RenderImGui()
     // ---------------- Game menu ----------------
 
     // title
-    ImGui::Begin(data::Text::GetMenuText(m_lang, "Menu").c_str());
+    ImGui::Begin(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Menu").c_str());
 
     // show action buttons
     m_editorGui->ShowActionsGui();
@@ -95,6 +96,10 @@ void mdcii::EditorState::RenderImGui()
 
     // rotate map buttons
     m_editorGui->RotateMapGui();
+    ImGui::Separator();
+
+    // zom in and out buttons
+    m_editorGui->ZoomMapGui();
     ImGui::Separator();
 
     // todo: Wechsel mgl. obwohl Build zB noch nicht abgeschlossen ist
@@ -116,7 +121,7 @@ void mdcii::EditorState::RenderImGui()
         }
 
         // toggle button to enable/disable demolition mode
-        ImGui::TextUnformatted(data::Text::GetMenuText(m_lang, "Demolish").c_str());
+        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Demolish").c_str());
         EditorGui::ToggleButton("_demolish", &m_map->demolitionMode);
     }
 
@@ -159,19 +164,19 @@ void mdcii::EditorState::Init()
 {
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] Initializing editor state.");
 
-    // set lang
-    m_lang = Game::INI.Get<std::string>("locale", "lang");
-
-    Log::MDCII_LOG_INFO("[EditorState::Init()] Locale is set to: {}.", m_lang);
+    Log::MDCII_LOG_INFO("[EditorState::Init()] Locale is set to: {}", Game::INI.Get<std::string>("locale", "lang"));
 
     // init menu texts
     data::Text::Init();
 
     // create the Map object to edit
-    m_map = std::make_shared<map::Map>(Game::INI.Get<std::string>("content", "start_map"), context->buildings, *context->window, *context->camera);
+    m_map = std::make_shared<map::Map>(
+        Game::INI.Get<std::string>("content", "start_map"),
+        context
+    );
 
     // create the menus
-    m_editorGui = std::make_unique<EditorGui>(m_map, context->buildings);
+    m_editorGui = std::make_unique<EditorGui>(m_map);
 
     Log::MDCII_LOG_DEBUG("[EditorState::Init()] The editor state was successfully initialized.");
 }

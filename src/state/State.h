@@ -36,9 +36,9 @@ namespace mdcii::camera
     class Camera;
 }
 
-namespace mdcii::data
+namespace mdcii::file
 {
-    class Buildings;
+    class OriginalResourcesManager;
 }
 
 //-------------------------------------------------
@@ -47,10 +47,44 @@ namespace mdcii::data
 
 namespace mdcii::state
 {
+    //-------------------------------------------------
+    // Context
+    //-------------------------------------------------
+
+    /**
+     * Shared objects between all states.
+     */
+    struct Context
+    {
+        Context() = delete;
+
+        explicit Context(
+            std::shared_ptr<ogl::Window> t_window,
+            std::shared_ptr<camera::Camera> t_camera,
+            std::shared_ptr<file::OriginalResourcesManager> t_originalResourcesManager
+        )
+            : window{ std::move(t_window) }
+            , camera{ std::move(t_camera) }
+            , originalResourcesManager{ std::move(t_originalResourcesManager) }
+        {}
+
+        std::shared_ptr<ogl::Window> window;
+        std::shared_ptr<camera::Camera> camera;
+        std::shared_ptr<file::OriginalResourcesManager> originalResourcesManager;
+    };
+
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
     /**
      * Forward declaration class StateStack.
      */
     class StateStack;
+
+    //-------------------------------------------------
+    // State
+    //-------------------------------------------------
 
     /**
      * The base class for all states.
@@ -81,26 +115,6 @@ namespace mdcii::state
         static constexpr std::array<std::string_view, 6> STATE_IDS
         {
             "MAIN_MENU", "START", "WORLD", "EDITOR", "SANDBOX", "ALL"
-        };
-
-        /**
-         * Shared objects between all states.
-         */
-        struct Context
-        {
-            explicit Context(
-                std::shared_ptr<ogl::Window> t_window,
-                std::shared_ptr<camera::Camera> t_camera,
-                std::shared_ptr<data::Buildings> t_buildings
-            )
-                : window{ std::move(t_window) }
-                , camera{ std::move(t_camera) }
-                , buildings{ std::move(t_buildings) }
-            {}
-
-            std::shared_ptr<ogl::Window> window;
-            std::shared_ptr<camera::Camera> camera;
-            std::shared_ptr<data::Buildings> buildings;
         };
 
         //-------------------------------------------------

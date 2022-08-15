@@ -66,7 +66,7 @@ namespace mdcii::ogl::resource
             try
             {
                 // Open file.
-                shaderFile.open(Game::RESOURCES_PATH + t_fileName);
+                shaderFile.open(Game::RESOURCES_REL_PATH + t_fileName);
                 std::stringstream shaderStream;
 
                 // Read file buffer content into stream.

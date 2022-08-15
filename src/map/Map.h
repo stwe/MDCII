@@ -18,24 +18,17 @@
 
 #pragma once
 
-#include "ecs/Components.h"
-#include "ogl/Window.h"
-#include "camera/Camera.h"
+#include "MapTile.h"
+#include "data/Buildings.h"
 #include "event/Event.h"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::data
+namespace mdcii::state
 {
-    class Buildings;
-}
-
-namespace mdcii::file
-{
-    class PaletteFile;
-    class BshFile;
+    struct Context;
 }
 
 namespace mdcii::renderer
@@ -59,6 +52,11 @@ namespace mdcii::map
      * Forward declaration class MapContent.
      */
     class MapContent;
+
+    /**
+     * Forward declaration enum class ChangeZoom.
+     */
+    enum class ChangeZoom;
 
     //-------------------------------------------------
     // Map
@@ -101,6 +99,11 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
+         * Shared objects (Window, Camera, original assets) between all states.
+         */
+        std::shared_ptr<state::Context> context;
+
+        /**
          * A MousePicker object to select tiles.
          */
         std::unique_ptr<MousePicker> mousePicker;
@@ -109,16 +112,6 @@ namespace mdcii::map
          * The map content (layers with tiles) read from a json file.
          */
         std::unique_ptr<MapContent> mapContent;
-
-        /**
-         * The bsh graphics from the stadtfld.bsh file.
-         */
-        std::unique_ptr<file::BshFile> stdBshFile;
-
-        /**
-         * The bsh graphics from the bauhaus.bsh file.
-         */
-        std::unique_ptr<file::BshFile> bauhausBshFile;
 
         /**
          * A tile renderer to render bsh graphics as Gpu texture.
@@ -190,17 +183,10 @@ namespace mdcii::map
         /**
          * Constructs a new Map object.
          *
-         * @param t_filePath The path to the json map file.
-         * @param t_buildings Access to all building objects.
-         * @param t_window The Window object.
-         * @param t_camera The Camera object.
+         * @param t_mapFilePath The path to the json map file.
+         * @param t_context Shared objects between all states.
          */
-        Map(
-            const std::string& t_filePath,
-            std::shared_ptr<data::Buildings> t_buildings,
-            const ogl::Window& t_window,
-            const camera::Camera& t_camera
-        );
+        Map(const std::string& t_mapFilePath, std::shared_ptr<state::Context> t_context);
 
         Map(const Map& t_other) = delete;
         Map(Map&& t_other) noexcept = delete;
@@ -215,11 +201,8 @@ namespace mdcii::map
 
         /**
          * Renders the map.
-         *
-         * @param t_window The Window object to get the orthographic projection matrix.
-         * @param t_camera The Camera object to get the view matrix.
          */
-        void Render(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+        void Render() const;
 
         /**
          * Renders ImGui menus.
@@ -229,16 +212,12 @@ namespace mdcii::map
         /**
          * Renders a gfx from the stadtfld.bsh file.
          *
-         * @param t_window The Window object to get the orthographic projection matrix.
-         * @param t_camera The Camera object to get the view matrix.
          * @param t_gfx The gfx to render.
          * @param t_screenPosition The isometric coordinates on the screen.
          * @param t_elevation Either 0 or 20 - equals the posoffs value of the building.
          * @param t_selected Determines if the building is selected and rendered a little darker.
          */
         void RenderBuilding(
-            const ogl::Window& t_window,
-            const camera::Camera& t_camera,
             int t_gfx,
             glm::vec2 t_screenPosition,
             float t_elevation,
@@ -246,7 +225,7 @@ namespace mdcii::map
         ) const;
 
         //-------------------------------------------------
-        // Rotate
+        // Rotate && Zoom
         //-------------------------------------------------
 
         /**
@@ -256,23 +235,16 @@ namespace mdcii::map
          */
         void Rotate(ChangeRotation t_changeRotation) const;
 
+        /**
+         * Changes the zoom of the map.
+         *
+         * @param t_changeZoom Zoom in or out.
+         */
+        void Zoom(ChangeZoom t_changeZoom) const;
+
     protected:
 
     private:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * The content from the haeuser.cod.
-         */
-        std::shared_ptr<data::Buildings> m_buildings;
-
-        /**
-         * Pallet values from the from the stadtfld.col file.
-         */
-        std::unique_ptr<file::PaletteFile> m_paletteFile;
-
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -281,10 +253,8 @@ namespace mdcii::map
          * Initialize objects.
          *
          * @param t_filePath The path to the json map file.
-         * @param t_window The Window object.
-         * @param t_camera The Camera object.
          */
-        void Init(const std::string& t_filePath, const ogl::Window& t_window, const camera::Camera& t_camera);
+        void Init(const std::string& t_filePath);
 
         //-------------------------------------------------
         // Render Entities
@@ -292,32 +262,22 @@ namespace mdcii::map
 
         /**
          * Renders the isometric grid.
-         *
-         * @param t_window The Window object to get the orthographic projection matrix.
-         * @param t_camera The Camera object to get the view matrix.
          */
-        void RenderGridEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+        void RenderGridEntities() const;
 
         /**
          * Renders the entities from all layers.
-         *
-         * @param t_window The Window object to get the orthographic projection matrix.
-         * @param t_camera The Camera object to get the view matrix.
          */
-        void RenderEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+        void RenderEntities() const;
 
         /**
          * Renders an entity.
          *
-         * @param t_window The Window object to get the orthographic projection matrix.
-         * @param t_camera The Camera object to get the view matrix.
          * @param t_mapTile A MapTile object.
          * @param t_building A Building object.
          * @param t_selected Determines if the building is selected and rendered a little darker.
          */
         void RenderEntity(
-            const ogl::Window& t_window,
-            const camera::Camera& t_camera,
             const MapTile& t_mapTile,
             const data::Building& t_building,
             bool t_selected = false
@@ -325,26 +285,17 @@ namespace mdcii::map
 
         /**
          * Iterates over all entities and renders tiles of the TerrainLayer.
-         *
-         * @param t_window The Window object to get the orthographic projection matrix.
-         * @param t_camera The Camera object to get the view matrix.
          */
-        void RenderTerrainLayerEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+        void RenderTerrainLayerEntities() const;
 
         /**
          * Iterates over all entities and renders tiles of the BuildingsLayer.
-         *
-         * @param t_window The Window object to get the orthographic projection matrix.
-         * @param t_camera The Camera object to get the view matrix.
          */
-        void RenderBuildingsLayerEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+        void RenderBuildingsLayerEntities() const;
 
         /**
          * Iterates over all entities and renders tiles of the TerrainLayer or the BuildingsLayer.
-         *
-         * @param t_window The Window object to get the orthographic projection matrix.
-         * @param t_camera The Camera object to get the view matrix.
          */
-        void RenderTerrainOrBuildingsEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const;
+        void RenderTerrainOrBuildingsEntities() const;
     };
 }

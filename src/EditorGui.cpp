@@ -20,20 +20,19 @@
 #include "EditorGui.h"
 #include "Game.h"
 #include "Log.h"
-#include "MdciiException.h"
 #include "map/Map.h"
-#include "file/BshFile.h"
+#include "map/MapContent.h"
 #include "data/Text.h"
 #include "event/EventManager.h"
-#include "map/MapContent.h"
+#include "file/OriginalResourcesManager.h"
+#include "state/State.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::EditorGui::EditorGui(std::shared_ptr<map::Map> t_map, std::shared_ptr<data::Buildings> t_buildings)
+mdcii::EditorGui::EditorGui(std::shared_ptr<map::Map> t_map)
     : m_map{ std::move(t_map) }
-    , m_buildings{ std::move(t_buildings) }
 {
     Log::MDCII_LOG_DEBUG("[EditorGui::EditorGui()] Create EditorGui.");
 }
@@ -63,6 +62,25 @@ void mdcii::EditorGui::RotateMapGui() const
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateMapLeft").c_str()))
     {
         m_map->Rotate(map::ChangeRotation::LEFT);
+    }
+}
+
+void mdcii::EditorGui::ZoomMapGui() const
+{
+    std::string zoomStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentMapZoom") };
+    zoomStr.append(std::string(": %s"));
+    ImGui::Text(zoomStr.c_str(), zoom_to_string(m_map->mapContent->zoom));
+
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ZoomMapIn").c_str()))
+    {
+        m_map->Zoom(map::ChangeZoom::ZOOM_IN);
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ZoomMapOut").c_str()))
+    {
+        m_map->Zoom(map::ChangeZoom::ZOOM_OUT);
     }
 }
 
@@ -124,11 +142,14 @@ void mdcii::EditorGui::AllWorkshopsGui() const
         {
             if (ImGui::TreeNode(v.c_str()))
             {
-                const auto& building{ m_buildings->buildingsMap.at(std::stoi(k)) };
+                const auto& building{ m_map->context->originalResourcesManager->GetBuildingById(std::stoi(k)) };
 
-                const auto textureWidth{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->width };
-                const auto textureHeight{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->height };
-                const auto textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(m_map->bauhausBshFile->bshTextures.at(building.baugfx)->textureId)) };
+                // todo: zoom
+                const auto& bauhausBshTextures{ m_map->context->originalResourcesManager->GetBauhausBshByZoom(map::Zoom::GFX) };
+
+                const auto textureWidth{ bauhausBshTextures.at(building.baugfx)->width };
+                const auto textureHeight{ bauhausBshTextures.at(building.baugfx)->height };
+                const auto textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(bauhausBshTextures.at(building.baugfx)->textureId)) };
 
                 if (ImGui::ImageButton(
                     textureId,
@@ -169,12 +190,15 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
 
     ImGui::Separator();
 
-    const auto& building{ m_buildings->buildingsMap.at(t_selectedBauGfx.buildingId) };
+    const auto& building{ m_map->context->originalResourcesManager->GetBuildingById(t_selectedBauGfx.buildingId) };
 
-    const auto textureWidth{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->width };
-    const auto textureHeight{ m_map->bauhausBshFile->bshTextures.at(building.baugfx)->height };
+    // todo: zoom
+    const auto& bauhausBshTextures{ m_map->context->originalResourcesManager->GetBauhausBshByZoom(map::Zoom::GFX) };
+
+    const auto textureWidth{ bauhausBshTextures.at(building.baugfx)->width };
+    const auto textureHeight{ bauhausBshTextures.at(building.baugfx)->height };
     const auto textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(
-        m_map->bauhausBshFile->bshTextures.at(static_cast<size_t>(building.baugfx) + rotation_to_int(t_selectedBauGfx.rotation))->textureId)
+        bauhausBshTextures.at(static_cast<size_t>(building.baugfx) + rotation_to_int(t_selectedBauGfx.rotation))->textureId)
     ) };
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingRight").c_str()))
@@ -213,7 +237,7 @@ void mdcii::EditorGui::CurrentSelectedMapTileGui(const map::MapTile& t_mapTile) 
 
 void mdcii::EditorGui::SaveGameGui()
 {
-    const auto fileName{ Game::RESOURCES_PATH + Game::INI.Get<std::string>("content", "save_map") };
+    const auto fileName{ Game::RESOURCES_REL_PATH + Game::INI.Get<std::string>("content", "save_map") };
 
     //static char str[128] = "";
     //ImGui::InputTextWithHint("input filename", "enter filename here", str, IM_ARRAYSIZE(str));

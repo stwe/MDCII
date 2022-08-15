@@ -23,6 +23,7 @@
 #include "MapContent.h"
 #include "MdciiAssert.h"
 #include "MdciiException.h"
+#include "ecs/Components.h"
 #include "event/EventManager.h"
 #include "eventpp/utilities/argumentadapter.h"
 #include "renderer/TileRenderer.h"
@@ -259,7 +260,7 @@ void mdcii::map::MousePicker::Init()
 
     m_renderer = std::make_unique<renderer::TileRenderer>();
 
-    const std::string path{Game::RESOURCES_PATH + "textures/corner.png" };
+    const std::string path{Game::RESOURCES_REL_PATH + "textures/corner.png" };
     int width, height, channels;
     m_cornerImage = stbi_load(path.c_str(), &width, &height, &channels, 0);
     if (!m_cornerImage)

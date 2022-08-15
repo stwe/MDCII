@@ -58,7 +58,7 @@ namespace mdcii::state
          *
          * @param t_context The holder of shared objects.
          */
-        explicit StateStack(std::shared_ptr<State::Context> t_context);
+        explicit StateStack(std::shared_ptr<Context> t_context);
 
         StateStack(const StateStack& t_other) = delete;
         StateStack(StateStack&& t_other) noexcept = delete;
@@ -147,7 +147,7 @@ namespace mdcii::state
         /**
          * Works as a holder of shared objects between all states.
          */
-        std::shared_ptr<State::Context> m_context;
+        std::shared_ptr<Context> m_context;
 
         /**
          * A list of factory functions for each Stack object.

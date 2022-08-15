@@ -26,11 +26,6 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::data
-{
-    class Buildings;
-}
-
 namespace mdcii::map
 {
     class Map;
@@ -52,13 +47,14 @@ namespace mdcii
         // Ctors. / Dtor.
         //-------------------------------------------------
 
+        EditorGui() = delete;
+
         /**
          * Constructs a new EditorGui object.
          *
          * @param t_map The Map object to edit.
-         * @param t_buildings Access to all building objects.
          */
-        EditorGui(std::shared_ptr<map::Map> t_map, std::shared_ptr<data::Buildings> t_buildings);
+        explicit EditorGui(std::shared_ptr<map::Map> t_map);
 
         EditorGui(const EditorGui& t_other) = delete;
         EditorGui(EditorGui&& t_other) noexcept = delete;
@@ -75,6 +71,11 @@ namespace mdcii
          * Buttons for rotating the map left and right.
          */
         void RotateMapGui() const;
+
+        /**
+         * Buttons to zoom in and out the map.
+         */
+        void ZoomMapGui() const;
 
         /**
          * Shows a menu with the action buttons.
@@ -130,11 +131,6 @@ namespace mdcii
          * The Map object to edit.
          */
         std::shared_ptr<map::Map> m_map;
-
-        /**
-         * Access to all building objects.
-         */
-        std::shared_ptr<data::Buildings> m_buildings;
 
         /**
          * Used as a flag to print out an info text.

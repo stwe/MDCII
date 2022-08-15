@@ -42,7 +42,7 @@ namespace mdcii
          * @param t_stateStack A pointer to the parent StateStack object.
          * @param t_context The holder of shared objects.
          */
-        WorldState(Id t_id, state::StateStack* t_stateStack, std::shared_ptr<Context> t_context);
+        WorldState(Id t_id, state::StateStack* t_stateStack, std::shared_ptr<state::Context> t_context);
 
         WorldState(const WorldState& t_other) = delete;
         WorldState(WorldState&& t_other) noexcept = delete;

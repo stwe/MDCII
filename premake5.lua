@@ -4,7 +4,6 @@ workspace "MDCII"
     conan_basic_setup()
 
     architecture "x64"
-    startproject "MDCII"
 
     configurations
     {
@@ -80,3 +79,43 @@ project "MDCII"
         defines { "GLFW_INCLUDE_NONE", "_CRT_SECURE_NO_WARNINGS" }
         runtime "Release"
         optimize "On"
+
+project "MDCII_TEST"
+    location "/Dev/MDCII"
+    architecture "x64"
+    kind "ConsoleApp"
+    language "C++"
+    cppdialect "C++17"
+    characterset "Unicode"
+
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("obj/" .. outputdir .. "/%{prj.name}")
+
+    linkoptions
+    {
+        conan_exelinkflags,
+        "/IGNORE:4099"
+    }
+
+    links
+    {
+        "gtest_main"
+    }
+
+    files
+    {
+        "tests/**.cpp"
+    }
+
+    includedirs
+    {
+        "src"
+    }
+
+    filter "system:windows"
+        systemversion "latest"
+
+    filter "configurations:Debug"
+        defines { "_CRT_SECURE_NO_WARNINGS" }
+        runtime "Debug"
+        symbols "On"

@@ -24,7 +24,7 @@
 #include "state/StateStack.h"
 #include "ogl/Window.h"
 #include "ogl/OpenGL.h"
-#include "data/Buildings.h"
+#include "file/OriginalResourcesManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -151,14 +151,14 @@ void mdcii::Game::CreateSharedObjects()
 
     m_window = std::make_shared<ogl::Window>();
     m_camera = std::make_shared<camera::Camera>();
-    m_buildings = std::make_shared<data::Buildings>();
+    m_originalResourcesManager = std::make_shared<file::OriginalResourcesManager>();
 }
 
 void mdcii::Game::Start()
 {
     Log::MDCII_LOG_DEBUG("[Game::Start()] Starts the game.");
 
-    m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::State::Context>(m_window, m_camera, m_buildings));
+    m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::Context>(m_window, m_camera, m_originalResourcesManager));
     m_stateStack->RegisterState<EditorState>(state::State::Id::EDITOR);
 
     const auto startStateName{ INI.Get<std::string>("game", "start") };

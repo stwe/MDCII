@@ -21,6 +21,7 @@
 #include <map>
 #include <vector>
 #include <cstdint>
+#include <string>
 
 //-------------------------------------------------
 // Forward declarations
@@ -469,7 +470,7 @@ namespace mdcii::data
     //-------------------------------------------------
 
     /**
-     * Parses the haeuser.cod and creates building objects from it.
+     * The decrypted content of the haeuser.cod.
      */
     class Buildings
     {
@@ -480,18 +481,31 @@ namespace mdcii::data
          */
         std::map<int32_t, Building> buildingsMap;
 
+        Buildings() = delete;
+
         /**
          * Constructs a new Buildings object.
+         *
+         * @param t_codFilePath The path to the haeuser.cod.
          */
-        Buildings();
+        explicit Buildings(const std::string& t_codFilePath);
+
+        Buildings(const Buildings& t_other) = delete;
+        Buildings(Buildings&& t_other) noexcept = delete;
+        Buildings& operator=(const Buildings& t_other) = delete;
+        Buildings& operator=(Buildings&& t_other) noexcept = delete;
+
+        ~Buildings() noexcept;
 
     protected:
 
     private:
         /**
          * Creates the Building objects.
+         *
+         * @param t_codFilePath The path to the haeuser.cod.
          */
-        void GenerateBuildings();
+        void GenerateBuildings(const std::string& t_codFilePath);
 
         /**
          * Creates a single Building object.

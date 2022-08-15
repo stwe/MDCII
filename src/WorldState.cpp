@@ -26,7 +26,7 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::WorldState::WorldState(const Id t_id, state::StateStack* t_stateStack, std::shared_ptr<Context> t_context)
+mdcii::WorldState::WorldState(const Id t_id, state::StateStack* t_stateStack, std::shared_ptr<state::Context> t_context)
     : State(t_id, t_stateStack, std::move(t_context))
 {
     Log::MDCII_LOG_DEBUG("[WorldState::WorldState()] Create WorldState.");

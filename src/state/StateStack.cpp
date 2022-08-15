@@ -23,7 +23,7 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::state::StateStack::StateStack(std::shared_ptr<State::Context> t_context)
+mdcii::state::StateStack::StateStack(std::shared_ptr<Context> t_context)
     : m_context{ std::move(t_context) }
 {
     Log::MDCII_LOG_DEBUG("[StateStack::StateStack()] Create StateStack.");

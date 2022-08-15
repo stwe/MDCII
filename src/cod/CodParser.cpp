@@ -35,7 +35,7 @@ mdcii::cod::CodParser::CodParser(std::string t_codFilePath)
 
     const std::filesystem::path p{ m_path };
     auto filenameOnly{ p.stem().string() };
-    m_jsonPath = Game::RESOURCES_PATH + filenameOnly.append(".json");
+    m_jsonPath = Game::RESOURCES_REL_PATH + filenameOnly.append(".json");
 
     if (std::filesystem::exists(m_jsonPath))
     {

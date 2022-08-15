@@ -4,15 +4,7 @@ Ein weiteres 1602 Projekt. Der Fokus liegt hier jedoch nicht in dem
 Einlesen der Originaldateien, sondern darin, eine editierbare isometrische
 Spielewelt zu erschaffen.
 
-Es wird das Originalspiel benötigt. Es müssen folgende Dateien nach
-`MDCII/resources` kopiert werden:
-
-* BAUHAUS.BSH
-* STADTFLD.BSH (GFX Variante)
-* STADTFLD.COL
-* haeuser.cod
-
-In der `config.ini` müssen die Pfade angepasst werden.
+Es wird das Originalspiel benötigt. In der `config.ini` müssen die Pfade angepasst werden.
 
 **Der erste Start dauert länger, da die `haeuser.cod` eingelesen wird.**
 

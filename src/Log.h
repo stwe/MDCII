@@ -38,7 +38,7 @@ namespace mdcii
         {
             spdlog::set_pattern("%^[%T] %n: %v%$");
 
-            m_logger = spdlog::stdout_color_mt("MDCII");
+            m_logger = spdlog::stdout_color_mt("MDCII"); // NOLINT(clang-diagnostic-undefined-func-template)
 
 #ifdef MDCII_DEBUG_BUILD
             m_logger->set_level(spdlog::level::trace);

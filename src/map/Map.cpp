@@ -18,31 +18,27 @@
 
 #include <imgui.h>
 #include "Map.h"
+#include "Game.h"
 #include "MousePicker.h"
 #include "MapContent.h"
-#include "Log.h"
 #include "MdciiAssert.h"
-#include "renderer/ImGuiTileRenderer.h"
-#include "renderer/RenderUtils.h"
+#include "ecs/Components.h"
+#include "file/OriginalResourcesManager.h"
+#include "state/State.h"
 #include "renderer/TileRenderer.h"
 #include "renderer/TextRenderer.h"
-#include "ecs/EcsUtils.h"
+#include "renderer/RenderUtils.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::map::Map::Map(
-    const std::string& t_filePath,
-    std::shared_ptr<data::Buildings> t_buildings,
-    const ogl::Window& t_window,
-    const camera::Camera& t_camera
-)
-    : m_buildings{ std::move(t_buildings) }
+mdcii::map::Map::Map(const std::string& t_mapFilePath, std::shared_ptr<state::Context> t_context)
+    : context{ std::move(t_context) }
 {
     Log::MDCII_LOG_DEBUG("[Map::Map()] Create Map.");
 
-    Init(t_filePath, t_window, t_camera);
+    Init(t_mapFilePath);
 }
 
 mdcii::map::Map::~Map() noexcept
@@ -54,12 +50,12 @@ mdcii::map::Map::~Map() noexcept
 // Render
 //-------------------------------------------------
 
-void mdcii::map::Map::Render(const ogl::Window& t_window, const camera::Camera& t_camera) const
+void mdcii::map::Map::Render() const
 {
-    RenderGridEntities(t_window, t_camera);
-    RenderEntities(t_window, t_camera);
+    RenderGridEntities();
+    RenderEntities();
 
-    mousePicker->Render(t_window, t_camera);
+    mousePicker->Render(*context->window, *context->camera);
 }
 
 void mdcii::map::Map::RenderImGui()
@@ -86,17 +82,18 @@ void mdcii::map::Map::RenderImGui()
 }
 
 void mdcii::map::Map::RenderBuilding(
-    const ogl::Window& t_window,
-    const camera::Camera& t_camera,
     const int t_gfx,
     glm::vec2 t_screenPosition,
     const float t_elevation,
     const bool t_selected
 ) const
 {
-    const auto w{ static_cast<float>(stdBshFile->bshTextures[t_gfx]->width) };
-    const auto h{ static_cast<float>(stdBshFile->bshTextures[t_gfx]->height) };
-    const auto textureId{ stdBshFile->bshTextures[t_gfx]->textureId };
+    // todo: zoom, change Id via argument
+    const auto& stadtfldBshTextures{ context->originalResourcesManager->GetStadtfldBshByZoom(Zoom::GFX) };
+
+    const auto w{ static_cast<float>(stadtfldBshTextures[t_gfx]->width) };
+    const auto h{ static_cast<float>(stadtfldBshTextures[t_gfx]->height) };
+    const auto textureId{ stadtfldBshTextures[t_gfx]->textureId };
 
     t_screenPosition.y -= h - MapTile::TILE_HEIGHT;
     t_screenPosition.y -= t_elevation;
@@ -104,13 +101,13 @@ void mdcii::map::Map::RenderBuilding(
     renderer->RenderTile(
         renderer::RenderUtils::GetModelMatrix(t_screenPosition, glm::vec2(w, h)),
         textureId,
-        t_window, t_camera,
+        *context->window, *context->camera,
         t_selected
     );
 }
 
 //-------------------------------------------------
-// Rotate
+// Rotate && Zoom
 //-------------------------------------------------
 
 void mdcii::map::Map::Rotate(const ChangeRotation t_changeRotation) const
@@ -126,37 +123,38 @@ void mdcii::map::Map::Rotate(const ChangeRotation t_changeRotation) const
     }
 }
 
+void mdcii::map::Map::Zoom(const ChangeZoom t_changeZoom) const
+{
+    switch (t_changeZoom)
+    {
+    case ChangeZoom::ZOOM_IN:
+        mapContent->ZoomIn();
+        break;
+    case ChangeZoom::ZOOM_OUT:
+        mapContent->ZoomOut();
+        break;
+    }
+}
+
 //-------------------------------------------------
 // Init
 //-------------------------------------------------
 
-void mdcii::map::Map::Init(const std::string& t_filePath, const ogl::Window& t_window, const camera::Camera& t_camera)
+void mdcii::map::Map::Init(const std::string& t_filePath)
 {
     Log::MDCII_LOG_DEBUG("[Map::Init()] Initializing map.");
 
     // create the MousePicker to select tiles
-    mousePicker = std::make_unique<MousePicker>(this, t_window, t_camera);
+    mousePicker = std::make_unique<MousePicker>(this, *context->window, *context->camera);
 
     // load map content
-    mapContent = std::make_unique<MapContent>(t_filePath, m_buildings);
-
-    // load palette from stadtfld.col
-    m_paletteFile = std::make_unique<file::PaletteFile>(Game::RESOURCES_PATH + "STADTFLD.COL");
-    m_paletteFile->ReadDataFromChunks();
-
-    // load bsh graphics from stadtfld.bsh
-    stdBshFile = std::make_unique<file::BshFile>(Game::RESOURCES_PATH + "STADTFLD.BSH", m_paletteFile->palette);
-    stdBshFile->ReadDataFromChunks();
-
-    // load bsh graphics from bauhaus.bsh
-    bauhausBshFile = std::make_unique<file::BshFile>(Game::RESOURCES_PATH + "BAUHAUS.BSH", m_paletteFile->palette);
-    bauhausBshFile->ReadDataFromChunks();
+    mapContent = std::make_unique<MapContent>(t_filePath, context);
 
     // create tile renderer
     renderer = std::make_unique<renderer::TileRenderer>();
 
     // create text renderer
-    textRenderer = std::make_unique<renderer::TextRenderer>(Game::RESOURCES_PATH + "bitter/Bitter-Regular.otf");
+    textRenderer = std::make_unique<renderer::TextRenderer>(Game::RESOURCES_REL_PATH + "bitter/Bitter-Regular.otf");
 
     Log::MDCII_LOG_DEBUG("[Map::Init()] The map was successfully initialized.");
 }
@@ -165,7 +163,7 @@ void mdcii::map::Map::Init(const std::string& t_filePath, const ogl::Window& t_w
 // Render Entities
 //-------------------------------------------------
 
-void mdcii::map::Map::RenderGridEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const
+void mdcii::map::Map::RenderGridEntities() const
 {
     if (!renderGrid && !renderText)
     {
@@ -186,7 +184,7 @@ void mdcii::map::Map::RenderGridEntities(const ogl::Window& t_window, const came
                     glm::vec2(MapTile::TILE_WIDTH, MapTile::TILE_HEIGHT)
                 ),
                 gc.textureId,
-                t_window, t_camera
+                *context->window, *context->camera
             );
         }
 
@@ -198,13 +196,13 @@ void mdcii::map::Map::RenderGridEntities(const ogl::Window& t_window, const came
                 screenPosition.y + static_cast<float>(MapTile::TILE_HEIGHT) / 4.0f,
                 0.25f,
                 glm::vec3(1.0f, 0.0f, 0.0f),
-                t_window, t_camera
+                *context->window, *context->camera
             );
         }
     }
 }
 
-void mdcii::map::Map::RenderEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const
+void mdcii::map::Map::RenderEntities() const
 {
     // render nothing
     if (!renderTerrainLayer && !renderBuildingsLayer)
@@ -215,24 +213,22 @@ void mdcii::map::Map::RenderEntities(const ogl::Window& t_window, const camera::
     // render terrain only
     if (renderTerrainLayer && !renderBuildingsLayer)
     {
-        RenderTerrainLayerEntities(t_window, t_camera);
+        RenderTerrainLayerEntities();
         return;
     }
 
     // render buildings only
     if (!renderTerrainLayer && renderBuildingsLayer)
     {
-        RenderBuildingsLayerEntities(t_window, t_camera);
+        RenderBuildingsLayerEntities();
         return;
     }
 
     // render terrain or buildings
-    RenderTerrainOrBuildingsEntities(t_window, t_camera);
+    RenderTerrainOrBuildingsEntities();
 }
 
 void mdcii::map::Map::RenderEntity(
-    const ogl::Window& t_window,
-    const camera::Camera& t_camera,
     const MapTile& t_mapTile,
     const data::Building& t_building,
     const bool t_selected
@@ -283,8 +279,6 @@ void mdcii::map::Map::RenderEntity(
     }
 
     RenderBuilding(
-        t_window,
-        t_camera,
         gfx,
         t_mapTile.screenPositions[rotation_to_int(mapContent->rotation)],
         static_cast<float>(t_building.posoffs),
@@ -292,7 +286,7 @@ void mdcii::map::Map::RenderEntity(
     );
 }
 
-void mdcii::map::Map::RenderTerrainLayerEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const
+void mdcii::map::Map::RenderTerrainLayerEntities() const
 {
 #ifdef MDCII_DEBUG_BUILD
     auto t{ 0 }; // terrain tiles expected result = width * height
@@ -313,7 +307,7 @@ void mdcii::map::Map::RenderTerrainLayerEntities(const ogl::Window& t_window, co
         }
 
         const auto& [terrainLayerTileComponent] { view.get(entity) };
-        RenderEntity(t_window, t_camera, terrainLayerTileComponent.mapTile, terrainLayerTileComponent.building, false);
+        RenderEntity(terrainLayerTileComponent.mapTile, terrainLayerTileComponent.building, false);
 #ifdef MDCII_DEBUG_BUILD
         t++;
 #endif
@@ -322,17 +316,17 @@ void mdcii::map::Map::RenderTerrainLayerEntities(const ogl::Window& t_window, co
     MDCII_ASSERT(t == mapContent->width * mapContent->height, "[Map::RenderTerrainLayerEntities()] Invalid number of entities.")
 }
 
-void mdcii::map::Map::RenderBuildingsLayerEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const
+void mdcii::map::Map::RenderBuildingsLayerEntities() const
 {
     const auto view{ Game::ecs.view<ecs::BuildingsLayerTileComponent>(entt::exclude<ecs::BuildingUpdatedComponent>) };
     for (const auto entity : view)
     {
         const auto& [buildingsComponent] { view.get(entity) };
-        RenderEntity(t_window, t_camera, buildingsComponent.mapTile, buildingsComponent.building, false);
+        RenderEntity(buildingsComponent.mapTile, buildingsComponent.building, false);
     }
 }
 
-void mdcii::map::Map::RenderTerrainOrBuildingsEntities(const ogl::Window& t_window, const camera::Camera& t_camera) const
+void mdcii::map::Map::RenderTerrainOrBuildingsEntities() const
 {
     const auto view{ Game::ecs.view<ecs::TerrainLayerTileComponent>(/*entt::exclude<ecs::BuildingUpdatedComponent>*/)};
     for (const auto entity : view)
@@ -343,11 +337,11 @@ void mdcii::map::Map::RenderTerrainOrBuildingsEntities(const ogl::Window& t_wind
         {
             const auto& buildingsLayerTileComponent{ Game::ecs.get<const ecs::BuildingsLayerTileComponent>(entity) };
 
-            RenderEntity(t_window, t_camera, buildingsLayerTileComponent.mapTile, buildingsLayerTileComponent.building, false);
+            RenderEntity(buildingsLayerTileComponent.mapTile, buildingsLayerTileComponent.building, false);
         }
         else
         {
-            RenderEntity(t_window, t_camera, terrainLayerTileComponent.mapTile, terrainLayerTileComponent.building, false);
+            RenderEntity(terrainLayerTileComponent.mapTile, terrainLayerTileComponent.building, false);
         }
     }
 }

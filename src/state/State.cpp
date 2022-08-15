@@ -21,7 +21,7 @@
 #include "MdciiAssert.h"
 #include "ogl/Window.h"
 #include "ogl/OpenGL.h"
-#include "data/Buildings.h"
+#include "file/OriginalResourcesManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

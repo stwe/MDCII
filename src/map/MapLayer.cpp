@@ -22,6 +22,8 @@
 #include "ecs/Components.h"
 #include "ecs/EcsUtils.h"
 #include "ogl/resource/ResourceManager.h"
+#include "file/OriginalResourcesManager.h"
+#include "state/State.h"
 
 //-------------------------------------------------
 // Json
@@ -182,7 +184,7 @@ void mdcii::map::MapLayer::CreateTerrainLayerEntity(const int t_mapX, const int 
     Game::ecs.emplace<ecs::TerrainLayerTileComponent>(
         entity,
         GetTile(t_mapX, t_mapY),
-        m_mapContent->buildings->buildingsMap.at(GetTile(t_mapX, t_mapY).buildingId)
+        m_mapContent->context->originalResourcesManager->GetBuildingById(GetTile(t_mapX, t_mapY).buildingId)
     );
 }
 
@@ -212,6 +214,6 @@ void mdcii::map::MapLayer::AddBuildingsLayerComponent(const int t_mapX, const in
     Game::ecs.emplace<ecs::BuildingsLayerTileComponent>(
         GetTile(t_mapX, t_mapY).entity,
         GetTile(t_mapX, t_mapY),
-        m_mapContent->buildings->buildingsMap.at(GetTile(t_mapX, t_mapY).buildingId)
+        m_mapContent->context->originalResourcesManager->GetBuildingById(GetTile(t_mapX, t_mapY).buildingId)
     );
 }

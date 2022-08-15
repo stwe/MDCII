@@ -13,7 +13,10 @@
     "Options": "Optionen",
     "Demolish": "Zerstören",
     "SaveGame": "Spiel speichern",
-    "SaveGameSuccess": "Das Spiel wurde erfolgreich gespeichert in"
+    "SaveGameSuccess": "Das Spiel wurde erfolgreich gespeichert in",
+    "ZoomMapIn": "Ansicht vergrößern",
+    "ZoomMapOut": "Ansicht verkleinern",
+    "CurrentMapZoom": "Aktuelle Ansicht der Karte"
   },
   "en": {
     "Menu": "Menu",
@@ -29,6 +32,9 @@
     "Options": "Options",
     "Demolish": "Demolish",
     "SaveGame": "Save game",
-    "SaveGameSuccess": "Game successfully saved to"
+    "SaveGameSuccess": "Game successfully saved to",
+    "ZoomMapIn": "Zoom map in",
+    "ZoomMapOut": "Zoom map out",
+    "CurrentMapZoom": "Current map zoom"
   }
 }
