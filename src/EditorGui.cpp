@@ -143,9 +143,7 @@ void mdcii::EditorGui::AllWorkshopsGui() const
             if (ImGui::TreeNode(v.c_str()))
             {
                 const auto& building{ m_map->context->originalResourcesManager->GetBuildingById(std::stoi(k)) };
-
-                // todo: zoom
-                const auto& bauhausBshTextures{ m_map->context->originalResourcesManager->GetBauhausBshByZoom(map::Zoom::GFX) };
+                const auto& bauhausBshTextures{ m_map->context->originalResourcesManager->GetBauhausBshByZoom(m_map->mapContent->bauhausZoom) };
 
                 const auto textureWidth{ bauhausBshTextures.at(building.baugfx)->width };
                 const auto textureHeight{ bauhausBshTextures.at(building.baugfx)->height };
@@ -191,9 +189,7 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
     ImGui::Separator();
 
     const auto& building{ m_map->context->originalResourcesManager->GetBuildingById(t_selectedBauGfx.buildingId) };
-
-    // todo: zoom
-    const auto& bauhausBshTextures{ m_map->context->originalResourcesManager->GetBauhausBshByZoom(map::Zoom::GFX) };
+    const auto& bauhausBshTextures{ m_map->context->originalResourcesManager->GetBauhausBshByZoom(m_map->mapContent->bauhausZoom) };
 
     const auto textureWidth{ bauhausBshTextures.at(building.baugfx)->width };
     const auto textureHeight{ bauhausBshTextures.at(building.baugfx)->height };

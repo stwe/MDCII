@@ -78,6 +78,12 @@ namespace mdcii::map
          */
         Zoom zoom{ Zoom::GFX };
 
+        /**
+         * The zoom of the building thumbnails.
+         * In History Ed. only GFX is available.
+         */
+        Zoom bauhausZoom{ Zoom::GFX };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -249,6 +255,11 @@ namespace mdcii::map
          * @param t_filePath The path to the json map file.
          */
         [[nodiscard]] static nlohmann::json ReadJsonFromFile(const std::string& t_filePath);
+
+        /**
+         * Initializes the zoom for all the bauhaus thumbnails in main menu.
+         */
+        void InitBauhausZoom();
 
         //-------------------------------------------------
         // Helper

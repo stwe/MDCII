@@ -38,6 +38,8 @@ mdcii::map::MapContent::MapContent(const std::string& t_mapFilePath, std::shared
 
     CreateEntitiesOfAllLayers();
     SortEntitiesOfAllLayers();
+
+    InitBauhausZoom();
 }
 
 mdcii::map::MapContent::~MapContent() noexcept
@@ -445,6 +447,29 @@ nlohmann::json mdcii::map::MapContent::ReadJsonFromFile(const std::string& t_fil
     }
 
     return j;
+}
+
+void mdcii::map::MapContent::InitBauhausZoom()
+{
+    // check for History Ed.
+    if (context->originalResourcesManager->bauhausBshFiles.size() == 1)
+    {
+        Log::MDCII_LOG_DEBUG("[MapContent::InitBauhausZoom()] History Ed.: Sets the thumbnail zoom for buildings to GFX.");
+
+        bauhausZoom = Zoom::GFX;
+        return;
+    }
+
+    // Nina has 3 Bauhaus.bsh files
+    const auto zoomOptional{ magic_enum::enum_cast<Zoom>(Game::INI.Get<std::string>("main_menu", "thumbnails_zoom")) };
+    if (zoomOptional.has_value())
+    {
+        bauhausZoom = zoomOptional.value();
+    }
+    else
+    {
+        bauhausZoom = Zoom::GFX;
+    }
 }
 
 //-------------------------------------------------
