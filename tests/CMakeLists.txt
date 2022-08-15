@@ -1,9 +1,11 @@
 enable_testing()
 
-find_package(GTest REQUIRED)
+include(../conanbuildinfo.cmake)
+conan_basic_setup()
 
 add_executable(MDCII_TEST ZoomTests.cpp)
 
-target_link_libraries(MDCII_TEST GTest::gtest_main)
+target_include_directories(MDCII_TEST PUBLIC ../../MDCII/src)
+target_link_libraries(MDCII_TEST ${CONAN_LIBS})
 
 add_test(ZoomTestSuite MDCII_TEST)
