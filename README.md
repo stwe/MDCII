@@ -8,10 +8,11 @@ Es wird das Originalspiel benötigt. In der `config.ini` müssen die Pfade angep
 
 **Der erste Start dauert länger, da die `haeuser.cod` eingelesen wird.**
 
-**Update vom 07.08.2022**
+**Update vom 17.08.2022**
 Derzeit können Handwerksbetriebe in beliebiger Rotation auf der Karte platziert und auch wieder zerstört werden.
 Es ist möglich, die Karte zu drehen. Darüber hinaus kann die Map gespeichert und wieder geladen werden. Um das
-Savegame beim Start anzuzeigen, muss nur der Eintrag `start_map` in der `config.ini` geändert werden.
+Savegame beim Start anzuzeigen, muss nur der Eintrag `start_map` in der `config.ini` geändert werden. 
+Wie im Originalspiel sind drei Zoomstufen möglich.
 
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ffb066523c4064ab513bef2f8d4628)](https://www.codacy.com/gh/stwe/MDCII/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stwe/MDCII&amp;utm_campaign=Badge_Grade)
