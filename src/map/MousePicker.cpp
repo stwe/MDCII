@@ -98,15 +98,15 @@ void mdcii::map::MousePicker::UpdatePositions(const ogl::Window& t_window, const
 glm::ivec2 mdcii::map::MousePicker::GetMapPosition(const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
     const auto mouse{ glm::ivec2(t_window.GetMouseX(), t_window.GetMouseY()) };
-    const auto cell{ glm::ivec2(mouse.x / MapTile::TILE_WIDTH, (mouse.y + Map::ELEVATION) / MapTile::TILE_HEIGHT) };
-    const auto offsetIntoCell{ glm::ivec2(mouse.x % MapTile::TILE_WIDTH, (mouse.y + Map::ELEVATION) % MapTile::TILE_HEIGHT) };
+    const auto cell{ glm::ivec2(mouse.x / get_tile_width(m_map->mapContent->zoom), (mouse.y + get_elevation(m_map->mapContent->zoom)) / get_tile_height(m_map->mapContent->zoom)) };
+    const auto offsetIntoCell{ glm::ivec2(mouse.x % get_tile_width(m_map->mapContent->zoom), (mouse.y + get_elevation(m_map->mapContent->zoom)) % get_tile_height(m_map->mapContent->zoom)) };
 
     const glm::ivec2 origin{
-        static_cast<int>(t_camera.position.x) / MapTile::TILE_WIDTH,
-        static_cast<int>(t_camera.position.y) / MapTile::TILE_HEIGHT
+        static_cast<int>(t_camera.position.x) / get_tile_width(m_map->mapContent->zoom),
+        static_cast<int>(t_camera.position.y) / get_tile_height(m_map->mapContent->zoom)
     };
 
-    const auto* pixelCol{ m_cornerImage + (4ULL * (static_cast<size_t>(offsetIntoCell.y) * MapTile::TILE_WIDTH + offsetIntoCell.x)) };
+    const auto* pixelCol{ m_cornerImages.at(magic_enum::enum_integer(m_map->mapContent->zoom)) + (4_uz * (static_cast<size_t>(offsetIntoCell.y) * get_tile_width(m_map->mapContent->zoom) + offsetIntoCell.x)) };
     const auto r = pixelCol[0];
     const auto g = pixelCol[1];
     const auto b = pixelCol[2];
@@ -237,15 +237,15 @@ void mdcii::map::MousePicker::RenderMouseCursor(const ogl::Window& t_window, con
         return;
     }
 
-    auto screenPosition{ m_map->mapContent->MapToScreen(m_currentPosition.x, m_currentPosition.y, m_map->mapContent->rotation) };
-    screenPosition.y -= Map::ELEVATION;
+    auto screenPosition{ m_map->mapContent->MapToScreen(m_currentPosition.x, m_currentPosition.y, m_map->mapContent->zoom, m_map->mapContent->rotation) };
+    screenPosition.y -= static_cast<float>(get_elevation(m_map->mapContent->zoom));
 
     m_renderer->RenderTile(
         renderer::RenderUtils::GetModelMatrix(
             screenPosition,
-            glm::vec2(MapTile::TILE_WIDTH, MapTile::TILE_HEIGHT)
+            glm::vec2(get_tile_width(m_map->mapContent->zoom), get_tile_height(m_map->mapContent->zoom))
         ),
-        ogl::resource::ResourceManager::LoadTexture("textures/frame.png").id,
+        ogl::resource::ResourceManager::LoadTexture(m_cursorFileNames.at(magic_enum::enum_integer(m_map->mapContent->zoom))).id,
         t_window, t_camera
     );
 }
@@ -260,16 +260,40 @@ void mdcii::map::MousePicker::Init()
 
     m_renderer = std::make_unique<renderer::TileRenderer>();
 
-    const std::string path{Game::RESOURCES_REL_PATH + "textures/corner.png" };
-    int width, height, channels;
-    m_cornerImage = stbi_load(path.c_str(), &width, &height, &channels, 0);
-    if (!m_cornerImage)
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom)
     {
-        throw MDCII_EXCEPTION("[MousePicker::Init()] Mouse picker corner image failed to load at path: " + path);
-    }
+        // store cursor file names
+        const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<Zoom>(t_zoom))) };
+        const auto cursorFileName{ "textures/" + zoomStr + "/frame_" + zoomStr + ".png" };
+        m_cursorFileNames.at(magic_enum::enum_integer(t_zoom)) = cursorFileName;
 
-    MDCII_ASSERT(width == MapTile::TILE_WIDTH, "[MousePicker::Init()] Invalid width.")
-    MDCII_ASSERT(height == MapTile::TILE_HEIGHT, "[MousePicker::Init()] Invalid height.")
+        // store cheat images
+        const auto fileName{ "textures/" + zoomStr + "/corner_" + zoomStr + ".png" };
+        const std::string path{ Game::RESOURCES_REL_PATH + fileName };
+
+        Log::MDCII_LOG_DEBUG("[MousePicker::Init()] Load cheat image for zoom {}...", magic_enum::enum_name(t_zoom));
+
+        int width, height, channels;
+        auto* cornerImage{ stbi_load(path.c_str(), &width, &height, &channels, 0) };
+        if (!cornerImage)
+        {
+            throw MDCII_EXCEPTION("[MousePicker::Init()] Mouse picker corner image failed to load at path: " + path);
+        }
+
+        if (width != get_tile_width(t_zoom))
+        {
+            throw MDCII_EXCEPTION("[MousePicker::Init()] Invalid width.");
+        }
+
+        if (height != get_tile_height(t_zoom))
+        {
+            throw MDCII_EXCEPTION("[MousePicker::Init()] Invalid height.");
+        }
+
+        Log::MDCII_LOG_DEBUG("[MousePicker::Init()] The cheat image was loaded successfully.");
+
+        m_cornerImages.at(magic_enum::enum_integer(t_zoom)) = cornerImage;
+    });
 
     Log::MDCII_LOG_DEBUG("[MousePicker::Init()] The mouse picker was successfully initialized.");
 }
@@ -396,5 +420,10 @@ void mdcii::map::MousePicker::CleanUp() const
 {
     Log::MDCII_LOG_DEBUG("[MousePicker::CleanUp()] CleanUp MousePicker.");
 
-    stbi_image_free(m_cornerImage);
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom)
+    {
+        Log::MDCII_LOG_DEBUG("[MousePicker::CleanUp()] CleanUp cheat image for zoom {}.", magic_enum::enum_name(t_zoom));
+
+        stbi_image_free(m_cornerImages.at(magic_enum::enum_integer(t_zoom)));
+    });
 }

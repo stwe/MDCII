@@ -80,6 +80,14 @@ mdcii::map::MapLayer::MapLayer(MapContent* t_mapContent)
     Log::MDCII_LOG_DEBUG("[MapLayer::MapLayer()] Create MapLayer.");
 
     MDCII_ASSERT(m_mapContent, "[MapLayer::MapLayer()] Null pointer.")
+
+    // store grid file names
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom)
+    {
+        const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<Zoom>(t_zoom))) };
+        const auto fileName{ "textures/" + zoomStr + "/red_" + zoomStr + ".png" };
+        m_gridFileNames.at(magic_enum::enum_integer(t_zoom)) = fileName;
+    });
 }
 
 mdcii::map::MapLayer::~MapLayer() noexcept
@@ -160,7 +168,7 @@ void mdcii::map::MapLayer::CreateGridEntity(const int t_mapX, const int t_mapY)
     Game::ecs.emplace<ecs::GridComponent>(
         entity,
         GetTile(t_mapX, t_mapY),
-        ogl::resource::ResourceManager::LoadTexture("textures/red.png").id
+        ogl::resource::ResourceManager::LoadTexture(m_gridFileNames.at(magic_enum::enum_integer(m_mapContent->zoom))).id
     );
 }
 

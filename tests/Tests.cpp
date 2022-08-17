@@ -18,8 +18,9 @@
 
 #include <gtest/gtest.h>
 #include "map/Zoom.h"
+#include "MdciiUtils.h"
 
-TEST(ZoomTestSuite, TestOperators)
+TEST(TestSuite, TestOperators)
 {
     auto zoomAdd{ mdcii::map::Zoom::SGFX };
     ASSERT_EQ(mdcii::map::Zoom::MGFX, ++zoomAdd);
@@ -30,6 +31,13 @@ TEST(ZoomTestSuite, TestOperators)
     ASSERT_EQ(mdcii::map::Zoom::MGFX, --zoomMinus);
     ASSERT_EQ(mdcii::map::Zoom::SGFX, --zoomMinus);
     ASSERT_EQ(mdcii::map::Zoom::SGFX, --zoomMinus);
+}
+
+TEST(TestSuite, TestStringUtils)
+{
+    const std::string foo{ "DumMy" };
+    ASSERT_EQ("DUMMY", mdcii::to_upper_case(foo));
+    ASSERT_EQ("dummy", mdcii::to_lower_case(foo));
 }
 
 int main()

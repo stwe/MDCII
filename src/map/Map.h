@@ -89,11 +89,6 @@ namespace mdcii::map
          */
         static constexpr std::array<std::string_view, magic_enum::enum_count<Action>()> ACTION_NAMES{ "Build", "Status", "Options" };
 
-        /**
-         * The height of the island.
-         */
-        static constexpr auto ELEVATION{ 20 };
-
         //-------------------------------------------------
         // Member
         //-------------------------------------------------

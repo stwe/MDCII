@@ -69,7 +69,7 @@ void mdcii::EditorGui::ZoomMapGui() const
 {
     std::string zoomStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentMapZoom") };
     zoomStr.append(std::string(": %s"));
-    ImGui::Text(zoomStr.c_str(), zoom_to_string(m_map->mapContent->zoom));
+    ImGui::Text(zoomStr.c_str(), magic_enum::enum_name(m_map->mapContent->zoom).data());
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ZoomMapIn").c_str()))
     {

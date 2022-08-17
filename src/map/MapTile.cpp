@@ -19,6 +19,7 @@
 #include <imgui.h>
 #include "Game.h"
 #include "MapTile.h"
+#include "Zoom.h"
 #include "data/Text.h"
 
 //-------------------------------------------------
@@ -67,18 +68,26 @@ void mdcii::map::MapTile::RenderImGui(const bool t_heading) const
 
     if (ImGui::TreeNode("Screen positions"))
     {
-        auto r{ Rotation::DEG0 };
-        for (const auto& position : screenPositions)
+        magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom)
         {
-            if (ImGui::TreeNode(rotation_to_string(r)))
+            if (ImGui::TreeNode(magic_enum::enum_name(t_zoom).data()))
             {
-                ImGui::Text("Screen x: %f", static_cast<double>(position.x));
-                ImGui::Text("Screen y: %f", static_cast<double>(position.y));
+                auto r{ Rotation::DEG0 };
+                for (const auto& position : screenPositions.at(magic_enum::enum_integer(t_zoom)))
+                {
+                    if (ImGui::TreeNode(rotation_to_string(r)))
+                    {
+                        ImGui::Text("Screen x: %f", static_cast<double>(position.x));
+                        ImGui::Text("Screen y: %f", static_cast<double>(position.y));
+                        ImGui::TreePop();
+                    }
+
+                    ++r;
+                }
+
                 ImGui::TreePop();
             }
-
-            ++r;
-        }
+        });
 
         ImGui::TreePop();
     }

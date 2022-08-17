@@ -77,36 +77,36 @@ void mdcii::file::OriginalResourcesManager::GetPathsFromOriginal()
             {
                 if (is_regular_file(f.status()))
                 {
-                    auto extension{ ToLowerCase(f.path().extension().string()) };
+                    auto extension{ to_lower_case(f.path().extension().string()) };
 
                     // BSH files
                     if (extension == ".bsh")
                     {
-                        const auto zoomOptional{ magic_enum::enum_cast<map::Zoom>(ToUpperCase(entry.path().filename().string())) };
+                        const auto zoomOptional{ magic_enum::enum_cast<map::Zoom>(to_upper_case(entry.path().filename().string())) };
                         if (zoomOptional.has_value())
                         {
-                            if (ToUpperCase(f.path().filename().string()) == "STADTFLD.BSH")
+                            if (to_upper_case(f.path().filename().string()) == "STADTFLD.BSH")
                             {
                                 m_stadtfldBshFilesPaths.emplace(zoomOptional.value(), f.path().string());
                             }
                         }
                         else
                         {
-                            if (ToUpperCase(entry.path().filename().string()) == "TOOLGFX")
+                            if (to_upper_case(entry.path().filename().string()) == "TOOLGFX")
                             {
                                 // Nina & Hist Ed.
-                                if (ToUpperCase(f.path().filename().string()) == "BAUHAUS.BSH")
+                                if (to_upper_case(f.path().filename().string()) == "BAUHAUS.BSH")
                                 {
                                     m_bauhausBshFilesPaths.emplace(map::Zoom::GFX, f.path().string());
                                 }
 
                                 // Nina only
-                                if (ToUpperCase(f.path().filename().string()) == "BAUHAUS8.BSH")
+                                if (to_upper_case(f.path().filename().string()) == "BAUHAUS8.BSH")
                                 {
                                     m_bauhausBshFilesPaths.emplace(map::Zoom::MGFX, f.path().string());
                                 }
 
-                                if (ToUpperCase(f.path().filename().string()) == "BAUHAUS6.BSH")
+                                if (to_upper_case(f.path().filename().string()) == "BAUHAUS6.BSH")
                                 {
                                     m_bauhausBshFilesPaths.emplace(map::Zoom::SGFX, f.path().string());
                                 }
@@ -117,7 +117,7 @@ void mdcii::file::OriginalResourcesManager::GetPathsFromOriginal()
                     // COL file
                     if (extension == ".col")
                     {
-                        if (ToUpperCase(f.path().filename().string()) == "STADTFLD.COL")
+                        if (to_upper_case(f.path().filename().string()) == "STADTFLD.COL")
                         {
                             m_paletteFilePath = f.path().string();
                         }
@@ -127,10 +127,10 @@ void mdcii::file::OriginalResourcesManager::GetPathsFromOriginal()
         }
         else if (is_regular_file(entry))
         {
-            auto extension{ ToLowerCase(entry.path().extension().string()) };
+            auto extension{ to_lower_case(entry.path().extension().string()) };
             if (extension == ".cod")
             {
-                if (ToUpperCase(entry.path().filename().string()) == "HAEUSER.COD")
+                if (to_upper_case(entry.path().filename().string()) == "HAEUSER.COD")
                 {
                     m_buildingsFilePath = entry.path().string();
                 }
@@ -201,30 +201,4 @@ void mdcii::file::OriginalResourcesManager::LoadFiles()
     buildings = std::make_unique<data::Buildings>(m_buildingsFilePath);
 
     Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::LoadFiles()] All files have been loaded successfully.");
-}
-
-//-------------------------------------------------
-// Helper
-//-------------------------------------------------
-
-std::string mdcii::file::OriginalResourcesManager::ToLowerCase(const std::string& t_string) const
-{
-    auto newString{ t_string };
-    for (auto& c : newString)
-    {
-        c = std::tolower(c);
-    }
-
-    return newString;
-}
-
-std::string mdcii::file::OriginalResourcesManager::ToUpperCase(const std::string& t_string) const
-{
-    auto newString{ t_string };
-    for (auto& c : newString)
-    {
-        c = std::toupper(c);
-    }
-
-    return newString;
 }

@@ -38,10 +38,9 @@ conanbuildinfo.cmake
 
 !/config.ini
 !/resources/devlog/*
-!/resources/textures/corner.png
-!/resources/textures/frame.png
-!/resources/textures/full.png
-!/resources/textures/red.png
+!/resources/textures/gfx/*
+!/resources/textures/mgfx/*
+!/resources/textures/sgfx/*
 !/resources/data/ExampleMap.json
 !/resources/data/Menus.json
 !/resources/data/Savegame.json

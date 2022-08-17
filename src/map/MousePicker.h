@@ -19,6 +19,7 @@
 #pragma once
 
 #include <memory>
+#include <array>
 #include "ogl/Window.h"
 #include "camera/Camera.h"
 
@@ -51,6 +52,8 @@ namespace mdcii::map
         //-------------------------------------------------
         // Constants
         //-------------------------------------------------
+
+        static constexpr auto NR_OF_ZOOMS{ 3 };
 
         static constexpr auto LEFT_MOUSE_BUTTON{ 0 };
         static constexpr auto RIGHT_MOUSE_BUTTON{ 1 };
@@ -120,14 +123,19 @@ namespace mdcii::map
         std::unique_ptr<renderer::TileRenderer> m_renderer;
 
         /**
-         * The pixels of the corner (cheat) image.
+         * One cheat image for each zoom level (SGFX, MGFX, GFX).
          */
-        unsigned char* m_cornerImage{ nullptr };
+        std::array<unsigned char*, NR_OF_ZOOMS> m_cornerImages{ nullptr, nullptr, nullptr };
 
         /**
          * Indicates whether the mouse is in the window.
          */
         bool m_inWindow{ false };
+
+        /**
+         * Each zoom level has a different mouse cursor texture.
+         */
+        std::array<std::string, NR_OF_ZOOMS> m_cursorFileNames{};
 
         //-------------------------------------------------
         // Logic

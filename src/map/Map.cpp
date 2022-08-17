@@ -88,14 +88,13 @@ void mdcii::map::Map::RenderBuilding(
     const bool t_selected
 ) const
 {
-    // todo: zoom, change Id via argument
-    const auto& stadtfldBshTextures{ context->originalResourcesManager->GetStadtfldBshByZoom(Zoom::GFX) };
+    const auto& stadtfldBshTextures{ context->originalResourcesManager->GetStadtfldBshByZoom(mapContent->zoom) };
 
     const auto w{ static_cast<float>(stadtfldBshTextures[t_gfx]->width) };
     const auto h{ static_cast<float>(stadtfldBshTextures[t_gfx]->height) };
     const auto textureId{ stadtfldBshTextures[t_gfx]->textureId };
 
-    t_screenPosition.y -= h - MapTile::TILE_HEIGHT;
+    t_screenPosition.y -= h - static_cast<float>(get_tile_height(mapContent->zoom));
     t_screenPosition.y -= t_elevation;
 
     renderer->RenderTile(
@@ -149,6 +148,10 @@ void mdcii::map::Map::Init(const std::string& t_filePath)
 
     // load map content
     mapContent = std::make_unique<MapContent>(t_filePath, context);
+    mapContent->zoom = Zoom::GFX;
+
+    // todo: the camera needs to know the current zoom
+    context->camera->zoom = Zoom::GFX; // default
 
     // create tile renderer
     renderer = std::make_unique<renderer::TileRenderer>();
@@ -174,26 +177,26 @@ void mdcii::map::Map::RenderGridEntities() const
     for (const auto entity : view)
     {
         const auto& gc{ view.get<const ecs::GridComponent>(entity) };
-        const auto screenPosition{ gc.mapTile.screenPositions[rotation_to_int(mapContent->rotation)] };
+        const auto& screenPosition{ gc.mapTile.screenPositions.at(magic_enum::enum_integer(mapContent->zoom)).at(rotation_to_int(mapContent->rotation)) };
 
         if (renderGrid)
         {
             renderer->RenderTile(
                 renderer::RenderUtils::GetModelMatrix(
                     screenPosition,
-                    glm::vec2(MapTile::TILE_WIDTH, MapTile::TILE_HEIGHT)
+                    glm::vec2(get_tile_width(mapContent->zoom), get_tile_height(mapContent->zoom))
                 ),
                 gc.textureId,
                 *context->window, *context->camera
             );
         }
 
-        if (renderText)
+        if (renderText && mapContent->zoom != Zoom::SGFX)
         {
             textRenderer->RenderText(
                 std::to_string(gc.mapTile.mapX).append(", ").append(std::to_string(gc.mapTile.mapY)),
-                screenPosition.x + static_cast<float>(MapTile::TILE_WIDTH) / 4.0f,
-                screenPosition.y + static_cast<float>(MapTile::TILE_HEIGHT) / 4.0f,
+                screenPosition.x + static_cast<float>(get_tile_width(mapContent->zoom)) / 4.0f,
+                screenPosition.y + static_cast<float>(get_tile_height(mapContent->zoom)) / 4.0f,
                 0.25f,
                 glm::vec3(1.0f, 0.0f, 0.0f),
                 *context->window, *context->camera
@@ -278,10 +281,16 @@ void mdcii::map::Map::RenderEntity(
         gfx += offset;
     }
 
+    auto elevation{ 0.0f };
+    if (t_building.posoffs > 0)
+    {
+        elevation = static_cast<float>(get_elevation(mapContent->zoom));
+    }
+
     RenderBuilding(
         gfx,
-        t_mapTile.screenPositions[rotation_to_int(mapContent->rotation)],
-        static_cast<float>(t_building.posoffs),
+        t_mapTile.screenPositions.at(magic_enum::enum_integer(mapContent->zoom)).at(rotation_to_int(mapContent->rotation)),
+        elevation,
         t_selected
     );
 }

@@ -19,6 +19,7 @@
 #include <imgui.h>
 #include "MapContent.h"
 #include "MdciiAssert.h"
+#include "camera/Camera.h"
 #include "state/State.h"
 #include "ecs/Components.h"
 #include "ecs/EcsUtils.h"
@@ -190,14 +191,17 @@ void mdcii::map::MapContent::RotateRight()
     SortEntitiesOfAllLayers();
 }
 
+// todo: The camera needs to know the current zoom
 void mdcii::map::MapContent::ZoomIn()
 {
     ++zoom;
+    context->camera->zoom = zoom;
 }
 
 void mdcii::map::MapContent::ZoomOut()
 {
     --zoom;
+    context->camera->zoom = zoom;
 }
 
 //-------------------------------------------------
@@ -224,15 +228,15 @@ int mdcii::map::MapContent::GetMapIndex(const int t_mapX, const int t_mapY, cons
     return position.y * width + position.x;
 }
 
-glm::vec2 mdcii::map::MapContent::MapToScreen(const int t_mapX, const int t_mapY, const Rotation t_rotation) const
+glm::vec2 mdcii::map::MapContent::MapToScreen(const int t_mapX, const int t_mapY, const Zoom t_zoom, const Rotation t_rotation) const
 {
     MDCII_ASSERT(IsPositionInMap(t_mapX, t_mapY), "[MapContent::MapToScreen()] Invalid map position given.")
 
     const auto position{ RotatePosition(t_mapX, t_mapY, t_rotation) };
 
     return {
-        (position.x - position.y) * MapTile::TILE_WIDTH_HALF,
-        (position.x + position.y) * MapTile::TILE_HEIGHT_HALF
+        (position.x - position.y) * get_tile_width_half(t_zoom),
+        (position.x + position.y) * get_tile_height_half(t_zoom)
     };
 }
 
@@ -582,11 +586,18 @@ void mdcii::map::MapContent::PreCalcTile(MapTile& t_mapTile, const int t_mapX, c
     t_mapTile.mapX = t_mapX;
     t_mapTile.mapY = t_mapY;
 
-    // pre-calculate the position on the screen for each rotation
-    t_mapTile.screenPositions[0] = MapToScreen(t_mapX, t_mapY, Rotation::DEG0);
-    t_mapTile.screenPositions[1] = MapToScreen(t_mapX, t_mapY, Rotation::DEG90);
-    t_mapTile.screenPositions[2] = MapToScreen(t_mapX, t_mapY, Rotation::DEG180);
-    t_mapTile.screenPositions[3] = MapToScreen(t_mapX, t_mapY, Rotation::DEG270);
+    // pre-calculate the position on the screen for each zoom and each rotation
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom)
+    {
+        std::array<glm::vec2, NR_OF_ROTATIONS> positions{};
+
+        positions[0] = MapToScreen(t_mapX, t_mapY, t_zoom, Rotation::DEG0);
+        positions[1] = MapToScreen(t_mapX, t_mapY, t_zoom, Rotation::DEG90);
+        positions[2] = MapToScreen(t_mapX, t_mapY, t_zoom, Rotation::DEG180);
+        positions[3] = MapToScreen(t_mapX, t_mapY, t_zoom, Rotation::DEG270);
+
+        t_mapTile.screenPositions.at(magic_enum::enum_integer(t_zoom)) = positions;
+    });
 
     // pre-calculate the index for each rotation for sorting
     t_mapTile.indices[0] = GetMapIndex(t_mapX, t_mapY, Rotation::DEG0);

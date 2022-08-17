@@ -68,6 +68,12 @@ namespace mdcii::map
     {
     public:
         //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        static constexpr auto NR_OF_ZOOMS{ 3 };
+
+        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -197,5 +203,10 @@ namespace mdcii::map
          * The parent MapContent object.
          */
         MapContent* m_mapContent{ nullptr };
+
+        /**
+         * Each zoom level has a different grid texture.
+         */
+        std::array<std::string, NR_OF_ZOOMS> m_gridFileNames{};
     };
 }

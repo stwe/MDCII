@@ -23,6 +23,7 @@
 #include "event/EventManager.h"
 #include "eventpp/utilities/argumentadapter.h"
 #include "map/MapTile.h"
+#include "map/Zoom.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -38,6 +39,8 @@ mdcii::camera::Camera::Camera()
     Log::MDCII_LOG_DEBUG("[Camera::Camera()] Set the camera position to (x: {}, y: {}).", position.x, position.y);
 
     AddListeners();
+
+    zoom = map::Zoom::GFX;
 }
 
 mdcii::camera::Camera::~Camera() noexcept
@@ -63,8 +66,8 @@ glm::mat4 mdcii::camera::Camera::GetViewMatrix() const noexcept
 
 void mdcii::camera::Camera::ProcessKeyboard(const Direction t_direction)
 {
-    const auto yOff{ glm::vec2(0.0f, map::MapTile::TILE_HEIGHT) };
-    const auto xOff{ glm::vec2(map::MapTile::TILE_WIDTH, 0.0f) };
+    const auto yOff{ glm::vec2(0.0f, get_tile_height(zoom)) };
+    const auto xOff{ glm::vec2(get_tile_width(zoom), 0.0f) };
 
     if (t_direction == Direction::UP)
     {

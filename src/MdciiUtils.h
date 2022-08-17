@@ -18,7 +18,48 @@
 
 #pragma once
 
+#include <string>
+
 constexpr std::size_t operator "" _uz(const unsigned long long t_val)
 {
     return t_val;
+}
+
+namespace mdcii
+{
+    /**
+     * Convert a string to lower case.
+     *
+     * @param t_string The string to convert.
+     *
+     * @return The converted string.
+     */
+    static std::string to_lower_case(const std::string& t_string)
+    {
+        auto newString{ t_string };
+        for (auto& c : newString)
+        {
+            c = static_cast<char>(std::tolower(c));
+        }
+
+        return newString;
+    }
+
+    /**
+     * Convert a string to upper case.
+     *
+     * @param t_string The string to convert.
+     *
+     * @return The converted string.
+     */
+    static std::string to_upper_case(const std::string& t_string)
+    {
+        auto newString{ t_string };
+        for (auto& c : newString)
+        {
+            c = static_cast<char>(std::toupper(c));
+        }
+
+        return newString;
+    }
 }

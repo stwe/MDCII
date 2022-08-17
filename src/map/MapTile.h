@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <array>
-#include <vector>
 #include "ecs/entt.hpp"
 #include "Rotation.h"
 
@@ -38,25 +36,8 @@ namespace mdcii::map
         // Constants
         //-------------------------------------------------
 
-        /**
-         * The width of a tile.
-         */
-        static constexpr auto TILE_WIDTH{ 64 };
-
-        /**
-         * The half width of a tile.
-         */
-        static constexpr auto TILE_WIDTH_HALF{ 32 };
-
-        /**
-         * The height of a tile.
-         */
-        static constexpr auto TILE_HEIGHT{ 32 };
-
-        /**
-         * The half height of a tile.
-         */
-        static constexpr auto TILE_HEIGHT_HALF{ 16 };
+        static constexpr auto NR_OF_ZOOMS{ 3 };
+        static constexpr auto NR_OF_ROTATIONS{ 4 };
 
         //-------------------------------------------------
         // Member
@@ -107,14 +88,14 @@ namespace mdcii::map
 
         /**
          * An isometric position on the screen for each
-         * rotation (world space).
+         * zoom and each rotation (world space).
          */
-        std::array<glm::vec2, 4> screenPositions{};
+        std::array<std::array<glm::vec2, NR_OF_ROTATIONS>, NR_OF_ZOOMS> screenPositions{};
 
         /**
          * The index for each rotation is needed for sorting.
          */
-        std::array<int, 4> indices{};
+        std::array<int, NR_OF_ROTATIONS> indices{};
 
         /**
          * The Bsh graphic for each rotation.

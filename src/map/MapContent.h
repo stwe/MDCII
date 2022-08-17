@@ -45,6 +45,12 @@ namespace mdcii::map
     {
     public:
         //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        static constexpr auto NR_OF_ROTATIONS{ 4 };
+
+        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -196,11 +202,12 @@ namespace mdcii::map
          *
          * @param t_mapX The x position of the map.
          * @param t_mapY The y position of the map.
+         * @param t_zoom The zoom to get the tile sizes.
          * @param t_rotation The position is previously rotated by the specified value.
          *
          * @return The isometric coordinates on the screen.
          */
-        [[nodiscard]] glm::vec2 MapToScreen(int t_mapX, int t_mapY, Rotation t_rotation = Rotation::DEG0) const;
+        [[nodiscard]] glm::vec2 MapToScreen(int t_mapX, int t_mapY, Zoom t_zoom, Rotation t_rotation = Rotation::DEG0) const;
 
         /**
          * Rotates a map position.

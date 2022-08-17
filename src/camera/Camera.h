@@ -22,6 +22,15 @@
 #include <glm/mat4x4.hpp>
 
 //-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::map
+{
+    enum class Zoom;
+}
+
+//-------------------------------------------------
 // Camera
 //-------------------------------------------------
 
@@ -50,6 +59,11 @@ namespace mdcii::camera
          * The position of the camera.
          */
         glm::vec2 position{ 0.0f };
+
+        /**
+         * The current zoom.
+         */
+        map::Zoom zoom;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
