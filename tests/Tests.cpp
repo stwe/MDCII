@@ -18,9 +18,10 @@
 
 #include <gtest/gtest.h>
 #include "map/Zoom.h"
+#include "map/Rotation.h"
 #include "MdciiUtils.h"
 
-TEST(TestSuite, TestOperators)
+TEST(TestSuite, TestZoomOperators)
 {
     auto zoomAdd{ mdcii::map::Zoom::SGFX };
     ASSERT_EQ(mdcii::map::Zoom::MGFX, ++zoomAdd);
@@ -38,6 +39,19 @@ TEST(TestSuite, TestStringUtils)
     const std::string foo{ "DumMy" };
     ASSERT_EQ("DUMMY", mdcii::to_upper_case(foo));
     ASSERT_EQ("dummy", mdcii::to_lower_case(foo));
+}
+
+TEST(TestSuite, TestRotateOperators)
+{
+    auto rotateAdd{ mdcii::map::Rotation::DEG0 };
+    ASSERT_EQ(mdcii::map::Rotation::DEG90, ++rotateAdd);
+    ASSERT_EQ(mdcii::map::Rotation::DEG180, ++rotateAdd);
+    ASSERT_EQ(mdcii::map::Rotation::DEG270, ++rotateAdd);
+
+    auto rotateMinus{ mdcii::map::Rotation::DEG270 };
+    ASSERT_EQ(mdcii::map::Rotation::DEG180, --rotateMinus);
+    ASSERT_EQ(mdcii::map::Rotation::DEG90, --rotateMinus);
+    ASSERT_EQ(mdcii::map::Rotation::DEG0, --rotateMinus);
 }
 
 int main()

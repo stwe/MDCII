@@ -24,21 +24,33 @@
 
 namespace mdcii::map
 {
+    //-------------------------------------------------
+    // Change rotation
+    //-------------------------------------------------
+
     enum class ChangeRotation
     {
         LEFT, RIGHT
     };
+
+    //-------------------------------------------------
+    // Rotation
+    //-------------------------------------------------
 
     enum class Rotation
     {
         DEG0, DEG90, DEG180, DEG270
     };
 
+    //-------------------------------------------------
+    // Operators
+    //-------------------------------------------------
+
     inline Rotation& operator++(Rotation& t_rotation)
     {
         if (t_rotation == Rotation::DEG270)
         {
-            t_rotation = Rotation::DEG0;
+            t_rotation = Rotation::DEG270;
         }
         else
         {
@@ -52,7 +64,7 @@ namespace mdcii::map
     {
         if (t_rotation == Rotation::DEG0)
         {
-            t_rotation = Rotation::DEG270;
+            t_rotation = Rotation::DEG0;
         }
         else
         {
@@ -61,6 +73,10 @@ namespace mdcii::map
 
         return t_rotation;
     }
+
+    //-------------------------------------------------
+    // For convenience
+    //-------------------------------------------------
 
     inline const char* rotation_to_string(const Rotation t_rotation)
     {
@@ -81,6 +97,10 @@ namespace mdcii::map
     {
         return magic_enum::enum_integer(t_rotation);
     }
+
+    //-------------------------------------------------
+    // Rotate position
+    //-------------------------------------------------
 
     inline glm::ivec2 rotate_position(const int t_mapX, const int t_mapY, const int t_width, const int t_height, const Rotation t_rotation = Rotation::DEG0)
     {
@@ -107,6 +127,10 @@ namespace mdcii::map
 
         return { x, y };
     }
+
+    //-------------------------------------------------
+    // Operators
+    //-------------------------------------------------
 
     inline Rotation operator+(const Rotation t_rotation, const Rotation t_other)
     {
