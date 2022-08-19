@@ -25,6 +25,8 @@
 #elif defined(__linux__) && defined(__GNUC__) && (__GNUC__ >= 7)
     #include <csignal>
     #define MDCII_DEBUG_BREAK raise(SIGTRAP)
+#elif defined(__MINGW64__) && defined(__GNUC__) && (__GNUC__ >= 7)
+    #define MDCII_DEBUG_BREAK __builtin_trap()
 #else
     #error Unsupported platform or compiler!
 #endif

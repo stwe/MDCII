@@ -37,14 +37,22 @@ Wie im Originalspiel sind drei Zoomstufen möglich.
 
 ### Platforms
 
-* Win
+* Win with Visual Studio and Premake
+* Win with MinGW64 (Gcc/Cmake)
 * Linux
 
 ### Build instructions
 
-#### Win
+Setting up a C++ project is always a pain. A few notes for the following explanations:
 
-First, [install](https://docs.conan.io/en/latest/installation.html) the Conan package manager locally.
+- First, [install](https://docs.conan.io/en/latest/installation.html) the Conan package manager locally.
+- Always use the latest Conan package manager.
+- The Conan profile should always specify the correct version of the compiler.
+- Especially on Windows with MinGW it is important that `gcc` and `cmake` are in the path.
+- It might be a good idea to use a newer or other version of ImGui or Protocol Buffers. It's not (for now)!
+Additional things would have to be changed for this.
+
+#### Win with Visual Studio and Premake
 
 As this project relies on multiple 3rd-Party Libs, I created a `conanfile.txt` with all the requirements.
 
@@ -61,6 +69,22 @@ protobuf/3.21.1
 
 [generators]
 premake
+```
+
+The Conan profile should look like this:
+
+```txt
+[settings]
+os=Windows
+os_build=Windows
+arch=x86_64
+arch_build=x86_64
+compiler=Visual Studio
+compiler.version=16
+build_type=Release
+[options]
+[build_requires]
+[env]
 ```
 
 My favor build configuration tool for Windows is Premake5. Premake5 can generate Makefiles and Visual Studio Solutions with a single description file for cross-platform projects.
@@ -85,9 +109,62 @@ $ premake5 vs2019
 ```
 
 
-#### Linux
+#### Win with MinGW64 (Gcc/Cmake)
 
-First, [install](https://docs.conan.io/en/latest/installation.html) the Conan package manager locally.
+I created a `conanfile.txt` with all the requirements.
+
+```txt
+[requires]
+glfw/3.3.7
+glew/2.2.0
+glm/0.9.9.8
+spdlog/1.10.0
+imgui/1.86
+magic_enum/0.8.0
+freetype/2.12.1
+protobuf/3.21.1
+
+[generators]
+cmake
+```
+
+The Conan profile should look like this:
+
+```txt
+[settings]
+os=Windows
+os_build=Windows
+arch=x86_64
+arch_build=x86_64
+compiler=gcc
+compiler.version=11.2
+compiler.libcxx=libstdc++11
+build_type=Release
+[options]
+[build_requires]
+[env]
+```
+
+Complete the installation of requirements for the project running:
+
+```bash
+$ conan install conanfile.txt -s build_type=Debug --build missing
+```
+
+or
+
+```bash
+$ conan install conanfile.txt -s build_type=Release --build missing
+```
+
+If another profile (e.g. `default_mingw`) is used, this can be specified with:
+
+```bash
+$ conan install conanfile.txt -s build_type=Debug --build missing --profile default_mingw
+```
+
+
+#### Linux
 
 If you are using GCC compiler >= 5.1, Conan will set the `compiler.libcxx` to the old ABI for backwards compatibility. You can change this with the following commands:
 
@@ -96,7 +173,7 @@ $ conan profile new default --detect  # Generates default profile detecting GCC 
 $ conan profile update settings.compiler.libcxx=libstdc++11 default  # Sets libcxx to C++11 ABI
 ```
 
-As this project relies on multiple 3rd-Party Libs, I created a `conanfile.txt` with all the requirements.
+I created a `conanfile.txt` with all the requirements.
 
 ```txt
 [requires]
