@@ -36,6 +36,7 @@ conanbuildinfo.txt
 conaninfo.txt
 conanbuildinfo.cmake
 
+!/create.bat
 !/config.ini
 !/resources/devlog/*
 !/resources/textures/gfx/*
