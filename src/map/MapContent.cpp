@@ -124,8 +124,7 @@ void mdcii::map::MapContent::RenderImGui() const
 
     // Entities with the BuildingsLayerTileComponent but not with the BuildingUpdatedComponent
 
-    if (ImGui::TreeNode(ecs::EcsUtils::EntityCounterLabel<const ecs::BuildingsLayerTileComponent>
-        ("Buildings Layer Entities", entt::exclude<ecs::BuildingUpdatedComponent>).c_str()))
+    if (ImGui::TreeNode(ecs::EcsUtils::EntityCounterLabel<const ecs::BuildingsLayerTileComponent>("Buildings Layer Entities", entt::exclude<ecs::BuildingUpdatedComponent>).c_str()))
     {
         const auto view{ Game::ecs.view<const ecs::BuildingsLayerTileComponent>(entt::exclude<ecs::BuildingUpdatedComponent>) };
         for (const auto entity : view)
@@ -160,7 +159,7 @@ void mdcii::map::MapContent::RenderImGui() const
         const auto& [t, b, u]{ view.get(entity) };
         ImGui::Text("mx: %d, my: %d, x: %d, y: %d, id: %d", b.mapTile.mapX, b.mapTile.mapY, b.mapTile.x, b.mapTile.y, b.building.id);
     }
- 
+
     ImGui::Separator();
 
     ImGui::End();
@@ -382,7 +381,6 @@ void mdcii::map::MapContent::CreateContent(const std::string& t_filePath)
         if (k == "width")
         {
             width = v.get<int>();
-
         }
         else if (k == "height")
         {
@@ -587,8 +585,7 @@ void mdcii::map::MapContent::PreCalcTile(MapTile& t_mapTile, const int t_mapX, c
     t_mapTile.mapY = t_mapY;
 
     // pre-calculate the position on the screen for each zoom and each rotation
-    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom)
-    {
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
         std::array<glm::vec2, NR_OF_ROTATIONS> positions{};
 
         positions[0] = MapToScreen(t_mapX, t_mapY, t_zoom, Rotation::DEG0);

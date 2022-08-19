@@ -146,7 +146,6 @@ void mdcii::EditorState::RenderImGui()
     // -------------------------------------------
 
 
-
     // ---------------- Debug menus --------------
 #ifdef MDCII_DEBUG_BUILD
     m_map->RenderImGui();
@@ -189,8 +188,7 @@ void mdcii::EditorState::AddListeners() const
     event::EventManager::eventDispatcher.appendListener(
         event::MdciiEventType::BAUGFX_SELECTED,
         eventpp::argumentAdapter<void(const event::BauGfxSelectedEvent&)>(
-            [&](const event::BauGfxSelectedEvent& t_event)
-            {
+            [&](const event::BauGfxSelectedEvent& t_event) {
                 if (t_event.selectedBauGfx.HasBuilding())
                 {
                     m_map->currentSelectedBauGfx = t_event.selectedBauGfx;
@@ -202,10 +200,8 @@ void mdcii::EditorState::AddListeners() const
     // mouse button pressed
     event::EventManager::eventDispatcher.appendListener(
         event::MdciiEventType::MOUSE_BUTTON_PRESSED,
-        eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>
-        (
-            [&](const event::MouseButtonPressedEvent& t_event)
-            {
+        eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>(
+            [&](const event::MouseButtonPressedEvent& t_event) {
                 // right mouse button && build action
                 if (t_event.button == map::MousePicker::RIGHT_MOUSE_BUTTON && m_map->currentAction == map::Map::Action::BUILD)
                 {

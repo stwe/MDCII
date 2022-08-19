@@ -43,7 +43,7 @@ namespace mdcii
     /**
      * Represents a map editor.
      */
-    class EditorState : public state::State
+    class EditorState: public state::State
     {
     public:
         //-------------------------------------------------

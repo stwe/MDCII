@@ -44,7 +44,9 @@ namespace mdcii::state
          */
         enum class Action
         {
-            PUSH, POP, CLEAR
+            PUSH,
+            POP,
+            CLEAR
         };
 
         //-------------------------------------------------

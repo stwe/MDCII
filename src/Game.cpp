@@ -127,9 +127,11 @@ void mdcii::Game::GameLoop()
 
             std::stringstream ss;
 #ifdef MDCII_DEBUG_BUILD
-            ss << m_window->GetTitle() << " [DEBUG BUILD] " << "   |   Render: " << render << "   |   Updates: " << updates;
+            ss << m_window->GetTitle() << " [DEBUG BUILD] "
+               << "   |   Render: " << render << "   |   Updates: " << updates;
 #else
-            ss << m_window->GetTitle() << " [RELEASE BUILD] " << "   |   Render: " << render << "   |   Updates: " << updates;
+            ss << m_window->GetTitle() << " [RELEASE BUILD] "
+               << "   |   Render: " << render << "   |   Updates: " << updates;
 #endif
             glfwSetWindowTitle(m_window->GetWindowHandle(), ss.str().c_str());
 

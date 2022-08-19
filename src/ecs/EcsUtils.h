@@ -66,8 +66,7 @@ namespace mdcii::ecs
         {
             auto c{ 0 };
             (
-                [&c](entt::view<entt::get_t<Component...>, entt::exclude_t<Exclude...>> t_view)
-                {
+                [&c](entt::view<entt::get_t<Component...>, entt::exclude_t<Exclude...>> t_view) {
                     for (auto e : t_view)
                     {
                         c++;
@@ -105,8 +104,7 @@ namespace mdcii::ecs
         static void SortEntities(const map::Rotation t_rotation)
         {
             const auto i{ rotation_to_int(t_rotation) };
-            Game::ecs.sort<Component>([i](const Component& t_lhs, const Component& t_rhs)
-            {
+            Game::ecs.sort<Component>([i](const Component& t_lhs, const Component& t_rhs) {
                 return t_lhs.mapTile.indices[i] < t_rhs.mapTile.indices[i];
             });
         }

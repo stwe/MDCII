@@ -133,7 +133,8 @@ std::vector<std::string> mdcii::cod::CodHelper::SplitByDelimiter(const std::stri
     std::vector<std::string> strings;
     size_t start;
     size_t end{ 0 };
-    while ((start = t_str.find_first_not_of(t_delim, end)) != std::string::npos) {
+    while ((start = t_str.find_first_not_of(t_delim, end)) != std::string::npos)
+    {
         end = t_str.find(t_delim, start);
         strings.push_back(t_str.substr(start, end - start));
     }

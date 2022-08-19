@@ -172,8 +172,7 @@ void mdcii::ogl::Window::InitWindow()
 
     // Setup an error callback.
     glfwSetErrorCallback(
-        [](const int t_error, const char* t_description)
-        {
+        [](const int t_error, const char* t_description) {
             Log::MDCII_LOG_ERROR("GLFW Error ({}) {}", t_error, t_description);
         }
     );
@@ -274,8 +273,7 @@ void mdcii::ogl::Window::InitInputCallbacks() const
 
 void mdcii::ogl::Window::UpdateOrthographicProjectionMatrix()
 {
-    m_orthographicProjectionMatrix = glm::ortho
-    (
+    m_orthographicProjectionMatrix = glm::ortho(
         0.0f,
         static_cast<float>(m_width),
         static_cast<float>(m_height),

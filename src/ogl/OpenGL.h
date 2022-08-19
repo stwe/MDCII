@@ -152,6 +152,5 @@ namespace mdcii::ogl
     protected:
 
     private:
-
     };
 }

@@ -73,10 +73,10 @@ namespace mdcii
 
 #if defined(_WIN64)
         inline static const std::string ORIGINAL_RESOURCES_FULL_PATH{ INI.Get<std::string>("win64", "original_resources_full_path") }; // NOLINT(cert-err58-cpp)
-        inline static const std::string RESOURCES_REL_PATH{ INI.Get<std::string>("win64", "resources_rel_path") }; // NOLINT(cert-err58-cpp)
+        inline static const std::string RESOURCES_REL_PATH{ INI.Get<std::string>("win64", "resources_rel_path") };                     // NOLINT(cert-err58-cpp)
 #else
         inline static const std::string ORIGINAL_RESOURCES_FULL_PATH{ INI.Get<std::string>("linux", "original_resources_full_path") }; // NOLINT(cert-err58-cpp)
-        inline static const std::string RESOURCES_REL_PATH{ INI.Get<std::string>("linux", "resources_rel_path") }; // NOLINT(cert-err58-cpp)
+        inline static const std::string RESOURCES_REL_PATH{ INI.Get<std::string>("linux", "resources_rel_path") };                     // NOLINT(cert-err58-cpp)
 #endif
 
         //-------------------------------------------------

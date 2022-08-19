@@ -120,21 +120,21 @@ void mdcii::state::StateStack::ApplyPendingChanges()
     {
         switch (change.action)
         {
-            case Action::PUSH:
-                // add element at the end
-                m_stack.emplace_back(CreateState(change.id));
-                Log::MDCII_LOG_INFO("Stack size is {} after PUSH state {}.", m_stack.size(), State::STATE_IDS.at(static_cast<int>(change.id)));
-                break;
-            case Action::POP:
-                // removes the last element in the vector
-                MDCII_ASSERT(change.id == m_stack.back()->GetId(), "[StateStack::ApplyPendingChanges()] Invalid POP operation.")
-                m_stack.pop_back();
-                Log::MDCII_LOG_INFO("Stack size is {} after POP state {}.", m_stack.size(), State::STATE_IDS.at(static_cast<int>(change.id)));
-                break;
-            case Action::CLEAR:
-                m_stack.clear();
-                Log::MDCII_LOG_INFO("Stack size is {} after CLEAR all states.", m_stack.size());
-                break;
+        case Action::PUSH:
+            // add element at the end
+            m_stack.emplace_back(CreateState(change.id));
+            Log::MDCII_LOG_INFO("Stack size is {} after PUSH state {}.", m_stack.size(), State::STATE_IDS.at(static_cast<int>(change.id)));
+            break;
+        case Action::POP:
+            // removes the last element in the vector
+            MDCII_ASSERT(change.id == m_stack.back()->GetId(), "[StateStack::ApplyPendingChanges()] Invalid POP operation.")
+            m_stack.pop_back();
+            Log::MDCII_LOG_INFO("Stack size is {} after POP state {}.", m_stack.size(), State::STATE_IDS.at(static_cast<int>(change.id)));
+            break;
+        case Action::CLEAR:
+            m_stack.clear();
+            Log::MDCII_LOG_INFO("Stack size is {} after CLEAR all states.", m_stack.size());
+            break;
         }
     }
 

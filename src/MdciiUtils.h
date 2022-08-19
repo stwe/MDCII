@@ -20,7 +20,7 @@
 
 #include <string>
 
-constexpr std::size_t operator "" _uz(const unsigned long long t_val)
+constexpr std::size_t operator"" _uz(const unsigned long long t_val)
 {
     return t_val;
 }

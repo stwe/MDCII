@@ -26,11 +26,9 @@
 void mdcii::event::EventManager::SetKeyboardGlfwCallbacks(GLFWwindow* t_windowHandle)
 {
     // Registers a callback that will be invoked when a key is pressed or released
-    glfwSetKeyCallback
-    (
+    glfwSetKeyCallback(
         t_windowHandle,
-        [](GLFWwindow* t_window, const int t_key, const int t_scanCode, const int t_action, const int t_mods)
-        {
+        [](GLFWwindow* t_window, const int t_key, const int t_scanCode, const int t_action, const int t_mods) {
             // stuff needed by ImGui
             auto& io{ ImGui::GetIO() };
             if (t_key >= 0 && t_key < IM_ARRAYSIZE(io.KeysDown))
@@ -64,12 +62,10 @@ void mdcii::event::EventManager::SetKeyboardGlfwCallbacks(GLFWwindow* t_windowHa
     );
 
     // Registers a callback that will be called when a Unicode character is input.
-    glfwSetCharCallback
-    (
+    glfwSetCharCallback(
         // stuff needed by ImGui
         t_windowHandle,
-        [](GLFWwindow* t_window, const unsigned int t_char)
-        {
+        [](GLFWwindow* t_window, const unsigned int t_char) {
             ImGuiIO& io = ImGui::GetIO();
             io.AddInputCharacter(t_char);
         }
@@ -79,27 +75,23 @@ void mdcii::event::EventManager::SetKeyboardGlfwCallbacks(GLFWwindow* t_windowHa
 void mdcii::event::EventManager::SetMouseGlfwCallbacks(GLFWwindow* t_windowHandle)
 {
     // Registers a callback that will be invoked when the mouse is moved.
-    glfwSetCursorPosCallback
-    (
+    glfwSetCursorPosCallback(
         t_windowHandle,
-        [](GLFWwindow* t_window, const double t_x, const double t_y)
-        {
+        [](GLFWwindow* t_window, const double t_x, const double t_y) {
             eventDispatcher.dispatch(
                 MdciiEventType::MOUSE_MOVED,
                 MouseMovedEvent(
                     static_cast<float>(t_x),
                     static_cast<float>(t_y)
-                    )
+                )
             );
         }
     );
 
     // Registers a callback that will be invoked when a scrolling device is used.
-    glfwSetScrollCallback
-    (
+    glfwSetScrollCallback(
         t_windowHandle,
-        [](GLFWwindow* t_window, const double t_xOffset, const double t_yOffset)
-        {
+        [](GLFWwindow* t_window, const double t_xOffset, const double t_yOffset) {
             // stuff needed by ImGui
             ImGuiIO& io = ImGui::GetIO();
             io.MouseWheelH += static_cast<float>(t_xOffset);
@@ -111,27 +103,23 @@ void mdcii::event::EventManager::SetMouseGlfwCallbacks(GLFWwindow* t_windowHandl
                 MouseScrolledEvent(
                     static_cast<float>(t_xOffset),
                     static_cast<float>(t_yOffset)
-                    )
+                )
             );
         }
     );
 
     // Registers a callback that will be invoked when the mouse enters our window.
-    glfwSetCursorEnterCallback
-    (
+    glfwSetCursorEnterCallback(
         t_windowHandle,
-        [](GLFWwindow* t_window, const int t_entered)
-        {
+        [](GLFWwindow* t_window, const int t_entered) {
             eventDispatcher.dispatch(MdciiEventType::MOUSE_ENTER, MouseEnterEvent(t_entered));
         }
     );
 
     // Registers a callback that will be invoked when a mouse button is pressed or released.
-    glfwSetMouseButtonCallback
-    (
+    glfwSetMouseButtonCallback(
         t_windowHandle,
-        [](GLFWwindow* t_window, const int t_button, const int t_action, const int t_mods)
-        {
+        [](GLFWwindow* t_window, const int t_button, const int t_action, const int t_mods) {
             switch (t_action)
             {
             case GLFW_PRESS:

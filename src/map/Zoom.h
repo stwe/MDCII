@@ -39,7 +39,9 @@ namespace mdcii::map
 
     enum class Zoom
     {
-        SGFX, MGFX, GFX
+        SGFX,
+        MGFX,
+        GFX
     };
 
     //-------------------------------------------------
@@ -78,32 +80,29 @@ namespace mdcii::map
     // Tile sizes
     //-------------------------------------------------
 
-    inline static constexpr std::array<std::pair<Zoom, std::pair<int, int>>, magic_enum::enum_count<Zoom>()> tile_sizes =
-    {
-        {
-            std::make_pair<Zoom, std::pair<int, int>>(Zoom::SGFX, std::make_pair<int, int>(16, 8)),
-            std::make_pair<Zoom, std::pair<int, int>>(Zoom::MGFX, std::make_pair<int, int>(32, 16)),
-            std::make_pair<Zoom, std::pair<int, int>>(Zoom::GFX, std::make_pair<int, int>(64, 32))
-        }
+    inline static constexpr std::array<std::pair<Zoom, std::pair<int, int>>, magic_enum::enum_count<Zoom>()> TILE_SIZES = {
+        { std::make_pair<Zoom, std::pair<int, int>>(Zoom::SGFX, std::make_pair<int, int>(16, 8)),
+          std::make_pair<Zoom, std::pair<int, int>>(Zoom::MGFX, std::make_pair<int, int>(32, 16)),
+          std::make_pair<Zoom, std::pair<int, int>>(Zoom::GFX, std::make_pair<int, int>(64, 32)) }
     };
 
     //-------------------------------------------------
     // Elevation
     //-------------------------------------------------
 
-    inline static constexpr std::array<int, magic_enum::enum_count<Zoom>()> elevations = { 20 / 4, 20 / 2, 20 };
+    inline static constexpr std::array<int, magic_enum::enum_count<Zoom>()> ELEVATIONS = { 20 / 4, 20 / 2, 20 };
 
     //-------------------------------------------------
     // For convenience
     //-------------------------------------------------
 
-    constexpr int get_tile_width(const Zoom t_zoom) { return tile_sizes[magic_enum::enum_integer(t_zoom)].second.first; }
-    constexpr int get_tile_height(const Zoom t_zoom) { return tile_sizes[magic_enum::enum_integer(t_zoom)].second.second; }
+    constexpr int get_tile_width(const Zoom t_zoom) { return TILE_SIZES[magic_enum::enum_integer(t_zoom)].second.first; }
+    constexpr int get_tile_height(const Zoom t_zoom) { return TILE_SIZES[magic_enum::enum_integer(t_zoom)].second.second; }
 
-    constexpr int get_tile_width_half(const Zoom t_zoom) { return tile_sizes[magic_enum::enum_integer(t_zoom)].second.first / 2; }
-    constexpr int get_tile_height_half(const Zoom t_zoom) { return tile_sizes[magic_enum::enum_integer(t_zoom)].second.second / 2; }
+    constexpr int get_tile_width_half(const Zoom t_zoom) { return TILE_SIZES[magic_enum::enum_integer(t_zoom)].second.first / 2; }
+    constexpr int get_tile_height_half(const Zoom t_zoom) { return TILE_SIZES[magic_enum::enum_integer(t_zoom)].second.second / 2; }
 
-    constexpr int get_elevation(const Zoom t_zoom) { return elevations[magic_enum::enum_integer(t_zoom)]; }
+    constexpr int get_elevation(const Zoom t_zoom) { return ELEVATIONS[magic_enum::enum_integer(t_zoom)]; }
 
     //-------------------------------------------------
     // Test

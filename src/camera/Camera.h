@@ -49,7 +49,13 @@ namespace mdcii::camera
         /**
          * The movement possibilities of the camera.
          */
-        enum class Direction { LEFT, RIGHT, UP, DOWN };
+        enum class Direction
+        {
+            LEFT,
+            RIGHT,
+            UP,
+            DOWN
+        };
 
         //-------------------------------------------------
         // Member

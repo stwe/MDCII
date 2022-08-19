@@ -31,7 +31,7 @@ namespace mdcii::file
      * The class loads the pallet values from the from the
      * original game's stadtfld.col file.
      */
-    class PaletteFile : public BinaryFile
+    class PaletteFile: public BinaryFile
     {
     public:
         //-------------------------------------------------

@@ -26,7 +26,7 @@
 
 namespace mdcii
 {
-    class WorldState : public state::State
+    class WorldState: public state::State
     {
     public:
         //-------------------------------------------------

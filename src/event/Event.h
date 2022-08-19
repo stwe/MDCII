@@ -62,10 +62,15 @@ namespace mdcii::event
         NONE,
 
         // keyboard events
-        KEY_PRESSED, KEY_RELEASED,
+        KEY_PRESSED,
+        KEY_RELEASED,
 
         // mouse events
-        MOUSE_BUTTON_PRESSED, MOUSE_BUTTON_RELEASED, MOUSE_MOVED, MOUSE_SCROLLED, MOUSE_ENTER,
+        MOUSE_BUTTON_PRESSED,
+        MOUSE_BUTTON_RELEASED,
+        MOUSE_MOVED,
+        MOUSE_SCROLLED,
+        MOUSE_ENTER,
 
         // menu events
         BAUGFX_SELECTED,
@@ -87,7 +92,7 @@ namespace mdcii::event
     // Keyboard events
     //-------------------------------------------------
 
-    struct KeyPressedEvent : MdciiEvent
+    struct KeyPressedEvent: MdciiEvent
     {
         int key;
         int repeatCount;
@@ -100,7 +105,7 @@ namespace mdcii::event
         }
     };
 
-    struct KeyReleasedEvent : MdciiEvent
+    struct KeyReleasedEvent: MdciiEvent
     {
         int key;
 
@@ -115,7 +120,7 @@ namespace mdcii::event
     // Mouse events
     //-------------------------------------------------
 
-    struct MouseButtonPressedEvent : MdciiEvent
+    struct MouseButtonPressedEvent: MdciiEvent
     {
         int button;
 
@@ -126,7 +131,7 @@ namespace mdcii::event
         }
     };
 
-    struct MouseButtonReleasedEvent : MdciiEvent
+    struct MouseButtonReleasedEvent: MdciiEvent
     {
         int button;
 
@@ -137,7 +142,7 @@ namespace mdcii::event
         }
     };
 
-    struct MouseMovedEvent : MdciiEvent
+    struct MouseMovedEvent: MdciiEvent
     {
         float x;
         float y;
@@ -150,7 +155,7 @@ namespace mdcii::event
         }
     };
 
-    struct MouseScrolledEvent : MdciiEvent
+    struct MouseScrolledEvent: MdciiEvent
     {
         float xOffset;
         float yOffset;
@@ -163,7 +168,7 @@ namespace mdcii::event
         }
     };
 
-    struct MouseEnterEvent : MdciiEvent
+    struct MouseEnterEvent: MdciiEvent
     {
         bool enter;
 
@@ -178,7 +183,7 @@ namespace mdcii::event
     // Menu events
     //-------------------------------------------------
 
-    struct BauGfxSelectedEvent : MdciiEvent
+    struct BauGfxSelectedEvent: MdciiEvent
     {
         SelectedBauGfx selectedBauGfx;
 

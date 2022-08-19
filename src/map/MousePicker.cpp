@@ -128,7 +128,7 @@ glm::ivec2 mdcii::map::MousePicker::GetMapPosition(const ogl::Window& t_window, 
         {
             result.y -= 1;
         }
-        else  if (r == 0 && g == 0 && b == 255)
+        else if (r == 0 && g == 0 && b == 255)
         {
             result.y += 1;
         }
@@ -153,7 +153,7 @@ glm::ivec2 mdcii::map::MousePicker::GetMapPosition(const ogl::Window& t_window, 
         {
             result.x -= 1;
         }
-        else  if (r == 0 && g == 0 && b == 255)
+        else if (r == 0 && g == 0 && b == 255)
         {
             result.x += 1;
         }
@@ -178,7 +178,7 @@ glm::ivec2 mdcii::map::MousePicker::GetMapPosition(const ogl::Window& t_window, 
         {
             result.y += 1;
         }
-        else  if (r == 0 && g == 0 && b == 255)
+        else if (r == 0 && g == 0 && b == 255)
         {
             result.y -= 1;
         }
@@ -203,7 +203,7 @@ glm::ivec2 mdcii::map::MousePicker::GetMapPosition(const ogl::Window& t_window, 
         {
             result.x += 1;
         }
-        else  if (r == 0 && g == 0 && b == 255)
+        else if (r == 0 && g == 0 && b == 255)
         {
             result.x -= 1;
         }
@@ -260,8 +260,7 @@ void mdcii::map::MousePicker::Init()
 
     m_renderer = std::make_unique<renderer::TileRenderer>();
 
-    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom)
-    {
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
         // store cursor file names
         const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<Zoom>(t_zoom))) };
         const auto cursorFileName{ "textures/" + zoomStr + "/frame_" + zoomStr + ".png" };
@@ -305,10 +304,8 @@ void mdcii::map::MousePicker::AddListeners(const ogl::Window& t_window, const ca
     // mouse enter
     event::EventManager::eventDispatcher.appendListener(
         event::MdciiEventType::MOUSE_ENTER,
-        eventpp::argumentAdapter<void(const event::MouseEnterEvent&)>
-        (
-            [&](const event::MouseEnterEvent& t_event)
-            {
+        eventpp::argumentAdapter<void(const event::MouseEnterEvent&)>(
+            [&](const event::MouseEnterEvent& t_event) {
                 m_inWindow = t_event.enter;
             }
         )
@@ -317,10 +314,8 @@ void mdcii::map::MousePicker::AddListeners(const ogl::Window& t_window, const ca
     // mouse button pressed
     event::EventManager::eventDispatcher.appendListener(
         event::MdciiEventType::MOUSE_BUTTON_PRESSED,
-        eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>
-        (
-            [&](const event::MouseButtonPressedEvent& t_event)
-            {
+        eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>(
+            [&](const event::MouseButtonPressedEvent& t_event) {
                 if (t_event.button == LEFT_MOUSE_BUTTON)
                 {
                     if (m_map->currentAction == Map::Action::STATUS)
@@ -379,10 +374,8 @@ void mdcii::map::MousePicker::AddListeners(const ogl::Window& t_window, const ca
     // mouse button released
     event::EventManager::eventDispatcher.appendListener(
         event::MdciiEventType::MOUSE_BUTTON_RELEASED,
-        eventpp::argumentAdapter<void(const event::MouseButtonReleasedEvent&)>
-        (
-            [&](const event::MouseButtonReleasedEvent& t_event)
-            {
+        eventpp::argumentAdapter<void(const event::MouseButtonReleasedEvent&)>(
+            [&](const event::MouseButtonReleasedEvent& t_event) {
             }
         )
     );
@@ -390,10 +383,8 @@ void mdcii::map::MousePicker::AddListeners(const ogl::Window& t_window, const ca
     // mouse moved
     event::EventManager::eventDispatcher.appendListener(
         event::MdciiEventType::MOUSE_MOVED,
-        eventpp::argumentAdapter<void(const event::MouseMovedEvent&)>
-        (
-            [&](const event::MouseMovedEvent& t_event)
-            {
+        eventpp::argumentAdapter<void(const event::MouseMovedEvent&)>(
+            [&](const event::MouseMovedEvent& t_event) {
                 UpdatePositions(t_window, t_camera);
 
                 if (m_map->currentAction == Map::Action::BUILD)
@@ -420,8 +411,7 @@ void mdcii::map::MousePicker::CleanUp() const
 {
     Log::MDCII_LOG_DEBUG("[MousePicker::CleanUp()] CleanUp MousePicker.");
 
-    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom)
-    {
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
         Log::MDCII_LOG_DEBUG("[MousePicker::CleanUp()] CleanUp cheat image for zoom {}.", magic_enum::enum_name(t_zoom));
 
         stbi_image_free(m_cornerImages.at(magic_enum::enum_integer(t_zoom)));

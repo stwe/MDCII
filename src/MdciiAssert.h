@@ -36,7 +36,14 @@
 #endif
 
 #ifdef MDCII_ENABLE_ASSERTS
-    #define MDCII_ASSERT(x, ...) { if(!(x)) { mdcii::Log::MDCII_LOG_ERROR("Assertion Failed: {0}", __VA_ARGS__); MDCII_DEBUG_BREAK; } }
+    #define MDCII_ASSERT(x, ...)                                                   \
+        {                                                                          \
+            if (!(x))                                                              \
+            {                                                                      \
+                mdcii::Log::MDCII_LOG_ERROR("Assertion Failed: {0}", __VA_ARGS__); \
+                MDCII_DEBUG_BREAK;                                                 \
+            }                                                                      \
+        }
 #else
     #define MDCII_ASSERT(x, ...)
 #endif

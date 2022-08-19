@@ -99,6 +99,5 @@ namespace mdcii::file
     protected:
 
     private:
-
     };
 }

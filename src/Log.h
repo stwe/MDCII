@@ -51,38 +51,38 @@ namespace mdcii
         // Log
         //-------------------------------------------------
 
-        template <typename ...T>
-        static void MDCII_LOG_TRACE(T ...t_args)
+        template<typename... T>
+        static void MDCII_LOG_TRACE(T... t_args) // NOLINT(readability-identifier-naming)
         {
             m_logger->trace(t_args...);
         }
 
-        template <typename ...T>
-        static void MDCII_LOG_DEBUG(T ...t_args)
+        template<typename... T>
+        static void MDCII_LOG_DEBUG(T... t_args) // NOLINT(readability-identifier-naming)
         {
             m_logger->debug(t_args...);
         }
 
-        template <typename ...T>
-        static void MDCII_LOG_INFO(T ...t_args)
+        template<typename... T>
+        static void MDCII_LOG_INFO(T... t_args) // NOLINT(readability-identifier-naming)
         {
             m_logger->info(t_args...);
         }
 
-        template <typename ...T>
-        static void MDCII_LOG_WARN(T ...t_args)
+        template<typename... T>
+        static void MDCII_LOG_WARN(T... t_args) // NOLINT(readability-identifier-naming)
         {
             m_logger->warn(t_args...);
         }
 
-        template <typename ...T>
-        static void MDCII_LOG_ERROR(T ...t_args)
+        template<typename... T>
+        static void MDCII_LOG_ERROR(T... t_args) // NOLINT(readability-identifier-naming)
         {
             m_logger->error(t_args...);
         }
 
-        template <typename ...T>
-        static void MDCII_LOG_FATAL(T ...t_args)
+        template<typename... T>
+        static void MDCII_LOG_FATAL(T... t_args) // NOLINT(readability-identifier-naming)
         {
             m_logger->critical(t_args...);
         }

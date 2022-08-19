@@ -102,8 +102,7 @@ void mdcii::renderer::TileRenderer::RenderTileForMousePicking(
 
 void mdcii::renderer::TileRenderer::Init()
 {
-    constexpr float vertices[]
-    {
+    constexpr float vertices[]{
         // pos      // tex
         0.0f, 1.0f, 0.0f, 1.0f,
         1.0f, 0.0f, 1.0f, 0.0f,

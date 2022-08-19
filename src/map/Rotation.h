@@ -30,7 +30,8 @@ namespace mdcii::map
 
     enum class ChangeRotation
     {
-        LEFT, RIGHT
+        LEFT,
+        RIGHT
     };
 
     //-------------------------------------------------
@@ -39,7 +40,10 @@ namespace mdcii::map
 
     enum class Rotation
     {
-        DEG0, DEG90, DEG180, DEG270
+        DEG0,
+        DEG90,
+        DEG180,
+        DEG270
     };
 
     //-------------------------------------------------
@@ -86,7 +90,8 @@ namespace mdcii::map
     inline Rotation int_to_rotation(const int t_rotation)
     {
         const auto rotation{ magic_enum::enum_cast<Rotation>(t_rotation) };
-        if (rotation.has_value()) {
+        if (rotation.has_value())
+        {
             return rotation.value();
         }
 

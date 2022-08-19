@@ -77,7 +77,9 @@ namespace mdcii::map
          */
         enum class Action
         {
-            BUILD, STATUS, OPTIONS
+            BUILD,
+            STATUS,
+            OPTIONS
         };
 
         //-------------------------------------------------

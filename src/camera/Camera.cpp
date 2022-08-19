@@ -101,8 +101,7 @@ void mdcii::camera::Camera::AddListeners()
     event::EventManager::eventDispatcher.appendListener(
         event::MdciiEventType::KEY_PRESSED,
         eventpp::argumentAdapter<void(const event::KeyPressedEvent&)>(
-            [&](const event::KeyPressedEvent& t_event)
-            {
+            [&](const event::KeyPressedEvent& t_event) {
                 if (t_event.key == GLFW_KEY_W || t_event.key == GLFW_KEY_UP)
                 {
                     ProcessKeyboard(Direction::UP);

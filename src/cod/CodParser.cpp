@@ -156,7 +156,7 @@ void mdcii::cod::CodParser::ParseFile()
                     }
                 }
                 else
-                    // example: 'IDHANDW =   20501'
+                // example: 'IDHANDW =   20501'
                 {
                     auto i{ ConstantExists(key) };
                     cod_pb::Variable* variable{ nullptr };
@@ -257,7 +257,7 @@ void mdcii::cod::CodParser::ParseFile()
                     }
                 }
                 else
-                    // example: Var: 1, 2, 3
+                // example: Var: 1, 2, 3
                 {
                     auto result{ CodHelper::RegexSearch("(\\b(?!Objekt\\b)\\w+)\\s*:\\s*(.+)", line) };
                     if (!result.empty())

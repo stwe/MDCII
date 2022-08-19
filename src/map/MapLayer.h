@@ -47,7 +47,9 @@ namespace mdcii::map
 
     enum class LayerType
     {
-        TERRAIN, BUILDINGS, NONE
+        TERRAIN,
+        BUILDINGS,
+        NONE
     };
 
     //-------------------------------------------------

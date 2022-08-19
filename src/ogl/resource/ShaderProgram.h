@@ -76,7 +76,7 @@ namespace mdcii::ogl::resource
         /**
          * Unbinds a shader program.
          */
-        static void Unbind() ;
+        static void Unbind();
 
         //-------------------------------------------------
         // Set uniforms

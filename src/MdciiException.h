@@ -27,7 +27,7 @@
 
 namespace mdcii
 {
-    class MdciiException : public std::exception
+    class MdciiException: public std::exception
     {
     public:
         //-------------------------------------------------

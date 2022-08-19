@@ -62,7 +62,7 @@ namespace mdcii::file
     /**
      * The class loads a Bsh file.
      */
-    class BshFile : public BinaryFile
+    class BshFile: public BinaryFile
     {
     public:
         //-------------------------------------------------

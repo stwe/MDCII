@@ -101,19 +101,18 @@ namespace mdcii::state
          */
         enum class Id
         {
-            MAIN_MENU,  // MainMenuState
-            START,      // StartState
-            WORLD,      // WorldState
-            EDITOR,     // EditorState
-            SANDBOX,    // SandboxState
-            ALL         // is used when all states are meant
+            MAIN_MENU, // MainMenuState
+            START,     // StartState
+            WORLD,     // WorldState
+            EDITOR,    // EditorState
+            SANDBOX,   // SandboxState
+            ALL        // is used when all states are meant
         };
 
         /**
          * The unique identifiers of the states as string.
          */
-        static constexpr std::array<std::string_view, 6> STATE_IDS
-        {
+        static constexpr std::array<std::string_view, 6> STATE_IDS{
             "MAIN_MENU", "START", "WORLD", "EDITOR", "SANDBOX", "ALL"
         };
 

@@ -315,7 +315,7 @@ void mdcii::map::Map::RenderTerrainLayerEntities() const
             }
         }
 
-        const auto& [terrainLayerTileComponent] { view.get(entity) };
+        const auto& [terrainLayerTileComponent]{ view.get(entity) };
         RenderEntity(terrainLayerTileComponent.mapTile, terrainLayerTileComponent.building, false);
 #ifdef MDCII_DEBUG_BUILD
         t++;
@@ -330,17 +330,17 @@ void mdcii::map::Map::RenderBuildingsLayerEntities() const
     const auto view{ Game::ecs.view<ecs::BuildingsLayerTileComponent>(entt::exclude<ecs::BuildingUpdatedComponent>) };
     for (const auto entity : view)
     {
-        const auto& [buildingsComponent] { view.get(entity) };
+        const auto& [buildingsComponent]{ view.get(entity) };
         RenderEntity(buildingsComponent.mapTile, buildingsComponent.building, false);
     }
 }
 
 void mdcii::map::Map::RenderTerrainOrBuildingsEntities() const
 {
-    const auto view{ Game::ecs.view<ecs::TerrainLayerTileComponent>(/*entt::exclude<ecs::BuildingUpdatedComponent>*/)};
+    const auto view{ Game::ecs.view<ecs::TerrainLayerTileComponent>(/*entt::exclude<ecs::BuildingUpdatedComponent>*/) };
     for (const auto entity : view)
     {
-        const auto& terrainLayerTileComponent { view.get<ecs::TerrainLayerTileComponent>(entity) };
+        const auto& terrainLayerTileComponent{ view.get<ecs::TerrainLayerTileComponent>(entity) };
 
         if (Game::ecs.all_of<const ecs::BuildingsLayerTileComponent>(entity))
         {

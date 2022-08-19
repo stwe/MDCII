@@ -86,8 +86,7 @@ void mdcii::EditorGui::ZoomMapGui() const
 
 void mdcii::EditorGui::ShowActionsGui()
 {
-    magic_enum::enum_for_each<map::Map::Action>([&](auto t_val)
-    {
+    magic_enum::enum_for_each<map::Map::Action>([&](auto t_val) {
         constexpr map::Map::Action action{ t_val };
         constexpr int i{ magic_enum::enum_integer(action) };
 
@@ -150,13 +149,13 @@ void mdcii::EditorGui::AllWorkshopsGui() const
                 const auto textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(bauhausBshTextures.at(building.baugfx)->textureId)) };
 
                 if (ImGui::ImageButton(
-                    textureId,
-                    ImVec2(static_cast<float>(textureWidth), static_cast<float>(textureHeight)),
-                    ImVec2(0.0f, 0.0f),
-                    ImVec2(1.0f, 1.0f),
-                    -1,
-                    ImVec4(0.6f, 0.6f, 0.6f, 1.0f)
-                ))
+                        textureId,
+                        ImVec2(static_cast<float>(textureWidth), static_cast<float>(textureHeight)),
+                        ImVec2(0.0f, 0.0f),
+                        ImVec2(1.0f, 1.0f),
+                        -1,
+                        ImVec4(0.6f, 0.6f, 0.6f, 1.0f)
+                    ))
                 {
                     event::EventManager::eventDispatcher.dispatch(
                         event::MdciiEventType::BAUGFX_SELECTED,
@@ -194,7 +193,8 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
     const auto textureWidth{ bauhausBshTextures.at(building.baugfx)->width };
     const auto textureHeight{ bauhausBshTextures.at(building.baugfx)->height };
     const auto textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(
-        bauhausBshTextures.at(static_cast<size_t>(building.baugfx) + rotation_to_int(t_selectedBauGfx.rotation))->textureId)
+        bauhausBshTextures.at(static_cast<size_t>(building.baugfx) + rotation_to_int(t_selectedBauGfx.rotation))->textureId
+    )
     ) };
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingRight").c_str()))

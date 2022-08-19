@@ -68,8 +68,7 @@ void mdcii::map::MapTile::RenderImGui(const bool t_heading) const
 
     if (ImGui::TreeNode("Screen positions"))
     {
-        magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom)
-        {
+        magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
             if (ImGui::TreeNode(magic_enum::enum_name(t_zoom).data()))
             {
                 auto r{ Rotation::DEG0 };

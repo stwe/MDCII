@@ -82,8 +82,7 @@ mdcii::map::MapLayer::MapLayer(MapContent* t_mapContent)
     MDCII_ASSERT(m_mapContent, "[MapLayer::MapLayer()] Null pointer.")
 
     // store grid file names
-    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom)
-    {
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
         const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<Zoom>(t_zoom))) };
         const auto fileName{ "textures/" + zoomStr + "/red_" + zoomStr + ".png" };
         m_gridFileNames.at(magic_enum::enum_integer(t_zoom)) = fileName;
@@ -102,8 +101,7 @@ mdcii::map::MapLayer::~MapLayer() noexcept
 void mdcii::map::MapLayer::SetLayerTypeByString(const std::string& t_layerType)
 {
     auto name{ t_layerType };
-    std::transform(name.begin(), name.end(), name.begin(),
-        [](const unsigned char t_c) { return std::toupper(t_c); });
+    std::transform(name.begin(), name.end(), name.begin(), [](const unsigned char t_c) { return std::toupper(t_c); });
 
     const auto newType{ magic_enum::enum_cast<LayerType>(name) };
     if (newType.has_value())
