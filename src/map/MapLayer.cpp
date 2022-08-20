@@ -100,10 +100,7 @@ mdcii::map::MapLayer::~MapLayer() noexcept
 
 void mdcii::map::MapLayer::SetLayerTypeByString(const std::string& t_layerType)
 {
-    auto name{ t_layerType };
-    std::transform(name.begin(), name.end(), name.begin(), [](const unsigned char t_c) { return std::toupper(t_c); });
-
-    const auto newType{ magic_enum::enum_cast<LayerType>(name) };
+    const auto newType{ magic_enum::enum_cast<LayerType>(to_upper_case(t_layerType)) };
     if (newType.has_value())
     {
         layerType = newType.value();

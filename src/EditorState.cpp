@@ -28,6 +28,7 @@
 #include "map/Map.h"
 #include "map/MapContent.h"
 #include "map/MousePicker.h"
+#include "map/MapGenerator.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -168,11 +169,16 @@ void mdcii::EditorState::Init()
     // init menu texts
     data::Text::Init();
 
+    // todo: tmp code
+    const auto& mapName{ Game::INI.Get<std::string>("content", "start_map") };
+    if (mapName != "data/ExampleMap.json")
+    {
+        // creates a 32x32 map if it doesn't already exist
+        map::MapGenerator mg{ 32, 32, mapName };
+    }
+
     // create the Map object to edit
-    m_map = std::make_shared<map::Map>(
-        Game::INI.Get<std::string>("content", "start_map"),
-        context
-    );
+    m_map = std::make_shared<map::Map>(mapName, context);
 
     // create the menus
     m_editorGui = std::make_unique<EditorGui>(m_map);
