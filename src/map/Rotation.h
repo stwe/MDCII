@@ -46,6 +46,8 @@ namespace mdcii::map
         DEG270
     };
 
+    static constexpr auto NR_OF_ROTATIONS{ 4 };
+
     //-------------------------------------------------
     // Operators
     //-------------------------------------------------

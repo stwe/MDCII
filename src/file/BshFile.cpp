@@ -72,7 +72,7 @@ void mdcii::file::BshFile::ReadDataFromChunks()
 
     Log::MDCII_LOG_DEBUG("[BshFile::ReadDataFromChunks()] Detected {} offsets.", m_offsets.size());
 
-    // create a BshTexture objects
+    // create BshTexture objects
     for (const auto offset : m_offsets)
     {
         DecodePixelData(offset);

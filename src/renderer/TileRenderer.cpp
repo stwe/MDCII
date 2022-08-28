@@ -17,8 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "TileRenderer.h"
-#include "MdciiAssert.h"
-#include "ogl/OpenGL.h"
+#include "RenderUtils.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/TextureUtils.h"
 
@@ -30,7 +29,7 @@ mdcii::renderer::TileRenderer::TileRenderer()
 {
     Log::MDCII_LOG_DEBUG("[TileRenderer::TileRenderer()] Create TileRenderer.");
 
-    Init();
+    RenderUtils::CreateRectangleVao(&m_vao);
 }
 
 mdcii::renderer::TileRenderer::~TileRenderer() noexcept
@@ -94,36 +93,4 @@ void mdcii::renderer::TileRenderer::RenderTileForMousePicking(
     glBindVertexArray(0);
 
     ogl::OpenGL::DisableBlending();
-}
-
-//-------------------------------------------------
-// Init
-//-------------------------------------------------
-
-void mdcii::renderer::TileRenderer::Init()
-{
-    constexpr float vertices[]{
-        // pos      // tex
-        0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 0.0f,
-
-        0.0f, 1.0f, 0.0f, 1.0f,
-        1.0f, 1.0f, 1.0f, 1.0f,
-        1.0f, 0.0f, 1.0f, 0.0f
-    };
-
-    glGenVertexArrays(1, &m_vao);
-
-    uint32_t vbo;
-    glGenBuffers(1, &vbo);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindVertexArray(m_vao);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }

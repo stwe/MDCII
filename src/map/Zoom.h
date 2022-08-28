@@ -44,6 +44,8 @@ namespace mdcii::map
         GFX
     };
 
+    static constexpr auto NR_OF_ZOOMS{ 3 };
+
     //-------------------------------------------------
     // Operators
     //-------------------------------------------------
@@ -80,7 +82,7 @@ namespace mdcii::map
     // Tile sizes
     //-------------------------------------------------
 
-    inline static constexpr std::array<std::pair<Zoom, std::pair<int, int>>, magic_enum::enum_count<Zoom>()> TILE_SIZES = {
+    inline static constexpr std::array<std::pair<Zoom, std::pair<int, int>>, NR_OF_ZOOMS> TILE_SIZES = {
         { std::make_pair<Zoom, std::pair<int, int>>(Zoom::SGFX, std::make_pair<int, int>(16, 8)),
           std::make_pair<Zoom, std::pair<int, int>>(Zoom::MGFX, std::make_pair<int, int>(32, 16)),
           std::make_pair<Zoom, std::pair<int, int>>(Zoom::GFX, std::make_pair<int, int>(64, 32)) }
@@ -90,7 +92,7 @@ namespace mdcii::map
     // Elevation
     //-------------------------------------------------
 
-    inline static constexpr std::array<int, magic_enum::enum_count<Zoom>()> ELEVATIONS = { 20 / 4, 20 / 2, 20 };
+    inline static constexpr std::array<int, NR_OF_ZOOMS> ELEVATIONS = { 20 / 4, 20 / 2, 20 };
 
     //-------------------------------------------------
     // For convenience

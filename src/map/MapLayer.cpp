@@ -23,6 +23,7 @@
 #include "ecs/EcsUtils.h"
 #include "ogl/resource/ResourceManager.h"
 #include "file/OriginalResourcesManager.h"
+#include "renderer/RenderUtils.h"
 #include "state/State.h"
 
 //-------------------------------------------------
@@ -81,12 +82,7 @@ mdcii::map::MapLayer::MapLayer(MapContent* t_mapContent)
 
     MDCII_ASSERT(m_mapContent, "[MapLayer::MapLayer()] Null pointer.")
 
-    // store grid file names
-    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
-        const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<Zoom>(t_zoom))) };
-        const auto fileName{ "textures/" + zoomStr + "/red_" + zoomStr + ".png" };
-        m_gridFileNames.at(magic_enum::enum_integer(t_zoom)) = fileName;
-    });
+    Init();
 }
 
 mdcii::map::MapLayer::~MapLayer() noexcept
@@ -95,7 +91,26 @@ mdcii::map::MapLayer::~MapLayer() noexcept
 }
 
 //-------------------------------------------------
-// Layer type
+// Getter
+//-------------------------------------------------
+
+const mdcii::map::MapLayer::Model_Matrices_For_Each_Rotation& mdcii::map::MapLayer::GetModelMatrices(const Zoom t_zoom) const
+{
+    return modelMatrices.at(magic_enum::enum_integer(t_zoom));
+}
+
+const mdcii::map::MapTile& mdcii::map::MapLayer::GetTile(const int t_mapX, const int t_mapY) const
+{
+    return mapTiles.at(m_mapContent->GetMapIndex(t_mapX, t_mapY));
+}
+
+mdcii::map::MapTile& mdcii::map::MapLayer::GetTile(const int t_mapX, const int t_mapY)
+{
+    return mapTiles.at(m_mapContent->GetMapIndex(t_mapX, t_mapY));
+}
+
+//-------------------------------------------------
+// Setter
 //-------------------------------------------------
 
 void mdcii::map::MapLayer::SetLayerTypeByString(const std::string& t_layerType)
@@ -112,6 +127,82 @@ void mdcii::map::MapLayer::SetLayerTypeByString(const std::string& t_layerType)
 }
 
 //-------------------------------------------------
+// Instanced rendering
+//-------------------------------------------------
+
+void mdcii::map::MapLayer::SortMapTiles()
+{
+    // for each rotation
+    magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+        // sort tiles by index
+        std::sort(mapTiles.begin(), mapTiles.end(), [&](const MapTile& t_a, const MapTile& t_b) {
+            return t_a.indices[magic_enum::enum_integer(t_rotation)] < t_b.indices[magic_enum::enum_integer(t_rotation)];
+        });
+
+        // copy sorted tiles
+        sortedMapTiles.at(magic_enum::enum_integer(t_rotation)) = mapTiles;
+    });
+}
+
+void mdcii::map::MapLayer::CreateModelMatrices()
+{
+    // for each zoom
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
+
+        // to store the model matrices for each rotation
+        Model_Matrices_For_Each_Rotation matricesForRotations;
+
+        // for each rotation create the model matrices
+        magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+
+            // to store the model matrices
+            Model_Matrices matrices;
+
+            // for each tile
+            for (const auto& mapTile : sortedMapTiles.at(magic_enum::enum_integer(t_rotation)))
+            {
+                // get building
+                const auto& building{ m_mapContent->context->originalResourcesManager->GetBuildingById(mapTile.buildingId) };
+
+                // copy position
+                auto screenPosition{ mapTile.screenPositions.at(magic_enum::enum_integer(t_zoom)).at(rotation_to_int(t_rotation)) };
+
+                // get gfx
+                auto buildingRotation{ mapTile.rotation };
+                if (building.rotate > 0)
+                {
+                    buildingRotation = buildingRotation + t_rotation;
+                }
+                const auto gfx{ mapTile.gfxs[rotation_to_int(buildingRotation)] };
+
+                // get width, height && textureId
+                const auto& stadtfldBshTextures{ m_mapContent->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
+                const auto w{ static_cast<float>(stadtfldBshTextures[gfx]->width) };
+                const auto h{ static_cast<float>(stadtfldBshTextures[gfx]->height) };
+                const auto textureId{ stadtfldBshTextures[gfx]->textureId }; // todo
+
+                // get elevation
+                auto elevation{ 0.0f };
+                if (building.posoffs > 0)
+                {
+                    elevation = static_cast<float>(get_elevation(t_zoom));
+                }
+
+                screenPosition.y -= h - static_cast<float>(get_tile_height(t_zoom));
+                screenPosition.y -= elevation;
+
+                // store model matrix
+                matrices.emplace_back(renderer::RenderUtils::GetModelMatrix(screenPosition, { w, h }));
+            }
+
+            matricesForRotations.at(rotation_to_int(t_rotation)) = matrices;
+        });
+
+        modelMatrices.at(magic_enum::enum_integer(t_zoom)) = matricesForRotations;
+    });
+}
+
+//-------------------------------------------------
 // Add/replace tile
 //-------------------------------------------------
 
@@ -123,20 +214,6 @@ void mdcii::map::MapLayer::AddTileFromJson(const nlohmann::json& t_json)
 void mdcii::map::MapLayer::ReplaceTile(const MapTile& t_mapTile)
 {
     mapTiles.at(m_mapContent->GetMapIndex(t_mapTile.mapX, t_mapTile.mapY)) = t_mapTile;
-}
-
-//-------------------------------------------------
-// Get tile
-//-------------------------------------------------
-
-const mdcii::map::MapTile& mdcii::map::MapLayer::GetTile(const int t_mapX, const int t_mapY) const
-{
-    return mapTiles.at(m_mapContent->GetMapIndex(t_mapX, t_mapY));
-}
-
-mdcii::map::MapTile& mdcii::map::MapLayer::GetTile(const int t_mapX, const int t_mapY)
-{
-    return mapTiles.at(m_mapContent->GetMapIndex(t_mapX, t_mapY));
 }
 
 //-------------------------------------------------
@@ -219,4 +296,18 @@ void mdcii::map::MapLayer::AddBuildingsLayerComponent(const int t_mapX, const in
         GetTile(t_mapX, t_mapY),
         m_mapContent->context->originalResourcesManager->GetBuildingById(GetTile(t_mapX, t_mapY).buildingId)
     );
+}
+
+//-------------------------------------------------
+// Init
+//-------------------------------------------------
+
+void mdcii::map::MapLayer::Init()
+{
+    // create and store the filenames to show an isometric grid for each zoom
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
+        const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<Zoom>(t_zoom))) };
+        const auto fileName{ "textures/" + zoomStr + "/red_" + zoomStr + ".png" };
+        m_gridFileNames.at(magic_enum::enum_integer(t_zoom)) = fileName;
+    });
 }

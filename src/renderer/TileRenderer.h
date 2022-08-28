@@ -95,14 +95,5 @@ namespace mdcii::renderer
          * The OpenGL Vertex Array Object handle.
          */
         uint32_t m_vao{ 0 };
-
-        //-------------------------------------------------
-        // Init
-        //-------------------------------------------------
-
-        /**
-         * Creates the VAO which consists a VBO to store the vertices and sets the buffer layout.
-         */
-        void Init();
     };
 }

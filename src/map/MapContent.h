@@ -21,7 +21,6 @@
 #include "MapLayer.h"
 #include "data/Buildings.h"
 #include "event/Event.h"
-#include "Zoom.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -44,12 +43,6 @@ namespace mdcii::map
     class MapContent
     {
     public:
-        //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        static constexpr auto NR_OF_ROTATIONS{ 4 };
-
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
@@ -143,7 +136,14 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * Sorts the entities of each layer for rendering.
+         * Sorts the entities by a given rotation.
+         *
+         * @param t_rotation The rotation to sort for.
+         */
+        static void SortEntitiesByRotation(Rotation t_rotation);
+
+        /**
+         * Sorts the entities by the current rotation.
          */
         void SortEntitiesOfAllLayers() const;
 

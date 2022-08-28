@@ -18,7 +18,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include "TextRenderer.h"
-#include "Log.h"
+#include "MdciiAssert.h"
 #include "MdciiException.h"
 #include "ogl/OpenGL.h"
 #include "ogl/resource/ResourceManager.h"
@@ -189,10 +189,16 @@ void mdcii::renderer::TextRenderer::CreateMesh()
 {
     // create && bind vao
     glGenVertexArrays(1, &m_vaoId);
+    MDCII_ASSERT(m_vaoId, "[TextRenderer::CreateMesh()] Invalid Vao handle.")
+    Log::MDCII_LOG_DEBUG("[TextRenderer::CreateMesh()] A new Vao was created with the Id: {}.", m_vaoId);
+
     glBindVertexArray(m_vaoId);
 
     // create && bind vbo
     glGenBuffers(1, &m_vboId);
+    MDCII_ASSERT(m_vboId, "[TextRenderer::CreateMesh()] Invalid Vbo handle.")
+    Log::MDCII_LOG_DEBUG("[TextRenderer::CreateMesh()] A new Vbo was created with the Id: {}.", m_vboId);
+
     glBindBuffer(GL_ARRAY_BUFFER, m_vboId);
 
     // reserve enough memory
@@ -202,7 +208,7 @@ void mdcii::renderer::TextRenderer::CreateMesh()
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
 
-    // undbind vbo
+    // unbind vbo
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // unbind vao

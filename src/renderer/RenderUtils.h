@@ -19,6 +19,8 @@
 #pragma once
 
 #include <glm/ext/matrix_transform.hpp>
+#include "MdciiAssert.h"
+#include "ogl/OpenGL.h"
 
 //-------------------------------------------------
 // RenderUtils
@@ -62,6 +64,59 @@ namespace mdcii::renderer
             modelMatrix = scale(modelMatrix, glm::vec3(t_size.x, t_size.y, 1.0f));
 
             return modelMatrix;
+        }
+
+        //-------------------------------------------------
+        // Mesh
+        //-------------------------------------------------
+
+        /**
+         * Creates Vao and Vbo to render a rectangle.
+         *
+         * @param t_vao Pointer to a Vao handle.
+         */
+        static void CreateRectangleVao(uint32_t* t_vao)
+        {
+            constexpr float vertices[]{
+                // pos      // tex
+                0.0f, 1.0f, 0.0f, 1.0f,
+                1.0f, 0.0f, 1.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 0.0f,
+
+                0.0f, 1.0f, 0.0f, 1.0f,
+                1.0f, 1.0f, 1.0f, 1.0f,
+                1.0f, 0.0f, 1.0f, 0.0f
+            };
+
+            // create Vao
+            glGenVertexArrays(1, t_vao);
+            MDCII_ASSERT(*t_vao, "[RenderUtils::CreateRectangleVao()] Invalid Vao handle.")
+            Log::MDCII_LOG_DEBUG("[RenderUtils::CreateRectangleVao()] A new Vao was created with the Id: {}.", *t_vao);
+
+            // bind Vao
+            glBindVertexArray(*t_vao);
+
+            // create Vbo
+            uint32_t vbo;
+            glGenBuffers(1, &vbo);
+            MDCII_ASSERT(vbo, "[RenderUtils::CreateRectangleVao()] Invalid Vbo handle.")
+            Log::MDCII_LOG_DEBUG("[RenderUtils::CreateRectangleVao()] A new Vbo was created with the Id: {}.", vbo);
+
+            // bind Vbo
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+            // store data
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+            // set buffer layout
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+
+            // unbind Vbo
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+            // unbind Vao
+            glBindVertexArray(0);
         }
 
     protected:

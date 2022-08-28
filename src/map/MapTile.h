@@ -20,25 +20,19 @@
 
 #include "ecs/entt.hpp"
 #include "Rotation.h"
+#include "Zoom.h"
+
+//-------------------------------------------------
+// MapTile
+//-------------------------------------------------
 
 namespace mdcii::map
 {
-    //-------------------------------------------------
-    // MapTile
-    //-------------------------------------------------
-
     /**
-     * MapTile represents a part of a layer.
+     * MapTile represents a single part of a layer.
      */
     struct MapTile
     {
-        //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        static constexpr auto NR_OF_ZOOMS{ 3 };
-        static constexpr auto NR_OF_ROTATIONS{ 4 };
-
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
@@ -87,8 +81,7 @@ namespace mdcii::map
         int32_t mapY{ -1 };
 
         /**
-         * An isometric position on the screen for each
-         * zoom and each rotation (world space).
+         * A screen position for each zoom and each rotation (world space positions).
          */
         std::array<std::array<glm::vec2, NR_OF_ROTATIONS>, NR_OF_ZOOMS> screenPositions{};
 

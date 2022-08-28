@@ -27,6 +27,7 @@
 #include "state/State.h"
 #include "renderer/TileRenderer.h"
 #include "renderer/TextRenderer.h"
+#include "renderer/TerrainRenderer.h"
 #include "renderer/RenderUtils.h"
 
 //-------------------------------------------------
@@ -52,8 +53,9 @@ mdcii::map::Map::~Map() noexcept
 
 void mdcii::map::Map::Render() const
 {
-    RenderGridEntities();
-    RenderEntities();
+    //RenderGridEntities();
+    //RenderEntities();
+    terrainRenderer->RenderTiles(mapContent->zoom, mapContent->rotation, *context->window, *context->camera);
 
     mousePicker->Render(*context->window, *context->camera);
 }
@@ -158,6 +160,16 @@ void mdcii::map::Map::Init(const std::string& t_filePath)
 
     // create text renderer
     textRenderer = std::make_unique<renderer::TextRenderer>(Game::RESOURCES_REL_PATH + "bitter/Bitter-Regular.otf");
+
+    // create terrain renderer
+    terrainRenderer = std::make_unique<renderer::TerrainRenderer>(this);
+
+    // pass all model matrices from each rotation in each zoom level
+    const auto& layer{ mapContent->GetLayer(LayerType::TERRAIN) };
+    const int32_t instances{ mapContent->GetLayer(LayerType::TERRAIN).GetInstances() };
+    terrainRenderer->AddModelMatrices(Zoom::SGFX, layer.GetModelMatrices(Zoom::SGFX), instances);
+    terrainRenderer->AddModelMatrices(Zoom::MGFX, layer.GetModelMatrices(Zoom::MGFX), instances);
+    terrainRenderer->AddModelMatrices(Zoom::GFX, layer.GetModelMatrices(Zoom::GFX), instances);
 
     Log::MDCII_LOG_DEBUG("[Map::Init()] The map was successfully initialized.");
 }

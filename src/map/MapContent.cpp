@@ -169,9 +169,14 @@ void mdcii::map::MapContent::RenderImGui() const
 // Sort
 //-------------------------------------------------
 
+void mdcii::map::MapContent::SortEntitiesByRotation(const Rotation t_rotation)
+{
+    ecs::EcsUtils::SortEntities<ecs::TerrainLayerTileComponent>(t_rotation);
+}
+
 void mdcii::map::MapContent::SortEntitiesOfAllLayers() const
 {
-    ecs::EcsUtils::SortEntities<ecs::TerrainLayerTileComponent>(rotation);
+    SortEntitiesByRotation(rotation);
 }
 
 //-------------------------------------------------
@@ -574,6 +579,14 @@ void mdcii::map::MapContent::PreCalcTiles() const
             {
                 PreCalcTile(layer->GetTile(x, y), x, y);
             }
+        }
+
+        layer->SortMapTiles();
+
+        // todo: tmp code for instancing
+        if (layer->layerType == LayerType::TERRAIN)
+        {
+            layer->CreateModelMatrices();
         }
     }
 }

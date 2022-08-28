@@ -18,17 +18,10 @@
 
 #pragma once
 
+#include <glm/mat4x4.hpp>
 #include "MapTile.h"
+#include "LayerType.h"
 #include "data/json.hpp"
-
-//-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii::data
-{
-    class Buildings;
-}
 
 namespace mdcii::map
 {
@@ -42,17 +35,6 @@ namespace mdcii::map
     class MapContent;
 
     //-------------------------------------------------
-    // Types
-    //-------------------------------------------------
-
-    enum class LayerType
-    {
-        TERRAIN,
-        BUILDINGS,
-        NONE
-    };
-
-    //-------------------------------------------------
     // Json
     //-------------------------------------------------
 
@@ -64,31 +46,63 @@ namespace mdcii::map
     //-------------------------------------------------
 
     /**
-     * Represents a layer with many tiles.
+     * Represents a layer, which is simply a collection of MapTile objects.
      */
     class MapLayer
     {
     public:
         //-------------------------------------------------
-        // Constants
+        // Types
         //-------------------------------------------------
 
-        static constexpr auto NR_OF_ZOOMS{ 3 };
+        /**
+         * A MapTile container.
+         */
+        using Map_Tiles = std::vector<MapTile>;
+
+        /**
+         * A MapTile container for each of the four possible rotations.
+         */
+        using Map_Tiles_For_Each_Rotation = std::array<Map_Tiles, NR_OF_ROTATIONS>;
+
+        /**
+         * A model matrices container.
+         */
+        using Model_Matrices = std::vector<glm::mat4>;
+
+        /**
+         * A model matrices container for each of the four possible rotations.
+         */
+        using Model_Matrices_For_Each_Rotation = std::array<Model_Matrices, NR_OF_ROTATIONS>;
+
+        /**
+         * Four model matrices containers for each of the three possible zoom levels.
+         */
+        using Model_Matrices_For_Each_Zoom = std::array<Model_Matrices_For_Each_Rotation, NR_OF_ZOOMS>;
 
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
         /**
-         * Specifies the type of layer.
+         * Specifies the type of this layer.
          */
         LayerType layerType{ LayerType::NONE };
 
         /**
-         * The MapTile objects.
-         * todo: pointer
+         * A MapTile container.
          */
-        std::vector<MapTile> mapTiles;
+        Map_Tiles mapTiles;
+
+        /**
+         * A MapTile container for each of the four possible rotations.
+         */
+        Map_Tiles_For_Each_Rotation sortedMapTiles;
+
+        /**
+         * Four model matrices containers for each of the three possible zoom levels
+         */
+        Model_Matrices_For_Each_Zoom modelMatrices;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -111,37 +125,18 @@ namespace mdcii::map
         ~MapLayer() noexcept;
 
         //-------------------------------------------------
-        // Layer type
+        // Getter
         //-------------------------------------------------
 
         /**
-         * Sets the layer type by a given string.
+         * There are four arrays with the model matrices for each zoom level.
+         * The function returns the arrays.
          *
-         * @param t_layerType The layer type string.
-         */
-        void SetLayerTypeByString(const std::string& t_layerType);
-
-        //-------------------------------------------------
-        // Add/replace tile
-        //-------------------------------------------------
-
-        /**
-         * Creates and saves a MapTile object from json in the layer.
+         * @param t_zoom The requested zoom level.
          *
-         * @param t_json The json entry to convert.
+         * @return The model matrices of the zoom.
          */
-        void AddTileFromJson(const nlohmann::json& t_json);
-
-        /**
-         * Replaces a MapTile object.
-         *
-         * @param t_mapTile The new MapTile object.
-         */
-        void ReplaceTile(const MapTile& t_mapTile);
-
-        //-------------------------------------------------
-        // Get tile
-        //-------------------------------------------------
+        [[nodiscard]] const Model_Matrices_For_Each_Rotation& GetModelMatrices(Zoom t_zoom) const;
 
         /**
          * Returns a MapTile.
@@ -162,6 +157,56 @@ namespace mdcii::map
          * @return The MapTile object.
          */
         MapTile& GetTile(int t_mapX, int t_mapY);
+
+        /**
+         * Returns the number of instances to render.
+         *
+         * @return The number of instances.
+         */
+        [[nodiscard]] int32_t GetInstances() const { return static_cast<int32_t>(mapTiles.size()); }
+
+        //-------------------------------------------------
+        // Setter
+        //-------------------------------------------------
+
+        /**
+         * Sets the type of this layer by a given string.
+         *
+         * @param t_layerType The layer type to set.
+         */
+        void SetLayerTypeByString(const std::string& t_layerType);
+
+        //-------------------------------------------------
+        // Instanced rendering
+        //-------------------------------------------------
+
+        /**
+         * Sort MapTile objects for instanced rendering.
+         */
+        void SortMapTiles();
+
+        /**
+         * Create model matrices for instanced rendering.
+         */
+        void CreateModelMatrices();
+
+        //-------------------------------------------------
+        // Add/replace tile
+        //-------------------------------------------------
+
+        /**
+         * Creates and saves a MapTile object from json in the layer.
+         *
+         * @param t_json The json entry to convert.
+         */
+        void AddTileFromJson(const nlohmann::json& t_json);
+
+        /**
+         * Replaces a MapTile object.
+         *
+         * @param t_mapTile The new MapTile object.
+         */
+        void ReplaceTile(const MapTile& t_mapTile);
 
         //-------------------------------------------------
         // Ecs
@@ -210,5 +255,14 @@ namespace mdcii::map
          * Each zoom level has a different grid texture.
          */
         std::array<std::string, NR_OF_ZOOMS> m_gridFileNames{};
+
+        //-------------------------------------------------
+        // Init
+        //-------------------------------------------------
+
+        /**
+         * Initializes the class.
+         */
+        void Init();
     };
 }

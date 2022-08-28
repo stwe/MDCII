@@ -35,6 +35,7 @@ namespace mdcii::renderer
 {
     class TileRenderer;
     class TextRenderer;
+    class TerrainRenderer;
 }
 
 namespace mdcii::map
@@ -119,6 +120,11 @@ namespace mdcii::map
          * Lets OpenGL render a text string.
          */
         std::unique_ptr<renderer::TextRenderer> textRenderer;
+
+        /**
+         * Instanced terrain renderer.
+         */
+        std::unique_ptr<renderer::TerrainRenderer> terrainRenderer;
 
         /**
          * Shows the isometric grid.

@@ -11,6 +11,7 @@ CheckOptions:
   - { key: readability-identifier-naming.PrivateMethodCase,   value: CamelCase }
   - { key: readability-identifier-naming.EnumCase,            value: CamelCase }
   - { key: readability-identifier-naming.StructCase,          value: CamelCase }
+  - { key: readability-identifier-naming.TypeAliasCase,       value: Camel_Snake_Case }
   - { key: readability-identifier-naming.FunctionCase,        value: lower_case }
   - { key: readability-identifier-naming.VariableCase,        value: camelBack }
   - { key: readability-identifier-naming.PrivateMemberPrefix, value: m_         }
