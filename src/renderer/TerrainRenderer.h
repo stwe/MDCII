@@ -21,7 +21,8 @@
 #include <array>
 #include "ogl/Window.h"
 #include "camera/Camera.h"
-#include "map/MapLayer.h"
+#include "map/Zoom.h"
+#include "map/Rotation.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -39,7 +40,7 @@ namespace mdcii::map
 namespace mdcii::renderer
 {
     /**
-     * Instanced terrain rendering.
+     * Renders the terrain layer with instancing.
      */
     class TerrainRenderer
     {
@@ -66,7 +67,7 @@ namespace mdcii::renderer
         // Render
         //-------------------------------------------------
 
-        void RenderTiles(
+        void Render(
             map::Zoom t_zoom,
             map::Rotation t_rotation,
             const ogl::Window& t_window,
@@ -74,14 +75,11 @@ namespace mdcii::renderer
         ) const;
 
         //-------------------------------------------------
-        // Instancing
+        // Data to Gpu
         //-------------------------------------------------
 
-        void AddModelMatrices(
-            map::Zoom t_zoom,
-            const map::MapLayer::Model_Matrices_For_Each_Rotation& t_modelMatrices,
-            int32_t t_instances
-        );
+        void AddModelMatrices();
+        void AddTextureInfo() const;
 
     protected:
 
@@ -96,7 +94,7 @@ namespace mdcii::renderer
         map::Map* m_map{ nullptr };
 
         /**
-         * The OpenGL Vertex Array Object handles.
+         * The OpenGL Vertex Array Object handles for each zoom level.
          */
         std::array<uint32_t, map::NR_OF_ZOOMS> m_vaos{};
 
@@ -113,5 +111,21 @@ namespace mdcii::renderer
          * Initializes the class.
          */
         void Init();
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        void AddModelMatrices(map::Zoom t_zoom);
+        void AddTextureInfo(map::Zoom t_zoom) const;
+
+        //-------------------------------------------------
+        // Clean up
+        //-------------------------------------------------
+
+        /**
+         * Clean up.
+         */
+        void CleanUp() const;
     };
 }

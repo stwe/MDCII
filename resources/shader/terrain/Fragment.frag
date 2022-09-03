@@ -3,13 +3,15 @@
 out vec4 fragColor;
 
 in vec2 vUv;
+flat in int vTextureAtlasIndex;
 
-uniform sampler2D diffuseMap;
+uniform sampler2DArray sampler;
 uniform float selected;
 
 void main()
 {
-    fragColor = texture(diffuseMap, vUv);
+    vec3 uv = vec3(vUv, vTextureAtlasIndex);
+    fragColor = texture(sampler, uv);
 
     if (selected > 0.5)
     {

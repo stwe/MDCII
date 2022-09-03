@@ -195,7 +195,6 @@ void mdcii::map::MapContent::RotateRight()
     SortEntitiesOfAllLayers();
 }
 
-// todo: The camera needs to know the current zoom
 void mdcii::map::MapContent::ZoomIn()
 {
     ++zoom;
@@ -587,6 +586,7 @@ void mdcii::map::MapContent::PreCalcTiles() const
         if (layer->layerType == LayerType::TERRAIN)
         {
             layer->CreateModelMatrices();
+            layer->CreateTextureInfo();
         }
     }
 }

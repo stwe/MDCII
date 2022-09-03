@@ -21,7 +21,7 @@
 #include "ogl/OpenGL.h"
 
 //-------------------------------------------------
-// Generate
+// Generate && delete
 //-------------------------------------------------
 
 uint32_t mdcii::ogl::resource::TextureUtils::GenerateNewTextureId()
@@ -32,6 +32,14 @@ uint32_t mdcii::ogl::resource::TextureUtils::GenerateNewTextureId()
     MDCII_ASSERT(textureId, "[TextureUtils::GenerateNewTextureId()] Invalid texture Id.")
 
     return textureId;
+}
+
+void mdcii::ogl::resource::TextureUtils::DeleteTexture(const uint32_t t_textureId)
+{
+    if (t_textureId)
+    {
+        glDeleteTextures(1, &t_textureId);
+    }
 }
 
 //-------------------------------------------------
@@ -105,6 +113,10 @@ void mdcii::ogl::resource::TextureUtils::UseClampToEdgeWrapping()
 void mdcii::ogl::resource::TextureUtils::Bind(const uint32_t t_textureId, const uint32_t t_target)
 {
     MDCII_ASSERT(t_textureId, "[TextureUtils::Bind()] Invalid texture Id.")
+
+    // make sure that the OpenGL constants are used here
+    MDCII_ASSERT(t_target == GL_TEXTURE_2D || t_target == GL_TEXTURE_3D || t_target == GL_TEXTURE_CUBE_MAP || t_target == GL_TEXTURE_2D_ARRAY, "[TextureUtils::Bind()] Invalid texture target.")
+
     glBindTexture(t_target, t_textureId);
 }
 
@@ -115,6 +127,9 @@ void mdcii::ogl::resource::TextureUtils::Bind(const uint32_t t_textureId)
 
 void mdcii::ogl::resource::TextureUtils::Unbind(const uint32_t t_target)
 {
+    // make sure that the OpenGL constants are used here
+    MDCII_ASSERT(t_target == GL_TEXTURE_2D || t_target == GL_TEXTURE_3D || t_target == GL_TEXTURE_CUBE_MAP || t_target == GL_TEXTURE_2D_ARRAY, "[TextureUtils::Unbind()] Invalid texture target.")
+
     glBindTexture(t_target, 0);
 }
 

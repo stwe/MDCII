@@ -21,7 +21,7 @@
 #include "Game.h"
 #include "MousePicker.h"
 #include "MapContent.h"
-#include "MdciiAssert.h"
+#include "TileAtlas.h"
 #include "ecs/Components.h"
 #include "file/OriginalResourcesManager.h"
 #include "state/State.h"
@@ -55,7 +55,7 @@ void mdcii::map::Map::Render() const
 {
     //RenderGridEntities();
     //RenderEntities();
-    terrainRenderer->RenderTiles(mapContent->zoom, mapContent->rotation, *context->window, *context->camera);
+    terrainRenderer->Render(mapContent->zoom, mapContent->rotation, *context->window, *context->camera);
 
     mousePicker->Render(*context->window, *context->camera);
 }
@@ -152,8 +152,8 @@ void mdcii::map::Map::Init(const std::string& t_filePath)
     mapContent = std::make_unique<MapContent>(t_filePath, context);
     mapContent->zoom = Zoom::GFX;
 
-    // todo: the camera needs to know the current zoom
-    context->camera->zoom = Zoom::GFX; // default
+    // the camera needs to know the current zoom
+    context->camera->zoom = Zoom::GFX;
 
     // create tile renderer
     renderer = std::make_unique<renderer::TileRenderer>();
@@ -161,15 +161,11 @@ void mdcii::map::Map::Init(const std::string& t_filePath)
     // create text renderer
     textRenderer = std::make_unique<renderer::TextRenderer>(Game::RESOURCES_REL_PATH + "bitter/Bitter-Regular.otf");
 
-    // create terrain renderer
-    terrainRenderer = std::make_unique<renderer::TerrainRenderer>(this);
+    // create tile atlas texture arrays
+    tileAtlas = std::make_unique<TileAtlas>();
 
-    // pass all model matrices from each rotation in each zoom level
-    const auto& layer{ mapContent->GetLayer(LayerType::TERRAIN) };
-    const int32_t instances{ mapContent->GetLayer(LayerType::TERRAIN).GetInstances() };
-    terrainRenderer->AddModelMatrices(Zoom::SGFX, layer.GetModelMatrices(Zoom::SGFX), instances);
-    terrainRenderer->AddModelMatrices(Zoom::MGFX, layer.GetModelMatrices(Zoom::MGFX), instances);
-    terrainRenderer->AddModelMatrices(Zoom::GFX, layer.GetModelMatrices(Zoom::GFX), instances);
+    // create terrain renderer that renders the terrain with instancing
+    terrainRenderer = std::make_unique<renderer::TerrainRenderer>(this);
 
     Log::MDCII_LOG_DEBUG("[Map::Init()] The map was successfully initialized.");
 }

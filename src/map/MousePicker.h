@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <array>
+#include "Zoom.h"
 #include "ogl/Window.h"
 #include "camera/Camera.h"
 
@@ -52,8 +53,6 @@ namespace mdcii::map
         //-------------------------------------------------
         // Constants
         //-------------------------------------------------
-
-        static constexpr auto NR_OF_ZOOMS{ 3 };
 
         static constexpr auto LEFT_MOUSE_BUTTON{ 0 };
         static constexpr auto RIGHT_MOUSE_BUTTON{ 1 };

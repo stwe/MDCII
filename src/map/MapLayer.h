@@ -52,7 +52,7 @@ namespace mdcii::map
     {
     public:
         //-------------------------------------------------
-        // Types
+        // MapTile types
         //-------------------------------------------------
 
         /**
@@ -64,6 +64,10 @@ namespace mdcii::map
          * A MapTile container for each of the four possible rotations.
          */
         using Map_Tiles_For_Each_Rotation = std::array<Map_Tiles, NR_OF_ROTATIONS>;
+
+        //-------------------------------------------------
+        // Model matrices types
+        //-------------------------------------------------
 
         /**
          * A model matrices container.
@@ -81,6 +85,45 @@ namespace mdcii::map
         using Model_Matrices_For_Each_Zoom = std::array<Model_Matrices_For_Each_Rotation, NR_OF_ZOOMS>;
 
         //-------------------------------------------------
+        // Texture info types
+        //-------------------------------------------------
+
+        /**
+         * A texture atlas indices container.
+         */
+        using Texture_Atlas_Indices = std::vector<glm::ivec4>;
+
+        /**
+         * A texture atlas indices container for each of the three possible zoom levels.
+         */
+        using Texture_Atlas_Indices_For_Each_Zoom = std::array<Texture_Atlas_Indices, NR_OF_ZOOMS>;
+
+        /**
+         * A texture offsets container.
+         */
+        using Texture_Offsets = std::vector<float>;
+
+        /**
+         * A texture offsets container for each of the four possible rotations.
+         */
+        using Texture_Offsets_For_Each_Rotation = std::array<Texture_Offsets, NR_OF_ROTATIONS>;
+
+        /**
+         * Four texture offsets containers for each of the three possible zoom levels.
+         */
+        using Texture_Offsets_For_Each_Zoom = std::array<Texture_Offsets_For_Each_Rotation, NR_OF_ZOOMS>;
+
+        /**
+         * A texture heights container.
+         */
+        using Texture_Heights = std::vector<glm::vec4>;
+
+        /**
+         * A texture heights container for each of the three possible zoom levels.
+         */
+        using Texture_Heights_For_Each_Zoom = std::array<Texture_Heights, NR_OF_ZOOMS>;
+
+        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -96,6 +139,7 @@ namespace mdcii::map
 
         /**
          * A MapTile container for each of the four possible rotations.
+         * Used to iterate over the tiles in the correct order for each rotation.
          */
         Map_Tiles_For_Each_Rotation sortedMapTiles;
 
@@ -103,6 +147,31 @@ namespace mdcii::map
          * Four model matrices containers for each of the three possible zoom levels
          */
         Model_Matrices_For_Each_Zoom modelMatrices;
+
+        /**
+         * A texture atlas indices container for each of the three possible zoom levels.
+         * Specifies from which atlas image the texture for each tile is to be taken.
+         * x = number of atlas image for rot0
+         * y = number of atlas image for rot90
+         * z = number of atlas image for rot180
+         * w = number of atlas image for rot270
+         */
+        Texture_Atlas_Indices_For_Each_Zoom textureAtlasIndices;
+
+        /**
+         * Four texture offsets containers for each of the three possible zoom levels.
+         */
+        Texture_Offsets_For_Each_Zoom offsets;
+
+        /**
+         * A texture heights container for each of the three possible zoom levels.
+         * The height of each texture.
+         * x = height for rot0
+         * y = height for rot90
+         * z = height for rot180
+         * w = height for rot270
+         */
+        Texture_Heights_For_Each_Zoom heights;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -189,6 +258,11 @@ namespace mdcii::map
          * Create model matrices for instanced rendering.
          */
         void CreateModelMatrices();
+
+        /**
+         * Stores information about which texture is used for each instance.
+         */
+        void CreateTextureInfo();
 
         //-------------------------------------------------
         // Add/replace tile

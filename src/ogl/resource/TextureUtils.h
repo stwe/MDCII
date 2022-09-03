@@ -38,7 +38,7 @@ namespace mdcii::ogl::resource
         TextureUtils& operator=(TextureUtils&& t_other) noexcept = delete;
 
         //-------------------------------------------------
-        // Generate
+        // Generate && delete
         //-------------------------------------------------
 
         /**
@@ -47,6 +47,13 @@ namespace mdcii::ogl::resource
          * @return The texture handle.
          */
         static uint32_t GenerateNewTextureId();
+
+        /**
+         * Deletes a texture handle.
+         *
+         * @param t_textureId The texture handle to delete.
+         */
+        static void DeleteTexture(uint32_t t_textureId);
 
         //-------------------------------------------------
         // Filter

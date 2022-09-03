@@ -55,6 +55,11 @@ namespace mdcii::map
     class MapContent;
 
     /**
+     * Forward declaration class TileAtlas.
+     */
+    class TileAtlas;
+
+    /**
      * Forward declaration enum class ChangeZoom.
      */
     enum class ChangeZoom;
@@ -120,6 +125,11 @@ namespace mdcii::map
          * Lets OpenGL render a text string.
          */
         std::unique_ptr<renderer::TextRenderer> textRenderer;
+
+        /**
+         * A texture array handle for each zoom level.
+         */
+        std::unique_ptr<TileAtlas> tileAtlas;
 
         /**
          * Instanced terrain renderer.

@@ -18,7 +18,7 @@
 
 #include "MapLayer.h"
 #include "MapContent.h"
-#include "MdciiAssert.h"
+#include "TileAtlas.h"
 #include "ecs/Components.h"
 #include "ecs/EcsUtils.h"
 #include "ogl/resource/ResourceManager.h"
@@ -152,7 +152,7 @@ void mdcii::map::MapLayer::CreateModelMatrices()
         // to store the model matrices for each rotation
         Model_Matrices_For_Each_Rotation matricesForRotations;
 
-        // for each rotation create the model matrices
+        // for each rotation in the zoom create the model matrices
         magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
 
             // to store the model matrices
@@ -175,11 +175,10 @@ void mdcii::map::MapLayer::CreateModelMatrices()
                 }
                 const auto gfx{ mapTile.gfxs[rotation_to_int(buildingRotation)] };
 
-                // get width, height && textureId
+                // get width && height
                 const auto& stadtfldBshTextures{ m_mapContent->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
                 const auto w{ static_cast<float>(stadtfldBshTextures[gfx]->width) };
                 const auto h{ static_cast<float>(stadtfldBshTextures[gfx]->height) };
-                const auto textureId{ stadtfldBshTextures[gfx]->textureId }; // todo
 
                 // get elevation
                 auto elevation{ 0.0f };
@@ -199,6 +198,69 @@ void mdcii::map::MapLayer::CreateModelMatrices()
         });
 
         modelMatrices.at(magic_enum::enum_integer(t_zoom)) = matricesForRotations;
+    });
+}
+
+void mdcii::map::MapLayer::CreateTextureInfo()
+{
+    // for each zoom
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
+
+        // zoom int
+        const auto zoom{ magic_enum::enum_integer(t_zoom) };
+
+        // atlas rows
+        const auto atlasRows{ TileAtlas::ROWS.at(zoom) };
+
+        // to store info for each rotation
+        Texture_Atlas_Indices texIndicesForRotations(GetInstances());
+        Texture_Offsets_For_Each_Rotation texOffsetsForRotations;
+        Texture_Heights texHeightsForRotations(GetInstances());
+
+        // for each rotation in the zoom
+        magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+
+            // to store texture offsets
+            Texture_Offsets textureOffsets;
+
+            // counter for vec4 types (0 = x, 1 = y, 2 = z, 3 = w)
+            auto i{ 0 };
+
+            // for each tile
+            for (const auto& mapTile : sortedMapTiles.at(magic_enum::enum_integer(t_rotation)))
+            {
+                // get gfx
+                const auto& building{ m_mapContent->context->originalResourcesManager->GetBuildingById(mapTile.buildingId) };
+                auto buildingRotation{ mapTile.rotation };
+                if (building.rotate > 0)
+                {
+                    buildingRotation = buildingRotation + t_rotation;
+                }
+                const auto gfx{ mapTile.gfxs[rotation_to_int(buildingRotation)] };
+
+                // texture indices
+                texIndicesForRotations.at(i)[magic_enum::enum_integer(t_rotation)] = gfx / (atlasRows * atlasRows);
+
+                // offsets
+                const auto index{ gfx % (atlasRows * atlasRows) };
+                auto offset{ TileAtlas::GetTextureOffset(index, atlasRows) };
+                textureOffsets.push_back(offset.x);
+                textureOffsets.push_back(offset.y);
+
+                // heights
+                const auto& stadtfldBshTextures{ m_mapContent->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
+                const auto h{ static_cast<float>(stadtfldBshTextures.at(gfx)->height) };
+                texHeightsForRotations.at(i)[magic_enum::enum_integer(t_rotation)] = h;
+
+                i++;
+            }
+
+            texOffsetsForRotations.at(rotation_to_int(t_rotation)) = textureOffsets;
+        });
+
+        textureAtlasIndices.at(zoom) = texIndicesForRotations;
+        offsets.at(zoom) = texOffsetsForRotations;
+        heights.at(zoom) = texHeightsForRotations;
     });
 }
 
