@@ -104,20 +104,7 @@ void mdcii::map::TileAtlas::LoadAtlasImages(const Zoom t_zoom, const int t_nrOfI
 
     Log::MDCII_LOG_DEBUG("[TileAtlas::LoadAtlasImages()] {} atlas images were loaded successfully.", images.size());
 
-    // todo: create one method
-    switch (t_zoom)
-    {
-    case Zoom::SGFX:
-        CreateSgfxTextureArray(images);
-        break;
-    case Zoom::MGFX:
-        CreateMgfxTextureArray(images);
-        break;
-    case Zoom::GFX:
-        CreateGfxTextureArray(images);
-        break;
-    }
-
+    CreateTextureArray(t_zoom, images);
     DeleteAtlasImages(t_nrOfImages, images);
 
     Log::MDCII_LOG_DEBUG("[TileAtlas::LoadAtlasImages()] The textures have been successfully created for zoom {}.", magic_enum::enum_name(t_zoom));
@@ -137,18 +124,24 @@ void mdcii::map::TileAtlas::DeleteAtlasImages(const int t_nrOfImages, const std:
 // Texture array
 //-------------------------------------------------
 
-void mdcii::map::TileAtlas::CreateSgfxTextureArray(const std::vector<unsigned char*>& t_images)
+void mdcii::map::TileAtlas::CreateTextureArray(const Zoom t_zoom, const std::vector<unsigned char*>& t_images)
 {
     const auto id{ ogl::resource::TextureUtils::GenerateNewTextureId() };
     ogl::resource::TextureUtils::Bind(id, GL_TEXTURE_2D_ARRAY);
+
+    const auto zoom{ magic_enum::enum_integer(t_zoom) };
+    const auto width{ WIDTHS.at(zoom) };
+    const auto height{ HEIGHTS.at(zoom) };
+    const auto rows{ ROWS.at(zoom) };
+    const auto images{ IMAGES.at(zoom) };
 
     glTextureStorage3D(
         id,
         1,
         GL_RGBA8,
-        static_cast<int32_t>(MAX_SGFX_WIDTH) * NR_OF_SGFX_ROWS,
-        static_cast<int32_t>(MAX_SGFX_HEIGHT) * NR_OF_SGFX_ROWS,
-        NR_OF_SGFX_ATLAS_IMAGES
+        static_cast<int32_t>(width) * rows,
+        static_cast<int32_t>(height) * rows,
+        images
     );
 
     auto zOffset{ 0 };
@@ -159,8 +152,8 @@ void mdcii::map::TileAtlas::CreateSgfxTextureArray(const std::vector<unsigned ch
             0,
             0, 0,
             zOffset,
-            static_cast<int32_t>(MAX_SGFX_WIDTH) * NR_OF_SGFX_ROWS,
-            static_cast<int32_t>(MAX_SGFX_HEIGHT) * NR_OF_SGFX_ROWS,
+            static_cast<int32_t>(width) * rows,
+            static_cast<int32_t>(height) * rows,
             1,
             GL_RGBA,
             GL_UNSIGNED_INT_8_8_8_8_REV,
@@ -172,83 +165,7 @@ void mdcii::map::TileAtlas::CreateSgfxTextureArray(const std::vector<unsigned ch
 
     ogl::resource::TextureUtils::Unbind(GL_TEXTURE_2D_ARRAY);
 
-    textureIds.at(magic_enum::enum_integer(Zoom::SGFX)) = id;
-}
-
-void mdcii::map::TileAtlas::CreateMgfxTextureArray(const std::vector<unsigned char*>& t_images)
-{
-    const auto id{ ogl::resource::TextureUtils::GenerateNewTextureId() };
-    ogl::resource::TextureUtils::Bind(id, GL_TEXTURE_2D_ARRAY);
-
-    glTextureStorage3D(
-        id,
-        1,
-        GL_RGBA8,
-        static_cast<int32_t>(MAX_MGFX_WIDTH) * NR_OF_MGFX_ROWS,
-        static_cast<int32_t>(MAX_MGFX_HEIGHT) * NR_OF_MGFX_ROWS,
-        NR_OF_MGFX_ATLAS_IMAGES
-    );
-
-    auto zOffset{ 0 };
-    for (const auto* image : t_images)
-    {
-        glTextureSubImage3D(
-            id,
-            0,
-            0, 0,
-            zOffset,
-            static_cast<int32_t>(MAX_MGFX_WIDTH) * NR_OF_MGFX_ROWS,
-            static_cast<int32_t>(MAX_MGFX_HEIGHT) * NR_OF_MGFX_ROWS,
-            1,
-            GL_RGBA,
-            GL_UNSIGNED_INT_8_8_8_8_REV,
-            image
-        );
-
-        zOffset++;
-    }
-
-    ogl::resource::TextureUtils::Unbind(GL_TEXTURE_2D_ARRAY);
-
-    textureIds.at(magic_enum::enum_integer(Zoom::MGFX)) = id;
-}
-
-void mdcii::map::TileAtlas::CreateGfxTextureArray(const std::vector<unsigned char*>& t_images)
-{
-    const auto id{ ogl::resource::TextureUtils::GenerateNewTextureId() };
-    ogl::resource::TextureUtils::Bind(id, GL_TEXTURE_2D_ARRAY);
-
-    glTextureStorage3D(
-        id,
-        1,
-        GL_RGBA8,
-        static_cast<int32_t>(MAX_GFX_WIDTH) * NR_OF_GFX_ROWS,
-        static_cast<int32_t>(MAX_GFX_HEIGHT) * NR_OF_GFX_ROWS,
-        NR_OF_GFX_ATLAS_IMAGES
-    );
-
-    auto zOffset{ 0 };
-    for (const auto* image : t_images)
-    {
-        glTextureSubImage3D(
-            id,
-            0,
-            0, 0,
-            zOffset,
-            static_cast<int32_t>(MAX_GFX_WIDTH) * NR_OF_GFX_ROWS,
-            static_cast<int32_t>(MAX_GFX_HEIGHT) * NR_OF_GFX_ROWS,
-            1,
-            GL_RGBA,
-            GL_UNSIGNED_INT_8_8_8_8_REV,
-            image
-        );
-
-        zOffset++;
-    }
-
-    ogl::resource::TextureUtils::Unbind(GL_TEXTURE_2D_ARRAY);
-
-    textureIds.at(magic_enum::enum_integer(Zoom::GFX)) = id;
+    textureIds.at(zoom) = id;
 }
 
 //-------------------------------------------------

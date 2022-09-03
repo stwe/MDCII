@@ -220,25 +220,12 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * Creates a texture array from atlas images for zoom Sgfx.
+         * Creates a texture array from atlas images for a given zoom.
          *
-         * @param t_images The Sgfx atlas images.
+         * @param t_zoom The zoom.
+         * @param t_images The atlas images.
          */
-        void CreateSgfxTextureArray(const std::vector<unsigned char*>& t_images);
-
-        /**
-         * Creates a texture array from atlas images for zoom Mgfx.
-         *
-         * @param t_images The Mgfx atlas images.
-         */
-        void CreateMgfxTextureArray(const std::vector<unsigned char*>& t_images);
-
-        /**
-         * Creates a texture array from atlas images for zoom Gfx.
-         *
-         * @param t_images The Gfx atlas images.
-         */
-        void CreateGfxTextureArray(const std::vector<unsigned char*>& t_images);
+        void CreateTextureArray(Zoom t_zoom, const std::vector<unsigned char*>& t_images);
 
         //-------------------------------------------------
         // Clean up
