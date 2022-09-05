@@ -84,7 +84,7 @@ namespace mdcii::ogl::resource
         //-------------------------------------------------
 
         /**
-         * Binds a texture.
+         * Binds this texture handle.
          */
         void Bind() const;
 

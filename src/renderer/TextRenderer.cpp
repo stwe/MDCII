@@ -18,11 +18,13 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 #include "TextRenderer.h"
-#include "MdciiAssert.h"
+#include "Log.h"
 #include "MdciiException.h"
 #include "ogl/OpenGL.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/TextureUtils.h"
+#include "ogl/buffer/Vao.h"
+#include "ogl/buffer/Vbo.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -66,7 +68,7 @@ void mdcii::renderer::TextRenderer::RenderText(
     shaderProgram.SetUniform("textColor", t_color);
 
     // bind Vao
-    glBindVertexArray(m_vaoId);
+    m_vao->Bind();
 
     // iterate through all characters
     for (auto c = t_text.begin(); c != t_text.end(); ++c)
@@ -94,19 +96,19 @@ void mdcii::renderer::TextRenderer::RenderText(
         shaderProgram.SetUniform("textTexture", 0);
 
         // update content of Vbo memory
-        glBindBuffer(GL_ARRAY_BUFFER, m_vboId);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        m_vao->vbos.at(0)->Bind();
+        ogl::buffer::Vbo::StoreData(0, sizeof(vertices), vertices);
+        ogl::buffer::Vbo::Unbind();
 
         // render
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        m_vao->DrawPrimitives();
 
         // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
         t_xPos += static_cast<float>(ch.advance >> 6) * t_scale;
     }
 
     // unbind Vao
-    glBindVertexArray(0);
+    ogl::buffer::Vao::Unbind();
 
     ogl::resource::TextureUtils::Unbind();
     ogl::resource::ShaderProgram::Unbind();
@@ -188,29 +190,26 @@ void mdcii::renderer::TextRenderer::Init()
 void mdcii::renderer::TextRenderer::CreateMesh()
 {
     // create && bind vao
-    glGenVertexArrays(1, &m_vaoId);
-    MDCII_ASSERT(m_vaoId, "[TextRenderer::CreateMesh()] Invalid Vao handle.")
-    Log::MDCII_LOG_DEBUG("[TextRenderer::CreateMesh()] A new Vao was created with the Id: {}.", m_vaoId);
+    m_vao = std::make_unique<ogl::buffer::Vao>();
+    m_vao->Bind();
 
-    glBindVertexArray(m_vaoId);
-
-    // create && bind vbo
-    glGenBuffers(1, &m_vboId);
-    MDCII_ASSERT(m_vboId, "[TextRenderer::CreateMesh()] Invalid Vbo handle.")
-    Log::MDCII_LOG_DEBUG("[TextRenderer::CreateMesh()] A new Vbo was created with the Id: {}.", m_vboId);
-
-    glBindBuffer(GL_ARRAY_BUFFER, m_vboId);
+    // create && bind Vbo
+    auto vbo{ std::make_unique<ogl::buffer::Vbo>() };
+    vbo->Bind();
 
     // reserve enough memory
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, nullptr, GL_DYNAMIC_DRAW);
+    ogl::buffer::Vbo::ReserveMemory(sizeof(float) * 6 * 4);
 
     // set buffer layout
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+    ogl::buffer::Vbo::AddFloatAttribute(0, 4, 4, 0);
 
-    // unbind vbo
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // set draw count
+    m_vao->drawCount = 6;
 
-    // unbind vao
-    glBindVertexArray(0);
+    // unbind Vbo && Vao
+    ogl::buffer::Vbo::Unbind();
+    ogl::buffer::Vao::Unbind();
+
+    // save Vbo in the Vao
+    m_vao->vbos.emplace_back(std::move(vbo));
 }

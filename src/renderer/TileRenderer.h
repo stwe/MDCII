@@ -18,8 +18,18 @@
 
 #pragma once
 
+#include <memory>
 #include "ogl/Window.h"
 #include "camera/Camera.h"
+
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::ogl::buffer
+{
+    class Vao;
+}
 
 //-------------------------------------------------
 // TileRenderer
@@ -92,8 +102,8 @@ namespace mdcii::renderer
         //-------------------------------------------------
 
         /**
-         * The OpenGL Vertex Array Object handle.
+         * The Vao for this renderer.
          */
-        uint32_t m_vao{ 0 };
+        std::unique_ptr<ogl::buffer::Vao> m_vao;
     };
 }

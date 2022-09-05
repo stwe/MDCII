@@ -19,6 +19,8 @@
 #pragma once
 
 #include <cstdint>
+#include <memory>
+#include <vector>
 
 //-------------------------------------------------
 // Vao
@@ -26,6 +28,15 @@
 
 namespace mdcii::ogl::buffer
 {
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
+    /**
+     * Forward declaration class Vbo.
+     */
+    class Vbo;
+
     /**
      * Represents a Vertex Array Object.
      */
@@ -46,6 +57,11 @@ namespace mdcii::ogl::buffer
          */
         int32_t drawCount{ 0 };
 
+        /**
+         * To store assigned Vbos objects.
+         */
+        std::vector<std::unique_ptr<Vbo>> vbos;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -63,16 +79,63 @@ namespace mdcii::ogl::buffer
         // Bind / unbind
         //-------------------------------------------------
 
+        /**
+         * Binds this Vao handle.
+         */
         void Bind() const;
+
+        /**
+         * Unbinds a Vao handle.
+         */
         static void Unbind();
 
         //-------------------------------------------------
         // Draw
         //-------------------------------------------------
 
+        /**
+         * Draws primitives using the currently active shader.
+         *
+         * @param t_drawMode The OpenGL primitive type to draw.
+         * @param t_first The starting index of the vertex array (usually 0).
+         */
         void DrawPrimitives(uint32_t t_drawMode, int32_t t_first) const;
+
+        /**
+         * Draws primitives using the currently active shader.
+         *
+         * @param t_drawMode The OpenGL primitive type to draw.
+         */
         void DrawPrimitives(uint32_t t_drawMode) const;
+
+        /**
+         * Draws primitives using the currently active shader.
+         */
         void DrawPrimitives() const;
+
+        /**
+         * Draw multiple instances with a single call.
+         *
+         * @param t_drawMode The OpenGL primitive type to draw.
+         * @param t_first The starting index of the vertex array (usually 0).
+         * @param t_instances The number of instances to render.
+         */
+        void DrawInstanced(uint32_t t_drawMode, int32_t t_first, int32_t t_instances) const;
+
+        /**
+         * Draw multiple instances with a single call.
+         *
+         * @param t_drawMode The OpenGL primitive type to draw.
+         * @param t_instances The number of instances to render.
+         */
+        void DrawInstanced(uint32_t t_drawMode, int32_t t_instances) const;
+
+        /**
+         * Draw multiple instances with a single call.
+         *
+         * @param t_instances The number of instances to render.
+         */
+        void DrawInstanced(int32_t t_instances) const;
 
     protected:
 
@@ -81,12 +144,18 @@ namespace mdcii::ogl::buffer
         // Create
         //-------------------------------------------------
 
+        /**
+         * Creates a new Vao handle.
+         */
         void CreateId();
 
         //-------------------------------------------------
         // Clean up
         //-------------------------------------------------
 
+        /**
+         * Clean up / delete handle.
+         */
         void CleanUp() const;
     };
 }

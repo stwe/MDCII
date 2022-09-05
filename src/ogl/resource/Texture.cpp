@@ -130,9 +130,11 @@ void mdcii::ogl::resource::Texture::LoadFromFile()
 
 void mdcii::ogl::resource::Texture::CleanUp() const
 {
+    Log::MDCII_LOG_DEBUG("[Texture::CleanUp()] Clean up Texture Id {}.", id);
+
     if (id)
     {
-        Log::MDCII_LOG_DEBUG("[Texture::CleanUp()] Clean up Texture Id {}.", id);
         glDeleteTextures(1, &id);
+        Log::MDCII_LOG_DEBUG("[Texture::CleanUp()] Texture Id {} was deleted.", id);
     }
 }

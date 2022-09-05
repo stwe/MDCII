@@ -22,8 +22,18 @@
 #include FT_FREETYPE_H
 
 #include <map>
+#include <memory>
 #include "ogl/Window.h"
 #include "camera/Camera.h"
+
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::ogl::buffer
+{
+    class Vao;
+}
 
 //-------------------------------------------------
 // TextRenderer
@@ -31,10 +41,6 @@
 
 namespace mdcii::renderer
 {
-    //-------------------------------------------------
-    // TextRenderer
-    //-------------------------------------------------
-
     /**
      * FreeType text rendering.
      */
@@ -124,14 +130,9 @@ namespace mdcii::renderer
         uint32_t m_textureId{ 0 };
 
         /**
-         * The Vao handle.
+         * The Vao for this renderer.
          */
-        uint32_t m_vaoId{ 0 };
-
-        /**
-         * The Vbo handle.
-         */
-        uint32_t m_vboId{ 0 };
+        std::unique_ptr<ogl::buffer::Vao> m_vao;
 
         //-------------------------------------------------
         // Init

@@ -18,6 +18,7 @@
 
 #include "TileRenderer.h"
 #include "RenderUtils.h"
+#include "ogl/OpenGL.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/TextureUtils.h"
 
@@ -29,7 +30,7 @@ mdcii::renderer::TileRenderer::TileRenderer()
 {
     Log::MDCII_LOG_DEBUG("[TileRenderer::TileRenderer()] Create TileRenderer.");
 
-    RenderUtils::CreateRectangleVao(&m_vao);
+    m_vao = RenderUtils::CreateRectangleVao();
 }
 
 mdcii::renderer::TileRenderer::~TileRenderer() noexcept
@@ -60,10 +61,10 @@ void mdcii::renderer::TileRenderer::RenderTile(
     shaderProgram.SetUniform("diffuseMap", 0);
     shaderProgram.SetUniform("selected", t_selected);
 
-    glBindVertexArray(m_vao);
+    m_vao->Bind();
     ogl::resource::TextureUtils::BindForReading(t_textureId, GL_TEXTURE0);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
+    m_vao->DrawPrimitives();
+    ogl::buffer::Vao::Unbind();
 
     ogl::OpenGL::DisableBlending();
 }
@@ -87,10 +88,10 @@ void mdcii::renderer::TileRenderer::RenderTileForMousePicking(
     shaderProgram.SetUniform("diffuseMap", 0);
     shaderProgram.SetUniform("color", t_color);
 
-    glBindVertexArray(m_vao);
+    m_vao->Bind();
     ogl::resource::TextureUtils::BindForReading(t_textureId, GL_TEXTURE0);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
+    m_vao->DrawPrimitives();
+    ogl::buffer::Vao::Unbind();
 
     ogl::OpenGL::DisableBlending();
 }

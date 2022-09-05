@@ -17,6 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "Vao.h"
+#include "Vbo.h"
 #include "MdciiAssert.h"
 #include "ogl/OpenGL.h"
 
@@ -70,6 +71,22 @@ void mdcii::ogl::buffer::Vao::DrawPrimitives(const uint32_t t_drawMode) const
 void mdcii::ogl::buffer::Vao::DrawPrimitives() const
 {
     DrawPrimitives(GL_TRIANGLES);
+}
+
+void mdcii::ogl::buffer::Vao::DrawInstanced(const uint32_t t_drawMode, const int32_t t_first, const int32_t t_instances) const
+{
+    MDCII_ASSERT(drawCount, "[Vao::DrawInstanced()] Invalid draw count.")
+    glDrawArraysInstanced(t_drawMode, t_first, drawCount, t_instances);
+}
+
+void mdcii::ogl::buffer::Vao::DrawInstanced(const uint32_t t_drawMode, const int32_t t_instances) const
+{
+    DrawInstanced(t_drawMode, 0, t_instances);
+}
+
+void mdcii::ogl::buffer::Vao::DrawInstanced(const int32_t t_instances) const
+{
+    DrawInstanced(GL_TRIANGLES, 0, t_instances);
 }
 
 //-------------------------------------------------

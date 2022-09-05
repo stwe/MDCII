@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <array>
 #include "ogl/Window.h"
 #include "camera/Camera.h"
 #include "map/Zoom.h"
@@ -31,6 +30,11 @@
 namespace mdcii::map
 {
     class Map;
+}
+
+namespace mdcii::ogl::buffer
+{
+    class Vao;
 }
 
 //-------------------------------------------------
@@ -67,6 +71,14 @@ namespace mdcii::renderer
         // Render
         //-------------------------------------------------
 
+        /**
+         * Renders the terrain layer with the specified zoom and rotation.
+         *
+         * @param t_zoom The zoom to render for.
+         * @param t_rotation The rotation to render for.
+         * @param t_window The Window object to get the orthographic projection matrix.
+         * @param t_camera The Camera object to get the view matrix.
+         */
         void Render(
             map::Zoom t_zoom,
             map::Rotation t_rotation,
@@ -78,7 +90,14 @@ namespace mdcii::renderer
         // Data to Gpu
         //-------------------------------------------------
 
+        /**
+         * Passes all model matrices to the Gpu.
+         */
         void AddModelMatrices();
+
+        /**
+         * Passes all texture info to the Gpu.
+         */
         void AddTextureInfo() const;
 
     protected:
@@ -94,9 +113,9 @@ namespace mdcii::renderer
         map::Map* m_map{ nullptr };
 
         /**
-         * The OpenGL Vertex Array Object handles for each zoom level.
+         * A Vao object for each zoom level.
          */
-        std::array<uint32_t, map::NR_OF_ZOOMS> m_vaos{};
+        std::array<std::unique_ptr<ogl::buffer::Vao>, map::NR_OF_ZOOMS> m_vaos{};
 
         /**
          * Number of instances to render.
@@ -116,16 +135,18 @@ namespace mdcii::renderer
         // Helper
         //-------------------------------------------------
 
+        /**
+         * Add model matrices to the Gpu for a given zoom level.
+         *
+         * @param t_zoom The zoom level.
+         */
         void AddModelMatrices(map::Zoom t_zoom);
-        void AddTextureInfo(map::Zoom t_zoom) const;
-
-        //-------------------------------------------------
-        // Clean up
-        //-------------------------------------------------
 
         /**
-         * Clean up.
+         * Add texture info to the Gpu for a given zoom level.
+         * 
+         * @param t_zoom The zoom level.
          */
-        void CleanUp() const;
+        void AddTextureInfo(map::Zoom t_zoom) const;
     };
 }

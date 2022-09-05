@@ -58,8 +58,23 @@ namespace mdcii::ogl::buffer
         // Bind / unbind
         //-------------------------------------------------
 
+        /**
+         * Binds this Vbo handle.
+         */
         void Bind() const;
+
+        /**
+         * Unbinds a Vbo handle.
+         */
         static void Unbind();
+
+        //-------------------------------------------------
+        // Data
+        //-------------------------------------------------
+
+        static void ReserveMemory(uint32_t t_size);
+        static void StoreStaticData(uint32_t t_size, const void* t_data);
+        static void StoreData(int32_t t_offset, uint32_t t_size, const void* t_data);
 
         //-------------------------------------------------
         // Attributes
@@ -72,13 +87,32 @@ namespace mdcii::ogl::buffer
          * @param t_nrOfFloatComponents The size of the vertex attribute.
          * @param t_nrOfAllFloats The space between consecutive vertex attributes.
          * @param t_startPoint The offset of where the position data begins in the buffer.
+         * @param t_instancing Call glVertexAttribDivisor if true.
          */
-        void AddFloatAttribute(
+        static void AddFloatAttribute(
             uint32_t t_index,
             int32_t t_nrOfFloatComponents,
             int32_t t_nrOfAllFloats,
-            uint64_t t_startPoint
-        ) const;
+            uint64_t t_startPoint,
+            bool t_instancing = false
+        );
+
+        /**
+         * Specified how OpenGL should interpret the vertex data.
+         *
+         * @param t_index The location of the vertex attribute.
+         * @param t_nrOfIntComponents The size of the vertex attribute.
+         * @param t_nrOfAllInts The space between consecutive vertex attributes.
+         * @param t_startPoint The offset of where the position data begins in the buffer.
+         * @param t_instancing Call glVertexAttribDivisor if true.
+         */
+        static void AddIntAttribute(
+            uint32_t t_index,
+            int32_t t_nrOfIntComponents,
+            int32_t t_nrOfAllInts,
+            uint64_t t_startPoint,
+            bool t_instancing
+        );
 
     protected:
 
@@ -87,12 +121,18 @@ namespace mdcii::ogl::buffer
         // Create
         //-------------------------------------------------
 
+        /**
+         * Creates a new Vbo handle.
+         */
         void CreateId();
 
         //-------------------------------------------------
         // Clean up
         //-------------------------------------------------
 
+        /**
+         * Clean up / delete handle.
+         */
         void CleanUp() const;
     };
 }

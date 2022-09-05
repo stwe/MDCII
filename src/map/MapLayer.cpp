@@ -148,13 +148,11 @@ void mdcii::map::MapLayer::CreateModelMatrices()
 {
     // for each zoom
     magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
-
         // to store the model matrices for each rotation
         Model_Matrices_For_Each_Rotation matricesForRotations;
 
         // for each rotation in the zoom create the model matrices
         magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
-
             // to store the model matrices
             Model_Matrices matrices;
 
@@ -205,7 +203,6 @@ void mdcii::map::MapLayer::CreateTextureInfo()
 {
     // for each zoom
     magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
-
         // zoom int
         const auto zoom{ magic_enum::enum_integer(t_zoom) };
 
@@ -219,7 +216,6 @@ void mdcii::map::MapLayer::CreateTextureInfo()
 
         // for each rotation in the zoom
         magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
-
             // to store texture offsets
             Texture_Offsets textureOffsets;
 
