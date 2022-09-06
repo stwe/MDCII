@@ -49,7 +49,7 @@ namespace mdcii::file
 
         /**
          * The OpenGL texture handle of this gfx.
-         * So this graphic is accessible to the GPU.
+         * So this graphic is accessible to the Gpu.
          */
         uint32_t textureId{ 0 };
     };
@@ -153,13 +153,18 @@ namespace mdcii::file
         void DecodePixelData(uint32_t t_offset);
 
         /**
-         * Makes the BshTexture pixel data accessible to the GPU.
+         * Makes the BshTexture pixel data accessible to the Gpu.
          */
         void CreateGLTextures() const;
 
         //-------------------------------------------------
         // CleanUp
         //-------------------------------------------------
+
+        /**
+         * Deletes data that is no longer needed after creating the OpenGL textures.
+         */
+        void ClearTempData();
 
         /**
          * Clean up OpenGL / delete textures.

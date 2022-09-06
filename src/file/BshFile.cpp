@@ -78,7 +78,11 @@ void mdcii::file::BshFile::ReadDataFromChunks()
         DecodePixelData(offset);
     }
 
+    // create OpenGL textures
     CreateGLTextures();
+
+    // clear Cpu pixel data
+    ClearTempData();
 
     Log::MDCII_LOG_DEBUG("[BshFile::ReadDataFromChunks()] BSH pixel data read successfully.");
 }
@@ -176,19 +180,28 @@ void mdcii::file::BshFile::CreateGLTextures() const
 // CleanUp
 //-------------------------------------------------
 
+void mdcii::file::BshFile::ClearTempData()
+{
+    Log::MDCII_LOG_DEBUG("[BshFile::ClearTempData()] Deletes data that is no longer needed.");
+
+    for (const auto& texture : bshTextures)
+    {
+        std::vector<PaletteFile::Color32Bit>().swap(texture->pixel);
+    }
+
+    std::vector<PaletteFile::Color32Bit>().swap(m_palette);
+    std::vector<uint32_t>().swap(m_offsets);
+}
+
 void mdcii::file::BshFile::CleanUp() const
 {
     Log::MDCII_LOG_DEBUG("[BshFile::CleanUp()] Clean up OpenGL textures.");
 
-    auto i{ 0 };
+    const auto i{ bshTextures.size() };
     for (const auto& texture : bshTextures)
     {
-        if (texture->textureId)
-        {
-            glDeleteTextures(1, &texture->textureId);
-            i++;
-        }
+        ogl::resource::TextureUtils::DeleteTexture(texture->textureId);
     }
 
-    Log::MDCII_LOG_DEBUG("[BshFile::CleanUp()] {} OpenGL textures was deleted.", i);
+    Log::MDCII_LOG_DEBUG("[BshFile::CleanUp()] {} OpenGL textures was deleted for file {}.", i, filePath);
 }

@@ -147,5 +147,14 @@ namespace mdcii::renderer
          * Creates a Vbo and Vao for rendering quads.
          */
         void CreateMesh();
+
+        //-------------------------------------------------
+        // Clean up
+        //-------------------------------------------------
+
+        /**
+         * Clean up.
+         */
+        void CleanUp() const;
     };
 }

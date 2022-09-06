@@ -42,6 +42,8 @@ mdcii::renderer::TextRenderer::TextRenderer(std::string t_fontPath)
 mdcii::renderer::TextRenderer::~TextRenderer() noexcept
 {
     Log::MDCII_LOG_DEBUG("[TextRenderer::~TextRenderer()] Destruct TextRenderer.");
+
+    CleanUp();
 }
 
 //-------------------------------------------------
@@ -152,9 +154,10 @@ void mdcii::renderer::TextRenderer::Init()
             throw MDCII_EXCEPTION("[TextRenderer::Init()] Failed to load Glyph.");
         }
 
-        // Generate texture.
-        glGenTextures(1, &m_textureId);
-        glBindTexture(GL_TEXTURE_2D, m_textureId);
+        // Generate and bind texture.
+        m_textureId = ogl::resource::TextureUtils::GenerateNewTextureId();
+        ogl::resource::TextureUtils::Bind(m_textureId);
+
         glTexImage2D(
             GL_TEXTURE_2D,
             0,
@@ -212,4 +215,15 @@ void mdcii::renderer::TextRenderer::CreateMesh()
 
     // save Vbo in the Vao
     m_vao->vbos.emplace_back(std::move(vbo));
+}
+
+//-------------------------------------------------
+// Clean up
+//-------------------------------------------------
+
+void mdcii::renderer::TextRenderer::CleanUp() const
+{
+    Log::MDCII_LOG_DEBUG("[TextRenderer::CleanUp()] Clean up TextRenderer.");
+
+    ogl::resource::TextureUtils::DeleteTexture(m_textureId);
 }
