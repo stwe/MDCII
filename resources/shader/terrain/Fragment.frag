@@ -8,8 +8,15 @@ flat in int vTextureAtlasIndex;
 uniform sampler2DArray sampler;
 uniform float selected;
 
+const int NO_TEXTURE_ATLAS = -1;
+
 void main()
 {
+    if (vTextureAtlasIndex == NO_TEXTURE_ATLAS)
+    {
+        discard;
+    }
+
     vec3 uv = vec3(vUv, vTextureAtlasIndex);
     fragColor = texture(sampler, uv);
 

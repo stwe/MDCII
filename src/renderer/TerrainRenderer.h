@@ -18,10 +18,11 @@
 
 #pragma once
 
+#include <array>
+#include <memory>
 #include "ogl/Window.h"
 #include "camera/Camera.h"
 #include "map/Zoom.h"
-#include "map/Rotation.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -30,6 +31,8 @@
 namespace mdcii::map
 {
     class Map;
+    enum class LayerType;
+    enum class Rotation;
 }
 
 namespace mdcii::ogl::buffer
@@ -44,7 +47,7 @@ namespace mdcii::ogl::buffer
 namespace mdcii::renderer
 {
     /**
-     * Renders the terrain layer with instancing.
+     * Renders the terrain with instancing.
      */
     class TerrainRenderer
     {
@@ -86,23 +89,33 @@ namespace mdcii::renderer
             const camera::Camera& t_camera
         ) const;
 
-        //-------------------------------------------------
-        // Data to Gpu
-        //-------------------------------------------------
-
-        /**
-         * Passes all model matrices to the Gpu.
-         */
-        void AddModelMatrices();
-
-        /**
-         * Passes all texture info to the Gpu.
-         */
-        void AddTextureInfo() const;
-
     protected:
 
     private:
+        //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * The number of the model matrices0 shader attribute.
+         */
+        static constexpr auto MODEL_MATRICES0_LOCATION{ 1 };
+
+        /**
+         * The number of the texture atlas shader attribute.
+         */
+        static constexpr auto TEXTURE_ATLAS_LOCATION{ 17 };
+
+        /**
+         * The number of the offsets0 shader attribute.
+         */
+        static constexpr auto OFFSETS0_LOCATION{ 18 };
+
+        /**
+         * The number of the heights shader attribute.
+         */
+        static constexpr auto HEIGHTS_LOCATION{ 22 };
+
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
@@ -136,17 +149,19 @@ namespace mdcii::renderer
         //-------------------------------------------------
 
         /**
-         * Add model matrices to the Gpu for a given zoom level.
+         * Add model matrices to the Gpu.
          *
          * @param t_zoom The zoom level.
+         * @param t_layerType The type of the layer (TERRAIN, BUILDINGS).
          */
-        void AddModelMatrices(map::Zoom t_zoom);
+        void AddModelMatrices(map::Zoom t_zoom, map::LayerType t_layerType);
 
         /**
-         * Add texture info to the Gpu for a given zoom level.
+         * Add texture info to the Gpu.
          * 
          * @param t_zoom The zoom level.
+         * @param t_layerType The type of the layer (TERRAIN, BUILDINGS).
          */
-        void AddTextureInfo(map::Zoom t_zoom) const;
+        void AddTextureInfo(map::Zoom t_zoom, map::LayerType t_layerType) const;
     };
 }

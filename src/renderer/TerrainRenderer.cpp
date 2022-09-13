@@ -81,24 +81,6 @@ void mdcii::renderer::TerrainRenderer::Render(
 }
 
 //-------------------------------------------------
-// Data to Gpu
-//-------------------------------------------------
-
-void mdcii::renderer::TerrainRenderer::AddModelMatrices()
-{
-    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        AddModelMatrices(t_zoom);
-    });
-}
-
-void mdcii::renderer::TerrainRenderer::AddTextureInfo() const
-{
-    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        AddTextureInfo(t_zoom);
-    });
-}
-
-//-------------------------------------------------
 // Init
 //-------------------------------------------------
 
@@ -109,11 +91,13 @@ void mdcii::renderer::TerrainRenderer::Init()
     });
 
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        AddModelMatrices(t_zoom);
+        //AddModelMatrices(t_zoom, map::LayerType::TERRAIN);
+        AddModelMatrices(t_zoom, map::LayerType::BUILDINGS);
     });
 
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        AddTextureInfo(t_zoom);
+        //AddTextureInfo(t_zoom, map::LayerType::TERRAIN);
+        AddTextureInfo(t_zoom, map::LayerType::BUILDINGS);
     });
 }
 
@@ -121,12 +105,16 @@ void mdcii::renderer::TerrainRenderer::Init()
 // Helper
 //-------------------------------------------------
 
-void mdcii::renderer::TerrainRenderer::AddModelMatrices(const map::Zoom t_zoom)
+void mdcii::renderer::TerrainRenderer::AddModelMatrices(const map::Zoom t_zoom, const map::LayerType t_layerType)
 {
-    Log::MDCII_LOG_DEBUG("[TerrainRenderer::AddModelMatrices()] Add model matrices to the Gpu for zoom {}.", magic_enum::enum_name(t_zoom));
+    Log::MDCII_LOG_DEBUG(
+        "[TerrainRenderer::AddModelMatrices()] Add model matrices to the Gpu for layer {} and zoom {}.",
+        magic_enum::enum_name(t_layerType),
+        magic_enum::enum_name(t_zoom)
+    );
 
-    // get the terrain layer
-    const auto& layer{ m_map->mapContent->GetLayer(map::LayerType::TERRAIN) };
+    // get the layer
+    const auto& layer{ m_map->mapContent->GetLayer(t_layerType) };
 
     // set number of instances to render
     m_instances = layer.GetInstances();
@@ -135,7 +123,7 @@ void mdcii::renderer::TerrainRenderer::AddModelMatrices(const map::Zoom t_zoom)
     m_vaos.at(magic_enum::enum_integer(t_zoom))->Bind();
 
     // generate a Vbo for each rotation and store the model matrices
-    auto i{ 1 };
+    auto i{ MODEL_MATRICES0_LOCATION };
     magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
         // get the model matrices of the rotation
         const auto& modelMatrices{ layer.GetModelMatrices(t_zoom).at(magic_enum::enum_integer(t_rotation)) };
@@ -167,15 +155,18 @@ void mdcii::renderer::TerrainRenderer::AddModelMatrices(const map::Zoom t_zoom)
     ogl::buffer::Vao::Unbind();
 }
 
-void mdcii::renderer::TerrainRenderer::AddTextureInfo(const map::Zoom t_zoom) const
+void mdcii::renderer::TerrainRenderer::AddTextureInfo(const map::Zoom t_zoom, const map::LayerType t_layerType) const
 {
-    Log::MDCII_LOG_DEBUG("[TerrainRenderer::AddTextureInfo()] Add texture info to the Gpu for zoom {}.", magic_enum::enum_name(t_zoom));
+    Log::MDCII_LOG_DEBUG(
+        "[TerrainRenderer::AddTextureInfo()] Add texture info to the Gpu for layer {} and zoom {}.",
+        magic_enum::enum_name(t_layerType),
+        magic_enum::enum_name(t_zoom)
+    );
 
-    constexpr auto textLocation{ 17 };
-    constexpr auto offLocation0{ 18 };
-    constexpr auto heightLocation{ 22 };
+    // get the layer
+    const auto& layer{ m_map->mapContent->GetLayer(t_layerType) };
 
-    const auto& layer{ m_map->mapContent->GetLayer(map::LayerType::TERRAIN) };
+    // zoom as int
     const auto zoom{ magic_enum::enum_integer(t_zoom) };
 
     // bind Vao
@@ -191,7 +182,7 @@ void mdcii::renderer::TerrainRenderer::AddTextureInfo(const map::Zoom t_zoom) co
     ogl::buffer::Vbo::StoreStaticData(static_cast<uint32_t>(layer.textureAtlasIndices.at(zoom).size()) * sizeof(glm::ivec4), layer.textureAtlasIndices.at(zoom).data());
 
     // set buffer layout
-    ogl::buffer::Vbo::AddIntAttribute(textLocation, 4, 4, 0, true);
+    ogl::buffer::Vbo::AddIntAttribute(TEXTURE_ATLAS_LOCATION, 4, 4, 0, true);
 
     // unbind Vbo
     ogl::buffer::Vbo::Unbind();
@@ -211,7 +202,7 @@ void mdcii::renderer::TerrainRenderer::AddTextureInfo(const map::Zoom t_zoom) co
         ogl::buffer::Vbo::StoreStaticData(static_cast<uint32_t>(layer.offsets.at(zoom).at(rotation).size()) * sizeof(float), layer.offsets.at(zoom).at(rotation).data());
 
         // set buffer layout
-        ogl::buffer::Vbo::AddFloatAttribute(offLocation0 + rotation, 2, 2, 0, true);
+        ogl::buffer::Vbo::AddFloatAttribute(OFFSETS0_LOCATION + rotation, 2, 2, 0, true);
 
         // unbind Vbo
         ogl::buffer::Vbo::Unbind();
@@ -230,7 +221,7 @@ void mdcii::renderer::TerrainRenderer::AddTextureInfo(const map::Zoom t_zoom) co
     ogl::buffer::Vbo::StoreStaticData(static_cast<uint32_t>(layer.heights.at(zoom).size()) * sizeof(glm::vec4), layer.heights.at(zoom).data());
 
     // set buffer layout
-    ogl::buffer::Vbo::AddFloatAttribute(heightLocation, 4, 4, 0, true);
+    ogl::buffer::Vbo::AddFloatAttribute(HEIGHTS_LOCATION, 4, 4, 0, true);
 
     // unbind Vbo
     ogl::buffer::Vbo::Unbind();

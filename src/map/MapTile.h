@@ -88,13 +88,13 @@ namespace mdcii::map
         /**
          * The index for each rotation is needed for sorting.
          */
-        std::array<int, NR_OF_ROTATIONS> indices{};
+        std::array<int32_t, NR_OF_ROTATIONS> indices{};
 
         /**
          * The Bsh graphic for each rotation.
          * In some cases the same gfx is used for all rotations.
          */
-        std::vector<int> gfxs{};
+        std::vector<int32_t> gfxs{};
 
         /**
          * Stores the entity handle created for this tile.
@@ -110,7 +110,7 @@ namespace mdcii::map
         /**
          * If a building requires more than 1x1 tiles, all indices are stored here.
          */
-        std::vector<int> connectedMapTiles;
+        std::vector<int32_t> connectedMapTiles;
 
         /**
          * For better readability/convenience.

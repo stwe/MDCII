@@ -581,13 +581,8 @@ void mdcii::map::MapContent::PreCalcTiles() const
         }
 
         layer->SortMapTiles();
-
-        // todo: tmp code for instancing
-        if (layer->layerType == LayerType::TERRAIN)
-        {
-            layer->CreateModelMatrices();
-            layer->CreateTextureInfo();
-        }
+        layer->CreateModelMatrices();
+        layer->CreateTextureInfo();
     }
 }
 

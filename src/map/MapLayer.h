@@ -317,6 +317,20 @@ namespace mdcii::map
 
     private:
         //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * If no data is available, the instance is created with this Id.
+         */
+        static constexpr auto GRASS_BUILDING_ID{ 101 };
+
+        /**
+         * If no data is available, the instance is created with this Gfx.
+         */
+        static constexpr auto GRASS_GFX{ 4 };
+
+        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 

@@ -160,7 +160,13 @@ void mdcii::map::MapLayer::CreateModelMatrices()
             for (const auto& mapTile : sortedMapTiles.at(magic_enum::enum_integer(t_rotation)))
             {
                 // get building
-                const auto& building{ m_mapContent->context->originalResourcesManager->GetBuildingById(mapTile.buildingId) };
+                int32_t buildingId{ GRASS_BUILDING_ID }; // to definitely create a position
+                if (mapTile.HasBuilding())
+                {
+                    buildingId = mapTile.buildingId;
+                }
+
+                const auto& building{ m_mapContent->context->originalResourcesManager->GetBuildingById(buildingId) };
 
                 // copy position
                 auto screenPosition{ mapTile.screenPositions.at(magic_enum::enum_integer(t_zoom)).at(rotation_to_int(t_rotation)) };
@@ -171,7 +177,49 @@ void mdcii::map::MapLayer::CreateModelMatrices()
                 {
                     buildingRotation = buildingRotation + t_rotation;
                 }
-                const auto gfx{ mapTile.gfxs[rotation_to_int(buildingRotation)] };
+
+                int32_t gfx{ GRASS_GFX }; // to definitely create a position
+                if (mapTile.HasBuilding())
+                {
+                    gfx = mapTile.gfxs[rotation_to_int(buildingRotation)];
+                }
+
+                // todo: create method
+                if (building.size.w > 1)
+                {
+                    // default: orientation 0
+                    auto rp{ glm::ivec2(mapTile.x, mapTile.y) };
+
+                    if (mapTile.rotation == Rotation::DEG270)
+                    {
+                        rp = rotate_position(
+                            mapTile.x, mapTile.y,
+                            building.size.w, building.size.h,
+                            Rotation::DEG90
+                        );
+                    }
+
+                    if (mapTile.rotation == Rotation::DEG180)
+                    {
+                        rp = rotate_position(
+                            mapTile.x, mapTile.y,
+                            building.size.w, building.size.h,
+                            Rotation::DEG180
+                        );
+                    }
+
+                    if (mapTile.rotation == Rotation::DEG90)
+                    {
+                        rp = rotate_position(
+                            mapTile.x, mapTile.y,
+                            building.size.w, building.size.h,
+                            Rotation::DEG270
+                        );
+                    }
+
+                    const auto offset{ rp.y * building.size.w + rp.x };
+                    gfx += offset;
+                }
 
                 // get width && height
                 const auto& stadtfldBshTextures{ m_mapContent->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
@@ -219,36 +267,87 @@ void mdcii::map::MapLayer::CreateTextureInfo()
             // to store texture offsets
             Texture_Offsets textureOffsets;
 
-            // counter for vec4 types (0 = x, 1 = y, 2 = z, 3 = w)
-            auto i{ 0 };
+            auto instance{ 0 };
 
             // for each tile
             for (const auto& mapTile : sortedMapTiles.at(magic_enum::enum_integer(t_rotation)))
             {
-                // get gfx
-                const auto& building{ m_mapContent->context->originalResourcesManager->GetBuildingById(mapTile.buildingId) };
-                auto buildingRotation{ mapTile.rotation };
-                if (building.rotate > 0)
+                if (mapTile.HasBuilding())
                 {
-                    buildingRotation = buildingRotation + t_rotation;
+                    // get gfx
+                    const auto& building{ m_mapContent->context->originalResourcesManager->GetBuildingById(mapTile.buildingId) };
+                    auto buildingRotation{ mapTile.rotation };
+                    if (building.rotate > 0)
+                    {
+                        buildingRotation = buildingRotation + t_rotation;
+                    }
+                    auto gfx{ mapTile.gfxs[rotation_to_int(buildingRotation)] };
+
+                    // todo: create method
+                    if (building.size.w > 1)
+                    {
+                        // default: orientation 0
+                        auto rp{ glm::ivec2(mapTile.x, mapTile.y) };
+
+                        if (mapTile.rotation == Rotation::DEG270)
+                        {
+                            rp = rotate_position(
+                                mapTile.x, mapTile.y,
+                                building.size.w, building.size.h,
+                                Rotation::DEG90
+                            );
+                        }
+
+                        if (mapTile.rotation == Rotation::DEG180)
+                        {
+                            rp = rotate_position(
+                                mapTile.x, mapTile.y,
+                                building.size.w, building.size.h,
+                                Rotation::DEG180
+                            );
+                        }
+
+                        if (mapTile.rotation == Rotation::DEG90)
+                        {
+                            rp = rotate_position(
+                                mapTile.x, mapTile.y,
+                                building.size.w, building.size.h,
+                                Rotation::DEG270
+                            );
+                        }
+
+                        const auto offset{ rp.y * building.size.w + rp.x };
+                        gfx += offset;
+                    }
+
+                    // texture indices
+                    texIndicesForRotations.at(instance)[magic_enum::enum_integer(t_rotation)] = gfx / (atlasRows * atlasRows);
+
+                    // offsets
+                    const auto index{ gfx % (atlasRows * atlasRows) };
+                    auto offset{ TileAtlas::GetTextureOffset(index, atlasRows) };
+                    textureOffsets.push_back(offset.x);
+                    textureOffsets.push_back(offset.y);
+
+                    // heights
+                    const auto& stadtfldBshTextures{ m_mapContent->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
+                    const auto h{ static_cast<float>(stadtfldBshTextures.at(gfx)->height) };
+                    texHeightsForRotations.at(instance)[magic_enum::enum_integer(t_rotation)] = h;
+
+                    instance++;
                 }
-                const auto gfx{ mapTile.gfxs[rotation_to_int(buildingRotation)] };
+                else // no building
+                {
+                    texIndicesForRotations.at(instance)[magic_enum::enum_integer(t_rotation)] = -1;
 
-                // texture indices
-                texIndicesForRotations.at(i)[magic_enum::enum_integer(t_rotation)] = gfx / (atlasRows * atlasRows);
+                    // todo: array
+                    textureOffsets.push_back(0.0f);
+                    textureOffsets.push_back(0.0f);
 
-                // offsets
-                const auto index{ gfx % (atlasRows * atlasRows) };
-                auto offset{ TileAtlas::GetTextureOffset(index, atlasRows) };
-                textureOffsets.push_back(offset.x);
-                textureOffsets.push_back(offset.y);
+                    texHeightsForRotations.at(instance)[magic_enum::enum_integer(t_rotation)] = -1.0f;
 
-                // heights
-                const auto& stadtfldBshTextures{ m_mapContent->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
-                const auto h{ static_cast<float>(stadtfldBshTextures.at(gfx)->height) };
-                texHeightsForRotations.at(i)[magic_enum::enum_integer(t_rotation)] = h;
-
-                i++;
+                    instance++;
+                }
             }
 
             texOffsetsForRotations.at(rotation_to_int(t_rotation)) = textureOffsets;
