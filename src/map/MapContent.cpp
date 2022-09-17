@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <imgui.h>
 #include "MapContent.h"
@@ -584,6 +584,56 @@ void mdcii::map::MapContent::PreCalcTiles() const
         layer->CreateModelMatrices();
         layer->CreateTextureInfo();
     }
+
+    // todo: die layer so lassen, wie sie sind und nur einen weiteren Vao erstellen
+    // todo: dafür vlt. die Cpu Daten vorher kopieren und als mixed container in
+    // todo: dieser Klasse speichern
+
+    // mix layer
+
+    auto& terrainLayer{ mapLayers.at(magic_enum::enum_integer(LayerType::TERRAIN)) };
+    const auto& buildingsLayer{ mapLayers.at(magic_enum::enum_integer(LayerType::BUILDINGS)) };
+
+    // for each zoom
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
+
+        // for each rotation
+        magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+
+            const auto z{ magic_enum::enum_integer(t_zoom) };
+            const auto r{ magic_enum::enum_integer(t_rotation) };
+
+            auto& mt{ terrainLayer->modelMatrices.at(z).at(r) };
+            const auto& mb{ buildingsLayer->modelMatrices.at(z).at(r) };
+
+            auto& it{ terrainLayer->textureAtlasIndices.at(z) };
+            const auto& ib{ buildingsLayer->textureAtlasIndices.at(z) };
+
+            auto& ot{ terrainLayer->offsets.at(z).at(r) };
+            const auto& ob{ buildingsLayer->offsets.at(z).at(r) };
+
+            auto& ht{ terrainLayer->heights.at(z) };
+            const auto& hb{ buildingsLayer->heights.at(z) };
+
+            // for each tile
+            auto i{ 0 };
+            for (const auto& mapTile : buildingsLayer->sortedMapTiles.at(r))
+            {
+                if (mapTile.HasBuilding())
+                {
+                    mt.at(i) = mb.at(i);
+                    it.at(i)[r] = ib.at(i)[r];
+
+                    ot.at(i * 2_uz) = ob.at(i * 2_uz);
+                    ot.at(i * 2_uz + 1_uz) = ob.at(i * 2_uz + 1_uz);
+
+                    ht.at(i)[r] = hb.at(i)[r];
+                }
+
+                i++;
+            }
+        });
+    });
 }
 
 void mdcii::map::MapContent::PreCalcTile(MapTile& t_mapTile, const int t_mapX, const int t_mapY) const

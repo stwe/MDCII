@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #pragma once
 
@@ -47,7 +47,7 @@ namespace mdcii::ogl::buffer
 namespace mdcii::renderer
 {
     /**
-     * Renders the terrain with instancing.
+     * Renders the map with instancing.
      */
     class TerrainRenderer
     {
@@ -75,14 +75,16 @@ namespace mdcii::renderer
         //-------------------------------------------------
 
         /**
-         * Renders the terrain layer with the specified zoom and rotation.
+         * Renders a layer with the specified zoom and rotation.
          *
+         * @param t_layerType The layer type to render.
          * @param t_zoom The zoom to render for.
          * @param t_rotation The rotation to render for.
          * @param t_window The Window object to get the orthographic projection matrix.
          * @param t_camera The Camera object to get the view matrix.
          */
         void Render(
+            map::LayerType t_layerType,
             map::Zoom t_zoom,
             map::Rotation t_rotation,
             const ogl::Window& t_window,
@@ -125,10 +127,12 @@ namespace mdcii::renderer
          */
         map::Map* m_map{ nullptr };
 
-        /**
-         * A Vao object for each zoom level.
-         */
-        std::array<std::unique_ptr<ogl::buffer::Vao>, map::NR_OF_ZOOMS> m_vaos{};
+        using Vaos = std::array<std::unique_ptr<ogl::buffer::Vao>, map::NR_OF_ZOOMS>;
+        using Layer_Vaos = std::array<Vaos, 2>;
+
+        // todo: einen weiteren Vao als mixed hinzufügen
+
+        Layer_Vaos m_vaos{};
 
         /**
          * Number of instances to render.

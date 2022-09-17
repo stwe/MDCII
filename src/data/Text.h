@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #pragma once
 
@@ -27,9 +27,9 @@ namespace mdcii::data
     class Text
     {
     public:
-        using language = std::string;
-        using key = std::string;
-        using translation = std::string;
+        using Language = std::string;
+        using Key = std::string;
+        using Translation = std::string;
 
         //-------------------------------------------------
         // Sections
@@ -63,17 +63,17 @@ namespace mdcii::data
         // Getter
         //-------------------------------------------------
 
-        static const std::map<key, translation>& GetBuildingsTexts(const Section t_section, const language& t_language)
+        static const std::map<Key, Translation>& GetBuildingsTexts(const Section t_section, const Language& t_language)
         {
             return m_buildings.find({ t_section, t_language })->second;
         }
 
-        static const translation& GetMenuText(const language& t_language, const key& t_key)
+        static const Translation& GetMenuText(const Language& t_language, const Key& t_key)
         {
             return m_menus.find(t_language)->second.at(t_key);
         }
 
-        static std::string GetTextForBuildingId(const Section t_section, const int t_buildingId, const language& t_language)
+        static std::string GetTextForBuildingId(const Section t_section, const int t_buildingId, const Language& t_language)
         {
             if (GetBuildingsTexts(t_section, t_language).count(std::to_string(t_buildingId)))
             {
@@ -90,8 +90,8 @@ namespace mdcii::data
         // Member
         //-------------------------------------------------
 
-        inline static std::multimap<std::pair<Section, language>, std::map<key, translation>> m_buildings;
-        inline static std::multimap<language, std::map<key, translation>> m_menus;
+        inline static std::multimap<std::pair<Section, Language>, std::map<Key, Translation>> m_buildings;
+        inline static std::multimap<Language, std::map<Key, Translation>> m_menus;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

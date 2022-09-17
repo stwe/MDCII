@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <imgui.h>
 #include "EventManager.h"
@@ -48,13 +48,13 @@ void mdcii::event::EventManager::SetKeyboardGlfwCallbacks(GLFWwindow* t_windowHa
             switch (t_action)
             {
             case GLFW_PRESS:
-                eventDispatcher.dispatch(MdciiEventType::KEY_PRESSED, KeyPressedEvent(t_key));
+                event_dispatcher.dispatch(MdciiEventType::KEY_PRESSED, KeyPressedEvent(t_key));
                 break;
             case GLFW_RELEASE:
-                eventDispatcher.dispatch(MdciiEventType::KEY_RELEASED, KeyReleasedEvent(t_key));
+                event_dispatcher.dispatch(MdciiEventType::KEY_RELEASED, KeyReleasedEvent(t_key));
                 break;
             case GLFW_REPEAT:
-                eventDispatcher.dispatch(MdciiEventType::KEY_PRESSED, KeyPressedEvent(t_key, 1));
+                event_dispatcher.dispatch(MdciiEventType::KEY_PRESSED, KeyPressedEvent(t_key, 1));
                 break;
             default:;
             }
@@ -78,7 +78,7 @@ void mdcii::event::EventManager::SetMouseGlfwCallbacks(GLFWwindow* t_windowHandl
     glfwSetCursorPosCallback(
         t_windowHandle,
         [](GLFWwindow* t_window, const double t_x, const double t_y) {
-            eventDispatcher.dispatch(
+            event_dispatcher.dispatch(
                 MdciiEventType::MOUSE_MOVED,
                 MouseMovedEvent(
                     static_cast<float>(t_x),
@@ -98,7 +98,7 @@ void mdcii::event::EventManager::SetMouseGlfwCallbacks(GLFWwindow* t_windowHandl
             io.MouseWheel += static_cast<float>(t_yOffset);
 
             // MDCII
-            eventDispatcher.dispatch(
+            event_dispatcher.dispatch(
                 MdciiEventType::MOUSE_SCROLLED,
                 MouseScrolledEvent(
                     static_cast<float>(t_xOffset),
@@ -112,7 +112,7 @@ void mdcii::event::EventManager::SetMouseGlfwCallbacks(GLFWwindow* t_windowHandl
     glfwSetCursorEnterCallback(
         t_windowHandle,
         [](GLFWwindow* t_window, const int t_entered) {
-            eventDispatcher.dispatch(MdciiEventType::MOUSE_ENTER, MouseEnterEvent(t_entered));
+            event_dispatcher.dispatch(MdciiEventType::MOUSE_ENTER, MouseEnterEvent(t_entered));
         }
     );
 
@@ -123,10 +123,10 @@ void mdcii::event::EventManager::SetMouseGlfwCallbacks(GLFWwindow* t_windowHandl
             switch (t_action)
             {
             case GLFW_PRESS:
-                eventDispatcher.dispatch(MdciiEventType::MOUSE_BUTTON_PRESSED, MouseButtonPressedEvent(t_button));
+                event_dispatcher.dispatch(MdciiEventType::MOUSE_BUTTON_PRESSED, MouseButtonPressedEvent(t_button));
                 break;
             case GLFW_RELEASE:
-                eventDispatcher.dispatch(MdciiEventType::MOUSE_BUTTON_RELEASED, MouseButtonReleasedEvent(t_button));
+                event_dispatcher.dispatch(MdciiEventType::MOUSE_BUTTON_RELEASED, MouseButtonReleasedEvent(t_button));
                 break;
             default:;
             }

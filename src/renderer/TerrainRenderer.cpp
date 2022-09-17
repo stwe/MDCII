@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "TerrainRenderer.h"
 #include "RenderUtils.h"
@@ -49,14 +49,13 @@ mdcii::renderer::TerrainRenderer::~TerrainRenderer() noexcept
 //-------------------------------------------------
 
 void mdcii::renderer::TerrainRenderer::Render(
+    const map::LayerType t_layerType,
     const map::Zoom t_zoom,
     const map::Rotation t_rotation,
     const ogl::Window& t_window,
     const camera::Camera& t_camera
 ) const
 {
-    ogl::OpenGL::EnableAlphaBlending();
-
     const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram("shader/terrain") };
     shaderProgram.Bind();
 
@@ -72,12 +71,10 @@ void mdcii::renderer::TerrainRenderer::Render(
     shaderProgram.SetUniform("maxY", maxY);
     shaderProgram.SetUniform("nrOfRows", nrOfRows);
 
-    m_vaos.at(magic_enum::enum_integer(t_zoom))->Bind();
+    m_vaos.at(magic_enum::enum_integer(t_layerType)).at(magic_enum::enum_integer(t_zoom))->Bind();
     ogl::resource::TextureUtils::BindForReading(m_map->tileAtlas->textureIds.at(magic_enum::enum_integer(t_zoom)), GL_TEXTURE0, GL_TEXTURE_2D_ARRAY);
-    m_vaos.at(magic_enum::enum_integer(t_zoom))->DrawInstanced(m_instances);
+    m_vaos.at(magic_enum::enum_integer(t_layerType)).at(magic_enum::enum_integer(t_zoom))->DrawInstanced(m_instances);
     ogl::buffer::Vao::Unbind();
-
-    ogl::OpenGL::DisableBlending();
 }
 
 //-------------------------------------------------
@@ -87,16 +84,17 @@ void mdcii::renderer::TerrainRenderer::Render(
 void mdcii::renderer::TerrainRenderer::Init()
 {
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        m_vaos.at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
+        m_vaos.at(magic_enum::enum_integer(map::LayerType::TERRAIN)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
+        m_vaos.at(magic_enum::enum_integer(map::LayerType::BUILDINGS)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
     });
 
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        //AddModelMatrices(t_zoom, map::LayerType::TERRAIN);
+        AddModelMatrices(t_zoom, map::LayerType::TERRAIN);
         AddModelMatrices(t_zoom, map::LayerType::BUILDINGS);
     });
 
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        //AddTextureInfo(t_zoom, map::LayerType::TERRAIN);
+        AddTextureInfo(t_zoom, map::LayerType::TERRAIN);
         AddTextureInfo(t_zoom, map::LayerType::BUILDINGS);
     });
 }
@@ -120,7 +118,7 @@ void mdcii::renderer::TerrainRenderer::AddModelMatrices(const map::Zoom t_zoom, 
     m_instances = layer.GetInstances();
 
     // bind Vao of the given zoom
-    m_vaos.at(magic_enum::enum_integer(t_zoom))->Bind();
+    m_vaos.at(magic_enum::enum_integer(t_layerType)).at(magic_enum::enum_integer(t_zoom))->Bind();
 
     // generate a Vbo for each rotation and store the model matrices
     auto i{ MODEL_MATRICES0_LOCATION };
@@ -148,7 +146,7 @@ void mdcii::renderer::TerrainRenderer::AddModelMatrices(const map::Zoom t_zoom, 
         ogl::buffer::Vbo::Unbind();
 
         // store Vbo
-        m_vaos.at(magic_enum::enum_integer(t_zoom))->vbos.emplace_back(std::move(vbo));
+        m_vaos.at(magic_enum::enum_integer(t_layerType)).at(magic_enum::enum_integer(t_zoom))->vbos.emplace_back(std::move(vbo));
     });
 
     // unbind Vao
@@ -170,7 +168,7 @@ void mdcii::renderer::TerrainRenderer::AddTextureInfo(const map::Zoom t_zoom, co
     const auto zoom{ magic_enum::enum_integer(t_zoom) };
 
     // bind Vao
-    m_vaos.at(zoom)->Bind();
+    m_vaos.at(magic_enum::enum_integer(t_layerType)).at(zoom)->Bind();
 
     // texture atlas indices
 
@@ -188,7 +186,7 @@ void mdcii::renderer::TerrainRenderer::AddTextureInfo(const map::Zoom t_zoom, co
     ogl::buffer::Vbo::Unbind();
 
     // store Vbo
-    m_vaos.at(zoom)->vbos.emplace_back(std::move(vboText));
+    m_vaos.at(magic_enum::enum_integer(t_layerType)).at(zoom)->vbos.emplace_back(std::move(vboText));
 
     // offsets
     magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
@@ -208,7 +206,7 @@ void mdcii::renderer::TerrainRenderer::AddTextureInfo(const map::Zoom t_zoom, co
         ogl::buffer::Vbo::Unbind();
 
         // store Vbo
-        m_vaos.at(zoom)->vbos.emplace_back(std::move(vboOff));
+        m_vaos.at(magic_enum::enum_integer(t_layerType)).at(zoom)->vbos.emplace_back(std::move(vboOff));
     });
 
     // heights
@@ -227,7 +225,7 @@ void mdcii::renderer::TerrainRenderer::AddTextureInfo(const map::Zoom t_zoom, co
     ogl::buffer::Vbo::Unbind();
 
     // store Vbo
-    m_vaos.at(zoom)->vbos.emplace_back(std::move(vboHeight));
+    m_vaos.at(magic_enum::enum_integer(t_layerType)).at(zoom)->vbos.emplace_back(std::move(vboHeight));
 
     // unbind Vao
     ogl::buffer::Vao::Unbind();

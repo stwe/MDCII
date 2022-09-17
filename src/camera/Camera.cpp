@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <glm/gtc/matrix_transform.hpp>
 #include "Game.h"
@@ -22,7 +22,6 @@
 #include "Log.h"
 #include "event/EventManager.h"
 #include "eventpp/utilities/argumentadapter.h"
-#include "map/MapTile.h"
 #include "map/Zoom.h"
 
 //-------------------------------------------------
@@ -98,7 +97,7 @@ void mdcii::camera::Camera::AddListeners()
 {
     Log::MDCII_LOG_DEBUG("[Camera::AddListeners()] Add listeners.");
 
-    event::EventManager::eventDispatcher.appendListener(
+    event::EventManager::event_dispatcher.appendListener(
         event::MdciiEventType::KEY_PRESSED,
         eventpp::argumentAdapter<void(const event::KeyPressedEvent&)>(
             [&](const event::KeyPressedEvent& t_event) {

@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <imgui.h>
 #include "EditorGui.h"
@@ -157,7 +157,7 @@ void mdcii::EditorGui::AllWorkshopsGui() const
                         ImVec4(0.6f, 0.6f, 0.6f, 1.0f)
                     ))
                 {
-                    event::EventManager::eventDispatcher.dispatch(
+                    event::EventManager::event_dispatcher.dispatch(
                         event::MdciiEventType::BAUGFX_SELECTED,
                         event::BauGfxSelectedEvent({ std::stoi(k), map::Rotation::DEG0, v })
                     );

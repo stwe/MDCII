@@ -1,5 +1,6 @@
 // This file is part of the MDCII Game Engine.
-// Copyright (C) 2019  Armin Schlegel
+//
+// Copyright (C) 2019 Armin Schlegel
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -8,12 +9,12 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #pragma once
 
@@ -69,7 +70,6 @@ namespace mdcii::cod
         cod_pb::Object* CreateOrReuseObject(const std::string& t_name, bool t_numberObject, int t_spaces, bool t_addToStack);
 
         std::optional<cod_pb::Object*> GetObject(const std::string& t_name);
-        std::optional<cod_pb::Object*> GetObject(int t_id);
         static std::optional<cod_pb::Object*> GetSubObject(cod_pb::Object* t_obj, const std::string& t_name);
         cod_pb::Object* ObjfillPrefill(cod_pb::Object* t_obj) const;
         void ResetObjfillPrefill();

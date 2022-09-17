@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
-// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <imgui.h>
 #include "Map.h"
@@ -55,7 +55,9 @@ void mdcii::map::Map::Render() const
 {
     //RenderGridEntities();
     //RenderEntities();
-    terrainRenderer->Render(mapContent->zoom, mapContent->rotation, *context->window, *context->camera);
+
+    terrainRenderer->Render(LayerType::TERRAIN, mapContent->zoom, mapContent->rotation, *context->window, *context->camera);
+    //terrainRenderer->Render(LayerType::BUILDINGS, mapContent->zoom, mapContent->rotation, *context->window, *context->camera);
 
     mousePicker->Render(*context->window, *context->camera);
 }
