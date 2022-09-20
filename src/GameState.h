@@ -21,35 +21,35 @@
 #include "state/State.h"
 
 //-------------------------------------------------
-// WorldState
+// GameState
 //-------------------------------------------------
 
 namespace mdcii
 {
-    class WorldState: public state::State
+    class GameState: public state::State
     {
     public:
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        WorldState() = delete;
+        GameState() = delete;
 
         /**
-         * Constructs a new WorldState object.
+         * Constructs a new GameState object.
          *
          * @param t_id The unique identifier of the State.
          * @param t_stateStack A pointer to the parent StateStack object.
          * @param t_context The holder of shared objects.
          */
-        WorldState(Id t_id, state::StateStack* t_stateStack, std::shared_ptr<state::Context> t_context);
+        GameState(state::StateId t_id, state::StateStack* t_stateStack, std::shared_ptr<state::Context> t_context);
 
-        WorldState(const WorldState& t_other) = delete;
-        WorldState(WorldState&& t_other) noexcept = delete;
-        WorldState& operator=(const WorldState& t_other) = delete;
-        WorldState& operator=(WorldState&& t_other) noexcept = delete;
+        GameState(const GameState& t_other) = delete;
+        GameState(GameState&& t_other) noexcept = delete;
+        GameState& operator=(const GameState& t_other) = delete;
+        GameState& operator=(GameState&& t_other) noexcept = delete;
 
-        ~WorldState() noexcept override;
+        ~GameState() noexcept override;
 
         //-------------------------------------------------
         // Override
@@ -57,7 +57,6 @@ namespace mdcii
 
         void Input() override;
         void Update() override;
-        void PreRender() override {}
         void Render() override;
         void RenderImGui() override;
 

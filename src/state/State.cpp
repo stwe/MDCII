@@ -27,7 +27,7 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::state::State::State(const Id t_id, StateStack* t_stateStack, std::shared_ptr<Context> t_context)
+mdcii::state::State::State(const StateId t_id, StateStack* t_stateStack, std::shared_ptr<Context> t_context)
     : context{ std::move(t_context) }
     , m_id{ t_id }
     , m_stateStack{ t_stateStack }
@@ -61,7 +61,7 @@ void mdcii::state::State::EndFrame() const
 // Stack operations
 //-------------------------------------------------
 
-void mdcii::state::State::RequestStackPush(const Id t_id) const
+void mdcii::state::State::RequestStackPush(const StateId t_id) const
 {
     m_stateStack->PushState(t_id);
 }

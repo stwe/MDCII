@@ -18,9 +18,10 @@
 
 #pragma once
 
+#include <magic_enum.hpp>
 #include <vector>
 #include <unordered_map>
-#include "State.h"
+#include "StateId.h"
 #include "Log.h"
 
 //-------------------------------------------------
@@ -29,6 +30,24 @@
 
 namespace mdcii::state
 {
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
+    /**
+     * Forward declaration struct Context.
+     */
+    struct Context;
+
+    /**
+     * Forward declaration class State.
+     */
+    class State;
+
+    //-------------------------------------------------
+    // StateStack
+    //-------------------------------------------------
+
     /**
      * Class to manage all the State objects.
      */
@@ -36,7 +55,7 @@ namespace mdcii::state
     {
     public:
         //-------------------------------------------------
-        // Types
+        // Action
         //-------------------------------------------------
 
         /**
@@ -86,12 +105,12 @@ namespace mdcii::state
          * Registers a State factory function so that it can be created on demand.
          *
          * @tparam T The derived state class.
-         * @param t_id The unique identifier of the state.
+         * @param t_id The unique identifier of the State object.
          */
         template<typename T>
-        void RegisterState(const State::Id t_id)
+        void RegisterState(const StateId t_id)
         {
-            Log::MDCII_LOG_DEBUG("[StateStack::RegisterState()] Register factory function for state {}.", State::STATE_IDS.at(static_cast<int>(t_id)));
+            Log::MDCII_LOG_DEBUG("[StateStack::RegisterState()] Register factory function for state {}.", magic_enum::enum_name(t_id));
             m_factories[t_id] = [this, t_id]() { return std::make_unique<T>(t_id, this, m_context); };
         }
 
@@ -99,8 +118,8 @@ namespace mdcii::state
         // Stack operations
         //-------------------------------------------------
 
-        void PushState(State::Id t_id);
-        void PopState(State::Id t_id);
+        void PushState(StateId t_id);
+        void PopState(StateId t_id);
         void ClearStates();
 
         //-------------------------------------------------
@@ -123,13 +142,13 @@ namespace mdcii::state
          */
         struct PendingChange
         {
-            PendingChange(const Action t_action, const State::Id t_id)
+            PendingChange(const Action t_action, const StateId t_id)
                 : action{ t_action }
                 , id{ t_id }
             {}
 
             Action action;
-            State::Id id;
+            StateId id;
         };
 
         //-------------------------------------------------
@@ -137,7 +156,7 @@ namespace mdcii::state
         //-------------------------------------------------
 
         /**
-         * The created state objects.
+         * The created State objects.
          */
         std::vector<std::unique_ptr<State>> m_stack;
 
@@ -154,7 +173,7 @@ namespace mdcii::state
         /**
          * A list of factory functions for each Stack object.
          */
-        std::unordered_map<State::Id, std::function<std::unique_ptr<State>()>> m_factories;
+        std::unordered_map<StateId, std::function<std::unique_ptr<State>()>> m_factories;
 
         //-------------------------------------------------
         // Helper
@@ -168,7 +187,7 @@ namespace mdcii::state
          *
          * @return The created state object.
          */
-        std::unique_ptr<State> CreateState(State::Id t_id);
+        std::unique_ptr<State> CreateState(StateId t_id);
 
         /**
          * Applies stack operations from a list.

@@ -59,7 +59,7 @@ namespace mdcii
          * @param t_stateStack A pointer to the parent StateStack object.
          * @param t_context The holder of shared objects.
          */
-        EditorState(Id t_id, state::StateStack* t_stateStack, std::shared_ptr<state::Context> t_context);
+        EditorState(state::StateId t_id, state::StateStack* t_stateStack, std::shared_ptr<state::Context> t_context);
 
         EditorState(const EditorState& t_other) = delete;
         EditorState(EditorState&& t_other) noexcept = delete;
@@ -74,7 +74,6 @@ namespace mdcii
 
         void Input() override;
         void Update() override;
-        void PreRender() override;
         void Render() override;
         void RenderImGui() override;
 

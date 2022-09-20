@@ -17,7 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <imgui.h>
-#include "WorldState.h"
+#include "GameState.h"
 #include "Log.h"
 #include "ogl/OpenGL.h"
 #include "ogl/Window.h"
@@ -26,46 +26,46 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::WorldState::WorldState(const Id t_id, state::StateStack* t_stateStack, std::shared_ptr<state::Context> t_context)
+mdcii::GameState::GameState(const state::StateId t_id, state::StateStack* t_stateStack, std::shared_ptr<state::Context> t_context)
     : State(t_id, t_stateStack, std::move(t_context))
 {
-    Log::MDCII_LOG_DEBUG("[WorldState::WorldState()] Create WorldState.");
+    Log::MDCII_LOG_DEBUG("[GameState::GameState()] Create GameState.");
 
     Init();
 }
 
-mdcii::WorldState::~WorldState() noexcept
+mdcii::GameState::~GameState() noexcept
 {
-    Log::MDCII_LOG_DEBUG("[WorldState::~WorldState()] Destruct WorldState.");
+    Log::MDCII_LOG_DEBUG("[GameState::~GameState()] Destruct GameState.");
 }
 
 //-------------------------------------------------
 // Override
 //-------------------------------------------------
 
-void mdcii::WorldState::Input()
+void mdcii::GameState::Input()
 {
     // ESC for quit
     if (context->window->IsKeyPressed(GLFW_KEY_ESCAPE))
     {
-        Log::MDCII_LOG_INFO("[WorldState::Input()] Starts POP WorldState.");
+        Log::MDCII_LOG_DEBUG("[GameState::Input()] Starts POP GameState.");
         RequestStackPop();
     }
 }
 
-void mdcii::WorldState::Update()
+void mdcii::GameState::Update()
 {
 }
 
-void mdcii::WorldState::Render()
+void mdcii::GameState::Render()
 {
 }
 
-void mdcii::WorldState::RenderImGui()
+void mdcii::GameState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    ImGui::Begin("WorldState");
+    ImGui::Begin("GameState");
 
 
     ImGui::End();
@@ -77,9 +77,9 @@ void mdcii::WorldState::RenderImGui()
 // Init
 //-------------------------------------------------
 
-void mdcii::WorldState::Init()
+void mdcii::GameState::Init()
 {
-    Log::MDCII_LOG_DEBUG("[WorldState::Init()] Initializing world state.");
+    Log::MDCII_LOG_DEBUG("[GameState::Init()] Initializing game state.");
 
-    Log::MDCII_LOG_DEBUG("[WorldState::Init()] The world state was successfully initialized.");
+    Log::MDCII_LOG_DEBUG("[GameState::Init()] The game state was successfully initialized.");
 }

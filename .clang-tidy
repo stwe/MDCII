@@ -1,4 +1,4 @@
-Checks: '-*,readability-identifier-naming'
+Checks: 'readability-identifier-naming'
 CheckOptions:
   - { key: readability-identifier-naming.GlobalConstantCase,  value: UPPER_CASE }
   - { key: readability-identifier-naming.GlobalFunctionCase,  value: lower_case }

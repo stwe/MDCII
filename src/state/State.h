@@ -19,8 +19,7 @@
 #pragma once
 
 #include <memory>
-#include <array>
-#include <string>
+#include "StateId.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -58,7 +57,7 @@ namespace mdcii::state
     {
         Context() = delete;
 
-        explicit Context(
+        Context(
             std::shared_ptr<ogl::Window> t_window,
             std::shared_ptr<camera::Camera> t_camera,
             std::shared_ptr<file::OriginalResourcesManager> t_originalResourcesManager
@@ -93,30 +92,6 @@ namespace mdcii::state
     {
     public:
         //-------------------------------------------------
-        // Types
-        //-------------------------------------------------
-
-        /**
-         * The unique identifiers of the states.
-         */
-        enum class Id
-        {
-            MAIN_MENU, // MainMenuState
-            START,     // StartState
-            WORLD,     // WorldState
-            EDITOR,    // EditorState
-            SANDBOX,   // SandboxState
-            ALL        // is used when all states are meant
-        };
-
-        /**
-         * The unique identifiers of the states as string.
-         */
-        static constexpr std::array<std::string_view, 6> STATE_IDS{
-            "MAIN_MENU", "START", "WORLD", "EDITOR", "SANDBOX", "ALL"
-        };
-
-        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -135,10 +110,10 @@ namespace mdcii::state
          * Constructs a new State object.
          *
          * @param t_id The unique identifier.
-         * @param t_stateStack The StateStack object.
+         * @param t_stateStack The parent StateStack object.
          * @param t_context The holder of shared objects.
          */
-        State(Id t_id, StateStack* t_stateStack, std::shared_ptr<Context> t_context);
+        State(StateId t_id, StateStack* t_stateStack, std::shared_ptr<Context> t_context);
 
         State(const State& t_other) = delete;
         State(State&& t_other) noexcept = delete;
@@ -151,7 +126,7 @@ namespace mdcii::state
         // Getter
         //-------------------------------------------------
 
-        [[nodiscard]] Id GetId() const { return m_id; }
+        [[nodiscard]] StateId GetId() const { return m_id; }
 
         //-------------------------------------------------
         // Logic
@@ -159,7 +134,6 @@ namespace mdcii::state
 
         virtual void Input() = 0;
         virtual void Update() = 0;
-        virtual void PreRender() {}
         virtual void Render() = 0;
         virtual void RenderImGui() = 0;
 
@@ -175,7 +149,7 @@ namespace mdcii::state
         // Stack operations
         //-------------------------------------------------
 
-        void RequestStackPush(Id t_id) const;
+        void RequestStackPush(StateId t_id) const;
         void RequestStackPop() const;
         void RequestStateClear() const;
 
@@ -187,10 +161,10 @@ namespace mdcii::state
         /**
          * The unique identifier of this state.
          */
-        Id m_id;
+        StateId m_id;
 
         /**
-         * Pointer to the parent state stack.
+         * Pointer to the parent StateStack object.
          */
         StateStack* m_stateStack{ nullptr };
     };

@@ -19,6 +19,7 @@
 #include <magic_enum.hpp>
 #include "Game.h"
 #include "MdciiException.h"
+#include "GameState.h"
 #include "EditorState.h"
 #include "camera/Camera.h"
 #include "state/StateStack.h"
@@ -160,20 +161,25 @@ void mdcii::Game::Start()
 {
     Log::MDCII_LOG_DEBUG("[Game::Start()] Starts the game.");
 
+    // register states
     m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::Context>(m_window, m_camera, m_originalResourcesManager));
-    m_stateStack->RegisterState<EditorState>(state::State::Id::EDITOR);
+    m_stateStack->RegisterState<GameState>(state::StateId::GAME);
+    m_stateStack->RegisterState<EditorState>(state::StateId::EDITOR);
 
-    const auto startStateName{ INI.Get<std::string>("game", "start") };
-    const auto startStateId{ magic_enum::enum_cast<state::State::Id>(startStateName) };
+    // push a start state
+    const auto startStateId{ magic_enum::enum_cast<state::StateId>(INI.Get<std::string>("game", "start_state")) };
     if (startStateId.has_value())
     {
         switch (startStateId.value()) // NOLINT(clang-diagnostic-switch-enum)
         {
-        case state::State::Id::EDITOR:
-            m_stateStack->PushState(state::State::Id::EDITOR);
+        case state::StateId::EDITOR:
+            m_stateStack->PushState(state::StateId::EDITOR);
+            break;
+        case state::StateId::GAME:
+            m_stateStack->PushState(state::StateId::GAME);
             break;
         default:
-            m_stateStack->PushState(state::State::Id::EDITOR);
+            m_stateStack->PushState(state::StateId::GAME);
         }
     }
     else

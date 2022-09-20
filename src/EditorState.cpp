@@ -34,7 +34,7 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::EditorState::EditorState(const Id t_id, state::StateStack* t_stateStack, std::shared_ptr<state::Context> t_context)
+mdcii::EditorState::EditorState(const state::StateId t_id, state::StateStack* t_stateStack, std::shared_ptr<state::Context> t_context)
     : State(t_id, t_stateStack, std::move(t_context))
 {
     Log::MDCII_LOG_DEBUG("[EditorState::EditorState()] Create EditorState.");
@@ -70,10 +70,6 @@ void mdcii::EditorState::Input()
 }
 
 void mdcii::EditorState::Update()
-{
-}
-
-void mdcii::EditorState::PreRender()
 {
 }
 
