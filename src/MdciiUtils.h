@@ -18,15 +18,61 @@
 
 #pragma once
 
-#include <string>
+#include <fstream>
+#include "data/json.hpp"
+#include "MdciiException.h"
+
+//-------------------------------------------------
+// Operators
+//-------------------------------------------------
 
 constexpr std::size_t operator"" _uz(const unsigned long long t_val)
 {
     return t_val;
 }
 
+//-------------------------------------------------
+// Utils
+//-------------------------------------------------
+
 namespace mdcii
 {
+    //-------------------------------------------------
+    // Files
+    //-------------------------------------------------
+
+    /**
+     * Reads and deserialize a Json file.
+     *
+     * @param t_filePath The path to the Json file.
+     *
+     * @return The Json value.
+     */
+    [[nodiscard]] static nlohmann::json read_json_from_file(const std::string& t_filePath)
+    {
+        nlohmann::json j;
+
+        std::ifstream jsonFile;
+        jsonFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+
+        try
+        {
+            jsonFile.open(t_filePath);
+            j = nlohmann::json::parse(jsonFile);
+            jsonFile.close();
+        }
+        catch (const std::ifstream::failure&)
+        {
+            throw MDCII_EXCEPTION("[read_json_from_file()] Exception caught while loading file " + t_filePath + ".");
+        }
+
+        return j;
+    }
+
+    //-------------------------------------------------
+    // Strings
+    //-------------------------------------------------
+
     /**
      * Convert a string to lower case.
      *
@@ -34,7 +80,7 @@ namespace mdcii
      *
      * @return The converted string.
      */
-    static std::string to_lower_case(const std::string& t_string)
+    [[nodiscard]] static std::string to_lower_case(const std::string& t_string)
     {
         auto newString{ t_string };
         for (auto& c : newString)
@@ -52,7 +98,7 @@ namespace mdcii
      *
      * @return The converted string.
      */
-    static std::string to_upper_case(const std::string& t_string)
+    [[nodiscard]] static std::string to_upper_case(const std::string& t_string)
     {
         auto newString{ t_string };
         for (auto& c : newString)

@@ -21,6 +21,7 @@
 #include "Log.h"
 #include "ogl/OpenGL.h"
 #include "ogl/Window.h"
+#include "world/World.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -59,16 +60,14 @@ void mdcii::GameState::Update()
 
 void mdcii::GameState::Render()
 {
+    m_world->Render();
 }
 
 void mdcii::GameState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    ImGui::Begin("GameState");
-
-
-    ImGui::End();
+    m_world->RenderImGui();
 
     ogl::Window::ImGuiEnd();
 }
@@ -80,6 +79,8 @@ void mdcii::GameState::RenderImGui()
 void mdcii::GameState::Init()
 {
     Log::MDCII_LOG_DEBUG("[GameState::Init()] Initializing game state.");
+
+    m_world = std::make_shared<world::World>("data/ExampleMap.json", context);
 
     Log::MDCII_LOG_DEBUG("[GameState::Init()] The game state was successfully initialized.");
 }

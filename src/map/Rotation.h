@@ -100,7 +100,7 @@ namespace mdcii::map
         throw MDCII_EXCEPTION("[int_to_rotation()] Invalid rotation given.");
     }
 
-    inline int rotation_to_int(const Rotation t_rotation)
+    [[deprecated("Use magic enum direct")]] inline int rotation_to_int(const Rotation t_rotation)
     {
         return magic_enum::enum_integer(t_rotation);
     }

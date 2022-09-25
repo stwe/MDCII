@@ -21,11 +21,23 @@
 #include "state/State.h"
 
 //-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::world
+{
+    class World;
+}
+
+//-------------------------------------------------
 // GameState
 //-------------------------------------------------
 
 namespace mdcii
 {
+    /**
+     * A state to use the new renderer.
+     */
     class GameState: public state::State
     {
     public:
@@ -64,9 +76,21 @@ namespace mdcii
 
     private:
         //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * The World object.
+         */
+        std::shared_ptr<world::World> m_world;
+
+        //-------------------------------------------------
         // Init
         //-------------------------------------------------
 
+        /**
+         * Initializes the state.
+         */
         void Init();
     };
 }
