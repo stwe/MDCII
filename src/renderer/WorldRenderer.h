@@ -108,11 +108,10 @@ namespace mdcii::renderer
          */
         using Vaos = std::array<std::unique_ptr<ogl::buffer::Vao>, map::NR_OF_ZOOMS>;
 
-        // todo TERRAIN_AND_BUILDINGS
         /**
          * A Vaos type for each layer type (TERRAIN, BUILDINGS, TERRAIN_AND_BUILDINGS) except type NONE.
          */
-        using Layer_Vaos = std::array<Vaos, 2>;
+        using Layer_Vaos = std::array<Vaos, 3>;
 
         //-------------------------------------------------
         // Shader constants

@@ -85,12 +85,15 @@ void mdcii::renderer::WorldRenderer::Init()
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
         m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::TERRAIN)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
         m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::BUILDINGS)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
+        m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::TERRAIN_AND_BUILDINGS)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
 
         AddModelMatrices(t_zoom, world::WorldLayerType::TERRAIN);
         AddModelMatrices(t_zoom, world::WorldLayerType::BUILDINGS);
+        AddModelMatrices(t_zoom, world::WorldLayerType::TERRAIN_AND_BUILDINGS);
 
         AddTextureInfo(t_zoom, world::WorldLayerType::TERRAIN);
         AddTextureInfo(t_zoom, world::WorldLayerType::BUILDINGS);
+        AddTextureInfo(t_zoom, world::WorldLayerType::TERRAIN_AND_BUILDINGS);
     });
 }
 

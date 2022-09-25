@@ -130,6 +130,17 @@ void mdcii::world::WorldLayer::AddTileFromJson(const nlohmann::json& t_json)
 // Prepare rendering
 //-------------------------------------------------
 
+void mdcii::world::WorldLayer::PrepareRendering()
+{
+    SortTiles();
+    CreateModelMatrices();
+    CreateTextureInfo();
+}
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
 void mdcii::world::WorldLayer::SortTiles()
 {
     // for each rotation

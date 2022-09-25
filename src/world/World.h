@@ -250,10 +250,15 @@ namespace mdcii::world
         void CreateLayers();
 
         /**
-         * Iterate over the Layers objects and prepare data for rendering.
+         * Prepares the terrain and buildings layer for rendering.
          * Calls PreCalcTile(), sorts tiles, creates model matrices and texture information.
          */
         void PrepareRendering();
+
+        /**
+         * Merge terrain layer with building layer.
+         */
+        void MergeLayer();
 
         /**
          * Adds some pre-calculations to every Tile object,
@@ -263,6 +268,6 @@ namespace mdcii::world
          * @param t_x The x position in the world.
          * @param t_y The y position in the world.
          */
-        void PreCalcTile(Tile* t_tile, int t_x, int t_y) const;
+        void PreCalcTile(Tile& t_tile, int t_x, int t_y) const;
     };
 }

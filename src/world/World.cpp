@@ -49,15 +49,11 @@ mdcii::world::World::~World() noexcept
 
 const mdcii::world::WorldLayer& mdcii::world::World::GetLayer(const WorldLayerType t_layerType) const
 {
-    MDCII_ASSERT(t_layerType == WorldLayerType::TERRAIN || t_layerType == WorldLayerType::BUILDINGS, "[World::GetLayer()] Invalid layer type.")
-
     return *layers.at(magic_enum::enum_integer(t_layerType));
 }
 
 mdcii::world::WorldLayer& mdcii::world::World::GetLayer(const WorldLayerType t_layerType)
 {
-    MDCII_ASSERT(t_layerType == WorldLayerType::TERRAIN || t_layerType == WorldLayerType::BUILDINGS, "[World::GetLayer()] Invalid layer type.")
-
     return *layers.at(magic_enum::enum_integer(t_layerType));
 }
 
@@ -81,7 +77,7 @@ void mdcii::world::World::RenderImGui()
     ImGui::SameLine();
     ImGui::RadioButton("Buildings", &e, 1);
     ImGui::SameLine();
-    ImGui::RadioButton("Terrain && Buildings", &e, 2); // todo: create layer
+    ImGui::RadioButton("Terrain && Buildings", &e, 2);
 
     auto layer{ magic_enum::enum_cast<WorldLayerType>(e) };
     if (layer.has_value())
@@ -168,7 +164,7 @@ bool mdcii::world::World::IsPositionInWorld(const int t_x, const int t_y) const
     return false;
 }
 
-int mdcii::world::World::GetMapIndex(const int t_x, const int t_y, const mdcii::map::Rotation t_rotation) const
+int mdcii::world::World::GetMapIndex(const int t_x, const int t_y, const map::Rotation t_rotation) const
 {
     MDCII_ASSERT(IsPositionInWorld(t_x, t_y), "[World::GetMapIndex()] Invalid world position given.")
 
@@ -177,7 +173,7 @@ int mdcii::world::World::GetMapIndex(const int t_x, const int t_y, const mdcii::
     return position.y * width + position.x;
 }
 
-glm::vec2 mdcii::world::World::WorldToScreen(const int t_x, const int t_y, const mdcii::map::Zoom t_zoom, const mdcii::map::Rotation t_rotation) const
+glm::vec2 mdcii::world::World::WorldToScreen(const int t_x, const int t_y, const map::Zoom t_zoom, const map::Rotation t_rotation) const
 {
     MDCII_ASSERT(IsPositionInWorld(t_x, t_y), "[World::WorldToScreen()] Invalid world position given.")
 
@@ -189,7 +185,7 @@ glm::vec2 mdcii::world::World::WorldToScreen(const int t_x, const int t_y, const
     };
 }
 
-glm::ivec2 mdcii::world::World::RotatePosition(const int t_x, const int t_y, const mdcii::map::Rotation t_rotation) const
+glm::ivec2 mdcii::world::World::RotatePosition(const int t_x, const int t_y, const map::Rotation t_rotation) const
 {
     return rotate_position(t_x, t_y, width, height, t_rotation);
 }
@@ -204,6 +200,7 @@ void mdcii::world::World::Init()
 
     CreateLayers();
     PrepareRendering();
+    MergeLayer();
 
     tileAtlas = std::make_unique<map::TileAtlas>();
     worldRenderer = std::make_unique<renderer::WorldRenderer>(this);
@@ -266,7 +263,6 @@ void mdcii::world::World::CreateLayers()
         }
     }
 
-    MDCII_ASSERT(!layers.empty(), "[World::CreateLayer()] Missing layers.")
     MDCII_ASSERT(layers.size() == 2, "[World::CreateLayer()] Invalid number of layers.")
     MDCII_ASSERT((static_cast<size_t>(width) * static_cast<size_t>(height)) == layers.at(0)->tiles.size(), "[World::CreateLayer()] Invalid number of tiles.")
     MDCII_ASSERT((static_cast<size_t>(width) * static_cast<size_t>(height)) == layers.at(1)->tiles.size(), "[World::CreateLayer()] Invalid number of tiles.")
@@ -276,31 +272,94 @@ void mdcii::world::World::CreateLayers()
 
 void mdcii::world::World::PrepareRendering()
 {
-    for (const auto& layer : layers)
-    {
-        // pre-calc tiles
-        for (auto y{ 0 }; y < height; ++y)
-        {
-            for (auto x{ 0 }; x < width; ++x)
-            {
-                PreCalcTile(&layer->GetTile(x, y), x, y);
-            }
-        }
+    MDCII_ASSERT(layers.size() == 2, "[World::PrepareRendering()] Invalid number of layers.")
 
-        // pre-calc stuff for rendering tiles
-        layer->SortTiles();
-        layer->CreateModelMatrices();
-        layer->CreateTextureInfo();
+    auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
+    auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
+
+    // pre-calc tiles
+    for (auto y{ 0 }; y < height; ++y)
+    {
+        for (auto x{ 0 }; x < width; ++x)
+        {
+            PreCalcTile(terrainLayer.GetTile(x, y), x, y);
+            PreCalcTile(buildingsLayer.GetTile(x, y), x, y);
+        }
     }
+
+    terrainLayer.PrepareRendering();
+    buildingsLayer.PrepareRendering();
 }
 
-void mdcii::world::World::PreCalcTile(mdcii::world::Tile* t_tile, const int t_x, const int t_y) const
+void mdcii::world::World::MergeLayer()
 {
-    MDCII_ASSERT(t_tile, "[World::PreCalcTile()] Null pointer.")
+    Log::MDCII_LOG_DEBUG("[World::MergeLayer()] Merge terrain layer with building layer.");
 
+    MDCII_ASSERT(layers.size() == 2, "[World::MergeLayer()] Invalid number of layers.")
+
+    // get the existing layers
+    const auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
+    const auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
+
+    // create a new layer
+    auto layer{ std::make_unique<WorldLayer>(this) };
+    layer->layerType = WorldLayerType::TERRAIN_AND_BUILDINGS;
+
+    // copy data from terrain layer
+    layer->tiles = terrainLayer.tiles;
+    layer->sortedTiles = terrainLayer.sortedTiles;
+    layer->modelMatrices = terrainLayer.modelMatrices;
+    layer->textureAtlasIndices = terrainLayer.textureAtlasIndices;
+    layer->offsets = terrainLayer.offsets;
+    layer->heights = terrainLayer.heights;
+
+    // merge
+
+    // for each zoom
+    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
+        // for each rotation
+        magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+            const auto z{ magic_enum::enum_integer(t_zoom) };
+            const auto r{ magic_enum::enum_integer(t_rotation) };
+
+            auto& mt{ layer->modelMatrices.at(z).at(r) };
+            const auto& mb{ buildingsLayer.modelMatrices.at(z).at(r) };
+
+            auto& it{ layer->textureAtlasIndices.at(z) };
+            const auto& ib{ buildingsLayer.textureAtlasIndices.at(z) };
+
+            auto& ot{ layer->offsets.at(z).at(r) };
+            const auto& ob{ buildingsLayer.offsets.at(z).at(r) };
+
+            auto& ht{ layer->heights.at(z) };
+            const auto& hb{ buildingsLayer.heights.at(z) };
+
+            // for each tile
+            auto i{ 0 };
+            for (const auto& mapTile : buildingsLayer.sortedTiles.at(r))
+            {
+                if (mapTile.HasBuilding())
+                {
+                    mt.at(i) = mb.at(i);
+                    it.at(i)[r] = ib.at(i)[r];
+                    ot.at(i) = ob.at(i);
+                    ht.at(i)[r] = hb.at(i)[r];
+                }
+
+                i++;
+            }
+        });
+    });
+
+    // store new layer
+    layers.emplace_back(std::move(layer));
+}
+
+void mdcii::world::World::PreCalcTile(Tile& t_tile, const int t_x, const int t_y) const
+{
     // set world position
-    t_tile->worldX = t_x;
-    t_tile->worldY = t_y;
+    t_tile.worldX = t_x;
+    t_tile.worldY = t_y;
 
     // pre-calculate the position on the screen for each zoom and each rotation
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
@@ -311,27 +370,27 @@ void mdcii::world::World::PreCalcTile(mdcii::world::Tile* t_tile, const int t_x,
         positions[2] = WorldToScreen(t_x, t_y, t_zoom, map::Rotation::DEG180);
         positions[3] = WorldToScreen(t_x, t_y, t_zoom, map::Rotation::DEG270);
 
-        t_tile->screenPositions.at(magic_enum::enum_integer(t_zoom)) = positions;
+        t_tile.screenPositions.at(magic_enum::enum_integer(t_zoom)) = positions;
     });
 
     // pre-calculate the index for each rotation for sorting
-    t_tile->indices[0] = GetMapIndex(t_x, t_y, map::Rotation::DEG0);
-    t_tile->indices[1] = GetMapIndex(t_x, t_y, map::Rotation::DEG90);
-    t_tile->indices[2] = GetMapIndex(t_x, t_y, map::Rotation::DEG180);
-    t_tile->indices[3] = GetMapIndex(t_x, t_y, map::Rotation::DEG270);
+    t_tile.indices[0] = GetMapIndex(t_x, t_y, map::Rotation::DEG0);
+    t_tile.indices[1] = GetMapIndex(t_x, t_y, map::Rotation::DEG90);
+    t_tile.indices[2] = GetMapIndex(t_x, t_y, map::Rotation::DEG180);
+    t_tile.indices[3] = GetMapIndex(t_x, t_y, map::Rotation::DEG270);
 
     // pre-calculate a gfx for each rotation
-    if (t_tile->HasBuilding())
+    if (t_tile.HasBuilding())
     {
-        const auto building{ context->originalResourcesManager->GetBuildingById(t_tile->buildingId) };
+        const auto building{ context->originalResourcesManager->GetBuildingById(t_tile.buildingId) };
         const auto gfx0{ building.gfx };
 
-        t_tile->gfxs.push_back(gfx0);
+        t_tile.gfxs.push_back(gfx0);
         if (building.rotate > 0)
         {
-            t_tile->gfxs.push_back(gfx0 + (1 * building.rotate));
-            t_tile->gfxs.push_back(gfx0 + (2 * building.rotate));
-            t_tile->gfxs.push_back(gfx0 + (3 * building.rotate));
+            t_tile.gfxs.push_back(gfx0 + (1 * building.rotate));
+            t_tile.gfxs.push_back(gfx0 + (2 * building.rotate));
+            t_tile.gfxs.push_back(gfx0 + (3 * building.rotate));
         }
     }
 }

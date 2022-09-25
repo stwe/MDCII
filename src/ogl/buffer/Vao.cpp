@@ -45,6 +45,7 @@ mdcii::ogl::buffer::Vao::~Vao() noexcept
 
 void mdcii::ogl::buffer::Vao::Bind() const
 {
+    MDCII_ASSERT(id, "[Vao::Bind()] Invalid Vao handle.")
     glBindVertexArray(id);
 }
 

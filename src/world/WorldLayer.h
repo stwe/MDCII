@@ -284,19 +284,9 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Sort Tile objects for rendering.
+         * Prepare data for rendering.
          */
-        void SortTiles();
-
-        /**
-         * Create model matrices for rendering.
-         */
-        void CreateModelMatrices();
-
-        /**
-         * Stores information about which texture is used for each instance to render.
-         */
-        void CreateTextureInfo();
+        void PrepareRendering();
 
     protected:
 
@@ -323,5 +313,24 @@ namespace mdcii::world
          * The parent World object.
          */
         World* m_world{ nullptr };
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        /**
+         * Sort Tile objects for rendering.
+         */
+        void SortTiles();
+
+        /**
+         * Create model matrices for rendering.
+         */
+        void CreateModelMatrices();
+
+        /**
+         * Stores information about which texture is used for each instance to render.
+         */
+        void CreateTextureInfo();
     };
 }

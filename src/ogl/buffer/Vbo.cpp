@@ -44,6 +44,7 @@ mdcii::ogl::buffer::Vbo::~Vbo() noexcept
 
 void mdcii::ogl::buffer::Vbo::Bind() const
 {
+    MDCII_ASSERT(id, "[Vbo::Bind()] Invalid Vbo handle.")
     glBindBuffer(GL_ARRAY_BUFFER, id);
 }
 
