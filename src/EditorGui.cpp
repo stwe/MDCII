@@ -192,8 +192,8 @@ void mdcii::EditorGui::WorkshopGui(event::SelectedBauGfx& t_selectedBauGfx) cons
 
     const auto textureWidth{ bauhausBshTextures.at(building.baugfx)->width };
     const auto textureHeight{ bauhausBshTextures.at(building.baugfx)->height };
-    const auto textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(
-        bauhausBshTextures.at(static_cast<size_t>(building.baugfx) + rotation_to_int(t_selectedBauGfx.rotation))->textureId
+    auto* const textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(
+        bauhausBshTextures.at(static_cast<size_t>(building.baugfx) + magic_enum::enum_integer(t_selectedBauGfx.rotation))->textureId
     )
     ) };
 

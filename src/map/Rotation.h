@@ -100,11 +100,6 @@ namespace mdcii::map
         throw MDCII_EXCEPTION("[int_to_rotation()] Invalid rotation given.");
     }
 
-    [[deprecated("Use magic enum direct")]] inline int rotation_to_int(const Rotation t_rotation)
-    {
-        return magic_enum::enum_integer(t_rotation);
-    }
-
     //-------------------------------------------------
     // Rotate position
     //-------------------------------------------------
@@ -141,7 +136,7 @@ namespace mdcii::map
 
     inline Rotation operator+(const Rotation t_rotation, const Rotation t_other)
     {
-        const auto result{ (rotation_to_int(t_rotation) + rotation_to_int(t_other)) % static_cast<int>(magic_enum::enum_count<Rotation>()) };
+        const auto result{ (magic_enum::enum_integer(t_rotation) + magic_enum::enum_integer(t_other)) % static_cast<int>(magic_enum::enum_count<Rotation>()) };
         return int_to_rotation(result);
     }
 }

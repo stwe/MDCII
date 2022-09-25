@@ -76,7 +76,7 @@ void mdcii::world::World::RenderImGui()
 
     // select layer
 
-    static int e = 0;
+    static int e{ 0 };
     ImGui::RadioButton("Terrain", &e, 0);
     ImGui::SameLine();
     ImGui::RadioButton("Buildings", &e, 1);

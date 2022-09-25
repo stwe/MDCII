@@ -103,7 +103,7 @@ namespace mdcii::ecs
         template<typename Component>
         static void SortEntities(const map::Rotation t_rotation)
         {
-            const auto i{ rotation_to_int(t_rotation) };
+            const auto i{ magic_enum::enum_integer(t_rotation) };
             Game::ecs.sort<Component>([i](const Component& t_lhs, const Component& t_rhs) {
                 return t_lhs.mapTile.indices[i] < t_rhs.mapTile.indices[i];
             });

@@ -34,7 +34,7 @@ void mdcii::map::to_json(nlohmann::json& t_json, const MapTile& t_mapTile)
 {
     t_json = nlohmann::json{
         { "id", t_mapTile.buildingId },
-        { "rotation", rotation_to_int(t_mapTile.rotation) },
+        { "rotation", magic_enum::enum_integer(t_mapTile.rotation) },
         { "x", t_mapTile.x },
         { "y", t_mapTile.y },
         { "connected", t_mapTile.connectedMapTiles }
@@ -169,7 +169,7 @@ void mdcii::map::MapLayer::CreateModelMatrices()
                 const auto& building{ m_mapContent->context->originalResourcesManager->GetBuildingById(buildingId) };
 
                 // copy position
-                auto screenPosition{ mapTile.screenPositions.at(magic_enum::enum_integer(t_zoom)).at(rotation_to_int(t_rotation)) };
+                auto screenPosition{ mapTile.screenPositions.at(magic_enum::enum_integer(t_zoom)).at(magic_enum::enum_integer(t_rotation)) };
 
                 // get gfx
                 auto buildingRotation{ mapTile.rotation };
@@ -181,7 +181,7 @@ void mdcii::map::MapLayer::CreateModelMatrices()
                 int32_t gfx{ GRASS_GFX }; // to definitely create a position
                 if (mapTile.HasBuilding())
                 {
-                    gfx = mapTile.gfxs[rotation_to_int(buildingRotation)];
+                    gfx = mapTile.gfxs[magic_enum::enum_integer(buildingRotation)];
                 }
 
                 // todo: create method
@@ -240,7 +240,7 @@ void mdcii::map::MapLayer::CreateModelMatrices()
                 matrices.emplace_back(renderer::RenderUtils::GetModelMatrix(screenPosition, { w, h }));
             }
 
-            matricesForRotations.at(rotation_to_int(t_rotation)) = matrices;
+            matricesForRotations.at(magic_enum::enum_integer(t_rotation)) = matrices;
         });
 
         modelMatrices.at(magic_enum::enum_integer(t_zoom)) = matricesForRotations;
@@ -281,7 +281,7 @@ void mdcii::map::MapLayer::CreateTextureInfo()
                     {
                         buildingRotation = buildingRotation + t_rotation;
                     }
-                    auto gfx{ mapTile.gfxs[rotation_to_int(buildingRotation)] };
+                    auto gfx{ mapTile.gfxs[magic_enum::enum_integer(buildingRotation)] };
 
                     // todo: create method
                     if (building.size.w > 1)
@@ -350,7 +350,7 @@ void mdcii::map::MapLayer::CreateTextureInfo()
                 }
             }
 
-            texOffsetsForRotations.at(rotation_to_int(t_rotation)) = textureOffsets;
+            texOffsetsForRotations.at(magic_enum::enum_integer(t_rotation)) = textureOffsets;
         });
 
         textureAtlasIndices.at(zoom) = texIndicesForRotations;

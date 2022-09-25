@@ -187,7 +187,7 @@ void mdcii::map::Map::RenderGridEntities() const
     for (const auto entity : view)
     {
         const auto& gc{ view.get<const ecs::GridComponent>(entity) };
-        const auto& screenPosition{ gc.mapTile.screenPositions.at(magic_enum::enum_integer(mapContent->zoom)).at(rotation_to_int(mapContent->rotation)) };
+        const auto& screenPosition{ gc.mapTile.screenPositions.at(magic_enum::enum_integer(mapContent->zoom)).at(magic_enum::enum_integer(mapContent->rotation)) };
 
         if (renderGrid)
         {
@@ -253,7 +253,7 @@ void mdcii::map::Map::RenderEntity(
         buildingRotation = buildingRotation + mapContent->rotation;
     }
 
-    auto gfx{ t_mapTile.gfxs[rotation_to_int(buildingRotation)] };
+    auto gfx{ t_mapTile.gfxs[magic_enum::enum_integer(buildingRotation)] };
 
     if (t_building.size.w > 1)
     {
@@ -299,7 +299,7 @@ void mdcii::map::Map::RenderEntity(
 
     RenderBuilding(
         gfx,
-        t_mapTile.screenPositions.at(magic_enum::enum_integer(mapContent->zoom)).at(rotation_to_int(mapContent->rotation)),
+        t_mapTile.screenPositions.at(magic_enum::enum_integer(mapContent->zoom)).at(magic_enum::enum_integer(mapContent->rotation)),
         elevation,
         t_selected
     );
