@@ -143,6 +143,8 @@ void mdcii::world::WorldLayer::PrepareRendering()
 
 void mdcii::world::WorldLayer::SortTiles()
 {
+    Log::MDCII_LOG_DEBUG("[WorldLayer::SortTiles()] Sorting tiles by index.");
+
     // for each rotation
     magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
         // sort tiles by index
@@ -157,6 +159,8 @@ void mdcii::world::WorldLayer::SortTiles()
 
 void mdcii::world::WorldLayer::CreateModelMatrices()
 {
+    Log::MDCII_LOG_DEBUG("[WorldLayer::CreateModelMatrices()] Create model matrices.");
+
     // for each zoom
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
         // to store the model matrices for each rotation
@@ -168,68 +172,18 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
             Model_Matrices matrices;
 
             // for each tile
-            for (const auto& mapTile : sortedTiles.at(magic_enum::enum_integer(t_rotation)))
+            for (const auto& tile : sortedTiles.at(magic_enum::enum_integer(t_rotation)))
             {
-                // get building
-                int32_t buildingId{ GRASS_BUILDING_ID }; // to definitely create a position
-                if (mapTile.HasBuilding())
+                // to definitely create a position
+                int32_t buildingId{ GRASS_BUILDING_ID };
+                int32_t gfx{ GRASS_GFX };
+                auto posoffs{ m_world->context->originalResourcesManager->GetBuildingById(buildingId).posoffs };
+
+                // override gfx && posoffs
+                if (tile.HasBuilding())
                 {
-                    buildingId = mapTile.buildingId;
-                }
-
-                const auto& building{ m_world->context->originalResourcesManager->GetBuildingById(buildingId) };
-
-                // copy position
-                auto screenPosition{ mapTile.screenPositions.at(magic_enum::enum_integer(t_zoom)).at(magic_enum::enum_integer(t_rotation)) };
-
-                // get gfx
-                auto buildingRotation{ mapTile.rotation };
-                if (building.rotate > 0)
-                {
-                    buildingRotation = buildingRotation + t_rotation;
-                }
-
-                int32_t gfx{ GRASS_GFX }; // to definitely create a position
-                if (mapTile.HasBuilding())
-                {
-                    gfx = mapTile.gfxs[magic_enum::enum_integer(buildingRotation)];
-                }
-
-                // todo: create method
-                if (building.size.w > 1)
-                {
-                    // default: orientation 0
-                    auto rp{ glm::ivec2(mapTile.x, mapTile.y) };
-
-                    if (mapTile.rotation == map::Rotation::DEG270)
-                    {
-                        rp = rotate_position(
-                            mapTile.x, mapTile.y,
-                            building.size.w, building.size.h,
-                            map::Rotation::DEG90
-                        );
-                    }
-
-                    if (mapTile.rotation == map::Rotation::DEG180)
-                    {
-                        rp = rotate_position(
-                            mapTile.x, mapTile.y,
-                            building.size.w, building.size.h,
-                            map::Rotation::DEG180
-                        );
-                    }
-
-                    if (mapTile.rotation == map::Rotation::DEG90)
-                    {
-                        rp = rotate_position(
-                            mapTile.x, mapTile.y,
-                            building.size.w, building.size.h,
-                            map::Rotation::DEG270
-                        );
-                    }
-
-                    const auto offset{ rp.y * building.size.w + rp.x };
-                    gfx += offset;
+                    gfx = CalcGfx(tile, t_rotation);
+                    posoffs = m_world->context->originalResourcesManager->GetBuildingById(tile.buildingId).posoffs;
                 }
 
                 // get width && height
@@ -239,11 +193,13 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
 
                 // get elevation
                 auto elevation{ 0.0f };
-                if (building.posoffs > 0)
+                if (posoffs > 0)
                 {
                     elevation = static_cast<float>(get_elevation(t_zoom));
                 }
 
+                // screen position
+                auto screenPosition{ tile.screenPositions.at(magic_enum::enum_integer(t_zoom)).at(magic_enum::enum_integer(t_rotation)) };
                 screenPosition.y -= h - static_cast<float>(get_tile_height(t_zoom));
                 screenPosition.y -= elevation;
 
@@ -260,6 +216,8 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
 
 void mdcii::world::WorldLayer::CreateTextureInfo()
 {
+    Log::MDCII_LOG_DEBUG("[WorldLayer::CreateTextureInfo()] Create texture info.");
+
     // for each zoom
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
         // zoom int
@@ -281,55 +239,12 @@ void mdcii::world::WorldLayer::CreateTextureInfo()
             auto instance{ 0 };
 
             // for each tile
-            for (const auto& mapTile : sortedTiles.at(magic_enum::enum_integer(t_rotation)))
+            for (const auto& tile : sortedTiles.at(magic_enum::enum_integer(t_rotation)))
             {
-                if (mapTile.HasBuilding())
+                if (tile.HasBuilding())
                 {
                     // get gfx
-                    const auto& building{ m_world->context->originalResourcesManager->GetBuildingById(mapTile.buildingId) };
-                    auto buildingRotation{ mapTile.rotation };
-                    if (building.rotate > 0)
-                    {
-                        buildingRotation = buildingRotation + t_rotation;
-                    }
-                    auto gfx{ mapTile.gfxs[magic_enum::enum_integer(buildingRotation)] };
-
-                    // todo: create method
-                    if (building.size.w > 1)
-                    {
-                        // default: orientation 0
-                        auto rp{ glm::ivec2(mapTile.x, mapTile.y) };
-
-                        if (mapTile.rotation == map::Rotation::DEG270)
-                        {
-                            rp = rotate_position(
-                                mapTile.x, mapTile.y,
-                                building.size.w, building.size.h,
-                                map::Rotation::DEG90
-                            );
-                        }
-
-                        if (mapTile.rotation == map::Rotation::DEG180)
-                        {
-                            rp = rotate_position(
-                                mapTile.x, mapTile.y,
-                                building.size.w, building.size.h,
-                                map::Rotation::DEG180
-                            );
-                        }
-
-                        if (mapTile.rotation == map::Rotation::DEG90)
-                        {
-                            rp = rotate_position(
-                                mapTile.x, mapTile.y,
-                                building.size.w, building.size.h,
-                                map::Rotation::DEG270
-                            );
-                        }
-
-                        const auto offset{ rp.y * building.size.w + rp.x };
-                        gfx += offset;
-                    }
+                    auto gfx{ CalcGfx(tile, t_rotation) };
 
                     // texture indices
                     texIndicesForRotations.at(instance)[magic_enum::enum_integer(t_rotation)] = gfx / (atlasRows * atlasRows);
@@ -365,4 +280,53 @@ void mdcii::world::WorldLayer::CreateTextureInfo()
         offsets.at(zoom) = texOffsetsForRotations;
         heights.at(zoom) = texHeightsForRotations;
     });
+}
+
+int32_t mdcii::world::WorldLayer::CalcGfx(const Tile& t_tile, const map::Rotation t_rotation) const
+{
+    const auto& building{ m_world->context->originalResourcesManager->GetBuildingById(t_tile.buildingId) };
+    auto buildingRotation{ t_tile.rotation };
+    if (building.rotate > 0)
+    {
+        buildingRotation = buildingRotation + t_rotation;
+    }
+    auto gfx{ t_tile.gfxs[magic_enum::enum_integer(buildingRotation)] };
+
+    if (building.size.w > 1)
+    {
+        // default: orientation 0
+        auto rp{ glm::ivec2(t_tile.x, t_tile.y) };
+
+        if (t_tile.rotation == map::Rotation::DEG270)
+        {
+            rp = rotate_position(
+                t_tile.x, t_tile.y,
+                building.size.w, building.size.h,
+                map::Rotation::DEG90
+            );
+        }
+
+        if (t_tile.rotation == map::Rotation::DEG180)
+        {
+            rp = rotate_position(
+                t_tile.x, t_tile.y,
+                building.size.w, building.size.h,
+                map::Rotation::DEG180
+            );
+        }
+
+        if (t_tile.rotation == map::Rotation::DEG90)
+        {
+            rp = rotate_position(
+                t_tile.x, t_tile.y,
+                building.size.w, building.size.h,
+                map::Rotation::DEG270
+            );
+        }
+
+        const auto offset{ rp.y * building.size.w + rp.x };
+        gfx += offset;
+    }
+
+    return gfx;
 }

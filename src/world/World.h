@@ -26,16 +26,25 @@
 
 namespace mdcii::state
 {
+    /**
+     * Forward declaration struct Context.
+     */
     struct Context;
 }
 
 namespace mdcii::map
 {
+    /**
+     * Forward declaration class TileAtlas.
+     */
     class TileAtlas;
 }
 
 namespace mdcii::renderer
 {
+    /**
+     * Forward declaration class WorldRenderer.
+     */
     class WorldRenderer;
 }
 
@@ -157,7 +166,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Changes the rotation of the world left or right.
+         * Changes the rotation of the world.
          *
          * @param t_changeRotation Rotate left or right.
          */
@@ -256,12 +265,12 @@ namespace mdcii::world
         void PrepareRendering();
 
         /**
-         * Merge terrain layer with building layer.
+         * Merge terrain layer with building layer to another new layer.
          */
         void MergeLayer();
 
         /**
-         * Adds some pre-calculations to every Tile object,
+         * Adds some pre-calculations to every Tile object of a layer,
          * which are necessary for the display the Tile on the screen.
          *
          * @param t_tile The Tile object.

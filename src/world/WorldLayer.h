@@ -48,6 +48,9 @@ namespace mdcii::world
     // WorldLayerType
     //-------------------------------------------------
 
+    /**
+     * The possible layer types.
+     */
     enum class WorldLayerType
     {
         TERRAIN,
@@ -332,5 +335,15 @@ namespace mdcii::world
          * Stores information about which texture is used for each instance to render.
          */
         void CreateTextureInfo();
+
+        /**
+         * Calculates the gfx considering the rotation of the Tile object and the World object.
+         *
+         * @param t_tile The Tile object.
+         * @param t_rotation The world rotation.
+         *
+         * @return The gfx to use for rendering.
+         */
+        [[nodiscard]] int32_t CalcGfx(const Tile& t_tile, map::Rotation t_rotation) const;
     };
 }

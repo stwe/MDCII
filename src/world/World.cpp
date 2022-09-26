@@ -49,12 +49,18 @@ mdcii::world::World::~World() noexcept
 
 const mdcii::world::WorldLayer& mdcii::world::World::GetLayer(const WorldLayerType t_layerType) const
 {
-    return *layers.at(magic_enum::enum_integer(t_layerType));
+    const auto& layer{ *layers.at(magic_enum::enum_integer(t_layerType)) };
+    MDCII_ASSERT(layer.layerType == t_layerType, "[World::GetLayer()] Invalid layer type.")
+
+    return layer;
 }
 
 mdcii::world::WorldLayer& mdcii::world::World::GetLayer(const WorldLayerType t_layerType)
 {
-    return *layers.at(magic_enum::enum_integer(t_layerType));
+    auto& layer{ *layers.at(magic_enum::enum_integer(t_layerType)) };
+    MDCII_ASSERT(layer.layerType == t_layerType, "[World::GetLayer()] Invalid layer type.")
+
+    return layer;
 }
 
 //-------------------------------------------------
@@ -198,9 +204,9 @@ void mdcii::world::World::Init()
 {
     Log::MDCII_LOG_DEBUG("[World::Init()] Start initializing the world...");
 
-    CreateLayers();
-    PrepareRendering();
-    MergeLayer();
+    CreateLayers();     // create terrain && buildings layer
+    PrepareRendering(); // add some pre-calculations to the tiles
+    MergeLayer();       // merge terrain && buildings layer into a new layer
 
     tileAtlas = std::make_unique<map::TileAtlas>();
     worldRenderer = std::make_unique<renderer::WorldRenderer>(this);
@@ -210,10 +216,12 @@ void mdcii::world::World::Init()
 
 void mdcii::world::World::CreateLayers()
 {
+    MDCII_ASSERT(layers.empty(), "[World::CreateLayers()] Invalid number of layers.")
+
     // read file
-    Log::MDCII_LOG_DEBUG("[World::CreateLayer()] Starts creating Json value from file {}...", m_mapFilePath);
+    Log::MDCII_LOG_DEBUG("[World::CreateLayers()] Starts creating Json value from file {}...", m_mapFilePath);
     nlohmann::json j = read_json_from_file(Game::RESOURCES_REL_PATH + m_mapFilePath);
-    Log::MDCII_LOG_DEBUG("[World::CreateLayer()] The Json value was created successfully.");
+    Log::MDCII_LOG_DEBUG("[World::CreateLayers()] The Json value was created successfully.");
 
     // set width && height of the world
     for (const auto& [k, v] : j.items())
@@ -230,15 +238,14 @@ void mdcii::world::World::CreateLayers()
 
     if (width < 0 || height < 0)
     {
-        throw MDCII_EXCEPTION("[World::CreateLayer()] Invalid width or height given.");
+        throw MDCII_EXCEPTION("[World::CreateLayers()] Invalid width or height given.");
     }
 
-    Log::MDCII_LOG_DEBUG("[World::CreateLayer()] World width: {}", width);
-    Log::MDCII_LOG_DEBUG("[World::CreateLayer()] World height: {}", height);
+    Log::MDCII_LOG_DEBUG("[World::CreateLayers()] World width: {}", width);
+    Log::MDCII_LOG_DEBUG("[World::CreateLayers()] World height: {}", height);
 
-    // create layers
-    Log::MDCII_LOG_DEBUG("[World::CreateLayer()] Starts creating layers...");
-
+    // create terrain && buildings layer
+    Log::MDCII_LOG_DEBUG("[World::CreateLayers()] Starts creating terrain and buildings layer...");
     for (const auto& [k, v] : j.items())
     {
         if (k == "layers")
@@ -250,7 +257,7 @@ void mdcii::world::World::CreateLayers()
                 for (const auto& [layerName, layerTiles] : o.items())
                 {
                     layer->SetLayerTypeByString(layerName);
-                    MDCII_ASSERT(layer->layerType != WorldLayerType::NONE, "[World::CreateLayer()] Invalid layer type.")
+                    MDCII_ASSERT(layer->layerType != WorldLayerType::NONE, "[World::CreateLayers()] Invalid layer type.")
 
                     for (const auto& [i, tile] : layerTiles.items())
                     {
@@ -263,16 +270,18 @@ void mdcii::world::World::CreateLayers()
         }
     }
 
-    MDCII_ASSERT(layers.size() == 2, "[World::CreateLayer()] Invalid number of layers.")
-    MDCII_ASSERT((static_cast<size_t>(width) * static_cast<size_t>(height)) == layers.at(0)->tiles.size(), "[World::CreateLayer()] Invalid number of tiles.")
-    MDCII_ASSERT((static_cast<size_t>(width) * static_cast<size_t>(height)) == layers.at(1)->tiles.size(), "[World::CreateLayer()] Invalid number of tiles.")
+    MDCII_ASSERT(layers.size() == 2, "[World::CreateLayers()] Invalid number of layers.")
+    MDCII_ASSERT((static_cast<size_t>(width) * static_cast<size_t>(height)) == layers.at(0)->tiles.size(), "[World::CreateLayers()] Invalid number of tiles.")
+    MDCII_ASSERT((static_cast<size_t>(width) * static_cast<size_t>(height)) == layers.at(1)->tiles.size(), "[World::CreateLayers()] Invalid number of tiles.")
 
-    Log::MDCII_LOG_DEBUG("[World::CreateLayer()] The layers has been created successfully.");
+    Log::MDCII_LOG_DEBUG("[World::CreateLayers()] The terrain and buildings layer has been created successfully.");
 }
 
 void mdcii::world::World::PrepareRendering()
 {
     MDCII_ASSERT(layers.size() == 2, "[World::PrepareRendering()] Invalid number of layers.")
+
+    Log::MDCII_LOG_DEBUG("[World::PrepareRendering()] Prepares the terrain and buildings layer for rendering.");
 
     auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
     auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
@@ -293,7 +302,7 @@ void mdcii::world::World::PrepareRendering()
 
 void mdcii::world::World::MergeLayer()
 {
-    Log::MDCII_LOG_DEBUG("[World::MergeLayer()] Merge terrain layer with building layer.");
+    Log::MDCII_LOG_DEBUG("[World::MergeLayer()] Merge terrain layer with building layer into a new layer.");
 
     MDCII_ASSERT(layers.size() == 2, "[World::MergeLayer()] Invalid number of layers.")
 
@@ -303,6 +312,8 @@ void mdcii::world::World::MergeLayer()
 
     // create a new layer
     auto layer{ std::make_unique<WorldLayer>(this) };
+
+    // set the type of the new layer
     layer->layerType = WorldLayerType::TERRAIN_AND_BUILDINGS;
 
     // copy data from terrain layer
@@ -353,6 +364,8 @@ void mdcii::world::World::MergeLayer()
 
     // store new layer
     layers.emplace_back(std::move(layer));
+
+    MDCII_ASSERT(layers.size() == 3, "[World::MergeLayer()] Invalid number of layers.")
 }
 
 void mdcii::world::World::PreCalcTile(Tile& t_tile, const int t_x, const int t_y) const
