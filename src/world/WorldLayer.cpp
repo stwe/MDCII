@@ -227,14 +227,14 @@ void mdcii::world::WorldLayer::CreateTextureInfo()
         const auto atlasRows{ map::TileAtlas::ROWS.at(zoom) };
 
         // to store info for each rotation
-        Texture_Atlas_Indices texIndicesForRotations(GetInstances());
+        Texture_Atlas_Indices texIndicesForRotations(GetInstances(), glm::ivec4(-1));
         Texture_Offsets_For_Each_Rotation texOffsetsForRotations;
-        Texture_Heights texHeightsForRotations(GetInstances());
+        Texture_Heights texHeightsForRotations(GetInstances(), glm::vec4(-1.0f));
 
         // for each rotation in the zoom
         magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
             // to store texture offsets
-            Texture_Offsets textureOffsets;
+            Texture_Offsets textureOffsets(GetInstances(), glm::vec2(0.0f));
 
             auto instance{ 0 };
 
@@ -251,26 +251,15 @@ void mdcii::world::WorldLayer::CreateTextureInfo()
 
                     // offsets
                     const auto index{ gfx % (atlasRows * atlasRows) };
-                    textureOffsets.push_back(map::TileAtlas::GetTextureOffset(index, atlasRows));
+                    textureOffsets.at(instance) = map::TileAtlas::GetTextureOffset(index, atlasRows);
 
                     // heights
                     const auto& stadtfldBshTextures{ m_world->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
                     const auto h{ static_cast<float>(stadtfldBshTextures.at(gfx)->height) };
                     texHeightsForRotations.at(instance)[magic_enum::enum_integer(t_rotation)] = h;
-
-                    instance++;
                 }
-                else // no building
-                {
-                    texIndicesForRotations.at(instance)[magic_enum::enum_integer(t_rotation)] = -1;
 
-                    // todo: array -> remove else
-                    textureOffsets.push_back(glm::vec2(0.0f));
-
-                    texHeightsForRotations.at(instance)[magic_enum::enum_integer(t_rotation)] = -1.0f;
-
-                    instance++;
-                }
+                instance++;
             }
 
             texOffsetsForRotations.at(magic_enum::enum_integer(t_rotation)) = textureOffsets;
