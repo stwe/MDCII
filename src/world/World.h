@@ -268,23 +268,28 @@ namespace mdcii::world
         void Init();
 
         /**
-         * Creates the Layer objects from Json value.
+         * Creates the Terrain- and Buildings Layer objects from Json value.
          */
-        void CreateLayers();
+        void CreateTerrainAndBuildingsLayers();
 
         /**
-         * Prepares the terrain and buildings layer for rendering.
+         * Prepares the Terrain- and Buildings Layer for rendering.
          * Calls PreCalcTile(), sorts tiles, creates model matrices and texture information.
          */
         void PrepareRendering();
 
         /**
-         * Merge terrain layer with building layer to another new layer.
+         * Merge Terrain- with Buildings Layer to another new layer (TERRAIN_AND_BUILDINGS).
          */
-        void MergeLayer();
+        void MergeTerrainAndBuildingsLayers();
 
         /**
-         * Adds some pre-calculations to every Tile object of a layer,
+         * Creates the Grid Layer.
+         */
+        void CreateGridLayer();
+
+        /**
+         * Adds some pre-calculations to every Tile object of a Layer,
          * which are necessary for the display the Tile on the screen.
          *
          * @param t_tile The Tile object.

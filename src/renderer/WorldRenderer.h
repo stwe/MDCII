@@ -29,17 +29,30 @@
 
 namespace mdcii::map
 {
+    /**
+     * Forward declaration enum class Rotation.
+     */
     enum class Rotation;
 }
 
 namespace mdcii::world
 {
+    /**
+     * Forward declaration class World.
+     */
     class World;
+
+    /**
+     * Forward declaration enum class WorldLayerType.
+     */
     enum class WorldLayerType;
 }
 
 namespace mdcii::ogl::buffer
 {
+    /**
+     * Forward declaration class Vao.
+     */
     class Vao;
 }
 
@@ -80,9 +93,9 @@ namespace mdcii::renderer
         //-------------------------------------------------
 
         /**
-         * Renders a layer with the specified zoom and rotation.
+         * Renders a Layer with the specified zoom and rotation.
          *
-         * @param t_layerType The layer type to render.
+         * @param t_layerType The Layer type to render.
          * @param t_zoom The zoom to render for.
          * @param t_rotation The rotation to render for.
          * @param t_window The Window object to get the orthographic projection matrix.
@@ -90,6 +103,21 @@ namespace mdcii::renderer
          */
         void Render(
             world::WorldLayerType t_layerType,
+            map::Zoom t_zoom,
+            map::Rotation t_rotation,
+            const ogl::Window& t_window,
+            const camera::Camera& t_camera
+        ) const;
+
+        /**
+         * Renders the Grid Layer with the specified zoom and rotation.
+         *
+         * @param t_zoom The zoom to render for.
+         * @param t_rotation The rotation to render for.
+         * @param t_window The Window object to get the orthographic projection matrix.
+         * @param t_camera The Camera object to get the view matrix.
+         */
+        void Render(
             map::Zoom t_zoom,
             map::Rotation t_rotation,
             const ogl::Window& t_window,
@@ -109,9 +137,9 @@ namespace mdcii::renderer
         using Vaos = std::array<std::unique_ptr<ogl::buffer::Vao>, map::NR_OF_ZOOMS>;
 
         /**
-         * A Vaos type for each layer type (TERRAIN, BUILDINGS, TERRAIN_AND_BUILDINGS) except type NONE.
+         * A Vaos type for each Layer type (TERRAIN, BUILDINGS, TERRAIN_AND_BUILDINGS, GRID) except type NONE.
          */
-        using Layer_Vaos = std::array<Vaos, 3>;
+        using Layer_Vaos = std::array<Vaos, 4>;
 
         //-------------------------------------------------
         // Shader constants
@@ -147,7 +175,7 @@ namespace mdcii::renderer
         world::World* m_world{ nullptr };
 
         /**
-         * Each of the three layers has three Vao.
+         * Each Layer has three Vao.
          */
         Layer_Vaos m_vaos{};
 
@@ -155,6 +183,11 @@ namespace mdcii::renderer
          * Number of instances to render.
          */
         int32_t m_instances{ -1 };
+
+        /**
+         * Each zoom Level has a different grid texture.
+         */
+        std::array<std::string, map::NR_OF_ZOOMS> m_gridFileNames{};
 
         //-------------------------------------------------
         // Init
@@ -173,7 +206,7 @@ namespace mdcii::renderer
          * Add model matrices to the Gpu.
          *
          * @param t_zoom The zoom level.
-         * @param t_layerType The type of the layer.
+         * @param t_layerType The type of the Layer.
          */
         void AddModelMatrices(map::Zoom t_zoom, world::WorldLayerType t_layerType);
 
@@ -181,7 +214,7 @@ namespace mdcii::renderer
          * Add texture info to the Gpu.
          *
          * @param t_zoom The zoom level.
-         * @param t_layerType The type of the layer.
+         * @param t_layerType The type of the Layer.
          */
         void AddTextureInfo(map::Zoom t_zoom, world::WorldLayerType t_layerType) const;
     };

@@ -55,12 +55,12 @@ void mdcii::renderer::WorldRenderer::Render(
     const camera::Camera& t_camera
 ) const
 {
-    const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram("shader/terrain") };
+    const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram("shader/world") };
     shaderProgram.Bind();
 
     shaderProgram.SetUniform("view", t_camera.GetViewMatrix());
     shaderProgram.SetUniform("projection", t_window.GetOrthographicProjectionMatrix());
-    shaderProgram.SetUniform("sampler", 0);
+    shaderProgram.SetUniform("diffuseMap", 0);
     shaderProgram.SetUniform("selected", false);
     shaderProgram.SetUniform("rotation", magic_enum::enum_integer(t_rotation));
 
@@ -76,25 +76,69 @@ void mdcii::renderer::WorldRenderer::Render(
     ogl::buffer::Vao::Unbind();
 }
 
+void mdcii::renderer::WorldRenderer::Render(
+    const mdcii::map::Zoom t_zoom,
+    const mdcii::map::Rotation t_rotation,
+    const mdcii::ogl::Window& t_window,
+    const mdcii::camera::Camera& t_camera
+) const
+{
+    ogl::OpenGL::EnableAlphaBlending();
+
+    const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram("shader/grid") };
+    shaderProgram.Bind();
+
+    shaderProgram.SetUniform("view", t_camera.GetViewMatrix());
+    shaderProgram.SetUniform("projection", t_window.GetOrthographicProjectionMatrix());
+    shaderProgram.SetUniform("diffuseMap", 0);
+    shaderProgram.SetUniform("selected", false);
+    shaderProgram.SetUniform("rotation", magic_enum::enum_integer(t_rotation));
+
+    m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::GRID)).at(magic_enum::enum_integer(t_zoom))->Bind();
+
+    const auto& textureId{ ogl::resource::ResourceManager::LoadTexture(m_gridFileNames.at(magic_enum::enum_integer(t_zoom))).id };
+    ogl::resource::TextureUtils::BindForReading(textureId, GL_TEXTURE0);
+
+    m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::GRID)).at(magic_enum::enum_integer(t_zoom))->DrawInstanced(m_instances);
+
+    ogl::buffer::Vao::Unbind();
+
+    ogl::OpenGL::DisableBlending();
+}
+
 //-------------------------------------------------
 // Init
 //-------------------------------------------------
 
 void mdcii::renderer::WorldRenderer::Init()
 {
+    Log::MDCII_LOG_DEBUG("[WorldRenderer::Init()] Starts initializing WorldRenderer...");
+
+    // create and store the filenames to show an isometric grid for each zoom
+    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
+        const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<map::Zoom>(t_zoom))) };
+        const auto fileName{ "textures/" + zoomStr + "/red_" + zoomStr + ".png" };
+        m_gridFileNames.at(magic_enum::enum_integer(t_zoom)) = fileName;
+    });
+
+    // create Vaos
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
         m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::TERRAIN)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
         m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::BUILDINGS)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
         m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::TERRAIN_AND_BUILDINGS)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
+        m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::GRID)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
 
         AddModelMatrices(t_zoom, world::WorldLayerType::TERRAIN);
         AddModelMatrices(t_zoom, world::WorldLayerType::BUILDINGS);
         AddModelMatrices(t_zoom, world::WorldLayerType::TERRAIN_AND_BUILDINGS);
+        AddModelMatrices(t_zoom, world::WorldLayerType::GRID);
 
         AddTextureInfo(t_zoom, world::WorldLayerType::TERRAIN);
         AddTextureInfo(t_zoom, world::WorldLayerType::BUILDINGS);
         AddTextureInfo(t_zoom, world::WorldLayerType::TERRAIN_AND_BUILDINGS);
     });
+
+    Log::MDCII_LOG_DEBUG("[WorldRenderer::Init()] The WorldRenderer was initialized successfully.");
 }
 
 //-------------------------------------------------

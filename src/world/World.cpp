@@ -70,7 +70,20 @@ mdcii::world::WorldLayer& mdcii::world::World::GetLayer(const WorldLayerType t_l
 
 void mdcii::world::World::Render() const
 {
+    /*
+    if (m_renderLayerType == WorldLayerType::GRID)
+    {
+        worldRenderer->Render(zoom, rotation, *context->window, *context->camera);
+    }
+    else
+    {
+        worldRenderer->Render(m_renderLayerType, zoom, rotation, *context->window, *context->camera);
+    }
+    */
+
     worldRenderer->Render(m_renderLayerType, zoom, rotation, *context->window, *context->camera);
+    worldRenderer->Render(zoom, rotation, *context->window, *context->camera);
+
     mousePicker->Render(*context->window, *context->camera);
 }
 
@@ -85,6 +98,8 @@ void mdcii::world::World::RenderImGui()
     ImGui::RadioButton("Buildings", &e, 1);
     ImGui::SameLine();
     ImGui::RadioButton("Terrain && Buildings", &e, 2);
+    ImGui::SameLine();
+    ImGui::RadioButton("Grid", &e, 3);
 
     auto layer{ magic_enum::enum_cast<WorldLayerType>(e) };
     if (layer.has_value())
@@ -206,9 +221,10 @@ void mdcii::world::World::Init()
 {
     Log::MDCII_LOG_DEBUG("[World::Init()] Start initializing the world...");
 
-    CreateLayers();     // create terrain && buildings layer
-    PrepareRendering(); // add some pre-calculations to the tiles
-    MergeLayer();       // merge terrain && buildings layer into a new layer
+    CreateTerrainAndBuildingsLayers(); // create Terrain && Buildings Layer
+    PrepareRendering();                // add some pre-calculations to the tiles
+    MergeTerrainAndBuildingsLayers();  // merge Terrain && Buildings Layer into a new Layer
+    CreateGridLayer();                 // create Grid Layer
 
     tileAtlas = std::make_unique<map::TileAtlas>();
     worldRenderer = std::make_unique<renderer::WorldRenderer>(this);
@@ -217,14 +233,14 @@ void mdcii::world::World::Init()
     Log::MDCII_LOG_DEBUG("[World::Init()] The world was successfully initialized.");
 }
 
-void mdcii::world::World::CreateLayers()
+void mdcii::world::World::CreateTerrainAndBuildingsLayers()
 {
-    MDCII_ASSERT(layers.empty(), "[World::CreateLayers()] Invalid number of layers.")
+    MDCII_ASSERT(layers.empty(), "[World::CreateTerrainAndBuildingsLayers()] Invalid number of Layers.")
 
     // read file
-    Log::MDCII_LOG_DEBUG("[World::CreateLayers()] Starts creating Json value from file {}...", m_mapFilePath);
+    Log::MDCII_LOG_DEBUG("[World::CreateTerrainAndBuildingsLayers()] Starts creating Json value from file {}...", m_mapFilePath);
     nlohmann::json j = read_json_from_file(Game::RESOURCES_REL_PATH + m_mapFilePath);
-    Log::MDCII_LOG_DEBUG("[World::CreateLayers()] The Json value was created successfully.");
+    Log::MDCII_LOG_DEBUG("[World::CreateTerrainAndBuildingsLayers()] The Json value was created successfully.");
 
     // set width && height of the world
     for (const auto& [k, v] : j.items())
@@ -241,14 +257,14 @@ void mdcii::world::World::CreateLayers()
 
     if (width < 0 || height < 0)
     {
-        throw MDCII_EXCEPTION("[World::CreateLayers()] Invalid width or height given.");
+        throw MDCII_EXCEPTION("[World::CreateTerrainAndBuildingsLayers()] Invalid width or height given.");
     }
 
-    Log::MDCII_LOG_DEBUG("[World::CreateLayers()] World width: {}", width);
-    Log::MDCII_LOG_DEBUG("[World::CreateLayers()] World height: {}", height);
+    Log::MDCII_LOG_DEBUG("[World::CreateTerrainAndBuildingsLayers()] World width: {}", width);
+    Log::MDCII_LOG_DEBUG("[World::CreateTerrainAndBuildingsLayers()] World height: {}", height);
 
     // create terrain && buildings layer
-    Log::MDCII_LOG_DEBUG("[World::CreateLayers()] Starts creating terrain and buildings layer...");
+    Log::MDCII_LOG_DEBUG("[World::CreateTerrainAndBuildingsLayers()] Starts creating Terrain and Buildings Layer...");
     for (const auto& [k, v] : j.items())
     {
         if (k == "layers")
@@ -260,7 +276,7 @@ void mdcii::world::World::CreateLayers()
                 for (const auto& [layerName, layerTiles] : o.items())
                 {
                     layer->SetLayerTypeByString(layerName);
-                    MDCII_ASSERT(layer->layerType != WorldLayerType::NONE, "[World::CreateLayers()] Invalid layer type.")
+                    MDCII_ASSERT(layer->layerType != WorldLayerType::NONE, "[World::CreateTerrainAndBuildingsLayers()] Invalid Layer type.")
 
                     for (const auto& [i, tile] : layerTiles.items())
                     {
@@ -273,18 +289,18 @@ void mdcii::world::World::CreateLayers()
         }
     }
 
-    MDCII_ASSERT(layers.size() == 2, "[World::CreateLayers()] Invalid number of layers.")
-    MDCII_ASSERT((static_cast<size_t>(width) * static_cast<size_t>(height)) == layers.at(0)->tiles.size(), "[World::CreateLayers()] Invalid number of tiles.")
-    MDCII_ASSERT((static_cast<size_t>(width) * static_cast<size_t>(height)) == layers.at(1)->tiles.size(), "[World::CreateLayers()] Invalid number of tiles.")
+    MDCII_ASSERT(layers.size() == 2, "[World::CreateTerrainAndBuildingsLayers()] Invalid number of Layers.")
+    MDCII_ASSERT((static_cast<size_t>(width) * static_cast<size_t>(height)) == layers.at(0)->tiles.size(), "[World::CreateTerrainAndBuildingsLayers()] Invalid number of tiles.")
+    MDCII_ASSERT((static_cast<size_t>(width) * static_cast<size_t>(height)) == layers.at(1)->tiles.size(), "[World::CreateTerrainAndBuildingsLayers()] Invalid number of tiles.")
 
-    Log::MDCII_LOG_DEBUG("[World::CreateLayers()] The terrain and buildings layer has been created successfully.");
+    Log::MDCII_LOG_DEBUG("[World::CreateTerrainAndBuildingsLayers()] The Terrain and Buildings Layer has been created successfully.");
 }
 
 void mdcii::world::World::PrepareRendering()
 {
     MDCII_ASSERT(layers.size() == 2, "[World::PrepareRendering()] Invalid number of layers.")
 
-    Log::MDCII_LOG_DEBUG("[World::PrepareRendering()] Prepares the terrain and buildings layer for rendering.");
+    Log::MDCII_LOG_DEBUG("[World::PrepareRendering()] Prepares the Terrain and Buildings Layer for rendering.");
 
     auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
     auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
@@ -303,11 +319,11 @@ void mdcii::world::World::PrepareRendering()
     buildingsLayer.PrepareRendering();
 }
 
-void mdcii::world::World::MergeLayer()
+void mdcii::world::World::MergeTerrainAndBuildingsLayers()
 {
-    Log::MDCII_LOG_DEBUG("[World::MergeLayer()] Merge terrain layer with building layer into a new layer.");
+    Log::MDCII_LOG_DEBUG("[World::MergeTerrainAndBuildingsLayers()] Merge Terrain Layer with Buildings Layer into a new Layer.");
 
-    MDCII_ASSERT(layers.size() == 2, "[World::MergeLayer()] Invalid number of layers.")
+    MDCII_ASSERT(layers.size() == 2, "[World::MergeLayer()] Invalid number of Layers.")
 
     // get the existing layers
     const auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
@@ -368,7 +384,35 @@ void mdcii::world::World::MergeLayer()
     // store new layer
     layers.emplace_back(std::move(layer));
 
-    MDCII_ASSERT(layers.size() == 3, "[World::MergeLayer()] Invalid number of layers.")
+    MDCII_ASSERT(layers.size() == 3, "[World::MergeLayer()] Invalid number of Layers.")
+}
+
+void mdcii::world::World::CreateGridLayer()
+{
+    Log::MDCII_LOG_DEBUG("[World::CreateGridLayer()] Starts creating Grid Layer...");
+
+    MDCII_ASSERT(layers.size() == 3, "[World::CreateGridLayer()] Invalid number of Layers.")
+
+    // get the Terrain Layer
+    const auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
+
+    // create a new Layer
+    auto layer{ std::make_unique<WorldLayer>(this) };
+
+    // set the type of the new Layer
+    layer->layerType = WorldLayerType::GRID;
+
+    // copy data from Terrain Layer
+    layer->tiles = terrainLayer.tiles;
+    layer->sortedTiles = terrainLayer.sortedTiles;
+    layer->modelMatrices = terrainLayer.modelMatrices;
+
+    // store new layer
+    layers.emplace_back(std::move(layer));
+
+    MDCII_ASSERT(layers.size() == 4, "[World::CreateGridLayer()] Invalid number of Layers.")
+
+    Log::MDCII_LOG_DEBUG("[World::CreateGridLayer()] The Grid Layer has been created successfully.");
 }
 
 void mdcii::world::World::PreCalcTile(Tile& t_tile, const int t_x, const int t_y) const

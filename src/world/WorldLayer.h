@@ -49,13 +49,14 @@ namespace mdcii::world
     //-------------------------------------------------
 
     /**
-     * The possible layer types.
+     * The possible Layer types.
      */
     enum class WorldLayerType
     {
         TERRAIN,
         BUILDINGS,
         TERRAIN_AND_BUILDINGS,
+        GRID,
         NONE
     };
 
@@ -64,7 +65,7 @@ namespace mdcii::world
     //-------------------------------------------------
 
     /**
-     * Represents a layer, which is simply a collection of Tile objects.
+     * Represents a Layer, which is simply a collection of Tile objects.
      */
     class WorldLayer
     {
@@ -154,7 +155,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Specifies the type of this layer.
+         * Specifies the type of this Layer object.
          */
         WorldLayerType layerType{ WorldLayerType::NONE };
 
@@ -265,9 +266,9 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Sets the type of this layer by a given string.
+         * Sets the type of this Layer object by a given string.
          *
-         * @param t_layerType The layer type as string.
+         * @param t_layerType The Layer type as string.
          */
         void SetLayerTypeByString(const std::string& t_layerType);
 
