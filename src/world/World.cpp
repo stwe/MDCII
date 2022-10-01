@@ -20,6 +20,7 @@
 #include "World.h"
 #include "Game.h"
 #include "MdciiAssert.h"
+#include "MousePicker.h"
 #include "state/State.h"
 #include "map/TileAtlas.h"
 #include "renderer/WorldRenderer.h"
@@ -70,14 +71,14 @@ mdcii::world::WorldLayer& mdcii::world::World::GetLayer(const WorldLayerType t_l
 void mdcii::world::World::Render() const
 {
     worldRenderer->Render(m_renderLayerType, zoom, rotation, *context->window, *context->camera);
+    mousePicker->Render(*context->window, *context->camera);
 }
 
 void mdcii::world::World::RenderImGui()
 {
     ImGui::Begin("World");
 
-    // select layer
-
+    // select layer to render
     static int e{ 0 };
     ImGui::RadioButton("Terrain", &e, 0);
     ImGui::SameLine();
@@ -93,7 +94,6 @@ void mdcii::world::World::RenderImGui()
     }
 
     // rotate world
-
     if (ImGui::Button("Rotate right"))
     {
         Rotate(map::ChangeRotation::RIGHT);
@@ -107,7 +107,6 @@ void mdcii::world::World::RenderImGui()
     }
 
     // zoom in/out world
-
     if (ImGui::Button("+"))
     {
         Zoom(map::ChangeZoom::ZOOM_IN);
@@ -121,6 +120,9 @@ void mdcii::world::World::RenderImGui()
     }
 
     ImGui::End();
+
+    // MousePicker Gui
+    mousePicker->RenderImGui();
 }
 
 //-------------------------------------------------
@@ -210,6 +212,7 @@ void mdcii::world::World::Init()
 
     tileAtlas = std::make_unique<map::TileAtlas>();
     worldRenderer = std::make_unique<renderer::WorldRenderer>(this);
+    mousePicker = std::make_unique<MousePicker>(this, *context->window, *context->camera);
 
     Log::MDCII_LOG_DEBUG("[World::Init()] The world was successfully initialized.");
 }

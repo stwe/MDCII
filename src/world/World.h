@@ -55,6 +55,15 @@ namespace mdcii::renderer
 namespace mdcii::world
 {
     //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
+    /**
+     * Forward declaration class MousePicker.
+     */
+    class MousePicker;
+
+    //-------------------------------------------------
     // World
     //-------------------------------------------------
 
@@ -107,6 +116,11 @@ namespace mdcii::world
          * The renderer to show the world.
          */
         std::unique_ptr<renderer::WorldRenderer> worldRenderer;
+
+        /**
+         * A MousePicker object to select tiles.
+         */
+        std::unique_ptr<MousePicker> mousePicker;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
