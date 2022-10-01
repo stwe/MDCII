@@ -70,20 +70,16 @@ mdcii::world::WorldLayer& mdcii::world::World::GetLayer(const WorldLayerType t_l
 
 void mdcii::world::World::Render() const
 {
-    /*
-    if (m_renderLayerType == WorldLayerType::GRID)
+    // terrain, buildings
+    worldRenderer->Render(m_renderLayerType, zoom, rotation, *context->window, *context->camera);
+
+    // grid
+    if (m_renderGridLayer)
     {
         worldRenderer->Render(zoom, rotation, *context->window, *context->camera);
     }
-    else
-    {
-        worldRenderer->Render(m_renderLayerType, zoom, rotation, *context->window, *context->camera);
-    }
-    */
 
-    worldRenderer->Render(m_renderLayerType, zoom, rotation, *context->window, *context->camera);
-    worldRenderer->Render(zoom, rotation, *context->window, *context->camera);
-
+    // mouse
     mousePicker->Render(*context->window, *context->camera);
 }
 
@@ -98,8 +94,6 @@ void mdcii::world::World::RenderImGui()
     ImGui::RadioButton("Buildings", &e, 1);
     ImGui::SameLine();
     ImGui::RadioButton("Terrain && Buildings", &e, 2);
-    ImGui::SameLine();
-    ImGui::RadioButton("Grid", &e, 3);
 
     auto layer{ magic_enum::enum_cast<WorldLayerType>(e) };
     if (layer.has_value())
@@ -107,6 +101,9 @@ void mdcii::world::World::RenderImGui()
         const auto l{ layer.value() };
         m_renderLayerType = l;
     }
+
+    // toggle grid
+    ImGui::Checkbox("Grid", &m_renderGridLayer);
 
     // rotate world
     if (ImGui::Button("Rotate right"))
@@ -331,11 +328,7 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
 
     // create a new layer
     auto layer{ std::make_unique<WorldLayer>(this) };
-
-    // set the type of the new layer
     layer->layerType = WorldLayerType::TERRAIN_AND_BUILDINGS;
-
-    // copy data from terrain layer
     layer->tiles = terrainLayer.tiles;
     layer->sortedTiles = terrainLayer.sortedTiles;
     layer->modelMatrices = terrainLayer.modelMatrices;
@@ -398,16 +391,9 @@ void mdcii::world::World::CreateGridLayer()
 
     // create a new Layer
     auto layer{ std::make_unique<WorldLayer>(this) };
-
-    // set the type of the new Layer
     layer->layerType = WorldLayerType::GRID;
-
-    // copy data from Terrain Layer
-    layer->tiles = terrainLayer.tiles;
-    layer->sortedTiles = terrainLayer.sortedTiles;
+    layer->tiles = terrainLayer.tiles; // to get the nr. of instances
     layer->modelMatrices = terrainLayer.modelMatrices;
-
-    // store new layer
     layers.emplace_back(std::move(layer));
 
     MDCII_ASSERT(layers.size() == 4, "[World::CreateGridLayer()] Invalid number of Layers.")

@@ -258,6 +258,11 @@ namespace mdcii::world
          */
         WorldLayerType m_renderLayerType{ WorldLayerType::TERRAIN };
 
+        /**
+         * Toggles grid rendering on and off.
+         */
+        bool m_renderGridLayer{ false };
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
