@@ -131,6 +131,9 @@ void mdcii::world::World::RenderImGui()
         Zoom(map::ChangeZoom::ZOOM_OUT);
     }
 
+    // actions
+    ShowActionButtons();
+
     ImGui::End();
 
     // MousePicker Gui
@@ -439,4 +442,53 @@ void mdcii::world::World::PreCalcTile(Tile& t_tile, const int t_x, const int t_y
             t_tile.gfxs.push_back(gfx0 + (3 * building.rotate));
         }
     }
+}
+
+//-------------------------------------------------
+// ImGui
+//-------------------------------------------------
+
+void mdcii::world::World::ShowActionButtons()
+{
+    magic_enum::enum_for_each<Action>([&](auto t_val) {
+        constexpr Action action{ t_val };
+        constexpr int i{ magic_enum::enum_integer(action) };
+
+        if (m_actionButtons[i])
+        {
+            ImGui::PushID(i);
+            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.6f, 0.6f)));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.7f, 0.7f)));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.8f, 0.8f)));
+
+            ImGui::Button(ACTION_NAMES[i].data());
+            if (ImGui::IsItemClicked(0))
+            {
+                if (action != m_currentAction)
+                {
+                    m_actionButtons[i] = !m_actionButtons[i];
+                }
+            }
+
+            ImGui::PopStyleColor(3);
+            ImGui::PopID();
+
+            ImGui::SameLine();
+        }
+        else
+        {
+            if (ImGui::Button(ACTION_NAMES[i].data()))
+            {
+                std::fill(m_actionButtons.begin(), m_actionButtons.end(), false);
+                m_actionButtons[i] = true;
+                m_currentAction = action;
+
+                Log::MDCII_LOG_DEBUG("[World::ShowActionButtons()] Change to action: {}", magic_enum::enum_name(m_currentAction));
+            }
+
+            ImGui::SameLine();
+        }
+    });
+
+    ImGui::NewLine();
 }

@@ -74,6 +74,29 @@ namespace mdcii::world
     {
     public:
         //-------------------------------------------------
+        // Actions
+        //-------------------------------------------------
+
+        /**
+         * The possible world actions.
+         */
+        enum class Action
+        {
+            EDIT,    // Change the building or the terrain.
+            STATUS,  // Get information about the tiles.
+            OPTIONS  // Change game settings.
+        };
+
+        //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * The (untranslated) labels of the action buttons.
+         */
+        static constexpr std::array<std::string_view, magic_enum::enum_count<Action>()> ACTION_NAMES{ "Edit", "Status", "Options" };
+
+        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -263,6 +286,16 @@ namespace mdcii::world
          */
         bool m_renderGridLayer{ false };
 
+        /**
+         * Indicates which action button is currently active.
+         */
+        std::array<bool, magic_enum::enum_count<Action>()> m_actionButtons{ false, true, false };
+
+        /**
+         * The current action.
+         */
+        Action m_currentAction{ Action::STATUS };
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -302,5 +335,11 @@ namespace mdcii::world
          * @param t_y The y position in the world.
          */
         void PreCalcTile(Tile& t_tile, int t_x, int t_y) const;
+
+        //-------------------------------------------------
+        // ImGui
+        //-------------------------------------------------
+
+        void ShowActionButtons();
     };
 }
