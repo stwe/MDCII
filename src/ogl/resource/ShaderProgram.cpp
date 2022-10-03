@@ -29,7 +29,7 @@
 mdcii::ogl::resource::ShaderProgram::ShaderProgram(std::string t_path)
     : m_path{ std::move(t_path) }
 {
-    Log::MDCII_LOG_DEBUG("[ShaderProgram::ShaderProgram()] Create ShaderProgram.");
+    Log::MDCII_LOG_DEBUG("[ShaderProgram::ShaderProgram()] Create ShaderProgram for {}.", m_path);
 
     Init();
 }
@@ -248,7 +248,7 @@ void mdcii::ogl::resource::ShaderProgram::LinkAndValidateProgram() const
             log.push_back(value);
         }
 
-        throw MDCII_EXCEPTION("[ShaderProgram::LinkAndValidate()] Error while linking shader program. Log: " + log);
+        throw MDCII_EXCEPTION("[ShaderProgram::LinkAndValidate()] Error while linking shader program " + m_path + ". Log: " + log);
     }
 
     // cleanup: always detach shaders after a successful link
