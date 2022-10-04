@@ -23,6 +23,7 @@
 #include "ogl/OpenGL.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/TextureUtils.h"
+#include "ogl/buffer/Ssbo.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -55,6 +56,10 @@ void mdcii::renderer::WorldRenderer::Render(
     const camera::Camera& t_camera
 ) const
 {
+    const auto layerType{ magic_enum::enum_integer(t_layerType) };
+    const auto zoom{ magic_enum::enum_integer(t_zoom) };
+    const auto rotation{ magic_enum::enum_integer(t_rotation) };
+
     const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram("shader/world") };
     shaderProgram.Bind();
 
@@ -62,17 +67,25 @@ void mdcii::renderer::WorldRenderer::Render(
     shaderProgram.SetUniform("projection", t_window.GetOrthographicProjectionMatrix());
     shaderProgram.SetUniform("diffuseMap", 0);
     shaderProgram.SetUniform("selected", false);
-    shaderProgram.SetUniform("rotation", magic_enum::enum_integer(t_rotation));
+    shaderProgram.SetUniform("rotation", rotation);
 
-    const auto maxY{ map::TileAtlas::HEIGHTS.at(magic_enum::enum_integer(t_zoom)) };
-    const auto nrOfRows{ static_cast<float>(map::TileAtlas::ROWS.at(magic_enum::enum_integer(t_zoom))) };
+    const auto maxY{ map::TileAtlas::HEIGHTS.at(zoom) };
+    const auto nrOfRows{ static_cast<float>(map::TileAtlas::ROWS.at(zoom)) };
 
     shaderProgram.SetUniform("maxY", maxY);
     shaderProgram.SetUniform("nrOfRows", nrOfRows);
 
-    m_vaos.at(magic_enum::enum_integer(t_layerType)).at(magic_enum::enum_integer(t_zoom))->Bind();
-    ogl::resource::TextureUtils::BindForReading(m_world->tileAtlas->textureIds.at(magic_enum::enum_integer(t_zoom)), GL_TEXTURE0, GL_TEXTURE_2D_ARRAY);
-    m_vaos.at(magic_enum::enum_integer(t_layerType)).at(magic_enum::enum_integer(t_zoom))->DrawInstanced(m_instances);
+    m_vaos.at(layerType).at(zoom)->Bind();
+
+    glBindBufferBase(
+        GL_SHADER_STORAGE_BUFFER,
+        MODEL_MATRICES_BINDING,
+        m_vaos.at(layerType).at(zoom)->ssbos.at(rotation)->id
+    );
+
+    ogl::resource::TextureUtils::BindForReading(m_world->tileAtlas->textureIds.at(zoom), GL_TEXTURE0, GL_TEXTURE_2D_ARRAY);
+    m_vaos.at(layerType).at(zoom)->DrawInstanced(m_instances);
+
     ogl::buffer::Vao::Unbind();
 }
 
@@ -126,12 +139,12 @@ void mdcii::renderer::WorldRenderer::Init()
         m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::TERRAIN)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
         m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::BUILDINGS)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
         m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::TERRAIN_AND_BUILDINGS)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
-        m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::GRID)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
+        //m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::GRID)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
 
         AddModelMatrices(t_zoom, world::WorldLayerType::TERRAIN);
         AddModelMatrices(t_zoom, world::WorldLayerType::BUILDINGS);
         AddModelMatrices(t_zoom, world::WorldLayerType::TERRAIN_AND_BUILDINGS);
-        AddModelMatrices(t_zoom, world::WorldLayerType::GRID);
+        //AddModelMatrices(t_zoom, world::WorldLayerType::GRID);
 
         AddTextureInfo(t_zoom, world::WorldLayerType::TERRAIN);
         AddTextureInfo(t_zoom, world::WorldLayerType::BUILDINGS);
@@ -162,33 +175,23 @@ void mdcii::renderer::WorldRenderer::AddModelMatrices(const map::Zoom t_zoom, co
     // bind Vao of the given zoom
     m_vaos.at(magic_enum::enum_integer(t_layerType)).at(magic_enum::enum_integer(t_zoom))->Bind();
 
-    // generate a Vbo for each rotation and store the model matrices
-    auto i{ MODEL_MATRICES0_LOCATION };
+    // generate a Ssbo for each rotation to store the model matrices
     magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
         // get the model matrices of the rotation
         const auto& modelMatrices{ layer.GetModelMatrices(t_zoom).at(magic_enum::enum_integer(t_rotation)) };
 
-        // create && bind Vbo
-        auto vbo{ std::make_unique<ogl::buffer::Vbo>() };
-        vbo->Bind();
+        // create and bind Ssbo object
+        auto ssbo{ std::make_unique<ogl::buffer::Ssbo>() };
+        ssbo->Bind();
 
-        // store data
-        ogl::buffer::Vbo::StoreStaticData(static_cast<uint32_t>(modelMatrices.size()) * sizeof(glm::mat4), modelMatrices.data());
+        // store the model matrices in the Ssbo
+        ssbo->StoreStaticData(modelMatrices.size() * sizeof(glm::mat4), modelMatrices.data());
 
-        // set buffer layout
-        ogl::buffer::Vbo::AddFloatAttribute(i, 4, 16, 0, true);
-        ogl::buffer::Vbo::AddFloatAttribute(i + 1, 4, 16, 4, true);
-        ogl::buffer::Vbo::AddFloatAttribute(i + 2, 4, 16, 8, true);
-        ogl::buffer::Vbo::AddFloatAttribute(i + 3, 4, 16, 12, true);
+        // unbind Ssbo
+        ssbo->Unbind();
 
-        // next rotation
-        i += map::NR_OF_ROTATIONS;
-
-        // unbind Vbo
-        ogl::buffer::Vbo::Unbind();
-
-        // store Vbo
-        m_vaos.at(magic_enum::enum_integer(t_layerType)).at(magic_enum::enum_integer(t_zoom))->vbos.emplace_back(std::move(vbo));
+        // store Ssbo object
+        m_vaos.at(magic_enum::enum_integer(t_layerType)).at(magic_enum::enum_integer(t_zoom))->ssbos.emplace_back(std::move(ssbo));
     });
 
     // unbind Vao

@@ -18,6 +18,7 @@
 
 #include "Vao.h"
 #include "Vbo.h"
+#include "Ssbo.h"
 #include "MdciiAssert.h"
 #include "ogl/OpenGL.h"
 
@@ -80,7 +81,7 @@ void mdcii::ogl::buffer::Vao::DrawInstanced(const uint32_t t_drawMode, const int
     glDrawArraysInstanced(t_drawMode, t_first, drawCount, t_instances);
 }
 
-void mdcii::ogl::buffer::Vao::DrawInstanced(const uint32_t t_drawMode, const int32_t t_instances) const
+[[maybe_unused]] void mdcii::ogl::buffer::Vao::DrawInstanced(const uint32_t t_drawMode, const int32_t t_instances) const
 {
     DrawInstanced(t_drawMode, 0, t_instances);
 }

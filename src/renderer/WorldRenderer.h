@@ -146,24 +146,24 @@ namespace mdcii::renderer
         //-------------------------------------------------
 
         /**
-         * The number of the model matrices0 shader attribute.
+         * The number of the modelMatrices shader binding.
          */
-        static constexpr auto MODEL_MATRICES0_LOCATION{ 1 };
+        static constexpr auto MODEL_MATRICES_BINDING{ 0 };
 
         /**
          * The number of the texture atlas shader attribute.
          */
-        static constexpr auto TEXTURE_ATLAS_LOCATION{ 17 };
+        static constexpr auto TEXTURE_ATLAS_LOCATION{ 1 };
 
         /**
          * The number of the offsets0 shader attribute.
          */
-        static constexpr auto OFFSETS0_LOCATION{ 18 };
+        static constexpr auto OFFSETS0_LOCATION{ 2 };
 
         /**
          * The number of the heights shader attribute.
          */
-        static constexpr auto HEIGHTS_LOCATION{ 22 };
+        static constexpr auto HEIGHTS_LOCATION{ 6 };
 
         //-------------------------------------------------
         // Member

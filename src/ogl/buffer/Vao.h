@@ -38,6 +38,11 @@ namespace mdcii::ogl::buffer
     class Vbo;
 
     /**
+     * Forward declaration class Ssbo.
+     */
+    class Ssbo;
+
+    /**
      * Represents a Vertex Array Object.
      */
     class Vao
@@ -61,6 +66,11 @@ namespace mdcii::ogl::buffer
          * To store assigned Vbos objects.
          */
         std::vector<std::unique_ptr<Vbo>> vbos;
+
+        /**
+         * To store assigned Ssbo objects.
+         */
+        std::vector<std::unique_ptr<Ssbo>> ssbos;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -128,7 +138,7 @@ namespace mdcii::ogl::buffer
          * @param t_drawMode The OpenGL primitive type to draw.
          * @param t_instances The number of instances to render.
          */
-        void DrawInstanced(uint32_t t_drawMode, int32_t t_instances) const;
+        [[maybe_unused]] void DrawInstanced(uint32_t t_drawMode, int32_t t_instances) const;
 
         /**
          * Draw multiple instances with a single call.

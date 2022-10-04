@@ -72,8 +72,28 @@ namespace mdcii::ogl::buffer
         // Data
         //-------------------------------------------------
 
+        /**
+         * Reserves memory on the Gpu.
+         *
+         * @param t_size The size in bytes.
+         */
         static void ReserveMemory(uint32_t t_size);
+
+        /**
+         * Copy static data to Gpu.
+         *
+         * @param t_size The size in bytes.
+         * @param t_data Pointer to data that will be copied into the Gpu.
+         */
         static void StoreStaticData(uint32_t t_size, const void* t_data);
+
+        /**
+         * Copy data to Gpu.
+         *
+         * @param t_offset The offset into the buffer object's data store where data replacement will begin.
+         * @param t_size The size in bytes.
+         * @param t_data Pointer to data that will be copied into the Gpu.
+         */
         static void StoreData(int32_t t_offset, uint32_t t_size, const void* t_data);
 
         //-------------------------------------------------
