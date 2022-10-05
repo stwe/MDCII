@@ -127,9 +127,14 @@ void mdcii::renderer::WorldRenderer::Render(
     shaderProgram.SetUniform("projection", t_window.GetOrthographicProjectionMatrix());
     shaderProgram.SetUniform("diffuseMap", 0);
     shaderProgram.SetUniform("selected", false);
-    shaderProgram.SetUniform("rotation", rotationInt);
 
     m_vaos.at(gridLayerTypeInt).at(zoomInt)->Bind();
+
+    glBindBufferBase(
+        GL_SHADER_STORAGE_BUFFER,
+        MODEL_MATRICES_BINDING,
+        m_vaos.at(gridLayerTypeInt).at(zoomInt)->ssbos.at(MODEL_MATRICES_BINDING).at(rotationInt)->id
+    );
 
     const auto& textureId{ ogl::resource::ResourceManager::LoadTexture(m_gridFileNames.at(zoomInt)).id };
     ogl::resource::TextureUtils::BindForReading(textureId, GL_TEXTURE0);
@@ -163,12 +168,12 @@ void mdcii::renderer::WorldRenderer::Init()
         m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::TERRAIN)).at(zoomInt) = RenderUtils::CreateRectangleVao();
         m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::BUILDINGS)).at(zoomInt) = RenderUtils::CreateRectangleVao();
         m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::TERRAIN_AND_BUILDINGS)).at(zoomInt) = RenderUtils::CreateRectangleVao();
-        //m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::GRID)).at(zoomInt) = RenderUtils::CreateRectangleVao();
+        m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::GRID)).at(zoomInt) = RenderUtils::CreateRectangleVao();
 
         AddModelMatrices(t_zoom, world::WorldLayerType::TERRAIN);
         AddModelMatrices(t_zoom, world::WorldLayerType::BUILDINGS);
         AddModelMatrices(t_zoom, world::WorldLayerType::TERRAIN_AND_BUILDINGS);
-        //AddModelMatrices(t_zoom, world::WorldLayerType::GRID);
+        AddModelMatrices(t_zoom, world::WorldLayerType::GRID);
 
         AddTextureInfo(t_zoom, world::WorldLayerType::TERRAIN);
         AddTextureInfo(t_zoom, world::WorldLayerType::BUILDINGS);
@@ -203,29 +208,17 @@ void mdcii::renderer::WorldRenderer::AddModelMatrices(const map::Zoom t_zoom, co
     // bind Vao of the given zoom
     m_vaos.at(layerTypeInt).at(zoomInt)->Bind();
 
-    // the generated Ssbo objects
+    // store model matrices in [0]
     std::vector<std::unique_ptr<ogl::buffer::Ssbo>> ssbos;
-
-    // generate a Ssbo for each rotation to store the model matrices
     magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
-        // get the model matrices of the rotation
         const auto& modelMatrices{ layer.GetModelMatrices(t_zoom).at(magic_enum::enum_integer(t_rotation)) };
 
-        // create and bind Ssbo object
         auto ssbo{ std::make_unique<ogl::buffer::Ssbo>() };
         ssbo->Bind();
-
-        // store the model matrices in the Ssbo
         ssbo->StoreStaticData(modelMatrices.size() * sizeof(glm::mat4), modelMatrices.data());
-
-        // unbind Ssbo
         ssbo->Unbind();
-
-        // store Ssbo object in the list
         ssbos.emplace_back(std::move(ssbo));
     });
-
-    // store Ssbo objects in [0]
     m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(ssbos));
 
     // unbind Vao
@@ -250,27 +243,17 @@ void mdcii::renderer::WorldRenderer::AddTextureInfo(const map::Zoom t_zoom, cons
     // bind Vao of the given zoom
     m_vaos.at(layerTypeInt).at(zoomInt)->Bind();
 
-    // offsets
+    // store texture offsets in [1]
     std::vector<std::unique_ptr<ogl::buffer::Ssbo>> offsetsSsbos;
     magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
-        // enum to int
         const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
-        // create and bind Ssbo object
-        auto ssbo{ std::make_unique<ogl::buffer::Ssbo>() };
-        ssbo->Bind();
-
-        // store the offsets in the Ssbo
-        ssbo->StoreStaticData(static_cast<uint32_t>(layer.offsets.at(zoomInt).at(rotationInt).size()) * sizeof(glm::vec2), layer.offsets.at(zoomInt).at(rotationInt).data());
-
-        // unbind Ssbo
-        ssbo->Unbind();
-
-        // store Ssbo object in the list
-        offsetsSsbos.emplace_back(std::move(ssbo));
+        auto offsetSsbo{ std::make_unique<ogl::buffer::Ssbo>() };
+        offsetSsbo->Bind();
+        offsetSsbo->StoreStaticData(static_cast<uint32_t>(layer.offsets.at(zoomInt).at(rotationInt).size()) * sizeof(glm::vec2), layer.offsets.at(zoomInt).at(rotationInt).data());
+        offsetSsbo->Unbind();
+        offsetsSsbos.emplace_back(std::move(offsetSsbo));
     });
-
-    // store Ssbo objects in [1]
     m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(offsetsSsbos));
 
     // store texture atlas indices in [2]
