@@ -156,14 +156,14 @@ namespace mdcii::renderer
         static constexpr auto OFFSETS_BINDING{ 1 };
 
         /**
-         * The number of the texture atlas shader attribute.
+         * The number of the texture atlas shader binding.
          */
-        static constexpr auto TEXTURE_ATLAS_LOCATION{ 1 };
+        static constexpr auto TEXTURE_ATLAS_BINDING{ 2 };
 
         /**
-         * The number of the heights shader attribute.
+         * The number of the heights shader binding.
          */
-        static constexpr auto HEIGHTS_LOCATION{ 2 };
+        static constexpr auto HEIGHTS_BINDING{ 3 };
 
         //-------------------------------------------------
         // Member

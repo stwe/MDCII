@@ -1,8 +1,6 @@
 #version 430
 
 layout (location = 0) in vec4 aPosition;
-layout (location = 1) in ivec4 aTextureAtlasIndex;
-layout (location = 2) in vec4 aHeight;
 
 layout(std140, binding = 0) buffer modelMatrices
 {
@@ -12,6 +10,16 @@ layout(std140, binding = 0) buffer modelMatrices
 layout(std430, binding = 1) buffer offsets
 {
     vec2 offset[];
+};
+
+layout(std430, binding = 2) buffer textureAtlasIndices
+{
+    ivec4 textureAtlasIndex[];
+};
+
+layout(std430, binding = 3) buffer heights
+{
+    vec4 textureHeight[];
 };
 
 out vec2 vUv;
@@ -31,30 +39,8 @@ void main()
 {
     gl_Position = projection * view * modelMatrix[gl_InstanceID] * vec4(aPosition.xy, 0.0, 1.0);
     uvOffset = offset[gl_InstanceID];
-
-    if (rotation == 0)
-    {
-        vTextureAtlasIndex = aTextureAtlasIndex.x;
-        height = aHeight.x;
-    }
-
-    if (rotation == 1)
-    {
-        vTextureAtlasIndex = aTextureAtlasIndex.y;
-        height = aHeight.y;
-    }
-
-    if (rotation == 2)
-    {
-        vTextureAtlasIndex = aTextureAtlasIndex.z;
-        height = aHeight.z;
-    }
-
-    if (rotation == 3)
-    {
-        vTextureAtlasIndex = aTextureAtlasIndex.w;
-        height = aHeight.w;
-    }
+    vTextureAtlasIndex = textureAtlasIndex[gl_InstanceID][rotation];
+    height = textureHeight[gl_InstanceID][rotation];
 
     uv = aPosition.zw;
 

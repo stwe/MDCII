@@ -89,6 +89,18 @@ void mdcii::renderer::WorldRenderer::Render(
         m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.at(OFFSETS_BINDING).at(rotationInt)->id
     );
 
+    glBindBufferBase(
+        GL_SHADER_STORAGE_BUFFER,
+        TEXTURE_ATLAS_BINDING,
+        m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.at(TEXTURE_ATLAS_BINDING).at(0)->id
+    );
+
+    glBindBufferBase(
+        GL_SHADER_STORAGE_BUFFER,
+        HEIGHTS_BINDING,
+        m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.at(HEIGHTS_BINDING).at(0)->id
+    );
+
     ogl::resource::TextureUtils::BindForReading(m_world->tileAtlas->textureIds.at(zoomInt), GL_TEXTURE0, GL_TEXTURE_2D_ARRAY);
     m_vaos.at(layerTypeInt).at(zoomInt)->DrawInstanced(m_instances);
 
@@ -238,26 +250,8 @@ void mdcii::renderer::WorldRenderer::AddTextureInfo(const map::Zoom t_zoom, cons
     // bind Vao of the given zoom
     m_vaos.at(layerTypeInt).at(zoomInt)->Bind();
 
-    // texture atlas indices
-
-    // create && bind Vbo
-    auto vboText{ std::make_unique<ogl::buffer::Vbo>() };
-    vboText->Bind();
-
-    // store data
-    ogl::buffer::Vbo::StoreStaticData(static_cast<uint32_t>(layer.textureAtlasIndices.at(zoomInt).size()) * sizeof(glm::ivec4), layer.textureAtlasIndices.at(zoomInt).data());
-
-    // set buffer layout
-    ogl::buffer::Vbo::AddIntAttribute(TEXTURE_ATLAS_LOCATION, 4, 4, 0, true);
-
-    // unbind Vbo
-    ogl::buffer::Vbo::Unbind();
-
-    // store Vbo
-    m_vaos.at(layerTypeInt).at(zoomInt)->vbos.emplace_back(std::move(vboText));
-
     // offsets
-    std::vector<std::unique_ptr<ogl::buffer::Ssbo>> ssbos;
+    std::vector<std::unique_ptr<ogl::buffer::Ssbo>> offsetsSsbos;
     magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
         // enum to int
         const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
@@ -273,29 +267,29 @@ void mdcii::renderer::WorldRenderer::AddTextureInfo(const map::Zoom t_zoom, cons
         ssbo->Unbind();
 
         // store Ssbo object in the list
-        ssbos.emplace_back(std::move(ssbo));
+        offsetsSsbos.emplace_back(std::move(ssbo));
     });
 
     // store Ssbo objects in [1]
-    m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(ssbos));
+    m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(offsetsSsbos));
 
-    // heights
+    // store texture atlas indices in [2]
+    std::vector<std::unique_ptr<ogl::buffer::Ssbo>> atlasIndicesSsbos;
+    auto atlasSsbo{ std::make_unique<ogl::buffer::Ssbo>() };
+    atlasSsbo->Bind();
+    atlasSsbo->StoreStaticData(static_cast<uint32_t>(layer.textureAtlasIndices.at(zoomInt).size()) * sizeof(glm::ivec4), layer.textureAtlasIndices.at(zoomInt).data());
+    atlasSsbo->Unbind();
+    atlasIndicesSsbos.emplace_back(std::move(atlasSsbo));
+    m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(atlasIndicesSsbos));
 
-    // create && bind Vbo
-    auto vboHeight{ std::make_unique<ogl::buffer::Vbo>() };
-    vboHeight->Bind();
-
-    // store data
-    ogl::buffer::Vbo::StoreStaticData(static_cast<uint32_t>(layer.heights.at(zoomInt).size()) * sizeof(glm::vec4), layer.heights.at(zoomInt).data());
-
-    // set buffer layout
-    ogl::buffer::Vbo::AddFloatAttribute(HEIGHTS_LOCATION, 4, 4, 0, true);
-
-    // unbind Vbo
-    ogl::buffer::Vbo::Unbind();
-
-    // store Vbo
-    m_vaos.at(layerTypeInt).at(zoomInt)->vbos.emplace_back(std::move(vboHeight));
+    // store heights in [3]
+    std::vector<std::unique_ptr<ogl::buffer::Ssbo>> heightsSsbos;
+    auto heightSsbo{ std::make_unique<ogl::buffer::Ssbo>() };
+    heightSsbo->Bind();
+    heightSsbo->StoreStaticData(static_cast<uint32_t>(layer.heights.at(zoomInt).size()) * sizeof(glm::vec4), layer.heights.at(zoomInt).data());
+    heightSsbo->Unbind();
+    heightsSsbos.emplace_back(std::move(heightSsbo));
+    m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(heightsSsbos));
 
     // unbind Vao
     ogl::buffer::Vao::Unbind();
