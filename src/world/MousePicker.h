@@ -59,6 +59,25 @@ namespace mdcii::world
         static constexpr auto RIGHT_MOUSE_BUTTON{ 1 };
 
         //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * The current tile map position under the mouse.
+         */
+        glm::ivec2 currentPosition{ -1 };
+
+        /**
+         * The last tile map position under the mouse.
+         */
+        glm::ivec2 lastPosition{ -1 };
+
+        /**
+         * Indicates whether the mouse is in the window.
+         */
+        bool inWindow{ false };
+
+        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
@@ -108,21 +127,6 @@ namespace mdcii::world
         World* m_world{ nullptr };
 
         /**
-         * The current tile map position under the mouse.
-         */
-        glm::ivec2 m_currentPosition{ -1 };
-
-        /**
-         * The last tile map position under the mouse.
-         */
-        glm::ivec2 m_lastPosition{ -1 };
-
-        /**
-         * Indicates whether the mouse is in the window.
-         */
-        bool m_inWindow{ false };
-
-        /**
          * A renderer to show the mouse cursor in the form of a tile.
          */
         std::unique_ptr<renderer::TileRenderer> m_renderer;
@@ -146,7 +150,7 @@ namespace mdcii::world
          *
          * @param t_inWindow Indicates whether the mouse is in the window.
          */
-        void OnMouseEnter(const bool t_inWindow) { m_inWindow = t_inWindow; }
+        void OnMouseEnter(const bool t_inWindow) { inWindow = t_inWindow; }
 
         /**
          * Updates the current and last tile world positions under the mouse.
@@ -169,32 +173,6 @@ namespace mdcii::world
          * @return The tile world position under the mouse.
          */
         [[nodiscard]] glm::ivec2 GetWorldPosition(const ogl::Window& t_window, const camera::Camera& t_camera) const;
-
-        /**
-         * Checks whether the current mouse position is in the world.
-         *
-         * @return True or false depending on the position in the world.
-         */
-        [[nodiscard]] bool IsCurrentMouseInWorld() const;
-
-        /**
-         * Checks whether the last mouse position is in the world.
-         *
-         * @return True or false depending on the position in the world.
-         */
-        [[nodiscard]] bool IsLastMouseInWorld() const;
-
-        //-------------------------------------------------
-        // Cursor
-        //-------------------------------------------------
-
-        /**
-         * Renders the mouse cursor.
-         *
-         * @param t_window The Window object.
-         * @param t_camera The Camera object.
-         */
-        void RenderMouseCursor(const ogl::Window& t_window, const camera::Camera& t_camera) const;
 
         //-------------------------------------------------
         // Init

@@ -21,6 +21,8 @@
 #include "Game.h"
 #include "MdciiAssert.h"
 #include "MousePicker.h"
+#include "event/EventManager.h"
+#include "eventpp/utilities/argumentadapter.h"
 #include "state/State.h"
 #include "map/TileAtlas.h"
 #include "renderer/WorldRenderer.h"
@@ -37,6 +39,7 @@ mdcii::world::World::World(std::string t_mapFilePath, std::shared_ptr<state::Con
     Log::MDCII_LOG_DEBUG("[World::World()] Create World.");
 
     Init();
+    AddListeners();
 }
 
 mdcii::world::World::~World() noexcept
@@ -134,6 +137,24 @@ void mdcii::world::World::RenderImGui()
     // actions
     ShowActionButtons();
 
+    // selected tile
+    if (m_currentTileIndex >= 0)
+    {
+        const auto& both{ GetLayer(WorldLayerType::TERRAIN_AND_BUILDINGS).tiles.at(m_currentTileIndex) };
+        if (both.HasBuilding())
+        {
+            // todo: Im Mixed Layer sind die Cpu Daten noch unverändert.
+
+            ImGui::Separator();
+
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 0, 0)));
+            ImGui::Text("Terrain & Buildings Layer");
+            ImGui::PopStyleColor();
+
+            both.RenderImGui();
+        }
+    }
+
     ImGui::End();
 
     // MousePicker Gui
@@ -187,6 +208,13 @@ bool mdcii::world::World::IsPositionInWorld(const int t_x, const int t_y) const
     return false;
 }
 
+int mdcii::world::World::GetMapIndex(const int t_x, const int t_y) const
+{
+    MDCII_ASSERT(IsPositionInWorld(t_x, t_y), "[World::GetMapIndex()] Invalid world position given.")
+
+    return t_y * width + t_x;
+}
+
 int mdcii::world::World::GetMapIndex(const int t_x, const int t_y, const map::Rotation t_rotation) const
 {
     MDCII_ASSERT(IsPositionInWorld(t_x, t_y), "[World::GetMapIndex()] Invalid world position given.")
@@ -214,6 +242,19 @@ glm::ivec2 mdcii::world::World::RotatePosition(const int t_x, const int t_y, con
 }
 
 //-------------------------------------------------
+// Event handler
+//-------------------------------------------------
+
+void mdcii::world::World::OnLeftMouseButtonPressed()
+{
+    const auto& mousePosition{ mousePicker->currentPosition };
+    if (IsPositionInWorld(mousePosition.x, mousePosition.y) && m_currentAction == Action::STATUS)
+    {
+        m_currentTileIndex = GetMapIndex(mousePosition.x, mousePosition.y);
+    }
+}
+
+//-------------------------------------------------
 // Init
 //-------------------------------------------------
 
@@ -231,6 +272,21 @@ void mdcii::world::World::Init()
     mousePicker = std::make_unique<MousePicker>(this, *context->window, *context->camera);
 
     Log::MDCII_LOG_DEBUG("[World::Init()] The world was successfully initialized.");
+}
+
+void mdcii::world::World::AddListeners()
+{
+    Log::MDCII_LOG_DEBUG("[World::AddListeners()] Add listeners.");
+
+    // OnLeftMouseButtonPressed
+    event::EventManager::event_dispatcher.appendListener(
+        event::MdciiEventType::MOUSE_BUTTON_PRESSED,
+        eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>(
+            [&](const event::MouseButtonPressedEvent& t_event) {
+                OnLeftMouseButtonPressed();
+            }
+        )
+    );
 }
 
 void mdcii::world::World::CreateTerrainAndBuildingsLayers()
@@ -310,8 +366,8 @@ void mdcii::world::World::PrepareRendering()
     {
         for (auto x{ 0 }; x < width; ++x)
         {
-            PreCalcTile(terrainLayer.GetTile(x, y), x, y);
-            PreCalcTile(buildingsLayer.GetTile(x, y), x, y);
+            PreCalcTile(terrainLayer.tiles.at(GetMapIndex(x, y)), x, y);
+            PreCalcTile(buildingsLayer.tiles.at(GetMapIndex(x, y)), x, y);
         }
     }
 

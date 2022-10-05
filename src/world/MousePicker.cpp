@@ -56,20 +56,30 @@ mdcii::world::MousePicker::~MousePicker() noexcept
 
 void mdcii::world::MousePicker::Render(const ogl::Window& t_window, const camera::Camera& t_camera)
 {
-    if (!m_inWindow)
+    if (!inWindow || !m_world->IsPositionInWorld(currentPosition.x, currentPosition.y))
     {
         return;
     }
 
-    RenderMouseCursor(t_window, t_camera);
+    auto screenPosition{ m_world->WorldToScreen(currentPosition.x, currentPosition.y, m_world->zoom, m_world->rotation) };
+    screenPosition.y -= static_cast<float>(get_elevation(m_world->zoom));
+
+    m_renderer->RenderTile(
+        renderer::RenderUtils::GetModelMatrix(
+            screenPosition,
+            glm::vec2(get_tile_width(m_world->zoom), get_tile_height(m_world->zoom))
+        ),
+        ogl::resource::ResourceManager::LoadTexture(m_cursorFileNames.at(magic_enum::enum_integer(m_world->zoom))).id,
+        t_window, t_camera
+    );
 }
 
 void mdcii::world::MousePicker::RenderImGui() const
 {
     ImGui::Begin("MousePicker");
 
-    ImGui::Text("Current position x: %d, y: %d", m_currentPosition.x, m_currentPosition.y);
-    ImGui::Text("Old position x: %d, y: %d", m_lastPosition.x, m_lastPosition.y);
+    ImGui::Text("Current position x: %d, y: %d", currentPosition.x, currentPosition.y);
+    ImGui::Text("Old position x: %d, y: %d", lastPosition.x, lastPosition.y);
 
     ImGui::End();
 }
@@ -81,10 +91,10 @@ void mdcii::world::MousePicker::RenderImGui() const
 void mdcii::world::MousePicker::OnMouseMoved(const ogl::Window& t_window, const camera::Camera& t_camera)
 {
     const auto newPosition{ GetWorldPosition(t_window, t_camera) };
-    if (newPosition != m_currentPosition)
+    if (newPosition != currentPosition)
     {
-        m_lastPosition = m_currentPosition;
-        m_currentPosition = newPosition;
+        lastPosition = currentPosition;
+        currentPosition = newPosition;
     }
 }
 
@@ -211,40 +221,6 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     }
 
     return result;
-}
-
-bool mdcii::world::MousePicker::IsCurrentMouseInWorld() const
-{
-    return m_world->IsPositionInWorld(m_currentPosition.x, m_currentPosition.y);
-}
-
-bool mdcii::world::MousePicker::IsLastMouseInWorld() const
-{
-    return m_world->IsPositionInWorld(m_lastPosition.x, m_lastPosition.y);
-}
-
-//-------------------------------------------------
-// Cursor
-//-------------------------------------------------
-
-void mdcii::world::MousePicker::RenderMouseCursor(const ogl::Window& t_window, const camera::Camera& t_camera) const
-{
-    if (!m_world->IsPositionInWorld(m_currentPosition.x, m_currentPosition.y))
-    {
-        return;
-    }
-
-    auto screenPosition{ m_world->WorldToScreen(m_currentPosition.x, m_currentPosition.y, m_world->zoom, m_world->rotation) };
-    screenPosition.y -= static_cast<float>(get_elevation(m_world->zoom));
-
-    m_renderer->RenderTile(
-        renderer::RenderUtils::GetModelMatrix(
-            screenPosition,
-            glm::vec2(get_tile_width(m_world->zoom), get_tile_height(m_world->zoom))
-        ),
-        ogl::resource::ResourceManager::LoadTexture(m_cursorFileNames.at(magic_enum::enum_integer(m_world->zoom))).id,
-        t_window, t_camera
-    );
 }
 
 //-------------------------------------------------

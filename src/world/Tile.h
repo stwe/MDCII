@@ -97,5 +97,14 @@ namespace mdcii::world
          * @return True if a valid building Id is present.
          */
         [[nodiscard]] bool HasBuilding() const { return buildingId >= 0; }
+
+        //-------------------------------------------------
+        // Render
+        //-------------------------------------------------
+
+        /**
+         * Render ImGui menu.
+         */
+        void RenderImGui() const;
     };
 }

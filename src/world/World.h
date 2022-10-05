@@ -235,11 +235,21 @@ namespace mdcii::world
          *
          * @param t_x The x position in the world.
          * @param t_y The y position in the world.
+         *
+         * @return The 1D index.
+         */
+        [[nodiscard]] int GetMapIndex(int t_x, int t_y) const;
+
+        /**
+         * 2D/1D - mapping.
+         *
+         * @param t_x The x position in the world.
+         * @param t_y The y position in the world.
          * @param t_rotation The position is previously rotated by the specified value.
          *
          * @return The 1D index.
          */
-        [[nodiscard]] int GetMapIndex(int t_x, int t_y, map::Rotation t_rotation = map::Rotation::DEG0) const;
+        [[nodiscard]] int GetMapIndex(int t_x, int t_y, map::Rotation t_rotation) const;
 
         /**
          * Projects world coordinates into an isometric position on the screen (world space).
@@ -296,6 +306,20 @@ namespace mdcii::world
          */
         Action m_currentAction{ Action::STATUS };
 
+        /**
+         * The index of the current selected Tile.
+         */
+        int m_currentTileIndex{ -1 };
+
+        //-------------------------------------------------
+        // Event handler
+        //-------------------------------------------------
+
+        /**
+         * Handle left mouse button pressed event.
+         */
+        void OnLeftMouseButtonPressed();
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -304,6 +328,11 @@ namespace mdcii::world
          * Initialize class.
          */
         void Init();
+
+        /**
+         * Adds event listeners.
+         */
+        void AddListeners();
 
         /**
          * Creates the Terrain- and Buildings Layer objects from Json value.

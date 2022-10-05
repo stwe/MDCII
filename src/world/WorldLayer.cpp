@@ -84,23 +84,13 @@ mdcii::world::WorldLayer::~WorldLayer() noexcept
 // Getter
 //-------------------------------------------------
 
-const mdcii::world::Tile& mdcii::world::WorldLayer::GetTile(const int t_x, const int t_y) const
-{
-    return tiles.at(m_world->GetMapIndex(t_x, t_y));
-}
-
-mdcii::world::Tile& mdcii::world::WorldLayer::GetTile(const int t_x, const int t_y)
-{
-    return tiles.at(m_world->GetMapIndex(t_x, t_y));
-}
-
 const mdcii::world::WorldLayer::Model_Matrices_For_Each_Rotation& mdcii::world::WorldLayer::GetModelMatrices(const map::Zoom t_zoom) const
 {
     return modelMatrices.at(magic_enum::enum_integer(t_zoom));
 }
 
 //-------------------------------------------------
-// Layer type
+// Setter
 //-------------------------------------------------
 
 void mdcii::world::WorldLayer::SetLayerTypeByString(const std::string& t_layerType)
@@ -155,6 +145,9 @@ void mdcii::world::WorldLayer::SortTiles()
         // copy sorted tiles
         sortedTiles.at(magic_enum::enum_integer(t_rotation)) = tiles;
     });
+
+    // tiles = sortedTiles DEG0
+    tiles = sortedTiles.at(magic_enum::enum_integer(map::Rotation::DEG0));
 }
 
 void mdcii::world::WorldLayer::CreateModelMatrices()

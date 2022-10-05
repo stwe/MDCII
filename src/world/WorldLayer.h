@@ -160,7 +160,7 @@ namespace mdcii::world
         WorldLayerType layerType{ WorldLayerType::NONE };
 
         /**
-         * A Tile container.
+         * An unsorted Tile container. Same as sortedTiles for DEG0.
          */
         Tiles tiles;
 
@@ -225,26 +225,6 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Returns a Tile.
-         *
-         * @param t_x The x position in the world.
-         * @param t_y The y position in the world.
-         *
-         * @return The Tile object.
-         */
-        [[nodiscard]] const Tile& GetTile(int t_x, int t_y) const;
-
-        /**
-         * Returns a Tile.
-         *
-         * @param t_x The x position in the world.
-         * @param t_y The y position in the world.
-         *
-         * @return The Tile object.
-         */
-        Tile& GetTile(int t_x, int t_y);
-
-        /**
          * Returns the number of instances to render.
          *
          * @return The number of instances.
@@ -262,7 +242,7 @@ namespace mdcii::world
         [[nodiscard]] const Model_Matrices_For_Each_Rotation& GetModelMatrices(map::Zoom t_zoom) const;
 
         //-------------------------------------------------
-        // Layer type
+        // Setter
         //-------------------------------------------------
 
         /**
