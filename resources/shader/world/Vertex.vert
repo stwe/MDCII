@@ -2,15 +2,16 @@
 
 layout (location = 0) in vec4 aPosition;
 layout (location = 1) in ivec4 aTextureAtlasIndex;
-layout (location = 2) in vec2 aOffset0;
-layout (location = 3) in vec2 aOffset90;
-layout (location = 4) in vec2 aOffset180;
-layout (location = 5) in vec2 aOffset270;
-layout (location = 6) in vec4 aHeight;
+layout (location = 2) in vec4 aHeight;
 
 layout(std140, binding = 0) buffer modelMatrices
 {
     mat4 modelMatrix[];
+};
+
+layout(std430, binding = 1) buffer offsets
+{
+    vec2 offset[];
 };
 
 out vec2 vUv;
@@ -28,34 +29,29 @@ float height;
 
 void main()
 {
+    gl_Position = projection * view * modelMatrix[gl_InstanceID] * vec4(aPosition.xy, 0.0, 1.0);
+    uvOffset = offset[gl_InstanceID];
+
     if (rotation == 0)
     {
-        gl_Position = projection * view * modelMatrix[gl_InstanceID] * vec4(aPosition.xy, 0.0, 1.0);
-        uvOffset = aOffset0;
         vTextureAtlasIndex = aTextureAtlasIndex.x;
         height = aHeight.x;
     }
 
     if (rotation == 1)
     {
-        gl_Position = projection * view * modelMatrix[gl_InstanceID] * vec4(aPosition.xy, 0.0, 1.0);
-        uvOffset = aOffset90;
         vTextureAtlasIndex = aTextureAtlasIndex.y;
         height = aHeight.y;
     }
 
     if (rotation == 2)
     {
-        gl_Position = projection * view * modelMatrix[gl_InstanceID] * vec4(aPosition.xy, 0.0, 1.0);
-        uvOffset = aOffset180;
         vTextureAtlasIndex = aTextureAtlasIndex.z;
         height = aHeight.z;
     }
 
     if (rotation == 3)
     {
-        gl_Position = projection * view * modelMatrix[gl_InstanceID] * vec4(aPosition.xy, 0.0, 1.0);
-        uvOffset = aOffset270;
         vTextureAtlasIndex = aTextureAtlasIndex.w;
         height = aHeight.w;
     }

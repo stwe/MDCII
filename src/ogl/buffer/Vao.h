@@ -68,9 +68,9 @@ namespace mdcii::ogl::buffer
         std::vector<std::unique_ptr<Vbo>> vbos;
 
         /**
-         * To store assigned Ssbo objects.
+         * For storing multiple assigned ssbo containers.
          */
-        std::vector<std::unique_ptr<Ssbo>> ssbos;
+        std::vector<std::vector<std::unique_ptr<Ssbo>>> ssbos;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
