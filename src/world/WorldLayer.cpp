@@ -211,6 +211,8 @@ void mdcii::world::WorldLayer::CreateTextureInfo()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateTextureInfo()] Create texture info.");
 
+    MDCII_ASSERT(instances >= 0, "[WorldLayer::CreateTextureInfo()()] Invalid number of instances.")
+
     // for each zoom
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
         // zoom int
@@ -220,14 +222,14 @@ void mdcii::world::WorldLayer::CreateTextureInfo()
         const auto atlasRows{ map::TileAtlas::ROWS.at(zoom) };
 
         // to store info for each rotation
-        Texture_Atlas_Indices texIndicesForRotations(GetInstances(), glm::ivec4(-1));
+        Texture_Atlas_Indices texIndicesForRotations(instances, glm::ivec4(-1));
         Texture_Offsets_For_Each_Rotation texOffsetsForRotations;
-        Texture_Heights texHeightsForRotations(GetInstances(), glm::vec4(-1.0f));
+        Texture_Heights texHeightsForRotations(instances, glm::vec4(-1.0f));
 
         // for each rotation in the zoom
         magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
             // to store texture offsets
-            Texture_Offsets textureOffsets(GetInstances(), glm::vec2(0.0f));
+            Texture_Offsets textureOffsets(instances, glm::vec2(0.0f));
 
             auto instance{ 0 };
 

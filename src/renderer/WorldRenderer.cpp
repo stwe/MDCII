@@ -102,7 +102,7 @@ void mdcii::renderer::WorldRenderer::Render(
     );
 
     ogl::resource::TextureUtils::BindForReading(m_world->tileAtlas->textureIds.at(zoomInt), GL_TEXTURE0, GL_TEXTURE_2D_ARRAY);
-    m_vaos.at(layerTypeInt).at(zoomInt)->DrawInstanced(m_instances);
+    m_vaos.at(layerTypeInt).at(zoomInt)->DrawInstanced(m_world->GetLayer(t_layerType).instances);
 
     ogl::buffer::Vao::Unbind();
 }
@@ -139,7 +139,7 @@ void mdcii::renderer::WorldRenderer::Render(
     const auto& textureId{ ogl::resource::ResourceManager::LoadTexture(m_gridFileNames.at(zoomInt)).id };
     ogl::resource::TextureUtils::BindForReading(textureId, GL_TEXTURE0);
 
-    m_vaos.at(gridLayerTypeInt).at(zoomInt)->DrawInstanced(m_instances);
+    m_vaos.at(gridLayerTypeInt).at(zoomInt)->DrawInstanced(m_world->GetLayer(world::WorldLayerType::GRID).instances);
 
     ogl::buffer::Vao::Unbind();
 
@@ -201,9 +201,6 @@ void mdcii::renderer::WorldRenderer::AddModelMatrices(const map::Zoom t_zoom, co
 
     // get the layer
     const auto& layer{ m_world->GetLayer(t_layerType) };
-
-    // set number of instances to render
-    m_instances = layer.GetInstances();
 
     // bind Vao of the given zoom
     m_vaos.at(layerTypeInt).at(zoomInt)->Bind();

@@ -140,18 +140,28 @@ void mdcii::world::World::RenderImGui()
     // selected tile
     if (m_currentTileIndex >= 0)
     {
-        const auto& both{ GetLayer(WorldLayerType::TERRAIN_AND_BUILDINGS).tiles.at(m_currentTileIndex) };
-        if (both.HasBuilding())
-        {
-            // todo: Im Mixed Layer sind die Cpu Daten noch unverändert.
+        const auto& terrainLayerTile{ GetLayer(WorldLayerType::TERRAIN).tiles.at(m_currentTileIndex) };
+        const auto& buildingsLayerTile{ GetLayer(WorldLayerType::BUILDINGS).tiles.at(m_currentTileIndex) };
 
+        if (buildingsLayerTile.HasBuilding())
+        {
             ImGui::Separator();
 
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 0, 0)));
-            ImGui::Text("Terrain & Buildings Layer");
+            ImGui::Text("Buildings Layer");
             ImGui::PopStyleColor();
 
-            both.RenderImGui();
+            buildingsLayerTile.RenderImGui();
+        }
+        else
+        {
+            ImGui::Separator();
+
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 0, 0)));
+            ImGui::Text("Terrain Layer");
+            ImGui::PopStyleColor();
+
+            terrainLayerTile.RenderImGui();
         }
     }
 
@@ -371,6 +381,9 @@ void mdcii::world::World::PrepareRendering()
         }
     }
 
+    terrainLayer.instances = static_cast<int32_t>(terrainLayer.tiles.size());
+    buildingsLayer.instances = static_cast<int32_t>(buildingsLayer.tiles.size());
+
     terrainLayer.PrepareRendering();
     buildingsLayer.PrepareRendering();
 }
@@ -387,19 +400,19 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
 
     // create a new layer
     auto layer{ std::make_unique<WorldLayer>(this) };
+
+    // set type and number of instances
     layer->layerType = WorldLayerType::TERRAIN_AND_BUILDINGS;
-    layer->tiles = terrainLayer.tiles;
-    layer->sortedTiles = terrainLayer.sortedTiles;
+    layer->instances = terrainLayer.instances;
+
+    // set Gpu data only
     layer->modelMatrices = terrainLayer.modelMatrices;
     layer->textureAtlasIndices = terrainLayer.textureAtlasIndices;
     layer->offsets = terrainLayer.offsets;
     layer->heights = terrainLayer.heights;
 
-    // merge
-
-    // for each zoom
+    // merge Gpu data
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        // for each rotation
         magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
             const auto z{ magic_enum::enum_integer(t_zoom) };
             const auto r{ magic_enum::enum_integer(t_rotation) };
@@ -451,7 +464,7 @@ void mdcii::world::World::CreateGridLayer()
     // create a new Layer
     auto layer{ std::make_unique<WorldLayer>(this) };
     layer->layerType = WorldLayerType::GRID;
-    layer->tiles = terrainLayer.tiles; // to get the nr. of instances
+    layer->instances = terrainLayer.instances;
     layer->modelMatrices = terrainLayer.modelMatrices;
     layers.emplace_back(std::move(layer));
 

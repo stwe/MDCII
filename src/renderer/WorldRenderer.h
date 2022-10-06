@@ -180,11 +180,6 @@ namespace mdcii::renderer
         Layer_Vaos m_vaos{};
 
         /**
-         * Number of instances to render.
-         */
-        int32_t m_instances{ -1 };
-
-        /**
          * Each zoom Level has a different grid texture.
          */
         std::array<std::string, map::NR_OF_ZOOMS> m_gridFileNames{};

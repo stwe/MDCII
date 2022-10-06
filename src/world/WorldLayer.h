@@ -200,6 +200,11 @@ namespace mdcii::world
          */
         Texture_Heights_For_Each_Zoom heights;
 
+        /**
+         * The number of instances to render.
+         */
+        int32_t instances{ -1 };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -223,13 +228,6 @@ namespace mdcii::world
         //-------------------------------------------------
         // Getter
         //-------------------------------------------------
-
-        /**
-         * Returns the number of instances to render.
-         *
-         * @return The number of instances.
-         */
-        [[nodiscard]] int32_t GetInstances() const { return static_cast<int32_t>(tiles.size()); }
 
         /**
          * There are four arrays with the model matrices for each zoom level.

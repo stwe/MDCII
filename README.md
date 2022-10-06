@@ -242,6 +242,18 @@ $ conan install conanfile.txt -s build_type=Release --build missing
 $ sudo apt install pkg-config
 ```
 
+**It may be also necessary to install the following packages.**
+
+```bash
+$ sudo apt install libgl1-mesa-dev
+```
+
+```bash
+$ sudo apt install libglu1-mesa-dev
+```
+
+Build with:
+
 ```bash
 $ mkdir build
 $ cd build
