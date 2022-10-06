@@ -21,6 +21,7 @@
 #include "Game.h"
 #include "MdciiAssert.h"
 #include "MousePicker.h"
+#include "WorldGui.h"
 #include "event/EventManager.h"
 #include "eventpp/utilities/argumentadapter.h"
 #include "state/State.h"
@@ -108,34 +109,10 @@ void mdcii::world::World::RenderImGui()
     // toggle grid
     ImGui::Checkbox("Grid", &m_renderGridLayer);
 
-    // rotate world
-    if (ImGui::Button("Rotate right"))
-    {
-        Rotate(map::ChangeRotation::RIGHT);
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("Rotate left"))
-    {
-        Rotate(map::ChangeRotation::LEFT);
-    }
-
-    // zoom in/out world
-    if (ImGui::Button("+"))
-    {
-        Zoom(map::ChangeZoom::ZOOM_IN);
-    }
-
-    ImGui::SameLine();
-
-    if (ImGui::Button("-"))
-    {
-        Zoom(map::ChangeZoom::ZOOM_OUT);
-    }
-
-    // actions
-    ShowActionButtons();
+    // world gui
+    m_worldGui->RotateGui();
+    m_worldGui->ZoomGui();
+    m_worldGui->ShowActionsGui();
 
     // selected tile
     if (m_currentTileIndex >= 0)
@@ -258,7 +235,7 @@ glm::ivec2 mdcii::world::World::RotatePosition(const int t_x, const int t_y, con
 void mdcii::world::World::OnLeftMouseButtonPressed()
 {
     const auto& mousePosition{ mousePicker->currentPosition };
-    if (IsPositionInWorld(mousePosition.x, mousePosition.y) && m_currentAction == Action::STATUS)
+    if (IsPositionInWorld(mousePosition.x, mousePosition.y) && currentAction == Action::STATUS)
     {
         m_currentTileIndex = GetMapIndex(mousePosition.x, mousePosition.y);
     }
@@ -280,6 +257,7 @@ void mdcii::world::World::Init()
     tileAtlas = std::make_unique<map::TileAtlas>();
     worldRenderer = std::make_unique<renderer::WorldRenderer>(this);
     mousePicker = std::make_unique<MousePicker>(this, *context->window, *context->camera);
+    m_worldGui = std::make_unique<WorldGui>(this);
 
     Log::MDCII_LOG_DEBUG("[World::Init()] The world was successfully initialized.");
 }
@@ -511,53 +489,4 @@ void mdcii::world::World::PreCalcTile(Tile& t_tile, const int t_x, const int t_y
             t_tile.gfxs.push_back(gfx0 + (3 * building.rotate));
         }
     }
-}
-
-//-------------------------------------------------
-// ImGui
-//-------------------------------------------------
-
-void mdcii::world::World::ShowActionButtons()
-{
-    magic_enum::enum_for_each<Action>([&](auto t_val) {
-        constexpr Action action{ t_val };
-        constexpr int i{ magic_enum::enum_integer(action) };
-
-        if (m_actionButtons[i])
-        {
-            ImGui::PushID(i);
-            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.6f, 0.6f)));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.7f, 0.7f)));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.8f, 0.8f)));
-
-            ImGui::Button(ACTION_NAMES[i].data());
-            if (ImGui::IsItemClicked(0))
-            {
-                if (action != m_currentAction)
-                {
-                    m_actionButtons[i] = !m_actionButtons[i];
-                }
-            }
-
-            ImGui::PopStyleColor(3);
-            ImGui::PopID();
-
-            ImGui::SameLine();
-        }
-        else
-        {
-            if (ImGui::Button(ACTION_NAMES[i].data()))
-            {
-                std::fill(m_actionButtons.begin(), m_actionButtons.end(), false);
-                m_actionButtons[i] = true;
-                m_currentAction = action;
-
-                Log::MDCII_LOG_DEBUG("[World::ShowActionButtons()] Change to action: {}", magic_enum::enum_name(m_currentAction));
-            }
-
-            ImGui::SameLine();
-        }
-    });
-
-    ImGui::NewLine();
 }
