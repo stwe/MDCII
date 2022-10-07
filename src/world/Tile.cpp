@@ -69,4 +69,21 @@ void mdcii::world::Tile::RenderImGui() const
 
         ImGui::TreePop();
     }
+
+    if (connectedTiles.empty())
+    {
+        ImGui::Text("Connected tiles: none");
+    }
+    else
+    {
+        if (ImGui::TreeNode("Connected tiles"))
+        {
+            for (const auto tileIndex : connectedTiles)
+            {
+                ImGui::Text("Connected tile index: %d", tileIndex);
+            }
+
+            ImGui::TreePop();
+        }
+    }
 }

@@ -34,7 +34,8 @@ void mdcii::world::to_json(nlohmann::json& t_json, const Tile& t_tile)
         { "id", t_tile.buildingId },
         { "rotation", magic_enum::enum_integer(t_tile.rotation) },
         { "x", t_tile.x },
-        { "y", t_tile.y }
+        { "y", t_tile.y },
+        { "connected", t_tile.connectedTiles }
     };
 }
 
@@ -60,6 +61,11 @@ void mdcii::world::from_json(const nlohmann::json& t_json, Tile& t_tile)
     if (t_json.count("y"))
     {
         t_json.at("y").get_to(t_tile.y);
+    }
+
+    if (t_json.count("connected"))
+    {
+        t_json.at("connected").get_to(t_tile.connectedTiles);
     }
 }
 

@@ -91,6 +91,11 @@ namespace mdcii::world
          */
         std::vector<int32_t> gfxs{};
 
+        /**
+         * If a building requires more than 1x1 tiles, all indices are stored here.
+         */
+        std::vector<int32_t> connectedTiles;
+
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
