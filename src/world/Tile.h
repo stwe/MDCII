@@ -91,6 +91,15 @@ namespace mdcii::world
          */
         std::vector<int32_t> gfxs{};
 
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        /**
+         * Resets all members to default values.
+         */
+        void Reset();
+
         /**
          * For better readability/convenience.
          *

@@ -91,6 +91,8 @@ void mdcii::world::World::RenderImGui()
 {
     ImGui::Begin("World");
 
+    ImGui::Separator();
+
     // select layer to render
     static int e{ 0 };
     ImGui::RadioButton("Terrain", &e, 0);
@@ -109,36 +111,53 @@ void mdcii::world::World::RenderImGui()
     // toggle grid
     ImGui::Checkbox("Grid", &m_renderGridLayer);
 
+    ImGui::Separator();
+
     // world gui
     m_worldGui->RotateGui();
+    ImGui::Separator();
+
     m_worldGui->ZoomGui();
+    ImGui::Separator();
+
     m_worldGui->ShowActionsGui();
+    ImGui::Separator();
 
-    // selected tile
-    if (m_currentTileIndex >= 0)
+    if (currentAction == Action::BUILD)
     {
-        const auto& terrainLayerTile{ GetLayer(WorldLayerType::TERRAIN).tiles.at(m_currentTileIndex) };
-        const auto& buildingsLayerTile{ GetLayer(WorldLayerType::BUILDINGS).tiles.at(m_currentTileIndex) };
+        m_currentTileIndex = -1;
+        m_worldGui->AllWorkshopsGui();
+    }
 
-        if (buildingsLayerTile.HasBuilding())
+    if (currentAction == Action::STATUS)
+    {
+        if (m_worldGui->selectedWorkshop.HasBuilding())
         {
-            ImGui::Separator();
-
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 0, 0)));
-            ImGui::Text("Buildings Layer");
-            ImGui::PopStyleColor();
-
-            buildingsLayerTile.RenderImGui();
+            m_worldGui->selectedWorkshop.Reset();
         }
-        else
+
+        if (m_currentTileIndex >= 0)
         {
-            ImGui::Separator();
+            const auto& terrainLayerTile{ GetLayer(WorldLayerType::TERRAIN).tiles.at(m_currentTileIndex) };
+            const auto& buildingsLayerTile{ GetLayer(WorldLayerType::BUILDINGS).tiles.at(m_currentTileIndex) };
 
-            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(255, 0, 0)));
-            ImGui::Text("Terrain Layer");
-            ImGui::PopStyleColor();
+            if (buildingsLayerTile.HasBuilding())
+            {
+                buildingsLayerTile.RenderImGui();
+            }
+            else
+            {
+                terrainLayerTile.RenderImGui();
+            }
+        }
+    }
 
-            terrainLayerTile.RenderImGui();
+    if (currentAction == Action::OPTIONS)
+    {
+        m_currentTileIndex = -1;
+        if (m_worldGui->selectedWorkshop.HasBuilding())
+        {
+            m_worldGui->selectedWorkshop.Reset();
         }
     }
 

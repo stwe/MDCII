@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "Tile.h"
+
 //-------------------------------------------------
 // WorldGui
 //-------------------------------------------------
@@ -35,6 +37,15 @@ namespace mdcii::world
     class WorldGui
     {
     public:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * The selected workshop to build.
+         */
+        Tile selectedWorkshop;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -73,7 +84,12 @@ namespace mdcii::world
          * Shows a menu with the action buttons.
          * These can be used to switch between Build, Status or Options.
          */
-        void ShowActionsGui();
+        void ShowActionsGui() const;
+
+        /**
+         * Shows a list of all workshops.
+         */
+        void AllWorkshopsGui();
 
     protected:
 
@@ -86,5 +102,29 @@ namespace mdcii::world
          * The parent World object.
          */
         World* m_world{ nullptr };
+
+        /**
+         * The zoom of the building thumbnails.
+         * In History Ed. only GFX is available.
+         */
+        map::Zoom m_bauhausZoom{ map::Zoom::GFX };
+
+        //-------------------------------------------------
+        // GUIs
+        //-------------------------------------------------
+
+        /**
+         * Shows a single selected workshop.
+         */
+        void WorkshopGui();
+
+        //-------------------------------------------------
+        // Init
+        //-------------------------------------------------
+
+        /**
+         * Initializes the zoom for all the bauhaus thumbnails in world menu.
+         */
+        void InitBauhausZoom();
     };
 }
