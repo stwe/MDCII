@@ -153,12 +153,12 @@ namespace mdcii::world
         /**
          * Indicates which action button is currently active.
          */
-        std::array<bool, magic_enum::enum_count<Action>()> actionButtons{ false, true, false };
+        std::array<bool, magic_enum::enum_count<Action>()> actionButtons{ true, false, false };
 
         /**
          * The current action.
          */
-        Action currentAction{ Action::STATUS };
+        Action currentAction{ Action::BUILD };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -297,7 +297,7 @@ namespace mdcii::world
         /**
          * The current layer type to render.
          */
-        WorldLayerType m_renderLayerType{ WorldLayerType::TERRAIN };
+        WorldLayerType m_renderLayerType{ WorldLayerType::TERRAIN_AND_BUILDINGS };
 
         /**
          * Toggles grid rendering on and off.

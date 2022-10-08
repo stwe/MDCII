@@ -86,7 +86,7 @@ void mdcii::world::World::RenderImGui()
     ImGui::Separator();
 
     // select layer to render
-    static int e{ 0 };
+    static int e{ magic_enum::enum_integer(m_renderLayerType) };
     ImGui::RadioButton("Terrain", &e, 0);
     ImGui::SameLine();
     ImGui::RadioButton("Buildings", &e, 1);
@@ -254,16 +254,16 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
 
 void mdcii::world::World::OnMouseMoved()
 {
-    // enum to int
-    const auto zoomInt{ magic_enum::enum_integer(zoom) };
-    const auto rotationInt{ magic_enum::enum_integer(rotation) };
-
     // get current mouse position
     const auto& currentMousePosition{ mousePicker->currentPosition };
 
     // condition to build: BUILD action + workshop selected + current mouse in the world?
     if (currentAction == Action::BUILD && m_worldGui->selectedWorkshop.HasBuilding() && IsPositionInWorld(currentMousePosition.x, currentMousePosition.y))
     {
+        // enum to int
+        const auto zoomInt{ magic_enum::enum_integer(zoom) };
+        const auto rotationInt{ magic_enum::enum_integer(rotation) };
+
         // get instance by current mouse position
         const auto tileInstance{ GetMapIndex(currentMousePosition.x, currentMousePosition.y) };
 

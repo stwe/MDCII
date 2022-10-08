@@ -181,18 +181,19 @@ void mdcii::renderer::WorldRenderer::UpdateGpuData(
     offsetsSsbo.at(rotationInt)->StoreSubData(static_cast<int32_t>(sizeof(glm::vec2)) * t_instance, sizeof(glm::vec2), &t_offset);
     ogl::buffer::Ssbo::Unbind();
 
-    // todo: 4 Werte statt 1
+    const auto oi{ rotationInt * static_cast<int32_t>(sizeof(int32_t)) };
+    const auto of{ rotationInt * static_cast<int32_t>(sizeof(float)) };
 
     // new texture atlas number
     const auto& atlasSsbo{ vao->ssbos.at(TEXTURE_ATLAS_BINDING) };
     atlasSsbo.at(0)->Bind();
-    atlasSsbo.at(0)->StoreSubData(static_cast<int32_t>(sizeof(glm::ivec4)) * t_instance, sizeof(int32_t), &t_atlasNr);
+    atlasSsbo.at(0)->StoreSubData((static_cast<int32_t>(sizeof(glm::ivec4)) * t_instance) + oi, sizeof(int32_t), &t_atlasNr);
     ogl::buffer::Ssbo::Unbind();
 
     // new height
     const auto& heightsSsbo{ vao->ssbos.at(HEIGHTS_BINDING) };
     heightsSsbo.at(0)->Bind();
-    heightsSsbo.at(0)->StoreSubData(static_cast<int32_t>(sizeof(glm::vec4)) * t_instance, sizeof(float), &t_height);
+    heightsSsbo.at(0)->StoreSubData((static_cast<int32_t>(sizeof(glm::vec4)) * t_instance) + of, sizeof(float), &t_height);
     ogl::buffer::Ssbo::Unbind();
 
     // unbind Vao
