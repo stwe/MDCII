@@ -146,6 +146,59 @@ void mdcii::renderer::WorldRenderer::Render(
     ogl::OpenGL::DisableBlending();
 }
 
+void mdcii::renderer::WorldRenderer::UpdateGpuData(
+    const int32_t t_instance,
+    const world::WorldLayerType t_layerType,
+    const map::Zoom t_zoom,
+    const map::Rotation t_rotation,
+    const glm::mat4& t_modelMatrix,
+    const int t_atlasNr,
+    const glm::vec2& t_offset,
+    const float t_height
+)
+{
+    // enum to int
+    const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
+    const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+    const auto layerTypeInt{ magic_enum::enum_integer(t_layerType) };
+
+    // get the layer
+    const auto& layer{ m_world->GetLayer(t_layerType) };
+
+    // bind Vao of the given zoom
+    const auto& vao{ m_vaos.at(layerTypeInt).at(zoomInt) };
+    vao->Bind();
+
+    // new model matrix
+    const auto& modelMatricesSsbo{ vao->ssbos.at(MODEL_MATRICES_BINDING) };
+    modelMatricesSsbo.at(rotationInt)->Bind();
+    modelMatricesSsbo.at(rotationInt)->StoreSubData(static_cast<int32_t>(sizeof(glm::mat4)) * t_instance, sizeof(glm::mat4), &t_modelMatrix);
+    ogl::buffer::Ssbo::Unbind();
+
+    // new offset
+    const auto& offsetsSsbo{ vao->ssbos.at(OFFSETS_BINDING) };
+    offsetsSsbo.at(rotationInt)->Bind();
+    offsetsSsbo.at(rotationInt)->StoreSubData(static_cast<int32_t>(sizeof(glm::vec2)) * t_instance, sizeof(glm::vec2), &t_offset);
+    ogl::buffer::Ssbo::Unbind();
+
+    // todo: 4 Werte statt 1
+
+    // new texture atlas number
+    const auto& atlasSsbo{ vao->ssbos.at(TEXTURE_ATLAS_BINDING) };
+    atlasSsbo.at(0)->Bind();
+    atlasSsbo.at(0)->StoreSubData(static_cast<int32_t>(sizeof(glm::ivec4)) * t_instance, sizeof(int32_t), &t_atlasNr);
+    ogl::buffer::Ssbo::Unbind();
+
+    // new height
+    const auto& heightsSsbo{ vao->ssbos.at(HEIGHTS_BINDING) };
+    heightsSsbo.at(0)->Bind();
+    heightsSsbo.at(0)->StoreSubData(static_cast<int32_t>(sizeof(glm::vec4)) * t_instance, sizeof(float), &t_height);
+    ogl::buffer::Ssbo::Unbind();
+
+    // unbind Vao
+    ogl::buffer::Vao::Unbind();
+}
+
 //-------------------------------------------------
 // Init
 //-------------------------------------------------
@@ -212,7 +265,7 @@ void mdcii::renderer::WorldRenderer::AddModelMatrices(const map::Zoom t_zoom, co
 
         auto ssbo{ std::make_unique<ogl::buffer::Ssbo>() };
         ssbo->Bind();
-        ssbo->StoreStaticData(modelMatrices.size() * sizeof(glm::mat4), modelMatrices.data());
+        ssbo->StoreData(modelMatrices.size() * sizeof(glm::mat4), modelMatrices.data());
         ssbo->Unbind();
         ssbos.emplace_back(std::move(ssbo));
     });
@@ -247,7 +300,7 @@ void mdcii::renderer::WorldRenderer::AddTextureInfo(const map::Zoom t_zoom, cons
 
         auto offsetSsbo{ std::make_unique<ogl::buffer::Ssbo>() };
         offsetSsbo->Bind();
-        offsetSsbo->StoreStaticData(static_cast<uint32_t>(layer.offsets.at(zoomInt).at(rotationInt).size()) * sizeof(glm::vec2), layer.offsets.at(zoomInt).at(rotationInt).data());
+        offsetSsbo->StoreData(static_cast<uint32_t>(layer.offsets.at(zoomInt).at(rotationInt).size()) * sizeof(glm::vec2), layer.offsets.at(zoomInt).at(rotationInt).data());
         offsetSsbo->Unbind();
         offsetsSsbos.emplace_back(std::move(offsetSsbo));
     });
@@ -257,7 +310,7 @@ void mdcii::renderer::WorldRenderer::AddTextureInfo(const map::Zoom t_zoom, cons
     std::vector<std::unique_ptr<ogl::buffer::Ssbo>> atlasIndicesSsbos;
     auto atlasSsbo{ std::make_unique<ogl::buffer::Ssbo>() };
     atlasSsbo->Bind();
-    atlasSsbo->StoreStaticData(static_cast<uint32_t>(layer.textureAtlasIndices.at(zoomInt).size()) * sizeof(glm::ivec4), layer.textureAtlasIndices.at(zoomInt).data());
+    atlasSsbo->StoreData(static_cast<uint32_t>(layer.textureAtlasIndices.at(zoomInt).size()) * sizeof(glm::ivec4), layer.textureAtlasIndices.at(zoomInt).data());
     atlasSsbo->Unbind();
     atlasIndicesSsbos.emplace_back(std::move(atlasSsbo));
     m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(atlasIndicesSsbos));
@@ -266,7 +319,7 @@ void mdcii::renderer::WorldRenderer::AddTextureInfo(const map::Zoom t_zoom, cons
     std::vector<std::unique_ptr<ogl::buffer::Ssbo>> heightsSsbos;
     auto heightSsbo{ std::make_unique<ogl::buffer::Ssbo>() };
     heightSsbo->Bind();
-    heightSsbo->StoreStaticData(static_cast<uint32_t>(layer.heights.at(zoomInt).size()) * sizeof(glm::vec4), layer.heights.at(zoomInt).data());
+    heightSsbo->StoreData(static_cast<uint32_t>(layer.heights.at(zoomInt).size()) * sizeof(glm::vec4), layer.heights.at(zoomInt).data());
     heightSsbo->Unbind();
     heightsSsbos.emplace_back(std::move(heightSsbo));
     m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(heightsSsbos));

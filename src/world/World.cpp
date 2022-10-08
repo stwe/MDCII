@@ -52,14 +52,6 @@ mdcii::world::World::~World() noexcept
 // Getter
 //-------------------------------------------------
 
-const mdcii::world::WorldLayer& mdcii::world::World::GetLayer(const WorldLayerType t_layerType) const
-{
-    const auto& layer{ *layers.at(magic_enum::enum_integer(t_layerType)) };
-    MDCII_ASSERT(layer.layerType == t_layerType, "[World::GetLayer()] Invalid layer type.")
-
-    return layer;
-}
-
 mdcii::world::WorldLayer& mdcii::world::World::GetLayer(const WorldLayerType t_layerType)
 {
     auto& layer{ *layers.at(magic_enum::enum_integer(t_layerType)) };
@@ -260,6 +252,87 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
     }
 }
 
+void mdcii::world::World::OnMouseMoved()
+{
+    // enum to int
+    const auto zoomInt{ magic_enum::enum_integer(zoom) };
+    const auto rotationInt{ magic_enum::enum_integer(rotation) };
+
+    // get current mouse position
+    const auto& currentMousePosition{ mousePicker->currentPosition };
+
+    // condition to build: BUILD action + workshop selected + current mouse in the world?
+    if (currentAction == Action::BUILD && m_worldGui->selectedWorkshop.HasBuilding() && IsPositionInWorld(currentMousePosition.x, currentMousePosition.y))
+    {
+        // get instance by current mouse position
+        const auto tileInstance{ GetMapIndex(currentMousePosition.x, currentMousePosition.y) };
+
+        // get layers
+        const auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
+        const auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
+        const auto& mixedLayer{ GetLayer(WorldLayerType::TERRAIN_AND_BUILDINGS) };
+
+        // skip if there is already a building at the location in the Buildings Layer
+        if (buildingsLayer.tiles.at(tileInstance).HasBuilding())
+        {
+            return;
+        }
+
+        // delete the created building from mixed Layer - overwrite with data from the Terrain Layer
+        if (m_lastBuildTileIndex >= 0)
+        {
+            const auto& tm{ terrainLayer.modelMatrices.at(zoomInt).at(rotationInt) };
+            const auto& ti{ terrainLayer.textureAtlasIndices.at(zoomInt) };
+            const auto& to{ terrainLayer.offsets.at(zoomInt).at(rotationInt) };
+            const auto& th{ terrainLayer.heights.at(zoomInt) };
+
+            worldRenderer->UpdateGpuData(
+                m_lastBuildTileIndex,
+                WorldLayerType::TERRAIN_AND_BUILDINGS,
+                zoom, rotation,
+                tm.at(m_lastBuildTileIndex),
+                ti.at(m_lastBuildTileIndex)[rotationInt],
+                to.at(m_lastBuildTileIndex),
+                th.at(m_lastBuildTileIndex)[rotationInt]
+            );
+
+            m_lastBuildTileIndex = -1;
+        }
+
+        // todo: -- Neues Gebäude schreiben --
+        // todo: hier werden momentan nur die Gpu Daten des Mixed Layer geändert
+        // todo: Cpu && Gpu Daten in den anderen Layern ändern
+        // todo: Tiles größer 1x1 schreiben
+        // todo: bisher nur DEG0
+
+        // create Tile object
+        Tile newTile;
+        newTile.buildingId = 1075; // m_worldGui->selectedWorkshop.buildingId;
+        newTile.rotation = m_worldGui->selectedWorkshop.rotation;
+        PreCalcTile(newTile, currentMousePosition.x, currentMousePosition.y);
+
+        // create new Gpu data
+        auto modelMatrix{ mixedLayer.GetModelMatrix(newTile, zoom, rotation) };
+        auto atlasNr{ mixedLayer.GetTextureAtlasNr(newTile, zoom, rotation) };
+        auto texOffset{ mixedLayer.GetTextureOffset(newTile, zoom, rotation) };
+        auto texHeight{ mixedLayer.GetTextureHeight(newTile, zoom, rotation) };
+
+        // update Gpu data
+        worldRenderer->UpdateGpuData(
+            tileInstance,
+            WorldLayerType::TERRAIN_AND_BUILDINGS,
+            zoom, rotation,
+            modelMatrix,
+            atlasNr,
+            texOffset,
+            texHeight
+        );
+
+        // store as last build index
+        m_lastBuildTileIndex = tileInstance;
+    }
+}
+
 //-------------------------------------------------
 // Init
 //-------------------------------------------------
@@ -291,6 +364,16 @@ void mdcii::world::World::AddListeners()
         eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>(
             [&](const event::MouseButtonPressedEvent& t_event) {
                 OnLeftMouseButtonPressed();
+            }
+        )
+    );
+
+    // OnMouseMoved
+    event::EventManager::event_dispatcher.appendListener(
+        event::MdciiEventType::MOUSE_MOVED,
+        eventpp::argumentAdapter<void(const event::MouseMovedEvent&)>(
+            [&](const event::MouseMovedEvent& t_event) {
+                OnMouseMoved();
             }
         )
     );

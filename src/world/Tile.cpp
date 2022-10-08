@@ -46,8 +46,8 @@ void mdcii::world::Tile::RenderImGui() const
     ImGui::Separator();
 
     ImGui::Text("Building Id: %d", buildingId);
-    ImGui::Text("Rotation name: %s", rotation_to_string(rotation));
-    ImGui::Text("Rotation value: %d", rotation);
+    ImGui::Text("Rotation name: %s", magic_enum::enum_name(rotation).data());
+    ImGui::Text("Rotation value: %d", magic_enum::enum_integer(rotation));
     ImGui::Text("X: %d", x);
     ImGui::Text("Y: %d", y);
     ImGui::Text("World x: %d", worldX);
@@ -58,7 +58,7 @@ void mdcii::world::Tile::RenderImGui() const
         auto r{ map::Rotation::DEG0 };
         for (const auto gfx : gfxs)
         {
-            if (ImGui::TreeNode(rotation_to_string(r)))
+            if (ImGui::TreeNode(magic_enum::enum_name(r).data()))
             {
                 ImGui::Text("Gfx: %d", gfx);
                 ImGui::TreePop();

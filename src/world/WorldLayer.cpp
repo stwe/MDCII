@@ -133,6 +133,64 @@ void mdcii::world::WorldLayer::PrepareRendering()
     CreateTextureInfo();
 }
 
+glm::mat4 mdcii::world::WorldLayer::GetModelMatrix(const Tile& t_tile, const map::Zoom t_zoom, const map::Rotation t_rotation) const
+{
+    // to definitely create a position
+    int32_t buildingId{ GRASS_BUILDING_ID };
+    int32_t gfx{ GRASS_GFX };
+    auto posoffs{ m_world->context->originalResourcesManager->GetBuildingById(buildingId).posoffs };
+
+    // override gfx && posoffs
+    if (t_tile.HasBuilding())
+    {
+        gfx = CalcGfx(t_tile, t_rotation);
+        posoffs = m_world->context->originalResourcesManager->GetBuildingById(t_tile.buildingId).posoffs;
+    }
+
+    // get width && height
+    const auto& stadtfldBshTextures{ m_world->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
+    const auto w{ static_cast<float>(stadtfldBshTextures[gfx]->width) };
+    const auto h{ static_cast<float>(stadtfldBshTextures[gfx]->height) };
+
+    // get elevation
+    auto elevation{ 0.0f };
+    if (posoffs > 0)
+    {
+        elevation = static_cast<float>(get_elevation(t_zoom));
+    }
+
+    // screen position
+    auto screenPosition{ t_tile.screenPositions.at(magic_enum::enum_integer(t_zoom)).at(magic_enum::enum_integer(t_rotation)) };
+    screenPosition.y -= h - static_cast<float>(get_tile_height(t_zoom));
+    screenPosition.y -= elevation;
+
+    // return model matrix
+    return renderer::RenderUtils::GetModelMatrix(screenPosition, { w, h });
+}
+
+int mdcii::world::WorldLayer::GetTextureAtlasNr(const Tile& t_tile, const map::Zoom t_zoom, const map::Rotation t_rotation) const
+{
+    const auto atlasRows{ map::TileAtlas::ROWS.at(magic_enum::enum_integer(t_zoom)) };
+    return t_tile.HasBuilding() ? CalcGfx(t_tile, t_rotation) / (atlasRows * atlasRows) : -1;
+}
+
+glm::vec2 mdcii::world::WorldLayer::GetTextureOffset(const Tile& t_tile, const map::Zoom t_zoom, const map::Rotation t_rotation) const
+{
+    const auto atlasRows{ map::TileAtlas::ROWS.at(magic_enum::enum_integer(t_zoom)) };
+    const auto gfx{ CalcGfx(t_tile, t_rotation) };
+    const auto index{ gfx % (atlasRows * atlasRows) };
+
+    return map::TileAtlas::GetTextureOffset(index, atlasRows);
+}
+
+float mdcii::world::WorldLayer::GetTextureHeight(const Tile& t_tile, const map::Zoom t_zoom, const map::Rotation t_rotation) const
+{
+    const auto gfx{ CalcGfx(t_tile, t_rotation) };
+    const auto& stadtfldBshTextures{ m_world->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
+
+    return static_cast<float>(stadtfldBshTextures.at(gfx)->height);
+}
+
 //-------------------------------------------------
 // Helper
 //-------------------------------------------------
@@ -162,48 +220,15 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
 
     // for each zoom
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        // to store the model matrices for each rotation
         Model_Matrices_For_Each_Rotation matricesForRotations;
 
         // for each rotation in the zoom create the model matrices
         magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
-            // to store the model matrices
             Model_Matrices matrices;
 
-            // for each tile
             for (const auto& tile : sortedTiles.at(magic_enum::enum_integer(t_rotation)))
             {
-                // to definitely create a position
-                int32_t buildingId{ GRASS_BUILDING_ID };
-                int32_t gfx{ GRASS_GFX };
-                auto posoffs{ m_world->context->originalResourcesManager->GetBuildingById(buildingId).posoffs };
-
-                // override gfx && posoffs
-                if (tile.HasBuilding())
-                {
-                    gfx = CalcGfx(tile, t_rotation);
-                    posoffs = m_world->context->originalResourcesManager->GetBuildingById(tile.buildingId).posoffs;
-                }
-
-                // get width && height
-                const auto& stadtfldBshTextures{ m_world->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
-                const auto w{ static_cast<float>(stadtfldBshTextures[gfx]->width) };
-                const auto h{ static_cast<float>(stadtfldBshTextures[gfx]->height) };
-
-                // get elevation
-                auto elevation{ 0.0f };
-                if (posoffs > 0)
-                {
-                    elevation = static_cast<float>(get_elevation(t_zoom));
-                }
-
-                // screen position
-                auto screenPosition{ tile.screenPositions.at(magic_enum::enum_integer(t_zoom)).at(magic_enum::enum_integer(t_rotation)) };
-                screenPosition.y -= h - static_cast<float>(get_tile_height(t_zoom));
-                screenPosition.y -= elevation;
-
-                // store model matrix
-                matrices.emplace_back(renderer::RenderUtils::GetModelMatrix(screenPosition, { w, h }));
+                matrices.emplace_back(GetModelMatrix(tile, t_zoom, t_rotation));
             }
 
             matricesForRotations.at(magic_enum::enum_integer(t_rotation)) = matrices;
@@ -221,51 +246,32 @@ void mdcii::world::WorldLayer::CreateTextureInfo()
 
     // for each zoom
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        // zoom int
-        const auto zoom{ magic_enum::enum_integer(t_zoom) };
-
-        // atlas rows
-        const auto atlasRows{ map::TileAtlas::ROWS.at(zoom) };
-
-        // to store info for each rotation
         Texture_Atlas_Indices texIndicesForRotations(instances, glm::ivec4(-1));
         Texture_Offsets_For_Each_Rotation texOffsetsForRotations;
         Texture_Heights texHeightsForRotations(instances, glm::vec4(-1.0f));
 
         // for each rotation in the zoom
         magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
-            // to store texture offsets
+            const auto rotation{ magic_enum::enum_integer(t_rotation) };
             Texture_Offsets textureOffsets(instances, glm::vec2(0.0f));
 
             auto instance{ 0 };
-
-            // for each tile
-            for (const auto& tile : sortedTiles.at(magic_enum::enum_integer(t_rotation)))
+            for (const auto& tile : sortedTiles.at(rotation))
             {
                 if (tile.HasBuilding())
                 {
-                    // get gfx
-                    auto gfx{ CalcGfx(tile, t_rotation) };
-
-                    // texture indices
-                    texIndicesForRotations.at(instance)[magic_enum::enum_integer(t_rotation)] = gfx / (atlasRows * atlasRows);
-
-                    // offsets
-                    const auto index{ gfx % (atlasRows * atlasRows) };
-                    textureOffsets.at(instance) = map::TileAtlas::GetTextureOffset(index, atlasRows);
-
-                    // heights
-                    const auto& stadtfldBshTextures{ m_world->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
-                    const auto h{ static_cast<float>(stadtfldBshTextures.at(gfx)->height) };
-                    texHeightsForRotations.at(instance)[magic_enum::enum_integer(t_rotation)] = h;
+                    texIndicesForRotations.at(instance)[rotation] = GetTextureAtlasNr(tile, t_zoom, t_rotation);
+                    textureOffsets.at(instance) = GetTextureOffset(tile, t_zoom, t_rotation);
+                    texHeightsForRotations.at(instance)[rotation] = GetTextureHeight(tile, t_zoom, t_rotation);
                 }
 
                 instance++;
             }
 
-            texOffsetsForRotations.at(magic_enum::enum_integer(t_rotation)) = textureOffsets;
+            texOffsetsForRotations.at(rotation) = textureOffsets;
         });
 
+        const auto zoom{ magic_enum::enum_integer(t_zoom) };
         textureAtlasIndices.at(zoom) = texIndicesForRotations;
         offsets.at(zoom) = texOffsetsForRotations;
         heights.at(zoom) = texHeightsForRotations;

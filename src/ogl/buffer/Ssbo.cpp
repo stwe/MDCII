@@ -57,9 +57,14 @@ void mdcii::ogl::buffer::Ssbo::Unbind()
 // Data
 //-------------------------------------------------
 
-void mdcii::ogl::buffer::Ssbo::StoreStaticData(const uint32_t t_size, const void* t_data)
+void mdcii::ogl::buffer::Ssbo::StoreData(const uint32_t t_size, const void* t_data)
 {
-    glBufferData(GL_SHADER_STORAGE_BUFFER, t_size, t_data, GL_STATIC_DRAW);
+    glBufferData(GL_SHADER_STORAGE_BUFFER, t_size, t_data, GL_DYNAMIC_DRAW);
+}
+
+void mdcii::ogl::buffer::Ssbo::StoreSubData(const int32_t t_offset, const uint32_t t_size, const void* t_data)
+{
+    glBufferSubData(GL_SHADER_STORAGE_BUFFER, t_offset, t_size, t_data);
 }
 
 //-------------------------------------------------

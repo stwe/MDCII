@@ -190,13 +190,6 @@ namespace mdcii::world
          *
          * @param t_layerType The type of the layer.
          */
-        [[nodiscard]] const WorldLayer& GetLayer(WorldLayerType t_layerType) const;
-
-        /**
-         * Get WorldLayer object by type.
-         *
-         * @param t_layerType The type of the layer.
-         */
         WorldLayer& GetLayer(WorldLayerType t_layerType);
 
         //-------------------------------------------------
@@ -317,6 +310,11 @@ namespace mdcii::world
         int m_currentTileIndex{ -1 };
 
         /**
+         * A building was last created on this index.
+         */
+        int m_lastBuildTileIndex{ -1 };
+
+        /**
          * ImGui menus for the game.
          */
         std::unique_ptr<WorldGui> m_worldGui;
@@ -326,9 +324,14 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Handle left mouse button pressed event.
+         * Handles left mouse button pressed event.
          */
         void OnLeftMouseButtonPressed();
+
+        /**
+         * Handles mouse move.
+         */
+        void OnMouseMoved();
 
         //-------------------------------------------------
         // Init

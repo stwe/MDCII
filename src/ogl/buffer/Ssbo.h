@@ -73,12 +73,24 @@ namespace mdcii::ogl::buffer
         //-------------------------------------------------
 
         /**
-         * Copy static data to Gpu.
+         * Creates and initializes a dynamic Ssbo.
          *
-         * @param t_size The size in bytes.
-         * @param t_data Pointer to data that will be copied into the Gpu.
+         * @param t_size Specifies the size in bytes of the buffer object's new data store.
+         *               GLsizeiptr: Non-negative binary integer size, for memory offsets and ranges.
+         * @param t_data Specifies a pointer to data that will be copied into the Gpu for initialization.
          */
-        static void StoreStaticData(uint32_t t_size, const void* t_data);
+        static void StoreData(uint32_t t_size, const void* t_data);
+
+        /**
+         * Updates a subset of a Ssbo.
+         *
+         * @param t_offset Specifies the offset into the buffer object's data store where data replacement will begin, measured in bytes.
+         *                 GLintptr: Signed, 2's complement binary integer.
+         * @param t_size Specifies the size in bytes of the data store region being replaced.
+         *               GLsizeiptr: Non-negative binary integer size, for memory offsets and ranges.
+         * @param t_data Specifies a pointer to the new data that will be copied into the Gpu.
+         */
+        static void StoreSubData(int32_t t_offset, uint32_t t_size, const void* t_data);
 
     protected:
 

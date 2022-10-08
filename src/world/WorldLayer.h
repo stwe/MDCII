@@ -270,6 +270,50 @@ namespace mdcii::world
          */
         void PrepareRendering();
 
+        /**
+         * Creates a model matrix for a given Tile object.
+         *
+         * @param t_tile The Tile object.
+         * @param t_zoom The zoom for which to create the model matrix.
+         * @param t_rotation The rotation for which to create the model matrix.
+         *
+         * @return The model matrix.
+         */
+        [[nodiscard]] glm::mat4 GetModelMatrix(const Tile& t_tile, map::Zoom t_zoom, map::Rotation t_rotation) const;
+
+        /**
+         * Determines the texture atlas number of a given Tile object.
+         *
+         * @param t_tile The Tile object.
+         * @param t_zoom The zoom for which to determine the atlas number.
+         * @param t_rotation The rotation for which to create the atlas number.
+         *
+         * @return The texture atlas number.
+         */
+        [[nodiscard]] int GetTextureAtlasNr(const Tile& t_tile, map::Zoom t_zoom, map::Rotation t_rotation) const;
+
+        /**
+         * Determines the texture offset of a given Tile object.
+         *
+         * @param t_tile The Tile object.
+         * @param t_zoom The zoom for which to determine the offset.
+         * @param t_rotation The rotation for which to create the offset.
+         *
+         * @return The offset.
+         */
+        [[nodiscard]] glm::vec2 GetTextureOffset(const Tile& t_tile, map::Zoom t_zoom, map::Rotation t_rotation) const;
+
+        /**
+         * Determines the texture height of a given Tile object.
+         *
+         * @param t_tile The Tile object.
+         * @param t_zoom The zoom for which to determine the height.
+         * @param t_rotation The rotation for which to create the height.
+         *
+         * @return The texture height.
+         */
+        [[nodiscard]] float GetTextureHeight(const Tile& t_tile, map::Zoom t_zoom, map::Rotation t_rotation) const;
+
     protected:
 
     private:

@@ -27,21 +27,33 @@
 
 namespace mdcii::ogl
 {
+    /**
+     * Forward declaration class Window.
+     */
     class Window;
 }
 
 namespace mdcii::camera
 {
+    /**
+     * Forward declaration class Camera.
+     */
     class Camera;
 }
 
 namespace mdcii::file
 {
+    /**
+     * Forward declaration class OriginalResourcesManager.
+     */
     class OriginalResourcesManager;
 }
 
 namespace mdcii::state
 {
+    /**
+     * Forward declaration class StateStack.
+     */
     class StateStack;
 }
 
@@ -51,12 +63,20 @@ namespace mdcii::state
 
 namespace mdcii
 {
+    /**
+     * The main game object.
+     */
     class Game
     {
     public:
         //-------------------------------------------------
         // Constants
         //-------------------------------------------------
+
+        /**
+         * The current version of this game.
+         */
+        static constexpr std::string_view VERSION{ "0.1-DEV" };
 
         /**
          * 60 updates per second.

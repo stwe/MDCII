@@ -124,6 +124,29 @@ namespace mdcii::renderer
             const camera::Camera& t_camera
         ) const;
 
+        /**
+         * Updates the Gpu data of a Layer object.
+         *
+         * @param t_instance The instance to change.
+         * @param t_layerType The type of the Layer object.
+         * @param t_zoom The zoom.
+         * @param t_rotation The rotation.
+         * @param t_modelMatrix The new model matrix.
+         * @param t_atlasNr The new texture atlas number.
+         * @param t_offset The new texture offset.
+         * @param t_height The new texture height.
+         */
+        void UpdateGpuData(
+            int32_t t_instance,
+            world::WorldLayerType t_layerType,
+            map::Zoom t_zoom,
+            map::Rotation t_rotation,
+            const glm::mat4& t_modelMatrix,
+            int t_atlasNr,
+            const glm::vec2& t_offset,
+            float t_height
+        );
+
     protected:
 
     private:
