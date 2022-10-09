@@ -136,9 +136,8 @@ void mdcii::world::WorldLayer::PrepareRendering()
 glm::mat4 mdcii::world::WorldLayer::GetModelMatrix(const Tile& t_tile, const map::Zoom t_zoom, const map::Rotation t_rotation) const
 {
     // to definitely create a position
-    int32_t buildingId{ GRASS_BUILDING_ID };
     int32_t gfx{ GRASS_GFX };
-    auto posoffs{ m_world->context->originalResourcesManager->GetBuildingById(buildingId).posoffs };
+    auto posoffs{ m_world->context->originalResourcesManager->GetBuildingById(GRASS_BUILDING_ID).posoffs };
 
     // override gfx && posoffs
     if (t_tile.HasBuilding())
@@ -195,22 +194,26 @@ float mdcii::world::WorldLayer::GetTextureHeight(const Tile& t_tile, const map::
 // Helper
 //-------------------------------------------------
 
+// ------------- Todo ----------------------------------
+
 void mdcii::world::WorldLayer::SortTiles()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::SortTiles()] Sorting tiles by index.");
 
-    // for each rotation
     magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+        // enum to int
+        const int rotationInt{ magic_enum::enum_integer(t_rotation) };
+
         // sort tiles by index
         std::sort(tiles.begin(), tiles.end(), [&](const Tile& t_a, const Tile& t_b) {
-            return t_a.indices[magic_enum::enum_integer(t_rotation)] < t_b.indices[magic_enum::enum_integer(t_rotation)];
+            return t_a.indices[rotationInt] < t_b.indices[rotationInt];
         });
 
         // copy sorted tiles
-        sortedTiles.at(magic_enum::enum_integer(t_rotation)) = tiles;
+        sortedTiles.at(rotationInt) = tiles;
     });
 
-    // tiles = sortedTiles DEG0
+    // revert tiles sorting = sortedTiles DEG0
     tiles = sortedTiles.at(magic_enum::enum_integer(map::Rotation::DEG0));
 }
 
@@ -229,6 +232,11 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
             for (const auto& tile : sortedTiles.at(magic_enum::enum_integer(t_rotation)))
             {
                 matrices.emplace_back(GetModelMatrix(tile, t_zoom, t_rotation));
+
+                if (t_rotation == map::Rotation::DEG90 && t_zoom == map::Zoom::GFX && layerType == WorldLayerType::TERRAIN)
+                {
+                    Log::MDCII_LOG_INFO("x: {}, y: {}, idx: {}", tile.worldX, tile.worldY, tile.indices[1]);
+                }
             }
 
             matricesForRotations.at(magic_enum::enum_integer(t_rotation)) = matrices;
@@ -236,13 +244,20 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
 
         modelMatrices.at(magic_enum::enum_integer(t_zoom)) = matricesForRotations;
     });
+
+    auto ii = 0;
 }
+
+// ------------- Todo ----------------------------------
+
+
+
 
 void mdcii::world::WorldLayer::CreateTextureInfo()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateTextureInfo()] Create texture info.");
 
-    MDCII_ASSERT(instances >= 0, "[WorldLayer::CreateTextureInfo()()] Invalid number of instances.")
+    MDCII_ASSERT(instances >= 0, "[WorldLayer::CreateTextureInfo()] Invalid number of instances.")
 
     // for each zoom
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {

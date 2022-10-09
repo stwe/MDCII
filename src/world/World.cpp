@@ -264,21 +264,41 @@ void mdcii::world::World::OnMouseMoved()
         const auto zoomInt{ magic_enum::enum_integer(zoom) };
         const auto rotationInt{ magic_enum::enum_integer(rotation) };
 
-        // get instance by current mouse position
-        const auto tileInstance{ GetMapIndex(currentMousePosition.x, currentMousePosition.y) };
-
         // get layers
         const auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
         const auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
         const auto& mixedLayer{ GetLayer(WorldLayerType::TERRAIN_AND_BUILDINGS) };
 
         // skip if there is already a building at the location in the Buildings Layer
-        if (buildingsLayer.tiles.at(tileInstance).HasBuilding())
+        if (buildingsLayer.tiles.at(GetMapIndex(currentMousePosition.x, currentMousePosition.y)).HasBuilding())
         {
+            Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] Skip build on position x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
             return;
         }
 
+        /*
+        if (currentMousePosition.x == 1 && currentMousePosition.y == 1)
+        {
+            const auto& tm{ terrainLayer.modelMatrices.at(zoomInt).at(rotationInt) };
+            const auto& ti{ terrainLayer.textureAtlasIndices.at(zoomInt) };
+            const auto& to{ terrainLayer.offsets.at(zoomInt).at(rotationInt) };
+            const auto& th{ terrainLayer.heights.at(zoomInt) };
+
+            auto tileInstance = 14; // (1, 1 DEG90)
+            worldRenderer->UpdateGpuData(
+                tileInstance,
+                WorldLayerType::TERRAIN_AND_BUILDINGS,
+                zoom, rotation,
+                tm.at(tileInstance),
+                ti.at(tileInstance)[rotationInt],
+                to.at(tileInstance),
+                th.at(tileInstance)[rotationInt]
+            );
+        }
+        */
+
         // delete the created building from mixed Layer - overwrite with data from the Terrain Layer
+        /*
         if (m_lastBuildTileIndex >= 0)
         {
             const auto& tm{ terrainLayer.modelMatrices.at(zoomInt).at(rotationInt) };
@@ -287,29 +307,25 @@ void mdcii::world::World::OnMouseMoved()
             const auto& th{ terrainLayer.heights.at(zoomInt) };
 
             worldRenderer->UpdateGpuData(
-                m_lastBuildTileIndex,
+                tileInstance,
                 WorldLayerType::TERRAIN_AND_BUILDINGS,
                 zoom, rotation,
-                tm.at(m_lastBuildTileIndex),
-                ti.at(m_lastBuildTileIndex)[rotationInt],
-                to.at(m_lastBuildTileIndex),
-                th.at(m_lastBuildTileIndex)[rotationInt]
+                tm.at(tileInstance),
+                ti.at(tileInstance)[rotationInt],
+                to.at(tileInstance),
+                th.at(tileInstance)[rotationInt]
             );
 
             m_lastBuildTileIndex = -1;
         }
+        */
 
-        // todo: -- Neues Gebäude schreiben --
-        // todo: hier werden momentan nur die Gpu Daten des Mixed Layer geändert
-        // todo: Cpu && Gpu Daten in den anderen Layern ändern
-        // todo: Tiles größer 1x1 schreiben
-        // todo: bisher nur DEG0
-
+        /*
         // create Tile object
         Tile newTile;
         newTile.buildingId = 1075; // m_worldGui->selectedWorkshop.buildingId;
         newTile.rotation = m_worldGui->selectedWorkshop.rotation;
-        PreCalcTile(newTile, currentMousePosition.x, currentMousePosition.y);
+        PreCalcTile(newTile, 2, 0);
 
         // create new Gpu data
         auto modelMatrix{ mixedLayer.GetModelMatrix(newTile, zoom, rotation) };
@@ -319,7 +335,7 @@ void mdcii::world::World::OnMouseMoved()
 
         // update Gpu data
         worldRenderer->UpdateGpuData(
-            tileInstance,
+            newTile.indices.at(rotationInt),
             WorldLayerType::TERRAIN_AND_BUILDINGS,
             zoom, rotation,
             modelMatrix,
@@ -329,7 +345,8 @@ void mdcii::world::World::OnMouseMoved()
         );
 
         // store as last build index
-        m_lastBuildTileIndex = tileInstance;
+        //m_lastBuildTileIndex = tileInstance;
+        */
     }
 }
 

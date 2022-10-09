@@ -39,8 +39,8 @@ void main()
 {
     gl_Position = projection * view * modelMatrix[gl_InstanceID] * vec4(aPosition.xy, 0.0, 1.0);
     uvOffset = offset[gl_InstanceID];
-    vTextureAtlasIndex = textureAtlasIndex[gl_InstanceID][rotation];
-    height = textureHeight[gl_InstanceID][rotation];
+    vTextureAtlasIndex = int(textureAtlasIndex[gl_InstanceID][rotation]);
+    height = float(textureHeight[gl_InstanceID][rotation]);
 
     uv = aPosition.zw;
 

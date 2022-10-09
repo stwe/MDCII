@@ -53,6 +53,23 @@ void mdcii::world::Tile::RenderImGui() const
     ImGui::Text("World x: %d", worldX);
     ImGui::Text("World y: %d", worldY);
 
+    if (ImGui::TreeNode("Indices"))
+    {
+        auto r{ map::Rotation::DEG0 };
+        for (const auto index : indices)
+        {
+            if (ImGui::TreeNode(rotation_to_string(r)))
+            {
+                ImGui::Text("Index: %d", index);
+                ImGui::TreePop();
+            }
+
+            ++r;
+        }
+
+        ImGui::TreePop();
+    }
+
     if (ImGui::TreeNode("Gfxs"))
     {
         auto r{ map::Rotation::DEG0 };
