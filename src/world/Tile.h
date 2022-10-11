@@ -86,6 +86,11 @@ namespace mdcii::world
         std::array<int32_t, map::NR_OF_ROTATIONS> indices{};
 
         /**
+         * The instance Id of this Tile object or the position in Layer sortedTiles array.
+         */
+        std::array<int32_t, map::NR_OF_ROTATIONS> instanceIds{};
+
+        /**
          * The Bsh graphic for each rotation.
          * In some cases the same gfx is used for all rotations.
          */

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <glm/mat4x4.hpp>
+#include <unordered_map>
 #include "Tile.h"
 #include "data/json.hpp"
 
@@ -169,6 +170,15 @@ namespace mdcii::world
          * Used to iterate over the tiles in the correct order for each rotation.
          */
         Tiles_For_Each_Rotation sortedTiles;
+
+        /**
+         * With this, the instance Id can be determined with a position xy and the rotation.
+         * x = worldX
+         * y = worldY
+         * z = rotationInt
+         * result = instance Id
+         */
+        std::unordered_map<glm::ivec3, int32_t> instanceIds;
 
         /**
          * Four model matrices containers for each of the three possible zoom levels

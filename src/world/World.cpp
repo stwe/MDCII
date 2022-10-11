@@ -16,6 +16,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/hash.hpp>
 #include <imgui.h>
 #include "World.h"
 #include "Game.h"
@@ -219,7 +221,12 @@ int mdcii::world::World::GetMapIndex(const int t_x, const int t_y, const map::Ro
 
     const auto position{ RotatePosition(t_x, t_y, t_rotation) };
 
-    return position.y * width + position.x;
+    if (t_rotation == map::Rotation::DEG0 || t_rotation == map::Rotation::DEG180)
+    {
+        return position.y * width + position.x;
+    }
+
+    return position.y * height + position.x;
 }
 
 glm::vec2 mdcii::world::World::WorldToScreen(const int t_x, const int t_y, const map::Zoom t_zoom, const map::Rotation t_rotation) const
@@ -265,7 +272,7 @@ void mdcii::world::World::OnMouseMoved()
         const auto rotationInt{ magic_enum::enum_integer(rotation) };
 
         // get layers
-        const auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
+        auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
         const auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
         const auto& mixedLayer{ GetLayer(WorldLayerType::TERRAIN_AND_BUILDINGS) };
 
@@ -276,30 +283,8 @@ void mdcii::world::World::OnMouseMoved()
             return;
         }
 
-        /*
-        if (currentMousePosition.x == 1 && currentMousePosition.y == 1)
-        {
-            const auto& tm{ terrainLayer.modelMatrices.at(zoomInt).at(rotationInt) };
-            const auto& ti{ terrainLayer.textureAtlasIndices.at(zoomInt) };
-            const auto& to{ terrainLayer.offsets.at(zoomInt).at(rotationInt) };
-            const auto& th{ terrainLayer.heights.at(zoomInt) };
-
-            auto tileInstance = 14; // (1, 1 DEG90)
-            worldRenderer->UpdateGpuData(
-                tileInstance,
-                WorldLayerType::TERRAIN_AND_BUILDINGS,
-                zoom, rotation,
-                tm.at(tileInstance),
-                ti.at(tileInstance)[rotationInt],
-                to.at(tileInstance),
-                th.at(tileInstance)[rotationInt]
-            );
-        }
-        */
-
-        // delete the created building from mixed Layer - overwrite with data from the Terrain Layer
-        /*
-        if (m_lastBuildTileIndex >= 0)
+        // delete the created building from the mixed Layer (overwrite with data from the Terrain Layer)
+        if (m_lastBuildOnInstanceId >= 0)
         {
             const auto& tm{ terrainLayer.modelMatrices.at(zoomInt).at(rotationInt) };
             const auto& ti{ terrainLayer.textureAtlasIndices.at(zoomInt) };
@@ -307,25 +292,33 @@ void mdcii::world::World::OnMouseMoved()
             const auto& th{ terrainLayer.heights.at(zoomInt) };
 
             worldRenderer->UpdateGpuData(
-                tileInstance,
+                m_lastBuildOnInstanceId,
                 WorldLayerType::TERRAIN_AND_BUILDINGS,
                 zoom, rotation,
-                tm.at(tileInstance),
-                ti.at(tileInstance)[rotationInt],
-                to.at(tileInstance),
-                th.at(tileInstance)[rotationInt]
+                tm.at(m_lastBuildOnInstanceId),
+                ti.at(m_lastBuildOnInstanceId)[rotationInt],
+                to.at(m_lastBuildOnInstanceId),
+                th.at(m_lastBuildOnInstanceId)[rotationInt]
             );
 
-            m_lastBuildTileIndex = -1;
+            m_lastBuildOnInstanceId = -1;
         }
-        */
 
-        /*
-        // create Tile object
+        // create Tile object (Galgen 841 zum testen)
         Tile newTile;
-        newTile.buildingId = 1075; // m_worldGui->selectedWorkshop.buildingId;
+        newTile.buildingId = 841; // m_worldGui->selectedWorkshop.buildingId;
         newTile.rotation = m_worldGui->selectedWorkshop.rotation;
-        PreCalcTile(newTile, 2, 0);
+        PreCalcTile(newTile, currentMousePosition.x, currentMousePosition.y);
+
+        for (auto r{ 0 }; r < 4; ++r)
+        {
+            const auto id{ terrainLayer.instanceIds.at(glm::ivec3(currentMousePosition.x, currentMousePosition.y, r)) };
+            newTile.instanceIds.at(r) = id;
+        }
+
+        // same values
+        const auto instanceIdTest{ terrainLayer.instanceIds.at(glm::ivec3(currentMousePosition.x, currentMousePosition.y, rotationInt)) };
+        const auto instanceId{ newTile.instanceIds.at(rotationInt) };
 
         // create new Gpu data
         auto modelMatrix{ mixedLayer.GetModelMatrix(newTile, zoom, rotation) };
@@ -335,7 +328,7 @@ void mdcii::world::World::OnMouseMoved()
 
         // update Gpu data
         worldRenderer->UpdateGpuData(
-            newTile.indices.at(rotationInt),
+            instanceId,
             WorldLayerType::TERRAIN_AND_BUILDINGS,
             zoom, rotation,
             modelMatrix,
@@ -344,9 +337,8 @@ void mdcii::world::World::OnMouseMoved()
             texHeight
         );
 
-        // store as last build index
-        //m_lastBuildTileIndex = tileInstance;
-        */
+        // store as last build
+        m_lastBuildOnInstanceId = instanceId;
     }
 }
 

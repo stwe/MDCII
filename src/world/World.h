@@ -310,9 +310,9 @@ namespace mdcii::world
         int m_currentTileIndex{ -1 };
 
         /**
-         * A building was last created on this index.
+         * A building was last created on this instance Id.
          */
-        int m_lastBuildTileIndex{ -1 };
+        int m_lastBuildOnInstanceId{ -1 };
 
         /**
          * ImGui menus for the game.

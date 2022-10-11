@@ -108,10 +108,10 @@ void mdcii::renderer::WorldRenderer::Render(
 }
 
 void mdcii::renderer::WorldRenderer::Render(
-    const mdcii::map::Zoom t_zoom,
-    const mdcii::map::Rotation t_rotation,
-    const mdcii::ogl::Window& t_window,
-    const mdcii::camera::Camera& t_camera
+    const map::Zoom t_zoom,
+    const map::Rotation t_rotation,
+    const ogl::Window& t_window,
+    const camera::Camera& t_camera
 ) const
 {
     const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
