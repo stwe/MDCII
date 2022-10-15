@@ -310,9 +310,14 @@ namespace mdcii::world
         int m_currentTileIndex{ -1 };
 
         /**
-         * A building was last created on this instance Id.
+         * The flag is set when a building is created.
          */
-        int m_lastBuildOnInstanceId{ -1 };
+        bool m_buildingCreated{ false };
+
+        /**
+         * A Tile used to create a building.
+         */
+        std::unique_ptr<Tile> m_tileToAdd;
 
         /**
          * ImGui menus for the game.
@@ -373,8 +378,8 @@ namespace mdcii::world
          * which are necessary for the display the Tile on the screen.
          *
          * @param t_tile The Tile object.
-         * @param t_x The x position in the world.
-         * @param t_y The y position in the world.
+         * @param t_x The x position for Deg0 in the world.
+         * @param t_y The y position for Deg0 in the world.
          */
         void PreCalcTile(Tile& t_tile, int t_x, int t_y) const;
     };

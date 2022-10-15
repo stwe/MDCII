@@ -76,12 +76,12 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * A Tile container.
+         * A vector of Tile pointers.
          */
-        using Tiles = std::vector<Tile>;
+        using Tiles = std::vector<std::shared_ptr<Tile>>;
 
         /**
-         * A Tile container for each of the four possible rotations.
+         * A vector of Tile pointers for each rotation.
          */
         using Tiles_For_Each_Rotation = std::array<Tiles, map::NR_OF_ROTATIONS>;
 
@@ -90,12 +90,12 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * A model matrices container.
+         * A vector of model matrices.
          */
         using Model_Matrices = std::vector<glm::mat4>;
 
         /**
-         * A model matrices container for each of the four possible rotations.
+         * A vector of model matrices for each rotation.
          */
         using Model_Matrices_For_Each_Rotation = std::array<Model_Matrices, map::NR_OF_ROTATIONS>;
 
@@ -109,26 +109,26 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * A texture atlas indices container.
+         * A vector of texture atlas numbers.
          */
-        using Texture_Atlas_Indices = std::vector<glm::ivec4>;
+        using Texture_Atlas_Numbers = std::vector<glm::ivec4>;
 
         /**
-         * A texture atlas indices container for each of the three possible zoom levels.
+         * A vector of texture atlas numbers for each zoom level.
          */
-        using Texture_Atlas_Indices_For_Each_Zoom = std::array<Texture_Atlas_Indices, map::NR_OF_ZOOMS>;
+        using Texture_Atlas_Numbers_For_Each_Zoom = std::array<Texture_Atlas_Numbers, map::NR_OF_ZOOMS>;
 
         //-------------------------------------------------
         // Texture offsets types
         //-------------------------------------------------
 
         /**
-         * A texture offsets container.
+         * A vector of texture offsets.
          */
         using Texture_Offsets = std::vector<glm::vec2>;
 
         /**
-         * A texture offsets container for each of the four possible rotations.
+         * A vector of texture offsets for each rotation.
          */
         using Texture_Offsets_For_Each_Rotation = std::array<Texture_Offsets, map::NR_OF_ROTATIONS>;
 
@@ -142,12 +142,12 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * A texture heights container.
+         * A vector of texture heights.
          */
         using Texture_Heights = std::vector<glm::vec4>;
 
         /**
-         * A texture heights container for each of the three possible zoom levels.
+         * A vector of texture heights for each zoom level.
          */
         using Texture_Heights_For_Each_Zoom = std::array<Texture_Heights, map::NR_OF_ZOOMS>;
 
@@ -161,18 +161,18 @@ namespace mdcii::world
         WorldLayerType layerType{ WorldLayerType::NONE };
 
         /**
-         * An unsorted Tile container. Same as sortedTiles for DEG0.
+         * Contains all Tile pointers in the order DEG0.
          */
         Tiles tiles;
 
         /**
-         * A Tile container for each of the four possible rotations.
-         * Used to iterate over the tiles in the correct order for each rotation.
+         * A vector of Tile pointers for each rotation.
+         * Used to iterate over the Tile pointers in the correct order for each rotation.
          */
         Tiles_For_Each_Rotation sortedTiles;
 
         /**
-         * With this, the instance Id can be determined with a position xy and the rotation.
+         * With this, the instance Id can be determined with a rotated world position.
          * x = worldX
          * y = worldY
          * z = rotationInt
@@ -186,14 +186,14 @@ namespace mdcii::world
         Model_Matrices_For_Each_Zoom modelMatrices;
 
         /**
-         * A texture atlas indices container for each of the three possible zoom levels.
+         * A vector of texture atlas numbers for each zoom level.
          * Specifies from which atlas image the texture for each tile is to be taken.
          * x = number of atlas image for rot0
          * y = number of atlas image for rot90
          * z = number of atlas image for rot180
          * w = number of atlas image for rot270
          */
-        Texture_Atlas_Indices_For_Each_Zoom textureAtlasIndices;
+        Texture_Atlas_Numbers_For_Each_Zoom textureAtlasNumbers;
 
         /**
          * Four texture offsets containers for each of the three possible zoom levels.
@@ -201,7 +201,7 @@ namespace mdcii::world
         Texture_Offsets_For_Each_Zoom offsets;
 
         /**
-         * A texture heights container for each of the three possible zoom levels.
+         * A vector of texture heights for each zoom level.
          * The height of each texture.
          * x = height for rot0
          * y = height for rot90
@@ -213,7 +213,7 @@ namespace mdcii::world
         /**
          * The number of instances to render.
          */
-        int32_t instances{ -1 };
+        int32_t instancesToRender{ -1 };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -265,7 +265,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Adds a Tile object from a given Json value.
+         * Adds a Tile pointer from a given Json value.
          *
          * @param t_json The Json value.
          */

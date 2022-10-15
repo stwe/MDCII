@@ -66,14 +66,14 @@ namespace mdcii::world
         int32_t y{ 0 };
 
         /**
-         * The x position in the world.
+         * The x position for Deg0 in the world.
          */
-        int32_t worldX{ -1 };
+        int32_t worldXDeg0{ -1 };
 
         /**
-         * The y position in the world.
+         * The y position for Deg0 in the world.
          */
-        int32_t worldY{ -1 };
+        int32_t worldYDeg0{ -1 };
 
         /**
          * A screen position for each zoom and each rotation.

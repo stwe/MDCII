@@ -121,7 +121,7 @@ void mdcii::world::WorldLayer::SetLayerTypeByString(const std::string& t_layerTy
 
 void mdcii::world::WorldLayer::AddTileFromJson(const nlohmann::json& t_json)
 {
-    tiles.emplace_back(t_json.get<Tile>());
+    tiles.emplace_back(std::make_unique<Tile>(t_json.get<Tile>()));
 }
 
 //-------------------------------------------------
@@ -205,8 +205,8 @@ void mdcii::world::WorldLayer::SortTiles()
         const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
         // sort tiles by index
-        std::sort(tiles.begin(), tiles.end(), [&](const Tile& t_a, const Tile& t_b) {
-            return t_a.indices[rotationInt] < t_b.indices[rotationInt];
+        std::sort(tiles.begin(), tiles.end(), [&](const std::shared_ptr<Tile>& t_a, const std::shared_ptr<Tile>& t_b) {
+            return t_a->indices[rotationInt] < t_b->indices[rotationInt];
         });
 
         // copy sorted tiles
@@ -229,10 +229,10 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
             const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
             Model_Matrices matrices;
             int32_t instance{ 0 };
-            for (auto& tile : sortedTiles.at(rotationInt))
+            for (const auto& tile : sortedTiles.at(rotationInt))
             {
-                matrices.emplace_back(GetModelMatrix(tile, t_zoom, t_rotation));
-                tile.instanceIds.at(rotationInt) = instance;
+                matrices.emplace_back(GetModelMatrix(*tile, t_zoom, t_rotation));
+                tile->instanceIds.at(rotationInt) = instance;
 
                 instance++;
             }
@@ -243,12 +243,13 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
         modelMatrices.at(magic_enum::enum_integer(t_zoom)) = matricesForRotations;
     });
 
-    // store instances Ids
+    // create a hashmap to find the instance ID for each rotated position
     magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
         const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
         for (auto& tile : sortedTiles.at(rotationInt))
         {
-            instanceIds.emplace(glm::ivec3(tile.worldX, tile.worldY, rotationInt), tile.instanceIds.at(rotationInt));
+            // the position at Deg0 is at a different instance depending on the rotation
+            instanceIds.emplace(glm::ivec3(tile->worldXDeg0, tile->worldYDeg0, rotationInt), tile->instanceIds.at(rotationInt));
         }
     });
 }
@@ -257,27 +258,26 @@ void mdcii::world::WorldLayer::CreateTextureInfo()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateTextureInfo()] Create texture info.");
 
-    MDCII_ASSERT(instances >= 0, "[WorldLayer::CreateTextureInfo()] Invalid number of instances.")
+    MDCII_ASSERT(instancesToRender >= 0, "[WorldLayer::CreateTextureInfo()] Invalid number of instances to render.")
 
-    // for each zoom
     magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        Texture_Atlas_Indices texIndicesForRotations(instances, glm::ivec4(-1));
+        Texture_Atlas_Numbers texAtlasNrs(instancesToRender, glm::ivec4(-1));
         Texture_Offsets_For_Each_Rotation texOffsetsForRotations;
-        Texture_Heights texHeightsForRotations(instances, glm::vec4(-1.0f));
+        Texture_Heights texHeights(instancesToRender, glm::vec4(-1.0f));
 
         // for each rotation in the zoom
         magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
             const auto rotation{ magic_enum::enum_integer(t_rotation) };
-            Texture_Offsets textureOffsets(instances, glm::vec2(0.0f));
+            Texture_Offsets textureOffsets(instancesToRender, glm::vec2(0.0f));
 
             auto instance{ 0 };
             for (const auto& tile : sortedTiles.at(rotation))
             {
-                if (tile.HasBuilding())
+                if (tile->HasBuilding())
                 {
-                    texIndicesForRotations.at(instance)[rotation] = GetTextureAtlasNr(tile, t_zoom, t_rotation);
-                    textureOffsets.at(instance) = GetTextureOffset(tile, t_zoom, t_rotation);
-                    texHeightsForRotations.at(instance)[rotation] = GetTextureHeight(tile, t_zoom, t_rotation);
+                    texAtlasNrs.at(instance)[rotation] = GetTextureAtlasNr(*tile, t_zoom, t_rotation);
+                    textureOffsets.at(instance) = GetTextureOffset(*tile, t_zoom, t_rotation);
+                    texHeights.at(instance)[rotation] = GetTextureHeight(*tile, t_zoom, t_rotation);
                 }
 
                 instance++;
@@ -287,9 +287,9 @@ void mdcii::world::WorldLayer::CreateTextureInfo()
         });
 
         const auto zoom{ magic_enum::enum_integer(t_zoom) };
-        textureAtlasIndices.at(zoom) = texIndicesForRotations;
+        textureAtlasNumbers.at(zoom) = texAtlasNrs;
         offsets.at(zoom) = texOffsetsForRotations;
-        heights.at(zoom) = texHeightsForRotations;
+        heights.at(zoom) = texHeights;
     });
 }
 

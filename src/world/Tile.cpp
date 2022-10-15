@@ -29,8 +29,8 @@ void mdcii::world::Tile::Reset()
     rotation = map::Rotation::DEG0;
     x = 0;
     y = 0;
-    worldX = -1;
-    worldY = -1;
+    worldXDeg0 = -1;
+    worldYDeg0 = -1;
 }
 
 //-------------------------------------------------
@@ -50,8 +50,8 @@ void mdcii::world::Tile::RenderImGui() const
     ImGui::Text("Rotation value: %d", magic_enum::enum_integer(rotation));
     ImGui::Text("X: %d", x);
     ImGui::Text("Y: %d", y);
-    ImGui::Text("World x: %d", worldX);
-    ImGui::Text("World y: %d", worldY);
+    ImGui::Text("Deg0 World x: %d", worldXDeg0);
+    ImGui::Text("Deg0 World y: %d", worldYDeg0);
 
     if (ImGui::TreeNode("Indices"))
     {
@@ -61,6 +61,23 @@ void mdcii::world::Tile::RenderImGui() const
             if (ImGui::TreeNode(rotation_to_string(r)))
             {
                 ImGui::Text("Index: %d", index);
+                ImGui::TreePop();
+            }
+
+            ++r;
+        }
+
+        ImGui::TreePop();
+    }
+
+    if (ImGui::TreeNode("Instances Ids"))
+    {
+        auto r{ map::Rotation::DEG0 };
+        for (const auto id : instanceIds)
+        {
+            if (ImGui::TreeNode(rotation_to_string(r)))
+            {
+                ImGui::Text("Instance Id: %d", id);
                 ImGui::TreePop();
             }
 

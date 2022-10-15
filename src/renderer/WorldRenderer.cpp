@@ -102,7 +102,7 @@ void mdcii::renderer::WorldRenderer::Render(
     );
 
     ogl::resource::TextureUtils::BindForReading(m_world->tileAtlas->textureIds.at(zoomInt), GL_TEXTURE0, GL_TEXTURE_2D_ARRAY);
-    m_vaos.at(layerTypeInt).at(zoomInt)->DrawInstanced(m_world->GetLayer(t_layerType).instances);
+    m_vaos.at(layerTypeInt).at(zoomInt)->DrawInstanced(m_world->GetLayer(t_layerType).instancesToRender);
 
     ogl::buffer::Vao::Unbind();
 }
@@ -139,7 +139,7 @@ void mdcii::renderer::WorldRenderer::Render(
     const auto& textureId{ ogl::resource::ResourceManager::LoadTexture(m_gridFileNames.at(zoomInt)).id };
     ogl::resource::TextureUtils::BindForReading(textureId, GL_TEXTURE0);
 
-    m_vaos.at(gridLayerTypeInt).at(zoomInt)->DrawInstanced(m_world->GetLayer(world::WorldLayerType::GRID).instances);
+    m_vaos.at(gridLayerTypeInt).at(zoomInt)->DrawInstanced(m_world->GetLayer(world::WorldLayerType::GRID).instancesToRender);
 
     ogl::buffer::Vao::Unbind();
 
@@ -311,7 +311,7 @@ void mdcii::renderer::WorldRenderer::AddTextureInfo(const map::Zoom t_zoom, cons
     std::vector<std::unique_ptr<ogl::buffer::Ssbo>> atlasIndicesSsbos;
     auto atlasSsbo{ std::make_unique<ogl::buffer::Ssbo>() };
     atlasSsbo->Bind();
-    atlasSsbo->StoreData(static_cast<uint32_t>(layer.textureAtlasIndices.at(zoomInt).size()) * sizeof(glm::ivec4), layer.textureAtlasIndices.at(zoomInt).data());
+    atlasSsbo->StoreData(static_cast<uint32_t>(layer.textureAtlasNumbers.at(zoomInt).size()) * sizeof(glm::ivec4), layer.textureAtlasNumbers.at(zoomInt).data());
     atlasSsbo->Unbind();
     atlasIndicesSsbos.emplace_back(std::move(atlasSsbo));
     m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(atlasIndicesSsbos));
