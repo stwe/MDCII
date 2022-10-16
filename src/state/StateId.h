@@ -31,7 +31,6 @@ namespace mdcii::state
     {
         MAIN_MENU, // the main menu
         GAME,      // the game
-        EDITOR,    // can be used to start an editor
         ALL        // all State objects
     };
 }

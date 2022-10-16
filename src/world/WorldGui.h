@@ -91,6 +91,11 @@ namespace mdcii::world
          */
         void AllWorkshopsGui();
 
+        /**
+         * Shows a menu to save the game.
+         */
+        void SaveGameGui();
+
     protected:
 
     private:

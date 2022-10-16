@@ -20,7 +20,6 @@
 #include "Game.h"
 #include "MdciiException.h"
 #include "GameState.h"
-#include "EditorState.h"
 #include "camera/Camera.h"
 #include "state/StateStack.h"
 #include "ogl/Window.h"
@@ -164,7 +163,6 @@ void mdcii::Game::Start()
     // register states
     m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::Context>(m_window, m_camera, m_originalResourcesManager));
     m_stateStack->RegisterState<GameState>(state::StateId::GAME);
-    m_stateStack->RegisterState<EditorState>(state::StateId::EDITOR);
 
     // push a start state
     const auto startStateId{ magic_enum::enum_cast<state::StateId>(INI.Get<std::string>("game", "start_state")) };
@@ -172,9 +170,6 @@ void mdcii::Game::Start()
     {
         switch (startStateId.value()) // NOLINT(clang-diagnostic-switch-enum)
         {
-        case state::StateId::EDITOR:
-            m_stateStack->PushState(state::StateId::EDITOR);
-            break;
         case state::StateId::GAME:
             m_stateStack->PushState(state::StateId::GAME);
             break;

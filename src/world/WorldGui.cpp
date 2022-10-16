@@ -177,6 +177,40 @@ void mdcii::world::WorldGui::AllWorkshopsGui()
     }
 }
 
+void mdcii::world::WorldGui::SaveGameGui()
+{
+    const auto fileName{ Game::RESOURCES_REL_PATH + Game::INI.Get<std::string>("content", "save_map") };
+
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame").c_str()))
+    {
+        Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] Start saving the game...");
+
+        nlohmann::json j;
+        nlohmann::json t = nlohmann::json::object();
+        nlohmann::json b = nlohmann::json::object();
+        std::ofstream file{ fileName };
+        if (!file)
+        {
+            throw MDCII_EXCEPTION("[WorldGui::SaveGameGui()] Error while opening file " + fileName + ".");
+        }
+
+        // todo
+        /*
+        j["width"] = m_world->width;
+        j["height"] = m_world->height;
+        j["layers"] = nlohmann::json::array();
+        t["terrain"] = m_world->GetLayer(WorldLayerType::TERRAIN).tiles;
+        b["buildings"] = m_world->GetLayer(WorldLayerType::BUILDINGS).tiles;
+        j["layers"].push_back(t);
+        j["layers"].push_back(b);
+        */
+
+        file << j;
+
+        Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] The game has been successfully saved.");
+    }
+}
+
 //-------------------------------------------------
 // Init
 //-------------------------------------------------

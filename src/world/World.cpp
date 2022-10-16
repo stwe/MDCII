@@ -161,6 +161,8 @@ void mdcii::world::World::RenderImGui()
         {
             m_worldGui->selectedWorkshop.Reset();
         }
+
+        m_worldGui->SaveGameGui();
     }
 
     ImGui::End();
