@@ -267,7 +267,6 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
         m_currentTileIndex = GetMapIndex(mousePosition.x, mousePosition.y);
     }
 
-    /*
     if (IsPositionInWorld(mousePosition.x, mousePosition.y) && currentAction == Action::BUILD && !m_tilesToAdd.empty())
     {
         auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
@@ -276,7 +275,7 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
         {
             const auto id0{ tile->instanceIds.at(magic_enum::enum_integer(map::Rotation::DEG0)) };
 
-            // reset
+            // reset 5 pointers
             MDCII_ASSERT(buildingsLayer.tiles.at(id0), "[World::OnLeftMouseButtonPressed()] Null pointer.")
             buildingsLayer.tiles.at(id0).reset();
             magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
@@ -285,7 +284,7 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
                 buildingsLayer.sortedTiles.at(r).at(tile->instanceIds.at(r)).reset();
             });
 
-            // replace
+            // replace 5 pointers
             MDCII_ASSERT(!buildingsLayer.tiles.at(id0), "[World::OnLeftMouseButtonPressed()] Invalid pointer.")
             buildingsLayer.tiles.at(id0) = std::move(tile);
             magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
@@ -295,16 +294,14 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
             });
         }
 
+        // clear vector
         std::vector<std::unique_ptr<Tile>>().swap(m_tilesToAdd);
     }
-    */
 
+    MDCII_ASSERT(m_tilesToAdd.empty(), "[World::OnLeftMouseButtonPressed()] Invalid number of tiles to add.")
+
+    // reset selected workshop on left mouse button clicked
     m_worldGui->selectedWorkshop.Reset();
-    if (!m_tilesToAdd.empty())
-    {
-        Log::MDCII_LOG_DEBUG("[World::OnLeftMouseButtonPressed()] Delete building.");
-        std::vector<std::unique_ptr<Tile>>().swap(m_tilesToAdd);
-    }
 }
 
 void mdcii::world::World::OnMouseMoved()
@@ -352,7 +349,7 @@ void mdcii::world::World::OnMouseMoved()
         {
             Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] Delete building with Id {} from Gpu.", m_worldGui->selectedWorkshop.buildingId);
 
-            for (auto& tile : m_tilesToAdd)
+            for (const auto& tile : m_tilesToAdd)
             {
                 magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
                     const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
@@ -391,7 +388,7 @@ void mdcii::world::World::OnMouseMoved()
 
             // clear vector
             std::vector<std::unique_ptr<Tile>>().swap(m_tilesToAdd);
-            MDCII_ASSERT(m_tilesToAdd.empty(), "[World::OnMouseMoved()] Invalid number of created tiles.")
+            MDCII_ASSERT(m_tilesToAdd.empty(), "[World::OnMouseMoved()] Invalid number of tiles to add.")
         }
 
         ///////////////
