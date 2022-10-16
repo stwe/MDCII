@@ -19,6 +19,7 @@
 #pragma once
 
 #include "WorldLayer.h"
+#include "data/Buildings.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -190,6 +191,13 @@ namespace mdcii::world
          *
          * @param t_layerType The type of the layer.
          */
+        [[nodiscard]] const WorldLayer& GetLayer(WorldLayerType t_layerType) const;
+
+        /**
+         * Get WorldLayer object by type.
+         *
+         * @param t_layerType The type of the layer.
+         */
         WorldLayer& GetLayer(WorldLayerType t_layerType);
 
         //-------------------------------------------------
@@ -310,14 +318,9 @@ namespace mdcii::world
         int m_currentTileIndex{ -1 };
 
         /**
-         * The flag is set when a building is created.
+         * Tiles used to create a building.
          */
-        bool m_buildingCreated{ false };
-
-        /**
-         * A Tile used to create a building.
-         */
-        std::unique_ptr<Tile> m_tileToAdd;
+        std::vector<std::unique_ptr<Tile>> m_tilesToAdd;
 
         /**
          * ImGui menus for the game.
@@ -382,5 +385,42 @@ namespace mdcii::world
          * @param t_y The y position for Deg0 in the world.
          */
         void PreCalcTile(Tile& t_tile, int t_x, int t_y) const;
+
+        //-------------------------------------------------
+        // Add building
+        //-------------------------------------------------
+
+        /**
+         * Checks if the building is outside the world.
+         *
+         * @param t_mapX The start x position of the building.
+         * @param t_mapY The start y position of the building.
+         * @param t_building The Building object to check.
+         *
+         * @return True or false depending on whether the building is outside.
+         */
+        [[nodiscard]] bool IsBuildingOutsideTheWorld(int t_x, int t_y, const data::Building& t_building) const;
+
+        /**
+         * Checks whether there is already a building at the given position in the Building Layer.
+         *
+         * @param t_mapX The start x position of the building.
+         * @param t_mapY The start y position of the building.
+         * @param t_building The Building object to check.
+         *
+         * @return True or false, depending on whether a building already exists.
+         */
+        [[nodiscard]] bool IsAlreadyBuildingOnPosition(int t_x, int t_y, const data::Building& t_building) const;
+
+        /**
+         * Checks if the building is over the coast.
+         *
+         * @param t_mapX The start x position of the building.
+         * @param t_mapY The start y position of the building.
+         * @param t_building The Building object to check.
+         *
+         * @return True or false, depending on whether the building is over the coast.
+         */
+        [[nodiscard]] bool IsBuildingOnWaterOrCoast(int t_x, int t_y, const data::Building& t_building) const;
     };
 }

@@ -54,6 +54,14 @@ mdcii::world::World::~World() noexcept
 // Getter
 //-------------------------------------------------
 
+const mdcii::world::WorldLayer& mdcii::world::World::GetLayer(WorldLayerType t_layerType) const
+{
+    const auto& layer{ *layers.at(magic_enum::enum_integer(t_layerType)) };
+    MDCII_ASSERT(layer.layerType == t_layerType, "[World::GetLayer()] Invalid layer type.")
+
+    return layer;
+}
+
 mdcii::world::WorldLayer& mdcii::world::World::GetLayer(const WorldLayerType t_layerType)
 {
     auto& layer{ *layers.at(magic_enum::enum_integer(t_layerType)) };
@@ -259,32 +267,44 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
         m_currentTileIndex = GetMapIndex(mousePosition.x, mousePosition.y);
     }
 
-    if (IsPositionInWorld(mousePosition.x, mousePosition.y) && currentAction == Action::BUILD && m_tileToAdd)
+    /*
+    if (IsPositionInWorld(mousePosition.x, mousePosition.y) && currentAction == Action::BUILD && !m_tilesToAdd.empty())
     {
         auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
-        const auto id0{ m_tileToAdd->instanceIds.at(magic_enum::enum_integer(map::Rotation::DEG0)) };
 
-        // reset
-        MDCII_ASSERT(buildingsLayer.tiles.at(id0), "[World::OnLeftMouseButtonPressed()] Null pointer.")
-        buildingsLayer.tiles.at(id0).reset();
-        magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
-            const auto r{ magic_enum::enum_integer(t_rotation) };
-            MDCII_ASSERT(buildingsLayer.sortedTiles.at(r).at(m_tileToAdd->instanceIds.at(r)), "[World::OnLeftMouseButtonPressed()] Null pointer.")
-            buildingsLayer.sortedTiles.at(r).at(m_tileToAdd->instanceIds.at(r)).reset();
-        });
+        for (auto& tile : m_tilesToAdd)
+        {
+            const auto id0{ tile->instanceIds.at(magic_enum::enum_integer(map::Rotation::DEG0)) };
 
-        // replace
-        MDCII_ASSERT(!buildingsLayer.tiles.at(id0), "[World::OnLeftMouseButtonPressed()] Invalid pointer.")
-        buildingsLayer.tiles.at(id0) = std::move(m_tileToAdd);
-        magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
-            const auto r{ magic_enum::enum_integer(t_rotation) };
-            MDCII_ASSERT(!buildingsLayer.sortedTiles.at(r).at(buildingsLayer.tiles.at(id0)->instanceIds.at(r)), "[World::OnLeftMouseButtonPressed()] Invalid pointer.")
-            buildingsLayer.sortedTiles.at(r).at(buildingsLayer.tiles.at(id0)->instanceIds.at(r)) = buildingsLayer.tiles.at(id0);
-        });
+            // reset
+            MDCII_ASSERT(buildingsLayer.tiles.at(id0), "[World::OnLeftMouseButtonPressed()] Null pointer.")
+            buildingsLayer.tiles.at(id0).reset();
+            magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+                const auto r{ magic_enum::enum_integer(t_rotation) };
+                MDCII_ASSERT(buildingsLayer.sortedTiles.at(r).at(tile->instanceIds.at(r)), "[World::OnLeftMouseButtonPressed()] Null pointer.")
+                buildingsLayer.sortedTiles.at(r).at(tile->instanceIds.at(r)).reset();
+            });
+
+            // replace
+            MDCII_ASSERT(!buildingsLayer.tiles.at(id0), "[World::OnLeftMouseButtonPressed()] Invalid pointer.")
+            buildingsLayer.tiles.at(id0) = std::move(tile);
+            magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+                const auto r{ magic_enum::enum_integer(t_rotation) };
+                MDCII_ASSERT(!buildingsLayer.sortedTiles.at(r).at(buildingsLayer.tiles.at(id0)->instanceIds.at(r)), "[World::OnLeftMouseButtonPressed()] Invalid pointer.")
+                buildingsLayer.sortedTiles.at(r).at(buildingsLayer.tiles.at(id0)->instanceIds.at(r)) = buildingsLayer.tiles.at(id0);
+            });
+        }
+
+        std::vector<std::unique_ptr<Tile>>().swap(m_tilesToAdd);
     }
+    */
 
-    m_buildingCreated = false;
     m_worldGui->selectedWorkshop.Reset();
+    if (!m_tilesToAdd.empty())
+    {
+        Log::MDCII_LOG_DEBUG("[World::OnLeftMouseButtonPressed()] Delete building.");
+        std::vector<std::unique_ptr<Tile>>().swap(m_tilesToAdd);
+    }
 }
 
 void mdcii::world::World::OnMouseMoved()
@@ -295,119 +315,154 @@ void mdcii::world::World::OnMouseMoved()
     // condition to build: BUILD action + workshop selected + current mouse in the world?
     if (currentAction == Action::BUILD && m_worldGui->selectedWorkshop.HasBuilding() && IsPositionInWorld(currentMousePosition.x, currentMousePosition.y))
     {
+        // get building
+        const auto& building{ context->originalResourcesManager->GetBuildingById(m_worldGui->selectedWorkshop.buildingId) };
+
+        // only add if the entire building fits on the world
+        if (IsBuildingOutsideTheWorld(currentMousePosition.x, currentMousePosition.y, building))
+        {
+            Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] The building is outside the world on x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
+            return;
+        }
+
+        // only add it if there is no other building on the position
+        if (IsAlreadyBuildingOnPosition(currentMousePosition.x, currentMousePosition.y, building))
+        {
+            Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] There is an other building on the position x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
+            return;
+        }
+
+        // don't build on the coast
+        if (IsBuildingOnWaterOrCoast(currentMousePosition.x, currentMousePosition.y, building))
+        {
+            Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] It cannot be built on the coast on position x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
+            return;
+        }
+
         // get layers
         auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
         const auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
         const auto& mixedLayer{ GetLayer(WorldLayerType::TERRAIN_AND_BUILDINGS) };
 
-        // skip if there is already a building at the location in the Buildings Layer
-        if (buildingsLayer.tiles.at(GetMapIndex(currentMousePosition.x, currentMousePosition.y))->HasBuilding())
-        {
-            Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] Skip build on position x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
-            return;
-        }
-
         ///////////////
         // Delete
         ///////////////
 
-        // delete the created building from the mixed Layer (overwrite with data from the Terrain Layer)
-        if (m_buildingCreated)
+        if (!m_tilesToAdd.empty())
         {
-            magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-                const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
-                magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
-                    const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+            Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] Delete building with Id {} from Gpu.", m_worldGui->selectedWorkshop.buildingId);
 
-                    const auto& tm{ terrainLayer.modelMatrices.at(zoomInt).at(rotationInt) };
-                    const auto& ti{ terrainLayer.textureAtlasNumbers.at(zoomInt) };
-                    const auto& to{ terrainLayer.offsets.at(zoomInt).at(rotationInt) };
-                    const auto& th{ terrainLayer.heights.at(zoomInt) };
+            for (auto& tile : m_tilesToAdd)
+            {
+                magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
+                    const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
+                    magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+                        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
-                    // delete: update Gpu data BUILDINGS
-                    worldRenderer->UpdateGpuData(
-                        m_tileToAdd->instanceIds.at(rotationInt),
-                        WorldLayerType::BUILDINGS,
-                        t_zoom, t_rotation,
-                        glm::mat4(),
-                        -1,
-                        glm::vec2(-1.0f),
-                        -1.0f
-                    );
+                        const auto& tm{ terrainLayer.modelMatrices.at(zoomInt).at(rotationInt) };
+                        const auto& ti{ terrainLayer.textureAtlasNumbers.at(zoomInt) };
+                        const auto& to{ terrainLayer.offsets.at(zoomInt).at(rotationInt) };
+                        const auto& th{ terrainLayer.heights.at(zoomInt) };
 
-                    // delete: update Gpu data TERRAIN_AND_BUILDINGS
-                    worldRenderer->UpdateGpuData(
-                        m_tileToAdd->instanceIds.at(rotationInt),
-                        WorldLayerType::TERRAIN_AND_BUILDINGS,
-                        t_zoom, t_rotation,
-                        tm.at(m_tileToAdd->instanceIds.at(rotationInt)),
-                        ti.at(m_tileToAdd->instanceIds.at(rotationInt))[rotationInt],
-                        to.at(m_tileToAdd->instanceIds.at(rotationInt)),
-                        th.at(m_tileToAdd->instanceIds.at(rotationInt))[rotationInt]
-                    );
+                        // delete: update Gpu data BUILDINGS
+                        worldRenderer->UpdateGpuData(
+                            tile->instanceIds.at(rotationInt),
+                            WorldLayerType::BUILDINGS,
+                            t_zoom, t_rotation,
+                            glm::mat4(),
+                            -1,
+                            glm::vec2(-1.0f),
+                            -1.0f
+                        );
+
+                        // delete: update Gpu data TERRAIN_AND_BUILDINGS
+                        worldRenderer->UpdateGpuData(
+                            tile->instanceIds.at(rotationInt),
+                            WorldLayerType::TERRAIN_AND_BUILDINGS,
+                            t_zoom, t_rotation,
+                            tm.at(tile->instanceIds.at(rotationInt)),
+                            ti.at(tile->instanceIds.at(rotationInt))[rotationInt],
+                            to.at(tile->instanceIds.at(rotationInt)),
+                            th.at(tile->instanceIds.at(rotationInt))[rotationInt]
+                        );
+                    });
                 });
-            });
+            }
 
-            m_buildingCreated = false;
+            // clear vector
+            std::vector<std::unique_ptr<Tile>>().swap(m_tilesToAdd);
+            MDCII_ASSERT(m_tilesToAdd.empty(), "[World::OnMouseMoved()] Invalid number of created tiles.")
         }
 
         ///////////////
         // Create
         ///////////////
 
-        // create Tile object (Galgen 841 zum testen)
-        if (!m_tileToAdd)
+        if (m_tilesToAdd.empty())
         {
-            Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] Create Tile to add.");
-            m_tileToAdd = std::make_unique<Tile>();
+            Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] Add building with Id {} to Gpu.", m_worldGui->selectedWorkshop.buildingId);
+
+            for (auto y{ 0 }; y < building.size.h; ++y)
+            {
+                for (auto x{ 0 }; x < building.size.w; ++x)
+                {
+                    // create a Tile pointer for each part of the building
+                    auto tile{ std::make_unique<Tile>() };
+                    tile->buildingId = m_worldGui->selectedWorkshop.buildingId;
+                    tile->rotation = m_worldGui->selectedWorkshop.rotation;
+                    tile->x = x;
+                    tile->y = y;
+
+                    // pre-calc and set screen positions / indices / gfx
+                    PreCalcTile(*tile, currentMousePosition.x + x, currentMousePosition.y + y);
+
+                    // copy the instances Ids from Terrain Layer Tile at the same position
+                    magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+                        const auto r{ magic_enum::enum_integer(t_rotation) };
+                        tile->instanceIds.at(r) = terrainLayer.instanceIds.at(glm::ivec3(currentMousePosition.x + x, currentMousePosition.y + y, r)) ;
+                    });
+
+                    // create Gpu data for each zoom and each rotation
+                    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
+                        magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+                            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+
+                            // create new Gpu data
+                            const auto modelMatrix{ mixedLayer.GetModelMatrix(*tile, t_zoom, t_rotation) };
+                            const auto atlasNr{ mixedLayer.GetTextureAtlasNr(*tile, t_zoom, t_rotation) };
+                            const auto texOffset{ mixedLayer.GetTextureOffset(*tile, t_zoom, t_rotation) };
+                            const auto texHeight{ mixedLayer.GetTextureHeight(*tile, t_zoom, t_rotation) };
+
+                            // add: update Gpu data BUILDINGS
+                            worldRenderer->UpdateGpuData(
+                                tile->instanceIds.at(rotationInt),
+                                WorldLayerType::BUILDINGS,
+                                t_zoom, t_rotation,
+                                modelMatrix,
+                                atlasNr,
+                                texOffset,
+                                texHeight
+                            );
+
+                            // add: update Gpu data TERRAIN_AND_BUILDINGS
+                            worldRenderer->UpdateGpuData(
+                                tile->instanceIds.at(rotationInt),
+                                WorldLayerType::TERRAIN_AND_BUILDINGS,
+                                t_zoom, t_rotation,
+                                modelMatrix,
+                                atlasNr,
+                                texOffset,
+                                texHeight
+                            );
+                        });
+                    });
+
+                    m_tilesToAdd.emplace_back(std::move(tile));
+                }
+            }
+
+            MDCII_ASSERT(m_tilesToAdd.size() == building.size.w * building.size.h, "[World::OnMouseMoved()] Invalid number of created tiles.")
         }
-
-        m_tileToAdd->buildingId = 841; // m_worldGui->selectedWorkshop.buildingId;
-        m_tileToAdd->rotation = m_worldGui->selectedWorkshop.rotation;
-        PreCalcTile(*m_tileToAdd, currentMousePosition.x, currentMousePosition.y);
-
-        // store instance Ids to the new Tile object
-        magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
-            const auto r{ magic_enum::enum_integer(t_rotation) };
-            m_tileToAdd->instanceIds.at(r) = terrainLayer.instanceIds.at(glm::ivec3(currentMousePosition.x, currentMousePosition.y, r)) ;
-        });
-
-        magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-            magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
-                const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-
-                // create new Gpu data
-                auto modelMatrix{ mixedLayer.GetModelMatrix(*m_tileToAdd, t_zoom, t_rotation) };
-                auto atlasNr{ mixedLayer.GetTextureAtlasNr(*m_tileToAdd, t_zoom, t_rotation) };
-                auto texOffset{ mixedLayer.GetTextureOffset(*m_tileToAdd, t_zoom, t_rotation) };
-                auto texHeight{ mixedLayer.GetTextureHeight(*m_tileToAdd, t_zoom, t_rotation) };
-
-                // add: update Gpu data BUILDINGS
-                worldRenderer->UpdateGpuData(
-                    m_tileToAdd->instanceIds.at(rotationInt),
-                    WorldLayerType::BUILDINGS,
-                    t_zoom, t_rotation,
-                    modelMatrix,
-                    atlasNr,
-                    texOffset,
-                    texHeight
-                );
-
-                // add: update Gpu data TERRAIN_AND_BUILDINGS
-                worldRenderer->UpdateGpuData(
-                    m_tileToAdd->instanceIds.at(rotationInt),
-                    WorldLayerType::TERRAIN_AND_BUILDINGS,
-                    t_zoom, t_rotation,
-                    modelMatrix,
-                    atlasNr,
-                    texOffset,
-                    texHeight
-                );
-
-                // set build flag
-                m_buildingCreated = true;
-            });
-        });
     }
 }
 
@@ -672,4 +727,58 @@ void mdcii::world::World::PreCalcTile(Tile& t_tile, const int t_x, const int t_y
             t_tile.gfxs.push_back(gfx0 + (3 * building.rotate));
         }
     }
+}
+
+//-------------------------------------------------
+// Add building
+//-------------------------------------------------
+
+bool mdcii::world::World::IsBuildingOutsideTheWorld(const int t_x, const int t_y, const data::Building& t_building) const
+{
+    for (auto y{ 0 }; y < t_building.size.h; ++y)
+    {
+        for (auto x{ 0 }; x < t_building.size.w; ++x)
+        {
+            if (!IsPositionInWorld(t_x + x, t_y + y))
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool mdcii::world::World::IsAlreadyBuildingOnPosition(const int t_x, const int t_y, const data::Building& t_building) const
+{
+    for (auto y{ 0 }; y < t_building.size.h; ++y)
+    {
+        for (auto x{ 0 }; x < t_building.size.w; ++x)
+        {
+            const auto& tile{ GetLayer(WorldLayerType::BUILDINGS).GetTile(t_x + x, t_y + y) };
+            if (tile.HasBuilding())
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool mdcii::world::World::IsBuildingOnWaterOrCoast(const int t_x, const int t_y, const data::Building& t_building) const
+{
+    for (auto y{ 0 }; y < t_building.size.h; ++y)
+    {
+        for (auto x{ 0 }; x < t_building.size.w; ++x)
+        {
+            const auto& terrainTile{ GetLayer(WorldLayerType::TERRAIN).GetTile(t_x + x, t_y + y) };
+            if (context->originalResourcesManager->GetBuildingById(terrainTile.buildingId).posoffs == 0)
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }

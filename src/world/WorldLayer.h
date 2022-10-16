@@ -249,6 +249,16 @@ namespace mdcii::world
          */
         [[nodiscard]] const Model_Matrices_For_Each_Rotation& GetModelMatrices(map::Zoom t_zoom) const;
 
+        /**
+         * Returns a Tile object.
+         *
+         * @param t_x The DEG0 x position.
+         * @param t_y The DEG0 y position.
+         *
+         * @return The Tile object.
+         */
+        [[nodiscard]] const Tile& GetTile(int t_x, int t_y) const;
+
         //-------------------------------------------------
         // Setter
         //-------------------------------------------------

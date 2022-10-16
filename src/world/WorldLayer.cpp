@@ -97,6 +97,11 @@ const mdcii::world::WorldLayer::Model_Matrices_For_Each_Rotation& mdcii::world::
     return modelMatrices.at(magic_enum::enum_integer(t_zoom));
 }
 
+const mdcii::world::Tile& mdcii::world::WorldLayer::GetTile(const int t_x, const int t_y) const
+{
+    return *tiles.at(m_world->GetMapIndex(t_x, t_y));
+}
+
 //-------------------------------------------------
 // Setter
 //-------------------------------------------------
