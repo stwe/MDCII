@@ -19,7 +19,7 @@
 #pragma once
 
 #include <string>
-#include "map/Rotation.h"
+#include "world/Rotation.h"
 
 namespace mdcii::event
 {
@@ -41,7 +41,7 @@ namespace mdcii::event
         /**
          * The bauGfx rotation.
          */
-        map::Rotation rotation{ map::Rotation::DEG0 };
+        world::Rotation rotation{ world::Rotation::DEG0 };
 
         /**
          * The translated label.

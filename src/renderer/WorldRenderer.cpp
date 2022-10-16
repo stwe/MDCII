@@ -19,7 +19,7 @@
 #include "WorldRenderer.h"
 #include "RenderUtils.h"
 #include "world/World.h"
-#include "map/TileAtlas.h"
+#include "world/TileAtlas.h"
 #include "ogl/OpenGL.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/TextureUtils.h"
@@ -50,8 +50,8 @@ mdcii::renderer::WorldRenderer::~WorldRenderer() noexcept
 
 void mdcii::renderer::WorldRenderer::Render(
     const world::WorldLayerType t_layerType,
-    const map::Zoom t_zoom,
-    const map::Rotation t_rotation,
+    const world::Zoom t_zoom,
+    const world::Rotation t_rotation,
     const ogl::Window& t_window,
     const camera::Camera& t_camera
 ) const
@@ -69,8 +69,8 @@ void mdcii::renderer::WorldRenderer::Render(
     shaderProgram.SetUniform("selected", false);
     shaderProgram.SetUniform("rotation", rotationInt);
 
-    const auto maxY{ map::TileAtlas::HEIGHTS.at(zoomInt) };
-    const auto nrOfRows{ static_cast<float>(map::TileAtlas::ROWS.at(zoomInt)) };
+    const auto maxY{ world::TileAtlas::HEIGHTS.at(zoomInt) };
+    const auto nrOfRows{ static_cast<float>(world::TileAtlas::ROWS.at(zoomInt)) };
 
     shaderProgram.SetUniform("maxY", maxY);
     shaderProgram.SetUniform("nrOfRows", nrOfRows);
@@ -108,8 +108,8 @@ void mdcii::renderer::WorldRenderer::Render(
 }
 
 void mdcii::renderer::WorldRenderer::Render(
-    const map::Zoom t_zoom,
-    const map::Rotation t_rotation,
+    const world::Zoom t_zoom,
+    const world::Rotation t_rotation,
     const ogl::Window& t_window,
     const camera::Camera& t_camera
 ) const
@@ -149,8 +149,8 @@ void mdcii::renderer::WorldRenderer::Render(
 void mdcii::renderer::WorldRenderer::UpdateGpuData(
     const int32_t t_instance,
     const world::WorldLayerType t_layerType,
-    const map::Zoom t_zoom,
-    const map::Rotation t_rotation,
+    const world::Zoom t_zoom,
+    const world::Rotation t_rotation,
     const glm::mat4& t_modelMatrix,
     const int t_atlasNr,
     const glm::vec2& t_offset,
@@ -209,14 +209,14 @@ void mdcii::renderer::WorldRenderer::Init()
     Log::MDCII_LOG_DEBUG("[WorldRenderer::Init()] Starts initializing WorldRenderer...");
 
     // create and store the filenames to show an isometric grid for each zoom
-    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<map::Zoom>(t_zoom))) };
+    magic_enum::enum_for_each<world::Zoom>([&](const world::Zoom t_zoom) {
+        const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<world::Zoom>(t_zoom))) };
         const auto fileName{ "textures/" + zoomStr + "/red_" + zoomStr + ".png" };
         m_gridFileNames.at(magic_enum::enum_integer(t_zoom)) = fileName;
     });
 
     // create Vaos
-    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
+    magic_enum::enum_for_each<world::Zoom>([&](const world::Zoom t_zoom) {
         const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
 
         m_vaos.at(magic_enum::enum_integer(world::WorldLayerType::TERRAIN)).at(zoomInt) = RenderUtils::CreateRectangleVao();
@@ -241,7 +241,7 @@ void mdcii::renderer::WorldRenderer::Init()
 // Helper
 //-------------------------------------------------
 
-void mdcii::renderer::WorldRenderer::AddModelMatrices(const map::Zoom t_zoom, const world::WorldLayerType t_layerType)
+void mdcii::renderer::WorldRenderer::AddModelMatrices(const world::Zoom t_zoom, const world::WorldLayerType t_layerType)
 {
     Log::MDCII_LOG_DEBUG(
         "[WorldRenderer::AddModelMatrices()] Add model matrices to the Gpu for layer {} and zoom {}.",
@@ -261,7 +261,7 @@ void mdcii::renderer::WorldRenderer::AddModelMatrices(const map::Zoom t_zoom, co
 
     // store model matrices in [0]
     std::vector<std::unique_ptr<ogl::buffer::Ssbo>> ssbos;
-    magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+    magic_enum::enum_for_each<world::Rotation>([&](const world::Rotation t_rotation) {
         const auto& modelMatrices{ layer.GetModelMatrices(t_zoom).at(magic_enum::enum_integer(t_rotation)) };
 
         auto ssbo{ std::make_unique<ogl::buffer::Ssbo>() };
@@ -276,7 +276,7 @@ void mdcii::renderer::WorldRenderer::AddModelMatrices(const map::Zoom t_zoom, co
     ogl::buffer::Vao::Unbind();
 }
 
-void mdcii::renderer::WorldRenderer::AddTextureInfo(const map::Zoom t_zoom, const world::WorldLayerType t_layerType) const
+void mdcii::renderer::WorldRenderer::AddTextureInfo(const world::Zoom t_zoom, const world::WorldLayerType t_layerType) const
 {
     Log::MDCII_LOG_DEBUG(
         "[WorldRenderer::AddTextureInfo()] Add texture info to the Gpu for layer {} and zoom {}.",
@@ -296,7 +296,7 @@ void mdcii::renderer::WorldRenderer::AddTextureInfo(const map::Zoom t_zoom, cons
 
     // store texture offsets in [1]
     std::vector<std::unique_ptr<ogl::buffer::Ssbo>> offsetsSsbos;
-    magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+    magic_enum::enum_for_each<world::Rotation>([&](const world::Rotation t_rotation) {
         const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
         auto offsetSsbo{ std::make_unique<ogl::buffer::Ssbo>() };

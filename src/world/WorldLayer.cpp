@@ -16,15 +16,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 #include "WorldLayer.h"
 #include "World.h"
+#include "TileAtlas.h"
 #include "MdciiAssert.h"
 #include "state/State.h"
 #include "file/OriginalResourcesManager.h"
 #include "renderer/RenderUtils.h"
-#include "map/TileAtlas.h"
 
 //-------------------------------------------------
 // Json
@@ -52,7 +51,7 @@ void mdcii::world::from_json(const nlohmann::json& t_json, Tile& t_tile)
     {
         auto r{ 0 };
         t_json.at("rotation").get_to(r);
-        t_tile.rotation = map::int_to_rotation(r);
+        t_tile.rotation = int_to_rotation(r);
     }
 
     if (t_json.count("x"))
@@ -92,7 +91,7 @@ mdcii::world::WorldLayer::~WorldLayer() noexcept
 // Getter
 //-------------------------------------------------
 
-const mdcii::world::WorldLayer::Model_Matrices_For_Each_Rotation& mdcii::world::WorldLayer::GetModelMatrices(const map::Zoom t_zoom) const
+const mdcii::world::WorldLayer::Model_Matrices_For_Each_Rotation& mdcii::world::WorldLayer::GetModelMatrices(const Zoom t_zoom) const
 {
     return modelMatrices.at(magic_enum::enum_integer(t_zoom));
 }
@@ -140,7 +139,7 @@ void mdcii::world::WorldLayer::PrepareRendering()
     CreateTextureInfo();
 }
 
-glm::mat4 mdcii::world::WorldLayer::GetModelMatrix(const Tile& t_tile, const map::Zoom t_zoom, const map::Rotation t_rotation) const
+glm::mat4 mdcii::world::WorldLayer::GetModelMatrix(const Tile& t_tile, const Zoom t_zoom, const Rotation t_rotation) const
 {
     // to definitely create a position
     int32_t gfx{ GRASS_GFX };
@@ -174,22 +173,22 @@ glm::mat4 mdcii::world::WorldLayer::GetModelMatrix(const Tile& t_tile, const map
     return renderer::RenderUtils::GetModelMatrix(screenPosition, { w, h });
 }
 
-int mdcii::world::WorldLayer::GetTextureAtlasNr(const Tile& t_tile, const map::Zoom t_zoom, const map::Rotation t_rotation) const
+int mdcii::world::WorldLayer::GetTextureAtlasNr(const Tile& t_tile, const Zoom t_zoom, const Rotation t_rotation) const
 {
-    const auto atlasRows{ map::TileAtlas::ROWS.at(magic_enum::enum_integer(t_zoom)) };
+    const auto atlasRows{ TileAtlas::ROWS.at(magic_enum::enum_integer(t_zoom)) };
     return t_tile.HasBuilding() ? CalcGfx(t_tile, t_rotation) / (atlasRows * atlasRows) : -1;
 }
 
-glm::vec2 mdcii::world::WorldLayer::GetTextureOffset(const Tile& t_tile, const map::Zoom t_zoom, const map::Rotation t_rotation) const
+glm::vec2 mdcii::world::WorldLayer::GetTextureOffset(const Tile& t_tile, const Zoom t_zoom, const Rotation t_rotation) const
 {
-    const auto atlasRows{ map::TileAtlas::ROWS.at(magic_enum::enum_integer(t_zoom)) };
+    const auto atlasRows{ TileAtlas::ROWS.at(magic_enum::enum_integer(t_zoom)) };
     const auto gfx{ CalcGfx(t_tile, t_rotation) };
     const auto index{ gfx % (atlasRows * atlasRows) };
 
-    return map::TileAtlas::GetTextureOffset(index, atlasRows);
+    return TileAtlas::GetTextureOffset(index, atlasRows);
 }
 
-float mdcii::world::WorldLayer::GetTextureHeight(const Tile& t_tile, const map::Zoom t_zoom, const map::Rotation t_rotation) const
+float mdcii::world::WorldLayer::GetTextureHeight(const Tile& t_tile, const Zoom t_zoom, const Rotation t_rotation) const
 {
     const auto gfx{ CalcGfx(t_tile, t_rotation) };
     const auto& stadtfldBshTextures{ m_world->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
@@ -205,7 +204,7 @@ void mdcii::world::WorldLayer::SortTiles()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::SortTiles()] Sorting tiles by index.");
 
-    magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+    magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
         // enum to int
         const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
@@ -219,18 +218,18 @@ void mdcii::world::WorldLayer::SortTiles()
     });
 
     // revert tiles sorting = sortedTiles DEG0
-    tiles = sortedTiles.at(magic_enum::enum_integer(map::Rotation::DEG0));
+    tiles = sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0));
 }
 
 void mdcii::world::WorldLayer::CreateModelMatrices()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateModelMatrices()] Create model matrices.");
 
-    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
         Model_Matrices_For_Each_Rotation matricesForRotations;
 
         // for each rotation in the zoom create the model matrices
-        magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+        magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
             const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
             Model_Matrices matrices;
             int32_t instance{ 0 };
@@ -249,7 +248,7 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
     });
 
     // create a hashmap to find the instance ID for each rotated position
-    magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+    magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
         const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
         for (auto& tile : sortedTiles.at(rotationInt))
         {
@@ -265,13 +264,13 @@ void mdcii::world::WorldLayer::CreateTextureInfo()
 
     MDCII_ASSERT(instancesToRender >= 0, "[WorldLayer::CreateTextureInfo()] Invalid number of instances to render.")
 
-    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
         Texture_Atlas_Numbers texAtlasNrs(instancesToRender, glm::ivec4(-1));
         Texture_Offsets_For_Each_Rotation texOffsetsForRotations;
         Texture_Heights texHeights(instancesToRender, glm::vec4(-1.0f));
 
         // for each rotation in the zoom
-        magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+        magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
             const auto rotation{ magic_enum::enum_integer(t_rotation) };
             Texture_Offsets textureOffsets(instancesToRender, glm::vec2(0.0f));
 
@@ -298,7 +297,7 @@ void mdcii::world::WorldLayer::CreateTextureInfo()
     });
 }
 
-int32_t mdcii::world::WorldLayer::CalcGfx(const Tile& t_tile, const map::Rotation t_rotation) const
+int32_t mdcii::world::WorldLayer::CalcGfx(const Tile& t_tile, const Rotation t_rotation) const
 {
     const auto& building{ m_world->context->originalResourcesManager->GetBuildingById(t_tile.buildingId) };
     auto buildingRotation{ t_tile.rotation };
@@ -313,30 +312,30 @@ int32_t mdcii::world::WorldLayer::CalcGfx(const Tile& t_tile, const map::Rotatio
         // default: orientation 0
         auto rp{ glm::ivec2(t_tile.x, t_tile.y) };
 
-        if (t_tile.rotation == map::Rotation::DEG270)
+        if (t_tile.rotation == Rotation::DEG270)
         {
             rp = rotate_position(
                 t_tile.x, t_tile.y,
                 building.size.w, building.size.h,
-                map::Rotation::DEG90
+                Rotation::DEG90
             );
         }
 
-        if (t_tile.rotation == map::Rotation::DEG180)
+        if (t_tile.rotation == Rotation::DEG180)
         {
             rp = rotate_position(
                 t_tile.x, t_tile.y,
                 building.size.w, building.size.h,
-                map::Rotation::DEG180
+                Rotation::DEG180
             );
         }
 
-        if (t_tile.rotation == map::Rotation::DEG90)
+        if (t_tile.rotation == Rotation::DEG90)
         {
             rp = rotate_position(
                 t_tile.x, t_tile.y,
                 building.size.w, building.size.h,
-                map::Rotation::DEG270
+                Rotation::DEG270
             );
         }
 

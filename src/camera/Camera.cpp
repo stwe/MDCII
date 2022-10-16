@@ -22,7 +22,7 @@
 #include "Log.h"
 #include "event/EventManager.h"
 #include "eventpp/utilities/argumentadapter.h"
-#include "map/Zoom.h"
+#include "world/Zoom.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -39,7 +39,7 @@ mdcii::camera::Camera::Camera()
 
     AddListeners();
 
-    zoom = map::Zoom::GFX;
+    zoom = world::Zoom::GFX;
 }
 
 mdcii::camera::Camera::~Camera() noexcept

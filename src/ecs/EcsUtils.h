@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Game.h"
-#include "map/MapLayer.h"
 
 //-------------------------------------------------
 // EcsUtils
@@ -91,22 +90,6 @@ namespace mdcii::ecs
         static std::string EntityCounterLabel(const std::string& t_label, entt::exclude_t<Exclude...> t_exclude = {})
         {
             return t_label + " (" + std::to_string(CountEntities<Component...>(t_exclude)).append(")");
-        }
-
-        /**
-         * Sort entities by a given component.
-         *
-         * @tparam Component The component type wich must have a mapTile member.
-         *
-         * @param t_rotation For this rotation is sorted.
-         */
-        template<typename Component>
-        static void SortEntities(const map::Rotation t_rotation)
-        {
-            const auto i{ magic_enum::enum_integer(t_rotation) };
-            Game::ecs.sort<Component>([i](const Component& t_lhs, const Component& t_rhs) {
-                return t_lhs.mapTile.indices[i] < t_rhs.mapTile.indices[i];
-            });
         }
 
     protected:

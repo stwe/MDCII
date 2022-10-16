@@ -21,7 +21,7 @@
 #include "Game.h"
 #include "MdciiAssert.h"
 #include "MdciiException.h"
-#include "map/Zoom.h"
+#include "world/Zoom.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -44,12 +44,12 @@ mdcii::file::OriginalResourcesManager::~OriginalResourcesManager() noexcept
 // Getter
 //-------------------------------------------------
 
-const std::vector<std::unique_ptr<mdcii::file::BshTexture>>& mdcii::file::OriginalResourcesManager::GetStadtfldBshByZoom(const map::Zoom t_zoom) const
+const std::vector<std::unique_ptr<mdcii::file::BshTexture>>& mdcii::file::OriginalResourcesManager::GetStadtfldBshByZoom(const world::Zoom t_zoom) const
 {
     return stadtfldBshFiles.at(t_zoom)->bshTextures;
 }
 
-const std::vector<std::unique_ptr<mdcii::file::BshTexture>>& mdcii::file::OriginalResourcesManager::GetBauhausBshByZoom(const map::Zoom t_zoom) const
+const std::vector<std::unique_ptr<mdcii::file::BshTexture>>& mdcii::file::OriginalResourcesManager::GetBauhausBshByZoom(const world::Zoom t_zoom) const
 {
     return bauhausBshFiles.at(t_zoom)->bshTextures;
 }
@@ -82,7 +82,7 @@ void mdcii::file::OriginalResourcesManager::GetPathsFromOriginal()
                     // BSH files
                     if (extension == ".bsh")
                     {
-                        const auto zoomOptional{ magic_enum::enum_cast<map::Zoom>(to_upper_case(entry.path().filename().string())) };
+                        const auto zoomOptional{ magic_enum::enum_cast<world::Zoom>(to_upper_case(entry.path().filename().string())) };
                         if (zoomOptional.has_value())
                         {
                             if (to_upper_case(f.path().filename().string()) == "STADTFLD.BSH")
@@ -97,18 +97,18 @@ void mdcii::file::OriginalResourcesManager::GetPathsFromOriginal()
                                 // Nina & Hist Ed.
                                 if (to_upper_case(f.path().filename().string()) == "BAUHAUS.BSH")
                                 {
-                                    m_bauhausBshFilesPaths.emplace(map::Zoom::GFX, f.path().string());
+                                    m_bauhausBshFilesPaths.emplace(world::Zoom::GFX, f.path().string());
                                 }
 
                                 // Nina only
                                 if (to_upper_case(f.path().filename().string()) == "BAUHAUS8.BSH")
                                 {
-                                    m_bauhausBshFilesPaths.emplace(map::Zoom::MGFX, f.path().string());
+                                    m_bauhausBshFilesPaths.emplace(world::Zoom::MGFX, f.path().string());
                                 }
 
                                 if (to_upper_case(f.path().filename().string()) == "BAUHAUS6.BSH")
                                 {
-                                    m_bauhausBshFilesPaths.emplace(map::Zoom::SGFX, f.path().string());
+                                    m_bauhausBshFilesPaths.emplace(world::Zoom::SGFX, f.path().string());
                                 }
                             }
                         }
@@ -155,7 +155,7 @@ void mdcii::file::OriginalResourcesManager::LoadFiles()
     m_paletteFile->ReadDataFromChunks();
 
     // stadtfld bsh graphics
-    if (m_stadtfldBshFilesPaths.size() != magic_enum::enum_count<map::Zoom>())
+    if (m_stadtfldBshFilesPaths.size() != magic_enum::enum_count<world::Zoom>())
     {
         throw MDCII_EXCEPTION("[OriginalResourcesManager::LoadFiles()] Error while reading stadtfld bsh files paths.");
     }

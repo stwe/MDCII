@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "map/Rotation.h"
-#include "map/Zoom.h"
+#include "Rotation.h"
+#include "Zoom.h"
 
 //-------------------------------------------------
 // Tile
@@ -40,7 +40,7 @@ namespace mdcii::world
         /**
          * The rotation of the building.
          */
-        map::Rotation rotation{ map::Rotation::DEG0 };
+        Rotation rotation{ Rotation::DEG0 };
 
         /**
          * Example: Bakery
@@ -78,17 +78,17 @@ namespace mdcii::world
         /**
          * A screen position for each zoom and each rotation.
          */
-        std::array<std::array<glm::vec2, map::NR_OF_ROTATIONS>, map::NR_OF_ZOOMS> screenPositions{};
+        std::array<std::array<glm::vec2, NR_OF_ROTATIONS>, NR_OF_ZOOMS> screenPositions{};
 
         /**
          * The index for each rotation is needed for sorting.
          */
-        std::array<int32_t, map::NR_OF_ROTATIONS> indices{};
+        std::array<int32_t, NR_OF_ROTATIONS> indices{};
 
         /**
          * The instance Id of this Tile object or the position in Layer sortedTiles array.
          */
-        std::array<int32_t, map::NR_OF_ROTATIONS> instanceIds{};
+        std::array<int32_t, NR_OF_ROTATIONS> instanceIds{};
 
         /**
          * The Bsh graphic for each rotation.

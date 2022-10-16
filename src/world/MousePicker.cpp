@@ -120,7 +120,7 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
 
     auto result{ glm::ivec2(-1) };
 
-    if (m_world->rotation == map::Rotation::DEG0)
+    if (m_world->rotation == Rotation::DEG0)
     {
         result = glm::ivec2(
             (cell.y + origin.y) + (cell.x + origin.x),
@@ -145,7 +145,7 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
         }
     }
 
-    if (m_world->rotation == map::Rotation::DEG90)
+    if (m_world->rotation == Rotation::DEG90)
     {
         result = glm::ivec2(
             (cell.y + origin.y) - (cell.x + origin.x),
@@ -170,7 +170,7 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
         }
     }
 
-    if (m_world->rotation == map::Rotation::DEG180)
+    if (m_world->rotation == Rotation::DEG180)
     {
         result = glm::ivec2(
             m_world->width - 1 - ((cell.y + origin.y) + (cell.x + origin.x)),
@@ -195,7 +195,7 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
         }
     }
 
-    if (m_world->rotation == map::Rotation::DEG270)
+    if (m_world->rotation == Rotation::DEG270)
     {
         result = glm::ivec2(
             m_world->height - 1 - ((cell.y + origin.y) - (cell.x + origin.x)),
@@ -233,9 +233,9 @@ void mdcii::world::MousePicker::Init()
 
     m_renderer = std::make_unique<renderer::TileRenderer>();
 
-    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
         // store cursor file names
-        const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<map::Zoom>(t_zoom))) };
+        const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<Zoom>(t_zoom))) };
         const auto cursorFileName{ "textures/" + zoomStr + "/frame_" + zoomStr + ".png" };
         m_cursorFileNames.at(magic_enum::enum_integer(t_zoom)) = cursorFileName;
 
@@ -303,7 +303,7 @@ void mdcii::world::MousePicker::CleanUp() const
 {
     Log::MDCII_LOG_DEBUG("[MousePicker::CleanUp()] CleanUp MousePicker.");
 
-    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
         Log::MDCII_LOG_DEBUG("[MousePicker::CleanUp()] CleanUp cheat image for zoom {}.", magic_enum::enum_name(t_zoom));
 
         stbi_image_free(m_cheatImages.at(magic_enum::enum_integer(t_zoom)));

@@ -27,7 +27,7 @@
 // TileAtlas
 //-------------------------------------------------
 
-namespace mdcii::map
+namespace mdcii::world
 {
     /**
      * Creates OpenGL textures from Tile Atlas png files.

@@ -28,14 +28,14 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::map::TileAtlas::TileAtlas()
+mdcii::world::TileAtlas::TileAtlas()
 {
     Log::MDCII_LOG_DEBUG("[TileAtlas::TileAtlas()] Create TileAtlas.");
 
     Init();
 }
 
-mdcii::map::TileAtlas::~TileAtlas() noexcept
+mdcii::world::TileAtlas::~TileAtlas() noexcept
 {
     Log::MDCII_LOG_DEBUG("[TileAtlas::~TileAtlas()] Destruct TileAtlas.");
 
@@ -46,7 +46,7 @@ mdcii::map::TileAtlas::~TileAtlas() noexcept
 // Offset
 //-------------------------------------------------
 
-glm::vec2 mdcii::map::TileAtlas::GetTextureOffset(const int t_textureIndex, const int t_nrOfRows)
+glm::vec2 mdcii::world::TileAtlas::GetTextureOffset(const int t_textureIndex, const int t_nrOfRows)
 {
     return { GetTextureXOffset(t_textureIndex, t_nrOfRows), GetTextureYOffset(t_textureIndex, t_nrOfRows) };
 }
@@ -55,7 +55,7 @@ glm::vec2 mdcii::map::TileAtlas::GetTextureOffset(const int t_textureIndex, cons
 // Init
 //-------------------------------------------------
 
-void mdcii::map::TileAtlas::Init()
+void mdcii::world::TileAtlas::Init()
 {
     magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
         LoadAtlasImages(t_zoom, IMAGES.at(magic_enum::enum_integer(t_zoom)));
@@ -66,13 +66,13 @@ void mdcii::map::TileAtlas::Init()
 // Helper
 //-------------------------------------------------
 
-float mdcii::map::TileAtlas::GetTextureXOffset(const int t_textureIndex, const int t_nrOfRows)
+float mdcii::world::TileAtlas::GetTextureXOffset(const int t_textureIndex, const int t_nrOfRows)
 {
     const auto column{ t_textureIndex % t_nrOfRows };
     return static_cast<float>(column) / static_cast<float>(t_nrOfRows);
 }
 
-float mdcii::map::TileAtlas::GetTextureYOffset(const int t_textureIndex, const int t_nrOfRows)
+float mdcii::world::TileAtlas::GetTextureYOffset(const int t_textureIndex, const int t_nrOfRows)
 {
     const auto row{ t_textureIndex / t_nrOfRows };
     return static_cast<float>(row) / static_cast<float>(t_nrOfRows);
@@ -82,7 +82,7 @@ float mdcii::map::TileAtlas::GetTextureYOffset(const int t_textureIndex, const i
 // Images
 //-------------------------------------------------
 
-void mdcii::map::TileAtlas::LoadAtlasImages(const Zoom t_zoom, const int t_nrOfImages)
+void mdcii::world::TileAtlas::LoadAtlasImages(const Zoom t_zoom, const int t_nrOfImages)
 {
     Log::MDCII_LOG_DEBUG("[TileAtlas::LoadAtlasImages()] Start creating {} textures from the atlas images for zoom {}...", t_nrOfImages, magic_enum::enum_name(t_zoom));
 
@@ -110,7 +110,7 @@ void mdcii::map::TileAtlas::LoadAtlasImages(const Zoom t_zoom, const int t_nrOfI
     Log::MDCII_LOG_DEBUG("[TileAtlas::LoadAtlasImages()] The textures have been successfully created for zoom {}.", magic_enum::enum_name(t_zoom));
 }
 
-void mdcii::map::TileAtlas::DeleteAtlasImages(const int t_nrOfImages, const std::vector<unsigned char*>& t_images)
+void mdcii::world::TileAtlas::DeleteAtlasImages(const int t_nrOfImages, const std::vector<unsigned char*>& t_images)
 {
     Log::MDCII_LOG_DEBUG("[TileAtlas::DeleteAtlasImages()] Delete {} images.", t_nrOfImages);
 
@@ -124,7 +124,7 @@ void mdcii::map::TileAtlas::DeleteAtlasImages(const int t_nrOfImages, const std:
 // Texture array
 //-------------------------------------------------
 
-void mdcii::map::TileAtlas::CreateTextureArray(const Zoom t_zoom, const std::vector<unsigned char*>& t_images)
+void mdcii::world::TileAtlas::CreateTextureArray(const Zoom t_zoom, const std::vector<unsigned char*>& t_images)
 {
     const auto id{ ogl::resource::TextureUtils::GenerateNewTextureId() };
     ogl::resource::TextureUtils::Bind(id, GL_TEXTURE_2D_ARRAY);
@@ -172,7 +172,7 @@ void mdcii::map::TileAtlas::CreateTextureArray(const Zoom t_zoom, const std::vec
 // Clean up
 //-------------------------------------------------
 
-void mdcii::map::TileAtlas::CleanUp() const
+void mdcii::world::TileAtlas::CleanUp() const
 {
     Log::MDCII_LOG_DEBUG("[TileAtlas::CleanUp()] Clean up textures.");
 

@@ -25,7 +25,7 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::map
+namespace mdcii::world
 {
     enum class Zoom;
 }
@@ -69,7 +69,7 @@ namespace mdcii::camera
         /**
          * The current zoom.
          */
-        map::Zoom zoom;
+        world::Zoom zoom;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

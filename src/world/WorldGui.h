@@ -112,7 +112,7 @@ namespace mdcii::world
          * The zoom of the building thumbnails.
          * In History Ed. only GFX is available.
          */
-        map::Zoom m_bauhausZoom{ map::Zoom::GFX };
+        Zoom m_bauhausZoom{ Zoom::GFX };
 
         //-------------------------------------------------
         // GUIs

@@ -21,19 +21,11 @@
 #include <memory>
 #include "ogl/Window.h"
 #include "camera/Camera.h"
-#include "map/Zoom.h"
+#include "world/Zoom.h"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
-
-namespace mdcii::map
-{
-    /**
-     * Forward declaration enum class Rotation.
-     */
-    enum class Rotation;
-}
 
 namespace mdcii::world
 {
@@ -46,6 +38,11 @@ namespace mdcii::world
      * Forward declaration enum class WorldLayerType.
      */
     enum class WorldLayerType;
+
+    /**
+     * Forward declaration enum class Rotation.
+     */
+    enum class Rotation;
 }
 
 namespace mdcii::ogl::buffer
@@ -103,8 +100,8 @@ namespace mdcii::renderer
          */
         void Render(
             world::WorldLayerType t_layerType,
-            map::Zoom t_zoom,
-            map::Rotation t_rotation,
+            world::Zoom t_zoom,
+            world::Rotation t_rotation,
             const ogl::Window& t_window,
             const camera::Camera& t_camera
         ) const;
@@ -118,8 +115,8 @@ namespace mdcii::renderer
          * @param t_camera The Camera object to get the view matrix.
          */
         void Render(
-            map::Zoom t_zoom,
-            map::Rotation t_rotation,
+            world::Zoom t_zoom,
+            world::Rotation t_rotation,
             const ogl::Window& t_window,
             const camera::Camera& t_camera
         ) const;
@@ -139,8 +136,8 @@ namespace mdcii::renderer
         void UpdateGpuData(
             int32_t t_instance,
             world::WorldLayerType t_layerType,
-            map::Zoom t_zoom,
-            map::Rotation t_rotation,
+            world::Zoom t_zoom,
+            world::Rotation t_rotation,
             const glm::mat4& t_modelMatrix,
             int t_atlasNr,
             const glm::vec2& t_offset,
@@ -157,7 +154,7 @@ namespace mdcii::renderer
         /**
          * A Vao for each zoom level.
          */
-        using Vaos = std::array<std::unique_ptr<ogl::buffer::Vao>, map::NR_OF_ZOOMS>;
+        using Vaos = std::array<std::unique_ptr<ogl::buffer::Vao>, world::NR_OF_ZOOMS>;
 
         /**
          * A Vaos type for each Layer type (TERRAIN, BUILDINGS, TERRAIN_AND_BUILDINGS, GRID) except type NONE.
@@ -205,7 +202,7 @@ namespace mdcii::renderer
         /**
          * Each zoom Level has a different grid texture.
          */
-        std::array<std::string, map::NR_OF_ZOOMS> m_gridFileNames{};
+        std::array<std::string, world::NR_OF_ZOOMS> m_gridFileNames{};
 
         //-------------------------------------------------
         // Init
@@ -226,7 +223,7 @@ namespace mdcii::renderer
          * @param t_zoom The zoom level.
          * @param t_layerType The type of the Layer.
          */
-        void AddModelMatrices(map::Zoom t_zoom, world::WorldLayerType t_layerType);
+        void AddModelMatrices(world::Zoom t_zoom, world::WorldLayerType t_layerType);
 
         /**
          * Add texture info to the Gpu.
@@ -234,6 +231,6 @@ namespace mdcii::renderer
          * @param t_zoom The zoom level.
          * @param t_layerType The type of the Layer.
          */
-        void AddTextureInfo(map::Zoom t_zoom, world::WorldLayerType t_layerType) const;
+        void AddTextureInfo(world::Zoom t_zoom, world::WorldLayerType t_layerType) const;
     };
 }

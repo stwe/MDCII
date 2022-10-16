@@ -18,19 +18,19 @@
 
 #pragma once
 
-#include "map/MapTile.h"
+#include <string>
+#include <memory>
+#include <vector>
 
 //-------------------------------------------------
-// MapGenerator
+// WorldGenerator
 //-------------------------------------------------
 
-namespace mdcii::map
+namespace mdcii::world
 {
-    /**
-     * Class to create maps.
-     * Currently the class creates a simple rectangular map.
-     */
-    class MapGenerator
+    struct Tile;
+
+    class WorldGenerator
     {
     public:
         //-------------------------------------------------
@@ -45,23 +45,23 @@ namespace mdcii::map
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        MapGenerator() = delete;
+        WorldGenerator() = delete;
 
         /**
-         * Constructs a new MapGenerator object.
+         * Constructs a new WorldGenerator object.
          *
-         * @param t_width The width of the map to create.
-         * @param t_height The height of the map to create.
-         * @param t_fileName The filename under which to save the map.
+         * @param t_width The width of the world to create.
+         * @param t_height The height of the world to create.
+         * @param t_fileName The filename under which to save the world.
          */
-        MapGenerator(int t_width, int t_height, const std::string& t_fileName);
+        WorldGenerator(int t_width, int t_height, const std::string& t_fileName);
 
-        MapGenerator(const MapGenerator& t_other) = delete;
-        MapGenerator(MapGenerator&& t_other) noexcept = delete;
-        MapGenerator& operator=(const MapGenerator& t_other) = delete;
-        MapGenerator& operator=(MapGenerator&& t_other) noexcept = delete;
+        WorldGenerator(const WorldGenerator& t_other) = delete;
+        WorldGenerator(WorldGenerator&& t_other) noexcept = delete;
+        WorldGenerator& operator=(const WorldGenerator& t_other) = delete;
+        WorldGenerator& operator=(WorldGenerator&& t_other) noexcept = delete;
 
-        ~MapGenerator() noexcept;
+        ~WorldGenerator() noexcept;
 
     protected:
 
@@ -71,19 +71,19 @@ namespace mdcii::map
         //-------------------------------------------------
 
         /**
-         * Creates a map.
+         * Creates the world.
          *
-         * @param t_width The width of the map to create.
-         * @param t_height The height of the map to create.
-         * @param t_fileName The filename under which to save the map.
+         * @param t_width The width of the world to create.
+         * @param t_height The height of the world to create.
+         * @param t_fileName The filename under which to save the world.
          */
         void Init(int t_width, int t_height, const std::string& t_fileName);
 
         //-------------------------------------------------
-        // Create map
+        // Create
         //-------------------------------------------------
 
-        std::vector<MapTile> CreateTerrainLayer();
-        std::vector<MapTile> CreateBuildingsLayer();
+        std::vector<std::shared_ptr<Tile>> CreateTerrainLayer();
+        std::vector<std::shared_ptr<Tile>> CreateBuildingsLayer();
     };
 }

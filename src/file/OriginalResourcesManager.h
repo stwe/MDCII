@@ -26,7 +26,7 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::map
+namespace mdcii::world
 {
     enum class Zoom;
 }
@@ -50,7 +50,7 @@ namespace mdcii::file
         /**
          * A bsh file for each zoom to get the Gpu texture Ids.
          */
-        std::unordered_map<map::Zoom, std::unique_ptr<BshFile>> stadtfldBshFiles;
+        std::unordered_map<world::Zoom, std::unique_ptr<BshFile>> stadtfldBshFiles;
 
         /**
          * A bauhaus bsh file for each zoom to get the Gpu texture Ids.
@@ -58,7 +58,7 @@ namespace mdcii::file
          * The Nina has two other versions, suffixed by 6 and 8, which
          * correspond to images for small and medium resolutions, respectively.
          */
-        std::unordered_map<map::Zoom, std::unique_ptr<BshFile>> bauhausBshFiles;
+        std::unordered_map<world::Zoom, std::unique_ptr<BshFile>> bauhausBshFiles;
 
         /**
          * The decrypted content of the haeuser.cod.
@@ -89,7 +89,7 @@ namespace mdcii::file
          *
          * @return A list with BshTexture objects.
          */
-        [[nodiscard]] const std::vector<std::unique_ptr<BshTexture>>& GetStadtfldBshByZoom(map::Zoom t_zoom) const;
+        [[nodiscard]] const std::vector<std::unique_ptr<BshTexture>>& GetStadtfldBshByZoom(world::Zoom t_zoom) const;
 
         /**
          * For convenience and better readability. Get a list of BshTexture objects of a given zoom.
@@ -98,7 +98,7 @@ namespace mdcii::file
          *
          * @return A list with BshTexture objects.
          */
-        [[nodiscard]] const std::vector<std::unique_ptr<BshTexture>>& GetBauhausBshByZoom(map::Zoom t_zoom) const;
+        [[nodiscard]] const std::vector<std::unique_ptr<BshTexture>>& GetBauhausBshByZoom(world::Zoom t_zoom) const;
 
         /**
          * For convenience and better readability. Get a Building object by Id.
@@ -124,12 +124,12 @@ namespace mdcii::file
         /**
          * The paths to the stadtfld.bsh graphic files.
          */
-        std::unordered_map<map::Zoom, std::string> m_stadtfldBshFilesPaths;
+        std::unordered_map<world::Zoom, std::string> m_stadtfldBshFilesPaths;
 
         /**
          * The paths to the bauhaus.bsh graphic files.
          */
-        std::unordered_map<map::Zoom, std::string> m_bauhausBshFilesPaths;
+        std::unordered_map<world::Zoom, std::string> m_bauhausBshFilesPaths;
 
         /**
          * The path to the haeuser.cod file.

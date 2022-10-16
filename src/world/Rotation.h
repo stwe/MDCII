@@ -22,7 +22,7 @@
 #include <glm/vec2.hpp>
 #include "MdciiException.h"
 
-namespace mdcii::map
+namespace mdcii::world
 {
     //-------------------------------------------------
     // Change rotation

@@ -16,18 +16,17 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 #include <imgui.h>
 #include "World.h"
 #include "Game.h"
+#include "TileAtlas.h"
 #include "MdciiAssert.h"
 #include "MousePicker.h"
 #include "WorldGui.h"
 #include "event/EventManager.h"
 #include "eventpp/utilities/argumentadapter.h"
 #include "state/State.h"
-#include "map/TileAtlas.h"
 #include "renderer/WorldRenderer.h"
 #include "file/OriginalResourcesManager.h"
 
@@ -175,28 +174,28 @@ void mdcii::world::World::RenderImGui()
 // Rotate && Zoom
 //-------------------------------------------------
 
-void mdcii::world::World::Rotate(const map::ChangeRotation t_changeRotation)
+void mdcii::world::World::RotateWorld(const ChangeRotation t_changeRotation)
 {
     switch (t_changeRotation)
     {
-    case map::ChangeRotation::LEFT:
+    case ChangeRotation::LEFT:
         --rotation;
         break;
-    case map::ChangeRotation::RIGHT:
+    case ChangeRotation::RIGHT:
         ++rotation;
         break;
     }
 }
 
-void mdcii::world::World::Zoom(const map::ChangeZoom t_changeZoom)
+void mdcii::world::World::ZoomWorld(const ChangeZoom t_changeZoom)
 {
     switch (t_changeZoom)
     {
-    case map::ChangeZoom::ZOOM_IN:
+    case ChangeZoom::ZOOM_IN:
         ++zoom;
         context->camera->zoom = zoom;
         break;
-    case map::ChangeZoom::ZOOM_OUT:
+    case ChangeZoom::ZOOM_OUT:
         --zoom;
         context->camera->zoom = zoom;
         break;
@@ -225,13 +224,13 @@ int mdcii::world::World::GetMapIndex(const int t_x, const int t_y) const
     return t_y * width + t_x;
 }
 
-int mdcii::world::World::GetMapIndex(const int t_x, const int t_y, const map::Rotation t_rotation) const
+int mdcii::world::World::GetMapIndex(const int t_x, const int t_y, const Rotation t_rotation) const
 {
     MDCII_ASSERT(IsPositionInWorld(t_x, t_y), "[World::GetMapIndex()] Invalid world position given.")
 
     const auto position{ RotatePosition(t_x, t_y, t_rotation) };
 
-    if (t_rotation == map::Rotation::DEG0 || t_rotation == map::Rotation::DEG180)
+    if (t_rotation == Rotation::DEG0 || t_rotation == Rotation::DEG180)
     {
         return position.y * width + position.x;
     }
@@ -239,7 +238,7 @@ int mdcii::world::World::GetMapIndex(const int t_x, const int t_y, const map::Ro
     return position.y * height + position.x;
 }
 
-glm::vec2 mdcii::world::World::WorldToScreen(const int t_x, const int t_y, const map::Zoom t_zoom, const map::Rotation t_rotation) const
+glm::vec2 mdcii::world::World::WorldToScreen(const int t_x, const int t_y, const Zoom t_zoom, const Rotation t_rotation) const
 {
     MDCII_ASSERT(IsPositionInWorld(t_x, t_y), "[World::WorldToScreen()] Invalid world position given.")
 
@@ -251,7 +250,7 @@ glm::vec2 mdcii::world::World::WorldToScreen(const int t_x, const int t_y, const
     };
 }
 
-glm::ivec2 mdcii::world::World::RotatePosition(const int t_x, const int t_y, const map::Rotation t_rotation) const
+glm::ivec2 mdcii::world::World::RotatePosition(const int t_x, const int t_y, const Rotation t_rotation) const
 {
     return rotate_position(t_x, t_y, width, height, t_rotation);
 }
@@ -275,12 +274,12 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
 
         for (auto& tile : m_tilesToAdd)
         {
-            const auto id0{ tile->instanceIds.at(magic_enum::enum_integer(map::Rotation::DEG0)) };
+            const auto id0{ tile->instanceIds.at(magic_enum::enum_integer(Rotation::DEG0)) };
 
             // reset 5 pointers
             MDCII_ASSERT(buildingsLayer.tiles.at(id0), "[World::OnLeftMouseButtonPressed()] Null pointer.")
             buildingsLayer.tiles.at(id0).reset();
-            magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+            magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
                 const auto r{ magic_enum::enum_integer(t_rotation) };
                 MDCII_ASSERT(buildingsLayer.sortedTiles.at(r).at(tile->instanceIds.at(r)), "[World::OnLeftMouseButtonPressed()] Null pointer.")
                 buildingsLayer.sortedTiles.at(r).at(tile->instanceIds.at(r)).reset();
@@ -289,7 +288,7 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
             // replace 5 pointers
             MDCII_ASSERT(!buildingsLayer.tiles.at(id0), "[World::OnLeftMouseButtonPressed()] Invalid pointer.")
             buildingsLayer.tiles.at(id0) = std::move(tile);
-            magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+            magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
                 const auto r{ magic_enum::enum_integer(t_rotation) };
                 MDCII_ASSERT(!buildingsLayer.sortedTiles.at(r).at(buildingsLayer.tiles.at(id0)->instanceIds.at(r)), "[World::OnLeftMouseButtonPressed()] Invalid pointer.")
                 buildingsLayer.sortedTiles.at(r).at(buildingsLayer.tiles.at(id0)->instanceIds.at(r)) = buildingsLayer.tiles.at(id0);
@@ -353,9 +352,9 @@ void mdcii::world::World::OnMouseMoved()
 
             for (const auto& tile : m_tilesToAdd)
             {
-                magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
+                magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
                     const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
-                    magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+                    magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
                         const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
                         const auto& tm{ terrainLayer.modelMatrices.at(zoomInt).at(rotationInt) };
@@ -416,14 +415,14 @@ void mdcii::world::World::OnMouseMoved()
                     PreCalcTile(*tile, currentMousePosition.x + x, currentMousePosition.y + y);
 
                     // copy the instances Ids from Terrain Layer Tile at the same position
-                    magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+                    magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
                         const auto r{ magic_enum::enum_integer(t_rotation) };
                         tile->instanceIds.at(r) = terrainLayer.instanceIds.at(glm::ivec3(currentMousePosition.x + x, currentMousePosition.y + y, r)) ;
                     });
 
                     // create Gpu data for each zoom and each rotation
-                    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-                        magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+                    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
+                        magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
                             const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
                             // create new Gpu data
@@ -478,7 +477,7 @@ void mdcii::world::World::Init()
     MergeTerrainAndBuildingsLayers();  // merge Terrain && Buildings Layer into a new Layer
     CreateGridLayer();                 // create Grid Layer
 
-    tileAtlas = std::make_unique<map::TileAtlas>();
+    tileAtlas = std::make_unique<TileAtlas>();
     worldRenderer = std::make_unique<renderer::WorldRenderer>(this);
     mousePicker = std::make_unique<MousePicker>(this, *context->window, *context->camera);
     m_worldGui = std::make_unique<WorldGui>(this);
@@ -627,8 +626,8 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
     layer->heights = terrainLayer.heights;
 
     // merge Gpu data
-    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        magic_enum::enum_for_each<map::Rotation>([&](const map::Rotation t_rotation) {
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
+        magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
             const auto z{ magic_enum::enum_integer(t_zoom) };
             const auto r{ magic_enum::enum_integer(t_rotation) };
 
@@ -695,22 +694,22 @@ void mdcii::world::World::PreCalcTile(Tile& t_tile, const int t_x, const int t_y
     t_tile.worldYDeg0 = t_y;
 
     // pre-calculate the position on the screen for each zoom and each rotation
-    magic_enum::enum_for_each<map::Zoom>([&](const map::Zoom t_zoom) {
-        std::array<glm::vec2, map::NR_OF_ROTATIONS> positions{};
+    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
+        std::array<glm::vec2, NR_OF_ROTATIONS> positions{};
 
-        positions[0] = WorldToScreen(t_x, t_y, t_zoom, map::Rotation::DEG0);
-        positions[1] = WorldToScreen(t_x, t_y, t_zoom, map::Rotation::DEG90);
-        positions[2] = WorldToScreen(t_x, t_y, t_zoom, map::Rotation::DEG180);
-        positions[3] = WorldToScreen(t_x, t_y, t_zoom, map::Rotation::DEG270);
+        positions[0] = WorldToScreen(t_x, t_y, t_zoom, Rotation::DEG0);
+        positions[1] = WorldToScreen(t_x, t_y, t_zoom, Rotation::DEG90);
+        positions[2] = WorldToScreen(t_x, t_y, t_zoom, Rotation::DEG180);
+        positions[3] = WorldToScreen(t_x, t_y, t_zoom, Rotation::DEG270);
 
         t_tile.screenPositions.at(magic_enum::enum_integer(t_zoom)) = positions;
     });
 
     // pre-calculate the index for each rotation for sorting
-    t_tile.indices[0] = GetMapIndex(t_x, t_y, map::Rotation::DEG0);
-    t_tile.indices[1] = GetMapIndex(t_x, t_y, map::Rotation::DEG90);
-    t_tile.indices[2] = GetMapIndex(t_x, t_y, map::Rotation::DEG180);
-    t_tile.indices[3] = GetMapIndex(t_x, t_y, map::Rotation::DEG270);
+    t_tile.indices[0] = GetMapIndex(t_x, t_y, Rotation::DEG0);
+    t_tile.indices[1] = GetMapIndex(t_x, t_y, Rotation::DEG90);
+    t_tile.indices[2] = GetMapIndex(t_x, t_y, Rotation::DEG180);
+    t_tile.indices[3] = GetMapIndex(t_x, t_y, Rotation::DEG270);
 
     // pre-calculate a gfx for each rotation
     if (t_tile.HasBuilding())

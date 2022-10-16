@@ -33,14 +33,6 @@ namespace mdcii::state
     struct Context;
 }
 
-namespace mdcii::map
-{
-    /**
-     * Forward declaration class TileAtlas.
-     */
-    class TileAtlas;
-}
-
 namespace mdcii::renderer
 {
     /**
@@ -68,6 +60,11 @@ namespace mdcii::world
      * Forward declaration class WorldGui.
      */
     class WorldGui;
+
+    /**
+     * Forward declaration class TileAtlas.
+     */
+    class TileAtlas;
 
     //-------------------------------------------------
     // World
@@ -119,12 +116,12 @@ namespace mdcii::world
         /**
          * The world rotation.
          */
-        map::Rotation rotation{ map::Rotation::DEG0 };
+        Rotation rotation{ Rotation::DEG0 };
 
         /**
          * The world zoom.
          */
-        map::Zoom zoom{ map::Zoom::GFX };
+        Zoom zoom{ Zoom::GFX };
 
         /**
          * The world layers.
@@ -139,7 +136,7 @@ namespace mdcii::world
         /**
          * An OpenGL texture array for each zoom level.
          */
-        std::unique_ptr<map::TileAtlas> tileAtlas;
+        std::unique_ptr<world::TileAtlas> tileAtlas;
 
         /**
          * The renderer to show the world.
@@ -223,14 +220,14 @@ namespace mdcii::world
          *
          * @param t_changeRotation Rotate left or right.
          */
-        void Rotate(map::ChangeRotation t_changeRotation);
+        void RotateWorld(ChangeRotation t_changeRotation);
 
         /**
          * Changes the zoom of the world.
          *
          * @param t_changeZoom Zoom in or out.
          */
-        void Zoom(map::ChangeZoom t_changeZoom);
+        void ZoomWorld(ChangeZoom t_changeZoom);
 
         //-------------------------------------------------
         // Helper
@@ -265,7 +262,7 @@ namespace mdcii::world
          *
          * @return The 1D index.
          */
-        [[nodiscard]] int GetMapIndex(int t_x, int t_y, map::Rotation t_rotation) const;
+        [[nodiscard]] int GetMapIndex(int t_x, int t_y, Rotation t_rotation) const;
 
         /**
          * Projects world coordinates into an isometric position on the screen (world space).
@@ -277,7 +274,7 @@ namespace mdcii::world
          *
          * @return The isometric coordinates on the screen.
          */
-        [[nodiscard]] glm::vec2 WorldToScreen(int t_x, int t_y, map::Zoom t_zoom, map::Rotation t_rotation = map::Rotation::DEG0) const;
+        [[nodiscard]] glm::vec2 WorldToScreen(int t_x, int t_y, Zoom t_zoom, Rotation t_rotation = Rotation::DEG0) const;
 
         /**
          * Rotates a world position.
@@ -288,7 +285,7 @@ namespace mdcii::world
          *
          * @return The rotated position.
          */
-        [[nodiscard]] glm::ivec2 RotatePosition(int t_x, int t_y, map::Rotation t_rotation = map::Rotation::DEG0) const;
+        [[nodiscard]] glm::ivec2 RotatePosition(int t_x, int t_y, Rotation t_rotation = Rotation::DEG0) const;
 
     protected:
 

@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "map/Zoom.h"
+#include "Zoom.h"
 #include "ogl/Window.h"
 #include "camera/Camera.h"
 
@@ -127,12 +127,12 @@ namespace mdcii::world
         /**
          * Cheat images pixel data for each zoom level (SGFX, MGFX, GFX).
          */
-        std::array<unsigned char*, map::NR_OF_ZOOMS> m_cheatImages{ nullptr, nullptr, nullptr };
+        std::array<unsigned char*, NR_OF_ZOOMS> m_cheatImages{ nullptr, nullptr, nullptr };
 
         /**
          * Each zoom level has a different mouse cursor texture.
          */
-        std::array<std::string, map::NR_OF_ZOOMS> m_cursorFileNames{};
+        std::array<std::string, NR_OF_ZOOMS> m_cursorFileNames{};
 
         //-------------------------------------------------
         // Event handler

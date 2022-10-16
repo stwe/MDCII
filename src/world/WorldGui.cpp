@@ -57,14 +57,14 @@ void mdcii::world::WorldGui::RotateGui() const
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateMapRight").c_str()))
     {
-        m_world->Rotate(map::ChangeRotation::RIGHT);
+        m_world->RotateWorld(ChangeRotation::RIGHT);
     }
 
     ImGui::SameLine();
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateMapLeft").c_str()))
     {
-        m_world->Rotate(map::ChangeRotation::LEFT);
+        m_world->RotateWorld(ChangeRotation::LEFT);
     }
 }
 
@@ -76,14 +76,14 @@ void mdcii::world::WorldGui::ZoomGui() const
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ZoomMapIn").c_str()))
     {
-        m_world->Zoom(map::ChangeZoom::ZOOM_IN);
+        m_world->ZoomWorld(ChangeZoom::ZOOM_IN);
     }
 
     ImGui::SameLine();
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ZoomMapOut").c_str()))
     {
-        m_world->Zoom(map::ChangeZoom::ZOOM_OUT);
+        m_world->ZoomWorld(ChangeZoom::ZOOM_OUT);
     }
 }
 
@@ -166,7 +166,7 @@ void mdcii::world::WorldGui::AllWorkshopsGui()
                     Log::MDCII_LOG_DEBUG("[WorldGui::AllWorkshopsGui()] Select k: {}, v: {}", std::stoi(k), v);
 
                     selectedWorkshop.buildingId = std::stoi(k);
-                    selectedWorkshop.rotation = map::Rotation::DEG0;
+                    selectedWorkshop.rotation = Rotation::DEG0;
                 }
 
                 ImGui::TreePop();
@@ -222,12 +222,12 @@ void mdcii::world::WorldGui::InitBauhausZoom()
     {
         Log::MDCII_LOG_DEBUG("[WorldGui::InitBauhausZoom()] History Ed.: Sets the thumbnail zoom for buildings to GFX.");
 
-        m_bauhausZoom = map::Zoom::GFX;
+        m_bauhausZoom = Zoom::GFX;
         return;
     }
 
     // Nina has 3 Bauhaus.bsh files
-    const auto zoomOptional{ magic_enum::enum_cast<map::Zoom>(Game::INI.Get<std::string>("main_menu", "thumbnails_zoom")) };
+    const auto zoomOptional{ magic_enum::enum_cast<Zoom>(Game::INI.Get<std::string>("main_menu", "thumbnails_zoom")) };
     if (zoomOptional.has_value())
     {
         const auto z{ zoomOptional.value() };
@@ -235,7 +235,7 @@ void mdcii::world::WorldGui::InitBauhausZoom()
     }
     else
     {
-        m_bauhausZoom = map::Zoom::GFX;
+        m_bauhausZoom = Zoom::GFX;
     }
 }
 

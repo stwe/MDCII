@@ -83,7 +83,7 @@ namespace mdcii::world
         /**
          * A vector of Tile pointers for each rotation.
          */
-        using Tiles_For_Each_Rotation = std::array<Tiles, map::NR_OF_ROTATIONS>;
+        using Tiles_For_Each_Rotation = std::array<Tiles, NR_OF_ROTATIONS>;
 
         //-------------------------------------------------
         // Model matrices types
@@ -97,12 +97,12 @@ namespace mdcii::world
         /**
          * A vector of model matrices for each rotation.
          */
-        using Model_Matrices_For_Each_Rotation = std::array<Model_Matrices, map::NR_OF_ROTATIONS>;
+        using Model_Matrices_For_Each_Rotation = std::array<Model_Matrices, NR_OF_ROTATIONS>;
 
         /**
          * Four model matrices containers for each of the three possible zoom levels.
          */
-        using Model_Matrices_For_Each_Zoom = std::array<Model_Matrices_For_Each_Rotation, map::NR_OF_ZOOMS>;
+        using Model_Matrices_For_Each_Zoom = std::array<Model_Matrices_For_Each_Rotation, NR_OF_ZOOMS>;
 
         //-------------------------------------------------
         // Texture indices types
@@ -116,7 +116,7 @@ namespace mdcii::world
         /**
          * A vector of texture atlas numbers for each zoom level.
          */
-        using Texture_Atlas_Numbers_For_Each_Zoom = std::array<Texture_Atlas_Numbers, map::NR_OF_ZOOMS>;
+        using Texture_Atlas_Numbers_For_Each_Zoom = std::array<Texture_Atlas_Numbers, NR_OF_ZOOMS>;
 
         //-------------------------------------------------
         // Texture offsets types
@@ -130,12 +130,12 @@ namespace mdcii::world
         /**
          * A vector of texture offsets for each rotation.
          */
-        using Texture_Offsets_For_Each_Rotation = std::array<Texture_Offsets, map::NR_OF_ROTATIONS>;
+        using Texture_Offsets_For_Each_Rotation = std::array<Texture_Offsets, NR_OF_ROTATIONS>;
 
         /**
          * Four texture offsets containers for each of the three possible zoom levels.
          */
-        using Texture_Offsets_For_Each_Zoom = std::array<Texture_Offsets_For_Each_Rotation, map::NR_OF_ZOOMS>;
+        using Texture_Offsets_For_Each_Zoom = std::array<Texture_Offsets_For_Each_Rotation, NR_OF_ZOOMS>;
 
         //-------------------------------------------------
         // Texture heights types
@@ -149,7 +149,7 @@ namespace mdcii::world
         /**
          * A vector of texture heights for each zoom level.
          */
-        using Texture_Heights_For_Each_Zoom = std::array<Texture_Heights, map::NR_OF_ZOOMS>;
+        using Texture_Heights_For_Each_Zoom = std::array<Texture_Heights, NR_OF_ZOOMS>;
 
         //-------------------------------------------------
         // Member
@@ -247,7 +247,7 @@ namespace mdcii::world
          *
          * @return The model matrices of the zoom.
          */
-        [[nodiscard]] const Model_Matrices_For_Each_Rotation& GetModelMatrices(map::Zoom t_zoom) const;
+        [[nodiscard]] const Model_Matrices_For_Each_Rotation& GetModelMatrices(Zoom t_zoom) const;
 
         /**
          * Returns a Tile object.
@@ -299,7 +299,7 @@ namespace mdcii::world
          *
          * @return The model matrix.
          */
-        [[nodiscard]] glm::mat4 GetModelMatrix(const Tile& t_tile, map::Zoom t_zoom, map::Rotation t_rotation) const;
+        [[nodiscard]] glm::mat4 GetModelMatrix(const Tile& t_tile, Zoom t_zoom, Rotation t_rotation) const;
 
         /**
          * Determines the texture atlas number of a given Tile object.
@@ -310,7 +310,7 @@ namespace mdcii::world
          *
          * @return The texture atlas number.
          */
-        [[nodiscard]] int GetTextureAtlasNr(const Tile& t_tile, map::Zoom t_zoom, map::Rotation t_rotation) const;
+        [[nodiscard]] int GetTextureAtlasNr(const Tile& t_tile, Zoom t_zoom, Rotation t_rotation) const;
 
         /**
          * Determines the texture offset of a given Tile object.
@@ -321,7 +321,7 @@ namespace mdcii::world
          *
          * @return The offset.
          */
-        [[nodiscard]] glm::vec2 GetTextureOffset(const Tile& t_tile, map::Zoom t_zoom, map::Rotation t_rotation) const;
+        [[nodiscard]] glm::vec2 GetTextureOffset(const Tile& t_tile, Zoom t_zoom, Rotation t_rotation) const;
 
         /**
          * Determines the texture height of a given Tile object.
@@ -332,7 +332,7 @@ namespace mdcii::world
          *
          * @return The texture height.
          */
-        [[nodiscard]] float GetTextureHeight(const Tile& t_tile, map::Zoom t_zoom, map::Rotation t_rotation) const;
+        [[nodiscard]] float GetTextureHeight(const Tile& t_tile, Zoom t_zoom, Rotation t_rotation) const;
 
     protected:
 
@@ -387,6 +387,6 @@ namespace mdcii::world
          *
          * @return The gfx to use for rendering.
          */
-        [[nodiscard]] int32_t CalcGfx(const Tile& t_tile, map::Rotation t_rotation) const;
+        [[nodiscard]] int32_t CalcGfx(const Tile& t_tile, Rotation t_rotation) const;
     };
 }

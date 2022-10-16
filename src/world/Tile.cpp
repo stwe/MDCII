@@ -26,7 +26,7 @@
 void mdcii::world::Tile::Reset()
 {
     buildingId = -1;
-    rotation = map::Rotation::DEG0;
+    rotation = Rotation::DEG0;
     x = 0;
     y = 0;
     worldXDeg0 = -1;
@@ -55,7 +55,7 @@ void mdcii::world::Tile::RenderImGui() const
 
     if (ImGui::TreeNode("Indices"))
     {
-        auto r{ map::Rotation::DEG0 };
+        auto r{ Rotation::DEG0 };
         for (const auto index : indices)
         {
             if (ImGui::TreeNode(rotation_to_string(r)))
@@ -72,7 +72,7 @@ void mdcii::world::Tile::RenderImGui() const
 
     if (ImGui::TreeNode("Instances Ids"))
     {
-        auto r{ map::Rotation::DEG0 };
+        auto r{ Rotation::DEG0 };
         for (const auto id : instanceIds)
         {
             if (ImGui::TreeNode(rotation_to_string(r)))
@@ -89,7 +89,7 @@ void mdcii::world::Tile::RenderImGui() const
 
     if (ImGui::TreeNode("Gfxs"))
     {
-        auto r{ map::Rotation::DEG0 };
+        auto r{ Rotation::DEG0 };
         for (const auto gfx : gfxs)
         {
             if (ImGui::TreeNode(magic_enum::enum_name(r).data()))

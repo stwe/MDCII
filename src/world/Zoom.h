@@ -21,7 +21,7 @@
 #include <magic_enum.hpp>
 #include "MdciiUtils.h"
 
-namespace mdcii::map
+namespace mdcii::world
 {
     //-------------------------------------------------
     // Change zoom
