@@ -17,21 +17,21 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <gtest/gtest.h>
-#include "map/Zoom.h"
-#include "map/Rotation.h"
+#include "world/Zoom.h"
+#include "world/Rotation.h"
 #include "MdciiUtils.h"
 
 TEST(TestSuite, TestZoomOperators)
 {
-    auto zoomAdd{ mdcii::map::Zoom::SGFX };
-    ASSERT_EQ(mdcii::map::Zoom::MGFX, ++zoomAdd);
-    ASSERT_EQ(mdcii::map::Zoom::GFX, ++zoomAdd);
-    ASSERT_EQ(mdcii::map::Zoom::GFX, ++zoomAdd);
+    auto zoomAdd{ mdcii::world::Zoom::SGFX };
+    ASSERT_EQ(mdcii::world::Zoom::MGFX, ++zoomAdd);
+    ASSERT_EQ(mdcii::world::Zoom::GFX, ++zoomAdd);
+    ASSERT_EQ(mdcii::world::Zoom::GFX, ++zoomAdd);
 
-    auto zoomMinus{ mdcii::map::Zoom::GFX };
-    ASSERT_EQ(mdcii::map::Zoom::MGFX, --zoomMinus);
-    ASSERT_EQ(mdcii::map::Zoom::SGFX, --zoomMinus);
-    ASSERT_EQ(mdcii::map::Zoom::SGFX, --zoomMinus);
+    auto zoomMinus{ mdcii::world::Zoom::GFX };
+    ASSERT_EQ(mdcii::world::Zoom::MGFX, --zoomMinus);
+    ASSERT_EQ(mdcii::world::Zoom::SGFX, --zoomMinus);
+    ASSERT_EQ(mdcii::world::Zoom::SGFX, --zoomMinus);
 }
 
 TEST(TestSuite, TestStringUtils)
@@ -43,15 +43,15 @@ TEST(TestSuite, TestStringUtils)
 
 TEST(TestSuite, TestRotateOperators)
 {
-    auto rotateAdd{ mdcii::map::Rotation::DEG0 };
-    ASSERT_EQ(mdcii::map::Rotation::DEG90, ++rotateAdd);
-    ASSERT_EQ(mdcii::map::Rotation::DEG180, ++rotateAdd);
-    ASSERT_EQ(mdcii::map::Rotation::DEG270, ++rotateAdd);
+    auto rotateAdd{ mdcii::world::Rotation::DEG0 };
+    ASSERT_EQ(mdcii::world::Rotation::DEG90, ++rotateAdd);
+    ASSERT_EQ(mdcii::world::Rotation::DEG180, ++rotateAdd);
+    ASSERT_EQ(mdcii::world::Rotation::DEG270, ++rotateAdd);
 
-    auto rotateMinus{ mdcii::map::Rotation::DEG270 };
-    ASSERT_EQ(mdcii::map::Rotation::DEG180, --rotateMinus);
-    ASSERT_EQ(mdcii::map::Rotation::DEG90, --rotateMinus);
-    ASSERT_EQ(mdcii::map::Rotation::DEG0, --rotateMinus);
+    auto rotateMinus{ mdcii::world::Rotation::DEG270 };
+    ASSERT_EQ(mdcii::world::Rotation::DEG180, --rotateMinus);
+    ASSERT_EQ(mdcii::world::Rotation::DEG90, --rotateMinus);
+    ASSERT_EQ(mdcii::world::Rotation::DEG0, --rotateMinus);
 }
 
 int main()

@@ -67,7 +67,7 @@ project "MDCII"
     -- disable Edit And Continue (use /Zi)
     -- disable Just My Code debugging
     filter "configurations:FastDebug"
-        defines { "MDCII_DEBUG_BUILD", "GLFW_INCLUDE_NONE", "_CRT_SECURE_NO_WARNINGS" }
+        defines { "MDCII_DEBUG_BUILD", "GLFW_INCLUDE_NONE", "_CRT_SECURE_NO_WARNINGS", "GLM_ENABLE_EXPERIMENTAL" }
         runtime "Debug"
         symbols "On"
         flags { "NoRuntimeChecks" }
@@ -76,7 +76,7 @@ project "MDCII"
         justmycode "Off"
 
     filter "configurations:Release"
-        defines { "GLFW_INCLUDE_NONE", "_CRT_SECURE_NO_WARNINGS" }
+        defines { "GLFW_INCLUDE_NONE", "_CRT_SECURE_NO_WARNINGS", "GLM_ENABLE_EXPERIMENTAL" }
         runtime "Release"
         optimize "On"
 
