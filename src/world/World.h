@@ -19,7 +19,6 @@
 #pragma once
 
 #include "WorldLayer.h"
-#include "data/Buildings.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -397,17 +396,6 @@ namespace mdcii::world
          * @return True or false depending on whether the building is outside.
          */
         [[nodiscard]] bool IsBuildingOutsideTheWorld(int t_x, int t_y, const data::Building& t_building) const;
-
-        /**
-         * Checks whether there is already a building at the given position in the Building Layer.
-         *
-         * @param t_mapX The start x position of the building.
-         * @param t_mapY The start y position of the building.
-         * @param t_building The Building object to check.
-         *
-         * @return True or false, depending on whether a building already exists.
-         */
-        [[nodiscard]] bool IsAlreadyBuildingOnPosition(int t_x, int t_y, const data::Building& t_building) const;
 
         /**
          * Checks if the building is over the coast.

@@ -86,7 +86,7 @@ namespace mdcii::world
         std::array<int32_t, NR_OF_ROTATIONS> indices{};
 
         /**
-         * The instance Id of this Tile object or the position in Layer sortedTiles array.
+         * The instance Ids of this Tile object or the positions in Layer sortedTiles array.
          */
         std::array<int32_t, NR_OF_ROTATIONS> instanceIds{};
 

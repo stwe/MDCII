@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include "Tile.h"
 #include "data/json.hpp"
+#include "data/Buildings.h"
 
 //-------------------------------------------------
 // WorldLayer
@@ -259,6 +260,17 @@ namespace mdcii::world
          */
         [[nodiscard]] const Tile& GetTile(int t_x, int t_y) const;
 
+        /**
+         * Checks whether there is already a building at the given position in this Layer.
+         *
+         * @param t_mapX The start x position of the building.
+         * @param t_mapY The start y position of the building.
+         * @param t_building The Building object to check.
+         *
+         * @return True or false, depending on whether a building already exists.
+         */
+        [[nodiscard]] bool IsAlreadyBuildingOnPosition(int t_x, int t_y, const data::Building& t_building) const;
+
         //-------------------------------------------------
         // Setter
         //-------------------------------------------------
@@ -271,7 +283,7 @@ namespace mdcii::world
         void SetLayerTypeByString(const std::string& t_layerType);
 
         //-------------------------------------------------
-        // Add/replace tile
+        // Tiles
         //-------------------------------------------------
 
         /**
@@ -280,6 +292,20 @@ namespace mdcii::world
          * @param t_json The Json value.
          */
         void AddTileFromJson(const nlohmann::json& t_json);
+
+        /**
+         * Resets Tile pointer at given instances in <i>tiles</i> and <i>sortedTiles</i>.
+         *
+         * @param t_instanceIds Instances at which the pointer should be deleted.
+         */
+        void ResetTilePointersAt(const std::array<int32_t, NR_OF_ROTATIONS>& t_instanceIds);
+
+        /**
+         * Stores a new Tile in the Layer.
+         *
+         * @param t_tile The Tile to be stored.
+         */
+        void StoreTile(std::unique_ptr<Tile> t_tile);
 
         //-------------------------------------------------
         // Prepare rendering

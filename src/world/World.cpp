@@ -261,6 +261,12 @@ glm::ivec2 mdcii::world::World::RotatePosition(const int t_x, const int t_y, con
 
 void mdcii::world::World::OnLeftMouseButtonPressed()
 {
+    // do nothing (return) when the mouse is over the ImGui window
+    if (ImGui::GetIO().WantCaptureMouse)
+    {
+        return;
+    }
+
     const auto& mousePosition{ mousePicker->currentPosition };
 
     if (IsPositionInWorld(mousePosition.x, mousePosition.y) && currentAction == Action::STATUS)
@@ -272,30 +278,14 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
     {
         auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
 
+        // reset Tile pointers and replace with new Tile
         for (auto& tile : m_tilesToAdd)
         {
-            const auto id0{ tile->instanceIds.at(magic_enum::enum_integer(Rotation::DEG0)) };
-
-            // reset 5 pointers
-            MDCII_ASSERT(buildingsLayer.tiles.at(id0), "[World::OnLeftMouseButtonPressed()] Null pointer.")
-            buildingsLayer.tiles.at(id0).reset();
-            magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
-                const auto r{ magic_enum::enum_integer(t_rotation) };
-                MDCII_ASSERT(buildingsLayer.sortedTiles.at(r).at(tile->instanceIds.at(r)), "[World::OnLeftMouseButtonPressed()] Null pointer.")
-                buildingsLayer.sortedTiles.at(r).at(tile->instanceIds.at(r)).reset();
-            });
-
-            // replace 5 pointers
-            MDCII_ASSERT(!buildingsLayer.tiles.at(id0), "[World::OnLeftMouseButtonPressed()] Invalid pointer.")
-            buildingsLayer.tiles.at(id0) = std::move(tile);
-            magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
-                const auto r{ magic_enum::enum_integer(t_rotation) };
-                MDCII_ASSERT(!buildingsLayer.sortedTiles.at(r).at(buildingsLayer.tiles.at(id0)->instanceIds.at(r)), "[World::OnLeftMouseButtonPressed()] Invalid pointer.")
-                buildingsLayer.sortedTiles.at(r).at(buildingsLayer.tiles.at(id0)->instanceIds.at(r)) = buildingsLayer.tiles.at(id0);
-            });
+            buildingsLayer.ResetTilePointersAt(tile->instanceIds);
+            buildingsLayer.StoreTile(std::move(tile));
         }
 
-        // clear vector
+        // clear m_tilesToAdd vector
         std::vector<std::unique_ptr<Tile>>().swap(m_tilesToAdd);
     }
 
@@ -307,12 +297,23 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
 
 void mdcii::world::World::OnMouseMoved()
 {
+    // do nothing (return) when the mouse is over the ImGui window
+    if (ImGui::GetIO().WantCaptureMouse)
+    {
+        return;
+    }
+
     // get current mouse position
     const auto& currentMousePosition{ mousePicker->currentPosition };
 
     // condition to build: BUILD action + workshop selected + current mouse in the world?
     if (currentAction == Action::BUILD && m_worldGui->selectedWorkshop.HasBuilding() && IsPositionInWorld(currentMousePosition.x, currentMousePosition.y))
     {
+        // get layers
+        auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
+        const auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
+        const auto& mixedLayer{ GetLayer(WorldLayerType::TERRAIN_AND_BUILDINGS) };
+
         // get building
         const auto& building{ context->originalResourcesManager->GetBuildingById(m_worldGui->selectedWorkshop.buildingId) };
 
@@ -324,7 +325,7 @@ void mdcii::world::World::OnMouseMoved()
         }
 
         // only add it if there is no other building on the position
-        if (IsAlreadyBuildingOnPosition(currentMousePosition.x, currentMousePosition.y, building))
+        if (buildingsLayer.IsAlreadyBuildingOnPosition(currentMousePosition.x, currentMousePosition.y, building))
         {
             Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] There is an other building on the position x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
             return;
@@ -336,11 +337,6 @@ void mdcii::world::World::OnMouseMoved()
             Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] It cannot be built on the coast on position x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
             return;
         }
-
-        // get layers
-        auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
-        const auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
-        const auto& mixedLayer{ GetLayer(WorldLayerType::TERRAIN_AND_BUILDINGS) };
 
         ///////////////
         // Delete
@@ -738,23 +734,6 @@ bool mdcii::world::World::IsBuildingOutsideTheWorld(const int t_x, const int t_y
         for (auto x{ 0 }; x < t_building.size.w; ++x)
         {
             if (!IsPositionInWorld(t_x + x, t_y + y))
-            {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
-bool mdcii::world::World::IsAlreadyBuildingOnPosition(const int t_x, const int t_y, const data::Building& t_building) const
-{
-    for (auto y{ 0 }; y < t_building.size.h; ++y)
-    {
-        for (auto x{ 0 }; x < t_building.size.w; ++x)
-        {
-            const auto& tile{ GetLayer(WorldLayerType::BUILDINGS).GetTile(t_x + x, t_y + y) };
-            if (tile.HasBuilding())
             {
                 return true;
             }

@@ -101,6 +101,22 @@ const mdcii::world::Tile& mdcii::world::WorldLayer::GetTile(const int t_x, const
     return *tiles.at(m_world->GetMapIndex(t_x, t_y));
 }
 
+bool mdcii::world::WorldLayer::IsAlreadyBuildingOnPosition(const int t_x, const int t_y, const data::Building& t_building) const
+{
+    for (auto y{ 0 }; y < t_building.size.h; ++y)
+    {
+        for (auto x{ 0 }; x < t_building.size.w; ++x)
+        {
+            if (GetTile(t_x + x, t_y + y).HasBuilding())
+            {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
 //-------------------------------------------------
 // Setter
 //-------------------------------------------------
@@ -120,12 +136,38 @@ void mdcii::world::WorldLayer::SetLayerTypeByString(const std::string& t_layerTy
 }
 
 //-------------------------------------------------
-// Add/replace tile
+// Tiles
 //-------------------------------------------------
 
 void mdcii::world::WorldLayer::AddTileFromJson(const nlohmann::json& t_json)
 {
     tiles.emplace_back(std::make_unique<Tile>(t_json.get<Tile>()));
+}
+
+void mdcii::world::WorldLayer::ResetTilePointersAt(const std::array<int32_t, NR_OF_ROTATIONS>& t_instanceIds)
+{
+    const auto id0{ t_instanceIds.at(magic_enum::enum_integer(Rotation::DEG0)) };
+    MDCII_ASSERT(tiles.at(id0), "[WorldLayer::ResetTilePointers()] Null pointer.")
+    tiles.at(id0).reset();
+
+    magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+        const auto r{ magic_enum::enum_integer(t_rotation) };
+        MDCII_ASSERT(sortedTiles.at(r).at(t_instanceIds.at(r)), "[WorldLayer::ResetTilePointers()] Null pointer.")
+        sortedTiles.at(r).at(t_instanceIds.at(r)).reset();
+    });
+}
+
+void mdcii::world::WorldLayer::StoreTile(std::unique_ptr<Tile> t_tile)
+{
+    const auto id0{ t_tile->instanceIds.at(magic_enum::enum_integer(Rotation::DEG0)) };
+    MDCII_ASSERT(!tiles.at(id0), "[WorldLayer::ReplaceTileWith()] Invalid pointer.")
+    tiles.at(id0) = std::move(t_tile);
+
+    magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+        const auto r{ magic_enum::enum_integer(t_rotation) };
+        MDCII_ASSERT(!sortedTiles.at(r).at(tiles.at(id0)->instanceIds.at(r)), "[WorldLayer::ReplaceTileWith()] Invalid pointer.")
+        sortedTiles.at(r).at(tiles.at(id0)->instanceIds.at(r)) = tiles.at(id0);
+    });
 }
 
 //-------------------------------------------------
