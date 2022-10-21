@@ -18,6 +18,7 @@
 
 #include <imgui.h>
 #include "GameState.h"
+#include "Game.h"
 #include "Log.h"
 #include "ogl/OpenGL.h"
 #include "ogl/Window.h"
@@ -56,6 +57,7 @@ void mdcii::GameState::Input()
 
 void mdcii::GameState::Update()
 {
+    // nothing to do at the moment
 }
 
 void mdcii::GameState::Render()
@@ -80,7 +82,7 @@ void mdcii::GameState::Init()
 {
     Log::MDCII_LOG_DEBUG("[GameState::Init()] Initializing game state.");
 
-    m_world = std::make_shared<world::World>("data/ExampleMap.json", context);
+    m_world = std::make_shared<world::World>(Game::INI.Get<std::string>("content", "save_map"), context);
 
     Log::MDCII_LOG_DEBUG("[GameState::Init()] The game state was successfully initialized.");
 }

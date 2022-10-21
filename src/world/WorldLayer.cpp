@@ -29,15 +29,22 @@
 // Json
 //-------------------------------------------------
 
-void mdcii::world::to_json(nlohmann::json& t_json, const Tile& t_tile)
+void mdcii::world::to_json(nlohmann::json& t_json, const std::shared_ptr<Tile>& t_tile)
 {
-    t_json = nlohmann::json{
-        { "id", t_tile.buildingId },
-        { "rotation", magic_enum::enum_integer(t_tile.rotation) },
-        { "x", t_tile.x },
-        { "y", t_tile.y },
-        { "connected", t_tile.connectedTiles }
-    };
+    if (t_tile)
+    {
+        t_json = nlohmann::json{
+            { "id", t_tile->buildingId },
+            { "rotation", magic_enum::enum_integer(t_tile->rotation) },
+            { "x", t_tile->x },
+            { "y", t_tile->y },
+            { "connected", t_tile->connectedTiles }
+        };
+    }
+    else
+    {
+        t_json = nullptr;
+    }
 }
 
 void mdcii::world::from_json(const nlohmann::json& t_json, Tile& t_tile)
@@ -150,7 +157,7 @@ void mdcii::world::WorldLayer::ResetTilePointersAt(const std::array<int32_t, NR_
     MDCII_ASSERT(tiles.at(id0), "[WorldLayer::ResetTilePointers()] Null pointer.")
     tiles.at(id0).reset();
 
-    magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+    magic_enum::enum_for_each<Rotation>([this, &t_instanceIds](const Rotation t_rotation) {
         const auto r{ magic_enum::enum_integer(t_rotation) };
         MDCII_ASSERT(sortedTiles.at(r).at(t_instanceIds.at(r)), "[WorldLayer::ResetTilePointers()] Null pointer.")
         sortedTiles.at(r).at(t_instanceIds.at(r)).reset();
@@ -163,7 +170,7 @@ void mdcii::world::WorldLayer::StoreTile(std::unique_ptr<Tile> t_tile)
     MDCII_ASSERT(!tiles.at(id0), "[WorldLayer::ReplaceTileWith()] Invalid pointer.")
     tiles.at(id0) = std::move(t_tile);
 
-    magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+    magic_enum::enum_for_each<Rotation>([this, &id0](const Rotation t_rotation) {
         const auto r{ magic_enum::enum_integer(t_rotation) };
         MDCII_ASSERT(!sortedTiles.at(r).at(tiles.at(id0)->instanceIds.at(r)), "[WorldLayer::ReplaceTileWith()] Invalid pointer.")
         sortedTiles.at(r).at(tiles.at(id0)->instanceIds.at(r)) = tiles.at(id0);
@@ -246,7 +253,7 @@ void mdcii::world::WorldLayer::SortTiles()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::SortTiles()] Sorting tiles by index.");
 
-    magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+    magic_enum::enum_for_each<Rotation>([this](const Rotation t_rotation) {
         // enum to int
         const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
@@ -267,11 +274,11 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateModelMatrices()] Create model matrices.");
 
-    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
+    magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
         Model_Matrices_For_Each_Rotation matricesForRotations;
 
         // for each rotation in the zoom create the model matrices
-        magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+        magic_enum::enum_for_each<Rotation>([this, &t_zoom, &matricesForRotations](const Rotation t_rotation) {
             const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
             Model_Matrices matrices;
             int32_t instance{ 0 };
@@ -290,9 +297,9 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
     });
 
     // create a hashmap to find the instance ID for each rotated position
-    magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+    magic_enum::enum_for_each<Rotation>([this](const Rotation t_rotation) {
         const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-        for (auto& tile : sortedTiles.at(rotationInt))
+        for (const auto& tile : sortedTiles.at(rotationInt))
         {
             // the position at Deg0 is at a different instance depending on the rotation
             instanceIds.emplace(glm::ivec3(tile->worldXDeg0, tile->worldYDeg0, rotationInt), tile->instanceIds.at(rotationInt));
@@ -306,13 +313,13 @@ void mdcii::world::WorldLayer::CreateTextureInfo()
 
     MDCII_ASSERT(instancesToRender >= 0, "[WorldLayer::CreateTextureInfo()] Invalid number of instances to render.")
 
-    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
+    magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
         Texture_Atlas_Numbers texAtlasNrs(instancesToRender, glm::ivec4(-1));
         Texture_Offsets_For_Each_Rotation texOffsetsForRotations;
         Texture_Heights texHeights(instancesToRender, glm::vec4(-1.0f));
 
         // for each rotation in the zoom
-        magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+        magic_enum::enum_for_each<Rotation>([this, &texAtlasNrs, &t_zoom, &texHeights, &texOffsetsForRotations](const Rotation t_rotation) {
             const auto rotation{ magic_enum::enum_integer(t_rotation) };
             Texture_Offsets textureOffsets(instancesToRender, glm::vec2(0.0f));
 

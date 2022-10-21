@@ -43,7 +43,7 @@ namespace mdcii::world
     // Json
     //-------------------------------------------------
 
-    void to_json(nlohmann::json& t_json, const Tile& t_tile);
+    void to_json(nlohmann::json& t_json, const std::shared_ptr<Tile>& t_tile);
     void from_json(const nlohmann::json& t_json, Tile& t_tile);
 
     //-------------------------------------------------

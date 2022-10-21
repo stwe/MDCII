@@ -168,7 +168,7 @@ void mdcii::Game::Start()
     const auto startStateId{ magic_enum::enum_cast<state::StateId>(INI.Get<std::string>("game", "start_state")) };
     if (startStateId.has_value())
     {
-        switch (startStateId.value()) // NOLINT(clang-diagnostic-switch-enum)
+        switch (startStateId.value())
         {
         case state::StateId::GAME:
             m_stateStack->PushState(state::StateId::GAME);

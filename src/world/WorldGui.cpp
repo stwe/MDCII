@@ -152,7 +152,7 @@ void mdcii::world::WorldGui::AllWorkshopsGui()
 
                 const auto textureWidth{ bauhausBshTextures.at(building.baugfx)->width };
                 const auto textureHeight{ bauhausBshTextures.at(building.baugfx)->height };
-                const auto textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(bauhausBshTextures.at(building.baugfx)->textureId)) };
+                auto* const textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(bauhausBshTextures.at(building.baugfx)->textureId)) };
 
                 if (ImGui::ImageButton(
                         textureId,
@@ -181,9 +181,10 @@ void mdcii::world::WorldGui::SaveGameGui()
 {
     const auto fileName{ Game::RESOURCES_REL_PATH + Game::INI.Get<std::string>("content", "save_map") };
 
-    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame").c_str()))
+    const auto str{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame") + fileName };
+    if (ImGui::Button(str.c_str()))
     {
-        Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] Start saving the game...");
+        Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] Start saving the game in file {}...", fileName);
 
         nlohmann::json j;
         nlohmann::json t = nlohmann::json::object();
@@ -194,8 +195,6 @@ void mdcii::world::WorldGui::SaveGameGui()
             throw MDCII_EXCEPTION("[WorldGui::SaveGameGui()] Error while opening file " + fileName + ".");
         }
 
-        // todo
-        /*
         j["width"] = m_world->width;
         j["height"] = m_world->height;
         j["layers"] = nlohmann::json::array();
@@ -203,11 +202,10 @@ void mdcii::world::WorldGui::SaveGameGui()
         b["buildings"] = m_world->GetLayer(WorldLayerType::BUILDINGS).tiles;
         j["layers"].push_back(t);
         j["layers"].push_back(b);
-        */
 
         file << j;
 
-        Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] The game has been successfully saved.");
+        Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] The game has been successfully saved in file {}.", fileName);
     }
 }
 
