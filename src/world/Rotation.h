@@ -91,8 +91,7 @@ namespace mdcii::world
 
     inline Rotation int_to_rotation(const int t_rotation)
     {
-        const auto rotation{ magic_enum::enum_cast<Rotation>(t_rotation) };
-        if (rotation.has_value())
+        if (const auto rotation{ magic_enum::enum_cast<Rotation>(t_rotation) }; rotation.has_value())
         {
             return rotation.value();
         }

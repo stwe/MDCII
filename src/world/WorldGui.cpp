@@ -52,8 +52,8 @@ mdcii::world::WorldGui::~WorldGui() noexcept
 void mdcii::world::WorldGui::RotateGui() const
 {
     std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentMapRotation") };
-    rotStr.append(std::string(": %s"));
-    ImGui::Text(rotStr.c_str(), magic_enum::enum_name(m_world->rotation).data());
+    std::string worldRotation{ magic_enum::enum_name(m_world->rotation) };
+    ImGui::TextUnformatted(rotStr.append(": ").append(worldRotation).c_str());
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateMapRight").c_str()))
     {
@@ -71,8 +71,8 @@ void mdcii::world::WorldGui::RotateGui() const
 void mdcii::world::WorldGui::ZoomGui() const
 {
     std::string zoomStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentMapZoom") };
-    zoomStr.append(std::string(": %s"));
-    ImGui::Text(zoomStr.c_str(), magic_enum::enum_name(m_world->zoom).data());
+    std::string worldZoom{ magic_enum::enum_name(m_world->zoom) };
+    ImGui::TextUnformatted(zoomStr.append(": ").append(worldZoom).c_str());
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ZoomMapIn").c_str()))
     {
@@ -89,7 +89,7 @@ void mdcii::world::WorldGui::ZoomGui() const
 
 void mdcii::world::WorldGui::ShowActionsGui() const
 {
-    magic_enum::enum_for_each<World::Action>([&](auto t_val) {
+    magic_enum::enum_for_each<World::Action>([this](auto t_val) {
         constexpr World::Action action{ t_val };
         constexpr int i{ magic_enum::enum_integer(action) };
 
@@ -101,12 +101,9 @@ void mdcii::world::WorldGui::ShowActionsGui() const
             ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.8f, 0.8f)));
 
             ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), World::ACTION_NAMES[i].data()).c_str());
-            if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+            if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && action != m_world->currentAction)
             {
-                if (action != m_world->currentAction)
-                {
-                    m_world->actionButtons[i] = !m_world->actionButtons[i];
-                }
+                m_world->actionButtons[i] = !m_world->actionButtons[i];
             }
 
             ImGui::PopStyleColor(3);
@@ -150,13 +147,9 @@ void mdcii::world::WorldGui::AllWorkshopsGui()
                 const auto& building{ m_world->context->originalResourcesManager->GetBuildingById(std::stoi(k)) };
                 const auto& bauhausBshTextures{ m_world->context->originalResourcesManager->GetBauhausBshByZoom(m_bauhausZoom) };
 
-                const auto textureWidth{ bauhausBshTextures.at(building.baugfx)->width };
-                const auto textureHeight{ bauhausBshTextures.at(building.baugfx)->height };
-                auto* const textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(bauhausBshTextures.at(building.baugfx)->textureId)) };
-
                 if (ImGui::ImageButton(
-                        textureId,
-                        ImVec2(static_cast<float>(textureWidth), static_cast<float>(textureHeight)),
+                        reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(bauhausBshTextures.at(building.baugfx)->textureId)),
+                        ImVec2(static_cast<float>(bauhausBshTextures.at(building.baugfx)->width), static_cast<float>(bauhausBshTextures.at(building.baugfx)->height)),
                         ImVec2(0.0f, 0.0f),
                         ImVec2(1.0f, 1.0f),
                         -1,
@@ -245,9 +238,8 @@ void mdcii::world::WorldGui::WorkshopGui()
     }
 
     std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentBuildingRotation") };
-    rotStr.append(std::string(": %s"));
-
-    ImGui::Text(rotStr.c_str(), rotation_to_string(selectedWorkshop.rotation));
+    std::string workshopRotation{ rotation_to_string(selectedWorkshop.rotation) };
+    ImGui::TextUnformatted(rotStr.append(": ").append(workshopRotation).c_str());
 
     ImGui::Separator();
 

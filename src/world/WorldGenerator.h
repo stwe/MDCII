@@ -19,8 +19,6 @@
 #pragma once
 
 #include <string>
-#include <memory>
-#include <vector>
 
 //-------------------------------------------------
 // WorldGenerator
@@ -28,8 +26,22 @@
 
 namespace mdcii::world
 {
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
+    /**
+     * Forward declaration struct Tile.
+     */
     struct Tile;
 
+    //-------------------------------------------------
+    // WorldGenerator
+    //-------------------------------------------------
+
+    /**
+     * Creates a world map.
+     */
     class WorldGenerator
     {
     public:
@@ -71,19 +83,12 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Creates the world.
+         * Creates a world.
          *
          * @param t_width The width of the world to create.
          * @param t_height The height of the world to create.
          * @param t_fileName The filename under which to save the world.
          */
-        void Init(int t_width, int t_height, const std::string& t_fileName);
-
-        //-------------------------------------------------
-        // Create
-        //-------------------------------------------------
-
-        std::vector<std::shared_ptr<Tile>> CreateTerrainLayer();
-        std::vector<std::shared_ptr<Tile>> CreateBuildingsLayer();
+        static void Init(int t_width, int t_height, const std::string& t_fileName);
     };
 }

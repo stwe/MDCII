@@ -20,6 +20,7 @@
 #include "Tile.h"
 #include "Log.h"
 #include "Game.h"
+#include "WorldLayer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -76,8 +77,8 @@ void mdcii::world::WorldGenerator::Init(const int t_width, const int t_height, c
             terrainTile->rotation = Rotation::DEG0;
             terrainTile->x = 0;
             terrainTile->y = 0;
-            //terrainTile->mapX = x;
-            //terrainTile->mapY = y;
+            terrainTile->worldXDeg0 = x;
+            terrainTile->worldYDeg0 = y;
 
             // store grass as default
             terrainTiles.emplace_back(std::move(terrainTile));
@@ -127,7 +128,6 @@ void mdcii::world::WorldGenerator::Init(const int t_width, const int t_height, c
     }
 
     // write
-    /*
     j["width"] = t_width;
     j["height"] = t_height;
     j["layers"] = nlohmann::json::array();
@@ -135,23 +135,8 @@ void mdcii::world::WorldGenerator::Init(const int t_width, const int t_height, c
     b["buildings"] = buildingsTiles;
     j["layers"].push_back(t);
     j["layers"].push_back(b);
-    */
 
     file << j;
 
     Log::MDCII_LOG_DEBUG("[WorldGenerator::Init()] The map file was created successfully and saved in {}.", fileName);
-}
-
-//-------------------------------------------------
-// Create
-//-------------------------------------------------
-
-std::vector<std::shared_ptr<mdcii::world::Tile>> mdcii::world::WorldGenerator::CreateTerrainLayer()
-{
-    return {};
-}
-
-std::vector<std::shared_ptr<mdcii::world::Tile>> mdcii::world::WorldGenerator::CreateBuildingsLayer()
-{
-    return {};
 }

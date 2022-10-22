@@ -233,7 +233,7 @@ void mdcii::world::MousePicker::Init()
 
     m_renderer = std::make_unique<renderer::TileRenderer>();
 
-    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
+    magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
         // store cursor file names
         const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<Zoom>(t_zoom))) };
         const auto cursorFileName{ "textures/" + zoomStr + "/frame_" + zoomStr + ".png" };
@@ -245,7 +245,9 @@ void mdcii::world::MousePicker::Init()
 
         Log::MDCII_LOG_DEBUG("[MousePicker::Init()] Load cheat image for zoom {}...", magic_enum::enum_name(t_zoom));
 
-        int width, height, channels;
+        int width;
+        int height;
+        int channels;
         auto* cornerImage{ stbi_load(path.c_str(), &width, &height, &channels, 0) };
         if (!cornerImage)
         {
@@ -278,7 +280,7 @@ void mdcii::world::MousePicker::AddListeners(const ogl::Window& t_window, const 
     event::EventManager::event_dispatcher.appendListener(
         event::MdciiEventType::MOUSE_ENTER,
         eventpp::argumentAdapter<void(const event::MouseEnterEvent&)>(
-            [&](const event::MouseEnterEvent& t_event) {
+            [this](const event::MouseEnterEvent& t_event) {
                 OnMouseEnter(t_event.enter);
             }
         )
@@ -288,7 +290,7 @@ void mdcii::world::MousePicker::AddListeners(const ogl::Window& t_window, const 
     event::EventManager::event_dispatcher.appendListener(
         event::MdciiEventType::MOUSE_MOVED,
         eventpp::argumentAdapter<void(const event::MouseMovedEvent&)>(
-            [&](const event::MouseMovedEvent& t_event) {
+            [this, &t_window, &t_camera]([[maybe_unused]] const event::MouseMovedEvent& t_event) {
                 OnMouseMoved(t_window, t_camera);
             }
         )
@@ -303,9 +305,7 @@ void mdcii::world::MousePicker::CleanUp() const
 {
     Log::MDCII_LOG_DEBUG("[MousePicker::CleanUp()] CleanUp MousePicker.");
 
-    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
-        Log::MDCII_LOG_DEBUG("[MousePicker::CleanUp()] CleanUp cheat image for zoom {}.", magic_enum::enum_name(t_zoom));
-
+    magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
         stbi_image_free(m_cheatImages.at(magic_enum::enum_integer(t_zoom)));
     });
 }

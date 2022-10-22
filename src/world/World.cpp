@@ -102,8 +102,7 @@ void mdcii::world::World::RenderImGui()
     ImGui::SameLine();
     ImGui::RadioButton("Terrain && Buildings", &e, 2);
 
-    auto layer{ magic_enum::enum_cast<WorldLayerType>(e) };
-    if (layer.has_value())
+    if (auto layer{ magic_enum::enum_cast<WorldLayerType>(e) }; layer.has_value())
     {
         const auto l{ layer.value() };
         m_renderLayerType = l;
@@ -348,9 +347,9 @@ void mdcii::world::World::OnMouseMoved()
 
             for (const auto& tile : m_tilesToAdd)
             {
-                magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
+                magic_enum::enum_for_each<Zoom>([this, &terrainLayer, &tile](const Zoom t_zoom) {
                     const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
-                    magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+                    magic_enum::enum_for_each<Rotation>([this, &terrainLayer, &zoomInt, &tile, &t_zoom](const Rotation t_rotation) {
                         const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
                         const auto& tm{ terrainLayer.modelMatrices.at(zoomInt).at(rotationInt) };
@@ -411,14 +410,14 @@ void mdcii::world::World::OnMouseMoved()
                     PreCalcTile(*tile, currentMousePosition.x + x, currentMousePosition.y + y);
 
                     // copy the instances Ids from Terrain Layer Tile at the same position
-                    magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+                    magic_enum::enum_for_each<Rotation>([&tile, &terrainLayer, &currentMousePosition, &x, &y](const Rotation t_rotation) {
                         const auto r{ magic_enum::enum_integer(t_rotation) };
                         tile->instanceIds.at(r) = terrainLayer.instanceIds.at(glm::ivec3(currentMousePosition.x + x, currentMousePosition.y + y, r)) ;
                     });
 
                     // create Gpu data for each zoom and each rotation
-                    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
-                        magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+                    magic_enum::enum_for_each<Zoom>([this, &mixedLayer, &tile](const Zoom t_zoom) {
+                        magic_enum::enum_for_each<Rotation>([this, &mixedLayer, &tile, &t_zoom](const Rotation t_rotation) {
                             const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
                             // create new Gpu data
@@ -489,7 +488,7 @@ void mdcii::world::World::AddListeners()
     event::EventManager::event_dispatcher.appendListener(
         event::MdciiEventType::MOUSE_BUTTON_PRESSED,
         eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>(
-            [&](const event::MouseButtonPressedEvent& t_event) {
+            [this](const event::MouseButtonPressedEvent& t_event) {
                 if (t_event.button == 0)
                 {
                     OnLeftMouseButtonPressed();
@@ -502,7 +501,7 @@ void mdcii::world::World::AddListeners()
     event::EventManager::event_dispatcher.appendListener(
         event::MdciiEventType::MOUSE_MOVED,
         eventpp::argumentAdapter<void(const event::MouseMovedEvent&)>(
-            [&](const event::MouseMovedEvent& t_event) {
+            [this]([[maybe_unused]] const event::MouseMovedEvent& t_event) {
                 OnMouseMoved();
             }
         )
@@ -622,8 +621,8 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
     layer->heights = terrainLayer.heights;
 
     // merge Gpu data
-    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
-        magic_enum::enum_for_each<Rotation>([&](const Rotation t_rotation) {
+    magic_enum::enum_for_each<Zoom>([&layer, &buildingsLayer](const Zoom t_zoom) {
+        magic_enum::enum_for_each<Rotation>([&t_zoom, &layer, &buildingsLayer](const Rotation t_rotation) {
             const auto z{ magic_enum::enum_integer(t_zoom) };
             const auto r{ magic_enum::enum_integer(t_rotation) };
 
@@ -690,7 +689,7 @@ void mdcii::world::World::PreCalcTile(Tile& t_tile, const int t_x, const int t_y
     t_tile.worldYDeg0 = t_y;
 
     // pre-calculate the position on the screen for each zoom and each rotation
-    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
+    magic_enum::enum_for_each<Zoom>([this, &t_x, &t_y, &t_tile](const Zoom t_zoom) {
         std::array<glm::vec2, NR_OF_ROTATIONS> positions{};
 
         positions[0] = WorldToScreen(t_x, t_y, t_zoom, Rotation::DEG0);

@@ -57,7 +57,7 @@ glm::vec2 mdcii::world::TileAtlas::GetTextureOffset(const int t_textureIndex, co
 
 void mdcii::world::TileAtlas::Init()
 {
-    magic_enum::enum_for_each<Zoom>([&](const Zoom t_zoom) {
+    magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
         LoadAtlasImages(t_zoom, IMAGES.at(magic_enum::enum_integer(t_zoom)));
     });
 }
@@ -89,9 +89,12 @@ void mdcii::world::TileAtlas::LoadAtlasImages(const Zoom t_zoom, const int t_nrO
     std::vector<unsigned char*> images;
     for (auto i{ 0 }; i < t_nrOfImages; ++i)
     {
-        int width, height, channels;
+        int width;
+        int height;
+        int channels;
         const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name(t_zoom))) };
-        const auto fileName{ Game::RESOURCES_REL_PATH + "atlas/" + zoomStr + "/" + std::to_string(i) + ".png" };
+        const auto path{ Game::RESOURCES_REL_PATH + "atlas/" };
+        const auto fileName{ path + zoomStr + "/" + std::to_string(i) + ".png" };
 
         auto* image{ stbi_load(fileName.c_str(), &width, &height, &channels, 0) };
         if (!image)
