@@ -166,7 +166,9 @@ void mdcii::Game::Start() const
     // register states
     m_stateStack->RegisterState<MainMenuState>(state::StateId::MAIN_MENU);
     m_stateStack->RegisterState<WorldGeneratorState>(state::StateId::WORLD_GENERATOR);
-    m_stateStack->RegisterState<GameState>(state::StateId::GAME);
+    m_stateStack->RegisterState<GameState>(state::StateId::NEW_GAME);
+    m_stateStack->RegisterState<GameState>(state::StateId::LOADED_GAME);
+    m_stateStack->RegisterState<GameState>(state::StateId::EXAMPLE_GAME);
 
     // push the configured start state
     if (const auto startStateId{ magic_enum::enum_cast<state::StateId>(INI.Get<std::string>("game", "start_state")) }; startStateId.has_value())
@@ -179,11 +181,17 @@ void mdcii::Game::Start() const
         case state::StateId::WORLD_GENERATOR:
             m_stateStack->PushState(state::StateId::WORLD_GENERATOR);
             break;
-        case state::StateId::GAME:
-            m_stateStack->PushState(state::StateId::GAME);
+        case state::StateId::NEW_GAME:
+            m_stateStack->PushState(state::StateId::NEW_GAME);
+            break;
+        case state::StateId::LOADED_GAME:
+            m_stateStack->PushState(state::StateId::LOADED_GAME);
+            break;
+        case state::StateId::EXAMPLE_GAME:
+            m_stateStack->PushState(state::StateId::EXAMPLE_GAME);
             break;
         default:
-            m_stateStack->PushState(state::StateId::GAME);
+            m_stateStack->PushState(state::StateId::NEW_GAME);
         }
     }
     else

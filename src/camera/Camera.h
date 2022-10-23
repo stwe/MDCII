@@ -20,6 +20,7 @@
 
 #include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
+#include "event/EventManager.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -99,6 +100,15 @@ namespace mdcii::camera
 
     private:
         //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * The key pressed listener handle.
+         */
+        decltype(event::EventManager::event_dispatcher)::Handle m_keyPressed;
+
+        //-------------------------------------------------
         // Helper
         //-------------------------------------------------
 
@@ -115,5 +125,14 @@ namespace mdcii::camera
          * Adds listeners to change camera position.
          */
         void AddListeners();
+
+        //-------------------------------------------------
+        // Clean up
+        //-------------------------------------------------
+
+        /**
+         * Clean up.
+         */
+        void CleanUp() const;
     };
 }

@@ -75,24 +75,22 @@ void mdcii::MainMenuState::RenderImGui()
         context->stateStack->PushState(state::StateId::WORLD_GENERATOR);
     }
 
-    // todo
-
     if (ImGui::Button("Start the example"))
     {
         context->stateStack->PopState(GetStateId());
-        context->stateStack->PushState(state::StateId::GAME);
+        context->stateStack->PushState(state::StateId::EXAMPLE_GAME);
     }
 
     if (ImGui::Button("Start a new game"))
     {
         context->stateStack->PopState(GetStateId());
-        context->stateStack->PushState(state::StateId::GAME);
+        context->stateStack->PushState(state::StateId::NEW_GAME);
     }
 
     if (ImGui::Button("Load an existing game"))
     {
         context->stateStack->PopState(GetStateId());
-        context->stateStack->PushState(state::StateId::GAME);
+        context->stateStack->PushState(state::StateId::LOADED_GAME);
     }
 
     if (ImGui::Button("Exit"))

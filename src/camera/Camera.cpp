@@ -20,7 +20,6 @@
 #include "Game.h"
 #include "Camera.h"
 #include "Log.h"
-#include "event/EventManager.h"
 #include "eventpp/utilities/argumentadapter.h"
 #include "world/Zoom.h"
 
@@ -45,6 +44,8 @@ mdcii::camera::Camera::Camera()
 mdcii::camera::Camera::~Camera() noexcept
 {
     Log::MDCII_LOG_DEBUG("[Camera::~Camera()] Destruct Camera.");
+
+    CleanUp();
 }
 
 //-------------------------------------------------
@@ -97,10 +98,10 @@ void mdcii::camera::Camera::AddListeners()
 {
     Log::MDCII_LOG_DEBUG("[Camera::AddListeners()] Add listeners.");
 
-    event::EventManager::event_dispatcher.appendListener(
+    m_keyPressed = event::EventManager::event_dispatcher.appendListener(
         event::MdciiEventType::KEY_PRESSED,
         eventpp::argumentAdapter<void(const event::KeyPressedEvent&)>(
-            [&](const event::KeyPressedEvent& t_event) {
+            [this](const event::KeyPressedEvent& t_event) {
                 if (t_event.key == GLFW_KEY_W || t_event.key == GLFW_KEY_UP)
                 {
                     ProcessKeyboard(Direction::UP);
@@ -123,4 +124,15 @@ void mdcii::camera::Camera::AddListeners()
             }
         )
     );
+}
+
+//-------------------------------------------------
+// Clean up
+//-------------------------------------------------
+
+void mdcii::camera::Camera::CleanUp() const
+{
+    Log::MDCII_LOG_DEBUG("[Camera::CleanUp()] CleanUp Camera.");
+
+    event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::KEY_PRESSED, m_keyPressed);
 }

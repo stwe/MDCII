@@ -172,7 +172,7 @@ void mdcii::world::WorldGui::AllWorkshopsGui()
 
 void mdcii::world::WorldGui::SaveGameGui()
 {
-    const auto fileName{ Game::RESOURCES_REL_PATH + Game::INI.Get<std::string>("content", "save_map") };
+    const auto fileName{ Game::RESOURCES_REL_PATH + Game::INI.Get<std::string>("content", "save_game_map") };
 
     const auto str{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame") + fileName };
     if (ImGui::Button(str.c_str()))

@@ -21,6 +21,7 @@
 #include "Zoom.h"
 #include "ogl/Window.h"
 #include "camera/Camera.h"
+#include "event/EventManager.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -133,6 +134,16 @@ namespace mdcii::world
          * Each zoom level has a different mouse cursor texture.
          */
         std::array<std::string, NR_OF_ZOOMS> m_cursorFileNames{};
+
+        /**
+         * The mouse enter listener handle.
+         */
+        decltype(event::EventManager::event_dispatcher)::Handle m_mouseEnter;
+
+        /**
+         * The mouse moved listener handle.
+         */
+        decltype(event::EventManager::event_dispatcher)::Handle m_mouseMoved;
 
         //-------------------------------------------------
         // Event handler

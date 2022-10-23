@@ -24,9 +24,9 @@
 #include "MdciiAssert.h"
 #include "MousePicker.h"
 #include "WorldGui.h"
-#include "event/EventManager.h"
 #include "eventpp/utilities/argumentadapter.h"
 #include "state/State.h"
+#include "state/StateStack.h"
 #include "renderer/WorldRenderer.h"
 #include "file/OriginalResourcesManager.h"
 
@@ -34,8 +34,9 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::World::World(std::string t_mapFilePath, std::shared_ptr<state::Context> t_context)
+mdcii::world::World::World(std::string t_mapFilePath, std::shared_ptr<state::Context> t_context, const state::StateId t_stateId)
     : context{ std::move(t_context) }
+    , m_stateId{ t_stateId }
     , m_mapFilePath{ std::move(t_mapFilePath) }
 {
     Log::MDCII_LOG_DEBUG("[World::World()] Create World.");
@@ -47,6 +48,8 @@ mdcii::world::World::World(std::string t_mapFilePath, std::shared_ptr<state::Con
 mdcii::world::World::~World() noexcept
 {
     Log::MDCII_LOG_DEBUG("[World::~World()] Destruct World.");
+
+    CleanUp();
 }
 
 //-------------------------------------------------
@@ -91,6 +94,14 @@ void mdcii::world::World::Render() const
 void mdcii::world::World::RenderImGui()
 {
     ImGui::Begin("World");
+
+    ImGui::Separator();
+
+    if (ImGui::Button("Back to main menu"))
+    {
+        context->stateStack->PopState(m_stateId);
+        context->stateStack->PushState(state::StateId::MAIN_MENU);
+    }
 
     ImGui::Separator();
 
@@ -485,7 +496,7 @@ void mdcii::world::World::AddListeners()
     Log::MDCII_LOG_DEBUG("[World::AddListeners()] Add listeners.");
 
     // OnLeftMouseButtonPressed
-    event::EventManager::event_dispatcher.appendListener(
+    m_mouseButtonPressed = event::EventManager::event_dispatcher.appendListener(
         event::MdciiEventType::MOUSE_BUTTON_PRESSED,
         eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>(
             [this](const event::MouseButtonPressedEvent& t_event) {
@@ -498,7 +509,7 @@ void mdcii::world::World::AddListeners()
     );
 
     // OnMouseMoved
-    event::EventManager::event_dispatcher.appendListener(
+    m_mouseMoved = event::EventManager::event_dispatcher.appendListener(
         event::MdciiEventType::MOUSE_MOVED,
         eventpp::argumentAdapter<void(const event::MouseMovedEvent&)>(
             [this]([[maybe_unused]] const event::MouseMovedEvent& t_event) {
@@ -757,4 +768,16 @@ bool mdcii::world::World::IsBuildingOnWaterOrCoast(const int t_x, const int t_y,
     }
 
     return false;
+}
+
+//-------------------------------------------------
+// Clean up
+//-------------------------------------------------
+
+void mdcii::world::World::CleanUp() const
+{
+    Log::MDCII_LOG_DEBUG("[World::CleanUp()] CleanUp World.");
+
+    event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_BUTTON_PRESSED, m_mouseButtonPressed);
+    event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_MOVED, m_mouseMoved);
 }

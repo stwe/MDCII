@@ -31,7 +31,9 @@ namespace mdcii::state
     {
         MAIN_MENU,
         WORLD_GENERATOR,
-        GAME,
+        NEW_GAME,
+        LOADED_GAME,
+        EXAMPLE_GAME,
         ALL
     };
 }

@@ -19,6 +19,7 @@
 #pragma once
 
 #include "WorldLayer.h"
+#include "event/EventManager.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -30,6 +31,11 @@ namespace mdcii::state
      * Forward declaration struct Context.
      */
     struct Context;
+
+    /**
+     * Forward declaration enum class StateId.
+     */
+    enum class StateId;
 }
 
 namespace mdcii::renderer
@@ -168,8 +174,9 @@ namespace mdcii::world
          *
          * @param t_mapFilePath The path to the Json map file.
          * @param t_context Access to shared objects.
+         * @param t_stateId The parent StateId.
          */
-        World(std::string t_mapFilePath, std::shared_ptr<state::Context> t_context);
+        World(std::string t_mapFilePath, std::shared_ptr<state::Context> t_context, state::StateId t_stateId);
 
         World(const World& t_other) = delete;
         World(World&& t_other) noexcept = delete;
@@ -294,6 +301,11 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
+         * The parent StateId.
+         */
+        state::StateId m_stateId;
+
+        /**
          * The path to the Json map file.
          */
         std::string m_mapFilePath;
@@ -322,6 +334,16 @@ namespace mdcii::world
          * ImGui menus for the game.
          */
         std::unique_ptr<WorldGui> m_worldGui;
+
+        /**
+         * The mouse button pressed listener handle.
+         */
+        decltype(event::EventManager::event_dispatcher)::Handle m_mouseButtonPressed;
+
+        /**
+         * The mouse moved listener handle.
+         */
+        decltype(event::EventManager::event_dispatcher)::Handle m_mouseMoved;
 
         //-------------------------------------------------
         // Event handler
@@ -407,5 +429,14 @@ namespace mdcii::world
          * @return True or false, depending on whether the building is over the coast.
          */
         [[nodiscard]] bool IsBuildingOnWaterOrCoast(int t_x, int t_y, const data::Building& t_building) const;
+
+        //-------------------------------------------------
+        // Clean up
+        //-------------------------------------------------
+
+        /**
+         * Clean up.
+         */
+        void CleanUp() const;
     };
 }

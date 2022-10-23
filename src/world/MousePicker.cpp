@@ -21,7 +21,6 @@
 #include "World.h"
 #include "MdciiAssert.h"
 #include "Game.h"
-#include "event/EventManager.h"
 #include "eventpp/utilities/argumentadapter.h"
 #include "renderer/TileRenderer.h"
 #include "renderer/RenderUtils.h"
@@ -277,7 +276,7 @@ void mdcii::world::MousePicker::AddListeners(const ogl::Window& t_window, const 
     Log::MDCII_LOG_DEBUG("[MousePicker::AddListeners()] Add listeners.");
 
     // OnMouseEnter
-    event::EventManager::event_dispatcher.appendListener(
+    m_mouseEnter = event::EventManager::event_dispatcher.appendListener(
         event::MdciiEventType::MOUSE_ENTER,
         eventpp::argumentAdapter<void(const event::MouseEnterEvent&)>(
             [this](const event::MouseEnterEvent& t_event) {
@@ -287,7 +286,7 @@ void mdcii::world::MousePicker::AddListeners(const ogl::Window& t_window, const 
     );
 
     // OnMouseMoved
-    event::EventManager::event_dispatcher.appendListener(
+    m_mouseMoved = event::EventManager::event_dispatcher.appendListener(
         event::MdciiEventType::MOUSE_MOVED,
         eventpp::argumentAdapter<void(const event::MouseMovedEvent&)>(
             [this, &t_window, &t_camera]([[maybe_unused]] const event::MouseMovedEvent& t_event) {
@@ -308,4 +307,7 @@ void mdcii::world::MousePicker::CleanUp() const
     magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
         stbi_image_free(m_cheatImages.at(magic_enum::enum_integer(t_zoom)));
     });
+
+    event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_ENTER, m_mouseEnter);
+    event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_MOVED, m_mouseMoved);
 }
