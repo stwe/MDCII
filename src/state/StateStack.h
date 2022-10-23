@@ -104,14 +104,14 @@ namespace mdcii::state
         /**
          * Registers a State factory function so that it can be created on demand.
          *
-         * @tparam T The derived state class.
+         * @tparam T The derived State class.
          * @param t_id The unique identifier of the State object.
          */
         template<typename T>
         void RegisterState(const StateId t_id)
         {
             Log::MDCII_LOG_DEBUG("[StateStack::RegisterState()] Register factory function for state {}.", magic_enum::enum_name(t_id));
-            m_factories[t_id] = [this, t_id]() { return std::make_unique<T>(t_id, this, m_context); };
+            m_factories[t_id] = [this, t_id]() { return std::make_unique<T>(t_id, m_context); };
         }
 
         //-------------------------------------------------
@@ -180,12 +180,12 @@ namespace mdcii::state
         //-------------------------------------------------
 
         /**
-         * Takes an Id of a state, and returns a smart pointer to a newly
-         * created object of the corresponding state class.
+         * Takes an Id of a State, and returns a smart pointer to a newly
+         * created object of the corresponding State class.
          *
-         * @param t_id The unique identifier of a state.
+         * @param t_id The unique identifier of a State.
          *
-         * @return The created state object.
+         * @return The created State object.
          */
         std::unique_ptr<State> CreateState(StateId t_id);
 

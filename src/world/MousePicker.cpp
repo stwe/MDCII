@@ -76,7 +76,7 @@ void mdcii::world::MousePicker::Render(const ogl::Window& t_window, const camera
 
 void mdcii::world::MousePicker::RenderImGui() const
 {
-    ImGui::Begin("MousePicker");
+    ImGui::Begin("Mouse Picker");
 
     ImGui::Text("Current position x: %d, y: %d", currentPosition.x, currentPosition.y);
     ImGui::Text("Old position x: %d, y: %d", lastPosition.x, lastPosition.y);

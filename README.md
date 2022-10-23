@@ -6,19 +6,22 @@ Spielewelt zu erschaffen.
 
 Es wird das Originalspiel benötigt. In der `config.ini` müssen die Pfade angepasst werden.
 
+Für einen Programmstart werden sog. Tile-Atlas Grafiken benötigt, die mit diesem Repository nicht verteilt werden.
+Diese Dateien können jedoch mit `Benno4j` erstellt werden.
+
 **Der erste Start dauert länger, da die `haeuser.cod` eingelesen wird.**
 
-**Update vom 16.10.2022**
-Der Renderer wurde komplett neu geschrieben. Damit können große Karten dargestellt und editiert werden.
-Es ist möglich, Handwerksbetriebe in beliebiger Rotation in der ebenfalls rotierbaren Welt frei zu platzieren.
-Dabei wird die bereits vorhandene Bebauung berücksichtigt. Es sind drei Zoomstufen möglich (SGFX, MGFX und GFX).
-Für einen Programmstart werden sog. Tile-Atlas Grafiken benötigt, die nicht verteilt werden und sich daher nicht
-im Repository befinden. Die Dateien können Stand heute nur mit `Benno4j` erstellt werden.
+**Update vom 23.10.2022**
+Der Renderer wurde neu geschrieben. Damit können große Karten samt Bebauung in drei Zoomstufen (SGFX, MGFX, GFX)
+und vier möglichen Rotationen (DEG0, DEG90, DEG180 und DEG270) dargestellt, editiert, gespeichert und geladen werden.
+
+Es ist möglich, Handwerksbetriebe in der Welt zu platzieren. Dabei wird die bereits vorhandene Bebauung
+berücksichtigt. Das System ist skalierbar, d.h. es können in Zukunft problemlos weitere Welten/Inseln und Bebauungen
+(Häuser/Strassen etc.) hinzugefügt werden.
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ffb066523c4064ab513bef2f8d4628)](https://www.codacy.com/gh/stwe/MDCII/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stwe/MDCII&amp;utm_campaign=Badge_Grade)
 
-
-<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/25-06-2022.png" width="500" height="400" />
+<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/23-10-2022.png" width="500" height="400" />
 
 
 ## Build

@@ -19,60 +19,39 @@
 #pragma once
 
 #include "state/State.h"
-#include "Game.h"
 
 //-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii::world
-{
-    /**
-     * Forward declaration class World.
-     */
-    class World;
-}
-
-//-------------------------------------------------
-// GameState
+// MainMenuState
 //-------------------------------------------------
 
 namespace mdcii
 {
     /**
-     * A state to use the new renderer.
+     * A state to show the main menu.
      */
-    class GameState: public state::State
+    class MainMenuState: public state::State
     {
     public:
-        //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        inline static const std::string EXAMPLE_GAME_MAP{ Game::INI.Get<std::string>("content", "example_game_map") };
-        inline static const std::string NEW_GAME_MAP{ Game::INI.Get<std::string>("content", "new_game_map") };
-        inline static const std::string SAVE_GAME_MAP{ Game::INI.Get<std::string>("content", "save_game_map") };
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        GameState() = delete;
+        MainMenuState() = delete;
 
         /**
-         * Constructs a new GameState object.
+         * Constructs a new MainMenuState object.
          *
          * @param t_id The unique identifier of the State.
          * @param t_context The holder of shared objects.
          */
-        GameState(state::StateId t_id, std::shared_ptr<state::Context> t_context);
+        MainMenuState(state::StateId t_id, std::shared_ptr<state::Context> t_context);
 
-        GameState(const GameState& t_other) = delete;
-        GameState(GameState&& t_other) noexcept = delete;
-        GameState& operator=(const GameState& t_other) = delete;
-        GameState& operator=(GameState&& t_other) noexcept = delete;
+        MainMenuState(const MainMenuState& t_other) = delete;
+        MainMenuState(MainMenuState&& t_other) noexcept = delete;
+        MainMenuState& operator=(const MainMenuState& t_other) = delete;
+        MainMenuState& operator=(MainMenuState&& t_other) noexcept = delete;
 
-        ~GameState() noexcept override;
+        ~MainMenuState() noexcept override;
 
         //-------------------------------------------------
         // Override
@@ -86,15 +65,6 @@ namespace mdcii
     protected:
 
     private:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * The World object.
-         */
-        std::shared_ptr<world::World> m_world;
-
         //-------------------------------------------------
         // Init
         //-------------------------------------------------

@@ -27,16 +27,25 @@
 
 namespace mdcii::ogl
 {
+    /**
+     * Forward declaration class Window.
+     */
     class Window;
 }
 
 namespace mdcii::camera
 {
+    /**
+     * Forward declaration class Camera.
+     */
     class Camera;
 }
 
 namespace mdcii::file
 {
+    /**
+     * Forward declaration class OriginalResourcesManager.
+     */
     class OriginalResourcesManager;
 }
 
@@ -46,6 +55,15 @@ namespace mdcii::file
 
 namespace mdcii::state
 {
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
+    /**
+     * Forward declaration class StateStack.
+     */
+    class StateStack;
+
     //-------------------------------------------------
     // Context
     //-------------------------------------------------
@@ -70,23 +88,16 @@ namespace mdcii::state
         std::shared_ptr<ogl::Window> window;
         std::shared_ptr<camera::Camera> camera;
         std::shared_ptr<file::OriginalResourcesManager> originalResourcesManager;
+
+        StateStack* stateStack{ nullptr };
     };
-
-    //-------------------------------------------------
-    // Forward declarations
-    //-------------------------------------------------
-
-    /**
-     * Forward declaration class StateStack.
-     */
-    class StateStack;
 
     //-------------------------------------------------
     // State
     //-------------------------------------------------
 
     /**
-     * The base class for all states.
+     * The base class for all States.
      */
     class State
     {
@@ -96,7 +107,7 @@ namespace mdcii::state
         //-------------------------------------------------
 
         /**
-         * Works as a holder of shared objects between all states.
+         * Works as a holder of shared objects between all States.
          */
         std::shared_ptr<Context> context;
 
@@ -110,10 +121,9 @@ namespace mdcii::state
          * Constructs a new State object.
          *
          * @param t_id The unique identifier.
-         * @param t_stateStack The parent StateStack object.
          * @param t_context The holder of shared objects.
          */
-        State(StateId t_id, StateStack* t_stateStack, std::shared_ptr<Context> t_context);
+        State(StateId t_id, std::shared_ptr<Context> t_context);
 
         State(const State& t_other) = delete;
         State(State&& t_other) noexcept = delete;
@@ -126,7 +136,7 @@ namespace mdcii::state
         // Getter
         //-------------------------------------------------
 
-        [[nodiscard]] StateId GetId() const { return m_id; }
+        [[nodiscard]] StateId GetStateId() const { return m_id; }
 
         //-------------------------------------------------
         // Logic
@@ -145,13 +155,6 @@ namespace mdcii::state
         virtual void EndFrame() const;
 
     protected:
-        //-------------------------------------------------
-        // Stack operations
-        //-------------------------------------------------
-
-        void RequestStackPush(StateId t_id) const;
-        void RequestStackPop() const;
-        void RequestStateClear() const;
 
     private:
         //-------------------------------------------------
@@ -159,13 +162,8 @@ namespace mdcii::state
         //-------------------------------------------------
 
         /**
-         * The unique identifier of this state.
+         * The unique identifier of this State.
          */
         StateId m_id;
-
-        /**
-         * Pointer to the parent StateStack object.
-         */
-        StateStack* m_stateStack{ nullptr };
     };
 }

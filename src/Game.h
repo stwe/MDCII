@@ -150,21 +150,21 @@ namespace mdcii
         //-------------------------------------------------
 
         void Init();
-        void Input();
-        void Update();
-        void Render();
+        void Input() const;
+        void Update() const;
+        void Render() const;
 
         //-------------------------------------------------
         // Game loop
         //-------------------------------------------------
 
-        void GameLoop();
+        void GameLoop() const;
 
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
 
         void CreateSharedObjects();
-        void Start();
+        void Start() const;
     };
 }

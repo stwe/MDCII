@@ -17,58 +17,76 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <imgui.h>
-#include "GameState.h"
+#include "WorldGeneratorState.h"
 #include "ogl/OpenGL.h"
 #include "ogl/Window.h"
-#include "world/World.h"
 #include "state/StateStack.h"
+#include "world/WorldGenerator.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::GameState::GameState(const state::StateId t_id, std::shared_ptr<state::Context> t_context)
+mdcii::WorldGeneratorState::WorldGeneratorState(state::StateId t_id, std::shared_ptr<state::Context> t_context)
     : State(t_id, std::move(t_context))
 {
-    Log::MDCII_LOG_DEBUG("[GameState::GameState()] Create GameState.");
+    Log::MDCII_LOG_DEBUG("[WorldGeneratorState::WorldGeneratorState()] Create WorldGeneratorState.");
 
     Init();
 }
 
-mdcii::GameState::~GameState() noexcept
+mdcii::WorldGeneratorState::~WorldGeneratorState() noexcept
 {
-    Log::MDCII_LOG_DEBUG("[GameState::~GameState()] Destruct GameState.");
+    Log::MDCII_LOG_DEBUG("[WorldGeneratorState::~WorldGeneratorState()] Destruct WorldGeneratorState.");
 }
 
 //-------------------------------------------------
 // Override
 //-------------------------------------------------
 
-void mdcii::GameState::Input()
+void mdcii::WorldGeneratorState::Input()
 {
     // ESC for quit
     if (context->window->IsKeyPressed(GLFW_KEY_ESCAPE))
     {
-        Log::MDCII_LOG_DEBUG("[GameState::Input()] Starts POP GameState.");
+        Log::MDCII_LOG_DEBUG("[WorldGeneratorState::Input()] Starts POP WorldGeneratorState.");
         context->stateStack->PopState(GetStateId());
     }
 }
 
-void mdcii::GameState::Update()
+void mdcii::WorldGeneratorState::Update()
 {
     // nothing to do at the moment
 }
 
-void mdcii::GameState::Render()
+void mdcii::WorldGeneratorState::Render()
 {
-    m_world->Render();
+    // nothing to do at the moment
 }
 
-void mdcii::GameState::RenderImGui()
+void mdcii::WorldGeneratorState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    m_world->RenderImGui();
+    ImGui::Begin("World Generator");
+
+    static int width{ 8 };
+    static int height{ 8 };
+    ImGui::SliderInt("World width: ", &width, 8, 128);
+    ImGui::SliderInt("World height:", &height, 8, 128);
+
+    if (ImGui::Button("Generate a new world in data/NewWorld.json"))
+    {
+        world::WorldGenerator worldGenerator{ width, height, "data/NewWorld.json" };
+    }
+
+    if (ImGui::Button("Back to main menu"))
+    {
+        context->stateStack->PopState(GetStateId());
+        context->stateStack->PushState(state::StateId::MAIN_MENU);
+    }
+
+    ImGui::End();
 
     ogl::Window::ImGuiEnd();
 }
@@ -77,11 +95,11 @@ void mdcii::GameState::RenderImGui()
 // Init
 //-------------------------------------------------
 
-void mdcii::GameState::Init()
+void mdcii::WorldGeneratorState::Init()
 {
-    Log::MDCII_LOG_DEBUG("[GameState::Init()] Initializing game state.");
+    Log::MDCII_LOG_DEBUG("[WorldGeneratorState::Init()] Initializing world generator state.");
 
-    m_world = std::make_shared<world::World>(NEW_GAME_MAP, context);
 
-    Log::MDCII_LOG_DEBUG("[GameState::Init()] The game state was successfully initialized.");
+    Log::MDCII_LOG_DEBUG("[WorldGeneratorState::Init()] The world generator state was successfully initialized.");
+
 }

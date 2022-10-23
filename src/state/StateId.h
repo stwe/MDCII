@@ -29,8 +29,9 @@ namespace mdcii::state
      */
     enum class StateId
     {
-        MAIN_MENU, // the main menu
-        GAME,      // the game
-        ALL        // all State objects
+        MAIN_MENU,
+        WORLD_GENERATOR,
+        GAME,
+        ALL
     };
 }

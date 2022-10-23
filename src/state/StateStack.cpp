@@ -28,6 +28,9 @@ mdcii::state::StateStack::StateStack(std::shared_ptr<Context> t_context)
     : m_context{ std::move(t_context) }
 {
     Log::MDCII_LOG_DEBUG("[StateStack::StateStack()] Create StateStack.");
+
+    MDCII_ASSERT(m_context, "[StateStack::StateStack()] Null pointer.")
+    m_context->stateStack = this;
 }
 
 mdcii::state::StateStack::~StateStack() noexcept
@@ -119,17 +122,17 @@ void mdcii::state::StateStack::ApplyPendingChanges()
         case Action::PUSH:
             // add element at the end
             m_stack.emplace_back(CreateState(change.id));
-            Log::MDCII_LOG_DEBUG("Stack size is {} after PUSH state {}.", m_stack.size(), magic_enum::enum_name(change.id));
+            Log::MDCII_LOG_INFO("Stack size is {} after PUSH state {}.", m_stack.size(), magic_enum::enum_name(change.id));
             break;
         case Action::POP:
             // removes the last element in the vector
-            MDCII_ASSERT(change.id == m_stack.back()->GetId(), "[StateStack::ApplyPendingChanges()] Invalid POP operation.")
+            MDCII_ASSERT(change.id == m_stack.back()->GetStateId(), "[StateStack::ApplyPendingChanges()] Invalid POP operation.")
             m_stack.pop_back();
-            Log::MDCII_LOG_DEBUG("Stack size is {} after POP state {}.", m_stack.size(), magic_enum::enum_name(change.id));
+            Log::MDCII_LOG_INFO("Stack size is {} after POP state {}.", m_stack.size(), magic_enum::enum_name(change.id));
             break;
         case Action::CLEAR:
             m_stack.clear();
-            Log::MDCII_LOG_DEBUG("Stack size is {} after CLEAR all states.", m_stack.size());
+            Log::MDCII_LOG_INFO("Stack size is {} after CLEAR all states.", m_stack.size());
             break;
         }
     }

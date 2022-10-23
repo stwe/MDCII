@@ -19,6 +19,8 @@
 #include <magic_enum.hpp>
 #include "Game.h"
 #include "MdciiException.h"
+#include "MainMenuState.h"
+#include "WorldGeneratorState.h"
 #include "GameState.h"
 #include "camera/Camera.h"
 #include "state/StateStack.h"
@@ -66,17 +68,17 @@ void mdcii::Game::Init()
     Log::MDCII_LOG_DEBUG("[Game::Init()] The game was successfully initialized.");
 }
 
-void mdcii::Game::Input()
+void mdcii::Game::Input() const
 {
     m_stateStack->Input();
 }
 
-void mdcii::Game::Update()
+void mdcii::Game::Update() const
 {
     m_stateStack->Update();
 }
 
-void mdcii::Game::Render()
+void mdcii::Game::Render() const
 {
     m_stateStack->Render();
 }
@@ -85,7 +87,7 @@ void mdcii::Game::Render()
 // Game loop
 //-------------------------------------------------
 
-void mdcii::Game::GameLoop()
+void mdcii::Game::GameLoop() const
 {
     Log::MDCII_LOG_DEBUG("[Game::GameLoop()] Starting the game loop.");
 
@@ -154,22 +156,29 @@ void mdcii::Game::CreateSharedObjects()
     m_window = std::make_shared<ogl::Window>();
     m_camera = std::make_shared<camera::Camera>();
     m_originalResourcesManager = std::make_shared<file::OriginalResourcesManager>();
+    m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::Context>(m_window, m_camera, m_originalResourcesManager));
 }
 
-void mdcii::Game::Start()
+void mdcii::Game::Start() const
 {
     Log::MDCII_LOG_DEBUG("[Game::Start()] Starts the game.");
 
     // register states
-    m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::Context>(m_window, m_camera, m_originalResourcesManager));
+    m_stateStack->RegisterState<MainMenuState>(state::StateId::MAIN_MENU);
+    m_stateStack->RegisterState<WorldGeneratorState>(state::StateId::WORLD_GENERATOR);
     m_stateStack->RegisterState<GameState>(state::StateId::GAME);
 
-    // push a start state
-    const auto startStateId{ magic_enum::enum_cast<state::StateId>(INI.Get<std::string>("game", "start_state")) };
-    if (startStateId.has_value())
+    // push the configured start state
+    if (const auto startStateId{ magic_enum::enum_cast<state::StateId>(INI.Get<std::string>("game", "start_state")) }; startStateId.has_value())
     {
         switch (startStateId.value())
         {
+        case state::StateId::MAIN_MENU:
+            m_stateStack->PushState(state::StateId::MAIN_MENU);
+            break;
+        case state::StateId::WORLD_GENERATOR:
+            m_stateStack->PushState(state::StateId::WORLD_GENERATOR);
+            break;
         case state::StateId::GAME:
             m_stateStack->PushState(state::StateId::GAME);
             break;

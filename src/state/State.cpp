@@ -27,14 +27,13 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::state::State::State(const StateId t_id, StateStack* t_stateStack, std::shared_ptr<Context> t_context)
+mdcii::state::State::State(const StateId t_id, std::shared_ptr<Context> t_context)
     : context{ std::move(t_context) }
     , m_id{ t_id }
-    , m_stateStack{ t_stateStack }
 {
-    MDCII_ASSERT(m_stateStack, "[State::State()] Null pointer")
-
     Log::MDCII_LOG_DEBUG("[State::State()] Create State.");
+
+    MDCII_ASSERT(context, "[State::State()] Null pointer")
 }
 
 mdcii::state::State::~State() noexcept
@@ -55,23 +54,4 @@ void mdcii::state::State::StartFrame()
 void mdcii::state::State::EndFrame() const
 {
     context->window->SwapBuffersAndCallEvents();
-}
-
-//-------------------------------------------------
-// Stack operations
-//-------------------------------------------------
-
-void mdcii::state::State::RequestStackPush(const StateId t_id) const
-{
-    m_stateStack->PushState(t_id);
-}
-
-void mdcii::state::State::RequestStackPop() const
-{
-    m_stateStack->PopState(m_id);
-}
-
-void mdcii::state::State::RequestStateClear() const
-{
-    m_stateStack->ClearStates();
 }

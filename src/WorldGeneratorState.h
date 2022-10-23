@@ -19,60 +19,39 @@
 #pragma once
 
 #include "state/State.h"
-#include "Game.h"
 
 //-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii::world
-{
-    /**
-     * Forward declaration class World.
-     */
-    class World;
-}
-
-//-------------------------------------------------
-// GameState
+// WorldGeneratorState
 //-------------------------------------------------
 
 namespace mdcii
 {
     /**
-     * A state to use the new renderer.
+     * A state to generate a world map.
      */
-    class GameState: public state::State
+    class WorldGeneratorState: public state::State
     {
     public:
-        //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        inline static const std::string EXAMPLE_GAME_MAP{ Game::INI.Get<std::string>("content", "example_game_map") };
-        inline static const std::string NEW_GAME_MAP{ Game::INI.Get<std::string>("content", "new_game_map") };
-        inline static const std::string SAVE_GAME_MAP{ Game::INI.Get<std::string>("content", "save_game_map") };
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        GameState() = delete;
+        WorldGeneratorState() = delete;
 
         /**
-         * Constructs a new GameState object.
+         * Constructs a new WorldGeneratorState object.
          *
          * @param t_id The unique identifier of the State.
          * @param t_context The holder of shared objects.
          */
-        GameState(state::StateId t_id, std::shared_ptr<state::Context> t_context);
+        WorldGeneratorState(state::StateId t_id, std::shared_ptr<state::Context> t_context);
 
-        GameState(const GameState& t_other) = delete;
-        GameState(GameState&& t_other) noexcept = delete;
-        GameState& operator=(const GameState& t_other) = delete;
-        GameState& operator=(GameState&& t_other) noexcept = delete;
+        WorldGeneratorState(const WorldGeneratorState& t_other) = delete;
+        WorldGeneratorState(WorldGeneratorState&& t_other) noexcept = delete;
+        WorldGeneratorState& operator=(const WorldGeneratorState& t_other) = delete;
+        WorldGeneratorState& operator=(WorldGeneratorState&& t_other) noexcept = delete;
 
-        ~GameState() noexcept override;
+        ~WorldGeneratorState() noexcept override;
 
         //-------------------------------------------------
         // Override
@@ -86,15 +65,6 @@ namespace mdcii
     protected:
 
     private:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * The World object.
-         */
-        std::shared_ptr<world::World> m_world;
-
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
