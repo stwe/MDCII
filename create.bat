@@ -2,8 +2,8 @@
 echo.
 echo Auswahl
 echo.
-echo 1. Debug Visual Studio
-echo 2. Release Visual Studio
+echo 1. Debug Visual Studio 2022
+echo 2. Release Visual Studio 2022
 echo 3. Debug MinGW
 echo 4. Release MinGW
 echo 5. Ende
@@ -16,15 +16,15 @@ if errorlevel 2 goto rv
 if errorlevel 1 goto dv
 
 :dv
-echo "Debug Visual Studio"
+echo "Debug Visual Studio 2022"
 conan install conanfile_win.txt -s build_type=Debug
-premake5 vs2019
+premake5 vs2022
 goto ende
 
 :rv
-echo "Release Visual Studio"
+echo "Release Visual Studio 2022"
 conan install conanfile_win.txt -s build_type=Release
-premake5 vs2019
+premake5 vs2022
 goto ende
 
 :dm
