@@ -56,7 +56,7 @@ Setting up a C++ project is always a pain. A few notes for the following explana
 - It might be a good idea to use a newer or other version of ImGui or Protocol Buffers. It's not (for now)!
 Additional things would have to be changed for this.
 
-#### Win with Visual Studio and Premake
+#### Win with Visual Studio 2022 and Premake 5
 
 The Conan profile should look like this:
 
@@ -110,7 +110,7 @@ $ conan install conanfile_win.txt -s build_type=Release
 followed by:
 
 ```bash
-$ premake5 vs2019
+$ premake5 vs2022
 ```
 
 

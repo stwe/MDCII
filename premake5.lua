@@ -58,7 +58,7 @@ project "MDCII"
         systemversion "latest"
 
     filter "configurations:Debug"
-        defines { "MDCII_DEBUG_BUILD", "GLFW_INCLUDE_NONE", "_CRT_SECURE_NO_WARNINGS" }
+        defines { "MDCII_DEBUG_BUILD", "GLFW_INCLUDE_NONE", "_CRT_SECURE_NO_WARNINGS", "GLM_ENABLE_EXPERIMENTAL" }
         runtime "Debug"
         symbols "On"
 

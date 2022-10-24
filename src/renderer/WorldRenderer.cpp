@@ -266,7 +266,7 @@ void mdcii::renderer::WorldRenderer::AddModelMatrices(const world::Zoom t_zoom, 
 
         auto ssbo{ std::make_unique<ogl::buffer::Ssbo>() };
         ssbo->Bind();
-        ssbo->StoreData(modelMatrices.size() * sizeof(glm::mat4), modelMatrices.data());
+        ssbo->StoreData(static_cast<uint32_t>(modelMatrices.size()) * sizeof(glm::mat4), modelMatrices.data());
         ssbo->Unbind();
         ssbos.emplace_back(std::move(ssbo));
     });
