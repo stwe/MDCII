@@ -31,8 +31,15 @@ void mdcii::data::Text::Init()
 {
     Log::MDCII_LOG_DEBUG("[Text::Init()] Start initializing the Text class...");
 
-    ReadTexts();
-    ReadMenus();
+    if (m_buildings.empty())
+    {
+        ReadTexts();
+    }
+
+    if (m_menus.empty())
+    {
+        ReadMenus();
+    }
 
     Log::MDCII_LOG_DEBUG("[Text::Init()] Text class successfully initialized.");
 }
@@ -43,7 +50,7 @@ void mdcii::data::Text::Init()
 
 void mdcii::data::Text::ReadTexts()
 {
-    Log::MDCII_LOG_DEBUG("[Text::ReadFileData()] Start reading Json data...");
+    Log::MDCII_LOG_DEBUG("[Text::ReadTexts()] Start reading Json data...");
 
     nlohmann::json j = ReadJsonFromFile(Game::RESOURCES_REL_PATH + "data/Texts.json");
 
@@ -71,7 +78,7 @@ void mdcii::data::Text::ReadTexts()
         }
     }
 
-    Log::MDCII_LOG_DEBUG("[Text::ReadFileData()] Json data read successfully.");
+    Log::MDCII_LOG_DEBUG("[Text::ReadTexts()] Json data read successfully.");
 }
 
 void mdcii::data::Text::ReadMenus()

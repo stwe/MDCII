@@ -23,6 +23,7 @@
 #include <tuple>
 #include "Texture.h"
 #include "ShaderProgram.h"
+#include "Log.h"
 
 //-------------------------------------------------
 // ResourceManager
@@ -36,13 +37,6 @@ namespace mdcii::ogl::resource
     class ResourceManager
     {
     public:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        inline static std::map<std::string, std::unique_ptr<Texture>> textures;
-        inline static std::map<std::string, std::unique_ptr<ShaderProgram>> shader_programs;
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -60,12 +54,13 @@ namespace mdcii::ogl::resource
         static const Texture& LoadTexture(Args&&... t_args)
         {
             auto t{ std::make_tuple(t_args...) };
-            if (textures.count(std::get<0>(t)) == 0)
+            if (m_textures.count(std::get<0>(t)) == 0)
             {
-                textures.emplace(std::get<0>(t), std::make_unique<Texture>(std::forward<Args>(t_args)...));
+                m_textures.emplace(std::get<0>(t), std::make_unique<Texture>(std::forward<Args>(t_args)...));
+                Log::MDCII_LOG_DEBUG("[ResourceManager::LoadTexture()] Number of stored textures: {}.", m_textures.size());
             }
 
-            return *textures.at(std::get<0>(t));
+            return *m_textures.at(std::get<0>(t));
         }
 
         //-------------------------------------------------
@@ -77,6 +72,13 @@ namespace mdcii::ogl::resource
     protected:
 
     private:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        inline static std::map<std::string, std::unique_ptr<Texture>> m_textures;
+        inline static std::map<std::string, std::unique_ptr<ShaderProgram>> m_shader_programs;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------

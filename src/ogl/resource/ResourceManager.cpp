@@ -24,10 +24,11 @@
 
 mdcii::ogl::resource::ShaderProgram& mdcii::ogl::resource::ResourceManager::LoadShaderProgram(const std::string& t_path)
 {
-    if (shader_programs.count(t_path) == 0)
+    if (m_shader_programs.count(t_path) == 0)
     {
-        shader_programs.emplace(t_path, std::make_unique<ShaderProgram>(t_path));
+        m_shader_programs.emplace(t_path, std::make_unique<ShaderProgram>(t_path));
+        Log::MDCII_LOG_DEBUG("[ResourceManager::LoadShaderProgram()] Number of stored shaders: {}.", m_shader_programs.size());
     }
 
-    return *shader_programs.at(t_path);
+    return *m_shader_programs.at(t_path);
 }

@@ -18,43 +18,11 @@
 
 #pragma once
 
-#include <string>
-#include "world/Rotation.h"
-
 namespace mdcii::event
 {
     //-------------------------------------------------
     // Types
     //-------------------------------------------------
-
-    /**
-     * Represents the BauGfx after a selection from
-     * the menu or map.
-     */
-    struct SelectedBauGfx
-    {
-        /**
-         * The building Id.
-         */
-        int32_t buildingId{ -1 };
-
-        /**
-         * The bauGfx rotation.
-         */
-        world::Rotation rotation{ world::Rotation::DEG0 };
-
-        /**
-         * The translated label.
-         */
-        std::string name;
-
-        /**
-         * For better readability/convenience.
-         *
-         * @return True if a valid building Id is present.
-         */
-        [[nodiscard]] bool HasBuilding() const { return buildingId >= 0; }
-    };
 
     enum class MdciiEventType
     {
@@ -71,9 +39,6 @@ namespace mdcii::event
         MOUSE_MOVED,
         MOUSE_SCROLLED,
         MOUSE_ENTER,
-
-        // menu events
-        BAUGFX_SELECTED,
     };
 
     //-------------------------------------------------
@@ -176,21 +141,6 @@ namespace mdcii::event
             : enter{ t_enter }
         {
             type = MdciiEventType::MOUSE_ENTER;
-        }
-    };
-
-    //-------------------------------------------------
-    // Menu events
-    //-------------------------------------------------
-
-    struct BauGfxSelectedEvent: MdciiEvent
-    {
-        SelectedBauGfx selectedBauGfx;
-
-        explicit BauGfxSelectedEvent(SelectedBauGfx t_selectedBauGfx)
-            : selectedBauGfx{ std::move(t_selectedBauGfx) }
-        {
-            type = MdciiEventType::BAUGFX_SELECTED;
         }
     };
 }
