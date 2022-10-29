@@ -196,7 +196,7 @@ void mdcii::renderer::WorldRenderer::DeleteBuildingFromGpu(const world::Tile& t_
 void mdcii::renderer::WorldRenderer::DeleteBuildingFromGpu(std::vector<std::unique_ptr<world::Tile>>& t_tiles)
 {
     MDCII_ASSERT(!t_tiles.empty(), "[WorldRenderer::DeleteBuildingFromGpu()] No Tile objects given.")
-    for (const auto& tile: t_tiles)
+    for (const auto& tile : t_tiles)
     {
         DeleteBuildingFromGpu(*tile);
     }
@@ -211,7 +211,7 @@ void mdcii::renderer::WorldRenderer::DeleteBuildingFromGpu(const std::vector<int
     const auto& layer{ m_world->GetLayer(world::WorldLayerType::BUILDINGS) };
     for (const auto tileIndex : t_tileIndices)
     {
-        DeleteBuildingFromGpu(*layer.tiles[tileIndex] );
+        DeleteBuildingFromGpu(*layer.tiles[tileIndex]);
     }
 }
 
@@ -289,6 +289,17 @@ void mdcii::renderer::WorldRenderer::AddBuildingToGpu(
     }
 
     MDCII_ASSERT(t_tiles.size() == t_building.size.w * t_building.size.h, "[WorldRenderer::AddBuildingToGpu()] Invalid number of created tiles.")
+
+    std::vector<int32_t> connected;
+    for (const auto& tile : t_tiles)
+    {
+        connected.push_back(tile->indices[0]);
+    }
+
+    for (const auto& tile : t_tiles)
+    {
+        tile->connectedTiles = connected;
+    }
 }
 
 void mdcii::renderer::WorldRenderer::UpdateGpuData(
