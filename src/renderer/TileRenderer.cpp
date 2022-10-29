@@ -18,7 +18,6 @@
 
 #include "TileRenderer.h"
 #include "RenderUtils.h"
-#include "ogl/OpenGL.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/TextureUtils.h"
 

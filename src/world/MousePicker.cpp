@@ -24,6 +24,7 @@
 #include "eventpp/utilities/argumentadapter.h"
 #include "renderer/TileRenderer.h"
 #include "renderer/RenderUtils.h"
+#include "state/State.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/stb_image.h"
 
@@ -94,6 +95,11 @@ void mdcii::world::MousePicker::OnMouseMoved(const ogl::Window& t_window, const 
     {
         lastPosition = currentPosition;
         currentPosition = newPosition;
+        newTilePosition = true;
+    }
+    else
+    {
+        newTilePosition = false;
     }
 }
 
@@ -232,10 +238,16 @@ void mdcii::world::MousePicker::Init()
 
     m_renderer = std::make_unique<renderer::TileRenderer>();
 
+    // initial setup
+    if (glfwGetWindowAttrib(m_world->context->window->GetWindowHandle(), GLFW_HOVERED))
+    {
+        inWindow = true;
+    }
+
     magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
         // store cursor file names
         const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<Zoom>(t_zoom))) };
-        const auto cursorFileName{ "textures/" + zoomStr + "/frame_" + zoomStr + ".png" };
+        const auto cursorFileName{ "textures/" + zoomStr + "/red_" + zoomStr + ".png" };
         m_cursorFileNames.at(magic_enum::enum_integer(t_zoom)) = cursorFileName;
 
         // store cheat images

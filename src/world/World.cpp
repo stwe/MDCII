@@ -136,8 +136,31 @@ void mdcii::world::World::RenderImGui()
 
     if (currentAction == Action::BUILD)
     {
-        m_currentTileIndex = -1;
+        m_statusTileIndex = -1;
+        m_demolishTileIndex = -1;
+
         m_worldGui->AllWorkshopsGui();
+    }
+
+    if (currentAction == Action::DEMOLISH)
+    {
+        if (m_worldGui->selectedWorkshop.HasBuilding())
+        {
+            m_worldGui->selectedWorkshop.Reset();
+        }
+
+        if (m_demolishTileIndex >= 0)
+        {
+            const auto& buildingsTile{ *GetLayer(WorldLayerType::BUILDINGS).tiles.at(m_demolishTileIndex) };
+            if (buildingsTile.HasBuilding())
+            {
+                buildingsTile.connectedTiles.empty() ?
+                    worldRenderer->DeleteBuildingFromGpu(buildingsTile) :
+                    worldRenderer->DeleteBuildingFromGpu(buildingsTile.connectedTiles);
+            }
+        }
+
+        m_demolishTileIndex = -1;
     }
 
     if (currentAction == Action::STATUS)
@@ -147,25 +170,20 @@ void mdcii::world::World::RenderImGui()
             m_worldGui->selectedWorkshop.Reset();
         }
 
-        if (m_currentTileIndex >= 0)
+        if (m_statusTileIndex >= 0)
         {
-            const auto& terrainLayerTile{ *GetLayer(WorldLayerType::TERRAIN).tiles.at(m_currentTileIndex) };
-            const auto& buildingsLayerTile{ *GetLayer(WorldLayerType::BUILDINGS).tiles.at(m_currentTileIndex) };
+            const auto& terrainTile{ *GetLayer(WorldLayerType::TERRAIN).tiles.at(m_statusTileIndex) };
+            const auto& buildingsTile{ *GetLayer(WorldLayerType::BUILDINGS).tiles.at(m_statusTileIndex) };
 
-            if (buildingsLayerTile.HasBuilding())
-            {
-                buildingsLayerTile.RenderImGui();
-            }
-            else
-            {
-                terrainLayerTile.RenderImGui();
-            }
+            buildingsTile.HasBuilding() ? buildingsTile.RenderImGui() : terrainTile.RenderImGui();
         }
     }
 
     if (currentAction == Action::OPTIONS)
     {
-        m_currentTileIndex = -1;
+        m_statusTileIndex = -1;
+        m_demolishTileIndex = -1;
+
         if (m_worldGui->selectedWorkshop.HasBuilding())
         {
             m_worldGui->selectedWorkshop.Reset();
@@ -265,6 +283,46 @@ glm::ivec2 mdcii::world::World::RotatePosition(const int t_x, const int t_y, con
     return rotate_position(t_x, t_y, width, height, t_rotation);
 }
 
+void mdcii::world::World::PreCalcTile(Tile& t_tile, const int t_x, const int t_y) const
+{
+    // set world position for Deg0
+    t_tile.worldXDeg0 = t_x;
+    t_tile.worldYDeg0 = t_y;
+
+    // pre-calculate the position on the screen for each zoom and each rotation
+    magic_enum::enum_for_each<Zoom>([this, &t_x, &t_y, &t_tile](const Zoom t_zoom) {
+        std::array<glm::vec2, NR_OF_ROTATIONS> positions{};
+
+        positions[0] = WorldToScreen(t_x, t_y, t_zoom, Rotation::DEG0);
+        positions[1] = WorldToScreen(t_x, t_y, t_zoom, Rotation::DEG90);
+        positions[2] = WorldToScreen(t_x, t_y, t_zoom, Rotation::DEG180);
+        positions[3] = WorldToScreen(t_x, t_y, t_zoom, Rotation::DEG270);
+
+        t_tile.screenPositions.at(magic_enum::enum_integer(t_zoom)) = positions;
+    });
+
+    // pre-calculate the index for each rotation for sorting
+    t_tile.indices[0] = GetMapIndex(t_x, t_y, Rotation::DEG0);
+    t_tile.indices[1] = GetMapIndex(t_x, t_y, Rotation::DEG90);
+    t_tile.indices[2] = GetMapIndex(t_x, t_y, Rotation::DEG180);
+    t_tile.indices[3] = GetMapIndex(t_x, t_y, Rotation::DEG270);
+
+    // pre-calculate a gfx for each rotation
+    if (t_tile.HasBuilding())
+    {
+        const auto building{ context->originalResourcesManager->GetBuildingById(t_tile.buildingId) };
+        const auto gfx0{ building.gfx };
+
+        t_tile.gfxs.push_back(gfx0);
+        if (building.rotate > 0)
+        {
+            t_tile.gfxs.push_back(gfx0 + (1 * building.rotate));
+            t_tile.gfxs.push_back(gfx0 + (2 * building.rotate));
+            t_tile.gfxs.push_back(gfx0 + (3 * building.rotate));
+        }
+    }
+}
+
 //-------------------------------------------------
 // Event handler
 //-------------------------------------------------
@@ -277,13 +335,22 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
         return;
     }
 
+    // get current mouse position
     const auto& mousePosition{ mousePicker->currentPosition };
 
+    // status
     if (IsPositionInWorld(mousePosition.x, mousePosition.y) && currentAction == Action::STATUS)
     {
-        m_currentTileIndex = GetMapIndex(mousePosition.x, mousePosition.y);
+        m_statusTileIndex = GetMapIndex(mousePosition.x, mousePosition.y);
     }
 
+    // demolish
+    if (IsPositionInWorld(mousePosition.x, mousePosition.y) && currentAction == Action::DEMOLISH)
+    {
+        m_demolishTileIndex = GetMapIndex(mousePosition.x, mousePosition.y);
+    }
+
+    // build
     if (IsPositionInWorld(mousePosition.x, mousePosition.y) && currentAction == Action::BUILD && !m_tilesToAdd.empty())
     {
         auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
@@ -316,15 +383,13 @@ void mdcii::world::World::OnMouseMoved()
     // get current mouse position
     const auto& currentMousePosition{ mousePicker->currentPosition };
 
-    // condition to build: BUILD action + workshop selected + current mouse in the world?
-    if (currentAction == Action::BUILD && m_worldGui->selectedWorkshop.HasBuilding() && IsPositionInWorld(currentMousePosition.x, currentMousePosition.y))
+    // show building to create
+    if (currentAction == Action::BUILD &&
+        m_worldGui->selectedWorkshop.HasBuilding() &&
+        IsPositionInWorld(currentMousePosition.x, currentMousePosition.y) &&
+        mousePicker->newTilePosition)
     {
-        // get layers
-        auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
         const auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
-        const auto& mixedLayer{ GetLayer(WorldLayerType::TERRAIN_AND_BUILDINGS) };
-
-        // get building
         const auto& building{ context->originalResourcesManager->GetBuildingById(m_worldGui->selectedWorkshop.buildingId) };
 
         // only add if the entire building fits on the world
@@ -348,124 +413,14 @@ void mdcii::world::World::OnMouseMoved()
             return;
         }
 
-        ///////////////
-        // Delete
-        ///////////////
-
+        // delete/add building Gpu data
         if (!m_tilesToAdd.empty())
         {
-            Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] Delete building with Id {} from Gpu.", m_worldGui->selectedWorkshop.buildingId);
-
-            for (const auto& tile : m_tilesToAdd)
-            {
-                magic_enum::enum_for_each<Zoom>([this, &terrainLayer, &tile](const Zoom t_zoom) {
-                    const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
-                    magic_enum::enum_for_each<Rotation>([this, &terrainLayer, &zoomInt, &tile, &t_zoom](const Rotation t_rotation) {
-                        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-
-                        const auto& tm{ terrainLayer.modelMatrices.at(zoomInt).at(rotationInt) };
-                        const auto& ti{ terrainLayer.textureAtlasNumbers.at(zoomInt) };
-                        const auto& to{ terrainLayer.offsets.at(zoomInt).at(rotationInt) };
-                        const auto& th{ terrainLayer.heights.at(zoomInt) };
-
-                        // delete: update Gpu data BUILDINGS
-                        worldRenderer->UpdateGpuData(
-                            tile->instanceIds.at(rotationInt),
-                            WorldLayerType::BUILDINGS,
-                            t_zoom, t_rotation,
-                            glm::mat4(),
-                            -1,
-                            glm::vec2(-1.0f),
-                            -1.0f
-                        );
-
-                        // delete: update Gpu data TERRAIN_AND_BUILDINGS
-                        worldRenderer->UpdateGpuData(
-                            tile->instanceIds.at(rotationInt),
-                            WorldLayerType::TERRAIN_AND_BUILDINGS,
-                            t_zoom, t_rotation,
-                            tm.at(tile->instanceIds.at(rotationInt)),
-                            ti.at(tile->instanceIds.at(rotationInt))[rotationInt],
-                            to.at(tile->instanceIds.at(rotationInt)),
-                            th.at(tile->instanceIds.at(rotationInt))[rotationInt]
-                        );
-                    });
-                });
-            }
-
-            // clear vector
-            std::vector<std::unique_ptr<Tile>>().swap(m_tilesToAdd);
-            MDCII_ASSERT(m_tilesToAdd.empty(), "[World::OnMouseMoved()] Invalid number of tiles to add.")
+            worldRenderer->DeleteBuildingFromGpu(m_tilesToAdd);
         }
-
-        ///////////////
-        // Create
-        ///////////////
-
         if (m_tilesToAdd.empty())
         {
-            Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] Add building with Id {} to Gpu.", m_worldGui->selectedWorkshop.buildingId);
-
-            for (auto y{ 0 }; y < building.size.h; ++y)
-            {
-                for (auto x{ 0 }; x < building.size.w; ++x)
-                {
-                    // create a Tile pointer for each part of the building
-                    auto tile{ std::make_unique<Tile>() };
-                    tile->buildingId = m_worldGui->selectedWorkshop.buildingId;
-                    tile->rotation = m_worldGui->selectedWorkshop.rotation;
-                    tile->x = x;
-                    tile->y = y;
-
-                    // pre-calc and set screen positions / indices / gfx
-                    PreCalcTile(*tile, currentMousePosition.x + x, currentMousePosition.y + y);
-
-                    // copy the instances Ids from Terrain Layer Tile at the same position
-                    magic_enum::enum_for_each<Rotation>([&tile, &terrainLayer, &currentMousePosition, &x, &y](const Rotation t_rotation) {
-                        const auto r{ magic_enum::enum_integer(t_rotation) };
-                        tile->instanceIds.at(r) = terrainLayer.instanceIds.at(glm::ivec3(currentMousePosition.x + x, currentMousePosition.y + y, r)) ;
-                    });
-
-                    // create Gpu data for each zoom and each rotation
-                    magic_enum::enum_for_each<Zoom>([this, &mixedLayer, &tile](const Zoom t_zoom) {
-                        magic_enum::enum_for_each<Rotation>([this, &mixedLayer, &tile, &t_zoom](const Rotation t_rotation) {
-                            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-
-                            // create new Gpu data
-                            const auto modelMatrix{ mixedLayer.GetModelMatrix(*tile, t_zoom, t_rotation) };
-                            const auto atlasNr{ mixedLayer.GetTextureAtlasNr(*tile, t_zoom, t_rotation) };
-                            const auto texOffset{ mixedLayer.GetTextureOffset(*tile, t_zoom, t_rotation) };
-                            const auto texHeight{ mixedLayer.GetTextureHeight(*tile, t_zoom, t_rotation) };
-
-                            // add: update Gpu data BUILDINGS
-                            worldRenderer->UpdateGpuData(
-                                tile->instanceIds.at(rotationInt),
-                                WorldLayerType::BUILDINGS,
-                                t_zoom, t_rotation,
-                                modelMatrix,
-                                atlasNr,
-                                texOffset,
-                                texHeight
-                            );
-
-                            // add: update Gpu data TERRAIN_AND_BUILDINGS
-                            worldRenderer->UpdateGpuData(
-                                tile->instanceIds.at(rotationInt),
-                                WorldLayerType::TERRAIN_AND_BUILDINGS,
-                                t_zoom, t_rotation,
-                                modelMatrix,
-                                atlasNr,
-                                texOffset,
-                                texHeight
-                            );
-                        });
-                    });
-
-                    m_tilesToAdd.emplace_back(std::move(tile));
-                }
-            }
-
-            MDCII_ASSERT(m_tilesToAdd.size() == building.size.w * building.size.h, "[World::OnMouseMoved()] Invalid number of created tiles.")
+            worldRenderer->AddBuildingToGpu(building, m_worldGui->selectedWorkshop.rotation, currentMousePosition.x, currentMousePosition.y, m_tilesToAdd);
         }
     }
 }
@@ -691,46 +646,6 @@ void mdcii::world::World::CreateGridLayer()
     MDCII_ASSERT(layers.size() == 4, "[World::CreateGridLayer()] Invalid number of Layers.")
 
     Log::MDCII_LOG_DEBUG("[World::CreateGridLayer()] The Grid Layer has been created successfully.");
-}
-
-void mdcii::world::World::PreCalcTile(Tile& t_tile, const int t_x, const int t_y) const
-{
-    // set world position for Deg0
-    t_tile.worldXDeg0 = t_x;
-    t_tile.worldYDeg0 = t_y;
-
-    // pre-calculate the position on the screen for each zoom and each rotation
-    magic_enum::enum_for_each<Zoom>([this, &t_x, &t_y, &t_tile](const Zoom t_zoom) {
-        std::array<glm::vec2, NR_OF_ROTATIONS> positions{};
-
-        positions[0] = WorldToScreen(t_x, t_y, t_zoom, Rotation::DEG0);
-        positions[1] = WorldToScreen(t_x, t_y, t_zoom, Rotation::DEG90);
-        positions[2] = WorldToScreen(t_x, t_y, t_zoom, Rotation::DEG180);
-        positions[3] = WorldToScreen(t_x, t_y, t_zoom, Rotation::DEG270);
-
-        t_tile.screenPositions.at(magic_enum::enum_integer(t_zoom)) = positions;
-    });
-
-    // pre-calculate the index for each rotation for sorting
-    t_tile.indices[0] = GetMapIndex(t_x, t_y, Rotation::DEG0);
-    t_tile.indices[1] = GetMapIndex(t_x, t_y, Rotation::DEG90);
-    t_tile.indices[2] = GetMapIndex(t_x, t_y, Rotation::DEG180);
-    t_tile.indices[3] = GetMapIndex(t_x, t_y, Rotation::DEG270);
-
-    // pre-calculate a gfx for each rotation
-    if (t_tile.HasBuilding())
-    {
-        const auto building{ context->originalResourcesManager->GetBuildingById(t_tile.buildingId) };
-        const auto gfx0{ building.gfx };
-
-        t_tile.gfxs.push_back(gfx0);
-        if (building.rotate > 0)
-        {
-            t_tile.gfxs.push_back(gfx0 + (1 * building.rotate));
-            t_tile.gfxs.push_back(gfx0 + (2 * building.rotate));
-            t_tile.gfxs.push_back(gfx0 + (3 * building.rotate));
-        }
-    }
 }
 
 //-------------------------------------------------

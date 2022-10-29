@@ -22,6 +22,8 @@
 #include "ogl/Window.h"
 #include "camera/Camera.h"
 #include "world/Zoom.h"
+#include "world/Tile.h"
+#include "data/Buildings.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -120,6 +122,47 @@ namespace mdcii::renderer
             const ogl::Window& t_window,
             const camera::Camera& t_camera
         ) const;
+
+        //-------------------------------------------------
+        // Add / remove Gpu data
+        //-------------------------------------------------
+
+        /**
+         * Deletes a building from the Gpu.
+         *
+         * @param t_tile The Tile object to delete building Gpu data.
+         */
+        void DeleteBuildingFromGpu(const world::Tile& t_tile);
+
+        /**
+         * Deletes a building from the Gpu.
+         *
+         * @param t_tiles The Tile objects to delete building Gpu data.
+         */
+        void DeleteBuildingFromGpu(std::vector<std::unique_ptr<world::Tile>>& t_tiles);
+
+        /**
+         * Deletes a building from the Gpu.
+         *
+         * @param t_tileIndices The Tile indices to delete building Gpu data.
+         */
+        void DeleteBuildingFromGpu(const std::vector<int32_t>& t_tileIndices);
+
+        /**
+         * Adds a building to the Gpu.
+         *
+         * @param t_building The building to add.
+         * @param t_buildingRotation The rotation of the building.
+         * @param t_x The world x position.
+         * @param t_y The world y position.
+         * @param t_tiles To store the created building tiles.
+         */
+        void AddBuildingToGpu(
+            const data::Building& t_building,
+            world::Rotation t_buildingRotation,
+            int t_x, int t_y,
+            std::vector<std::unique_ptr<world::Tile>>& t_tiles
+        );
 
         /**
          * Updates the Gpu data of a Layer object.

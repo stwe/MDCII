@@ -19,7 +19,6 @@
 #include "TextRenderer.h"
 #include "Log.h"
 #include "MdciiException.h"
-#include "ogl/OpenGL.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/TextureUtils.h"
 #include "ogl/buffer/Vao.h"

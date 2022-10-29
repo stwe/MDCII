@@ -90,9 +90,10 @@ namespace mdcii::world
          */
         enum class Action
         {
-            BUILD,   // Change the building or the terrain.
-            STATUS,  // Get information about the tiles.
-            OPTIONS  // Change game settings.
+            BUILD,    // Create a building.
+            DEMOLISH, // Demolish a building.
+            STATUS,   // Get information about a tile.
+            OPTIONS,  // Change game settings.
         };
 
         //-------------------------------------------------
@@ -102,7 +103,7 @@ namespace mdcii::world
         /**
          * The (untranslated) labels of the action buttons.
          */
-        static constexpr std::array<std::string_view, magic_enum::enum_count<Action>()> ACTION_NAMES{ "Build", "Status", "Options" };
+        static constexpr std::array<std::string_view, magic_enum::enum_count<Action>()> ACTION_NAMES{ "Build", "Demolish", "Status", "Options" };
 
         //-------------------------------------------------
         // Member
@@ -156,7 +157,7 @@ namespace mdcii::world
         /**
          * Indicates which action button is currently active.
          */
-        std::array<bool, magic_enum::enum_count<Action>()> actionButtons{ true, false, false };
+        std::array<bool, magic_enum::enum_count<Action>()> actionButtons{ true, false, false, false };
 
         /**
          * The current action.
@@ -293,6 +294,16 @@ namespace mdcii::world
          */
         [[nodiscard]] glm::ivec2 RotatePosition(int t_x, int t_y, Rotation t_rotation = Rotation::DEG0) const;
 
+        /**
+         * Adds some pre-calculations to every Tile object of a Layer,
+         * which are necessary for the display the Tile on the screen.
+         *
+         * @param t_tile The Tile object.
+         * @param t_x The x position for Deg0 in the world.
+         * @param t_y The y position for Deg0 in the world.
+         */
+        void PreCalcTile(Tile& t_tile, int t_x, int t_y) const;
+
     protected:
 
     private:
@@ -321,9 +332,14 @@ namespace mdcii::world
         bool m_renderGridLayer{ false };
 
         /**
-         * The index of the current selected Tile.
+         * For the status of a tile.
          */
-        int m_currentTileIndex{ -1 };
+        int m_statusTileIndex{ -1 };
+
+        /**
+         * To demolish a building.
+         */
+        int m_demolishTileIndex{ -1 };
 
         /**
          * Tiles used to create a building.
@@ -393,16 +409,6 @@ namespace mdcii::world
          * Creates the Grid Layer.
          */
         void CreateGridLayer();
-
-        /**
-         * Adds some pre-calculations to every Tile object of a Layer,
-         * which are necessary for the display the Tile on the screen.
-         *
-         * @param t_tile The Tile object.
-         * @param t_x The x position for Deg0 in the world.
-         * @param t_y The y position for Deg0 in the world.
-         */
-        void PreCalcTile(Tile& t_tile, int t_x, int t_y) const;
 
         //-------------------------------------------------
         // Add building

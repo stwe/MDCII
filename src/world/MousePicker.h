@@ -57,14 +57,19 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * The current tile map position under the mouse.
+         * The current tile position under the mouse.
          */
         glm::ivec2 currentPosition{ -1 };
 
         /**
-         * The last tile map position under the mouse.
+         * The last tile position under the mouse.
          */
         glm::ivec2 lastPosition{ -1 };
+
+        /**
+         * Indicates whether the mouse is in a new tile position since the last movement.
+         */
+        bool newTilePosition{ false };
 
         /**
          * Indicates whether the mouse is in the window.
