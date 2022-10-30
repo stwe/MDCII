@@ -99,7 +99,7 @@ namespace mdcii::world
         /**
          * If a building requires more than 1x1 tiles, all indices are stored here.
          */
-        std::vector<int32_t> connectedTiles;
+        std::vector<int32_t> connectedTiles{};
 
         //-------------------------------------------------
         // Helper
@@ -109,6 +109,11 @@ namespace mdcii::world
          * Resets all members to default values.
          */
         void Reset();
+
+        /**
+         * Resets all building values to default.
+         */
+        void ResetBuildingInfo();
 
         /**
          * For better readability/convenience.

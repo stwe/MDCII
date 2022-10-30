@@ -149,6 +149,20 @@ namespace mdcii::renderer
         void DeleteBuildingFromGpu(const std::vector<int32_t>& t_tileIndices);
 
         /**
+         * Deletes a building from Cpu.
+         *
+         * @param t_tile Tile object where building information should be deleted/overwritten.
+         */
+        static void DeleteBuildingFromCpu(world::Tile& t_tile);
+
+        /**
+         * Deletes a building from Cpu.
+         *
+         * @param t_tileIndices Tile object indices where building information should be deleted/overwritten.
+         */
+        void DeleteBuildingFromCpu(const std::vector<int32_t>& t_tileIndices) const;
+
+        /**
          * Adds a building to the Gpu.
          *
          * @param t_building The building to add.

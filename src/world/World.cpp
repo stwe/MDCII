@@ -151,12 +151,22 @@ void mdcii::world::World::RenderImGui()
 
         if (m_demolishTileIndex >= 0)
         {
-            const auto& buildingsTile{ *GetLayer(WorldLayerType::BUILDINGS).tiles.at(m_demolishTileIndex) };
+            const auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
+            auto& buildingsTile{ *buildingsLayer.tiles.at(m_demolishTileIndex) };
+
+            // remove all building tiles from Gpu/Cpu
             if (buildingsTile.HasBuilding())
             {
-                buildingsTile.connectedTiles.empty() ?
-                    worldRenderer->DeleteBuildingFromGpu(buildingsTile) :
+                if (buildingsTile.connectedTiles.empty())
+                {
+                    worldRenderer->DeleteBuildingFromGpu(buildingsTile);
+                    worldRenderer->DeleteBuildingFromCpu(buildingsTile);
+                }
+                else
+                {
                     worldRenderer->DeleteBuildingFromGpu(buildingsTile.connectedTiles);
+                    worldRenderer->DeleteBuildingFromCpu(buildingsTile.connectedTiles);
+                }
             }
         }
 
@@ -353,9 +363,8 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
     // build
     if (IsPositionInWorld(mousePosition.x, mousePosition.y) && currentAction == Action::BUILD && !m_tilesToAdd.empty())
     {
-        auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
-
         // reset Tile pointers and replace with new Tile
+        auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
         for (auto& tile : m_tilesToAdd)
         {
             buildingsLayer.ResetTilePointersAt(tile->instanceIds);

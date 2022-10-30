@@ -25,12 +25,23 @@
 
 void mdcii::world::Tile::Reset()
 {
+    ResetBuildingInfo();
+
+    worldXDeg0 = -1;
+    worldYDeg0 = -1;
+    screenPositions = {};
+    indices = {};
+    instanceIds = {};
+}
+
+void mdcii::world::Tile::ResetBuildingInfo()
+{
     buildingId = -1;
     rotation = Rotation::DEG0;
     x = 0;
     y = 0;
-    worldXDeg0 = -1;
-    worldYDeg0 = -1;
+    gfxs = {};
+    connectedTiles = {};
 }
 
 //-------------------------------------------------

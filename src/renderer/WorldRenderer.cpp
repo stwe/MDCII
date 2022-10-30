@@ -215,6 +215,25 @@ void mdcii::renderer::WorldRenderer::DeleteBuildingFromGpu(const std::vector<int
     }
 }
 
+void mdcii::renderer::WorldRenderer::DeleteBuildingFromCpu(world::Tile& t_tile)
+{
+    MDCII_ASSERT(t_tile.HasBuilding(), "[WorldRenderer::DeleteBuildingFromCpu()] No building to delete.")
+
+    Log::MDCII_LOG_DEBUG("[WorldRenderer::DeleteBuildingFromCpu()] Delete building Id {} Cpu data of Tile ({}, {}).", t_tile.buildingId, t_tile.worldXDeg0, t_tile.worldYDeg0);
+
+    t_tile.ResetBuildingInfo();
+}
+
+void mdcii::renderer::WorldRenderer::DeleteBuildingFromCpu(const std::vector<int32_t>& t_tileIndices) const
+{
+    MDCII_ASSERT(!t_tileIndices.empty(), "[WorldRenderer::DeleteBuildingFromCpu()] No Tile indices given.")
+    const auto& layer{ m_world->GetLayer(world::WorldLayerType::BUILDINGS) };
+    for (const auto tileIndex : t_tileIndices)
+    {
+        DeleteBuildingFromCpu(*layer.tiles[tileIndex]);
+    }
+}
+
 void mdcii::renderer::WorldRenderer::AddBuildingToGpu(
     const data::Building& t_building,
     world::Rotation t_buildingRotation,
