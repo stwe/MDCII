@@ -18,31 +18,38 @@
 
 #pragma once
 
+#include <magic_enum.hpp>
 #include <string>
 #include <map>
+#include <optional>
 #include "json.hpp"
 
 namespace mdcii::data
 {
+    //-------------------------------------------------
+    // Sections
+    //-------------------------------------------------
+
+    enum class Section
+    {
+        HOUSES,
+        //PUBLIC_BUILDINGS,
+        //FARMS,
+        WORKSHOPS,
+        //WATER_RELATED,
+        //MILITARY
+    };
+
+    //-------------------------------------------------
+    // Text
+    //-------------------------------------------------
+
     class Text
     {
     public:
         using Language = std::string;
         using Key = std::string;
         using Translation = std::string;
-
-        //-------------------------------------------------
-        // Sections
-        //-------------------------------------------------
-
-        enum class Section
-        {
-            PUBLIC_BUILDINGS,
-            FARMS,
-            WORKSHOPS,
-            WATER_RELATED,
-            MILITARY
-        };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -73,14 +80,14 @@ namespace mdcii::data
             return m_menus.find(t_language)->second.at(t_key);
         }
 
-        static std::string GetTextForBuildingId(const Section t_section, const int t_buildingId, const Language& t_language)
+        static std::optional<std::string> GetTextForBuildingId(const Section t_section, const int t_buildingId, const Language& t_language)
         {
             if (GetBuildingsTexts(t_section, t_language).count(std::to_string(t_buildingId)))
             {
                 return GetBuildingsTexts(t_section, t_language).at(std::to_string(t_buildingId));
             }
 
-            return { "Translation is missing." };
+            return std::nullopt;
         }
 
     protected:
@@ -104,7 +111,7 @@ namespace mdcii::data
         // Read
         //-------------------------------------------------
 
-        static void ReadTexts();
+        static void ReadBuildings();
         static void ReadMenus();
 
         //-------------------------------------------------

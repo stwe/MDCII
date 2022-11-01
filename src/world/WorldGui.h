@@ -21,6 +21,18 @@
 #include "Tile.h"
 
 //-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::data
+{
+    /**
+     * Forward declaration enum class Section.
+     */
+    enum class Section;
+}
+
+//-------------------------------------------------
 // WorldGui
 //-------------------------------------------------
 
@@ -42,9 +54,9 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * The selected workshop to build.
+         * The selected building.
          */
-        Tile selectedWorkshop;
+        Tile selectedBuilding;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -87,9 +99,14 @@ namespace mdcii::world
         void ShowActionsGui() const;
 
         /**
-         * Shows a list of all workshops.
+         * Shows a single selected building.
          */
-        void AllWorkshopsGui();
+        void BuildingGui();
+
+        /**
+         * Shows all buildings of a section.
+         */
+        void BuildingsSectionGui(data::Section t_section);
 
         /**
          * Shows a menu to save the game.
@@ -113,15 +130,6 @@ namespace mdcii::world
          * In History Ed. only GFX is available.
          */
         Zoom m_bauhausZoom{ Zoom::GFX };
-
-        //-------------------------------------------------
-        // GUIs
-        //-------------------------------------------------
-
-        /**
-         * Shows a single selected workshop.
-         */
-        void WorkshopGui();
 
         //-------------------------------------------------
         // Init

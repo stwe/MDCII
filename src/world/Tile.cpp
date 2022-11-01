@@ -18,6 +18,8 @@
 
 #include <imgui.h>
 #include "Tile.h"
+#include "Game.h"
+#include "data/Text.h"
 
 //-------------------------------------------------
 // Helper
@@ -56,6 +58,14 @@ void mdcii::world::Tile::RenderImGui() const
 
     ImGui::Separator();
 
+    // todo HOUSES
+    /*
+    const auto nameOptional{ data::Text::GetTextForBuildingId(
+        data::Section::WORKSHOPS,
+        buildingId, Game::INI.Get<std::string>("locale", "lang"))
+    };
+    ImGui::Text("Building Name: %s", nameOptional.has_value() ? nameOptional.value().c_str() : "Translation missing");
+    */
     ImGui::Text("Building Id: %d", buildingId);
     ImGui::Text("Rotation name: %s", magic_enum::enum_name(rotation).data());
     ImGui::Text("Rotation value: %d", magic_enum::enum_integer(rotation));

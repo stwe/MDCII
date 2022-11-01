@@ -129,18 +129,66 @@ void mdcii::world::WorldGui::ShowActionsGui() const
     ImGui::NewLine();
 }
 
-void mdcii::world::WorldGui::AllWorkshopsGui()
+void mdcii::world::WorldGui::BuildingGui()
 {
-    if (selectedWorkshop.HasBuilding())
+    if (!selectedBuilding.HasBuilding())
     {
-        WorkshopGui();
-        ImGui::Separator();
+        return;
     }
 
-    if (ImGui::TreeNode(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Workshops").c_str()))
+    std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentBuildingRotation") };
+    std::string workshopRotation{ rotation_to_string(selectedBuilding.rotation) };
+    ImGui::TextUnformatted(rotStr.append(": ").append(workshopRotation).c_str());
+
+    ImGui::Separator();
+
+    const auto& building{ m_world->context->originalResourcesManager->GetBuildingById(selectedBuilding.buildingId) };
+    const auto& bauhausBshTextures{ m_world->context->originalResourcesManager->GetBauhausBshByZoom(m_bauhausZoom) };
+
+    const auto textureWidth{ bauhausBshTextures.at(building.baugfx)->width };
+    const auto textureHeight{ bauhausBshTextures.at(building.baugfx)->height };
+    auto* const textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(
+        bauhausBshTextures.at(static_cast<size_t>(building.baugfx) + magic_enum::enum_integer(selectedBuilding.rotation))->textureId
+    )
+    ) };
+
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingRight").c_str()))
     {
-        const auto& shops{ data::Text::GetBuildingsTexts(data::Text::Section::WORKSHOPS, Game::INI.Get<std::string>("locale", "lang")) };
-        for (const auto& [k, v] : shops)
+        ++selectedBuilding.rotation;
+    }
+
+    ImGui::SameLine();
+
+    ImGui::Image(
+        textureId,
+        ImVec2(static_cast<float>(textureWidth), static_cast<float>(textureHeight)),
+        ImVec2(0.0f, 0.0f),
+        ImVec2(1.0f, 1.0f),
+        ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
+        ImVec4(0.6f, 0.6f, 0.6f, 1.0f)
+    );
+
+    ImGui::SameLine();
+
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingLeft").c_str()))
+    {
+        --selectedBuilding.rotation;
+    }
+
+    ImGui::Separator();
+}
+
+void mdcii::world::WorldGui::BuildingsSectionGui(const data::Section t_section)
+{
+    // Section toString
+    std::string name{ magic_enum::enum_name(t_section) };
+    std::string lc{ to_lower_case(name) };
+    lc[0] = static_cast<char>(toupper(lc[0]));
+
+    if (ImGui::TreeNode(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), lc).c_str()))
+    {
+        const auto& buildings{ data::Text::GetBuildingsTexts(t_section, Game::INI.Get<std::string>("locale", "lang")) };
+        for (const auto& [k, v] : buildings)
         {
             if (ImGui::TreeNode(v.c_str()))
             {
@@ -156,10 +204,10 @@ void mdcii::world::WorldGui::AllWorkshopsGui()
                         ImVec4(0.6f, 0.6f, 0.6f, 1.0f)
                     ))
                 {
-                    Log::MDCII_LOG_DEBUG("[WorldGui::AllWorkshopsGui()] Select k: {}, v: {}", std::stoi(k), v);
+                    Log::MDCII_LOG_DEBUG("[WorldGui::BuildingsSectionGui()] Select k: {}, v: {}", std::stoi(k), v);
 
-                    selectedWorkshop.buildingId = std::stoi(k);
-                    selectedWorkshop.rotation = Rotation::DEG0;
+                    selectedBuilding.buildingId = std::stoi(k);
+                    selectedBuilding.rotation = Rotation::DEG0;
                 }
 
                 ImGui::TreePop();
@@ -227,52 +275,5 @@ void mdcii::world::WorldGui::InitBauhausZoom()
     else
     {
         m_bauhausZoom = Zoom::GFX;
-    }
-}
-
-void mdcii::world::WorldGui::WorkshopGui()
-{
-    if (!selectedWorkshop.HasBuilding())
-    {
-        return;
-    }
-
-    std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentBuildingRotation") };
-    std::string workshopRotation{ rotation_to_string(selectedWorkshop.rotation) };
-    ImGui::TextUnformatted(rotStr.append(": ").append(workshopRotation).c_str());
-
-    ImGui::Separator();
-
-    const auto& building{ m_world->context->originalResourcesManager->GetBuildingById(selectedWorkshop.buildingId) };
-    const auto& bauhausBshTextures{ m_world->context->originalResourcesManager->GetBauhausBshByZoom(m_bauhausZoom) };
-
-    const auto textureWidth{ bauhausBshTextures.at(building.baugfx)->width };
-    const auto textureHeight{ bauhausBshTextures.at(building.baugfx)->height };
-    auto* const textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(
-        bauhausBshTextures.at(static_cast<size_t>(building.baugfx) + magic_enum::enum_integer(selectedWorkshop.rotation))->textureId
-    )
-    ) };
-
-    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingRight").c_str()))
-    {
-        ++selectedWorkshop.rotation;
-    }
-
-    ImGui::SameLine();
-
-    ImGui::Image(
-        textureId,
-        ImVec2(static_cast<float>(textureWidth), static_cast<float>(textureHeight)),
-        ImVec2(0.0f, 0.0f),
-        ImVec2(1.0f, 1.0f),
-        ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
-        ImVec4(0.6f, 0.6f, 0.6f, 1.0f)
-    );
-
-    ImGui::SameLine();
-
-    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingLeft").c_str()))
-    {
-        --selectedWorkshop.rotation;
     }
 }

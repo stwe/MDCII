@@ -36,5 +36,15 @@
       "531": "Weaving mill",
       "533": "Goldsmith"
     }
+  },
+  "HOUSES": {
+    "de": {
+      "605": "Pioniere",
+      "632": "Siedler"
+    },
+    "en": {
+      "605": "Pioneers",
+      "632": "Settlers"
+    }
   }
 }

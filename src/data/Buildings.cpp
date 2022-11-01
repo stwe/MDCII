@@ -432,7 +432,14 @@ void mdcii::data::Building::RenderImGui() const
 
     ImGui::Separator();
 
-    ImGui::Text("Name: %s", Text::GetTextForBuildingId(Text::Section::WORKSHOPS, id, Game::INI.Get<std::string>("locale", "lang")).c_str());
+    // todo HOUSES
+    /*
+    const auto nameOptional{ data::Text::GetTextForBuildingId(
+        data::Section::WORKSHOPS,
+        id, Game::INI.Get<std::string>("locale", "lang"))
+    };
+    ImGui::Text("Name: %s", nameOptional.has_value() ? nameOptional.value().c_str() : "Translation missing");
+    */
 
     ImGui::Text("Building Id: %d", id);
     ImGui::Text("Gfx: %d", gfx);

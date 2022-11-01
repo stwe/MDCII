@@ -46,4 +46,4 @@ conanbuildinfo.cmake
 !/resources/data/NewWorld.json
 !/resources/data/Savegame.json
 !/resources/data/Menus.json
-!/resources/data/Texts.json
+!/resources/data/Buildings.json

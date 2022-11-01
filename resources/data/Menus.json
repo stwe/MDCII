@@ -2,6 +2,7 @@
   "de": {
     "Menu": "Menü",
     "Workshops": "Handwerk",
+    "Houses": "Häuser",
     "CurrentBuildingRotation": "Aktuelle Drehung des Bauwerks",
     "RotateBuildingLeft": "Bauwerk linksherum drehen",
     "RotateBuildingRight": "Bauwerk rechtsherum drehen",
@@ -21,6 +22,7 @@
   "en": {
     "Menu": "Menu",
     "Workshops": "Workshops",
+    "Houses": "Houses",
     "CurrentBuildingRotation": "Current building rotation",
     "RotateBuildingLeft": "Rotate building left",
     "RotateBuildingRight": "Rotate building right",

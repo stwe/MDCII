@@ -29,6 +29,7 @@
 #include "state/StateStack.h"
 #include "renderer/WorldRenderer.h"
 #include "file/OriginalResourcesManager.h"
+#include "data/Text.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -139,14 +140,16 @@ void mdcii::world::World::RenderImGui()
         m_statusTileIndex = -1;
         m_demolishTileIndex = -1;
 
-        m_worldGui->AllWorkshopsGui();
+        m_worldGui->BuildingGui();
+        m_worldGui->BuildingsSectionGui(data::Section::HOUSES);
+        m_worldGui->BuildingsSectionGui(data::Section::WORKSHOPS);
     }
 
     if (currentAction == Action::DEMOLISH)
     {
-        if (m_worldGui->selectedWorkshop.HasBuilding())
+        if (m_worldGui->selectedBuilding.HasBuilding())
         {
-            m_worldGui->selectedWorkshop.Reset();
+            m_worldGui->selectedBuilding.Reset();
         }
 
         if (m_demolishTileIndex >= 0)
@@ -160,7 +163,7 @@ void mdcii::world::World::RenderImGui()
                 if (buildingsTile.connectedTiles.empty())
                 {
                     worldRenderer->DeleteBuildingFromGpu(buildingsTile);
-                    worldRenderer->DeleteBuildingFromCpu(buildingsTile);
+                    renderer::WorldRenderer::DeleteBuildingFromCpu(buildingsTile);
                 }
                 else
                 {
@@ -175,9 +178,9 @@ void mdcii::world::World::RenderImGui()
 
     if (currentAction == Action::STATUS)
     {
-        if (m_worldGui->selectedWorkshop.HasBuilding())
+        if (m_worldGui->selectedBuilding.HasBuilding())
         {
-            m_worldGui->selectedWorkshop.Reset();
+            m_worldGui->selectedBuilding.Reset();
         }
 
         if (m_statusTileIndex >= 0)
@@ -194,9 +197,9 @@ void mdcii::world::World::RenderImGui()
         m_statusTileIndex = -1;
         m_demolishTileIndex = -1;
 
-        if (m_worldGui->selectedWorkshop.HasBuilding())
+        if (m_worldGui->selectedBuilding.HasBuilding())
         {
-            m_worldGui->selectedWorkshop.Reset();
+            m_worldGui->selectedBuilding.Reset();
         }
 
         m_worldGui->SaveGameGui();
@@ -377,8 +380,8 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
 
     MDCII_ASSERT(m_tilesToAdd.empty(), "[World::OnLeftMouseButtonPressed()] Invalid number of tiles to add.")
 
-    // reset selected workshop on left mouse button clicked
-    m_worldGui->selectedWorkshop.Reset();
+    // reset selected building on left mouse button clicked
+    m_worldGui->selectedBuilding.Reset();
 }
 
 void mdcii::world::World::OnMouseMoved()
@@ -394,12 +397,12 @@ void mdcii::world::World::OnMouseMoved()
 
     // show building to create
     if (currentAction == Action::BUILD &&
-        m_worldGui->selectedWorkshop.HasBuilding() &&
+        m_worldGui->selectedBuilding.HasBuilding() &&
         IsPositionInWorld(currentMousePosition.x, currentMousePosition.y) &&
         mousePicker->newTilePosition)
     {
         const auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
-        const auto& building{ context->originalResourcesManager->GetBuildingById(m_worldGui->selectedWorkshop.buildingId) };
+        const auto& building{ context->originalResourcesManager->GetBuildingById(m_worldGui->selectedBuilding.buildingId) };
 
         // only add if the entire building fits on the world
         if (IsBuildingOutsideTheWorld(currentMousePosition.x, currentMousePosition.y, building))
@@ -429,7 +432,7 @@ void mdcii::world::World::OnMouseMoved()
         }
         if (m_tilesToAdd.empty())
         {
-            worldRenderer->AddBuildingToGpu(building, m_worldGui->selectedWorkshop.rotation, currentMousePosition.x, currentMousePosition.y, m_tilesToAdd);
+            worldRenderer->AddBuildingToGpu(building, m_worldGui->selectedBuilding.rotation, currentMousePosition.x, currentMousePosition.y, m_tilesToAdd);
         }
     }
 }

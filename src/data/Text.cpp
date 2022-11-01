@@ -33,7 +33,7 @@ void mdcii::data::Text::Init()
 
     if (m_buildings.empty())
     {
-        ReadTexts();
+        ReadBuildings();
     }
 
     if (m_menus.empty())
@@ -48,16 +48,18 @@ void mdcii::data::Text::Init()
 // Read
 //-------------------------------------------------
 
-void mdcii::data::Text::ReadTexts()
+void mdcii::data::Text::ReadBuildings()
 {
-    Log::MDCII_LOG_DEBUG("[Text::ReadTexts()] Start reading Json data...");
+    Log::MDCII_LOG_DEBUG("[Text::ReadBuildings()] Start reading Json data...");
 
-    nlohmann::json j = ReadJsonFromFile(Game::RESOURCES_REL_PATH + "data/Texts.json");
+    nlohmann::json j = ReadJsonFromFile(Game::RESOURCES_REL_PATH + "data/Buildings.json");
 
     for (const auto& [s, v] : j.items())
     {
         // e.g.: s = WORKSHOPS
         auto section{ magic_enum::enum_cast<Section>(s) };
+        Log::MDCII_LOG_DEBUG("[Text::ReadBuildings()] Reading {} section.", s);
+
         if (section.has_value())
         {
             // e.g.: l = de
@@ -78,7 +80,7 @@ void mdcii::data::Text::ReadTexts()
         }
     }
 
-    Log::MDCII_LOG_DEBUG("[Text::ReadTexts()] Json data read successfully.");
+    Log::MDCII_LOG_DEBUG("[Text::ReadBuildings()] Json data read successfully.");
 }
 
 void mdcii::data::Text::ReadMenus()
