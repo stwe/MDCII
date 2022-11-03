@@ -40,11 +40,37 @@
   "HOUSES": {
     "de": {
       "605": "Pioniere",
-      "632": "Siedler"
+      "621": "Siedler",
+      "631": "Bürger",
+      "641": "Kaufleute",
+      "651": "Aristokraten"
     },
     "en": {
       "605": "Pioneers",
-      "632": "Settlers"
+      "621": "Settlers",
+      "631": "Citizens",
+      "641": "Merchants",
+      "651": "Aristocrats"
+    }
+  },
+  "PUBLIC": {
+    "de": {
+      "805": "Kirche",
+      "807": "Wirtshaus",
+      "809": "Marktplatz",
+      "811": "Feuerwehr",
+      "817": "Arzt",
+      "819": "Hochschule",
+      "821": "Schule"
+    },
+    "en": {
+      "805": "Church",
+      "807": "Tavern",
+      "809": "Market place",
+      "811": "Fire department",
+      "817": "Doctor",
+      "819": "University",
+      "821": "School"
     }
   }
 }

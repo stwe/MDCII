@@ -142,6 +142,7 @@ void mdcii::world::World::RenderImGui()
 
         m_worldGui->BuildingGui();
         m_worldGui->BuildingsSectionGui(data::Section::HOUSES);
+        m_worldGui->BuildingsSectionGui(data::Section::PUBLIC);
         m_worldGui->BuildingsSectionGui(data::Section::WORKSHOPS);
     }
 

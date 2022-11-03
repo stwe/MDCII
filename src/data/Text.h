@@ -33,7 +33,7 @@ namespace mdcii::data
     enum class Section
     {
         HOUSES,
-        //PUBLIC_BUILDINGS,
+        PUBLIC,
         //FARMS,
         WORKSHOPS,
         //WATER_RELATED,

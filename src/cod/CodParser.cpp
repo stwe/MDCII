@@ -133,8 +133,9 @@ void mdcii::cod::CodParser::ParseFile()
             if (!result.empty())
             {
                 auto isMath{ CodHelper::IsSubstring(result[3], "+") };
+                auto relative{ result[1] };
                 auto key{ result[2] };
-                auto value{ result[3] };
+                auto const& value{ result[3] };
 
                 // example: 'HAUSWACHS = Nummer'
                 if (value == "Nummer")
@@ -169,7 +170,7 @@ void mdcii::cod::CodParser::ParseFile()
                     {
                         variable = m_constants.add_variable();
                     }
-                    *variable = GetValue(key, value, isMath, m_constants);
+                    *variable = GetValue(key, value, isMath, m_constants, relative == "@");
                 }
                 continue;
             }
@@ -211,7 +212,7 @@ void mdcii::cod::CodParser::ParseFile()
                     else
                     {
                         currentValue = CalculateOperation(variableNumbersArray[name][i], "+", offsets[i]);
-                        auto var{ CreateOrReuseVariable(name) };
+                        auto* var{ CreateOrReuseVariable(name) };
                         var->set_name(name);
                         var->mutable_value_array()->add_value()->set_value_int(currentValue);
                     }
@@ -233,7 +234,7 @@ void mdcii::cod::CodParser::ParseFile()
                     if (!result.empty())
                     {
                         auto name{ result[1] };
-                        auto var{ CreateOrReuseVariable(name) };
+                        auto* var{ CreateOrReuseVariable(name) };
                         if (ExistsInCurrentObject(name))
                         {
                             var->mutable_value_array()->Clear();
@@ -276,9 +277,9 @@ void mdcii::cod::CodParser::ParseFile()
                             v = CodHelper::TrimSpacesLeadingTrailing(v);
                         }
                         auto varExists{ ExistsInCurrentObject(result[1]) };
-                        auto var{ CreateOrReuseVariable(result[1]) };
+                        auto* var{ CreateOrReuseVariable(result[1]) };
                         var->set_name(result[1]);
-                        auto arr{ var->mutable_value_array() };
+                        auto* arr{ var->mutable_value_array() };
 
                         if (varExists)
                         {
@@ -345,7 +346,7 @@ void mdcii::cod::CodParser::ParseFile()
                 else
                 {
                     currentValue = CalculateOperation(variableNumbers[result[3]], result[4], std::stoi(result[5]));
-                    auto var{ CreateOrReuseVariable(result[3]) };
+                    auto* var{ CreateOrReuseVariable(result[3]) };
                     var->set_name(result[3]);
                     var->set_value_int(currentValue);
                 }
@@ -381,7 +382,7 @@ void mdcii::cod::CodParser::ParseFile()
                 }
                 else
                 {
-                    auto var{ m_currentObject->mutable_variables()->add_variable() };
+                    auto* var{ m_currentObject->mutable_variables()->add_variable() };
                     var->set_name(result[1]);
                     var->set_value_int(currentValue);
                 }
@@ -511,7 +512,7 @@ void mdcii::cod::CodParser::ParseFile()
                     m_objFillRange.stacksize = static_cast<unsigned>(m_objectStack.size());
                     ObjectFinished();
                     m_currentObject = m_objectStack.top().object;
-                    auto p{ m_currentObject->mutable_objects()->ReleaseLast() }; // todo p -> nodiscard
+                    auto* p{ m_currentObject->mutable_objects()->ReleaseLast() }; // todo p -> nodiscard
                 }
                 else
                 {
@@ -524,7 +525,7 @@ void mdcii::cod::CodParser::ParseFile()
                         {
                             for (auto i{ 0 }; i < obj.value()->variables().variable_size(); ++i)
                             {
-                                auto variable{ CreateOrReuseVariable(obj.value()->variables().variable(i).name()) };
+                                auto* variable{ CreateOrReuseVariable(obj.value()->variables().variable(i).name()) };
                                 *variable = obj.value()->variables().variable(i);
                             }
                         }
@@ -532,7 +533,7 @@ void mdcii::cod::CodParser::ParseFile()
                         {
                             for (auto i{ 0 }; i < obj.value()->objects_size(); ++i)
                             {
-                                auto object{ CreateOrReuseObject(obj.value()->objects(i).name(), false, spaces, false) };
+                                auto* object{ CreateOrReuseObject(obj.value()->objects(i).name(), false, spaces, false) };
                                 *object = obj.value()->objects(i);
                             }
                         }
@@ -733,81 +734,97 @@ int mdcii::cod::CodParser::ConstantExists(const std::string& t_key) const
     return -1;
 }
 
-cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const std::string& t_value, bool t_isMath, const cod_pb::Variables& t_variables) const
+cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const std::string& t_value, bool t_isMath, const cod_pb::Variables& t_variables, const bool t_relative) const
 {
     cod_pb::Variable ret;
     ret.set_name(t_key);
     if (t_isMath)
     {
-        // Searching for some characters followed by a + or - sign and some digits.
-        // example: VALUE+20
-        auto result{ CodHelper::RegexSearch("(\\w+)(\\+|-)(\\d+)", t_value) };
-        if (!result.empty())
+        std::string constant;
+        std::string operation;
+        std::string number;
+        if (!t_relative)
         {
-            cod_pb::Variable oldValue;
-            auto i{ ConstantExists(result[1]) };
-            if (i != -1)
+            // Searching for some characters followed by a + or - sign and some digits.
+            // example: VALUE+20
+            std::vector<std::string> result{ CodHelper::RegexSearch("(\\w+)(\\+|-)(\\d+)", t_value) };
+            if (!result.empty())
             {
-                oldValue = t_variables.variable(i);
+                constant = result[1];
+                operation = result[2];
+                number = result[3];
             }
-            else
+        }
+        else
+        {
+            // Example '+20'
+            std::vector<std::string> result{ CodHelper::RegexSearch("(\\+|-)(\\d+)", t_value) };
+            if (!result.empty())
             {
-                oldValue.set_value_int(0);
+                constant = t_key;
+                operation = result[1];
+                number = result[2];
             }
+        }
 
-            if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueString)
+        cod_pb::Variable oldValue;
+        if (auto i{ ConstantExists(constant) }; i != -1)
+        {
+            oldValue = t_variables.variable(i);
+        }
+        else
+        {
+            oldValue.set_value_int(0);
+        }
+
+        if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueString)
+        {
+            if (oldValue.value_string() == "RUINE_KONTOR_1")
             {
-                if (oldValue.value_string() == "RUINE_KONTOR_1")
-                {
-                    // TODO
-                    oldValue.set_value_int(424242);
-                }
+                // TODO
+                oldValue.set_value_int(424242);
             }
-            if (result[2] == "+")
+        }
+        if (operation == "+")
+        {
+            if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueInt)
             {
-                if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueInt)
-                {
-                    ret.set_value_int(oldValue.value_int() + std::stoi(result[3]));
-                    return ret;
-                }
-
-                if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueFloat)
-                {
-                    ret.set_value_int(static_cast<int>(oldValue.value_float() + std::stof(result[3])));
-                    return ret;
-                }
-
-                const auto& o{ oldValue.value_string() };
-                ret.set_value_int(std::stoi(o) + std::stoi(result[3]));
-
+                ret.set_value_int(oldValue.value_int() + std::stoi(number));
+                return ret;
+            }
+            if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueFloat)
+            {
+                ret.set_value_int(oldValue.value_float() + std::stof(number));
                 return ret;
             }
 
-            if (result[2] == "-")
+            std::string o{ oldValue.value_string() };
+            ret.set_value_int(std::stoi(o) + std::stoi(number));
+            return ret;
+        }
+
+        if (operation == "-")
+        {
+            if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueInt)
             {
-                if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueInt)
-                {
-                    ret.set_value_int(oldValue.value_int() - std::stoi(result[3]));
-                    return ret;
-                }
-
-                if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueFloat)
-                {
-                    ret.set_value_int(static_cast<int>(oldValue.value_float() - std::stof(result[3])));
-                    return ret;
-                }
-
-                ret.set_value_int(std::stoi(oldValue.value_string()) - std::stoi(result[3]));
-
+                ret.set_value_int(oldValue.value_int() - std::stoi(number));
                 return ret;
             }
+            if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueFloat)
+            {
+                ret.set_value_int(oldValue.value_float() - std::stof(number));
+                return ret;
+            }
+
+            ret.set_value_int(std::stoi(oldValue.value_string()) - std::stoi(number));
+            return ret;
         }
     }
 
     {
         // Check if value has no preceding characters, a possible + or - sign
-        // and one ore more digits -> its an int
-        auto result{ CodHelper::RegexMatch("^\\w*[\\-+]?\\d+", t_value) };
+        // and one or more digits -> it's an int
+        std::vector<std::string> result{ CodHelper::RegexMatch("^\\w*[\\-+]?\\d+", t_value) };
         if (!result.empty())
         {
             ret.set_value_int(std::stoi(t_value));
@@ -816,12 +833,12 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
     }
 
     {
-        // Check if value has no preceding characters, a possible + or - sign and one ore more digits
-        // followed by a dot and another one or more digits -> its a float
-        auto result{ CodHelper::RegexMatch("^\\w+[\\-+]?\\d+\\.\\d+", t_value) };
+        // Check if value has no preceding characters, a possible + or - sign and one or more digits
+        // followed by a dot and another one or more digits -> it's a float
+        std::vector<std::string> result{ CodHelper::RegexMatch("^\\w+[\\-+]?\\d+\\.\\d+", t_value) };
         if (!result.empty())
         {
-            ret.set_value_int(static_cast<int>(std::stof(t_value)));
+            ret.set_value_int(std::stof(t_value));
             return ret;
         }
     }
@@ -829,11 +846,11 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
     {
         // Check if value contains any other characters besides 0-9, + and -
         // -> it is a pure string
-        auto result{ CodHelper::RegexMatch("([A-Za-z0-9_]+)", t_value) };
+        std::vector<std::string> result{ CodHelper::RegexMatch("([A-Za-z0-9_]+)", t_value) };
         if (!result.empty())
         {
             // TODO : When is value not in variables
-            if (ConstantExists(t_key))
+            if (ConstantExists(t_key) == true)
             {
                 auto v{ GetVariable(result[1]) };
                 ret = v;

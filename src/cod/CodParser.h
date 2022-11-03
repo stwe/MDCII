@@ -79,7 +79,7 @@ namespace mdcii::cod
         //-------------------------------------------------
 
         int ConstantExists(const std::string& t_key) const;
-        cod_pb::Variable GetValue(const std::string& t_key, const std::string& t_value, bool t_isMath, const cod_pb::Variables& t_variables) const;
+        cod_pb::Variable GetValue(const std::string& t_key, const std::string& t_value, bool t_isMath, const cod_pb::Variables& t_variables, bool t_relative) const;
 
         //-------------------------------------------------
         // Variables related functions

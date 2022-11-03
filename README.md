@@ -11,17 +11,14 @@ Diese Dateien können jedoch mit `Benno4j` erstellt werden.
 
 **Der erste Start dauert länger, da die `haeuser.cod` eingelesen wird.**
 
-**Update vom 23.10.2022**
-Der Renderer wurde neu geschrieben. Damit können große Karten samt Bebauung in drei Zoomstufen (SGFX, MGFX, GFX)
-und vier möglichen Rotationen (DEG0, DEG90, DEG180 und DEG270) dargestellt, editiert, gespeichert und geladen werden.
+**Update vom 03.11.2022**
+Es sind einige neue Gebäudearten verfügbar. Bei den Öffentlichen Gebäuden funktioniert das Hinzufügen von rotierten
+Objekten nicht. Es ist nun möglich, Gebäude von der Karte zu löschen.
 
-Es ist möglich, Handwerksbetriebe in der Welt zu platzieren. Dabei wird die bereits vorhandene Bebauung
-berücksichtigt. Das System ist skalierbar, d.h. es können in Zukunft problemlos weitere Welten/Inseln und Bebauungen
-(Häuser/Strassen etc.) hinzugefügt werden.
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ffb066523c4064ab513bef2f8d4628)](https://www.codacy.com/gh/stwe/MDCII/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stwe/MDCII&amp;utm_campaign=Badge_Grade)
 
-<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/23-10-2022.png" width="500" height="400" />
+<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/03-11-2022.png" width="500" height="400" />
 
 
 ## Build
