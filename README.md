@@ -6,8 +6,10 @@ Spielewelt zu erschaffen.
 
 Es wird das Originalspiel benötigt. In der `config.ini` müssen die Pfade angepasst werden.
 
-Für einen Programmstart werden sog. Tile-Atlas Grafiken benötigt, die mit diesem Repository nicht verteilt werden.
-Diese Dateien können jedoch mit `Benno4j` erstellt werden.
+Für einen Programmstart werden sog. Tile-Atlas Grafiken benötigt, die zunächst erstellt werden müssen. Dazu befindet
+sich der `TileAtlasCreator` im Verzeichnis `install`. Dabei handelt es sich um ein kleines separates Java Projekt.
+Die Konfiguration erfolgt in der `creator.properties`. Der damit erstellte Ordner `atlas` muss dann nach `resources`
+kopiert werden.
 
 **Der erste Start dauert länger, da die `haeuser.cod` eingelesen wird.**
 
@@ -262,6 +264,11 @@ $ make
 $ cd src/bin
 $ ./MDCII
 ```
+
+## Install
+
+The `TileAtlasCreator` program must be configured in `creator.properties` and run.
+The complete `atlas` folder must then be copied to resources.
 
 ## License
 

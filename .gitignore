@@ -5,6 +5,9 @@
 /obj/
 /cmake-build-debug/
 /cmake-build-release/
+/install/TileAtlasCreator/.idea
+/install/TileAtlasCreator/out
+/install/TileAtlasCreator/target
 build
 
 # Files
