@@ -61,7 +61,8 @@
       "811": "Feuerwehr",
       "817": "Arzt",
       "819": "Hochschule",
-      "821": "Schule"
+      "821": "Schule",
+      "303": "Stadttor"
     },
     "en": {
       "805": "Church",
@@ -70,7 +71,8 @@
       "811": "Fire department",
       "817": "Doctor",
       "819": "University",
-      "821": "School"
+      "821": "School",
+      "303": "City Gate"
     }
   }
 }

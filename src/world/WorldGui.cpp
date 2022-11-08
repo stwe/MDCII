@@ -55,17 +55,42 @@ void mdcii::world::WorldGui::RotateGui() const
     std::string worldRotation{ magic_enum::enum_name(m_world->rotation) };
     ImGui::TextUnformatted(rotStr.append(": ").append(worldRotation).c_str());
 
-    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateMapRight").c_str()))
+    static bool r = false;
+    static bool l = false;
+    m_world->rotation == Rotation::DEG270 ? r = true : r = false;
+    m_world->rotation == Rotation::DEG0 ? l = true : l = false;
+
+    ImGui::BeginDisabled(r);
+    if (ImGui::Button("->##MapRot"))
     {
         m_world->RotateWorld(ChangeRotation::RIGHT);
     }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, IM_COL32(66, 104, 188, 255));
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
+        ImGui::SetTooltip("%s", data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateMapRight").c_str());
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
+    }
+    ImGui::EndDisabled();
 
     ImGui::SameLine();
 
-    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateMapLeft").c_str()))
+    ImGui::BeginDisabled(l);
+    if (ImGui::Button("<-##MapRot"))
     {
         m_world->RotateWorld(ChangeRotation::LEFT);
     }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, IM_COL32(66, 104, 188, 255));
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
+        ImGui::SetTooltip("%s", data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateMapLeft").c_str());
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
+    }
+    ImGui::EndDisabled();
 }
 
 void mdcii::world::WorldGui::ZoomGui() const
@@ -74,17 +99,42 @@ void mdcii::world::WorldGui::ZoomGui() const
     std::string worldZoom{ magic_enum::enum_name(m_world->zoom) };
     ImGui::TextUnformatted(zoomStr.append(": ").append(worldZoom).c_str());
 
-    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ZoomMapIn").c_str()))
+    static bool i = false;
+    static bool o = false;
+    m_world->zoom == Zoom::GFX ? i = true : i = false;
+    m_world->zoom == Zoom::SGFX ? o = true : o = false;
+
+    ImGui::BeginDisabled(i);
+    if (ImGui::Button("+##MapZoom"))
     {
         m_world->ZoomWorld(ChangeZoom::ZOOM_IN);
     }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, IM_COL32(66, 104, 188, 255));
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
+        ImGui::SetTooltip("%s", data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ZoomMapIn").c_str());
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
+    }
+    ImGui::EndDisabled();
 
     ImGui::SameLine();
 
-    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ZoomMapOut").c_str()))
+    ImGui::BeginDisabled(o);
+    if (ImGui::Button("-##MapZoom"))
     {
         m_world->ZoomWorld(ChangeZoom::ZOOM_OUT);
     }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, IM_COL32(66, 104, 188, 255));
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
+        ImGui::SetTooltip("%s", data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ZoomMapOut").c_str());
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
+    }
+    ImGui::EndDisabled();
 }
 
 void mdcii::world::WorldGui::ShowActionsGui() const
@@ -152,10 +202,25 @@ void mdcii::world::WorldGui::BuildingGui()
     )
     ) };
 
-    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingRight").c_str()))
+    static bool r = false;
+    static bool l = false;
+    selectedBuilding.rotation == Rotation::DEG270 ? r = true : r = false;
+    selectedBuilding.rotation == Rotation::DEG0 ? l = true : l = false;
+
+    ImGui::BeginDisabled(r);
+    if (ImGui::Button("->##BuildingRot"))
     {
         ++selectedBuilding.rotation;
     }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, IM_COL32(66, 104, 188, 255));
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
+        ImGui::SetTooltip("%s", data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingRight").c_str());
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
+    }
+    ImGui::EndDisabled();
 
     ImGui::SameLine();
 
@@ -170,10 +235,20 @@ void mdcii::world::WorldGui::BuildingGui()
 
     ImGui::SameLine();
 
-    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingLeft").c_str()))
+    ImGui::BeginDisabled(l);
+    if (ImGui::Button("<-##BuildingRot"))
     {
         --selectedBuilding.rotation;
     }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, IM_COL32(66, 104, 188, 255));
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
+        ImGui::SetTooltip("%s", data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "RotateBuildingLeft").c_str());
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
+    }
+    ImGui::EndDisabled();
 
     ImGui::Separator();
 }

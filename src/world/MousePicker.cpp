@@ -76,10 +76,31 @@ void mdcii::world::MousePicker::Render(const ogl::Window& t_window, const camera
 
 void mdcii::world::MousePicker::RenderImGui() const
 {
-    ImGui::Begin("Mouse Picker");
+    auto winW{ static_cast<float>(m_world->context->window->GetWidth()) };
+    auto winH{ static_cast<float>(m_world->context->window->GetHeight()) };
+
+    ImGui::SetNextWindowSize(ImVec2(290.0f, 48.0f), ImGuiCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 1.4f), ImGui::GetMainViewport()->Pos.y + winH - (winH / 8.0f) + 12.0f), ImGuiCond_Once);
+
+    int windowFlags =
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoNavFocus;
+    //ImGuiWindowFlags_NoBackground;
+
+    ImGui::SetNextWindowBgAlpha(0.2f);
+
+    ImGui::Begin("Mouse Picker", nullptr, windowFlags);
+
+    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(8, 8, 8, 255));
 
     ImGui::Text("Current position x: %d, y: %d", currentPosition.x, currentPosition.y);
     ImGui::Text("Old position x: %d, y: %d", lastPosition.x, lastPosition.y);
+
+    ImGui::PopStyleColor();
 
     ImGui::End();
 }

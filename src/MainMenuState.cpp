@@ -67,7 +67,26 @@ void mdcii::MainMenuState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    ImGui::Begin("Main Menu");
+    auto winW{ static_cast<float>(context->window->GetWidth()) };
+    auto winH{ static_cast<float>(context->window->GetHeight()) };
+
+    ImGui::SetNextWindowSize(ImVec2(174.0f, 128.0f), ImGuiCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 2.5f), ImGui::GetMainViewport()->Pos.y + (winH / 4.0f)), ImGuiCond_Once);
+
+    int windowFlags =
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoNavFocus;
+    //ImGuiWindowFlags_NoBackground;
+
+    ImGui::SetNextWindowBgAlpha(0.2f);
+
+    ImGui::Begin("Main Menu", nullptr, windowFlags);
+
+    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(8, 8, 8, 255));
 
     if (ImGui::Button("Create a new world"))
     {
@@ -97,6 +116,8 @@ void mdcii::MainMenuState::RenderImGui()
     {
         context->stateStack->PopState(GetStateId());
     }
+
+    ImGui::PopStyleColor();
 
     ImGui::End();
 

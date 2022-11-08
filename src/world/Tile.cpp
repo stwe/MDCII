@@ -52,23 +52,26 @@ void mdcii::world::Tile::ResetBuildingInfo()
 
 void mdcii::world::Tile::RenderImGui() const
 {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0, 255, 0)));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0.7f, 0.8f, 0.8f)));
     ImGui::Text("Tile");
     ImGui::PopStyleColor();
 
     ImGui::Separator();
 
-    // todo HOUSES
-    /*
-    const auto nameOptional{ data::Text::GetTextForBuildingId(
-        data::Section::WORKSHOPS,
-        buildingId, Game::INI.Get<std::string>("locale", "lang"))
-    };
-    ImGui::Text("Building Name: %s", nameOptional.has_value() ? nameOptional.value().c_str() : "Translation missing");
-    */
-    ImGui::Text("Building Id: %d", buildingId);
-    ImGui::Text("Rotation name: %s", magic_enum::enum_name(rotation).data());
-    ImGui::Text("Rotation value: %d", magic_enum::enum_integer(rotation));
+    magic_enum::enum_for_each< data::Section>([this] (auto t_section) {
+        constexpr data::Section section = t_section;
+        const auto nameOptional{ data::Text::GetTextForBuildingId(
+            section,
+            buildingId, Game::INI.Get<std::string>("locale", "lang"))
+        };
+        if (nameOptional.has_value())
+        {
+            ImGui::Text("Building Name: %s", nameOptional.value().c_str());
+        }
+    });
+
+    ImGui::Text("Tile Building-Id: %d", buildingId);
+    ImGui::Text("Tile rotation: %s", magic_enum::enum_name(rotation).data());
     ImGui::Text("X: %d", x);
     ImGui::Text("Y: %d", y);
     ImGui::Text("Deg0 World x: %d", worldXDeg0);

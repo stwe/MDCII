@@ -426,20 +426,11 @@ void mdcii::data::Building::RenderImGui() const
 {
     ImGui::Separator();
 
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0, 255, 0)));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0.7f, 0.8f, 0.8f)));
     ImGui::Text("Building");
     ImGui::PopStyleColor();
 
     ImGui::Separator();
-
-    // todo HOUSES
-    /*
-    const auto nameOptional{ data::Text::GetTextForBuildingId(
-        data::Section::WORKSHOPS,
-        id, Game::INI.Get<std::string>("locale", "lang"))
-    };
-    ImGui::Text("Name: %s", nameOptional.has_value() ? nameOptional.value().c_str() : "Translation missing");
-    */
 
     ImGui::Text("Building Id: %d", id);
     ImGui::Text("Gfx: %d", gfx);
@@ -471,6 +462,6 @@ void mdcii::data::Building::RenderImGui() const
     ImGui::Text("Bausample type: %s", magic_enum::enum_name(bausample).data());
     ImGui::Text("Ruinenr type: %s", magic_enum::enum_name(ruinenr).data());
 
-    ImGui::Text("w: %d", size.w);
-    ImGui::Text("h: %d", size.h);
+    ImGui::Text("width: %d", size.w);
+    ImGui::Text("height: %d", size.h);
 }

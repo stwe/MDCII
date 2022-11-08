@@ -356,7 +356,7 @@ int32_t mdcii::world::WorldLayer::CalcGfx(const Tile& t_tile, const Rotation t_r
     }
     auto gfx{ t_tile.gfxs[magic_enum::enum_integer(buildingRotation)] };
 
-    if (building.size.w > 1)
+    if (building.size.w > 1 || building.size.h > 1)
     {
         // default: orientation 0
         auto rp{ glm::ivec2(t_tile.x, t_tile.y) };

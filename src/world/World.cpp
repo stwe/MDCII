@@ -94,7 +94,25 @@ void mdcii::world::World::Render() const
 
 void mdcii::world::World::RenderImGui()
 {
-    ImGui::Begin("World");
+    auto winW{ static_cast<float>(context->window->GetWidth()) };
+
+    ImGui::SetNextWindowSize(ImVec2(290.0f, 675.0f), ImGuiCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 1.4f), 4.0f + ImGui::GetMainViewport()->Pos.y), ImGuiCond_Once);
+
+    int windowFlags =
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoCollapse |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoNavFocus;
+        //ImGuiWindowFlags_NoBackground;
+
+    ImGui::SetNextWindowBgAlpha(0.2f);
+
+    ImGui::Begin("World", nullptr, windowFlags);
+
+    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(8, 8, 8, 255));
 
     ImGui::Separator();
 
@@ -112,7 +130,7 @@ void mdcii::world::World::RenderImGui()
     ImGui::SameLine();
     ImGui::RadioButton("Buildings", &e, 1);
     ImGui::SameLine();
-    ImGui::RadioButton("Terrain && Buildings", &e, 2);
+    ImGui::RadioButton("Both", &e, 2);
 
     if (auto layer{ magic_enum::enum_cast<WorldLayerType>(e) }; layer.has_value())
     {
@@ -189,7 +207,16 @@ void mdcii::world::World::RenderImGui()
             const auto& terrainTile{ *GetLayer(WorldLayerType::TERRAIN).tiles.at(m_statusTileIndex) };
             const auto& buildingsTile{ *GetLayer(WorldLayerType::BUILDINGS).tiles.at(m_statusTileIndex) };
 
-            buildingsTile.HasBuilding() ? buildingsTile.RenderImGui() : terrainTile.RenderImGui();
+            if (buildingsTile.HasBuilding())
+            {
+                buildingsTile.RenderImGui();
+                context->originalResourcesManager->GetBuildingById(buildingsTile.buildingId).RenderImGui();
+            }
+            else
+            {
+                terrainTile.RenderImGui();
+                context->originalResourcesManager->GetBuildingById(terrainTile.buildingId).RenderImGui();
+            }
         }
     }
 
@@ -205,6 +232,8 @@ void mdcii::world::World::RenderImGui()
 
         m_worldGui->SaveGameGui();
     }
+
+    ImGui::PopStyleColor();
 
     ImGui::End();
 
