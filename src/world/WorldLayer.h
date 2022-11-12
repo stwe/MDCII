@@ -266,10 +266,11 @@ namespace mdcii::world
          * @param t_mapX The start x position of the building.
          * @param t_mapY The start y position of the building.
          * @param t_building The Building object to check.
+         * @param t_buildingRotation The rotation of the building.
          *
          * @return True or false, depending on whether a building already exists.
          */
-        [[nodiscard]] bool IsAlreadyBuildingOnPosition(int t_x, int t_y, const data::Building& t_building) const;
+        [[nodiscard]] bool IsAlreadyBuildingOnPosition(int t_x, int t_y, const data::Building& t_building, Rotation t_buildingRotation) const;
 
         //-------------------------------------------------
         // Setter

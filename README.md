@@ -11,10 +11,6 @@ sich der `TileAtlasCreator` im Verzeichnis `install`.
 
 **Der erste Start dauert länger, da die `haeuser.cod` eingelesen wird.**
 
-**Update vom 03.11.2022**
-Es sind einige neue Gebäudearten verfügbar. Bei den Öffentlichen Gebäuden funktioniert das Hinzufügen von rotierten
-Objekten nicht. Es ist nun möglich, Gebäude von der Karte zu löschen.
-
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ffb066523c4064ab513bef2f8d4628)](https://www.codacy.com/gh/stwe/MDCII/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stwe/MDCII&amp;utm_campaign=Badge_Grade)
 

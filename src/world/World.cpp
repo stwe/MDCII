@@ -435,21 +435,21 @@ void mdcii::world::World::OnMouseMoved()
         const auto& building{ context->originalResourcesManager->GetBuildingById(m_worldGui->selectedBuilding.buildingId) };
 
         // only add if the entire building fits on the world
-        if (IsBuildingOutsideTheWorld(currentMousePosition.x, currentMousePosition.y, building))
+        if (IsBuildingOutsideTheWorld(currentMousePosition.x, currentMousePosition.y, building, m_worldGui->selectedBuilding.rotation))
         {
             Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] The building is outside the world on x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
             return;
         }
 
         // only add it if there is no other building on the position
-        if (buildingsLayer.IsAlreadyBuildingOnPosition(currentMousePosition.x, currentMousePosition.y, building))
+        if (buildingsLayer.IsAlreadyBuildingOnPosition(currentMousePosition.x, currentMousePosition.y, building, m_worldGui->selectedBuilding.rotation))
         {
             Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] There is an other building on the position x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
             return;
         }
 
         // don't build on the coast
-        if (IsBuildingOnWaterOrCoast(currentMousePosition.x, currentMousePosition.y, building))
+        if (IsBuildingOnWaterOrCoast(currentMousePosition.x, currentMousePosition.y, building, m_worldGui->selectedBuilding.rotation))
         {
             Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] It cannot be built on the coast on position x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
             return;
@@ -694,13 +694,19 @@ void mdcii::world::World::CreateGridLayer()
 // Add building
 //-------------------------------------------------
 
-bool mdcii::world::World::IsBuildingOutsideTheWorld(const int t_x, const int t_y, const data::Building& t_building) const
+bool mdcii::world::World::IsBuildingOutsideTheWorld(const int t_x, const int t_y, const data::Building& t_building, const Rotation t_buildingRotation) const
 {
     for (auto y{ 0 }; y < t_building.size.h; ++y)
     {
         for (auto x{ 0 }; x < t_building.size.w; ++x)
         {
-            if (!IsPositionInWorld(t_x + x, t_y + y))
+            auto rp{ world::rotate_position(x, y, t_building.size.h, t_building.size.w, t_buildingRotation) };
+            if (t_buildingRotation == world::Rotation::DEG0 || t_buildingRotation == world::Rotation::DEG180)
+            {
+                rp = world::rotate_position(x, y, t_building.size.w, t_building.size.h, t_buildingRotation);
+            }
+
+            if (!IsPositionInWorld(t_x + rp.x, t_y + rp.y))
             {
                 return true;
             }
@@ -710,13 +716,19 @@ bool mdcii::world::World::IsBuildingOutsideTheWorld(const int t_x, const int t_y
     return false;
 }
 
-bool mdcii::world::World::IsBuildingOnWaterOrCoast(const int t_x, const int t_y, const data::Building& t_building) const
+bool mdcii::world::World::IsBuildingOnWaterOrCoast(const int t_x, const int t_y, const data::Building& t_building, const Rotation t_buildingRotation) const
 {
     for (auto y{ 0 }; y < t_building.size.h; ++y)
     {
         for (auto x{ 0 }; x < t_building.size.w; ++x)
         {
-            const auto& terrainTile{ GetLayer(WorldLayerType::TERRAIN).GetTile(t_x + x, t_y + y) };
+            auto rp{ world::rotate_position(x, y, t_building.size.h, t_building.size.w, t_buildingRotation) };
+            if (t_buildingRotation == world::Rotation::DEG0 || t_buildingRotation == world::Rotation::DEG180)
+            {
+                rp = world::rotate_position(x, y, t_building.size.w, t_building.size.h, t_buildingRotation);
+            }
+
+            const auto& terrainTile{ GetLayer(WorldLayerType::TERRAIN).GetTile(t_x + rp.x, t_y + rp.y) };
             if (context->originalResourcesManager->GetBuildingById(terrainTile.buildingId).posoffs == 0)
             {
                 return true;

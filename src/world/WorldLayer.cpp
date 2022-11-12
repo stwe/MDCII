@@ -108,13 +108,19 @@ const mdcii::world::Tile& mdcii::world::WorldLayer::GetTile(const int t_x, const
     return *tiles.at(m_world->GetMapIndex(t_x, t_y));
 }
 
-bool mdcii::world::WorldLayer::IsAlreadyBuildingOnPosition(const int t_x, const int t_y, const data::Building& t_building) const
+bool mdcii::world::WorldLayer::IsAlreadyBuildingOnPosition(const int t_x, const int t_y, const data::Building& t_building, const Rotation t_buildingRotation) const
 {
     for (auto y{ 0 }; y < t_building.size.h; ++y)
     {
         for (auto x{ 0 }; x < t_building.size.w; ++x)
         {
-            if (GetTile(t_x + x, t_y + y).HasBuilding())
+            auto rp{ world::rotate_position(x, y, t_building.size.h, t_building.size.w, t_buildingRotation) };
+            if (t_buildingRotation == world::Rotation::DEG0 || t_buildingRotation == world::Rotation::DEG180)
+            {
+                rp = world::rotate_position(x, y, t_building.size.w, t_building.size.h, t_buildingRotation);
+            }
+
+            if (GetTile(t_x + rp.x, t_y + rp.y).HasBuilding())
             {
                 return true;
             }

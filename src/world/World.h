@@ -420,10 +420,11 @@ namespace mdcii::world
          * @param t_mapX The start x position of the building.
          * @param t_mapY The start y position of the building.
          * @param t_building The Building object to check.
+         * @param t_buildingRotation The rotation of the building.
          *
          * @return True or false depending on whether the building is outside.
          */
-        [[nodiscard]] bool IsBuildingOutsideTheWorld(int t_x, int t_y, const data::Building& t_building) const;
+        [[nodiscard]] bool IsBuildingOutsideTheWorld(int t_x, int t_y, const data::Building& t_building, Rotation t_buildingRotation) const;
 
         /**
          * Checks if the building is over the coast.
@@ -431,10 +432,11 @@ namespace mdcii::world
          * @param t_mapX The start x position of the building.
          * @param t_mapY The start y position of the building.
          * @param t_building The Building object to check.
+         * @param t_buildingRotation The rotation of the building.
          *
          * @return True or false, depending on whether the building is over the coast.
          */
-        [[nodiscard]] bool IsBuildingOnWaterOrCoast(int t_x, int t_y, const data::Building& t_building) const;
+        [[nodiscard]] bool IsBuildingOnWaterOrCoast(int t_x, int t_y, const data::Building& t_building, Rotation t_buildingRotation) const;
 
         //-------------------------------------------------
         // Clean up

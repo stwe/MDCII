@@ -252,20 +252,27 @@ void mdcii::renderer::WorldRenderer::AddBuildingToGpu(
     {
         for (auto x{ 0 }; x < t_building.size.w; ++x)
         {
+            // rotate building
+            auto rp{ world::rotate_position(x, y, t_building.size.h, t_building.size.w, t_buildingRotation) };
+            if (t_buildingRotation == world::Rotation::DEG0 || t_buildingRotation == world::Rotation::DEG180)
+            {
+                rp = world::rotate_position(x, y, t_building.size.w, t_building.size.h, t_buildingRotation);
+            }
+
             // create a Tile pointer for each part of the building
             auto tile{ std::make_unique<world::Tile>() };
             tile->buildingId = t_building.id;
             tile->rotation = t_buildingRotation;
-            tile->x = x;
-            tile->y = y;
+            tile->x = rp.x;
+            tile->y = rp.y;
 
             // pre-calc and set screen positions / indices / gfx
-            m_world->PreCalcTile(*tile, t_x + x, t_y + y);
+            m_world->PreCalcTile(*tile, t_x + rp.x, t_y + rp.y);
 
             // copy the instances Ids from Terrain Layer Tile at the same position
-            magic_enum::enum_for_each<world::Rotation>([&terrainLayer, &tile, &t_x, &t_y, &x, &y](const world::Rotation t_rotation) {
+            magic_enum::enum_for_each<world::Rotation>([&terrainLayer, &tile, &t_x, &t_y, &rp](const world::Rotation t_rotation) {
                 const auto r{ magic_enum::enum_integer(t_rotation) };
-                tile->instanceIds[r] = terrainLayer.instanceIds.at(glm::ivec3(t_x + x, t_y + y, r));
+                tile->instanceIds[r] = terrainLayer.instanceIds.at(glm::ivec3(t_x + rp.x, t_y + rp.y, r));
             });
 
             // create Gpu data for each zoom and each rotation
