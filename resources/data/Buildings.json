@@ -61,8 +61,7 @@
       "811": "Feuerwehr",
       "817": "Arzt",
       "819": "Hochschule",
-      "821": "Schule",
-      "303": "Stadttor"
+      "821": "Schule"
     },
     "en": {
       "805": "Church",
@@ -71,8 +70,33 @@
       "811": "Fire department",
       "817": "Doctor",
       "819": "University",
-      "821": "School",
-      "303": "City Gate"
+      "821": "School"
+    }
+  },
+  "FARMS": {
+    "de": {
+      "1331": "Baumwollfeld"
+    },
+    "en": {
+      "1331": "Cotton plantation"
+    }
+  },
+  "MILITARY": {
+    "de": {
+      "303": "Stadttor",
+      "2501": "Stadtmauer"
+    },
+    "en": {
+      "303": "City Gate",
+      "2501": "City Wall"
+    }
+  },
+  "WATER": {
+    "de": {
+      "1075": "Fischerhütte"
+    },
+    "en": {
+      "1075": "Fisher’s hut"
     }
   }
 }

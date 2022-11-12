@@ -34,10 +34,10 @@ namespace mdcii::data
     {
         HOUSES,
         PUBLIC,
-        //FARMS,
+        FARMS,
         WORKSHOPS,
-        //WATER_RELATED,
-        //MILITARY
+        WATER,
+        MILITARY
     };
 
     //-------------------------------------------------

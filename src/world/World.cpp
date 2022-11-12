@@ -161,7 +161,10 @@ void mdcii::world::World::RenderImGui()
         m_worldGui->BuildingGui();
         m_worldGui->BuildingsSectionGui(data::Section::HOUSES);
         m_worldGui->BuildingsSectionGui(data::Section::PUBLIC);
+        m_worldGui->BuildingsSectionGui(data::Section::FARMS);
         m_worldGui->BuildingsSectionGui(data::Section::WORKSHOPS);
+        m_worldGui->BuildingsSectionGui(data::Section::WATER);
+        m_worldGui->BuildingsSectionGui(data::Section::MILITARY);
     }
 
     if (currentAction == Action::DEMOLISH)
