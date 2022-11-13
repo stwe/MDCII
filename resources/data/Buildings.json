@@ -93,10 +93,20 @@
   },
   "WATER": {
     "de": {
-      "1075": "Fischerhütte"
+      "1075": "Fischerhütte",
+      "1073": "Kontorküste",
+      "2101": "Kontor 1",
+      "2103": "Kontor 2",
+      "2105": "Kontor 3",
+      "2107": "Kontor 4"
     },
     "en": {
-      "1075": "Fisher’s hut"
+      "1075": "Fishers hut",
+      "1073": "Warehouse coast",
+      "2101": "Warehouse 1",
+      "2103": "Warehouse 2",
+      "2105": "Warehouse 3",
+      "2107": "Warehouse 4"
     }
   }
 }

@@ -99,14 +99,9 @@ namespace mdcii::world
         void ShowActionsGui() const;
 
         /**
-         * Shows a single selected building.
+         * Shows a menu for selecting a building.
          */
-        void BuildingGui();
-
-        /**
-         * Shows all buildings of a section.
-         */
-        void BuildingsSectionGui(data::Section t_section);
+        void ShowBuildingsGui();
 
         /**
          * Shows a menu to save the game.
@@ -130,6 +125,25 @@ namespace mdcii::world
          * In History Ed. only GFX is available.
          */
         Zoom m_bauhausZoom{ Zoom::GFX };
+
+        //-------------------------------------------------
+        // Buildings
+        //-------------------------------------------------
+
+        /**
+         * Shows a single selected building.
+         */
+        void BuildingGui() const;
+
+        /**
+         * Shows a single rotatable selected building.
+         */
+        void RotatableBuildingGui();
+
+        /**
+         * Shows all buildings of a section.
+         */
+        void BuildingsSectionGui(data::Section t_section);
 
         //-------------------------------------------------
         // Init

@@ -179,13 +179,84 @@ void mdcii::world::WorldGui::ShowActionsGui() const
     ImGui::NewLine();
 }
 
-void mdcii::world::WorldGui::BuildingGui()
+void mdcii::world::WorldGui::ShowBuildingsGui()
 {
-    if (!selectedBuilding.HasBuilding())
+    if (selectedBuilding.HasBuilding())
     {
-        return;
+        const auto it{ data::NON_ROTATABLE_BUILDING_IDS.find(selectedBuilding.buildingId) };
+        it != data::NON_ROTATABLE_BUILDING_IDS.end() ? BuildingGui() : RotatableBuildingGui();
     }
 
+    BuildingsSectionGui(data::Section::HOUSES);
+    BuildingsSectionGui(data::Section::PUBLIC);
+    BuildingsSectionGui(data::Section::FARMS);
+    BuildingsSectionGui(data::Section::WORKSHOPS);
+    BuildingsSectionGui(data::Section::WATER);
+    BuildingsSectionGui(data::Section::MILITARY);
+}
+
+void mdcii::world::WorldGui::SaveGameGui()
+{
+    const auto fileName{ Game::RESOURCES_REL_PATH + Game::INI.Get<std::string>("content", "save_game_map") };
+
+    const auto str{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame") + fileName };
+    if (ImGui::Button(str.c_str()))
+    {
+        Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] Start saving the game in file {}...", fileName);
+
+        nlohmann::json j;
+        nlohmann::json t = nlohmann::json::object();
+        nlohmann::json b = nlohmann::json::object();
+        std::ofstream file{ fileName };
+        if (!file)
+        {
+            throw MDCII_EXCEPTION("[WorldGui::SaveGameGui()] Error while opening file " + fileName + ".");
+        }
+
+        j["width"] = m_world->width;
+        j["height"] = m_world->height;
+        j["layers"] = nlohmann::json::array();
+        t["terrain"] = m_world->GetLayer(WorldLayerType::TERRAIN).tiles;
+        b["buildings"] = m_world->GetLayer(WorldLayerType::BUILDINGS).tiles;
+        j["layers"].push_back(t);
+        j["layers"].push_back(b);
+
+        file << j;
+
+        Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] The game has been successfully saved in file {}.", fileName);
+    }
+}
+
+//-------------------------------------------------
+// Buildings
+//-------------------------------------------------
+
+void mdcii::world::WorldGui::BuildingGui() const
+{
+    const auto& building{ m_world->context->originalResourcesManager->GetBuildingById(selectedBuilding.buildingId) };
+    const auto& bauhausBshTextures{ m_world->context->originalResourcesManager->GetBauhausBshByZoom(m_bauhausZoom) };
+
+    const auto textureWidth{ bauhausBshTextures.at(building.baugfx)->width };
+    const auto textureHeight{ bauhausBshTextures.at(building.baugfx)->height };
+    auto* const textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(
+        bauhausBshTextures.at(static_cast<size_t>(building.baugfx) + magic_enum::enum_integer(selectedBuilding.rotation))->textureId
+    )
+    ) };
+
+    ImGui::Image(
+        textureId,
+        ImVec2(static_cast<float>(textureWidth), static_cast<float>(textureHeight)),
+        ImVec2(0.0f, 0.0f),
+        ImVec2(1.0f, 1.0f),
+        ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
+        ImVec4(0.6f, 0.6f, 0.6f, 1.0f)
+    );
+
+    ImGui::Separator();
+}
+
+void mdcii::world::WorldGui::RotatableBuildingGui()
+{
     std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentBuildingRotation") };
     std::string workshopRotation{ rotation_to_string(selectedBuilding.rotation) };
     ImGui::TextUnformatted(rotStr.append(": ").append(workshopRotation).c_str());
@@ -290,38 +361,6 @@ void mdcii::world::WorldGui::BuildingsSectionGui(const data::Section t_section)
         }
 
         ImGui::TreePop();
-    }
-}
-
-void mdcii::world::WorldGui::SaveGameGui()
-{
-    const auto fileName{ Game::RESOURCES_REL_PATH + Game::INI.Get<std::string>("content", "save_game_map") };
-
-    const auto str{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame") + fileName };
-    if (ImGui::Button(str.c_str()))
-    {
-        Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] Start saving the game in file {}...", fileName);
-
-        nlohmann::json j;
-        nlohmann::json t = nlohmann::json::object();
-        nlohmann::json b = nlohmann::json::object();
-        std::ofstream file{ fileName };
-        if (!file)
-        {
-            throw MDCII_EXCEPTION("[WorldGui::SaveGameGui()] Error while opening file " + fileName + ".");
-        }
-
-        j["width"] = m_world->width;
-        j["height"] = m_world->height;
-        j["layers"] = nlohmann::json::array();
-        t["terrain"] = m_world->GetLayer(WorldLayerType::TERRAIN).tiles;
-        b["buildings"] = m_world->GetLayer(WorldLayerType::BUILDINGS).tiles;
-        j["layers"].push_back(t);
-        j["layers"].push_back(b);
-
-        file << j;
-
-        Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] The game has been successfully saved in file {}.", fileName);
     }
 }
 

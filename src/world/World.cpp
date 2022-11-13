@@ -29,7 +29,6 @@
 #include "state/StateStack.h"
 #include "renderer/WorldRenderer.h"
 #include "file/OriginalResourcesManager.h"
-#include "data/Text.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -158,13 +157,7 @@ void mdcii::world::World::RenderImGui()
         m_statusTileIndex = -1;
         m_demolishTileIndex = -1;
 
-        m_worldGui->BuildingGui();
-        m_worldGui->BuildingsSectionGui(data::Section::HOUSES);
-        m_worldGui->BuildingsSectionGui(data::Section::PUBLIC);
-        m_worldGui->BuildingsSectionGui(data::Section::FARMS);
-        m_worldGui->BuildingsSectionGui(data::Section::WORKSHOPS);
-        m_worldGui->BuildingsSectionGui(data::Section::WATER);
-        m_worldGui->BuildingsSectionGui(data::Section::MILITARY);
+        m_worldGui->ShowBuildingsGui();
     }
 
     if (currentAction == Action::DEMOLISH)
@@ -451,11 +444,24 @@ void mdcii::world::World::OnMouseMoved()
             return;
         }
 
-        // don't build on the coast
-        if (IsBuildingOnWaterOrCoast(currentMousePosition.x, currentMousePosition.y, building, m_worldGui->selectedBuilding.rotation))
+        // check coast
+        if (const auto it{ data::WATER_RELATED_BUILDING_IDS.find( m_worldGui->selectedBuilding.buildingId) }; it != data::WATER_RELATED_BUILDING_IDS.end())
         {
-            Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] It cannot be built on the coast on position x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
-            return;
+            // built on the coast
+            if (!IsBuildingOnWaterOrCoast(currentMousePosition.x, currentMousePosition.y, building, m_worldGui->selectedBuilding.rotation))
+            {
+                Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] The building can only be built on the coast. Position: ({}, {}).", currentMousePosition.x, currentMousePosition.y);
+                return;
+            }
+        }
+        else
+        {
+            // don't build on the coast
+            if (IsBuildingOnWaterOrCoast(currentMousePosition.x, currentMousePosition.y, building, m_worldGui->selectedBuilding.rotation))
+            {
+                Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] The building cannot be built on the coast. Position: ({}, {}).", currentMousePosition.x, currentMousePosition.y);
+                return;
+            }
         }
 
         // delete/add building Gpu data
