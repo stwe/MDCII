@@ -393,6 +393,7 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
     if (IsPositionInWorld(mousePosition.x, mousePosition.y) && currentAction == Action::BUILD && !m_tilesToAdd.empty())
     {
         // reset Tile pointers and replace with new Tile
+        // todo: method AddToCpu
         auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
         for (auto& tile : m_tilesToAdd)
         {
@@ -433,14 +434,14 @@ void mdcii::world::World::OnMouseMoved()
         // only add if the entire building fits on the world
         if (IsBuildingOutsideTheWorld(currentMousePosition.x, currentMousePosition.y, building, m_worldGui->selectedBuilding.rotation))
         {
-            Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] The building is outside the world on x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
+            //Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] The building is outside the world on x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
             return;
         }
 
         // only add it if there is no other building on the position
         if (buildingsLayer.IsAlreadyBuildingOnPosition(currentMousePosition.x, currentMousePosition.y, building, m_worldGui->selectedBuilding.rotation))
         {
-            Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] There is an other building on the position x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
+            //Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] There is an other building on the position x: {}, y: {}.", currentMousePosition.x, currentMousePosition.y);
             return;
         }
 
@@ -450,7 +451,7 @@ void mdcii::world::World::OnMouseMoved()
             // built on the coast
             if (!IsBuildingOnWaterOrCoast(currentMousePosition.x, currentMousePosition.y, building, m_worldGui->selectedBuilding.rotation))
             {
-                Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] The building can only be built on the coast. Position: ({}, {}).", currentMousePosition.x, currentMousePosition.y);
+                //Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] The building can only be built on the coast. Position: ({}, {}).", currentMousePosition.x, currentMousePosition.y);
                 return;
             }
         }
@@ -459,12 +460,12 @@ void mdcii::world::World::OnMouseMoved()
             // don't build on the coast
             if (IsBuildingOnWaterOrCoast(currentMousePosition.x, currentMousePosition.y, building, m_worldGui->selectedBuilding.rotation))
             {
-                Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] The building cannot be built on the coast. Position: ({}, {}).", currentMousePosition.x, currentMousePosition.y);
+                //Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] The building cannot be built on the coast. Position: ({}, {}).", currentMousePosition.x, currentMousePosition.y);
                 return;
             }
         }
 
-        // delete/add building Gpu data
+        // add (after delete) building data to Gpu
         if (!m_tilesToAdd.empty())
         {
             worldRenderer->DeleteBuildingFromGpu(m_tilesToAdd);
@@ -473,6 +474,11 @@ void mdcii::world::World::OnMouseMoved()
         {
             worldRenderer->AddBuildingToGpu(building, m_worldGui->selectedBuilding.rotation, currentMousePosition.x, currentMousePosition.y, m_tilesToAdd);
         }
+    }
+
+    if (currentAction == Action::BUILD && !IsPositionInWorld(currentMousePosition.x, currentMousePosition.y) && !m_tilesToAdd.empty())
+    {
+        worldRenderer->DeleteBuildingFromGpu(m_tilesToAdd);
     }
 }
 
