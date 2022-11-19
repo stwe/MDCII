@@ -110,12 +110,12 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * A vector of texture heights.
+         * A vector of gfx texture heights.
          */
-        using Texture_Heights = std::vector<glm::vec4>;
+        using Texture_Heights = std::vector<uint32_t>;
 
         /**
-         * A vector of texture heights for each zoom level.
+         * A vector of gfx texture heights for each zoom level.
          */
         using Texture_Heights_For_Each_Zoom = std::array<Texture_Heights, NR_OF_ZOOMS>;
 
@@ -168,12 +168,7 @@ namespace mdcii::world
         Model_Matrices_For_Each_Zoom modelMatrices;
 
         /**
-         * A vector of texture heights for each zoom level.
-         * The height of each texture.
-         * x = height for rot0
-         * y = height for rot90
-         * z = height for rot180
-         * w = height for rot270
+         * A vector of gfx texture heights for each zoom level.
          */
         Texture_Heights_For_Each_Zoom heights;
 
@@ -305,39 +300,6 @@ namespace mdcii::world
         [[nodiscard]] glm::mat4 GetModelMatrix(const Tile& t_tile, Zoom t_zoom, Rotation t_rotation) const;
 
         /**
-         * Determines the texture atlas number of a given Tile object.
-         *
-         * @param t_tile The Tile object.
-         * @param t_zoom The zoom for which to determine the atlas number.
-         * @param t_rotation The rotation for which to create the atlas number.
-         *
-         * @return The texture atlas number.
-         */
-        [[maybe_unused]] [[nodiscard]] int GetTextureAtlasNr(const Tile& t_tile, Zoom t_zoom, Rotation t_rotation) const;
-
-        /**
-         * Determines the texture offset of a given Tile object.
-         *
-         * @param t_tile The Tile object.
-         * @param t_zoom The zoom for which to determine the offset.
-         * @param t_rotation The rotation for which to create the offset.
-         *
-         * @return The offset.
-         */
-        [[maybe_unused]] [[nodiscard]] glm::vec2 GetTextureOffset(const Tile& t_tile, Zoom t_zoom, Rotation t_rotation) const;
-
-        /**
-         * Determines the texture height of a given Tile object.
-         *
-         * @param t_tile The Tile object.
-         * @param t_zoom The zoom for which to determine the height.
-         * @param t_rotation The rotation for which to create the height.
-         *
-         * @return The texture height.
-         */
-        [[nodiscard]] float GetTextureHeight(const Tile& t_tile, Zoom t_zoom, Rotation t_rotation) const;
-
-        /**
          * Calculates the gfx considering the rotation of the Tile object and the World object.
          *
          * @param t_tile The Tile object.
@@ -386,6 +348,11 @@ namespace mdcii::world
          * Creates model matrices for rendering.
          */
         void CreateModelMatrices();
+
+        /**
+         * Provides information about the height of each texture.
+         */
+        void CreateHeightInfo();
 
         /**
          * Creates information about which gfx is used for each instance to render.

@@ -48,6 +48,15 @@ mdcii::renderer::WorldRenderer::~WorldRenderer() noexcept
 // Logic
 //-------------------------------------------------
 
+void mdcii::renderer::WorldRenderer::Update()
+{
+    m_updates++;
+    if (m_updates == 16)
+    {
+        m_updates = 0;
+    }
+}
+
 void mdcii::renderer::WorldRenderer::Render(
     const world::WorldLayerType t_layerType,
     const world::Zoom t_zoom,
@@ -68,6 +77,7 @@ void mdcii::renderer::WorldRenderer::Render(
     shaderProgram.SetUniform("diffuseMap", 0);
     shaderProgram.SetUniform("selected", false);
     shaderProgram.SetUniform("rotation", rotationInt);
+    shaderProgram.SetUniform("updates", m_updates);
 
     const auto maxY{ world::TileAtlas::HEIGHTS.at(zoomInt) };
     const auto nrOfRows{ static_cast<float>(world::TileAtlas::ROWS.at(zoomInt)) };
@@ -158,7 +168,6 @@ void mdcii::renderer::WorldRenderer::DeleteBuildingFromGpu(const world::Tile& t_
             const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
 
             const auto& tm{ terrainLayer.modelMatrices[zoomInt][rotationInt] };
-            const auto& th{ terrainLayer.heights[zoomInt] };
             const auto& tg{ terrainLayer.gfxNumbers[zoomInt] };
 
             // delete: update Gpu data from BUILDINGS Layer
@@ -167,8 +176,7 @@ void mdcii::renderer::WorldRenderer::DeleteBuildingFromGpu(const world::Tile& t_
                 world::WorldLayerType::BUILDINGS,
                 t_zoom, t_rotation,
                 glm::mat4(),   // model matrix
-                -1,            // gfx
-                -1.0f          // height
+                -1             // gfx
             );
 
             // delete: update Gpu data from TERRAIN_AND_BUILDINGS Layer
@@ -177,8 +185,7 @@ void mdcii::renderer::WorldRenderer::DeleteBuildingFromGpu(const world::Tile& t_
                 world::WorldLayerType::TERRAIN_AND_BUILDINGS,
                 t_zoom, t_rotation,
                 tm[t_tile.instanceIds[rotationInt]],
-                tg[t_tile.instanceIds[rotationInt]][rotationInt],
-                th[t_tile.instanceIds[rotationInt]][rotationInt]
+                tg[t_tile.instanceIds[rotationInt]][rotationInt]
             );
         });
     });
@@ -274,7 +281,6 @@ void mdcii::renderer::WorldRenderer::AddBuildingToGpu(
                     // create new Gpu data
                     const auto modelMatrix{ mixedLayer.GetModelMatrix(*tile, t_zoom, t_rotation) };
                     const auto gfxNumber{ mixedLayer.CalcGfx(*tile, t_rotation) };
-                    const auto texHeight{ mixedLayer.GetTextureHeight(*tile, t_zoom, t_rotation) };
 
                     // add: update Gpu data BUILDINGS
                     UpdateGpuData(
@@ -282,8 +288,7 @@ void mdcii::renderer::WorldRenderer::AddBuildingToGpu(
                         world::WorldLayerType::BUILDINGS,
                         t_zoom, t_rotation,
                         modelMatrix,
-                        gfxNumber,
-                        texHeight
+                        gfxNumber
                     );
 
                     // add: update Gpu data TERRAIN_AND_BUILDINGS
@@ -292,8 +297,7 @@ void mdcii::renderer::WorldRenderer::AddBuildingToGpu(
                         world::WorldLayerType::TERRAIN_AND_BUILDINGS,
                         t_zoom, t_rotation,
                         modelMatrix,
-                        gfxNumber,
-                        texHeight
+                        gfxNumber
                     );
                 });
             });
@@ -322,8 +326,7 @@ void mdcii::renderer::WorldRenderer::UpdateGpuData(
     const world::Zoom t_zoom,
     const world::Rotation t_rotation,
     const glm::mat4& t_modelMatrix,
-    const int32_t t_gfxNumber,
-    const float t_height
+    const int32_t t_gfxNumber
 )
 {
     // enum to int
@@ -341,16 +344,8 @@ void mdcii::renderer::WorldRenderer::UpdateGpuData(
     ogl::buffer::Ssbo::StoreSubData(static_cast<int32_t>(sizeof(glm::mat4)) * t_instance, sizeof(glm::mat4), &t_modelMatrix);
     ogl::buffer::Ssbo::Unbind();
 
-    const auto oi{ rotationInt * static_cast<int32_t>(sizeof(int32_t)) };
-    const auto of{ rotationInt * static_cast<int32_t>(sizeof(float)) };
-
-    // new height
-    const auto& heightsSsbo{ vao->ssbos.at(HEIGHTS_BINDING) };
-    heightsSsbo.at(0)->Bind();
-    ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::vec4)) * t_instance) + of, sizeof(float), &t_height);
-    ogl::buffer::Ssbo::Unbind();
-
     // new gfx number
+    const auto oi{ rotationInt * static_cast<int32_t>(sizeof(int32_t)) };
     const auto& gfxNumbersSsbo{ vao->ssbos.at(GFX_NUMBERS_BINDING) };
     gfxNumbersSsbo.at(0)->Bind();
     ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::ivec4)) * t_instance) + oi, sizeof(int32_t), &t_gfxNumber);
@@ -458,7 +453,7 @@ void mdcii::renderer::WorldRenderer::AddTextureInfo(const world::Zoom t_zoom, co
     std::vector<std::unique_ptr<ogl::buffer::Ssbo>> heightsSsbos;
     auto heightSsbo{ std::make_unique<ogl::buffer::Ssbo>() };
     heightSsbo->Bind();
-    ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(layer.heights.at(zoomInt).size()) * sizeof(glm::vec4), layer.heights.at(zoomInt).data());
+    ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(layer.heights.at(zoomInt).size()) * sizeof(uint32_t), layer.heights.at(zoomInt).data());
     ogl::buffer::Ssbo::Unbind();
     heightsSsbos.emplace_back(std::move(heightSsbo));
     m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(heightsSsbos));

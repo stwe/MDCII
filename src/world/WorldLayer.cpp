@@ -191,6 +191,7 @@ void mdcii::world::WorldLayer::PrepareRendering()
 {
     SortTiles();
     CreateModelMatrices();
+    CreateHeightInfo();
     CreateGfxInfo();
 }
 
@@ -226,29 +227,6 @@ glm::mat4 mdcii::world::WorldLayer::GetModelMatrix(const Tile& t_tile, const Zoo
 
     // return model matrix
     return renderer::RenderUtils::GetModelMatrix(screenPosition, { w, h });
-}
-
-[[maybe_unused]] int mdcii::world::WorldLayer::GetTextureAtlasNr(const Tile& t_tile, const Zoom t_zoom, const Rotation t_rotation) const
-{
-    const auto atlasRows{ TileAtlas::ROWS.at(magic_enum::enum_integer(t_zoom)) };
-    return t_tile.HasBuilding() ? CalcGfx(t_tile, t_rotation) / (atlasRows * atlasRows) : -1;
-}
-
-[[maybe_unused]] glm::vec2 mdcii::world::WorldLayer::GetTextureOffset(const Tile& t_tile, const Zoom t_zoom, const Rotation t_rotation) const
-{
-    const auto atlasRows{ TileAtlas::ROWS.at(magic_enum::enum_integer(t_zoom)) };
-    const auto gfx{ CalcGfx(t_tile, t_rotation) };
-    const auto index{ gfx % (atlasRows * atlasRows) };
-
-    return TileAtlas::GetTextureOffset(index, atlasRows);
-}
-
-float mdcii::world::WorldLayer::GetTextureHeight(const Tile& t_tile, const Zoom t_zoom, const Rotation t_rotation) const
-{
-    const auto gfx{ CalcGfx(t_tile, t_rotation) };
-    const auto& stadtfldBshTextures{ m_world->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
-
-    return static_cast<float>(stadtfldBshTextures.at(gfx)->height);
 }
 
 int32_t mdcii::world::WorldLayer::CalcGfx(const Tile& t_tile, const Rotation t_rotation) const
@@ -362,6 +340,27 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
     });
 }
 
+void mdcii::world::WorldLayer::CreateHeightInfo()
+{
+    Log::MDCII_LOG_DEBUG("[WorldLayer::CreateHeightInfo()] Create height info.");
+
+    magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
+        const auto& stadtfldBshTextures{ m_world->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
+
+        MDCII_ASSERT(stadtfldBshTextures.size() - 1 == 5963, "[WorldLayer::CreateHeightInfo()] Invalid number of Bsh Textures.")
+
+        Texture_Heights textureHeights(stadtfldBshTextures.size(), 0);
+        auto i{ 0 };
+        for (const auto& bshTexture : stadtfldBshTextures)
+        {
+            textureHeights.at(i) = bshTexture->height;
+            i++;
+        }
+
+        heights.at(magic_enum::enum_integer(t_zoom)) = textureHeights;
+    });
+}
+
 void mdcii::world::WorldLayer::CreateGfxInfo()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateGfxInfo()] Create gfx info.");
@@ -369,10 +368,9 @@ void mdcii::world::WorldLayer::CreateGfxInfo()
     MDCII_ASSERT(instancesToRender >= 0, "[WorldLayer::CreateGfxInfo()] Invalid number of instances to render.")
 
     magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
-        Texture_Heights texHeights(instancesToRender, glm::vec4(-1.0f));
         Gfx_Info gfxs(instancesToRender, glm::ivec4(-1));
 
-        magic_enum::enum_for_each<Rotation>([this, &t_zoom, &texHeights, &gfxs](const Rotation t_rotation) {
+        magic_enum::enum_for_each<Rotation>([this, &gfxs](const Rotation t_rotation) {
             const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
             auto instance{ 0 };
@@ -380,7 +378,6 @@ void mdcii::world::WorldLayer::CreateGfxInfo()
             {
                 if (tile->HasBuilding())
                 {
-                    texHeights.at(instance)[rotationInt] = GetTextureHeight(*tile, t_zoom, t_rotation);
                     gfxs.at(instance)[rotationInt] = CalcGfx(*tile, t_rotation);
                 }
 
@@ -388,8 +385,6 @@ void mdcii::world::WorldLayer::CreateGfxInfo()
             }
         });
 
-        const auto zoom{ magic_enum::enum_integer(t_zoom) };
-        heights.at(zoom) = texHeights;
-        gfxNumbers.at(zoom) = gfxs;
+        gfxNumbers.at(magic_enum::enum_integer(t_zoom)) = gfxs;
     });
 }

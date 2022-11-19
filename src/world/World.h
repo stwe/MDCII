@@ -209,6 +209,11 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
+         * Updates the world.
+         */
+        void Update() const;
+
+        /**
          * Renders the world.
          */
         void Render() const;

@@ -76,6 +76,11 @@ mdcii::world::WorldLayer& mdcii::world::World::GetLayer(const WorldLayerType t_l
 // Logic
 //-------------------------------------------------
 
+void mdcii::world::World::Update() const
+{
+    worldRenderer->Update();
+}
+
 void mdcii::world::World::Render() const
 {
     // terrain, buildings
@@ -637,7 +642,7 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
     newLayer->layerType = WorldLayerType::TERRAIN_AND_BUILDINGS;
     newLayer->instancesToRender = terrainLayer.instancesToRender;
 
-    // copy Gpu data
+    // copy Gpu data to the new layer
     newLayer->modelMatrices = terrainLayer.modelMatrices;
     newLayer->heights = terrainLayer.heights;
     newLayer->gfxNumbers = terrainLayer.gfxNumbers;
@@ -651,9 +656,6 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
             auto& mt{ newLayer->modelMatrices.at(z).at(r) };
             const auto& mb{ buildingsLayer.modelMatrices.at(z).at(r) };
 
-            auto& ht{ newLayer->heights.at(z) };
-            const auto& hb{ buildingsLayer.heights.at(z) };
-
             auto& gt{ newLayer->gfxNumbers.at(z) };
             const auto& gb{ buildingsLayer.gfxNumbers.at(z) };
 
@@ -664,7 +666,6 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
                 if (mapTile->HasBuilding())
                 {
                     mt.at(i) = mb.at(i);
-                    ht.at(i)[r] = hb.at(i)[r];
                     gt.at(i)[r] = gb.at(i)[r];
                 }
 

@@ -13,7 +13,7 @@ layout(std140, binding = 0) buffer modelMatrices
 
 layout(std430, binding = 1) buffer heights
 {
-    vec4 textureHeight[];
+    int textureHeight[];
 };
 
 layout(std430, binding = 2) buffer gfxNumbers
@@ -37,6 +37,7 @@ uniform mat4 projection;
 uniform int rotation;
 uniform float maxY;
 uniform float nrOfRows;
+uniform int updates;
 
 //-------------------------------------------------
 // Globals
@@ -44,29 +45,56 @@ uniform float nrOfRows;
 
 vec2 uvOffset;
 vec2 uv;
-float height;
+int height;
 
 //-------------------------------------------------
 // Helper
 //-------------------------------------------------
 
-vec2 calcUvOffset(int gfx, int rows)
+vec2 calcUvOffset(int t_gfx, int t_rows)
 {
     return vec2(
-        (gfx % rows) / nrOfRows,
-        (gfx / rows) / nrOfRows
+        (t_gfx % t_rows) / nrOfRows,
+        (t_gfx / t_rows) / nrOfRows
     );
 }
 
-int calcTextureAtlasIndex(int gfx, int rows)
+int calcTextureAtlasIndex(int t_gfx, int t_rows)
 {
     const int NO_GFX = -1;
-    if (gfx == NO_GFX)
+    if (t_gfx == NO_GFX)
     {
         return NO_GFX;
     }
 
-    return (gfx / (rows * rows));
+    return (t_gfx / (t_rows * t_rows));
+}
+
+int getHeight(int t_gfx)
+{
+    return int(textureHeight[t_gfx]);
+}
+
+//-------------------------------------------------
+// Test Windmill Animation
+//-------------------------------------------------
+
+void animateWindmill(int t_gfx, int t_rows)
+{
+    if (t_gfx >= 1840 && t_gfx <= 1840 + 256)
+    {
+        int startOffset = 1840 + 16;
+        int diff = t_gfx - startOffset;
+        int rest = diff % 16;
+        int start = 1840 + rest;
+
+        int gfxOffset = updates;
+        gfxOffset *= 16;
+        int gfx = start + gfxOffset;
+
+        uvOffset = calcUvOffset(gfx, t_rows);
+        vTextureAtlasIndex = calcTextureAtlasIndex(gfx, t_rows);
+    }
 }
 
 //-------------------------------------------------
@@ -79,10 +107,13 @@ void main()
 
     int rows = int(nrOfRows);
     int gfx = int(gfxNumber[gl_InstanceID][rotation]);
+
     uvOffset = calcUvOffset(gfx, rows);
     vTextureAtlasIndex = calcTextureAtlasIndex(gfx, rows);
+    height = getHeight(gfx);
 
-    height = float(textureHeight[gl_InstanceID][rotation]);
+    // hardcoded for testing
+    animateWindmill(gfx, rows);
 
     uv = aPosition.zw;
 
@@ -91,6 +122,7 @@ void main()
 
     if (uv.y == 1.0)
     {
-        vUv.y = ((1.0 / nrOfRows) * height / maxY) + uvOffset.y;
+        float h = float(height);
+        vUv.y = ((1.0 / nrOfRows) * h / maxY) + uvOffset.y;
     }
 }

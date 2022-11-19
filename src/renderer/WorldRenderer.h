@@ -92,6 +92,11 @@ namespace mdcii::renderer
         //-------------------------------------------------
 
         /**
+         * Updates a Layer.
+         */
+        void Update();
+
+        /**
          * Renders a Layer with the specified zoom and rotation.
          *
          * @param t_layerType The Layer type to render.
@@ -187,7 +192,6 @@ namespace mdcii::renderer
          * @param t_rotation The rotation.
          * @param t_modelMatrix The new model matrix.
          * @param t_gfxNumber The new gfx number.
-         * @param t_height The new texture height.
          */
         void UpdateGpuData(
             int32_t t_instance,
@@ -195,8 +199,7 @@ namespace mdcii::renderer
             world::Zoom t_zoom,
             world::Rotation t_rotation,
             const glm::mat4& t_modelMatrix,
-            int32_t t_gfxNumber,
-            float t_height
+            int32_t t_gfxNumber
         );
 
     protected:
@@ -253,6 +256,11 @@ namespace mdcii::renderer
          * Each zoom Level has a different grid texture.
          */
         std::array<std::string, world::NR_OF_ZOOMS> m_gridFileNames{};
+
+        /**
+         * The number of updates.
+         */
+        int32_t m_updates{ 0 };
 
         //-------------------------------------------------
         // Init

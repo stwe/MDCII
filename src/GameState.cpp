@@ -56,7 +56,7 @@ void mdcii::GameState::Input()
 
 void mdcii::GameState::Update()
 {
-    // nothing to do at the moment
+    m_world->Update();
 }
 
 void mdcii::GameState::Render()
