@@ -82,7 +82,7 @@ void mdcii::MainMenuState::RenderImGui()
         ImGuiWindowFlags_NoNavFocus;
     //ImGuiWindowFlags_NoBackground;
 
-    ImGui::SetNextWindowBgAlpha(0.2f);
+    ImGui::SetNextWindowBgAlpha(0.4f);
 
     ImGui::Begin("Main Menu", nullptr, windowFlags);
 

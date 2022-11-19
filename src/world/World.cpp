@@ -73,7 +73,7 @@ mdcii::world::WorldLayer& mdcii::world::World::GetLayer(const WorldLayerType t_l
 }
 
 //-------------------------------------------------
-// Render
+// Logic
 //-------------------------------------------------
 
 void mdcii::world::World::Render() const
@@ -107,7 +107,7 @@ void mdcii::world::World::RenderImGui()
         ImGuiWindowFlags_NoNavFocus;
         //ImGuiWindowFlags_NoBackground;
 
-    ImGui::SetNextWindowBgAlpha(0.2f);
+    ImGui::SetNextWindowBgAlpha(0.4f);
 
     ImGui::Begin("World", nullptr, windowFlags);
 
@@ -631,35 +631,31 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
     const auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
 
     // create a new layer
-    auto layer{ std::make_unique<WorldLayer>(this) };
+    auto newLayer{ std::make_unique<WorldLayer>(this) };
 
     // set type and number of instances
-    layer->layerType = WorldLayerType::TERRAIN_AND_BUILDINGS;
-    layer->instancesToRender = terrainLayer.instancesToRender;
+    newLayer->layerType = WorldLayerType::TERRAIN_AND_BUILDINGS;
+    newLayer->instancesToRender = terrainLayer.instancesToRender;
 
-    // set Gpu data only
-    layer->modelMatrices = terrainLayer.modelMatrices;
-    layer->textureAtlasNumbers = terrainLayer.textureAtlasNumbers;
-    layer->offsets = terrainLayer.offsets;
-    layer->heights = terrainLayer.heights;
+    // copy Gpu data
+    newLayer->modelMatrices = terrainLayer.modelMatrices;
+    newLayer->heights = terrainLayer.heights;
+    newLayer->gfxNumbers = terrainLayer.gfxNumbers;
 
     // merge Gpu data
-    magic_enum::enum_for_each<Zoom>([&layer, &buildingsLayer](const Zoom t_zoom) {
-        magic_enum::enum_for_each<Rotation>([&t_zoom, &layer, &buildingsLayer](const Rotation t_rotation) {
+    magic_enum::enum_for_each<Zoom>([&newLayer, &buildingsLayer](const Zoom t_zoom) {
+        magic_enum::enum_for_each<Rotation>([&t_zoom, &newLayer, &buildingsLayer](const Rotation t_rotation) {
             const auto z{ magic_enum::enum_integer(t_zoom) };
             const auto r{ magic_enum::enum_integer(t_rotation) };
 
-            auto& mt{ layer->modelMatrices.at(z).at(r) };
+            auto& mt{ newLayer->modelMatrices.at(z).at(r) };
             const auto& mb{ buildingsLayer.modelMatrices.at(z).at(r) };
 
-            auto& it{ layer->textureAtlasNumbers.at(z) };
-            const auto& ib{ buildingsLayer.textureAtlasNumbers.at(z) };
-
-            auto& ot{ layer->offsets.at(z).at(r) };
-            const auto& ob{ buildingsLayer.offsets.at(z).at(r) };
-
-            auto& ht{ layer->heights.at(z) };
+            auto& ht{ newLayer->heights.at(z) };
             const auto& hb{ buildingsLayer.heights.at(z) };
+
+            auto& gt{ newLayer->gfxNumbers.at(z) };
+            const auto& gb{ buildingsLayer.gfxNumbers.at(z) };
 
             // for each tile
             auto i{ 0 };
@@ -668,9 +664,8 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
                 if (mapTile->HasBuilding())
                 {
                     mt.at(i) = mb.at(i);
-                    it.at(i)[r] = ib.at(i)[r];
-                    ot.at(i) = ob.at(i);
                     ht.at(i)[r] = hb.at(i)[r];
+                    gt.at(i)[r] = gb.at(i)[r];
                 }
 
                 i++;
@@ -679,7 +674,7 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
     });
 
     // store new layer
-    layers.emplace_back(std::move(layer));
+    layers.emplace_back(std::move(newLayer));
 
     MDCII_ASSERT(layers.size() == 3, "[World::MergeLayer()] Invalid number of Layers.")
 }

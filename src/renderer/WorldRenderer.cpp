@@ -45,7 +45,7 @@ mdcii::renderer::WorldRenderer::~WorldRenderer() noexcept
 }
 
 //-------------------------------------------------
-// Render
+// Logic
 //-------------------------------------------------
 
 void mdcii::renderer::WorldRenderer::Render(
@@ -85,20 +85,14 @@ void mdcii::renderer::WorldRenderer::Render(
 
     glBindBufferBase(
         GL_SHADER_STORAGE_BUFFER,
-        OFFSETS_BINDING,
-        m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.at(OFFSETS_BINDING).at(rotationInt)->id
-    );
-
-    glBindBufferBase(
-        GL_SHADER_STORAGE_BUFFER,
-        TEXTURE_ATLAS_BINDING,
-        m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.at(TEXTURE_ATLAS_BINDING).at(0)->id
-    );
-
-    glBindBufferBase(
-        GL_SHADER_STORAGE_BUFFER,
         HEIGHTS_BINDING,
         m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.at(HEIGHTS_BINDING).at(0)->id
+    );
+
+    glBindBufferBase(
+        GL_SHADER_STORAGE_BUFFER,
+        GFX_NUMBERS_BINDING,
+        m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.at(GFX_NUMBERS_BINDING).at(0)->id
     );
 
     ogl::resource::TextureUtils::BindForReading(m_world->tileAtlas->textureIds.at(zoomInt), GL_TEXTURE0, GL_TEXTURE_2D_ARRAY);
@@ -164,19 +158,17 @@ void mdcii::renderer::WorldRenderer::DeleteBuildingFromGpu(const world::Tile& t_
             const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
 
             const auto& tm{ terrainLayer.modelMatrices[zoomInt][rotationInt] };
-            const auto& ti{ terrainLayer.textureAtlasNumbers[zoomInt] };
-            const auto& to{ terrainLayer.offsets[zoomInt][rotationInt] };
             const auto& th{ terrainLayer.heights[zoomInt] };
+            const auto& tg{ terrainLayer.gfxNumbers[zoomInt] };
 
             // delete: update Gpu data from BUILDINGS Layer
             UpdateGpuData(
                 t_tile.instanceIds[rotationInt],
                 world::WorldLayerType::BUILDINGS,
                 t_zoom, t_rotation,
-                glm::mat4(),
-                -1,
-                glm::vec2(-1.0f),
-                -1.0f
+                glm::mat4(),   // model matrix
+                -1,            // gfx
+                -1.0f          // height
             );
 
             // delete: update Gpu data from TERRAIN_AND_BUILDINGS Layer
@@ -185,8 +177,7 @@ void mdcii::renderer::WorldRenderer::DeleteBuildingFromGpu(const world::Tile& t_
                 world::WorldLayerType::TERRAIN_AND_BUILDINGS,
                 t_zoom, t_rotation,
                 tm[t_tile.instanceIds[rotationInt]],
-                ti[t_tile.instanceIds[rotationInt]][rotationInt],
-                to[t_tile.instanceIds[rotationInt]],
+                tg[t_tile.instanceIds[rotationInt]][rotationInt],
                 th[t_tile.instanceIds[rotationInt]][rotationInt]
             );
         });
@@ -282,8 +273,7 @@ void mdcii::renderer::WorldRenderer::AddBuildingToGpu(
 
                     // create new Gpu data
                     const auto modelMatrix{ mixedLayer.GetModelMatrix(*tile, t_zoom, t_rotation) };
-                    const auto atlasNr{ mixedLayer.GetTextureAtlasNr(*tile, t_zoom, t_rotation) };
-                    const auto texOffset{ mixedLayer.GetTextureOffset(*tile, t_zoom, t_rotation) };
+                    const auto gfxNumber{ mixedLayer.CalcGfx(*tile, t_rotation) };
                     const auto texHeight{ mixedLayer.GetTextureHeight(*tile, t_zoom, t_rotation) };
 
                     // add: update Gpu data BUILDINGS
@@ -292,8 +282,7 @@ void mdcii::renderer::WorldRenderer::AddBuildingToGpu(
                         world::WorldLayerType::BUILDINGS,
                         t_zoom, t_rotation,
                         modelMatrix,
-                        atlasNr,
-                        texOffset,
+                        gfxNumber,
                         texHeight
                     );
 
@@ -303,8 +292,7 @@ void mdcii::renderer::WorldRenderer::AddBuildingToGpu(
                         world::WorldLayerType::TERRAIN_AND_BUILDINGS,
                         t_zoom, t_rotation,
                         modelMatrix,
-                        atlasNr,
-                        texOffset,
+                        gfxNumber,
                         texHeight
                     );
                 });
@@ -334,8 +322,7 @@ void mdcii::renderer::WorldRenderer::UpdateGpuData(
     const world::Zoom t_zoom,
     const world::Rotation t_rotation,
     const glm::mat4& t_modelMatrix,
-    const int t_atlasNr,
-    const glm::vec2& t_offset,
+    const int32_t t_gfxNumber,
     const float t_height
 )
 {
@@ -354,25 +341,19 @@ void mdcii::renderer::WorldRenderer::UpdateGpuData(
     ogl::buffer::Ssbo::StoreSubData(static_cast<int32_t>(sizeof(glm::mat4)) * t_instance, sizeof(glm::mat4), &t_modelMatrix);
     ogl::buffer::Ssbo::Unbind();
 
-    // new offset
-    const auto& offsetsSsbo{ vao->ssbos.at(OFFSETS_BINDING) };
-    offsetsSsbo.at(rotationInt)->Bind();
-    ogl::buffer::Ssbo::StoreSubData(static_cast<int32_t>(sizeof(glm::vec2)) * t_instance, sizeof(glm::vec2), &t_offset);
-    ogl::buffer::Ssbo::Unbind();
-
     const auto oi{ rotationInt * static_cast<int32_t>(sizeof(int32_t)) };
     const auto of{ rotationInt * static_cast<int32_t>(sizeof(float)) };
-
-    // new texture atlas number
-    const auto& atlasSsbo{ vao->ssbos.at(TEXTURE_ATLAS_BINDING) };
-    atlasSsbo.at(0)->Bind();
-    ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::ivec4)) * t_instance) + oi, sizeof(int32_t), &t_atlasNr);
-    ogl::buffer::Ssbo::Unbind();
 
     // new height
     const auto& heightsSsbo{ vao->ssbos.at(HEIGHTS_BINDING) };
     heightsSsbo.at(0)->Bind();
     ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::vec4)) * t_instance) + of, sizeof(float), &t_height);
+    ogl::buffer::Ssbo::Unbind();
+
+    // new gfx number
+    const auto& gfxNumbersSsbo{ vao->ssbos.at(GFX_NUMBERS_BINDING) };
+    gfxNumbersSsbo.at(0)->Bind();
+    ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::ivec4)) * t_instance) + oi, sizeof(int32_t), &t_gfxNumber);
     ogl::buffer::Ssbo::Unbind();
 
     // unbind Vao
@@ -473,29 +454,7 @@ void mdcii::renderer::WorldRenderer::AddTextureInfo(const world::Zoom t_zoom, co
     // bind Vao of the given zoom
     m_vaos.at(layerTypeInt).at(zoomInt)->Bind();
 
-    // store texture offsets in [1]
-    std::vector<std::unique_ptr<ogl::buffer::Ssbo>> offsetsSsbos;
-    magic_enum::enum_for_each<world::Rotation>([&layer, &zoomInt, &offsetsSsbos](const world::Rotation t_rotation) {
-        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-
-        auto offsetSsbo{ std::make_unique<ogl::buffer::Ssbo>() };
-        offsetSsbo->Bind();
-        ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(layer.offsets.at(zoomInt).at(rotationInt).size()) * sizeof(glm::vec2), layer.offsets.at(zoomInt).at(rotationInt).data());
-        ogl::buffer::Ssbo::Unbind();
-        offsetsSsbos.emplace_back(std::move(offsetSsbo));
-    });
-    m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(offsetsSsbos));
-
-    // store texture atlas indices in [2]
-    std::vector<std::unique_ptr<ogl::buffer::Ssbo>> atlasIndicesSsbos;
-    auto atlasSsbo{ std::make_unique<ogl::buffer::Ssbo>() };
-    atlasSsbo->Bind();
-    ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(layer.textureAtlasNumbers.at(zoomInt).size()) * sizeof(glm::ivec4), layer.textureAtlasNumbers.at(zoomInt).data());
-    ogl::buffer::Ssbo::Unbind();
-    atlasIndicesSsbos.emplace_back(std::move(atlasSsbo));
-    m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(atlasIndicesSsbos));
-
-    // store heights in [3]
+    // store heights in [1]
     std::vector<std::unique_ptr<ogl::buffer::Ssbo>> heightsSsbos;
     auto heightSsbo{ std::make_unique<ogl::buffer::Ssbo>() };
     heightSsbo->Bind();
@@ -503,6 +462,15 @@ void mdcii::renderer::WorldRenderer::AddTextureInfo(const world::Zoom t_zoom, co
     ogl::buffer::Ssbo::Unbind();
     heightsSsbos.emplace_back(std::move(heightSsbo));
     m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(heightsSsbos));
+
+    // store gfx numbers in [2]
+    std::vector<std::unique_ptr<ogl::buffer::Ssbo>> gfxSsbos;
+    auto gfxSsbo{ std::make_unique<ogl::buffer::Ssbo>() };
+    gfxSsbo->Bind();
+    ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(layer.gfxNumbers.at(zoomInt).size()) * sizeof(glm::ivec4), layer.gfxNumbers.at(zoomInt).data());
+    ogl::buffer::Ssbo::Unbind();
+    gfxSsbos.emplace_back(std::move(gfxSsbo));
+    m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(gfxSsbos));
 
     // unbind Vao
     ogl::buffer::Vao::Unbind();

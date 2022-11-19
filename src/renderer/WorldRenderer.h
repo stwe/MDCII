@@ -88,7 +88,7 @@ namespace mdcii::renderer
         ~WorldRenderer() noexcept;
 
         //-------------------------------------------------
-        // Render
+        // Logic
         //-------------------------------------------------
 
         /**
@@ -186,8 +186,7 @@ namespace mdcii::renderer
          * @param t_zoom The zoom.
          * @param t_rotation The rotation.
          * @param t_modelMatrix The new model matrix.
-         * @param t_atlasNr The new texture atlas number.
-         * @param t_offset The new texture offset.
+         * @param t_gfxNumber The new gfx number.
          * @param t_height The new texture height.
          */
         void UpdateGpuData(
@@ -196,8 +195,7 @@ namespace mdcii::renderer
             world::Zoom t_zoom,
             world::Rotation t_rotation,
             const glm::mat4& t_modelMatrix,
-            int t_atlasNr,
-            const glm::vec2& t_offset,
+            int32_t t_gfxNumber,
             float t_height
         );
 
@@ -228,19 +226,14 @@ namespace mdcii::renderer
         static constexpr auto MODEL_MATRICES_BINDING{ 0 };
 
         /**
-         * The number of the offsets shader binding.
-         */
-        static constexpr auto OFFSETS_BINDING{ 1 };
-
-        /**
-         * The number of the texture atlas shader binding.
-         */
-        static constexpr auto TEXTURE_ATLAS_BINDING{ 2 };
-
-        /**
          * The number of the heights shader binding.
          */
-        static constexpr auto HEIGHTS_BINDING{ 3 };
+        static constexpr auto HEIGHTS_BINDING{ 1 };
+
+        /**
+         * The number of the gfxNumbers shader binding.
+         */
+        static constexpr auto GFX_NUMBERS_BINDING{ 2 };
 
         //-------------------------------------------------
         // Member

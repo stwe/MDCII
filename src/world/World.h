@@ -205,7 +205,7 @@ namespace mdcii::world
         WorldLayer& GetLayer(WorldLayerType t_layerType);
 
         //-------------------------------------------------
-        // Render
+        // Logic
         //-------------------------------------------------
 
         /**

@@ -91,7 +91,7 @@ void mdcii::world::MousePicker::RenderImGui() const
         ImGuiWindowFlags_NoNavFocus;
     //ImGuiWindowFlags_NoBackground;
 
-    ImGui::SetNextWindowBgAlpha(0.2f);
+    ImGui::SetNextWindowBgAlpha(0.4f);
 
     ImGui::Begin("Mouse Picker", nullptr, windowFlags);
 
