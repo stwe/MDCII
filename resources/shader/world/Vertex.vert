@@ -34,7 +34,7 @@ flat out int vTextureAtlasIndex;
 
 uniform mat4 view;
 uniform mat4 projection;
-uniform int rotation;
+uniform int worldRotation;
 uniform float maxY;
 uniform float nrOfRows;
 uniform int updates;
@@ -76,24 +76,59 @@ int getHeight(int t_gfx)
 }
 
 //-------------------------------------------------
-// Test Windmill Animation
+// Animation
 //-------------------------------------------------
+
+int getFrame(int t_animCount)
+{
+    return updates % t_animCount;
+}
+
+void animateToolSmithy(int t_gfx, int t_rows)
+{
+    if (t_gfx >= 3984 && t_gfx <= 3999)
+    {
+        int animAdd = 16;
+        int animAnz = 5;
+        int frame = getFrame(animAnz);
+
+        int gfxOffset = frame * animAdd;
+        int newGfx = t_gfx + gfxOffset;
+
+        uvOffset = calcUvOffset(newGfx, t_rows);
+        vTextureAtlasIndex = calcTextureAtlasIndex(newGfx, t_rows);
+    }
+}
+
+void animateFirestation(int t_gfx, int t_rows)
+{
+    if (t_gfx >= 2760 && t_gfx <= 2775)
+    {
+        int animAdd = 16;
+        int animAnz = 6;
+        int frame = getFrame(animAnz); // Werte von 0 bis 5
+
+        int gfxOffset = frame * animAdd;
+        int newGfx = t_gfx + gfxOffset;
+
+        uvOffset = calcUvOffset(newGfx, t_rows);
+        vTextureAtlasIndex = calcTextureAtlasIndex(newGfx, t_rows);
+    }
+}
 
 void animateWindmill(int t_gfx, int t_rows)
 {
-    if (t_gfx >= 1840 && t_gfx <= 1840 + 256)
+    if (t_gfx >= 1840 && t_gfx <= 1855)
     {
-        int startOffset = 1840 + 16;
-        int diff = t_gfx - startOffset;
-        int rest = diff % 16;
-        int start = 1840 + rest;
+        int animAdd = 16;
+        int animAnz = 16;
+        int frame = getFrame(animAnz);
 
-        int gfxOffset = updates;
-        gfxOffset *= 16;
-        int gfx = start + gfxOffset;
+        int gfxOffset = frame * animAdd;
+        int newGfx = t_gfx + gfxOffset;
 
-        uvOffset = calcUvOffset(gfx, t_rows);
-        vTextureAtlasIndex = calcTextureAtlasIndex(gfx, t_rows);
+        uvOffset = calcUvOffset(newGfx, t_rows);
+        vTextureAtlasIndex = calcTextureAtlasIndex(newGfx, t_rows);
     }
 }
 
@@ -106,13 +141,14 @@ void main()
     gl_Position = projection * view * modelMatrix[gl_InstanceID] * vec4(aPosition.xy, 0.0, 1.0);
 
     int rows = int(nrOfRows);
-    int gfx = int(gfxNumber[gl_InstanceID][rotation]);
+    int gfx = int(gfxNumber[gl_InstanceID][worldRotation]);
 
     uvOffset = calcUvOffset(gfx, rows);
     vTextureAtlasIndex = calcTextureAtlasIndex(gfx, rows);
     height = getHeight(gfx);
 
-    // hardcoded for testing
+    animateToolSmithy(gfx, rows);
+    animateFirestation(gfx, rows);
     animateWindmill(gfx, rows);
 
     uv = aPosition.zw;

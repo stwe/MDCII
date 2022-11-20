@@ -76,7 +76,7 @@ void mdcii::renderer::WorldRenderer::Render(
     shaderProgram.SetUniform("projection", t_window.GetOrthographicProjectionMatrix());
     shaderProgram.SetUniform("diffuseMap", 0);
     shaderProgram.SetUniform("selected", false);
-    shaderProgram.SetUniform("rotation", rotationInt);
+    shaderProgram.SetUniform("worldRotation", rotationInt);
     shaderProgram.SetUniform("updates", m_updates);
 
     const auto maxY{ world::TileAtlas::HEIGHTS.at(zoomInt) };

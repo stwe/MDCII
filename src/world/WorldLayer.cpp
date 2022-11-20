@@ -357,6 +357,20 @@ void mdcii::world::WorldLayer::CreateHeightInfo()
             i++;
         }
 
+        // todo remove
+        /*
+        for (auto a{ 0 }; a < 16; ++a)
+        {
+            const auto f{ a * 16 };
+            for (auto p{ 0 }; p < 4; ++p)
+            {
+                auto index{ 1840 + f + p };
+                const auto& bshTexture{stadtfldBshTextures.at(index)};
+                Log::MDCII_LOG_INFO("i: {}, height: {}", index, bshTexture->height);
+            }
+        }
+        */
+
         heights.at(magic_enum::enum_integer(t_zoom)) = textureHeights;
     });
 }
