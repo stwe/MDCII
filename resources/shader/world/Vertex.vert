@@ -116,6 +116,13 @@ void animateFirestation(int t_gfx, int t_rows)
     }
 }
 
+/*
+DEG0
+ 7  7  7  7  7  7  7  7  7  7  7  7  7  7  7  7
+28 28 27 27 27 27 27 26 26 26 26 27 27 28 28 28
+28 28 27 27 27 27 27 26 26 26 26 27 27 28 28 28
+32 32 31 31 31 31 31 30 30 30 30 31 31 32 32 32
+*/
 void animateWindmill(int t_gfx, int t_rows)
 {
     if (t_gfx >= 1840 && t_gfx <= 1855)
@@ -129,6 +136,26 @@ void animateWindmill(int t_gfx, int t_rows)
 
         uvOffset = calcUvOffset(newGfx, t_rows);
         vTextureAtlasIndex = calcTextureAtlasIndex(newGfx, t_rows);
+
+        int newHeight = getHeight(newGfx);
+
+        if (height > newHeight)
+        {
+            mat4 m = modelMatrix[gl_InstanceID];
+            m[1].y = newHeight;
+            m[3].y += (height - newHeight);
+            gl_Position = projection * view * m * vec4(aPosition.xy, 0.0, 1.0);
+        }
+
+        if (height < newHeight)
+        {
+            mat4 m = modelMatrix[gl_InstanceID];
+            m[1].y = newHeight;
+            m[3].y -= (newHeight - height);
+            gl_Position = projection * view * m * vec4(aPosition.xy, 0.0, 1.0);
+        }
+
+        height = newHeight;
     }
 }
 
