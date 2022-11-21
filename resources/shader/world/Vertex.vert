@@ -32,8 +32,7 @@ flat out int vTextureAtlasIndex;
 // Uniforms
 //-------------------------------------------------
 
-uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 projectionView;
 uniform int worldRotation;
 uniform float maxY;
 uniform float nrOfRows;
@@ -116,13 +115,30 @@ void animateFirestation(int t_gfx, int t_rows)
     }
 }
 
-/*
-DEG0
- 7  7  7  7  7  7  7  7  7  7  7  7  7  7  7  7
-28 28 27 27 27 27 27 26 26 26 26 27 27 28 28 28
-28 28 27 27 27 27 27 26 26 26 26 27 27 28 28 28
-32 32 31 31 31 31 31 30 30 30 30 31 31 32 32 32
-*/
+void correctModelMatrix(int t_newHeight)
+{
+    mat4 m = modelMatrix[gl_InstanceID];
+
+    /* scaling
+        x 0 0 0
+        0 y 0 0
+        0 0 z 0
+        0 0 0 1
+    */
+    m[1].y = t_newHeight;
+
+    /* translation
+        1 0 0 x
+        0 1 0 y
+        0 0 1 z
+        0 0 0 1
+    */
+    m[3].y += (height - t_newHeight);
+
+    gl_Position = projectionView * m * vec4(aPosition.xy, 0.0, 1.0);
+    height = t_newHeight;
+}
+
 void animateWindmill(int t_gfx, int t_rows)
 {
     if (t_gfx >= 1840 && t_gfx <= 1855)
@@ -136,26 +152,7 @@ void animateWindmill(int t_gfx, int t_rows)
 
         uvOffset = calcUvOffset(newGfx, t_rows);
         vTextureAtlasIndex = calcTextureAtlasIndex(newGfx, t_rows);
-
-        int newHeight = getHeight(newGfx);
-
-        if (height > newHeight)
-        {
-            mat4 m = modelMatrix[gl_InstanceID];
-            m[1].y = newHeight;
-            m[3].y += (height - newHeight);
-            gl_Position = projection * view * m * vec4(aPosition.xy, 0.0, 1.0);
-        }
-
-        if (height < newHeight)
-        {
-            mat4 m = modelMatrix[gl_InstanceID];
-            m[1].y = newHeight;
-            m[3].y -= (newHeight - height);
-            gl_Position = projection * view * m * vec4(aPosition.xy, 0.0, 1.0);
-        }
-
-        height = newHeight;
+        correctModelMatrix(getHeight(newGfx));
     }
 }
 
@@ -165,7 +162,7 @@ void animateWindmill(int t_gfx, int t_rows)
 
 void main()
 {
-    gl_Position = projection * view * modelMatrix[gl_InstanceID] * vec4(aPosition.xy, 0.0, 1.0);
+    gl_Position = projectionView * modelMatrix[gl_InstanceID] * vec4(aPosition.xy, 0.0, 1.0);
 
     int rows = int(nrOfRows);
     int gfx = int(gfxNumber[gl_InstanceID][worldRotation]);
@@ -185,7 +182,6 @@ void main()
 
     if (uv.y == 1.0)
     {
-        float h = float(height);
-        vUv.y = ((1.0 / nrOfRows) * h / maxY) + uvOffset.y;
+        vUv.y = ((1.0 / nrOfRows) * height / maxY) + uvOffset.y;
     }
 }

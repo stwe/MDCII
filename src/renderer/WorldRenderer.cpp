@@ -72,8 +72,7 @@ void mdcii::renderer::WorldRenderer::Render(
     const auto& shaderProgram{ ogl::resource::ResourceManager::LoadShaderProgram("shader/world") };
     shaderProgram.Bind();
 
-    shaderProgram.SetUniform("view", t_camera.GetViewMatrix());
-    shaderProgram.SetUniform("projection", t_window.GetOrthographicProjectionMatrix());
+    shaderProgram.SetUniform("projectionView", t_window.GetOrthographicProjectionMatrix() * t_camera.GetViewMatrix());
     shaderProgram.SetUniform("diffuseMap", 0);
     shaderProgram.SetUniform("selected", false);
     shaderProgram.SetUniform("worldRotation", rotationInt);
