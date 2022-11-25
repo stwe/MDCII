@@ -184,15 +184,20 @@ void mdcii::world::WorldLayer::StoreTile(std::unique_ptr<Tile> t_tile)
 }
 
 //-------------------------------------------------
-// Prepare rendering
+// Helper
 //-------------------------------------------------
 
 void mdcii::world::WorldLayer::PrepareRendering()
 {
+    MDCII_ASSERT(instancesToRender >= 0, "[WorldLayer::PrepareRendering()] Invalid number of instances to render.")
+
     SortTiles();
+
     CreateModelMatrices();
     CreateHeightInfo();
     CreateGfxInfo();
+    CreateBuildingInfo();
+    CreateAnimationInfo();
 }
 
 glm::mat4 mdcii::world::WorldLayer::GetModelMatrix(const Tile& t_tile, const Zoom t_zoom, const Rotation t_rotation) const
@@ -278,13 +283,9 @@ int32_t mdcii::world::WorldLayer::CalcGfx(const Tile& t_tile, const Rotation t_r
     return gfx;
 }
 
-//-------------------------------------------------
-// Helper
-//-------------------------------------------------
-
 void mdcii::world::WorldLayer::SortTiles()
 {
-    Log::MDCII_LOG_DEBUG("[WorldLayer::SortTiles()] Sorting tiles by index.");
+    Log::MDCII_LOG_DEBUG("[WorldLayer::SortTiles()] Sorting tiles by index for Layer type {}.", magic_enum::enum_name(layerType));
 
     magic_enum::enum_for_each<Rotation>([this](const Rotation t_rotation) {
         // enum to int
@@ -303,14 +304,17 @@ void mdcii::world::WorldLayer::SortTiles()
     tiles = sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0));
 }
 
+//-------------------------------------------------
+// Create Gpu data
+//-------------------------------------------------
+
 void mdcii::world::WorldLayer::CreateModelMatrices()
 {
-    Log::MDCII_LOG_DEBUG("[WorldLayer::CreateModelMatrices()] Create model matrices.");
+    Log::MDCII_LOG_DEBUG("[WorldLayer::CreateModelMatrices()] Create model matrices for Layer type {}.", magic_enum::enum_name(layerType));
 
     magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
         Model_Matrices_For_Each_Rotation matricesForRotations;
 
-        // for each rotation in the zoom create the model matrices
         magic_enum::enum_for_each<Rotation>([this, &t_zoom, &matricesForRotations](const Rotation t_rotation) {
             const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
             Model_Matrices matrices;
@@ -342,12 +346,10 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
 
 void mdcii::world::WorldLayer::CreateHeightInfo()
 {
-    Log::MDCII_LOG_DEBUG("[WorldLayer::CreateHeightInfo()] Create height info.");
+    Log::MDCII_LOG_DEBUG("[WorldLayer::CreateHeightInfo()] Create height info for Layer type {}.", magic_enum::enum_name(layerType));
 
     magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
         const auto& stadtfldBshTextures{ m_world->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
-
-        MDCII_ASSERT(stadtfldBshTextures.size() - 1 == 5963, "[WorldLayer::CreateHeightInfo()] Invalid number of Bsh Textures.")
 
         Texture_Heights textureHeights(stadtfldBshTextures.size(), 0);
         auto i{ 0 };
@@ -357,48 +359,70 @@ void mdcii::world::WorldLayer::CreateHeightInfo()
             i++;
         }
 
-        // todo remove
-        /*
-        for (auto a{ 0 }; a < 16; ++a)
-        {
-            const auto f{ a * 16 };
-            for (auto p{ 0 }; p < 4; ++p)
-            {
-                auto index{ 1840 + f + p };
-                const auto& bshTexture{stadtfldBshTextures.at(index)};
-                Log::MDCII_LOG_INFO("i: {}, height: {}", index, bshTexture->height);
-            }
-        }
-        */
-
         heights.at(magic_enum::enum_integer(t_zoom)) = textureHeights;
     });
 }
 
 void mdcii::world::WorldLayer::CreateGfxInfo()
 {
-    Log::MDCII_LOG_DEBUG("[WorldLayer::CreateGfxInfo()] Create gfx info.");
+    Log::MDCII_LOG_DEBUG("[WorldLayer::CreateGfxInfo()] Create gfx info for Layer type {}.", magic_enum::enum_name(layerType));
 
-    MDCII_ASSERT(instancesToRender >= 0, "[WorldLayer::CreateGfxInfo()] Invalid number of instances to render.")
+    Gfx_Info info(instancesToRender, glm::ivec4(-1));
 
-    magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
-        Gfx_Info gfxs(instancesToRender, glm::ivec4(-1));
+    magic_enum::enum_for_each<Rotation>([this, &info](const Rotation t_rotation) {
+        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
-        magic_enum::enum_for_each<Rotation>([this, &gfxs](const Rotation t_rotation) {
-            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-
-            auto instance{ 0 };
-            for (const auto& tile : sortedTiles.at(rotationInt))
+        auto instance{ 0 };
+        for (const auto& tile : sortedTiles.at(rotationInt))
+        {
+            if (tile->HasBuilding())
             {
-                if (tile->HasBuilding())
-                {
-                    gfxs.at(instance)[rotationInt] = CalcGfx(*tile, t_rotation);
-                }
-
-                instance++;
+                info.at(instance)[rotationInt] = CalcGfx(*tile, t_rotation);
             }
-        });
 
-        gfxNumbers.at(magic_enum::enum_integer(t_zoom)) = gfxs;
+            instance++;
+        }
     });
+
+    gfxInfo = info;
+}
+
+void mdcii::world::WorldLayer::CreateBuildingInfo()
+{
+    Log::MDCII_LOG_DEBUG("[WorldLayer::CreateBuildingInfo()] Create building info for Layer type {}.", magic_enum::enum_name(layerType));
+
+    Building_Info info(instancesToRender, glm::ivec4(-1));
+
+    magic_enum::enum_for_each<Rotation>([this, &info](const Rotation t_rotation) {
+        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+
+        auto instance{ 0 };
+        for (const auto& tile : sortedTiles.at(rotationInt))
+        {
+            if (tile->HasBuilding())
+            {
+                info.at(instance)[rotationInt] = tile->buildingId;
+            }
+
+            instance++;
+        }
+    });
+
+    buildingInfo = info;
+}
+
+void mdcii::world::WorldLayer::CreateAnimationInfo()
+{
+    Log::MDCII_LOG_DEBUG("[WorldLayer::CreateAnimationInfo()] Create animation info for Layer type {}.", magic_enum::enum_name(layerType));
+
+    const auto& buildings{ m_world->context->originalResourcesManager->buildings->buildingsMap };
+
+    Animation_Info info(buildings.rbegin()->first + 1, glm::ivec4(-1));
+
+    for (const auto& [k, v] : buildings)
+    {
+        info.at(k) = glm::ivec4(v.animAnz, v.animTime, v.animFrame, v.animAdd);
+    }
+
+    animationInfo = info;
 }

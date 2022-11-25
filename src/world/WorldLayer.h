@@ -120,18 +120,25 @@ namespace mdcii::world
         using Texture_Heights_For_Each_Zoom = std::array<Texture_Heights, NR_OF_ZOOMS>;
 
         //-------------------------------------------------
-        // Gfx info
+        // Gfx / building / animation types
         //-------------------------------------------------
 
         /**
-         * A vector of gfx info.
+         * To store the gfx number for each instance.
+         * The values from x to w are used for rotation from DEG0 to DEG270.
          */
         using Gfx_Info = std::vector<glm::ivec4>;
 
         /**
-         * A vector of gfx info for each zoom level.
+         * To store the Building-Id for each instance.
+         * The values from x to w are used for rotation from DEG0 to DEG270.
          */
-        using Gfx_Info_For_Each_Zoom = std::array<Gfx_Info, NR_OF_ZOOMS>;
+        using Building_Info = std::vector<glm::ivec4>;
+
+        /**
+         * To store the animation info for each building.
+         */
+        using Animation_Info = std::vector<glm::ivec4>;
 
         //-------------------------------------------------
         // Member
@@ -168,19 +175,36 @@ namespace mdcii::world
         Model_Matrices_For_Each_Zoom modelMatrices;
 
         /**
-         * A vector of gfx texture heights for each zoom level.
+         * A vector of Stadtfld Bsh-Image heights for each zoom level.
          */
         Texture_Heights_For_Each_Zoom heights;
 
         /**
-         * A vector of gfx numbers for each zoom level.
-         * A gfx number for each tile.
+         * To store the gfx for each instance.
          * x = gfx for rot0
          * y = gfx for rot90
          * z = gfx for rot180
          * w = gfx for rot270
          */
-        Gfx_Info_For_Each_Zoom gfxNumbers;
+        Gfx_Info gfxInfo;
+
+        /**
+         * To store the Building-Id for each instance.
+         * x = building for rot0
+         * y = building for rot90
+         * z = building for rot180
+         * w = building for rot270
+         */
+        Building_Info buildingInfo;
+
+        /**
+         * To store the animation info for each building.
+         * x = animAnz
+         * y = animTime
+         * z = animFrame
+         * w = animAdd
+         */
+        Animation_Info animationInfo;
 
         /**
          * The number of instances to render.
@@ -280,7 +304,7 @@ namespace mdcii::world
         void StoreTile(std::unique_ptr<Tile> t_tile);
 
         //-------------------------------------------------
-        // Prepare rendering
+        // Helper
         //-------------------------------------------------
 
         /**
@@ -344,19 +368,33 @@ namespace mdcii::world
          */
         void SortTiles();
 
+        //-------------------------------------------------
+        // Create Gpu data
+        //-------------------------------------------------
+
         /**
-         * Creates model matrices for rendering.
+         * Stores a model matrix for each instance.
          */
         void CreateModelMatrices();
 
         /**
-         * Provides information about the height of each texture.
+         * Stores the height of each Stadtfld Bsh-Image.
          */
         void CreateHeightInfo();
 
         /**
-         * Creates information about which gfx is used for each instance to render.
+         * Stores the gfx number for each instance.
          */
         void CreateGfxInfo();
+
+        /**
+         * Stores the Building-Id for each instance.
+         */
+        void CreateBuildingInfo();
+
+        /**
+         * Stores the animation info of each building.
+         */
+        void CreateAnimationInfo();
     };
 }

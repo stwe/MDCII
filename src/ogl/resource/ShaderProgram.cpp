@@ -100,6 +100,18 @@ void mdcii::ogl::resource::ShaderProgram::SetUniform(const std::string& t_unifor
     glUniformMatrix3fv(m_uniforms.at(t_uniformName), 1, GL_FALSE, value_ptr(t_value));
 }
 
+void mdcii::ogl::resource::ShaderProgram::SetUniform(const std::string& t_uniformName, const std::vector<int32_t>& t_container) const
+{
+    const auto& m{ m_arrayUniformNames.at(t_uniformName) };
+
+    auto c{ 0 };
+    for (const auto& value : m)
+    {
+        glUniform1i(m_uniforms.at(value), t_container[c]);
+        c++;
+    }
+}
+
 //-------------------------------------------------
 // Init
 //-------------------------------------------------
@@ -157,7 +169,7 @@ uint32_t mdcii::ogl::resource::ShaderProgram::CreateShaderObject(const int32_t t
 
 void mdcii::ogl::resource::ShaderProgram::CompileShader(const uint32_t t_shaderId, const std::string& t_shaderCode)
 {
-    const auto shaderSrc{ t_shaderCode.c_str() };
+    const auto* const shaderSrc{ t_shaderCode.c_str() };
     glShaderSource(t_shaderId, 1, &shaderSrc, nullptr);
     glCompileShader(t_shaderId);
 }
@@ -201,10 +213,33 @@ void mdcii::ogl::resource::ShaderProgram::FindUniforms(const std::string& t_shad
         const auto uniformLine{ t_shaderCode.substr(begin, end - begin) };
 
         const auto uniformNamePos{ uniformLine.find_first_of(' ') + 1 };
-        const auto uniformName{ uniformLine.substr(uniformNamePos, uniformLine.length()) };
+        auto uniformName{ uniformLine.substr(uniformNamePos, uniformLine.length()) };
         const auto uniformType{ uniformLine.substr(0, uniformNamePos - 1) };
 
-        m_foundUniforms.emplace_back(uniformType, uniformName);
+        std::vector<std::string> cache;
+        const auto uniformArrayStartPos{ uniformName.find_first_of('[') };
+        if (uniformArrayStartPos != std::string::npos)
+        {
+            const auto uniformArrayEndPos{ uniformName.find_first_of(']') };
+            const auto number{ uniformName.substr(uniformArrayStartPos + 1, (uniformArrayEndPos - 1) - uniformArrayStartPos) };
+            const auto iNumber{ std::stoi(number) };
+            const auto newUniformName{ uniformName.substr(0, uniformArrayStartPos) };
+
+            for (auto i{ 0 }; i < iNumber; ++i)
+            {
+                fmt::format_int f(i);
+                uniformName = newUniformName + "[" + f.c_str() + "]";
+
+                cache.push_back(uniformName);
+                m_foundUniforms.emplace_back(uniformType, uniformName);
+            }
+
+            m_arrayUniformNames.emplace(newUniformName, cache);
+        }
+        else
+        {
+            m_foundUniforms.emplace_back(uniformType, uniformName);
+        }
     }
 }
 

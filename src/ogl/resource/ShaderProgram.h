@@ -90,6 +90,7 @@ namespace mdcii::ogl::resource
         void SetUniform(const std::string& t_uniformName, const glm::vec4& t_value) const;
         void SetUniform(const std::string& t_uniformName, const glm::mat4& t_value) const;
         void SetUniform(const std::string& t_uniformName, const glm::mat3& t_value) const;
+        void SetUniform(const std::string& t_uniformName, const std::vector<int32_t>& t_container) const;
 
     protected:
 
@@ -137,6 +138,11 @@ namespace mdcii::ogl::resource
          * A uniform handle for each uniform.
          */
         std::unordered_map<std::string, int32_t> m_uniforms;
+
+        /**
+         * Stores array uniforms.
+         */
+        std::unordered_map<std::string, std::vector<std::string>> m_arrayUniformNames;
 
         //-------------------------------------------------
         // Init

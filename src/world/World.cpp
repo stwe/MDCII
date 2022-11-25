@@ -645,7 +645,9 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
     // copy Gpu data to the new layer
     newLayer->modelMatrices = terrainLayer.modelMatrices;
     newLayer->heights = terrainLayer.heights;
-    newLayer->gfxNumbers = terrainLayer.gfxNumbers;
+    newLayer->gfxInfo = terrainLayer.gfxInfo;
+    newLayer->buildingInfo = terrainLayer.buildingInfo;
+    newLayer->animationInfo = terrainLayer.animationInfo;
 
     // merge Gpu data
     magic_enum::enum_for_each<Zoom>([&newLayer, &buildingsLayer](const Zoom t_zoom) {
@@ -656,20 +658,24 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
             auto& mt{ newLayer->modelMatrices.at(z).at(r) };
             const auto& mb{ buildingsLayer.modelMatrices.at(z).at(r) };
 
-            auto& gt{ newLayer->gfxNumbers.at(z) };
-            const auto& gb{ buildingsLayer.gfxNumbers.at(z) };
+            auto& gt{ newLayer->gfxInfo };
+            const auto& gb{ buildingsLayer.gfxInfo };
+
+            auto& bt{ newLayer->buildingInfo };
+            const auto& bb{ buildingsLayer.buildingInfo };
 
             // for each tile
-            auto i{ 0 };
+            auto instance{ 0 };
             for (const auto& mapTile : buildingsLayer.sortedTiles.at(r))
             {
                 if (mapTile->HasBuilding())
                 {
-                    mt.at(i) = mb.at(i);
-                    gt.at(i)[r] = gb.at(i)[r];
+                    mt.at(instance) = mb.at(instance);
+                    gt.at(instance)[r] = gb.at(instance)[r];
+                    bt.at(instance)[r] = bb.at(instance)[r];
                 }
 
-                i++;
+                instance++;
             }
         });
     });

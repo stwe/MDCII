@@ -129,7 +129,7 @@ namespace mdcii::renderer
         ) const;
 
         //-------------------------------------------------
-        // Add / remove Gpu data
+        // Add / remove Tile Gpu data
         //-------------------------------------------------
 
         /**
@@ -192,6 +192,7 @@ namespace mdcii::renderer
          * @param t_rotation The rotation.
          * @param t_modelMatrix The new model matrix.
          * @param t_gfxNumber The new gfx number.
+         * @param t_buildingId The new Building-Id.
          */
         void UpdateGpuData(
             int32_t t_instance,
@@ -199,7 +200,8 @@ namespace mdcii::renderer
             world::Zoom t_zoom,
             world::Rotation t_rotation,
             const glm::mat4& t_modelMatrix,
-            int32_t t_gfxNumber
+            int32_t t_gfxNumber,
+            int32_t t_buildingId
         );
 
     protected:
@@ -238,6 +240,16 @@ namespace mdcii::renderer
          */
         static constexpr auto GFX_NUMBERS_BINDING{ 2 };
 
+        /**
+         * The number of the buildingInfo shader binding.
+         */
+        static constexpr auto BUILDING_IDS_BINDING{ 3 };
+
+        /**
+         * The number of the animationInfo shader binding.
+         */
+        static constexpr auto ANIMATIONS_BINDING{ 4 };
+
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
@@ -262,6 +274,11 @@ namespace mdcii::renderer
          */
         int32_t m_updates{ 0 };
 
+        /**
+         * Counters to get animation frames.
+         */
+        std::vector<int32_t> m_timeCounter{ 0, 0, 0, 0, 0 };
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -272,23 +289,49 @@ namespace mdcii::renderer
         void Init();
 
         //-------------------------------------------------
-        // Helper
+        // Create buffers
         //-------------------------------------------------
 
         /**
-         * Add model matrices to the Gpu.
+         * Creates all Vaos for the given Layer type.
          *
-         * @param t_zoom The zoom level.
          * @param t_layerType The type of the Layer.
          */
-        void AddModelMatrices(world::Zoom t_zoom, world::WorldLayerType t_layerType);
+        void CreateVaos(world::WorldLayerType t_layerType);
 
         /**
-         * Add texture info to the Gpu.
+         * Creates all Ssbos which holding model matrices for the given Layer type.
          *
-         * @param t_zoom The zoom level.
          * @param t_layerType The type of the Layer.
          */
-        void AddTextureInfo(world::Zoom t_zoom, world::WorldLayerType t_layerType) const;
+        void CreateModelMatricesSsbos(world::WorldLayerType t_layerType) const;
+
+        /**
+         * Creates all Ssbos which holding image heights for the given Layer type.
+         *
+         * @param t_layerType The type of the Layer.
+         */
+        void CreateHeightsSsbos(world::WorldLayerType t_layerType) const;
+
+        /**
+         * Creates all Ssbos which holding gfx numbers for the given Layer type.
+         *
+         * @param t_layerType The type of the Layer.
+         */
+        void CreateGfxInfoSsbos(world::WorldLayerType t_layerType) const;
+
+        /**
+         * Creates all Ssbos which holding Building-Ids for the given Layer type.
+         *
+         * @param t_layerType The type of the Layer.
+         */
+        void CreateBuildingInfoSsbos(world::WorldLayerType t_layerType) const;
+
+        /**
+         * Creates all Ssbos which holding animation info for the given Layer type.
+         *
+         * @param t_layerType The type of the Layer.
+         */
+        void CreateAnimationInfoSsbos(world::WorldLayerType t_layerType) const;
     };
 }

@@ -7,7 +7,7 @@ Spielewelt zu erschaffen.
 Es wird das Originalspiel benötigt. In der `config.ini` müssen die Pfade angepasst werden.
 
 Für einen Programmstart werden sog. Tile-Atlas Grafiken benötigt, die zunächst erstellt werden müssen. Dazu befindet
-sich der `TileAtlasCreator` im Verzeichnis `install`. 
+sich der `TileAtlasCreator` im Verzeichnis `install`.
 
 **Der erste Start dauert länger, da die `haeuser.cod` eingelesen wird.**
 

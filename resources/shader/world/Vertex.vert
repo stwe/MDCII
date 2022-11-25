@@ -21,6 +21,16 @@ layout(std430, binding = 2) buffer gfxNumbers
     ivec4 gfxNumber[];
 };
 
+layout(std430, binding = 3) buffer buildingIds
+{
+    ivec4 buildingId[];
+};
+
+layout(std430, binding = 4) buffer buildingAnimations
+{
+    ivec4 buildingAnimation[];
+};
+
 //-------------------------------------------------
 // Out
 //-------------------------------------------------
@@ -36,7 +46,7 @@ uniform mat4 projectionView;
 uniform int worldRotation;
 uniform float maxY;
 uniform float nrOfRows;
-uniform int updates;
+uniform int updates[5];
 
 //-------------------------------------------------
 // Globals
@@ -78,40 +88,20 @@ int getHeight(int t_gfx)
 // Animation
 //-------------------------------------------------
 
-int getFrame(int t_animCount)
+int getFrame(int t_animCount, int t_animTime)
 {
-    return updates % t_animCount;
-}
-
-void animateToolSmithy(int t_gfx, int t_rows)
-{
-    if (t_gfx >= 3984 && t_gfx <= 3999)
+    switch(t_animTime)
     {
-        int animAdd = 16;
-        int animAnz = 5;
-        int frame = getFrame(animAnz);
-
-        int gfxOffset = frame * animAdd;
-        int newGfx = t_gfx + gfxOffset;
-
-        uvOffset = calcUvOffset(newGfx, t_rows);
-        vTextureAtlasIndex = calcTextureAtlasIndex(newGfx, t_rows);
-    }
-}
-
-void animateFirestation(int t_gfx, int t_rows)
-{
-    if (t_gfx >= 2760 && t_gfx <= 2775)
-    {
-        int animAdd = 16;
-        int animAnz = 6;
-        int frame = getFrame(animAnz); // Werte von 0 bis 5
-
-        int gfxOffset = frame * animAdd;
-        int newGfx = t_gfx + gfxOffset;
-
-        uvOffset = calcUvOffset(newGfx, t_rows);
-        vTextureAtlasIndex = calcTextureAtlasIndex(newGfx, t_rows);
+        case 90:
+            return updates[0] % t_animCount;
+        case 130:
+            return updates[1] % t_animCount;
+        case 150:
+            return updates[2] % t_animCount;
+        case 180:
+            return updates[3] % t_animCount;
+        case 220:
+            return updates[4] % t_animCount;
     }
 }
 
@@ -139,21 +129,28 @@ void correctModelMatrix(int t_newHeight)
     height = t_newHeight;
 }
 
-void animateWindmill(int t_gfx, int t_rows)
+void animateBuilding(int t_gfx, int t_rows)
 {
-    if (t_gfx >= 1840 && t_gfx <= 1855)
+    int building = int(buildingId[gl_InstanceID][worldRotation]);
+    ivec4 animation = ivec4(buildingAnimation[building]);
+
+    int animAnz = animation.x;
+    int animTime = animation.y;
+    int animAdd = animation.w;
+
+    if (animTime < 0)
     {
-        int animAdd = 16;
-        int animAnz = 16;
-        int frame = getFrame(animAnz);
-
-        int gfxOffset = frame * animAdd;
-        int newGfx = t_gfx + gfxOffset;
-
-        uvOffset = calcUvOffset(newGfx, t_rows);
-        vTextureAtlasIndex = calcTextureAtlasIndex(newGfx, t_rows);
-        correctModelMatrix(getHeight(newGfx));
+        return;
     }
+
+    int frame = getFrame(animAnz, animTime);
+
+    int gfxOffset = frame * animAdd;
+    int newGfx = t_gfx + gfxOffset;
+
+    uvOffset = calcUvOffset(newGfx, t_rows);
+    vTextureAtlasIndex = calcTextureAtlasIndex(newGfx, t_rows);
+    correctModelMatrix(getHeight(newGfx));
 }
 
 //-------------------------------------------------
@@ -171,9 +168,7 @@ void main()
     vTextureAtlasIndex = calcTextureAtlasIndex(gfx, rows);
     height = getHeight(gfx);
 
-    animateToolSmithy(gfx, rows);
-    animateFirestation(gfx, rows);
-    animateWindmill(gfx, rows);
+    animateBuilding(gfx, rows);
 
     uv = aPosition.zw;
 
@@ -182,6 +177,7 @@ void main()
 
     if (uv.y == 1.0)
     {
-        vUv.y = ((1.0 / nrOfRows) * height / maxY) + uvOffset.y;
+        float h = float(height);
+        vUv.y = ((1.0 / nrOfRows) * h / maxY) + uvOffset.y;
     }
 }
