@@ -355,7 +355,7 @@ void mdcii::world::WorldLayer::CreateHeightInfo()
         auto i{ 0 };
         for (const auto& bshTexture : stadtfldBshTextures)
         {
-            textureHeights.at(i) = bshTexture->height;
+            textureHeights.at(i) = static_cast<float>(bshTexture->height);
             i++;
         }
 

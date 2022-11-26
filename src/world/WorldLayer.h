@@ -112,7 +112,7 @@ namespace mdcii::world
         /**
          * A vector of gfx texture heights.
          */
-        using Texture_Heights = std::vector<uint32_t>;
+        using Texture_Heights = std::vector<float>;
 
         /**
          * A vector of gfx texture heights for each zoom level.

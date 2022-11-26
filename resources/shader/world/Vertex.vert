@@ -13,7 +13,7 @@ layout(std140, binding = 0) buffer modelMatrices
 
 layout(std430, binding = 1) buffer heights
 {
-    int textureHeight[];
+    float textureHeight[];
 };
 
 layout(std430, binding = 2) buffer gfxNumbers
@@ -54,7 +54,7 @@ uniform int updates[5];
 
 vec2 uvOffset;
 vec2 uv;
-int height;
+float height;
 
 //-------------------------------------------------
 // Helper
@@ -79,9 +79,9 @@ int calcTextureAtlasIndex(int t_gfx, int t_rows)
     return (t_gfx / (t_rows * t_rows));
 }
 
-int getHeight(int t_gfx)
+float getHeight(int t_gfx)
 {
-    return int(textureHeight[t_gfx]);
+    return textureHeight[t_gfx];
 }
 
 //-------------------------------------------------
@@ -105,7 +105,7 @@ int getFrame(int t_animCount, int t_animTime)
     }
 }
 
-void correctModelMatrix(int t_newHeight)
+void correctModelMatrix(float t_newHeight)
 {
     mat4 m = modelMatrix[gl_InstanceID];
 
@@ -123,7 +123,7 @@ void correctModelMatrix(int t_newHeight)
         0 0 1 z
         0 0 0 1
     */
-    m[3].y += (height - t_newHeight);
+    m[3].y += height - t_newHeight;
 
     gl_Position = projectionView * m * vec4(aPosition.xy, 0.0, 1.0);
     height = t_newHeight;
@@ -177,7 +177,6 @@ void main()
 
     if (uv.y == 1.0)
     {
-        float h = float(height);
-        vUv.y = ((1.0 / nrOfRows) * h / maxY) + uvOffset.y;
+        vUv.y = ((1.0 / nrOfRows) * height / maxY) + uvOffset.y;
     }
 }

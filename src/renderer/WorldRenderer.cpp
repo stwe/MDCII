@@ -530,7 +530,7 @@ void mdcii::renderer::WorldRenderer::CreateHeightsSsbos(const world::WorldLayerT
         std::vector<std::unique_ptr<ogl::buffer::Ssbo>> ssbos;
         auto ssbo{ std::make_unique<ogl::buffer::Ssbo>() };
         ssbo->Bind();
-        ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(layer.heights.at(zoomInt).size()) * sizeof(uint32_t), layer.heights.at(zoomInt).data());
+        ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(layer.heights.at(zoomInt).size()) * sizeof(float), layer.heights.at(zoomInt).data());
         ogl::buffer::Ssbo::Unbind();
         ssbos.emplace_back(std::move(ssbo));
         m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(ssbos));
