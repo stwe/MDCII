@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string>
 
 //-------------------------------------------------
 // Ssbo
@@ -41,11 +42,18 @@ namespace mdcii::ogl::buffer
          */
         uint32_t id{ 0 };
 
+        /**
+         * A name for debug reason.
+         */
+        std::string name;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
         Ssbo();
+
+        explicit Ssbo(std::string t_name);
 
         Ssbo(const Ssbo& t_other) = delete;
         Ssbo(Ssbo&& t_other) noexcept = delete;

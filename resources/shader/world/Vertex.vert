@@ -11,19 +11,19 @@ layout(std140, binding = 0) buffer modelMatrices
     mat4 modelMatrix[];
 };
 
-layout(std430, binding = 1) buffer heights
-{
-    float textureHeight[];
-};
-
-layout(std430, binding = 2) buffer gfxNumbers
+layout(std430, binding = 1) buffer gfxNumbers
 {
     ivec4 gfxNumber[];
 };
 
-layout(std430, binding = 3) buffer buildingIds
+layout(std430, binding = 2) buffer buildingIds
 {
     ivec4 buildingId[];
+};
+
+layout(std430, binding = 3) buffer heights
+{
+    float textureHeight[];
 };
 
 layout(std430, binding = 4) buffer buildingAnimations

@@ -194,10 +194,8 @@ void mdcii::world::WorldLayer::PrepareRendering()
     SortTiles();
 
     CreateModelMatrices();
-    CreateHeightInfo();
     CreateGfxInfo();
     CreateBuildingInfo();
-    CreateAnimationInfo();
 }
 
 glm::mat4 mdcii::world::WorldLayer::GetModelMatrix(const Tile& t_tile, const Zoom t_zoom, const Rotation t_rotation) const
@@ -344,25 +342,6 @@ void mdcii::world::WorldLayer::CreateModelMatrices()
     });
 }
 
-void mdcii::world::WorldLayer::CreateHeightInfo()
-{
-    Log::MDCII_LOG_DEBUG("[WorldLayer::CreateHeightInfo()] Create height info for Layer type {}.", magic_enum::enum_name(layerType));
-
-    magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
-        const auto& stadtfldBshTextures{ m_world->context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
-
-        Texture_Heights textureHeights(stadtfldBshTextures.size(), 0);
-        auto i{ 0 };
-        for (const auto& bshTexture : stadtfldBshTextures)
-        {
-            textureHeights.at(i) = static_cast<float>(bshTexture->height);
-            i++;
-        }
-
-        heights.at(magic_enum::enum_integer(t_zoom)) = textureHeights;
-    });
-}
-
 void mdcii::world::WorldLayer::CreateGfxInfo()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateGfxInfo()] Create gfx info for Layer type {}.", magic_enum::enum_name(layerType));
@@ -409,20 +388,4 @@ void mdcii::world::WorldLayer::CreateBuildingInfo()
     });
 
     buildingInfo = info;
-}
-
-void mdcii::world::WorldLayer::CreateAnimationInfo()
-{
-    Log::MDCII_LOG_DEBUG("[WorldLayer::CreateAnimationInfo()] Create animation info for Layer type {}.", magic_enum::enum_name(layerType));
-
-    const auto& buildings{ m_world->context->originalResourcesManager->buildings->buildingsMap };
-
-    Animation_Info info(buildings.rbegin()->first + 1, glm::ivec4(-1));
-
-    for (const auto& [k, v] : buildings)
-    {
-        info.at(k) = glm::ivec4(v.animAnz, v.animTime, v.animFrame, v.animAdd);
-    }
-
-    animationInfo = info;
 }

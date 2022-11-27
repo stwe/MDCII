@@ -53,6 +53,11 @@ namespace mdcii::ogl::buffer
      * Forward declaration class Vao.
      */
     class Vao;
+
+    /**
+     * Forward declaration class Ssbo.
+     */
+    class Ssbo;
 }
 
 //-------------------------------------------------
@@ -231,19 +236,19 @@ namespace mdcii::renderer
         static constexpr auto MODEL_MATRICES_BINDING{ 0 };
 
         /**
-         * The number of the heights shader binding.
-         */
-        static constexpr auto HEIGHTS_BINDING{ 1 };
-
-        /**
          * The number of the gfxNumbers shader binding.
          */
-        static constexpr auto GFX_NUMBERS_BINDING{ 2 };
+        static constexpr auto GFX_NUMBERS_BINDING{ 1 };
 
         /**
          * The number of the buildingInfo shader binding.
          */
-        static constexpr auto BUILDING_IDS_BINDING{ 3 };
+        static constexpr auto BUILDING_IDS_BINDING{ 2 };
+
+        /**
+         * The number of the heights shader binding.
+         */
+        static constexpr auto HEIGHTS_BINDING{ 3 };
 
         /**
          * The number of the animationInfo shader binding.
@@ -261,8 +266,19 @@ namespace mdcii::renderer
 
         /**
          * Each Layer has three Vao.
+         * Access: m_vaos[one of the four Layer][one of the three Zoom levels]
          */
         Layer_Vaos m_vaos{};
+
+        /**
+         * A buffer for each zoom containing the height of each Stadtfld Bsh-Image.
+         */
+        std::array<std::unique_ptr<ogl::buffer::Ssbo>, 3> m_heightsSsbos;
+
+        /**
+         * A buffer containing the animation information for each building.
+         */
+        std::unique_ptr<ogl::buffer::Ssbo> m_animationSsbo;
 
         /**
          * Each zoom Level has a different grid texture.
@@ -307,13 +323,6 @@ namespace mdcii::renderer
         void CreateModelMatricesSsbos(world::WorldLayerType t_layerType) const;
 
         /**
-         * Creates all Ssbos which holding image heights for the given Layer type.
-         *
-         * @param t_layerType The type of the Layer.
-         */
-        void CreateHeightsSsbos(world::WorldLayerType t_layerType) const;
-
-        /**
          * Creates all Ssbos which holding gfx numbers for the given Layer type.
          *
          * @param t_layerType The type of the Layer.
@@ -328,10 +337,13 @@ namespace mdcii::renderer
         void CreateBuildingInfoSsbos(world::WorldLayerType t_layerType) const;
 
         /**
-         * Creates all Ssbos which holding animation info for the given Layer type.
-         *
-         * @param t_layerType The type of the Layer.
+         * Creates a Ssbo for each zoom level which holding the height of each Bsh-Image.
          */
-        void CreateAnimationInfoSsbos(world::WorldLayerType t_layerType) const;
+        void CreateHeightsSsbos();
+
+        /**
+         * Creates a Ssbo which holding animation info for each building.
+         */
+        void CreateAnimationInfoSsbo();
     };
 }

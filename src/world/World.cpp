@@ -644,10 +644,8 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
 
     // copy Gpu data to the new layer
     newLayer->modelMatrices = terrainLayer.modelMatrices;
-    newLayer->heights = terrainLayer.heights;
     newLayer->gfxInfo = terrainLayer.gfxInfo;
     newLayer->buildingInfo = terrainLayer.buildingInfo;
-    newLayer->animationInfo = terrainLayer.animationInfo;
 
     // merge Gpu data
     magic_enum::enum_for_each<Zoom>([&newLayer, &buildingsLayer](const Zoom t_zoom) {

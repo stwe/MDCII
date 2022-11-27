@@ -31,6 +31,14 @@ mdcii::ogl::buffer::Ssbo::Ssbo()
     CreateId();
 }
 
+mdcii::ogl::buffer::Ssbo::Ssbo(std::string t_name)
+    : name{ std::move(t_name) }
+{
+    Log::MDCII_LOG_DEBUG("[Ssbo::Ssbo()] Create Ssbo {}.", name);
+
+    CreateId();
+}
+
 mdcii::ogl::buffer::Ssbo::~Ssbo() noexcept
 {
     Log::MDCII_LOG_DEBUG("[Ssbo::~Ssbo()] Destruct Ssbo.");
@@ -85,13 +93,13 @@ void mdcii::ogl::buffer::Ssbo::CreateId()
 
 void mdcii::ogl::buffer::Ssbo::CleanUp() const
 {
-    Log::MDCII_LOG_DEBUG("[Ssbo::CleanUp()] Clean up Ssbo Id {}.", id);
+    Log::MDCII_LOG_DEBUG("[Ssbo::CleanUp()] Clean up Ssbo {} Id {}.", name, id);
 
     Unbind();
 
     if (id)
     {
         glDeleteBuffers(1, &id);
-        Log::MDCII_LOG_DEBUG("[Ssbo::CleanUp()] Ssbo Id {} was deleted.", id);
+        Log::MDCII_LOG_DEBUG("[Ssbo::CleanUp()] Ssbo {} Id {} was deleted.", name, id);
     }
 }

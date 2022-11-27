@@ -106,21 +106,7 @@ namespace mdcii::world
         using Model_Matrices_For_Each_Zoom = std::array<Model_Matrices_For_Each_Rotation, NR_OF_ZOOMS>;
 
         //-------------------------------------------------
-        // Texture heights types
-        //-------------------------------------------------
-
-        /**
-         * A vector of gfx texture heights.
-         */
-        using Texture_Heights = std::vector<float>;
-
-        /**
-         * A vector of gfx texture heights for each zoom level.
-         */
-        using Texture_Heights_For_Each_Zoom = std::array<Texture_Heights, NR_OF_ZOOMS>;
-
-        //-------------------------------------------------
-        // Gfx / building / animation types
+        // Gfx / building types
         //-------------------------------------------------
 
         /**
@@ -134,11 +120,6 @@ namespace mdcii::world
          * The values from x to w are used for rotation from DEG0 to DEG270.
          */
         using Building_Info = std::vector<glm::ivec4>;
-
-        /**
-         * To store the animation info for each building.
-         */
-        using Animation_Info = std::vector<glm::ivec4>;
 
         //-------------------------------------------------
         // Member
@@ -175,11 +156,6 @@ namespace mdcii::world
         Model_Matrices_For_Each_Zoom modelMatrices;
 
         /**
-         * A vector of Stadtfld Bsh-Image heights for each zoom level.
-         */
-        Texture_Heights_For_Each_Zoom heights;
-
-        /**
          * To store the gfx for each instance.
          * x = gfx for rot0
          * y = gfx for rot90
@@ -196,15 +172,6 @@ namespace mdcii::world
          * w = building for rot270
          */
         Building_Info buildingInfo;
-
-        /**
-         * To store the animation info for each building.
-         * x = animAnz
-         * y = animTime
-         * z = animFrame
-         * w = animAdd
-         */
-        Animation_Info animationInfo;
 
         /**
          * The number of instances to render.
@@ -378,11 +345,6 @@ namespace mdcii::world
         void CreateModelMatrices();
 
         /**
-         * Stores the height of each Stadtfld Bsh-Image.
-         */
-        void CreateHeightInfo();
-
-        /**
          * Stores the gfx number for each instance.
          */
         void CreateGfxInfo();
@@ -391,10 +353,5 @@ namespace mdcii::world
          * Stores the Building-Id for each instance.
          */
         void CreateBuildingInfo();
-
-        /**
-         * Stores the animation info of each building.
-         */
-        void CreateAnimationInfo();
     };
 }
