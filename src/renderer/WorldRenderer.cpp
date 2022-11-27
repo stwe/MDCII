@@ -125,13 +125,13 @@ void mdcii::renderer::WorldRenderer::Render(
     glBindBufferBase(
         GL_SHADER_STORAGE_BUFFER,
         GFX_NUMBERS_BINDING,
-        m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.at(GFX_NUMBERS_BINDING).at(0)->id
+        m_world->GetLayer(t_layerType).gfxSsbo->id
     );
 
     glBindBufferBase(
         GL_SHADER_STORAGE_BUFFER,
         BUILDING_IDS_BINDING,
-        m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.at(BUILDING_IDS_BINDING).at(0)->id
+        m_world->GetLayer(t_layerType).buildingsSsbo->id
     );
 
     glBindBufferBase(
@@ -396,14 +396,14 @@ void mdcii::renderer::WorldRenderer::UpdateGpuData(
     const auto rotOffset{ rotationInt * static_cast<int32_t>(sizeof(int32_t)) };
 
     // new gfx number
-    const auto& gfxNumbersSsbo{ vao->ssbos.at(GFX_NUMBERS_BINDING) };
-    gfxNumbersSsbo.at(0)->Bind();
+    const auto& gfxNumbersSsbo{ m_world->GetLayer(t_layerType).gfxSsbo };
+    gfxNumbersSsbo->Bind();
     ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::ivec4)) * t_instance) + rotOffset, sizeof(int32_t), &t_gfxNumber);
     ogl::buffer::Ssbo::Unbind();
 
     // new building
-    const auto& buildingsSsbo{ vao->ssbos.at(BUILDING_IDS_BINDING) };
-    buildingsSsbo.at(0)->Bind();
+    const auto& buildingsSsbo{ m_world->GetLayer(t_layerType).buildingsSsbo };
+    buildingsSsbo->Bind();
     ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::ivec4)) * t_instance) + rotOffset, sizeof(int32_t), &t_buildingId);
     ogl::buffer::Ssbo::Unbind();
 
@@ -435,14 +435,6 @@ void mdcii::renderer::WorldRenderer::Init()
     CreateModelMatricesSsbos(world::WorldLayerType::BUILDINGS);
     CreateModelMatricesSsbos(world::WorldLayerType::TERRAIN_AND_BUILDINGS);
     CreateModelMatricesSsbos(world::WorldLayerType::GRID);
-
-    CreateGfxInfoSsbos(world::WorldLayerType::TERRAIN);
-    CreateGfxInfoSsbos(world::WorldLayerType::BUILDINGS);
-    CreateGfxInfoSsbos(world::WorldLayerType::TERRAIN_AND_BUILDINGS);
-
-    CreateBuildingInfoSsbos(world::WorldLayerType::TERRAIN);
-    CreateBuildingInfoSsbos(world::WorldLayerType::BUILDINGS);
-    CreateBuildingInfoSsbos(world::WorldLayerType::TERRAIN_AND_BUILDINGS);
 
     CreateHeightsSsbos();
     CreateAnimationInfoSsbo();
@@ -503,74 +495,6 @@ void mdcii::renderer::WorldRenderer::CreateModelMatricesSsbos(const world::World
     });
 }
 
-void mdcii::renderer::WorldRenderer::CreateGfxInfoSsbos(const world::WorldLayerType t_layerType) const
-{
-    // todo: create only 1x and then use the buffer for each zoom
-
-    Log::MDCII_LOG_DEBUG(
-        "[WorldRenderer::CreateGfxInfoSsbos()] Creates all Ssbos which holding gfx numbers for Layer type {}.",
-        magic_enum::enum_name(t_layerType)
-    );
-
-    magic_enum::enum_for_each<world::Zoom>([this, t_layerType](const world::Zoom t_zoom) {
-        // enum to int
-        const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
-        const auto layerTypeInt{ magic_enum::enum_integer(t_layerType) };
-
-        // get the layer
-        const auto& layer{ m_world->GetLayer(t_layerType) };
-
-        // bind Vao of the given zoom
-        m_vaos.at(layerTypeInt).at(zoomInt)->Bind();
-
-        // store gfx numbers in [1][0]
-        std::vector<std::unique_ptr<ogl::buffer::Ssbo>> ssbos;
-        auto ssbo{ std::make_unique<ogl::buffer::Ssbo>() };
-        ssbo->Bind();
-        ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(layer.gfxInfo.size()) * sizeof(glm::ivec4), layer.gfxInfo.data());
-        ogl::buffer::Ssbo::Unbind();
-        ssbos.emplace_back(std::move(ssbo));
-        m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(ssbos));
-
-        // unbind Vao
-        ogl::buffer::Vao::Unbind();
-    });
-}
-
-void mdcii::renderer::WorldRenderer::CreateBuildingInfoSsbos(const world::WorldLayerType t_layerType) const
-{
-    // todo: create only 1x and then use the buffer for each zoom
-
-    Log::MDCII_LOG_DEBUG(
-        "[WorldRenderer::CreateBuildingInfoSsbos()] Creates all Ssbos which holding building Ids for Layer type {}.",
-        magic_enum::enum_name(t_layerType)
-    );
-
-    magic_enum::enum_for_each<world::Zoom>([this, t_layerType](const world::Zoom t_zoom) {
-        // enum to int
-        const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
-        const auto layerTypeInt{ magic_enum::enum_integer(t_layerType) };
-
-        // get the layer
-        const auto& layer{ m_world->GetLayer(t_layerType) };
-
-        // bind Vao of the given zoom
-        m_vaos.at(layerTypeInt).at(zoomInt)->Bind();
-
-        // store gfx numbers in [2][0]
-        std::vector<std::unique_ptr<ogl::buffer::Ssbo>> ssbos;
-        auto ssbo{ std::make_unique<ogl::buffer::Ssbo>() };
-        ssbo->Bind();
-        ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(layer.buildingInfo.size()) * sizeof(glm::ivec4), layer.buildingInfo.data());
-        ogl::buffer::Ssbo::Unbind();
-        ssbos.emplace_back(std::move(ssbo));
-        m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(ssbos));
-
-        // unbind Vao
-        ogl::buffer::Vao::Unbind();
-    });
-}
-
 void mdcii::renderer::WorldRenderer::CreateHeightsSsbos()
 {
     Log::MDCII_LOG_DEBUG("[WorldRenderer::CreateHeightsSsbos()] Creates a Ssbo for each zoom level which holding Stadtfld Bsh-Image heights.");
@@ -614,7 +538,7 @@ void mdcii::renderer::WorldRenderer::CreateAnimationInfoSsbo()
         animationInfo.at(k) = glm::ivec4(v.animAnz, v.animTime, v.animFrame, v.animAdd);
     }
 
-    m_animationSsbo = std::make_unique<ogl::buffer::Ssbo>("AnimationInfo-Ssbo");
+    m_animationSsbo = std::make_unique<ogl::buffer::Ssbo>("Animation-Ssbo");
     m_animationSsbo->Bind();
     ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(animationInfo.size()) * sizeof(glm::ivec4), animationInfo.data());
     ogl::buffer::Ssbo::Unbind();

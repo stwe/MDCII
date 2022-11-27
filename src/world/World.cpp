@@ -495,10 +495,10 @@ void mdcii::world::World::Init()
 {
     Log::MDCII_LOG_DEBUG("[World::Init()] Start initializing the world...");
 
-    CreateTerrainAndBuildingsLayers(); // create Terrain && Buildings Layer
-    PrepareRendering();                // add some pre-calculations to the tiles
-    MergeTerrainAndBuildingsLayers();  // merge Terrain && Buildings Layer into a new Layer
-    CreateGridLayer();                 // create Grid Layer
+    CreateTerrainAndBuildingsLayers();          // create Terrain && Buildings Layer
+    PrepareTerrainAndBuildingsLayerRendering(); // add some pre-calculations to the Terrain && Buildings Layer tiles
+    MergeTerrainAndBuildingsLayers();           // merge Terrain && Buildings Layer into a new Layer
+    CreateGridLayer();                          // create Grid Layer
 
     tileAtlas = std::make_unique<TileAtlas>();
     worldRenderer = std::make_unique<renderer::WorldRenderer>(this);
@@ -599,16 +599,15 @@ void mdcii::world::World::CreateTerrainAndBuildingsLayers()
     Log::MDCII_LOG_DEBUG("[World::CreateTerrainAndBuildingsLayers()] The Terrain and Buildings Layer has been created successfully.");
 }
 
-void mdcii::world::World::PrepareRendering()
+void mdcii::world::World::PrepareTerrainAndBuildingsLayerRendering()
 {
-    MDCII_ASSERT(layers.size() == 2, "[World::PrepareRendering()] Invalid number of layers.")
+    MDCII_ASSERT(layers.size() == 2, "[World::PrepareTerrainAndBuildingsLayerRendering()] Invalid number of layers.")
 
-    Log::MDCII_LOG_DEBUG("[World::PrepareRendering()] Prepares the Terrain and Buildings Layer for rendering.");
+    Log::MDCII_LOG_DEBUG("[World::PrepareTerrainAndBuildingsLayerRendering()] Prepares the Terrain and Buildings Layer tiles for rendering.");
 
     auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
     auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
 
-    // pre-calc tiles
     for (auto y{ 0 }; y < height; ++y)
     {
         for (auto x{ 0 }; x < width; ++x)
@@ -621,8 +620,11 @@ void mdcii::world::World::PrepareRendering()
     terrainLayer.instancesToRender = static_cast<int32_t>(terrainLayer.tiles.size());
     buildingsLayer.instancesToRender = static_cast<int32_t>(buildingsLayer.tiles.size());
 
-    terrainLayer.PrepareRendering();
-    buildingsLayer.PrepareRendering();
+    terrainLayer.PrepareCpuDataForRendering();
+    buildingsLayer.PrepareCpuDataForRendering();
+
+    terrainLayer.PrepareGpuDataForRendering();
+    buildingsLayer.PrepareGpuDataForRendering();
 }
 
 void mdcii::world::World::MergeTerrainAndBuildingsLayers()
@@ -642,7 +644,7 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
     newLayer->layerType = WorldLayerType::TERRAIN_AND_BUILDINGS;
     newLayer->instancesToRender = terrainLayer.instancesToRender;
 
-    // copy Gpu data to the new layer
+    // copy only Gpu data to the new layer - only the Ssbos have to be created later
     newLayer->modelMatrices = terrainLayer.modelMatrices;
     newLayer->gfxInfo = terrainLayer.gfxInfo;
     newLayer->buildingInfo = terrainLayer.buildingInfo;
@@ -677,6 +679,9 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
             }
         });
     });
+
+    // create Ssbos
+    newLayer->PrepareGpuDataForRendering();
 
     // store new layer
     layers.emplace_back(std::move(newLayer));

@@ -271,12 +271,12 @@ namespace mdcii::renderer
         Layer_Vaos m_vaos{};
 
         /**
-         * A buffer for each zoom containing the height of each Stadtfld Bsh-Image.
+         * A Ssbo for each zoom containing the height of each Stadtfld Bsh-Image.
          */
         std::array<std::unique_ptr<ogl::buffer::Ssbo>, 3> m_heightsSsbos;
 
         /**
-         * A buffer containing the animation information for each building.
+         * A Ssbo containing the animation information for each building.
          */
         std::unique_ptr<ogl::buffer::Ssbo> m_animationSsbo;
 
@@ -321,20 +321,6 @@ namespace mdcii::renderer
          * @param t_layerType The type of the Layer.
          */
         void CreateModelMatricesSsbos(world::WorldLayerType t_layerType) const;
-
-        /**
-         * Creates all Ssbos which holding gfx numbers for the given Layer type.
-         *
-         * @param t_layerType The type of the Layer.
-         */
-        void CreateGfxInfoSsbos(world::WorldLayerType t_layerType) const;
-
-        /**
-         * Creates all Ssbos which holding Building-Ids for the given Layer type.
-         *
-         * @param t_layerType The type of the Layer.
-         */
-        void CreateBuildingInfoSsbos(world::WorldLayerType t_layerType) const;
 
         /**
          * Creates a Ssbo for each zoom level which holding the height of each Bsh-Image.

@@ -24,6 +24,7 @@
 #include "state/State.h"
 #include "file/OriginalResourcesManager.h"
 #include "renderer/RenderUtils.h"
+#include "ogl/buffer/Ssbo.h"
 
 //-------------------------------------------------
 // Json
@@ -187,11 +188,16 @@ void mdcii::world::WorldLayer::StoreTile(std::unique_ptr<Tile> t_tile)
 // Helper
 //-------------------------------------------------
 
-void mdcii::world::WorldLayer::PrepareRendering()
+void mdcii::world::WorldLayer::PrepareCpuDataForRendering()
 {
-    MDCII_ASSERT(instancesToRender >= 0, "[WorldLayer::PrepareRendering()] Invalid number of instances to render.")
+    MDCII_ASSERT(instancesToRender >= 0, "[WorldLayer::PrepareCpuDataForRendering()] Invalid number of instances to render.")
 
     SortTiles();
+}
+
+void mdcii::world::WorldLayer::PrepareGpuDataForRendering()
+{
+    MDCII_ASSERT(instancesToRender >= 0, "[WorldLayer::PrepareGpuDataForRendering()] Invalid number of instances to render.")
 
     CreateModelMatrices();
     CreateGfxInfo();
@@ -308,6 +314,17 @@ void mdcii::world::WorldLayer::SortTiles()
 
 void mdcii::world::WorldLayer::CreateModelMatrices()
 {
+    if (layerType == WorldLayerType::TERRAIN_AND_BUILDINGS)
+    {
+        MDCII_ASSERT(!modelMatrices.at(magic_enum::enum_integer(Zoom::SGFX)).empty(), "[WorldLayer::CreateModelMatrices()] Invalid number of model matrices.")
+        MDCII_ASSERT(!modelMatrices.at(magic_enum::enum_integer(Zoom::MGFX)).empty(), "[WorldLayer::CreateModelMatrices()] Invalid number of model matrices.")
+        MDCII_ASSERT(!modelMatrices.at(magic_enum::enum_integer(Zoom::GFX)).empty(), "[WorldLayer::CreateModelMatrices()] Invalid number of model matrices.")
+
+        Log::MDCII_LOG_DEBUG("[WorldLayer::CreateModelMatrices()] No model matrices need to be created for the Layer type TERRAIN_AND_BUILDINGS.");
+
+        return;
+    }
+
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateModelMatrices()] Create model matrices for Layer type {}.", magic_enum::enum_name(layerType));
 
     magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
@@ -346,46 +363,70 @@ void mdcii::world::WorldLayer::CreateGfxInfo()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateGfxInfo()] Create gfx info for Layer type {}.", magic_enum::enum_name(layerType));
 
-    Gfx_Info info(instancesToRender, glm::ivec4(-1));
+    if (layerType != WorldLayerType::TERRAIN_AND_BUILDINGS)
+    {
+        MDCII_ASSERT(gfxInfo.empty(), "[WorldLayer::CreateGfxInfo()] Invalid gfx info.")
 
-    magic_enum::enum_for_each<Rotation>([this, &info](const Rotation t_rotation) {
-        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+        std::vector<glm::ivec4> info(instancesToRender, glm::ivec4(-1));
+        magic_enum::enum_for_each<Rotation>([this, &info](const Rotation t_rotation) {
+            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
-        auto instance{ 0 };
-        for (const auto& tile : sortedTiles.at(rotationInt))
-        {
-            if (tile->HasBuilding())
+            auto instance{ 0 };
+            for (const auto& tile : sortedTiles.at(rotationInt))
             {
-                info.at(instance)[rotationInt] = CalcGfx(*tile, t_rotation);
+                if (tile->HasBuilding())
+                {
+                    info.at(instance)[rotationInt] = CalcGfx(*tile, t_rotation);
+                }
+
+                instance++;
             }
+        });
 
-            instance++;
-        }
-    });
+        gfxInfo = info;
+    }
 
-    gfxInfo = info;
+    MDCII_ASSERT(!gfxInfo.empty(), "[WorldLayer::CreateGfxInfo()] Invalid gfx info.")
+
+    // store all calc gfx numbers for Gpu access
+    gfxSsbo = std::make_unique<ogl::buffer::Ssbo>("Gfx-Ssbo");
+    gfxSsbo->Bind();
+    ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(gfxInfo.size()) * sizeof(glm::ivec4), gfxInfo.data());
+    ogl::buffer::Ssbo::Unbind();
 }
 
 void mdcii::world::WorldLayer::CreateBuildingInfo()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateBuildingInfo()] Create building info for Layer type {}.", magic_enum::enum_name(layerType));
 
-    Building_Info info(instancesToRender, glm::ivec4(-1));
+    if (layerType != WorldLayerType::TERRAIN_AND_BUILDINGS)
+    {
+        MDCII_ASSERT(buildingInfo.empty(), "[WorldLayer::CreateBuildingInfo()] Invalid building info.")
 
-    magic_enum::enum_for_each<Rotation>([this, &info](const Rotation t_rotation) {
-        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+        std::vector<glm::ivec4> info(instancesToRender, glm::ivec4(-1));
+        magic_enum::enum_for_each<Rotation>([this, &info](const Rotation t_rotation) {
+            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
-        auto instance{ 0 };
-        for (const auto& tile : sortedTiles.at(rotationInt))
-        {
-            if (tile->HasBuilding())
+            auto instance{ 0 };
+            for (const auto& tile : sortedTiles.at(rotationInt))
             {
-                info.at(instance)[rotationInt] = tile->buildingId;
+                if (tile->HasBuilding())
+                {
+                    info.at(instance)[rotationInt] = tile->buildingId;
+                }
+
+                instance++;
             }
+        });
 
-            instance++;
-        }
-    });
+        buildingInfo = info;
+    }
 
-    buildingInfo = info;
+    MDCII_ASSERT(!buildingInfo.empty(), "[WorldLayer::CreateBuildingInfo()] Invalid building info.")
+
+    // store all Building Ids for Gpu access
+    buildingsSsbo = std::make_unique<ogl::buffer::Ssbo>("Buildings-Ssbo");
+    buildingsSsbo->Bind();
+    ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(buildingInfo.size()) * sizeof(glm::ivec4), buildingInfo.data());
+    ogl::buffer::Ssbo::Unbind();
 }

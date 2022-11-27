@@ -401,9 +401,8 @@ namespace mdcii::world
 
         /**
          * Prepares the Terrain- and Buildings Layer for rendering.
-         * Calls PreCalcTile(), sorts tiles, creates model matrices and texture information.
          */
-        void PrepareRendering();
+        void PrepareTerrainAndBuildingsLayerRendering();
 
         /**
          * Merge Terrain- with Buildings Layer to another new layer (TERRAIN_AND_BUILDINGS).

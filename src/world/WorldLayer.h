@@ -25,6 +25,18 @@
 #include "data/Buildings.h"
 
 //-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::ogl::buffer
+{
+    /**
+     * Forward declaration class Ssbo.
+     */
+    class Ssbo;
+}
+
+//-------------------------------------------------
 // WorldLayer
 //-------------------------------------------------
 
@@ -106,22 +118,6 @@ namespace mdcii::world
         using Model_Matrices_For_Each_Zoom = std::array<Model_Matrices_For_Each_Rotation, NR_OF_ZOOMS>;
 
         //-------------------------------------------------
-        // Gfx / building types
-        //-------------------------------------------------
-
-        /**
-         * To store the gfx number for each instance.
-         * The values from x to w are used for rotation from DEG0 to DEG270.
-         */
-        using Gfx_Info = std::vector<glm::ivec4>;
-
-        /**
-         * To store the Building-Id for each instance.
-         * The values from x to w are used for rotation from DEG0 to DEG270.
-         */
-        using Building_Info = std::vector<glm::ivec4>;
-
-        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -156,13 +152,13 @@ namespace mdcii::world
         Model_Matrices_For_Each_Zoom modelMatrices;
 
         /**
-         * To store the gfx for each instance.
+         * To store the gfx number for each instance.
          * x = gfx for rot0
          * y = gfx for rot90
          * z = gfx for rot180
          * w = gfx for rot270
          */
-        Gfx_Info gfxInfo;
+        std::vector<glm::ivec4> gfxInfo;
 
         /**
          * To store the Building-Id for each instance.
@@ -171,7 +167,17 @@ namespace mdcii::world
          * z = building for rot180
          * w = building for rot270
          */
-        Building_Info buildingInfo;
+        std::vector<glm::ivec4> buildingInfo;
+
+        /**
+         * A Ssbo containing the gfx number for each instance.
+         */
+        std::unique_ptr<ogl::buffer::Ssbo> gfxSsbo;
+
+        /**
+         * A Ssbo containing the Building Id number for each instance.
+         */
+        std::unique_ptr<ogl::buffer::Ssbo> buildingsSsbo;
 
         /**
          * The number of instances to render.
@@ -275,9 +281,14 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Prepare data for rendering.
+         * Prepare Cpu data for rendering.
          */
-        void PrepareRendering();
+        void PrepareCpuDataForRendering();
+
+        /**
+         * Prepare Gpu data for rendering.
+         */
+        void PrepareGpuDataForRendering();
 
         /**
          * Creates a model matrix for a given Tile object.
