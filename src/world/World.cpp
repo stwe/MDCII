@@ -644,7 +644,7 @@ void mdcii::world::World::MergeTerrainAndBuildingsLayers()
     newLayer->layerType = WorldLayerType::TERRAIN_AND_BUILDINGS;
     newLayer->instancesToRender = terrainLayer.instancesToRender;
 
-    // copy only Gpu data to the new layer - only the Ssbos have to be created later
+    // copy only Gpu data to the new layer - only the Ssbos have to be created
     newLayer->modelMatrices = terrainLayer.modelMatrices;
     newLayer->gfxInfo = terrainLayer.gfxInfo;
     newLayer->buildingInfo = terrainLayer.buildingInfo;
@@ -695,15 +695,24 @@ void mdcii::world::World::CreateGridLayer()
 
     MDCII_ASSERT(layers.size() == 3, "[World::CreateGridLayer()] Invalid number of Layers.")
 
-    // get the Terrain Layer
+    // get the already existing Terrain Layer
     const auto& terrainLayer{ GetLayer(WorldLayerType::TERRAIN) };
 
     // create a new Layer
-    auto layer{ std::make_unique<WorldLayer>(this) };
-    layer->layerType = WorldLayerType::GRID;
-    layer->instancesToRender = terrainLayer.instancesToRender;
-    layer->modelMatrices = terrainLayer.modelMatrices;
-    layers.emplace_back(std::move(layer));
+    auto newLayer{ std::make_unique<WorldLayer>(this) };
+
+    // set type and number of instances
+    newLayer->layerType = WorldLayerType::GRID;
+    newLayer->instancesToRender = terrainLayer.instancesToRender;
+
+    // copy only model matrices Gpu data to the new layer - only the Ssbos have to be created
+    newLayer->modelMatrices = terrainLayer.modelMatrices;
+
+    // create Ssbos
+    newLayer->PrepareGpuDataForRendering();
+
+    // store new layer
+    layers.emplace_back(std::move(newLayer));
 
     MDCII_ASSERT(layers.size() == 4, "[World::CreateGridLayer()] Invalid number of Layers.")
 

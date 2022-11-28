@@ -103,14 +103,9 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * A vector of model matrices.
-         */
-        using Model_Matrices = std::vector<glm::mat4>;
-
-        /**
          * A vector of model matrices for each rotation.
          */
-        using Model_Matrices_For_Each_Rotation = std::array<Model_Matrices, NR_OF_ROTATIONS>;
+        using Model_Matrices_For_Each_Rotation = std::array<std::vector<glm::mat4>, NR_OF_ROTATIONS>;
 
         /**
          * Four model matrices containers for each of the three possible zoom levels.
@@ -168,6 +163,11 @@ namespace mdcii::world
          * w = building for rot270
          */
         std::vector<glm::ivec4> buildingInfo;
+
+        /**
+         * The Ssbos containing the model matrices for all instances.
+         */
+        std::array<std::array<std::unique_ptr<ogl::buffer::Ssbo>, NR_OF_ROTATIONS>, NR_OF_ZOOMS> modelMatricesSsbos{};
 
         /**
          * A Ssbo containing the gfx number for each instance.

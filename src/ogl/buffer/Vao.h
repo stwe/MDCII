@@ -38,11 +38,6 @@ namespace mdcii::ogl::buffer
     class Vbo;
 
     /**
-     * Forward declaration class Ssbo.
-     */
-    class Ssbo;
-
-    /**
      * Represents a Vertex Array Object.
      */
     class Vao
@@ -66,11 +61,6 @@ namespace mdcii::ogl::buffer
          * To store assigned Vbos objects.
          */
         std::vector<std::unique_ptr<Vbo>> vbos;
-
-        /**
-         * For storing multiple assigned Ssbo containers.
-         */
-        std::vector<std::vector<std::unique_ptr<Ssbo>>> ssbos;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

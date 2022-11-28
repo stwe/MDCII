@@ -119,7 +119,7 @@ void mdcii::renderer::WorldRenderer::Render(
     glBindBufferBase(
         GL_SHADER_STORAGE_BUFFER,
         MODEL_MATRICES_BINDING,
-        m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.at(MODEL_MATRICES_BINDING).at(rotationInt)->id
+        m_world->GetLayer(t_layerType).modelMatricesSsbos.at(zoomInt).at(rotationInt)->id
     );
 
     glBindBufferBase(
@@ -175,10 +175,11 @@ void mdcii::renderer::WorldRenderer::Render(
 
     m_vaos.at(gridLayerTypeInt).at(zoomInt)->Bind();
 
+    MDCII_ASSERT(m_world->GetLayer(world::WorldLayerType::GRID).modelMatricesSsbos.at(zoomInt).at(rotationInt), "[WorldRenderer::Render()] Null pointer.")
     glBindBufferBase(
         GL_SHADER_STORAGE_BUFFER,
         MODEL_MATRICES_BINDING,
-        m_vaos.at(gridLayerTypeInt).at(zoomInt)->ssbos.at(MODEL_MATRICES_BINDING).at(rotationInt)->id
+        m_world->GetLayer(world::WorldLayerType::GRID).modelMatricesSsbos.at(zoomInt).at(rotationInt)->id
     );
 
     const auto& textureId{ ogl::resource::ResourceManager::LoadTexture(m_gridFileNames.at(zoomInt)).id };
@@ -387,8 +388,8 @@ void mdcii::renderer::WorldRenderer::UpdateGpuData(
     vao->Bind();
 
     // new model matrix
-    const auto& modelMatricesSsbo{ vao->ssbos.at(MODEL_MATRICES_BINDING) };
-    modelMatricesSsbo.at(rotationInt)->Bind();
+    const auto& modelMatricesSsbo{ m_world->GetLayer(t_layerType).modelMatricesSsbos.at(zoomInt).at(rotationInt) };
+    modelMatricesSsbo->Bind();
     ogl::buffer::Ssbo::StoreSubData(static_cast<int32_t>(sizeof(glm::mat4)) * t_instance, sizeof(glm::mat4), &t_modelMatrix);
     ogl::buffer::Ssbo::Unbind();
 
@@ -431,11 +432,6 @@ void mdcii::renderer::WorldRenderer::Init()
     CreateVaos(world::WorldLayerType::TERRAIN_AND_BUILDINGS);
     CreateVaos(world::WorldLayerType::GRID);
 
-    CreateModelMatricesSsbos(world::WorldLayerType::TERRAIN);
-    CreateModelMatricesSsbos(world::WorldLayerType::BUILDINGS);
-    CreateModelMatricesSsbos(world::WorldLayerType::TERRAIN_AND_BUILDINGS);
-    CreateModelMatricesSsbos(world::WorldLayerType::GRID);
-
     CreateHeightsSsbos();
     CreateAnimationInfoSsbo();
 
@@ -456,42 +452,6 @@ void mdcii::renderer::WorldRenderer::CreateVaos(const world::WorldLayerType t_la
     // create a Vao for each zoom
     magic_enum::enum_for_each<world::Zoom>([this, t_layerType](const world::Zoom t_zoom) {
         m_vaos.at(magic_enum::enum_integer(t_layerType)).at(magic_enum::enum_integer(t_zoom)) = RenderUtils::CreateRectangleVao();
-    });
-}
-
-void mdcii::renderer::WorldRenderer::CreateModelMatricesSsbos(const world::WorldLayerType t_layerType) const
-{
-    Log::MDCII_LOG_DEBUG(
-        "[WorldRenderer::CreateModelMatricesSsbos()] Creates all Ssbos which holding model matrices for Layer type {}.",
-        magic_enum::enum_name(t_layerType)
-    );
-
-    magic_enum::enum_for_each<world::Zoom>([this, t_layerType](const world::Zoom t_zoom) {
-        // enum to int
-        const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
-        const auto layerTypeInt{ magic_enum::enum_integer(t_layerType) };
-
-        // get the layer
-        const auto& layer{ m_world->GetLayer(t_layerType) };
-
-        // bind Vao of the given zoom
-        m_vaos.at(layerTypeInt).at(zoomInt)->Bind();
-
-        // store model matrices Ssbos in [0][0/DEG0] .. [3/DEG270]
-        std::vector<std::unique_ptr<ogl::buffer::Ssbo>> ssbos;
-        magic_enum::enum_for_each<world::Rotation>([&layer, &t_zoom, &ssbos](const world::Rotation t_rotation) {
-            const auto& modelMatrices{ layer.GetModelMatrices(t_zoom).at(magic_enum::enum_integer(t_rotation)) };
-
-            auto ssbo{ std::make_unique<ogl::buffer::Ssbo>() };
-            ssbo->Bind();
-            ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(modelMatrices.size()) * sizeof(glm::mat4), modelMatrices.data());
-            ogl::buffer::Ssbo::Unbind();
-            ssbos.emplace_back(std::move(ssbo));
-        });
-        m_vaos.at(layerTypeInt).at(zoomInt)->ssbos.emplace_back(std::move(ssbos));
-
-        // unbind Vao
-        ogl::buffer::Vao::Unbind();
     });
 }
 

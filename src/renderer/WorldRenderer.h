@@ -316,13 +316,6 @@ namespace mdcii::renderer
         void CreateVaos(world::WorldLayerType t_layerType);
 
         /**
-         * Creates all Ssbos which holding model matrices for the given Layer type.
-         *
-         * @param t_layerType The type of the Layer.
-         */
-        void CreateModelMatricesSsbos(world::WorldLayerType t_layerType) const;
-
-        /**
          * Creates a Ssbo for each zoom level which holding the height of each Bsh-Image.
          */
         void CreateHeightsSsbos();

@@ -314,53 +314,74 @@ void mdcii::world::WorldLayer::SortTiles()
 
 void mdcii::world::WorldLayer::CreateModelMatrices()
 {
-    if (layerType == WorldLayerType::TERRAIN_AND_BUILDINGS)
-    {
-        MDCII_ASSERT(!modelMatrices.at(magic_enum::enum_integer(Zoom::SGFX)).empty(), "[WorldLayer::CreateModelMatrices()] Invalid number of model matrices.")
-        MDCII_ASSERT(!modelMatrices.at(magic_enum::enum_integer(Zoom::MGFX)).empty(), "[WorldLayer::CreateModelMatrices()] Invalid number of model matrices.")
-        MDCII_ASSERT(!modelMatrices.at(magic_enum::enum_integer(Zoom::GFX)).empty(), "[WorldLayer::CreateModelMatrices()] Invalid number of model matrices.")
-
-        Log::MDCII_LOG_DEBUG("[WorldLayer::CreateModelMatrices()] No model matrices need to be created for the Layer type TERRAIN_AND_BUILDINGS.");
-
-        return;
-    }
-
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateModelMatrices()] Create model matrices for Layer type {}.", magic_enum::enum_name(layerType));
 
-    magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
-        Model_Matrices_For_Each_Rotation matricesForRotations;
+    if (layerType != WorldLayerType::TERRAIN_AND_BUILDINGS && layerType != WorldLayerType::GRID)
+    {
+        // check first entry
+        MDCII_ASSERT(modelMatrices.at(0).at(0).empty(), "[WorldLayer::CreateModelMatrices()] Invalid model matrices.")
 
-        magic_enum::enum_for_each<Rotation>([this, &t_zoom, &matricesForRotations](const Rotation t_rotation) {
-            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-            Model_Matrices matrices;
-            int32_t instance{ 0 };
-            for (const auto& tile : sortedTiles.at(rotationInt))
-            {
-                matrices.emplace_back(GetModelMatrix(*tile, t_zoom, t_rotation));
-                tile->instanceIds.at(rotationInt) = instance;
+        magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
+            Model_Matrices_For_Each_Rotation matricesForRotations;
 
-                instance++;
-            }
+            magic_enum::enum_for_each<Rotation>([this, &t_zoom, &matricesForRotations](const Rotation t_rotation) {
+                const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+                std::vector<glm::mat4> matrices;
+                int32_t instance{ 0 };
+                for (const auto& tile : sortedTiles.at(rotationInt))
+                {
+                    matrices.emplace_back(GetModelMatrix(*tile, t_zoom, t_rotation));
+                    tile->instanceIds.at(rotationInt) = instance;
 
-            matricesForRotations.at(rotationInt) = matrices;
+                    instance++;
+                }
+
+                matricesForRotations.at(rotationInt) = matrices;
+            });
+
+            modelMatrices.at(magic_enum::enum_integer(t_zoom)) = matricesForRotations;
         });
 
-        modelMatrices.at(magic_enum::enum_integer(t_zoom)) = matricesForRotations;
-    });
+        // create a hashmap to find the instance ID for each rotated position
+        magic_enum::enum_for_each<Rotation>([this](const Rotation t_rotation) {
+            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+            for (const auto& tile : sortedTiles.at(rotationInt))
+            {
+                // the position at Deg0 is at a different instance depending on the rotation
+                instanceIds.emplace(glm::ivec3(tile->worldXDeg0, tile->worldYDeg0, rotationInt), tile->instanceIds.at(rotationInt));
+            }
+        });
+    }
 
-    // create a hashmap to find the instance ID for each rotated position
-    magic_enum::enum_for_each<Rotation>([this](const Rotation t_rotation) {
-        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-        for (const auto& tile : sortedTiles.at(rotationInt))
-        {
-            // the position at Deg0 is at a different instance depending on the rotation
-            instanceIds.emplace(glm::ivec3(tile->worldXDeg0, tile->worldYDeg0, rotationInt), tile->instanceIds.at(rotationInt));
-        }
+    // check first entry
+    MDCII_ASSERT(!modelMatrices.at(0).at(0).empty(), "[WorldLayer::CreateModelMatrices()] Invalid model matrices.")
+    MDCII_ASSERT(!modelMatricesSsbos.at(0).at(0), "[WorldLayer::CreateModelMatrices()] Invalid model matrices Ssbo.")
+
+    // store all model matrices for Gpu access
+    magic_enum::enum_for_each<world::Zoom>([this](const world::Zoom t_zoom) {
+        const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
+
+        magic_enum::enum_for_each<world::Rotation>([this, &t_zoom, zoomInt](const world::Rotation t_rotation) {
+            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+            const auto& matrices{ GetModelMatrices(t_zoom).at(magic_enum::enum_integer(t_rotation)) };
+
+            auto ssbo{ std::make_unique<ogl::buffer::Ssbo>() };
+            ssbo->Bind();
+            ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(matrices.size()) * sizeof(glm::mat4), matrices.data());
+            ogl::buffer::Ssbo::Unbind();
+
+            modelMatricesSsbos.at(zoomInt).at(rotationInt) = std::move(ssbo);
+        });
     });
 }
 
 void mdcii::world::WorldLayer::CreateGfxInfo()
 {
+    if (layerType == WorldLayerType::GRID)
+    {
+        return;
+    }
+
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateGfxInfo()] Create gfx info for Layer type {}.", magic_enum::enum_name(layerType));
 
     if (layerType != WorldLayerType::TERRAIN_AND_BUILDINGS)
@@ -387,6 +408,7 @@ void mdcii::world::WorldLayer::CreateGfxInfo()
     }
 
     MDCII_ASSERT(!gfxInfo.empty(), "[WorldLayer::CreateGfxInfo()] Invalid gfx info.")
+    MDCII_ASSERT(!gfxSsbo, "[WorldLayer::CreateGfxInfo()] Invalid gfx Ssbo.")
 
     // store all calc gfx numbers for Gpu access
     gfxSsbo = std::make_unique<ogl::buffer::Ssbo>("Gfx-Ssbo");
@@ -397,6 +419,11 @@ void mdcii::world::WorldLayer::CreateGfxInfo()
 
 void mdcii::world::WorldLayer::CreateBuildingInfo()
 {
+    if (layerType == WorldLayerType::GRID)
+    {
+        return;
+    }
+
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateBuildingInfo()] Create building info for Layer type {}.", magic_enum::enum_name(layerType));
 
     if (layerType != WorldLayerType::TERRAIN_AND_BUILDINGS)
@@ -423,6 +450,7 @@ void mdcii::world::WorldLayer::CreateBuildingInfo()
     }
 
     MDCII_ASSERT(!buildingInfo.empty(), "[WorldLayer::CreateBuildingInfo()] Invalid building info.")
+    MDCII_ASSERT(!buildingsSsbo, "[WorldLayer::CreateBuildingInfo()] Invalid building Ssbo.")
 
     // store all Building Ids for Gpu access
     buildingsSsbo = std::make_unique<ogl::buffer::Ssbo>("Buildings-Ssbo");
