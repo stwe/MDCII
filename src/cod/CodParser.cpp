@@ -794,7 +794,7 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
             }
             if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueFloat)
             {
-                ret.set_value_int(oldValue.value_float() + std::stof(number));
+                ret.set_value_int(static_cast<int32_t>(oldValue.value_float() + std::stof(number)));
                 return ret;
             }
 
@@ -812,7 +812,7 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
             }
             if (oldValue.Value_case() == cod_pb::Variable::ValueCase::kValueFloat)
             {
-                ret.set_value_int(oldValue.value_float() - std::stof(number));
+                ret.set_value_int(static_cast<int32_t>(oldValue.value_float() - std::stof(number)));
                 return ret;
             }
 
@@ -838,7 +838,7 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
         std::vector<std::string> result{ CodHelper::RegexMatch("^\\w+[\\-+]?\\d+\\.\\d+", t_value) };
         if (!result.empty())
         {
-            ret.set_value_int(std::stof(t_value));
+            ret.set_value_int(static_cast<int32_t>(std::stof(t_value)));
             return ret;
         }
     }
@@ -850,7 +850,7 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
         if (!result.empty())
         {
             // TODO : When is value not in variables
-            if (ConstantExists(t_key) == true)
+            if (ConstantExists(t_key) > 0)
             {
                 auto v{ GetVariable(result[1]) };
                 ret = v;
