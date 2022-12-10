@@ -88,11 +88,13 @@ void mdcii::MainMenuState::RenderImGui()
 
     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(8, 8, 8, 255));
 
+    /*
     if (ImGui::Button("Create a new world"))
     {
         context->stateStack->PopState(GetStateId());
         context->stateStack->PushState(state::StateId::WORLD_GENERATOR);
     }
+    */
 
     if (ImGui::Button("Start the example"))
     {

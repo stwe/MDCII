@@ -139,6 +139,7 @@ void mdcii::world::WorldGui::ZoomGui() const
 
 void mdcii::world::WorldGui::ShowActionsGui() const
 {
+    /*
     magic_enum::enum_for_each<World::Action>([this](auto t_val) {
         constexpr World::Action action{ t_val };
         constexpr int i{ magic_enum::enum_integer(action) };
@@ -177,6 +178,7 @@ void mdcii::world::WorldGui::ShowActionsGui() const
     });
 
     ImGui::NewLine();
+    */
 }
 
 void mdcii::world::WorldGui::ShowBuildingsGui()
@@ -213,6 +215,7 @@ void mdcii::world::WorldGui::SaveGameGui()
             throw MDCII_EXCEPTION("[WorldGui::SaveGameGui()] Error while opening file " + fileName + ".");
         }
 
+        /*
         j["width"] = m_world->width;
         j["height"] = m_world->height;
         j["layers"] = nlohmann::json::array();
@@ -220,6 +223,7 @@ void mdcii::world::WorldGui::SaveGameGui()
         b["buildings"] = m_world->GetLayer(WorldLayerType::BUILDINGS).tiles;
         j["layers"].push_back(t);
         j["layers"].push_back(b);
+        */
 
         file << j;
 

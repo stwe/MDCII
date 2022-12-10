@@ -21,6 +21,7 @@
 #include <fstream>
 #include "data/json.hpp"
 #include "MdciiException.h"
+#include "Log.h"
 
 //-------------------------------------------------
 // Operators
@@ -50,6 +51,8 @@ namespace mdcii
      */
     [[nodiscard]] static nlohmann::json read_json_from_file(const std::string& t_filePath)
     {
+        Log::MDCII_LOG_DEBUG("[read_json_from_file] Starts creating Json value from file {}...", t_filePath);
+
         nlohmann::json j;
 
         std::ifstream jsonFile;
@@ -65,6 +68,8 @@ namespace mdcii
         {
             throw MDCII_EXCEPTION("[read_json_from_file()] Exception caught while loading file " + t_filePath + ".");
         }
+
+        Log::MDCII_LOG_DEBUG("[read_json_from_file] The Json value was created successfully.");
 
         return j;
     }

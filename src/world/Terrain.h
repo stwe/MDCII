@@ -18,10 +18,22 @@
 
 #pragma once
 
-#include <string>
+#include "data/json.hpp"
 
 //-------------------------------------------------
-// WorldGenerator
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::state
+{
+    /**
+     * Forward declaration struct Context.
+     */
+    struct Context;
+}
+
+//-------------------------------------------------
+// Terrain
 //-------------------------------------------------
 
 namespace mdcii::world
@@ -31,64 +43,79 @@ namespace mdcii::world
     //-------------------------------------------------
 
     /**
-     * Forward declaration struct Tile.
+     * Forward declaration class Island.
      */
-    struct Tile;
+    class Island;
 
     //-------------------------------------------------
-    // WorldGenerator
+    // Terrain
     //-------------------------------------------------
 
     /**
-     * Creates a world map.
+     * Represents the terrain of the world.
      */
-    class WorldGenerator
+    class Terrain
     {
     public:
         //-------------------------------------------------
-        // Constants
+        // Member
         //-------------------------------------------------
 
-        static constexpr auto GRASS{ 101 };
-        static constexpr auto COAST{ 1011 };
-        static constexpr auto COAST_CORNER{ 1051 };
+        /**
+         * The Island objects of the Terrain.
+         */
+        std::vector<std::unique_ptr<Island>> islands;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        WorldGenerator() = delete;
+        Terrain() = delete;
 
         /**
-         * Constructs a new WorldGenerator object.
+         * Constructs a new Terrain object.
          *
-         * @param t_width The width of the world to create.
-         * @param t_height The height of the world to create.
-         * @param t_fileName The filename under which to save the world.
+         * @param t_context Access to shared objects.
          */
-        WorldGenerator(int t_width, int t_height, const std::string& t_fileName);
+        explicit Terrain(std::shared_ptr<state::Context> t_context);
 
-        WorldGenerator(const WorldGenerator& t_other) = delete;
-        WorldGenerator(WorldGenerator&& t_other) noexcept = delete;
-        WorldGenerator& operator=(const WorldGenerator& t_other) = delete;
-        WorldGenerator& operator=(WorldGenerator&& t_other) noexcept = delete;
+        Terrain(const Terrain& t_other) = delete;
+        Terrain(Terrain&& t_other) noexcept = delete;
+        Terrain& operator=(const Terrain& t_other) = delete;
+        Terrain& operator=(Terrain&& t_other) noexcept = delete;
 
-        ~WorldGenerator() noexcept;
+        ~Terrain() noexcept;
 
-    protected:
-
-    private:
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
 
         /**
-         * Creates a world.
+         * Creates the Island objects from a Json value.
          *
-         * @param t_width The width of the world to create.
-         * @param t_height The height of the world to create.
-         * @param t_fileName The filename under which to save the world.
+         * @param t_json The Json value.
          */
-        static void Init(int t_width, int t_height, const std::string& t_fileName);
+        void CreateIslandsFromJson(const nlohmann::json& t_json);
+
+    protected:
+
+    private:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * To have access to the shared objects (Window, Camera, Original-Assets).
+         */
+        std::shared_ptr<state::Context> m_context;
+
+        //-------------------------------------------------
+        // Clean up
+        //-------------------------------------------------
+
+        /**
+         * Clean up.
+         */
+        void CleanUp() const;
     };
 }

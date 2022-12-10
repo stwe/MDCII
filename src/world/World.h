@@ -18,12 +18,25 @@
 
 #pragma once
 
-#include "WorldLayer.h"
-#include "event/EventManager.h"
+#include <string>
+#include <memory>
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
+
+namespace mdcii::layer
+{
+    /**
+     * Forward declaration enum class LayerType.
+     */
+    enum class LayerType;
+
+    /**
+     * Forward declaration class GridLayer.
+     */
+    class GridLayer;
+}
 
 namespace mdcii::state
 {
@@ -41,9 +54,14 @@ namespace mdcii::state
 namespace mdcii::renderer
 {
     /**
-     * Forward declaration class WorldRenderer.
+     * Forward declaration class TerrainRenderer.
      */
-    class WorldRenderer;
+    class TerrainRenderer;
+
+    /**
+     * Forward declaration class GridRenderer.
+     */
+    class GridRenderer;
 }
 
 //-------------------------------------------------
@@ -57,112 +75,93 @@ namespace mdcii::world
     //-------------------------------------------------
 
     /**
-     * Forward declaration class MousePicker.
+     * Forward declaration class Terrain.
      */
-    class MousePicker;
+    class Terrain;
 
     /**
-     * Forward declaration class WorldGui.
+     * Forward declaration enum class Rotation.
      */
-    class WorldGui;
+    enum class Rotation;
+
+    /**
+     * Forward declaration enum class ChangeRotation.
+     */
+    enum class ChangeRotation;
+
+    /**
+     * Forward declaration enum class Zoom.
+     */
+    enum class Zoom;
+
+    /**
+     * Forward declaration enum class ChangeZoom.
+     */
+    enum class ChangeZoom;
 
     /**
      * Forward declaration class TileAtlas.
      */
     class TileAtlas;
 
+    /**
+     * Forward declaration class WorldGui.
+     */
+    class WorldGui;
+
     //-------------------------------------------------
     // World
     //-------------------------------------------------
 
     /**
-     * Loads and shows the world map.
+     * Represents the world including all islands and the ocean.
      */
     class World
     {
     public:
         //-------------------------------------------------
-        // Actions
-        //-------------------------------------------------
-
-        /**
-         * The possible world actions.
-         */
-        enum class Action
-        {
-            BUILD,    // Create a building.
-            DEMOLISH, // Demolish a building.
-            STATUS,   // Get information about a tile.
-            OPTIONS,  // Change game settings.
-        };
-
-        //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        /**
-         * The (untranslated) labels of the action buttons.
-         */
-        static constexpr std::array<std::string_view, magic_enum::enum_count<Action>()> ACTION_NAMES{ "Build", "Demolish", "Status", "Options" };
-
-        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
         /**
-         * The world width.
-         */
-        int width{ -1 };
-
-        /**
-         * The world height.
-         */
-        int height{ -1 };
-
-        /**
-         * The world rotation.
-         */
-        Rotation rotation{ Rotation::DEG0 };
-
-        /**
-         * The world zoom.
-         */
-        Zoom zoom{ Zoom::GFX };
-
-        /**
-         * The world layers.
-         */
-        std::vector<std::unique_ptr<WorldLayer>> layers;
-
-        /**
-         * To have access to the shared objects (Window, Camera, original assets).
+         * To have access to the shared objects (Window, Camera, Original-Assets).
          */
         std::shared_ptr<state::Context> context;
 
         /**
+         * The world rotation.
+         */
+        Rotation rotation;
+
+        /**
+         * The world zoom.
+         */
+        Zoom zoom;
+
+        /**
+         * The Terrain object contains all islands with their coasts.
+         */
+        std::unique_ptr<Terrain> terrain;
+
+        /**
          * An OpenGL texture array for each zoom level.
          */
-        std::unique_ptr<world::TileAtlas> tileAtlas;
+        std::shared_ptr<world::TileAtlas> tileAtlas;
 
         /**
-         * The renderer to show the world.
+         * A renderer to render all islands with their coasts.
          */
-        std::unique_ptr<renderer::WorldRenderer> worldRenderer;
+        std::unique_ptr<renderer::TerrainRenderer> terrainRenderer;
 
         /**
-         * A MousePicker object to select tiles.
+         * The world grid.
          */
-        std::unique_ptr<MousePicker> mousePicker;
+        std::unique_ptr<layer::GridLayer> worldGridLayer;
 
         /**
-         * Indicates which action button is currently active.
+         * A renderer to render the world grid.
          */
-        std::array<bool, magic_enum::enum_count<Action>()> actionButtons{ true, false, false, false };
-
-        /**
-         * The current action.
-         */
-        Action currentAction{ Action::BUILD };
+        std::unique_ptr<renderer::GridRenderer> worldGridRenderer;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -185,24 +184,6 @@ namespace mdcii::world
         World& operator=(World&& t_other) noexcept = delete;
 
         ~World() noexcept;
-
-        //-------------------------------------------------
-        // Getter
-        //-------------------------------------------------
-
-        /**
-         * Get WorldLayer object by type.
-         *
-         * @param t_layerType The type of the layer.
-         */
-        [[nodiscard]] const WorldLayer& GetLayer(WorldLayerType t_layerType) const;
-
-        /**
-         * Get WorldLayer object by type.
-         *
-         * @param t_layerType The type of the layer.
-         */
-        WorldLayer& GetLayer(WorldLayerType t_layerType);
 
         //-------------------------------------------------
         // Logic
@@ -241,74 +222,6 @@ namespace mdcii::world
          */
         void ZoomWorld(ChangeZoom t_changeZoom);
 
-        //-------------------------------------------------
-        // Helper
-        //-------------------------------------------------
-
-        /**
-         * Checks whether a given position is in the world.
-         *
-         * @param t_x The x position to check.
-         * @param t_x The y position to check.
-         *
-         * @return True or false.
-         */
-        [[nodiscard]] bool IsPositionInWorld(int t_x, int t_y) const;
-
-        /**
-         * 2D/1D - mapping.
-         *
-         * @param t_x The x position in the world.
-         * @param t_y The y position in the world.
-         *
-         * @return The 1D index.
-         */
-        [[nodiscard]] int GetMapIndex(int t_x, int t_y) const;
-
-        /**
-         * 2D/1D - mapping.
-         *
-         * @param t_x The x position in the world.
-         * @param t_y The y position in the world.
-         * @param t_rotation The position is previously rotated by the specified value.
-         *
-         * @return The 1D index.
-         */
-        [[nodiscard]] int GetMapIndex(int t_x, int t_y, Rotation t_rotation) const;
-
-        /**
-         * Projects world coordinates into an isometric position on the screen (world space).
-         *
-         * @param t_x The x position in the world.
-         * @param t_y The y position in the world.
-         * @param t_zoom The zoom to get the tile sizes.
-         * @param t_rotation The position is previously rotated by the specified value.
-         *
-         * @return The isometric coordinates on the screen.
-         */
-        [[nodiscard]] glm::vec2 WorldToScreen(int t_x, int t_y, Zoom t_zoom, Rotation t_rotation = Rotation::DEG0) const;
-
-        /**
-         * Rotates a world position.
-         *
-         * @param t_x The x position in the world to rotate.
-         * @param t_y The y position in the world to rotate.
-         * @param t_rotation The rotation.
-         *
-         * @return The rotated position.
-         */
-        [[nodiscard]] glm::ivec2 RotatePosition(int t_x, int t_y, Rotation t_rotation = Rotation::DEG0) const;
-
-        /**
-         * Adds some pre-calculations to every Tile object of a Layer,
-         * which are necessary for the display the Tile on the screen.
-         *
-         * @param t_tile The Tile object.
-         * @param t_x The x position for Deg0 in the world.
-         * @param t_y The y position for Deg0 in the world.
-         */
-        void PreCalcTile(Tile& t_tile, int t_x, int t_y) const;
-
     protected:
 
     private:
@@ -327,9 +240,14 @@ namespace mdcii::world
         std::string m_mapFilePath;
 
         /**
-         * The current layer type to render.
+         * ImGui menus for the game.
          */
-        WorldLayerType m_renderLayerType{ WorldLayerType::TERRAIN_AND_BUILDINGS };
+        std::unique_ptr<WorldGui> m_worldGui;
+
+        /**
+         * To change the current Layer.
+         */
+        layer::LayerType m_layerType;
 
         /**
          * Toggles grid rendering on and off.
@@ -337,48 +255,9 @@ namespace mdcii::world
         bool m_renderGridLayer{ false };
 
         /**
-         * For the status of a tile.
+         * Toggles animations on and off.
          */
-        int m_statusTileIndex{ -1 };
-
-        /**
-         * To demolish a building.
-         */
-        int m_demolishTileIndex{ -1 };
-
-        /**
-         * Tiles used to create a building.
-         */
-        std::vector<std::unique_ptr<Tile>> m_tilesToAdd;
-
-        /**
-         * ImGui menus for the game.
-         */
-        std::unique_ptr<WorldGui> m_worldGui;
-
-        /**
-         * The mouse button pressed listener handle.
-         */
-        decltype(event::EventManager::event_dispatcher)::Handle m_mouseButtonPressed;
-
-        /**
-         * The mouse moved listener handle.
-         */
-        decltype(event::EventManager::event_dispatcher)::Handle m_mouseMoved;
-
-        //-------------------------------------------------
-        // Event handler
-        //-------------------------------------------------
-
-        /**
-         * Handles left mouse button pressed event.
-         */
-        void OnLeftMouseButtonPressed();
-
-        /**
-         * Handles mouse move.
-         */
-        void OnMouseMoved();
+        bool m_runAnimations{ true };
 
         //-------------------------------------------------
         // Init
@@ -388,59 +267,6 @@ namespace mdcii::world
          * Initialize class.
          */
         void Init();
-
-        /**
-         * Adds event listeners.
-         */
-        void AddListeners();
-
-        /**
-         * Creates the Terrain- and Buildings Layer objects from Json value.
-         */
-        void CreateTerrainAndBuildingsLayers();
-
-        /**
-         * Prepares the Terrain- and Buildings Layer for rendering.
-         */
-        void PrepareTerrainAndBuildingsLayerRendering();
-
-        /**
-         * Merge Terrain- with Buildings Layer to another new layer (TERRAIN_AND_BUILDINGS).
-         */
-        void MergeTerrainAndBuildingsLayers();
-
-        /**
-         * Creates the Grid Layer.
-         */
-        void CreateGridLayer();
-
-        //-------------------------------------------------
-        // Add building
-        //-------------------------------------------------
-
-        /**
-         * Checks if the building is outside the world.
-         *
-         * @param t_mapX The start x position of the building.
-         * @param t_mapY The start y position of the building.
-         * @param t_building The Building object to check.
-         * @param t_buildingRotation The rotation of the building.
-         *
-         * @return True or false depending on whether the building is outside.
-         */
-        [[nodiscard]] bool IsBuildingOutsideTheWorld(int t_x, int t_y, const data::Building& t_building, Rotation t_buildingRotation) const;
-
-        /**
-         * Checks if the building is over the coast.
-         *
-         * @param t_mapX The start x position of the building.
-         * @param t_mapY The start y position of the building.
-         * @param t_building The Building object to check.
-         * @param t_buildingRotation The rotation of the building.
-         *
-         * @return True or false, depending on whether the building is over the coast.
-         */
-        [[nodiscard]] bool IsBuildingOnWaterOrCoast(int t_x, int t_y, const data::Building& t_building, Rotation t_buildingRotation) const;
 
         //-------------------------------------------------
         // Clean up

@@ -16,16 +16,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include <magic_enum.hpp>
 #include "Game.h"
 #include "MdciiException.h"
 #include "MainMenuState.h"
-#include "WorldGeneratorState.h"
 #include "GameState.h"
 #include "camera/Camera.h"
 #include "state/StateStack.h"
 #include "ogl/Window.h"
-#include "ogl/OpenGL.h"
 #include "file/OriginalResourcesManager.h"
 
 //-------------------------------------------------
@@ -165,7 +162,6 @@ void mdcii::Game::Start() const
 
     // register states
     m_stateStack->RegisterState<MainMenuState>(state::StateId::MAIN_MENU);
-    m_stateStack->RegisterState<WorldGeneratorState>(state::StateId::WORLD_GENERATOR);
     m_stateStack->RegisterState<GameState>(state::StateId::NEW_GAME);
     m_stateStack->RegisterState<GameState>(state::StateId::LOADED_GAME);
     m_stateStack->RegisterState<GameState>(state::StateId::EXAMPLE_GAME);
@@ -177,9 +173,6 @@ void mdcii::Game::Start() const
         {
         case state::StateId::MAIN_MENU:
             m_stateStack->PushState(state::StateId::MAIN_MENU);
-            break;
-        case state::StateId::WORLD_GENERATOR:
-            m_stateStack->PushState(state::StateId::WORLD_GENERATOR);
             break;
         case state::StateId::NEW_GAME:
             m_stateStack->PushState(state::StateId::NEW_GAME);

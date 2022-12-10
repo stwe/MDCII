@@ -1,0 +1,160 @@
+// This file is part of the MDCII project.
+//
+// Copyright (c) 2022. stwe <https://github.com/stwe/MDCII>
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License
+// as published by the Free Software Foundation; either version 2
+// of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+
+#include "Island.h"
+#include "layer/TerrainLayer.h"
+#include "state/State.h"
+#include "MdciiAssert.h"
+
+//-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
+mdcii::world::Island::Island(std::shared_ptr<state::Context> t_context)
+    : m_context{ std::move(t_context) }
+{
+    Log::MDCII_LOG_DEBUG("[Island::Island()] Create Island.");
+
+    MDCII_ASSERT(m_context, "[Island::Island()] Null pointer.")
+}
+
+mdcii::world::Island::~Island() noexcept
+{
+    Log::MDCII_LOG_DEBUG("[Island::~Island()] Destruct Island.");
+}
+
+//-------------------------------------------------
+// Init
+//-------------------------------------------------
+
+void mdcii::world::Island::InitValuesFromJson(const nlohmann::json& t_json)
+{
+    Log::MDCII_LOG_DEBUG("[Island::InitValuesFromJson()] Start initialize an island...");
+
+    for (const auto& [k, v] : t_json.items())
+    {
+        if (k == "width")
+        {
+            width = v.get<int32_t>();
+        }
+        if (k == "height")
+        {
+            height = v.get<int32_t>();
+        }
+        if (k == "x")
+        {
+            worldX = v.get<int32_t>();
+        }
+        if (k == "y")
+        {
+            worldY = v.get<int32_t>();
+        }
+    }
+
+    MDCII_ASSERT(width > 0, "[Island::InitValuesFromJson()] Invalid width.")
+    MDCII_ASSERT(height > 0, "[Island::InitValuesFromJson()] Invalid height.")
+
+    for (const auto& [k, v] : t_json.items())
+    {
+        if (k == "layers")
+        {
+            CreateLayersFromJson(v);
+        }
+    }
+
+    Log::MDCII_LOG_DEBUG("[Island::InitValuesFromJson()] The island have been initialized successfully.");
+}
+
+//-------------------------------------------------
+// Layer
+//-------------------------------------------------
+
+void mdcii::world::Island::CreateLayersFromJson(const nlohmann::json& t_json)
+{
+    Log::MDCII_LOG_DEBUG("[Island::CreateLayersFromJson()] Create the Layer objects.");
+
+    for (const auto& [k, v] : t_json.items())
+    {
+        for (const auto& [layerNameJson, layerTilesJson] : v.items())
+        {
+            if (layerNameJson == "coast")
+            {
+                coastLayer = std::make_unique<layer::TerrainLayer>(m_context, this);
+                coastLayer->CreateTilesFromJson(layerTilesJson);
+                coastLayer->PrepareCpuDataForRendering();
+                coastLayer->PrepareGpuDataForRendering();
+            }
+
+            if (layerNameJson == "terrain")
+            {
+                terrainLayer = std::make_unique<layer::TerrainLayer>(m_context, this);
+                terrainLayer->CreateTilesFromJson(layerTilesJson);
+                terrainLayer->PrepareCpuDataForRendering();
+                terrainLayer->PrepareGpuDataForRendering();
+            }
+
+            if (layerNameJson == "buildings")
+            {
+                buildingsLayer = std::make_unique<layer::TerrainLayer>(m_context, this);
+                buildingsLayer->CreateTilesFromJson(layerTilesJson);
+                buildingsLayer->PrepareCpuDataForRendering();
+                buildingsLayer->PrepareGpuDataForRendering();
+            }
+        }
+    }
+
+    MDCII_ASSERT(terrainLayer, "[Island::CreateLayersFromJson()] Null pointer.")
+    MDCII_ASSERT(buildingsLayer, "[Island::CreateLayersFromJson()] Null pointer.")
+
+    mixedLayer = std::make_unique<layer::TerrainLayer>(m_context, this);
+    mixedLayer->instancesToRender = terrainLayer->instancesToRender;
+    mixedLayer->modelMatrices = terrainLayer->modelMatrices;
+    mixedLayer->gfxNumbers = terrainLayer->gfxNumbers;
+    mixedLayer->buildingIds = terrainLayer->buildingIds;
+
+    magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
+        magic_enum::enum_for_each<Rotation>([this, &t_zoom](const Rotation t_rotation) {
+            const auto z{ magic_enum::enum_integer(t_zoom) };
+            const auto r{ magic_enum::enum_integer(t_rotation) };
+
+            auto& mt{ mixedLayer->modelMatrices.at(z).at(r) };
+            const auto& mb{ buildingsLayer->modelMatrices.at(z).at(r) };
+
+            auto& gt{ mixedLayer->gfxNumbers };
+            const auto& gb{ buildingsLayer->gfxNumbers };
+
+            auto& bt{ mixedLayer->buildingIds };
+            const auto& bb{ buildingsLayer->buildingIds };
+
+            auto instance{ 0 };
+            for (const auto& mapTile : buildingsLayer->sortedTiles.at(r))
+            {
+                if (mapTile->HasBuilding())
+                {
+                    mt.at(instance) = mb.at(instance);
+                    gt.at(instance)[r] = gb.at(instance)[r];
+                    bt.at(instance)[r] = bb.at(instance)[r];
+                }
+
+                instance++;
+            }
+        });
+    });
+
+    mixedLayer->PrepareGpuDataForRendering();
+}

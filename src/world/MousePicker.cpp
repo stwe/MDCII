@@ -19,6 +19,7 @@
 #include <imgui.h>
 #include "MousePicker.h"
 #include "World.h"
+#include "Rotation.h"
 #include "MdciiAssert.h"
 #include "Game.h"
 #include "eventpp/utilities/argumentadapter.h"
@@ -39,6 +40,12 @@ mdcii::world::MousePicker::MousePicker(world::World* t_world, const ogl::Window&
 
     MDCII_ASSERT(m_world, "[MousePicker::MousePicker()] Null pointer.")
 
+    worldWidth = Game::INI.Get<int32_t>("game", "world_width");
+    worldHeight = Game::INI.Get<int32_t>("game", "world_height");
+
+    MDCII_ASSERT(worldWidth > 0, "[MousePicker::MousePicker()] Invalid width.")
+    MDCII_ASSERT(worldHeight > 0, "[MousePicker::MousePicker()] Invalid height.")
+
     Init();
     AddListeners(t_window, t_camera);
 }
@@ -56,6 +63,7 @@ mdcii::world::MousePicker::~MousePicker() noexcept
 
 void mdcii::world::MousePicker::Render(const ogl::Window& t_window, const camera::Camera& t_camera)
 {
+    /*
     if (!inWindow || !m_world->IsPositionInWorld(currentPosition.x, currentPosition.y))
     {
         return;
@@ -72,10 +80,12 @@ void mdcii::world::MousePicker::Render(const ogl::Window& t_window, const camera
         ogl::resource::ResourceManager::LoadTexture(m_cursorFileNames.at(magic_enum::enum_integer(m_world->zoom))).id,
         t_window, t_camera
     );
+    */
 }
 
 void mdcii::world::MousePicker::RenderImGui() const
 {
+    /*
     auto winW{ static_cast<float>(m_world->context->window->GetWidth()) };
     auto winH{ static_cast<float>(m_world->context->window->GetHeight()) };
 
@@ -103,6 +113,7 @@ void mdcii::world::MousePicker::RenderImGui() const
     ImGui::PopStyleColor();
 
     ImGui::End();
+    */
 }
 
 //-------------------------------------------------
@@ -175,7 +186,7 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     {
         result = glm::ivec2(
             (cell.y + origin.y) - (cell.x + origin.x),
-            m_world->width - 1 - ((cell.x + origin.x) + (cell.y + origin.y))
+            worldWidth - 1 - ((cell.x + origin.x) + (cell.y + origin.y))
         );
 
         if (r == 255 && g == 0 && b == 0)
@@ -199,8 +210,8 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     if (m_world->rotation == Rotation::DEG180)
     {
         result = glm::ivec2(
-            m_world->width - 1 - ((cell.y + origin.y) + (cell.x + origin.x)),
-            m_world->height - 1 - ((cell.y + origin.y) - (cell.x + origin.x))
+            worldWidth - 1 - ((cell.y + origin.y) + (cell.x + origin.x)),
+            worldHeight - 1 - ((cell.y + origin.y) - (cell.x + origin.x))
         );
 
         if (r == 255 && g == 0 && b == 0)
@@ -224,7 +235,7 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     if (m_world->rotation == Rotation::DEG270)
     {
         result = glm::ivec2(
-            m_world->height - 1 - ((cell.y + origin.y) - (cell.x + origin.x)),
+            worldHeight - 1 - ((cell.y + origin.y) - (cell.x + origin.x)),
             (cell.y + origin.y) + (cell.x + origin.x)
         );
 
@@ -260,10 +271,12 @@ void mdcii::world::MousePicker::Init()
     m_renderer = std::make_unique<renderer::TileRenderer>();
 
     // initial setup
+    /*
     if (glfwGetWindowAttrib(m_world->context->window->GetWindowHandle(), GLFW_HOVERED))
     {
         inWindow = true;
     }
+    */
 
     magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
         // store cursor file names

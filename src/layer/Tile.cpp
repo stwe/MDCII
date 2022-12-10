@@ -25,7 +25,7 @@
 // Helper
 //-------------------------------------------------
 
-void mdcii::world::Tile::Reset()
+void mdcii::layer::Tile::Reset()
 {
     ResetBuildingInfo();
 
@@ -36,10 +36,10 @@ void mdcii::world::Tile::Reset()
     instanceIds = {};
 }
 
-void mdcii::world::Tile::ResetBuildingInfo()
+void mdcii::layer::Tile::ResetBuildingInfo()
 {
     buildingId = -1;
-    rotation = Rotation::DEG0;
+    rotation = world::Rotation::DEG0;
     x = 0;
     y = 0;
     gfxs = {};
@@ -50,7 +50,7 @@ void mdcii::world::Tile::ResetBuildingInfo()
 // Render
 //-------------------------------------------------
 
-void mdcii::world::Tile::RenderImGui() const
+void mdcii::layer::Tile::RenderImGui() const
 {
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0.7f, 0.8f, 0.8f)));
     ImGui::Text("Tile");
@@ -79,7 +79,7 @@ void mdcii::world::Tile::RenderImGui() const
 
     if (ImGui::TreeNode("Indices"))
     {
-        auto r{ Rotation::DEG0 };
+        auto r{ world::Rotation::DEG0 };
         for (const auto index : indices)
         {
             if (ImGui::TreeNode(rotation_to_string(r)))
@@ -96,7 +96,7 @@ void mdcii::world::Tile::RenderImGui() const
 
     if (ImGui::TreeNode("Instances Ids"))
     {
-        auto r{ Rotation::DEG0 };
+        auto r{ world::Rotation::DEG0 };
         for (const auto id : instanceIds)
         {
             if (ImGui::TreeNode(rotation_to_string(r)))
@@ -113,7 +113,7 @@ void mdcii::world::Tile::RenderImGui() const
 
     if (ImGui::TreeNode("Gfxs"))
     {
-        auto r{ Rotation::DEG0 };
+        auto r{ world::Rotation::DEG0 };
         for (const auto gfx : gfxs)
         {
             if (ImGui::TreeNode(magic_enum::enum_name(r).data()))

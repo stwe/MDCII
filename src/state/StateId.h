@@ -30,7 +30,6 @@ namespace mdcii::state
     enum class StateId
     {
         MAIN_MENU,
-        WORLD_GENERATOR,
         NEW_GAME,
         LOADED_GAME,
         EXAMPLE_GAME,

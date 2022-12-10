@@ -18,14 +18,14 @@
 
 #pragma once
 
-#include "Rotation.h"
-#include "Zoom.h"
+#include "world/Rotation.h"
+#include "world/Zoom.h"
 
 //-------------------------------------------------
 // Tile
 //-------------------------------------------------
 
-namespace mdcii::world
+namespace mdcii::layer
 {
     /**
      * Represents a single part of a Layer object.
@@ -33,14 +33,14 @@ namespace mdcii::world
     struct Tile
     {
         /**
-         * The building Id from the haeuser.cod file.
+         * The Building Id from the haeuser.cod file.
          */
         int32_t buildingId{ -1 };
 
         /**
          * The rotation of the building.
          */
-        Rotation rotation{ Rotation::DEG0 };
+        world::Rotation rotation{ world::Rotation::DEG0 };
 
         /**
          * Example: Bakery
@@ -78,17 +78,17 @@ namespace mdcii::world
         /**
          * A screen position for each zoom and each rotation.
          */
-        std::array<std::array<glm::vec2, NR_OF_ROTATIONS>, NR_OF_ZOOMS> screenPositions{};
+        std::array<std::array<glm::vec2, world::NR_OF_ROTATIONS>, world::NR_OF_ZOOMS> screenPositions{};
 
         /**
          * The index for each rotation is needed for sorting.
          */
-        std::array<int32_t, NR_OF_ROTATIONS> indices{};
+        std::array<int32_t, world::NR_OF_ROTATIONS> indices{};
 
         /**
          * The instance Ids of this Tile object or the positions in Layer sortedTiles array.
          */
-        std::array<int32_t, NR_OF_ROTATIONS> instanceIds{};
+        std::array<int32_t, world::NR_OF_ROTATIONS> instanceIds{};
 
         /**
          * The Bsh graphic for each rotation.

@@ -1,19 +1,20 @@
 Checks: 'readability-identifier-naming'
 CheckOptions:
-  - { key: readability-identifier-naming.GlobalConstantCase,  value: UPPER_CASE }
-  - { key: readability-identifier-naming.GlobalFunctionCase,  value: lower_case }
-  - { key: readability-identifier-naming.GlobalVariableCase,  value: lower_case }
-  - { key: readability-identifier-naming.NamespaceCase,       value: lower_case }
-  - { key: readability-identifier-naming.ClassCase,           value: CamelCase }
-  - { key: readability-identifier-naming.ClassMethodCase,     value: CamelCase }
-  - { key: readability-identifier-naming.PublicMethodCase,    value: CamelCase }
-  - { key: readability-identifier-naming.ProtectedMethodCase, value: CamelCase }
-  - { key: readability-identifier-naming.PrivateMethodCase,   value: CamelCase }
-  - { key: readability-identifier-naming.EnumCase,            value: CamelCase }
-  - { key: readability-identifier-naming.StructCase,          value: CamelCase }
-  - { key: readability-identifier-naming.TypeAliasCase,       value: Camel_Snake_Case }
-  - { key: readability-identifier-naming.FunctionCase,        value: lower_case }
-  - { key: readability-identifier-naming.VariableCase,        value: camelBack }
-  - { key: readability-identifier-naming.PrivateMemberPrefix, value: m_         }
-  - { key: readability-identifier-naming.ParameterPrefix,     value: t_         }
-  - { key: readability-identifier-naming.ParameterPackPrefix, value: t_         }
+  - { key: readability-identifier-naming.GlobalConstantCase,    value: UPPER_CASE }
+  - { key: readability-identifier-naming.GlobalFunctionCase,    value: lower_case }
+  - { key: readability-identifier-naming.GlobalVariableCase,    value: lower_case }
+  - { key: readability-identifier-naming.NamespaceCase,         value: lower_case }
+  - { key: readability-identifier-naming.ClassCase,             value: CamelCase }
+  - { key: readability-identifier-naming.ClassMethodCase,       value: CamelCase }
+  - { key: readability-identifier-naming.PublicMethodCase,      value: CamelCase }
+  - { key: readability-identifier-naming.ProtectedMethodCase,   value: CamelCase }
+  - { key: readability-identifier-naming.PrivateMethodCase,     value: CamelCase }
+  - { key: readability-identifier-naming.EnumCase,              value: CamelCase }
+  - { key: readability-identifier-naming.StructCase,            value: CamelCase }
+  - { key: readability-identifier-naming.TypeAliasCase,         value: Camel_Snake_Case }
+  - { key: readability-identifier-naming.FunctionCase,          value: lower_case }
+  - { key: readability-identifier-naming.VariableCase,          value: camelBack }
+  - { key: readability-identifier-naming.ProtectedMemberPrefix, value: m_         }
+  - { key: readability-identifier-naming.PrivateMemberPrefix,   value: m_         }
+  - { key: readability-identifier-naming.ParameterPrefix,       value: t_         }
+  - { key: readability-identifier-naming.ParameterPackPrefix,   value: t_         }

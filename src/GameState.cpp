@@ -18,6 +18,7 @@
 
 #include <imgui.h>
 #include "GameState.h"
+#include "MdciiAssert.h"
 #include "ogl/OpenGL.h"
 #include "ogl/Window.h"
 #include "world/World.h"
@@ -31,6 +32,8 @@ mdcii::GameState::GameState(const state::StateId t_id, std::shared_ptr<state::Co
     : State(t_id, std::move(t_context))
 {
     Log::MDCII_LOG_DEBUG("[GameState::GameState()] Create GameState.");
+
+    MDCII_ASSERT(context, "[GameState::GameState()] Null pointer.")
 
     Init();
 }

@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "Tile.h"
+#include "layer/Tile.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -56,7 +56,7 @@ namespace mdcii::world
         /**
          * The selected building.
          */
-        Tile selectedBuilding;
+        layer::Tile selectedBuilding;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

@@ -138,6 +138,8 @@ void animateBuilding(int t_gfx, int t_rows)
     int animTime = animation.y;
     int animAdd = animation.w;
 
+    // todo: bei -1 entspricht die Animation einer Gabäude-Variante (Gebäude steigt auf/ab)
+    // todo: animAnz = Anzahl der Varianten
     if (animTime < 0)
     {
         return;
