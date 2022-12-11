@@ -23,13 +23,11 @@
 #include "Terrain.h"
 #include "TileAtlas.h"
 #include "WorldGui.h"
+#include "MousePicker.h"
 #include "state/State.h"
 #include "renderer/TerrainRenderer.h"
 #include "renderer/GridRenderer.h"
 #include "world/Island.h"
-#include "camera/Camera.h"
-#include "ogl/Window.h"
-#include "layer/GridLayer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -45,6 +43,12 @@ mdcii::world::World::World(std::string t_mapFilePath, std::shared_ptr<state::Con
     MDCII_ASSERT(!m_mapFilePath.empty(), "[World::World()] Invalid path given.")
     MDCII_ASSERT(context, "[World::World()] Null pointer.")
 
+    worldWidth = Game::INI.Get<int32_t>("game", "world_width");
+    worldHeight = Game::INI.Get<int32_t>("game", "world_height");
+
+    MDCII_ASSERT(worldWidth > 0, "[World::World()] Invalid width.")
+    MDCII_ASSERT(worldHeight > 0, "[World::World()] Invalid height.")
+
     rotation = Rotation::DEG0;
     zoom = Zoom::GFX;
     m_layerType = layer::LayerType::ALL;
@@ -57,6 +61,29 @@ mdcii::world::World::~World() noexcept
     Log::MDCII_LOG_DEBUG("[World::~World()] Destruct World.");
 
     CleanUp();
+}
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+bool mdcii::world::World::IsPositionInWorld(const int32_t t_x, const int32_t t_y) const
+{
+    if (t_x >= 0 && t_x < worldWidth && t_y >= 0 && t_y < worldHeight)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+glm::vec2 mdcii::world::World::WorldToScreen(const int32_t t_x, const int32_t t_y, const world::Zoom t_zoom, const world::Rotation t_rotation) const
+{
+    const auto position{ rotate_position(t_x, t_y, worldWidth, worldHeight, t_rotation) };
+    return {
+        (position.x - position.y) * get_tile_width_half(t_zoom),
+        (position.x + position.y) * get_tile_height_half(t_zoom)
+    };
 }
 
 //-------------------------------------------------
@@ -100,12 +127,19 @@ void mdcii::world::World::Render() const
             terrainRenderer->Render(*island->coastLayer, zoom, rotation);
             terrainRenderer->Render(*island->mixedLayer, zoom, rotation);
         }
+
+        if (m_renderIslandGridLayers)
+        {
+            gridRenderer->Render(island->gridLayer->modelMatricesSsbos, island->gridLayer->instancesToRender, zoom, rotation);
+        }
     }
 
-    if (m_renderGridLayer)
+    if (m_renderWorldGridLayer)
     {
-        worldGridRenderer->Render(*worldGridLayer, zoom, rotation);
+        gridRenderer->Render(worldGridLayer->modelMatricesSsbos, worldGridLayer->instancesToRender, zoom, rotation);
     }
+
+    mousePicker->Render(*context->window, *context->camera);
 }
 
 void mdcii::world::World::RenderImGui()
@@ -148,7 +182,8 @@ void mdcii::world::World::RenderImGui()
         m_layerType = l;
     }
 
-    ImGui::Checkbox("World-Grid", &m_renderGridLayer);
+    ImGui::Checkbox("World-Grid", &m_renderWorldGridLayer);
+    ImGui::Checkbox("Island-Grids", &m_renderIslandGridLayers);
     ImGui::Checkbox("Animations", &m_runAnimations);
 
     ImGui::Separator();
@@ -162,6 +197,8 @@ void mdcii::world::World::RenderImGui()
     ImGui::PopStyleColor();
 
     ImGui::End();
+
+    mousePicker->RenderImGui();
 }
 
 //-------------------------------------------------
@@ -217,13 +254,13 @@ void mdcii::world::World::Init()
         }
     }
 
-    worldGridLayer = std::make_unique<layer::GridLayer>(context);
+    worldGridLayer = std::make_unique<layer::WorldGridLayer>(context);
     worldGridLayer->PrepareCpuDataForRendering();
     worldGridLayer->PrepareGpuDataForRendering();
 
-    worldGridRenderer = std::make_unique<renderer::GridRenderer>(context);
-
+    gridRenderer = std::make_unique<renderer::GridRenderer>(context);
     m_worldGui = std::make_unique<WorldGui>(this);
+    mousePicker = std::make_unique<MousePicker>(this, *context->window, *context->camera);
 
     MDCII_ASSERT(!terrain->islands.empty(), "[World::Init()] No islands created.")
 

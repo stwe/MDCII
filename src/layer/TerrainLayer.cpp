@@ -250,7 +250,7 @@ void mdcii::layer::TerrainLayer::SortTiles()
     tiles = sortedTiles.at(magic_enum::enum_integer(world::Rotation::DEG0));
 }
 
-int32_t mdcii::layer::TerrainLayer::CalcGfx(const Tile& t_tile, world::Rotation t_rotation) const
+int32_t mdcii::layer::TerrainLayer::CalcGfx(const Tile& t_tile, const world::Rotation t_rotation) const
 {
     const auto& building{ m_context->originalResourcesManager->GetBuildingById(t_tile.buildingId) };
     auto buildingRotation{ t_tile.rotation };
@@ -299,7 +299,7 @@ int32_t mdcii::layer::TerrainLayer::CalcGfx(const Tile& t_tile, world::Rotation 
     return gfx;
 }
 
-glm::mat4 mdcii::layer::TerrainLayer::CreateModelMatrix(const Tile& t_tile, world::Zoom t_zoom, world::Rotation t_rotation) const
+glm::mat4 mdcii::layer::TerrainLayer::CreateModelMatrix(const Tile& t_tile, const world::Zoom t_zoom, const world::Rotation t_rotation) const
 {
     // to definitely create a screen position
     int32_t gfx{ GRASS_GFX };

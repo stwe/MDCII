@@ -40,11 +40,8 @@ mdcii::world::MousePicker::MousePicker(world::World* t_world, const ogl::Window&
 
     MDCII_ASSERT(m_world, "[MousePicker::MousePicker()] Null pointer.")
 
-    worldWidth = Game::INI.Get<int32_t>("game", "world_width");
-    worldHeight = Game::INI.Get<int32_t>("game", "world_height");
-
-    MDCII_ASSERT(worldWidth > 0, "[MousePicker::MousePicker()] Invalid width.")
-    MDCII_ASSERT(worldHeight > 0, "[MousePicker::MousePicker()] Invalid height.")
+    m_worldWidth = m_world->worldWidth;
+    m_worldHeight = m_world->worldHeight;
 
     Init();
     AddListeners(t_window, t_camera);
@@ -63,7 +60,6 @@ mdcii::world::MousePicker::~MousePicker() noexcept
 
 void mdcii::world::MousePicker::Render(const ogl::Window& t_window, const camera::Camera& t_camera)
 {
-    /*
     if (!inWindow || !m_world->IsPositionInWorld(currentPosition.x, currentPosition.y))
     {
         return;
@@ -80,12 +76,10 @@ void mdcii::world::MousePicker::Render(const ogl::Window& t_window, const camera
         ogl::resource::ResourceManager::LoadTexture(m_cursorFileNames.at(magic_enum::enum_integer(m_world->zoom))).id,
         t_window, t_camera
     );
-    */
 }
 
 void mdcii::world::MousePicker::RenderImGui() const
 {
-    /*
     auto winW{ static_cast<float>(m_world->context->window->GetWidth()) };
     auto winH{ static_cast<float>(m_world->context->window->GetHeight()) };
 
@@ -101,11 +95,11 @@ void mdcii::world::MousePicker::RenderImGui() const
         ImGuiWindowFlags_NoNavFocus;
     //ImGuiWindowFlags_NoBackground;
 
-    ImGui::SetNextWindowBgAlpha(0.4f);
+    ImGui::SetNextWindowBgAlpha(0.8f);
 
     ImGui::Begin("Mouse Picker", nullptr, windowFlags);
 
-    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(8, 8, 8, 255));
+    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 230, 230, 255));
 
     ImGui::Text("Current position x: %d, y: %d", currentPosition.x, currentPosition.y);
     ImGui::Text("Old position x: %d, y: %d", lastPosition.x, lastPosition.y);
@@ -113,7 +107,6 @@ void mdcii::world::MousePicker::RenderImGui() const
     ImGui::PopStyleColor();
 
     ImGui::End();
-    */
 }
 
 //-------------------------------------------------
@@ -186,7 +179,7 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     {
         result = glm::ivec2(
             (cell.y + origin.y) - (cell.x + origin.x),
-            worldWidth - 1 - ((cell.x + origin.x) + (cell.y + origin.y))
+            m_worldWidth - 1 - ((cell.x + origin.x) + (cell.y + origin.y))
         );
 
         if (r == 255 && g == 0 && b == 0)
@@ -210,8 +203,8 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     if (m_world->rotation == Rotation::DEG180)
     {
         result = glm::ivec2(
-            worldWidth - 1 - ((cell.y + origin.y) + (cell.x + origin.x)),
-            worldHeight - 1 - ((cell.y + origin.y) - (cell.x + origin.x))
+            m_worldWidth - 1 - ((cell.y + origin.y) + (cell.x + origin.x)),
+            m_worldHeight - 1 - ((cell.y + origin.y) - (cell.x + origin.x))
         );
 
         if (r == 255 && g == 0 && b == 0)
@@ -235,7 +228,7 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     if (m_world->rotation == Rotation::DEG270)
     {
         result = glm::ivec2(
-            worldHeight - 1 - ((cell.y + origin.y) - (cell.x + origin.x)),
+            m_worldHeight - 1 - ((cell.y + origin.y) - (cell.x + origin.x)),
             (cell.y + origin.y) + (cell.x + origin.x)
         );
 
@@ -266,22 +259,20 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
 
 void mdcii::world::MousePicker::Init()
 {
-    Log::MDCII_LOG_DEBUG("[MousePicker::Init()] Initializing mouse picker.");
+    Log::MDCII_LOG_DEBUG("[MousePicker::Init()] Initializing mouse picker...");
 
     m_renderer = std::make_unique<renderer::TileRenderer>();
 
     // initial setup
-    /*
     if (glfwGetWindowAttrib(m_world->context->window->GetWindowHandle(), GLFW_HOVERED))
     {
         inWindow = true;
     }
-    */
 
     magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
         // store cursor file names
         const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<Zoom>(t_zoom))) };
-        const auto cursorFileName{ "textures/" + zoomStr + "/red_" + zoomStr + ".png" };
+        const auto cursorFileName{ "textures/" + zoomStr + "/mouse_" + zoomStr + ".png" };
         m_cursorFileNames.at(magic_enum::enum_integer(t_zoom)) = cursorFileName;
 
         // store cheat images

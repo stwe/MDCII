@@ -66,7 +66,7 @@ namespace mdcii::layer
     {
     public:
         //-------------------------------------------------
-        // Model matrices types
+        // Types
         //-------------------------------------------------
 
         /**
@@ -78,6 +78,11 @@ namespace mdcii::layer
          * The four containers with the model matrices for each zoom.
          */
         using Model_Matrices_For_Each_Zoom = std::array<Model_Matrices_For_Each_Rotation, world::NR_OF_ZOOMS>;
+
+        /**
+         * The four containers with the model matrices Ssbos for each zoom.
+         */
+        using Model_Matrices_Ssbos_For_Each_zoom = std::array<std::array<std::unique_ptr<ogl::buffer::Ssbo>, world::NR_OF_ROTATIONS>, world::NR_OF_ZOOMS>;
 
         //-------------------------------------------------
         // Member
@@ -113,7 +118,7 @@ namespace mdcii::layer
          * The Ssbos to store all modelMatrices.
          * Access: modelMatricesSsbos[0/SGFX ... 2/GFX][0/DEG0 ... 3/DEG270]
          */
-        std::array<std::array<std::unique_ptr<ogl::buffer::Ssbo>, world::NR_OF_ROTATIONS>, world::NR_OF_ZOOMS> modelMatricesSsbos;
+        Model_Matrices_Ssbos_For_Each_zoom modelMatricesSsbos;
 
         /**
          * The number of instances to render.

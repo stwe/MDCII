@@ -38,6 +38,11 @@ namespace mdcii::layer
      * Forward declaration class TerrainLayer.
      */
     class TerrainLayer;
+
+    /**
+     * Forward declaration class GridLayer.
+     */
+    class GridLayer;
 }
 
 //-------------------------------------------------
@@ -96,6 +101,11 @@ namespace mdcii::world
          */
         std::unique_ptr<layer::TerrainLayer> mixedLayer;
 
+        /**
+         * A Layer object to show a grid.
+         */
+        std::unique_ptr<layer::GridLayer> gridLayer;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -121,7 +131,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Initializes the members from a Json value.
+         * Initializes this Island from a Json value.
          *
          * @param t_json The Json value.
          */

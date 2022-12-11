@@ -20,6 +20,7 @@
 
 #include <string>
 #include <memory>
+#include <glm/vec2.hpp>
 
 //-------------------------------------------------
 // Forward declarations
@@ -33,9 +34,9 @@ namespace mdcii::layer
     enum class LayerType;
 
     /**
-     * Forward declaration class GridLayer.
+     * Forward declaration class WorldGridLayer.
      */
-    class GridLayer;
+    class WorldGridLayer;
 }
 
 namespace mdcii::state
@@ -109,6 +110,11 @@ namespace mdcii::world
      */
     class WorldGui;
 
+    /**
+     * Forward declaration class MousePicker.
+     */
+    class MousePicker;
+
     //-------------------------------------------------
     // World
     //-------------------------------------------------
@@ -127,6 +133,16 @@ namespace mdcii::world
          * To have access to the shared objects (Window, Camera, Original-Assets).
          */
         std::shared_ptr<state::Context> context;
+
+        /**
+         * The world width.
+         */
+        int32_t worldWidth;
+
+        /**
+         * The world height.
+         */
+        int32_t worldHeight;
 
         /**
          * The world rotation.
@@ -156,12 +172,17 @@ namespace mdcii::world
         /**
          * The world grid.
          */
-        std::unique_ptr<layer::GridLayer> worldGridLayer;
+        std::unique_ptr<layer::WorldGridLayer> worldGridLayer;
 
         /**
-         * A renderer to render the world grid.
+         * A renderer to render grids.
          */
-        std::unique_ptr<renderer::GridRenderer> worldGridRenderer;
+        std::unique_ptr<renderer::GridRenderer> gridRenderer;
+
+        /**
+         * The MousePicker object.
+         */
+        std::unique_ptr<MousePicker> mousePicker;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -184,6 +205,14 @@ namespace mdcii::world
         World& operator=(World&& t_other) noexcept = delete;
 
         ~World() noexcept;
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        [[nodiscard]] bool IsPositionInWorld(int32_t t_x, int32_t t_y) const;
+
+        [[nodiscard]] glm::vec2 WorldToScreen(int32_t t_x, int32_t t_y, Zoom t_zoom, Rotation t_rotation) const;
 
         //-------------------------------------------------
         // Logic
@@ -250,9 +279,14 @@ namespace mdcii::world
         layer::LayerType m_layerType;
 
         /**
-         * Toggles grid rendering on and off.
+         * Toggles world grid rendering on and off.
          */
-        bool m_renderGridLayer{ false };
+        bool m_renderWorldGridLayer{ false };
+
+        /**
+         * Toggles island grid rendering on and off.
+         */
+        bool m_renderIslandGridLayers{ false };
 
         /**
          * Toggles animations on and off.

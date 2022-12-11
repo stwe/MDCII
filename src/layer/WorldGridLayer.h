@@ -21,17 +21,25 @@
 #include "GameLayer.h"
 
 //-------------------------------------------------
-// GridLayer
+// WorldGridLayer
 //-------------------------------------------------
 
 namespace mdcii::layer
 {
-    class GridLayer : public GameLayer
+    /**
+     * A Layer to show a world grid.
+     */
+    class WorldGridLayer: public GameLayer
     {
     public:
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
+
+        /**
+         * Contains all Tile pointers in the order DEG0.
+         */
+        std::vector<std::shared_ptr<Tile>> tiles;
 
         /**
          * A vector of Tile pointers for each rotation.
@@ -43,21 +51,21 @@ namespace mdcii::layer
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        GridLayer() = delete;
+        WorldGridLayer() = delete;
 
         /**
-         * Constructs a new GridLayer object.
+         * Constructs a new WorldGridLayer object.
          *
          * @param t_context Access to shared objects.
          */
-        explicit GridLayer(std::shared_ptr<state::Context> t_context);
+        explicit WorldGridLayer(std::shared_ptr<state::Context> t_context);
 
-        GridLayer(const GridLayer& t_other) = delete;
-        GridLayer(GridLayer&& t_other) noexcept = delete;
-        GridLayer& operator=(const GridLayer& t_other) = delete;
-        GridLayer& operator=(GridLayer&& t_other) noexcept = delete;
+        WorldGridLayer(const WorldGridLayer& t_other) = delete;
+        WorldGridLayer(WorldGridLayer&& t_other) noexcept = delete;
+        WorldGridLayer& operator=(const WorldGridLayer& t_other) = delete;
+        WorldGridLayer& operator=(WorldGridLayer&& t_other) noexcept = delete;
 
-        ~GridLayer() noexcept override;
+        ~WorldGridLayer() noexcept override;
 
         //-------------------------------------------------
         // Override
@@ -80,6 +88,21 @@ namespace mdcii::layer
         //-------------------------------------------------
         // Cpu data
         //-------------------------------------------------
+
+        /**
+         * Adds some pre-calculations to every Tile object of the Layer,
+         * which are necessary to render the Tile on the screen.
+         *
+         * @param t_tile The Tile object.
+         * @param t_x The x position for Deg0 in the world.
+         * @param t_y The y position for Deg0 in the world.
+         */
+        void PreCalcTile(Tile& t_tile, int32_t t_x, int32_t t_y) const;
+
+        /**
+         * Sort Tile objects for rendering.
+         */
+        void SortTiles();
 
         /**
          * Creates and stores all the model matrices for each Tile object from sortedTiles.

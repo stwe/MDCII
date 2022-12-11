@@ -18,6 +18,7 @@
 
 #include "Island.h"
 #include "layer/TerrainLayer.h"
+#include "layer/GridLayer.h"
 #include "state/State.h"
 #include "MdciiAssert.h"
 
@@ -68,6 +69,8 @@ void mdcii::world::Island::InitValuesFromJson(const nlohmann::json& t_json)
 
     MDCII_ASSERT(width > 0, "[Island::InitValuesFromJson()] Invalid width.")
     MDCII_ASSERT(height > 0, "[Island::InitValuesFromJson()] Invalid height.")
+    MDCII_ASSERT(worldX >= 0, "[Island::InitValuesFromJson()] Invalid world x.")
+    MDCII_ASSERT(worldY >= 0, "[Island::InitValuesFromJson()] Invalid world y.")
 
     for (const auto& [k, v] : t_json.items())
     {
@@ -157,4 +160,9 @@ void mdcii::world::Island::CreateLayersFromJson(const nlohmann::json& t_json)
     });
 
     mixedLayer->PrepareGpuDataForRendering();
+
+    gridLayer = std::make_unique<layer::GridLayer>(m_context);
+    gridLayer->sortedTiles = terrainLayer->sortedTiles;
+    gridLayer->PrepareCpuDataForRendering();
+    gridLayer->PrepareGpuDataForRendering();
 }

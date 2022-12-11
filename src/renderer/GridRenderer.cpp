@@ -49,7 +49,7 @@ mdcii::renderer::GridRenderer::~GridRenderer() noexcept
 // Logic
 //-------------------------------------------------
 
-void mdcii::renderer::GridRenderer::Render(const layer::GridLayer& t_gridLayer, const world::Zoom t_zoom, const world::Rotation t_rotation) const
+void mdcii::renderer::GridRenderer::Render(const layer::GameLayer::Model_Matrices_Ssbos_For_Each_zoom& t_modelMatricesSsbos, const int32_t t_instancesToRender, const world::Zoom t_zoom, const world::Rotation t_rotation) const
 {
     const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
     const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
@@ -69,13 +69,13 @@ void mdcii::renderer::GridRenderer::Render(const layer::GridLayer& t_gridLayer, 
     glBindBufferBase(
         GL_SHADER_STORAGE_BUFFER,
         MODEL_MATRICES_BINDING,
-        t_gridLayer.modelMatricesSsbos.at(zoomInt).at(rotationInt)->id
+        t_modelMatricesSsbos.at(zoomInt).at(rotationInt)->id
     );
 
     const auto& textureId{ ogl::resource::ResourceManager::LoadTexture(m_gridFileNames.at(zoomInt)).id };
     ogl::resource::TextureUtils::BindForReading(textureId, GL_TEXTURE0);
 
-    m_vaos.at(zoomInt)->DrawInstanced(t_gridLayer.instancesToRender);
+    m_vaos.at(zoomInt)->DrawInstanced(t_instancesToRender);
 
     ogl::buffer::Vao::Unbind();
 
@@ -94,7 +94,7 @@ void mdcii::renderer::GridRenderer::Init()
 
     magic_enum::enum_for_each<world::Zoom>([this](const world::Zoom t_zoom) {
         const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name<world::Zoom>(t_zoom))) };
-        const auto fileName{ "textures/" + zoomStr + "/red_" + zoomStr + ".png" };
+        const auto fileName{ "textures/" + zoomStr + "/green_" + zoomStr + ".png" };
         m_gridFileNames.at(magic_enum::enum_integer(t_zoom)) = fileName;
     });
 
