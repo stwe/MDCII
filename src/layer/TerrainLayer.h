@@ -164,13 +164,6 @@ namespace mdcii::layer
          */
         void StoreTile(std::unique_ptr<Tile> t_tile);
 
-        //-------------------------------------------------
-        // Override
-        //-------------------------------------------------
-
-        void PrepareCpuDataForRendering() override;
-        void PrepareGpuDataForRendering() override;
-
     protected:
 
     private:
@@ -198,7 +191,21 @@ namespace mdcii::layer
         world::Island* m_island{ nullptr };
 
         //-------------------------------------------------
-        // Cpu data
+        // Override
+        //-------------------------------------------------
+
+        void CreateTiles() override;
+        void SortTiles() override;
+
+        void CreateModelMatricesContainer() override;
+        void CreateGfxNumbersContainer() override;
+        void CreateBuildingIdsContainer() override;
+
+        void StoreGfxNumbersInGpu() override;
+        void StoreBuildingIdsInGpu() override;
+
+        //-------------------------------------------------
+        // Helper
         //-------------------------------------------------
 
         /**
@@ -221,11 +228,6 @@ namespace mdcii::layer
         void PreCalcTile(Tile& t_tile, int32_t t_x, int32_t t_y, int32_t t_islandPosX, int32_t t_islandPosY) const;
 
         /**
-         * Sort Tile objects for rendering.
-         */
-        void SortTiles();
-
-        /**
          * Calculates the gfx.
          *
          * @param t_tile The Tile object.
@@ -245,34 +247,5 @@ namespace mdcii::layer
          * @return The model matrix.
          */
         [[nodiscard]] glm::mat4 CreateModelMatrix(const Tile& t_tile, world::Zoom t_zoom, world::Rotation t_rotation) const;
-
-        /**
-         * Creates and stores all the model matrices for each Tile object from sortedTiles.
-         */
-        void CreateModelMatricesContainer();
-
-        /**
-         * Creates and stores all the gfx numbers for each Tile object from sortedTiles.
-         */
-        void CreateGfxNumbersContainer();
-
-        /**
-         * Creates and stores all the Building Ids for each Tile object from sortedTiles.
-         */
-        void CreateBuildingIdsContainer();
-
-        //-------------------------------------------------
-        // Gpu data
-        //-------------------------------------------------
-
-        /**
-         * Stores gfxNumbers in the Gpu memory.
-         */
-        void StoreGfxNumbersInGpu();
-
-        /**
-         * Stores buildingIds in the Gpu memory.
-         */
-        void StoreBuildingIdsInGpu();
     };
 }

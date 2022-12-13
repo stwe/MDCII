@@ -189,16 +189,6 @@ namespace mdcii::layer
          *
          * @param t_x The x position.
          * @param t_y The y position.
-         *
-         * @return The 1D index.
-         */
-        [[nodiscard]] int32_t GetMapIndex(int32_t t_x, int32_t t_y) const;
-
-        /**
-         * 2D/1D - mapping of a Layer position.
-         *
-         * @param t_x The x position.
-         * @param t_y The y position.
          * @param t_rotation The position is previously rotated by the specified value.
          *
          * @return The 1D index.
@@ -218,18 +208,18 @@ namespace mdcii::layer
         [[nodiscard]] glm::vec2 WorldToScreen(int32_t t_x, int32_t t_y, world::Zoom t_zoom, world::Rotation t_rotation = world::Rotation::DEG0) const;
 
         //-------------------------------------------------
-        // Interface
+        // Prepare rendering
         //-------------------------------------------------
 
         /**
          * Prepare Cpu data for rendering.
          */
-        virtual void PrepareCpuDataForRendering() = 0;
+        void PrepareCpuDataForRendering();
 
         /**
          * Prepare Gpu data for rendering.
          */
-        virtual void PrepareGpuDataForRendering();
+        void PrepareGpuDataForRendering();
 
     protected:
         //-------------------------------------------------
@@ -243,12 +233,18 @@ namespace mdcii::layer
 
     private:
         //-------------------------------------------------
-        // Gpu data
+        // Interface
         //-------------------------------------------------
 
-        /**
-         * Stores modelMatrices in the Gpu memory.
-         */
-        void StoreModelMatricesInGpu();
+        virtual void CreateTiles() {};
+        virtual void SortTiles() {};
+
+        virtual void CreateModelMatricesContainer() {};
+        virtual void CreateGfxNumbersContainer() {};
+        virtual void CreateBuildingIdsContainer() {};
+
+        virtual void StoreModelMatricesInGpu();
+        virtual void StoreGfxNumbersInGpu() {};
+        virtual void StoreBuildingIdsInGpu() {};
     };
 }

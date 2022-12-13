@@ -26,6 +26,9 @@
 
 namespace mdcii::layer
 {
+    /**
+     * The GridLayer contains all the data to render a grid over an island.
+     */
     class GridLayer : public GameLayer
     {
     public:
@@ -59,12 +62,6 @@ namespace mdcii::layer
 
         ~GridLayer() noexcept override;
 
-        //-------------------------------------------------
-        // Override
-        //-------------------------------------------------
-
-        void PrepareCpuDataForRendering() override;
-
     protected:
 
     private:
@@ -73,18 +70,19 @@ namespace mdcii::layer
         //-------------------------------------------------
 
         /**
-         * The model matrix is based on this gfx number.
+         * Each model matrix is based on this gfx number.
          */
         static constexpr auto GRASS_GFX{ 4 };
 
         //-------------------------------------------------
-        // Cpu data
+        // Override
         //-------------------------------------------------
 
-        /**
-         * Creates and stores all the model matrices for each Tile object from sortedTiles.
-         */
-        void CreateModelMatricesContainer();
+        void CreateModelMatricesContainer() override;
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
 
         /**
          * Creates a model matrix for a given Tile object.

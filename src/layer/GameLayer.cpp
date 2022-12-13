@@ -36,8 +36,8 @@ mdcii::layer::GameLayer::GameLayer(std::shared_ptr<state::Context> t_context)
     worldWidth = Game::INI.Get<int32_t>("game", "world_width");
     worldHeight = Game::INI.Get<int32_t>("game", "world_height");
 
-    MDCII_ASSERT(worldWidth > 0, "[GameLayer::GameLayer()] Invalid width.")
-    MDCII_ASSERT(worldHeight > 0, "[GameLayer::GameLayer()] Invalid height.")
+    MDCII_ASSERT(worldWidth > 0, "[GameLayer::GameLayer()] Invalid worldWidth.")
+    MDCII_ASSERT(worldHeight > 0, "[GameLayer::GameLayer()] Invalid worldHeight.")
 }
 
 mdcii::layer::GameLayer::~GameLayer() noexcept
@@ -51,6 +51,8 @@ mdcii::layer::GameLayer::~GameLayer() noexcept
 
 const mdcii::layer::GameLayer::Model_Matrices_For_Each_Rotation& mdcii::layer::GameLayer::GetModelMatrices(const world::Zoom t_zoom) const
 {
+    MDCII_ASSERT(!modelMatrices.at(0).at(0).empty(), "[GameLayer::GetModelMatrices()] Invalid model matrices container.")
+
     return modelMatrices.at(magic_enum::enum_integer(t_zoom));
 }
 
@@ -60,6 +62,9 @@ const mdcii::layer::GameLayer::Model_Matrices_For_Each_Rotation& mdcii::layer::G
 
 bool mdcii::layer::GameLayer::IsPositionInLayer(const int32_t t_x, const int32_t t_y) const
 {
+    MDCII_ASSERT(width > 0, "[GameLayer::IsPositionInLayer()] Invalid width.")
+    MDCII_ASSERT(height > 0, "[GameLayer::IsPositionInLayer()] Invalid height.")
+
     if (t_x >= 0 && t_x < width &&
         t_y >= 0 && t_y < height)
     {
@@ -71,14 +76,10 @@ bool mdcii::layer::GameLayer::IsPositionInLayer(const int32_t t_x, const int32_t
 
 glm::ivec2 mdcii::layer::GameLayer::RotatePosition(const int32_t t_x, const int32_t t_y, const world::Rotation t_rotation) const
 {
+    MDCII_ASSERT(width > 0, "[GameLayer::RotatePosition()] Invalid width.")
+    MDCII_ASSERT(height > 0, "[GameLayer::RotatePosition()] Invalid height.")
+
     return rotate_position(t_x, t_y, width, height, t_rotation);
-}
-
-int32_t mdcii::layer::GameLayer::GetMapIndex(const int32_t t_x, const int32_t t_y) const
-{
-    MDCII_ASSERT(IsPositionInLayer(t_x, t_y), "[GameLayer::GetMapIndex()] Invalid position given.")
-
-    return t_y * width + t_x;
 }
 
 int32_t mdcii::layer::GameLayer::GetMapIndex(const int32_t t_x, const int32_t t_y, const world::Rotation t_rotation) const
@@ -105,16 +106,28 @@ glm::vec2 mdcii::layer::GameLayer::WorldToScreen(const int32_t t_x, const int32_
 }
 
 //-------------------------------------------------
-// Interface
+// Prepare rendering
 //-------------------------------------------------
+
+void mdcii::layer::GameLayer::PrepareCpuDataForRendering()
+{
+    CreateTiles();
+    SortTiles();
+
+    CreateModelMatricesContainer();
+    CreateGfxNumbersContainer();
+    CreateBuildingIdsContainer();
+}
 
 void mdcii::layer::GameLayer::PrepareGpuDataForRendering()
 {
     StoreModelMatricesInGpu();
+    StoreGfxNumbersInGpu();
+    StoreBuildingIdsInGpu();
 }
 
 //-------------------------------------------------
-// Gpu data
+// Interface
 //-------------------------------------------------
 
 void mdcii::layer::GameLayer::StoreModelMatricesInGpu()

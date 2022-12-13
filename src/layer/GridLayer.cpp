@@ -34,27 +34,18 @@ mdcii::layer::GridLayer::GridLayer(std::shared_ptr<state::Context> t_context)
 
 mdcii::layer::GridLayer::~GridLayer() noexcept
 {
-    Log::MDCII_LOG_DEBUG("[GridLayer::GridLayer()] Destruct GridLayer.");
+    Log::MDCII_LOG_DEBUG("[GridLayer::~GridLayer()] Destruct GridLayer.");
 }
 
 //-------------------------------------------------
 // Override
 //-------------------------------------------------
 
-void mdcii::layer::GridLayer::PrepareCpuDataForRendering()
-{
-    CreateModelMatricesContainer();
-}
-
-//-------------------------------------------------
-// Cpu data
-//-------------------------------------------------
-
 void mdcii::layer::GridLayer::CreateModelMatricesContainer()
 {
     Log::MDCII_LOG_DEBUG("[GridLayer::CreateModelMatricesContainer()] Create model matrices container.");
 
-    MDCII_ASSERT(modelMatrices.at(0).at(0).empty(), "[GridLayer::CreateModelMatricesContainer()] Invalid model matrices container.")
+    MDCII_ASSERT(modelMatrices.at(0).at(0).empty(), "[GridLayer::CreateModelMatricesContainer()] Invalid model matrices container size.")
     MDCII_ASSERT(!sortedTiles.empty(), "[GridLayer::CreateModelMatricesContainer()] Missing Tile objects.")
 
     magic_enum::enum_for_each<world::Zoom>([this](const world::Zoom t_zoom) {
@@ -80,6 +71,10 @@ void mdcii::layer::GridLayer::CreateModelMatricesContainer()
 
     instancesToRender = static_cast<int32_t>(modelMatrices.at(0).at(0).size());
 }
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
 
 glm::mat4 mdcii::layer::GridLayer::CreateModelMatrix(const layer::Tile& t_tile, const world::Zoom t_zoom, const world::Rotation t_rotation) const
 {

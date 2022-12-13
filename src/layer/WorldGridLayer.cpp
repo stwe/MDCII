@@ -45,8 +45,10 @@ mdcii::layer::WorldGridLayer::~WorldGridLayer() noexcept
 // Override
 //-------------------------------------------------
 
-void mdcii::layer::WorldGridLayer::PrepareCpuDataForRendering()
+void mdcii::layer::WorldGridLayer::CreateTiles()
 {
+    Log::MDCII_LOG_DEBUG("[WorldGridLayer::CreateTiles()] Create and prepare Tile objects for rendering.");
+
     for (auto i{ 0 }; i < instancesToRender; ++i)
     {
         tiles.emplace_back(std::make_unique<Tile>());
@@ -56,17 +58,65 @@ void mdcii::layer::WorldGridLayer::PrepareCpuDataForRendering()
     {
         for (auto x{ 0 }; x < width; ++x)
         {
-            PreCalcTile(*tiles.at(GetMapIndex(x, y)), x, y);
+            PreCalcTile(*tiles.at(GetMapIndex(x, y, world::Rotation::DEG0)), x, y);
         }
     }
+}
 
-    SortTiles();
+void mdcii::layer::WorldGridLayer::SortTiles()
+{
+    Log::MDCII_LOG_DEBUG("[WorldGridLayer::SortTiles()] Sorting Tile objects by index.");
 
-    CreateModelMatricesContainer();
+    MDCII_ASSERT(!tiles.empty(), "[WorldGridLayer::SortTiles()] Missing Tile objects.")
+
+    magic_enum::enum_for_each<world::Rotation>([this](const world::Rotation t_rotation) {
+        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+
+        // sort tiles by index
+        std::sort(tiles.begin(), tiles.end(), [&](const std::shared_ptr<Tile>& t_a, const std::shared_ptr<Tile>& t_b) {
+            return t_a->indices[rotationInt] < t_b->indices[rotationInt];
+        });
+
+        // copy sorted tiles
+        sortedTiles.at(rotationInt) = tiles;
+    });
+
+    // revert tiles sorting = sortedTiles DEG0
+    tiles = sortedTiles.at(magic_enum::enum_integer(world::Rotation::DEG0));
+}
+
+void mdcii::layer::WorldGridLayer::CreateModelMatricesContainer()
+{
+    Log::MDCII_LOG_DEBUG("[WorldGridLayer::CreateModelMatricesContainer()] Create model matrices container.");
+
+    MDCII_ASSERT(modelMatrices.at(0).at(0).empty(), "[WorldGridLayer::CreateModelMatricesContainer()] Invalid model matrices container size.")
+    MDCII_ASSERT(!sortedTiles.empty(), "[WorldGridLayer::CreateModelMatricesContainer()] Missing Tile objects.")
+
+    magic_enum::enum_for_each<world::Zoom>([this](const world::Zoom t_zoom) {
+
+        Model_Matrices_For_Each_Rotation matricesForRotations;
+        magic_enum::enum_for_each<world::Rotation>([this, &t_zoom, &matricesForRotations](const world::Rotation t_rotation) {
+            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+
+            std::vector<glm::mat4> matrices;
+            int32_t instance{ 0 };
+            for (const auto& tile : sortedTiles.at(rotationInt))
+            {
+                matrices.emplace_back(CreateModelMatrix(*tile, t_zoom, t_rotation));
+                tile->instanceIds.at(rotationInt) = instance;
+
+                instance++;
+            }
+
+            matricesForRotations.at(rotationInt) = matrices;
+        });
+
+        modelMatrices.at(magic_enum::enum_integer(t_zoom)) = matricesForRotations;
+    });
 }
 
 //-------------------------------------------------
-// Cpu data
+// Helper
 //-------------------------------------------------
 
 void mdcii::layer::WorldGridLayer::PreCalcTile(layer::Tile& t_tile, int32_t t_x, int32_t t_y) const
@@ -92,59 +142,6 @@ void mdcii::layer::WorldGridLayer::PreCalcTile(layer::Tile& t_tile, int32_t t_x,
     t_tile.indices[1] = GetMapIndex(t_x, t_y, world::Rotation::DEG90);
     t_tile.indices[2] = GetMapIndex(t_x, t_y, world::Rotation::DEG180);
     t_tile.indices[3] = GetMapIndex(t_x, t_y, world::Rotation::DEG270);
-}
-
-void mdcii::layer::WorldGridLayer::SortTiles()
-{
-    Log::MDCII_LOG_DEBUG("[WorldGridLayer::SortTiles()] Sorting tiles by index.");
-
-    MDCII_ASSERT(!tiles.empty(), "[WorldGridLayer::SortTiles()] Missing Tile objects.")
-
-    magic_enum::enum_for_each<world::Rotation>([this](const world::Rotation t_rotation) {
-        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-
-        // sort tiles by index
-        std::sort(tiles.begin(), tiles.end(), [&](const std::shared_ptr<Tile>& t_a, const std::shared_ptr<Tile>& t_b) {
-            return t_a->indices[rotationInt] < t_b->indices[rotationInt];
-        });
-
-        // copy sorted tiles
-        sortedTiles.at(rotationInt) = tiles;
-    });
-
-    // revert tiles sorting = sortedTiles DEG0
-    tiles = sortedTiles.at(magic_enum::enum_integer(world::Rotation::DEG0));
-}
-
-void mdcii::layer::WorldGridLayer::CreateModelMatricesContainer()
-{
-    Log::MDCII_LOG_DEBUG("[WorldGridLayer::CreateModelMatricesContainer()] Create model matrices container.");
-
-    MDCII_ASSERT(modelMatrices.at(0).at(0).empty(), "[WorldGridLayer::CreateModelMatricesContainer()] Invalid model matrices container.")
-    MDCII_ASSERT(instancesToRender > 0, "[WorldGridLayer::CreateModelMatricesContainer()] Invalid number of instances.")
-    MDCII_ASSERT(!sortedTiles.empty(), "[WorldGridLayer::CreateModelMatricesContainer()] Missing Tile objects.")
-
-    magic_enum::enum_for_each<world::Zoom>([this](const world::Zoom t_zoom) {
-
-        Model_Matrices_For_Each_Rotation matricesForRotations;
-        magic_enum::enum_for_each<world::Rotation>([this, &t_zoom, &matricesForRotations](const world::Rotation t_rotation) {
-            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-
-            std::vector<glm::mat4> matrices;
-            int32_t instance{ 0 };
-            for (const auto& tile : sortedTiles.at(rotationInt))
-            {
-                matrices.emplace_back(CreateModelMatrix(*tile, t_zoom, t_rotation));
-                tile->instanceIds.at(rotationInt) = instance;
-
-                instance++;
-            }
-
-            matricesForRotations.at(rotationInt) = matrices;
-        });
-
-        modelMatrices.at(magic_enum::enum_integer(t_zoom)) = matricesForRotations;
-    });
 }
 
 glm::mat4 mdcii::layer::WorldGridLayer::CreateModelMatrix(const layer::Tile& t_tile, world::Zoom t_zoom, world::Rotation t_rotation) const

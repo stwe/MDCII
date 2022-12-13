@@ -27,7 +27,7 @@
 namespace mdcii::layer
 {
     /**
-     * A Layer to show a world grid.
+     * The WorldGridLayer contains all the data to render a grid over the world.
      */
     class WorldGridLayer: public GameLayer
     {
@@ -67,12 +67,6 @@ namespace mdcii::layer
 
         ~WorldGridLayer() noexcept override;
 
-        //-------------------------------------------------
-        // Override
-        //-------------------------------------------------
-
-        void PrepareCpuDataForRendering() override;
-
     protected:
 
     private:
@@ -81,12 +75,20 @@ namespace mdcii::layer
         //-------------------------------------------------
 
         /**
-         * The model matrix is based on this gfx number.
+         * Each model matrix is based on this gfx number.
          */
         static constexpr auto GRASS_GFX{ 4 };
 
         //-------------------------------------------------
-        // Cpu data
+        // Override
+        //-------------------------------------------------
+
+        void CreateTiles() override;
+        void SortTiles() override;
+        void CreateModelMatricesContainer() override;
+
+        //-------------------------------------------------
+        // Helper
         //-------------------------------------------------
 
         /**
@@ -98,16 +100,6 @@ namespace mdcii::layer
          * @param t_y The y position for Deg0 in the world.
          */
         void PreCalcTile(Tile& t_tile, int32_t t_x, int32_t t_y) const;
-
-        /**
-         * Sort Tile objects for rendering.
-         */
-        void SortTiles();
-
-        /**
-         * Creates and stores all the model matrices for each Tile object from sortedTiles.
-         */
-        void CreateModelMatricesContainer();
 
         /**
          * Creates a model matrix for a given Tile object.

@@ -104,20 +104,20 @@ mdcii::layer::TerrainLayer::~TerrainLayer() noexcept
 
 void mdcii::layer::TerrainLayer::CreateTilesFromJson(const nlohmann::json& t_json)
 {
-    Log::MDCII_LOG_DEBUG("[TerrainLayer::CreateTilesFromJson()] Create Tile objects.");
+    Log::MDCII_LOG_DEBUG("[TerrainLayer::CreateTilesFromJson()] Create Tile objects from Json.");
 
     for (const auto& [k, v] : t_json.items())
     {
         AddTileFromJson(v);
     }
 
-    MDCII_ASSERT(!tiles.empty(), "[Island::CreateTilesFromJson()] Missing Tile objects.")
-    MDCII_ASSERT(instancesToRender == static_cast<int32_t>(tiles.size()), "[Island::CreateTilesFromJson()] Invalid map data.")
+    MDCII_ASSERT(!tiles.empty(), "[TerrainLayer::CreateTilesFromJson()] Missing Tile objects.")
+    MDCII_ASSERT(instancesToRender == static_cast<int32_t>(tiles.size()), "[TerrainLayer::CreateTilesFromJson()] Invalid map data.")
 }
 
 const mdcii::layer::Tile& mdcii::layer::TerrainLayer::GetTile(const int32_t t_x, const int32_t t_y) const
 {
-    return *tiles.at(GetMapIndex(t_x, t_y));
+    return *tiles.at(GetMapIndex(t_x, t_y, world::Rotation::DEG0));
 }
 
 void mdcii::layer::TerrainLayer::ResetTilePointersAt(const std::array<int32_t, world::NR_OF_ROTATIONS>& t_instanceIds)
@@ -150,37 +150,170 @@ void mdcii::layer::TerrainLayer::StoreTile(std::unique_ptr<Tile> t_tile)
 // Override
 //-------------------------------------------------
 
-void mdcii::layer::TerrainLayer::PrepareCpuDataForRendering()
+void mdcii::layer::TerrainLayer::CreateTiles()
 {
-    MDCII_ASSERT(width > 0, "[TerrainLayer::PrepareCpuDataForRendering()] Invalid width.")
-    MDCII_ASSERT(height > 0, "[TerrainLayer::PrepareCpuDataForRendering()] Invalid height.")
-    MDCII_ASSERT(!tiles.empty(), "[TerrainLayer::PrepareCpuDataForRendering()] Missing Tile objects.")
+    Log::MDCII_LOG_DEBUG("[TerrainLayer::CreateTiles()] Prepare Tile objects for rendering.");
+
+    MDCII_ASSERT(width > 0, "[TerrainLayer::CreateTiles()] Invalid width.")
+    MDCII_ASSERT(height > 0, "[TerrainLayer::CreateTiles()] Invalid height.")
+    MDCII_ASSERT(!tiles.empty(), "[TerrainLayer::CreateTiles()] Missing Tile objects.")
 
     for (auto y{ 0 }; y < height; ++y)
     {
         for (auto x{ 0 }; x < width; ++x)
         {
-            PreCalcTile(*tiles.at(GetMapIndex(x, y)), x, y, m_island->worldX, m_island->worldY);
+            PreCalcTile(*tiles.at(GetMapIndex(x, y, world::Rotation::DEG0)), x, y, m_island->worldX, m_island->worldY);
         }
     }
-
-    SortTiles();
-
-    CreateModelMatricesContainer();
-    CreateGfxNumbersContainer();
-    CreateBuildingIdsContainer();
 }
 
-void mdcii::layer::TerrainLayer::PrepareGpuDataForRendering()
+void mdcii::layer::TerrainLayer::SortTiles()
 {
-    GameLayer::PrepareGpuDataForRendering();
+    Log::MDCII_LOG_DEBUG("[TerrainLayer::SortTiles()] Sorting Tile objects by index.");
 
-    StoreGfxNumbersInGpu();
-    StoreBuildingIdsInGpu();
+    MDCII_ASSERT(!tiles.empty(), "[TerrainLayer::SortTiles()] Missing Tile objects.")
+
+    magic_enum::enum_for_each<world::Rotation>([this](const world::Rotation t_rotation) {
+        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+
+        // sort tiles by index
+        std::sort(tiles.begin(), tiles.end(), [&](const std::shared_ptr<Tile>& t_a, const std::shared_ptr<Tile>& t_b) {
+            return t_a->indices[rotationInt] < t_b->indices[rotationInt];
+        });
+
+        // copy sorted tiles
+        sortedTiles.at(rotationInt) = tiles;
+    });
+
+    // revert tiles sorting = sortedTiles DEG0
+    tiles = sortedTiles.at(magic_enum::enum_integer(world::Rotation::DEG0));
+}
+
+void mdcii::layer::TerrainLayer::CreateModelMatricesContainer()
+{
+    Log::MDCII_LOG_DEBUG("[TerrainLayer::CreateModelMatricesContainer()] Create model matrices container.");
+
+    MDCII_ASSERT(modelMatrices.at(0).at(0).empty(), "[TerrainLayer::CreateModelMatricesContainer()] Invalid model matrices container size.")
+    MDCII_ASSERT(!sortedTiles.empty(), "[TerrainLayer::CreateModelMatricesContainer()] Missing Tile objects.")
+
+    magic_enum::enum_for_each<world::Zoom>([this](const world::Zoom t_zoom) {
+
+        Model_Matrices_For_Each_Rotation matricesForRotations;
+        magic_enum::enum_for_each<world::Rotation>([this, &t_zoom, &matricesForRotations](const world::Rotation t_rotation) {
+            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+
+            std::vector<glm::mat4> matrices;
+            int32_t instance{ 0 };
+            for (const auto& tile : sortedTiles.at(rotationInt))
+            {
+                matrices.emplace_back(CreateModelMatrix(*tile, t_zoom, t_rotation));
+                tile->instanceIds.at(rotationInt) = instance;
+
+                instance++;
+            }
+
+            matricesForRotations.at(rotationInt) = matrices;
+        });
+
+        modelMatrices.at(magic_enum::enum_integer(t_zoom)) = matricesForRotations;
+    });
+
+    MDCII_ASSERT(instanceIds.empty(), "[TerrainLayer::CreateModelMatricesContainer()] Invalid Instance Ids map size.")
+
+    // create a hashmap to fast find the instance ID for each position
+    magic_enum::enum_for_each<world::Rotation>([this](const world::Rotation t_rotation) {
+        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+        for (const auto& tile : sortedTiles.at(rotationInt))
+        {
+            instanceIds.emplace(glm::ivec3(tile->worldXDeg0, tile->worldYDeg0, rotationInt), tile->instanceIds.at(rotationInt));
+        }
+    });
+}
+
+void mdcii::layer::TerrainLayer::CreateGfxNumbersContainer()
+{
+    Log::MDCII_LOG_DEBUG("[TerrainLayer::CreateGfxNumbersContainer()] Create gfx numbers container.");
+
+    MDCII_ASSERT(gfxNumbers.empty(), "[TerrainLayer::CreateGfxNumbersContainer()] Invalid gfx numbers container size.")
+    MDCII_ASSERT(instancesToRender > 0, "[TerrainLayer::CreateGfxNumbersContainer()] Invalid number of instances.")
+    MDCII_ASSERT(!sortedTiles.empty(), "[TerrainLayer::CreateGfxNumbersContainer()] Missing Tile objects.")
+
+    std::vector<glm::ivec4> gfxs(instancesToRender, glm::ivec4(-1));
+
+    magic_enum::enum_for_each<world::Rotation>([this, &gfxs](const world::Rotation t_rotation) {
+        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+
+        auto instance{ 0 };
+        for (const auto& tile : sortedTiles.at(rotationInt))
+        {
+            if (tile->HasBuilding())
+            {
+                gfxs.at(instance)[rotationInt] = CalcGfx(*tile, t_rotation);
+            }
+
+            instance++;
+        }
+    });
+
+    gfxNumbers = gfxs;
+}
+
+void mdcii::layer::TerrainLayer::CreateBuildingIdsContainer()
+{
+    Log::MDCII_LOG_DEBUG("[TerrainLayer::CreateBuildingIdsContainer()] Create Building Ids container.");
+
+    MDCII_ASSERT(buildingIds.empty(), "[TerrainLayer::CreateBuildingIdsContainer()] Invalid Building Ids container size.")
+    MDCII_ASSERT(instancesToRender > 0, "[TerrainLayer::CreateBuildingIdsContainer()] Invalid number of instances.")
+    MDCII_ASSERT(!sortedTiles.empty(), "[TerrainLayer::CreateBuildingIdsContainer()] Missing Tile objects.")
+
+    std::vector<glm::ivec4> ids(instancesToRender, glm::ivec4(-1));
+
+    magic_enum::enum_for_each<world::Rotation>([this, &ids](const world::Rotation t_rotation) {
+        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+
+        auto instance{ 0 };
+        for (const auto& tile : sortedTiles.at(rotationInt))
+        {
+            if (tile->HasBuilding())
+            {
+                ids.at(instance)[rotationInt] = tile->buildingId;
+            }
+
+            instance++;
+        }
+    });
+
+    buildingIds = ids;
+}
+
+void mdcii::layer::TerrainLayer::StoreGfxNumbersInGpu()
+{
+    Log::MDCII_LOG_DEBUG("[TerrainLayer::StoreGfxNumbersInGpu()] Store gfx numbers container in Gpu memory.");
+
+    MDCII_ASSERT(!gfxNumbers.empty(), "[TerrainLayer::StoreGfxNumbersInGpu()] Invalid gfx numbers container size.")
+    MDCII_ASSERT(!gfxNumbersSsbo, "[TerrainLayer::StoreGfxNumbersInGpu()] Invalid gfx numbers Ssbo pointer.")
+
+    gfxNumbersSsbo = std::make_unique<ogl::buffer::Ssbo>("GfxNumbers_Ssbo");
+    gfxNumbersSsbo->Bind();
+    ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(gfxNumbers.size()) * sizeof(glm::ivec4), gfxNumbers.data());
+    ogl::buffer::Ssbo::Unbind();
+}
+
+void mdcii::layer::TerrainLayer::StoreBuildingIdsInGpu()
+{
+    Log::MDCII_LOG_DEBUG("[TerrainLayer::StoreBuildingIdsInGpu()] Store Building Ids container in Gpu memory.");
+
+    MDCII_ASSERT(!buildingIds.empty(), "[TerrainLayer::StoreBuildingIdsInGpu()] Invalid Building Ids container size.")
+    MDCII_ASSERT(!buildingIdsSsbo, "[TerrainLayer::StoreBuildingIdsInGpu()] Invalid Building Ids Ssbo pointer.")
+
+    buildingIdsSsbo = std::make_unique<ogl::buffer::Ssbo>("BuildingIds_Ssbo");
+    buildingIdsSsbo->Bind();
+    ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(buildingIds.size()) * sizeof(glm::ivec4), buildingIds.data());
+    ogl::buffer::Ssbo::Unbind();
 }
 
 //-------------------------------------------------
-// Cpu data
+// Helper
 //-------------------------------------------------
 
 void mdcii::layer::TerrainLayer::AddTileFromJson(const nlohmann::json& t_json)
@@ -226,28 +359,6 @@ void mdcii::layer::TerrainLayer::PreCalcTile(layer::Tile& t_tile, const int32_t 
             t_tile.gfxs.push_back(gfx0 + (3 * building.rotate));
         }
     }
-}
-
-void mdcii::layer::TerrainLayer::SortTiles()
-{
-    Log::MDCII_LOG_DEBUG("[TerrainLayer::SortTiles()] Sorting tiles by index.");
-
-    MDCII_ASSERT(!tiles.empty(), "[TerrainLayer::SortTiles()] Missing Tile objects.")
-
-    magic_enum::enum_for_each<world::Rotation>([this](const world::Rotation t_rotation) {
-        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-
-        // sort tiles by index
-        std::sort(tiles.begin(), tiles.end(), [&](const std::shared_ptr<Tile>& t_a, const std::shared_ptr<Tile>& t_b) {
-            return t_a->indices[rotationInt] < t_b->indices[rotationInt];
-        });
-
-        // copy sorted tiles
-        sortedTiles.at(rotationInt) = tiles;
-    });
-
-    // revert tiles sorting = sortedTiles DEG0
-    tiles = sortedTiles.at(magic_enum::enum_integer(world::Rotation::DEG0));
 }
 
 int32_t mdcii::layer::TerrainLayer::CalcGfx(const Tile& t_tile, const world::Rotation t_rotation) const
@@ -332,132 +443,4 @@ glm::mat4 mdcii::layer::TerrainLayer::CreateModelMatrix(const Tile& t_tile, cons
 
     // return model matrix
     return renderer::RenderUtils::GetModelMatrix(screenPosition, { w, h });
-}
-
-void mdcii::layer::TerrainLayer::CreateModelMatricesContainer()
-{
-    Log::MDCII_LOG_DEBUG("[TerrainLayer::CreateModelMatricesContainer()] Create model matrices container.");
-
-    MDCII_ASSERT(modelMatrices.at(0).at(0).empty(), "[TerrainLayer::CreateModelMatricesContainer()] Invalid model matrices container.")
-    MDCII_ASSERT(instancesToRender > 0, "[TerrainLayer::CreateModelMatricesContainer()] Invalid number of instances.")
-    MDCII_ASSERT(!sortedTiles.empty(), "[TerrainLayer::CreateModelMatricesContainer()] Missing Tile objects.")
-
-    magic_enum::enum_for_each<world::Zoom>([this](const world::Zoom t_zoom) {
-
-        Model_Matrices_For_Each_Rotation matricesForRotations;
-        magic_enum::enum_for_each<world::Rotation>([this, &t_zoom, &matricesForRotations](const world::Rotation t_rotation) {
-            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-
-            std::vector<glm::mat4> matrices;
-            int32_t instance{ 0 };
-            for (const auto& tile : sortedTiles.at(rotationInt))
-            {
-                matrices.emplace_back(CreateModelMatrix(*tile, t_zoom, t_rotation));
-                tile->instanceIds.at(rotationInt) = instance;
-
-                instance++;
-            }
-
-            matricesForRotations.at(rotationInt) = matrices;
-        });
-
-        modelMatrices.at(magic_enum::enum_integer(t_zoom)) = matricesForRotations;
-    });
-
-    MDCII_ASSERT(instanceIds.empty(), "[TerrainLayer::CreateModelMatricesContainer()] Invalid Instance Ids map.")
-
-    // create a hashmap to fast find the instance ID for each position
-    magic_enum::enum_for_each<world::Rotation>([this](const world::Rotation t_rotation) {
-        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-        for (const auto& tile : sortedTiles.at(rotationInt))
-        {
-            instanceIds.emplace(glm::ivec3(tile->worldXDeg0, tile->worldYDeg0, rotationInt), tile->instanceIds.at(rotationInt));
-        }
-    });
-}
-
-void mdcii::layer::TerrainLayer::CreateGfxNumbersContainer()
-{
-    Log::MDCII_LOG_DEBUG("[TerrainLayer::CreateGfxNumbersContainer()] Create gfx numbers container.");
-
-    MDCII_ASSERT(gfxNumbers.empty(), "[TerrainLayer::CreateGfxNumbersContainer()] Invalid gfx numbers.")
-    MDCII_ASSERT(instancesToRender > 0, "[TerrainLayer::CreateGfxNumbersContainer()] Invalid number of instances.")
-    MDCII_ASSERT(!sortedTiles.empty(), "[TerrainLayer::CreateGfxNumbersContainer()] Missing Tile objects.")
-
-    std::vector<glm::ivec4> gfxs(instancesToRender, glm::ivec4(-1));
-
-    magic_enum::enum_for_each<world::Rotation>([this, &gfxs](const world::Rotation t_rotation) {
-        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-
-        auto instance{ 0 };
-        for (const auto& tile : sortedTiles.at(rotationInt))
-        {
-            if (tile->HasBuilding())
-            {
-                gfxs.at(instance)[rotationInt] = CalcGfx(*tile, t_rotation);
-            }
-
-            instance++;
-        }
-    });
-
-    gfxNumbers = gfxs;
-}
-
-void mdcii::layer::TerrainLayer::CreateBuildingIdsContainer()
-{
-    Log::MDCII_LOG_DEBUG("[TerrainLayer::CreateBuildingIdsContainer()] Create Building Ids container.");
-
-    MDCII_ASSERT(buildingIds.empty(), "[TerrainLayer::CreateBuildingIdsContainer()] Invalid Building Ids.")
-    MDCII_ASSERT(instancesToRender > 0, "[TerrainLayer::CreateBuildingIdsContainer()] Invalid number of instances.")
-    MDCII_ASSERT(!sortedTiles.empty(), "[TerrainLayer::CreateBuildingIdsContainer()] Missing Tile objects.")
-
-    std::vector<glm::ivec4> ids(instancesToRender, glm::ivec4(-1));
-
-    magic_enum::enum_for_each<world::Rotation>([this, &ids](const world::Rotation t_rotation) {
-        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
-
-        auto instance{ 0 };
-        for (const auto& tile : sortedTiles.at(rotationInt))
-        {
-            if (tile->HasBuilding())
-            {
-                ids.at(instance)[rotationInt] = tile->buildingId;
-            }
-
-            instance++;
-        }
-    });
-
-    buildingIds = ids;
-}
-
-//-------------------------------------------------
-// Gpu data
-//-------------------------------------------------
-
-void mdcii::layer::TerrainLayer::StoreGfxNumbersInGpu()
-{
-    Log::MDCII_LOG_DEBUG("[TerrainLayer::StoreGfxNumbersInGpu()] Store gfx numbers container in Gpu memory.");
-
-    MDCII_ASSERT(!gfxNumbers.empty(), "[TerrainLayer::StoreGfxNumbersInGpu()] Invalid gfx numbers container.")
-    MDCII_ASSERT(!gfxNumbersSsbo, "[TerrainLayer::StoreGfxNumbersInGpu()] Invalid gfx numbers Ssbo pointer.")
-
-    gfxNumbersSsbo = std::make_unique<ogl::buffer::Ssbo>("GfxNumbers_Ssbo");
-    gfxNumbersSsbo->Bind();
-    ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(gfxNumbers.size()) * sizeof(glm::ivec4), gfxNumbers.data());
-    ogl::buffer::Ssbo::Unbind();
-}
-
-void mdcii::layer::TerrainLayer::StoreBuildingIdsInGpu()
-{
-    Log::MDCII_LOG_DEBUG("[TerrainLayer::StoreBuildingIdsInGpu()] Store Building Ids container in Gpu memory.");
-
-    MDCII_ASSERT(!buildingIds.empty(), "[TerrainLayer::StoreBuildingIdsInGpu()] Invalid Building Ids container.")
-    MDCII_ASSERT(!buildingIdsSsbo, "[TerrainLayer::StoreBuildingIdsInGpu()] Invalid Building Ids Ssbo pointer.")
-
-    buildingIdsSsbo = std::make_unique<ogl::buffer::Ssbo>("BuildingIds_Ssbo");
-    buildingIdsSsbo->Bind();
-    ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(buildingIds.size()) * sizeof(glm::ivec4), buildingIds.data());
-    ogl::buffer::Ssbo::Unbind();
 }
