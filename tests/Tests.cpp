@@ -19,7 +19,7 @@
 #include <gtest/gtest.h>
 #include "world/Zoom.h"
 #include "world/Rotation.h"
-#include "MdciiUtils.h"
+#include "physics/Aabb.h"
 
 TEST(TestSuite, TestZoomOperators)
 {
@@ -52,6 +52,28 @@ TEST(TestSuite, TestRotateOperators)
     ASSERT_EQ(mdcii::world::Rotation::DEG180, --rotateMinus);
     ASSERT_EQ(mdcii::world::Rotation::DEG90, --rotateMinus);
     ASSERT_EQ(mdcii::world::Rotation::DEG0, --rotateMinus);
+}
+
+TEST(TestSuite, TestAabb0)
+{
+    auto aabb{ mdcii::physics::Aabb(glm::ivec2(0, 0), glm::ivec2(50, 35)) };
+
+    ASSERT_FALSE(mdcii::physics::Aabb::PointVsAabb(glm::ivec2(-1, -1), aabb));
+    ASSERT_FALSE(mdcii::physics::Aabb::PointVsAabb(glm::ivec2(50, 35), aabb));
+
+    ASSERT_TRUE(mdcii::physics::Aabb::PointVsAabb(glm::ivec2(0, 0), aabb));
+    ASSERT_TRUE(mdcii::physics::Aabb::PointVsAabb(glm::ivec2(1, 1), aabb));
+    ASSERT_TRUE(mdcii::physics::Aabb::PointVsAabb(glm::ivec2(49, 34), aabb));
+}
+
+TEST(TestSuite, TestAabb1)
+{
+    auto aabb{ mdcii::physics::Aabb(glm::ivec2(8, 12), glm::ivec2(8, 12)) };
+
+    ASSERT_FALSE(mdcii::physics::Aabb::PointVsAabb(glm::ivec2(7, 12), aabb));
+    ASSERT_FALSE(mdcii::physics::Aabb::PointVsAabb(glm::ivec2(8, 11), aabb));
+
+    ASSERT_TRUE(mdcii::physics::Aabb::PointVsAabb(glm::ivec2(15, 23), aabb));
 }
 
 int main()

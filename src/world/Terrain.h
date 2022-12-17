@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <glm/vec2.hpp>
 #include "data/json.hpp"
 
 //-------------------------------------------------
@@ -96,6 +97,20 @@ namespace mdcii::world
          * @param t_json The Json value.
          */
         void CreateIslandsFromJson(const nlohmann::json& t_json);
+
+        //-------------------------------------------------
+        // Getter
+        //-------------------------------------------------
+
+        /**
+         * Checks whether a given position on any Island.
+         * The Aabb of the Island objects is used for this test.
+         *
+         * @param t_position The position to be checked.
+         *
+         * @return True or false.
+         */
+        [[nodiscard]] bool IsPositionOnTerrain(const glm::ivec2& t_position) const;
 
     protected:
 

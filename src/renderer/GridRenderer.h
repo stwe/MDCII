@@ -18,8 +18,7 @@
 
 #pragma once
 
-#include "layer/WorldGridLayer.h"
-#include "layer/GridLayer.h"
+#include "layer/GameLayer.h"
 
 //-------------------------------------------------
 // Forward declarations

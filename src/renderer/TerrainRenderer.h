@@ -106,9 +106,28 @@ namespace mdcii::renderer
         void Update();
 
         /**
-         * Renders the TerrainLayer with the specified zoom and rotation.
+         * Renders a Layer content with the specified zoom and rotation.
          *
-         * @param t_terrainLayer The TerrainLayer object to render.
+         * @param t_modelMatricesSsbos The model matrices Ssbos.
+         * @param t_gfxNumbersSsbo The gfx numbers Ssbo.
+         * @param t_buildingIdsSsbo The Building Ids Ssbo.
+         * @param t_instancesToRender The number of instances to render.
+         * @param t_zoom The zoom to render for.
+         * @param t_rotation The rotation to render for.
+         */
+        void Render(
+            const layer::GameLayer::Model_Matrices_Ssbos_For_Each_zoom& t_modelMatricesSsbos,
+            const ogl::buffer::Ssbo& t_gfxNumbersSsbo,
+            const ogl::buffer::Ssbo& t_buildingIdsSsbo,
+            int32_t t_instancesToRender,
+            world::Zoom t_zoom,
+            world::Rotation t_rotation
+        ) const;
+
+        /**
+         * Renders a TerrainLayer with the specified zoom and rotation.
+         *
+         * @param t_terrainLayer The TerrainLayer object.
          * @param t_zoom The zoom to render for.
          * @param t_rotation The rotation to render for.
          */

@@ -34,6 +34,11 @@ namespace mdcii::layer
     enum class LayerType;
 
     /**
+     * Forward declaration class WorldLayer.
+     */
+    class WorldLayer;
+
+    /**
      * Forward declaration class WorldGridLayer.
      */
     class WorldGridLayer;
@@ -120,7 +125,7 @@ namespace mdcii::world
     //-------------------------------------------------
 
     /**
-     * Represents the world including all islands and the ocean.
+     * Represents the world including all islands and the ocean/deep water area.
      */
     class World
     {
@@ -157,7 +162,7 @@ namespace mdcii::world
         /**
          * The Terrain object contains all islands with their coasts.
          */
-        std::unique_ptr<Terrain> terrain;
+        std::shared_ptr<Terrain> terrain;
 
         /**
          * An OpenGL texture array for each zoom level.
@@ -170,7 +175,12 @@ namespace mdcii::world
         std::unique_ptr<renderer::TerrainRenderer> terrainRenderer;
 
         /**
-         * The world grid.
+         * A Layer object containing only the deep water area of the world.
+         */
+        std::unique_ptr<layer::WorldLayer> worldLayer;
+
+        /**
+         * A Layer object to show a world grid.
          */
         std::unique_ptr<layer::WorldGridLayer> worldGridLayer;
 
@@ -277,6 +287,11 @@ namespace mdcii::world
          * To change the current Layer.
          */
         layer::LayerType m_layerType;
+
+        /**
+         * Toggles world deep water rendering on and off.
+         */
+        bool m_renderWorldLayer{ true };
 
         /**
          * Toggles world grid rendering on and off.

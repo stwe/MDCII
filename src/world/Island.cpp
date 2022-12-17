@@ -17,10 +17,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "Island.h"
-#include "layer/TerrainLayer.h"
-#include "layer/GridLayer.h"
 #include "state/State.h"
 #include "MdciiAssert.h"
+#include "layer/TerrainLayer.h"
+#include "layer/GridLayer.h"
+#include "physics/Aabb.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -72,6 +73,8 @@ void mdcii::world::Island::InitValuesFromJson(const nlohmann::json& t_json)
     MDCII_ASSERT(worldX >= 0, "[Island::InitValuesFromJson()] Invalid world x.")
     MDCII_ASSERT(worldY >= 0, "[Island::InitValuesFromJson()] Invalid world y.")
 
+    aabb = std::make_unique<physics::Aabb>(glm::ivec2(worldX, worldY), glm::ivec2(width, height));
+
     for (const auto& [k, v] : t_json.items())
     {
         if (k == "layers")
@@ -81,6 +84,17 @@ void mdcii::world::Island::InitValuesFromJson(const nlohmann::json& t_json)
     }
 
     Log::MDCII_LOG_DEBUG("[Island::InitValuesFromJson()] The island have been initialized successfully.");
+}
+
+//-------------------------------------------------
+// Getter
+//-------------------------------------------------
+
+bool mdcii::world::Island::IsPositionOnIsland(const glm::ivec2& t_position) const
+{
+    MDCII_ASSERT(aabb, "[Island::IsPositionOnIsland()] Null pointer.")
+
+    return physics::Aabb::PointVsAabb(t_position, *aabb);
 }
 
 //-------------------------------------------------

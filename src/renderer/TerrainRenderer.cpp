@@ -89,7 +89,14 @@ void mdcii::renderer::TerrainRenderer::Update()
     }
 }
 
-void mdcii::renderer::TerrainRenderer::Render(const layer::TerrainLayer& t_terrainLayer, const world::Zoom t_zoom, const world::Rotation t_rotation) const
+void mdcii::renderer::TerrainRenderer::Render(
+    const layer::GameLayer::Model_Matrices_Ssbos_For_Each_zoom& t_modelMatricesSsbos,
+    const ogl::buffer::Ssbo& t_gfxNumbersSsbo,
+    const ogl::buffer::Ssbo& t_buildingIdsSsbo,
+    const int32_t t_instancesToRender,
+    mdcii::world::Zoom t_zoom,
+    mdcii::world::Rotation t_rotation
+    ) const
 {
     const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
     const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
@@ -114,19 +121,19 @@ void mdcii::renderer::TerrainRenderer::Render(const layer::TerrainLayer& t_terra
     glBindBufferBase(
         GL_SHADER_STORAGE_BUFFER,
         MODEL_MATRICES_BINDING,
-        t_terrainLayer.modelMatricesSsbos.at(zoomInt).at(rotationInt)->id
+        t_modelMatricesSsbos.at(zoomInt).at(rotationInt)->id
     );
 
     glBindBufferBase(
         GL_SHADER_STORAGE_BUFFER,
         GFX_NUMBERS_BINDING,
-        t_terrainLayer.gfxNumbersSsbo->id
+        t_gfxNumbersSsbo.id
     );
 
     glBindBufferBase(
         GL_SHADER_STORAGE_BUFFER,
         BUILDING_IDS_BINDING,
-        t_terrainLayer.buildingIdsSsbo->id
+        t_buildingIdsSsbo.id
     );
 
     glBindBufferBase(
@@ -142,9 +149,21 @@ void mdcii::renderer::TerrainRenderer::Render(const layer::TerrainLayer& t_terra
     );
 
     ogl::resource::TextureUtils::BindForReading(m_tileAtlas->textureIds.at(zoomInt), GL_TEXTURE0, GL_TEXTURE_2D_ARRAY);
-    m_vaos.at(zoomInt)->DrawInstanced(t_terrainLayer.instancesToRender);
+    m_vaos.at(zoomInt)->DrawInstanced(t_instancesToRender);
 
     ogl::buffer::Vao::Unbind();
+}
+
+void mdcii::renderer::TerrainRenderer::Render(const layer::TerrainLayer& t_terrainLayer, const world::Zoom t_zoom, const world::Rotation t_rotation) const
+{
+    Render(
+        t_terrainLayer.modelMatricesSsbos,
+        *t_terrainLayer.gfxNumbersSsbo,
+        *t_terrainLayer.buildingIdsSsbo,
+        t_terrainLayer.instancesToRender,
+        t_zoom,
+        t_rotation
+    );
 }
 
 //-------------------------------------------------

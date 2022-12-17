@@ -28,6 +28,9 @@
 #include "renderer/TerrainRenderer.h"
 #include "renderer/GridRenderer.h"
 #include "world/Island.h"
+#include "layer/GridLayer.h"
+#include "layer/WorldLayer.h"
+#include "layer/WorldGridLayer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -102,36 +105,51 @@ void mdcii::world::World::Render() const
 {
     for(const auto& island : terrain->islands)
     {
-        if (m_layerType == layer::LayerType::COAST)
+        if (m_layerType != layer::LayerType::NOTHING)
         {
-            terrainRenderer->Render(*island->coastLayer, zoom, rotation);
-        }
+            if (m_layerType == layer::LayerType::COAST)
+            {
+                terrainRenderer->Render(*island->coastLayer, zoom, rotation);
+            }
 
-        if (m_layerType == layer::LayerType::TERRAIN)
-        {
-            terrainRenderer->Render(*island->terrainLayer, zoom, rotation);
-        }
+            if (m_layerType == layer::LayerType::TERRAIN)
+            {
+                terrainRenderer->Render(*island->terrainLayer, zoom, rotation);
+            }
 
-        if (m_layerType == layer::LayerType::BUILDINGS)
-        {
-            terrainRenderer->Render(*island->buildingsLayer, zoom, rotation);
-        }
+            if (m_layerType == layer::LayerType::BUILDINGS)
+            {
+                terrainRenderer->Render(*island->buildingsLayer, zoom, rotation);
+            }
 
-        if (m_layerType == layer::LayerType::MIXED)
-        {
-            terrainRenderer->Render(*island->mixedLayer, zoom, rotation);
-        }
+            if (m_layerType == layer::LayerType::MIXED)
+            {
+                terrainRenderer->Render(*island->mixedLayer, zoom, rotation);
+            }
 
-        if (m_layerType == layer::LayerType::ALL)
-        {
-            terrainRenderer->Render(*island->coastLayer, zoom, rotation);
-            terrainRenderer->Render(*island->mixedLayer, zoom, rotation);
+            if (m_layerType == layer::LayerType::ALL)
+            {
+                terrainRenderer->Render(*island->coastLayer, zoom, rotation);
+                terrainRenderer->Render(*island->mixedLayer, zoom, rotation);
+            }
         }
 
         if (m_renderIslandGridLayers)
         {
             gridRenderer->Render(island->gridLayer->modelMatricesSsbos, island->gridLayer->instancesToRender, zoom, rotation);
         }
+    }
+
+    if (m_renderWorldLayer)
+    {
+        terrainRenderer->Render(
+            worldLayer->modelMatricesSsbos,
+            *worldLayer->gfxNumbersSsbo,
+            *worldLayer->buildingIdsSsbo,
+            worldLayer->instancesToRender,
+            zoom,
+            rotation
+        );
     }
 
     if (m_renderWorldGridLayer)
@@ -165,7 +183,8 @@ void mdcii::world::World::RenderImGui()
     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 230, 230, 255));
 
     ImGui::Separator();
-
+    ImGui::Text("Render Islands");
+    ImGui::Separator();
     static int e{ magic_enum::enum_integer(m_layerType) };
     ImGui::RadioButton("Coast", &e, 0);
     ImGui::SameLine();
@@ -175,6 +194,10 @@ void mdcii::world::World::RenderImGui()
     ImGui::RadioButton("Mixed", &e, 3);
     ImGui::SameLine();
     ImGui::RadioButton("All", &e, 4);
+    ImGui::SameLine();
+    ImGui::RadioButton("Nothing", &e, 5);
+
+    ImGui::Checkbox("Island Grids", &m_renderIslandGridLayers);
 
     if (auto layer{ magic_enum::enum_cast<layer::LayerType>(e) }; layer.has_value())
     {
@@ -182,17 +205,22 @@ void mdcii::world::World::RenderImGui()
         m_layerType = l;
     }
 
-    ImGui::Checkbox("World-Grid", &m_renderWorldGridLayer);
-    ImGui::Checkbox("Island-Grids", &m_renderIslandGridLayers);
+    ImGui::Separator();
+    ImGui::Text("Render World");
+    ImGui::Separator();
+    ImGui::Checkbox("World Deep Water", &m_renderWorldLayer);
+    ImGui::Checkbox("World Grid", &m_renderWorldGridLayer);
     ImGui::Checkbox("Animations", &m_runAnimations);
 
     ImGui::Separator();
-
+    ImGui::Text("Rotate");
+    ImGui::Separator();
     m_worldGui->RotateGui();
-    ImGui::Separator();
 
-    m_worldGui->ZoomGui();
     ImGui::Separator();
+    ImGui::Text("Zoom");
+    ImGui::Separator();
+    m_worldGui->ZoomGui();
 
     ImGui::PopStyleColor();
 
@@ -241,7 +269,7 @@ void mdcii::world::World::Init()
 {
     Log::MDCII_LOG_DEBUG("[World::Init()] Start initializing the world...");
 
-    terrain = std::make_unique<Terrain>(context);
+    terrain = std::make_shared<Terrain>(context);
     tileAtlas = std::make_unique<TileAtlas>();
     terrainRenderer = std::make_unique<renderer::TerrainRenderer>(context, tileAtlas);
 
@@ -253,6 +281,10 @@ void mdcii::world::World::Init()
             terrain->CreateIslandsFromJson(v);
         }
     }
+
+    worldLayer = std::make_unique<layer::WorldLayer>(context, terrain);
+    worldLayer->PrepareCpuDataForRendering();
+    worldLayer->PrepareGpuDataForRendering();
 
     worldGridLayer = std::make_unique<layer::WorldGridLayer>(context);
     worldGridLayer->PrepareCpuDataForRendering();

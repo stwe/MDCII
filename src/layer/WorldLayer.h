@@ -21,15 +21,27 @@
 #include "GameLayer.h"
 
 //-------------------------------------------------
-// WorldGridLayer
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::world
+{
+    /**
+     * Forward declaration class Terrain.
+     */
+    class Terrain;
+}
+
+//-------------------------------------------------
+// WorldLayer
 //-------------------------------------------------
 
 namespace mdcii::layer
 {
     /**
-     * The WorldGridLayer contains all the data to render a grid over the world.
+     * The WorldLayer contains all the data to render the deep water area of the world.
      */
-    class WorldGridLayer : public GameLayer
+    class WorldLayer : public GameLayer
     {
     public:
         //-------------------------------------------------
@@ -47,25 +59,63 @@ namespace mdcii::layer
          */
         std::array<std::vector<std::shared_ptr<Tile>>, world::NR_OF_ROTATIONS> sortedTiles;
 
+        /**
+         * This allows the Instance Id to be determined for each (rotated) position in the world.
+         * x = worldX
+         * y = worldY
+         * z = rotation as Int
+         * result/value = The Instance Id
+         */
+        std::unordered_map<glm::ivec3, int32_t> instanceIds;
+
+        /**
+         * To store the gfx number for each instance.
+         * x = gfx for rot0
+         * y = gfx for rot90
+         * z = gfx for rot180
+         * w = gfx for rot270
+         */
+        std::vector<glm::ivec4> gfxNumbers;
+
+        /**
+         * To store the Building Id for each instance.
+         * x = building for rot0
+         * y = building for rot90
+         * z = building for rot180
+         * w = building for rot270
+         */
+        std::vector<glm::ivec4> buildingIds;
+
+        /**
+         * A Ssbo containing the gfx number for each instance.
+         */
+        std::unique_ptr<ogl::buffer::Ssbo> gfxNumbersSsbo;
+
+        /**
+         * A Ssbo containing the Building Id number for each instance.
+         */
+        std::unique_ptr<ogl::buffer::Ssbo> buildingIdsSsbo;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        WorldGridLayer() = delete;
+        WorldLayer() = delete;
 
         /**
-         * Constructs a new WorldGridLayer object.
+         * Constructs a new WorldLayer object.
          *
          * @param t_context Access to shared objects.
+         * @param t_terrain The Terrain object for access to all the Island objects.
          */
-        explicit WorldGridLayer(std::shared_ptr<state::Context> t_context);
+        WorldLayer(std::shared_ptr<state::Context> t_context, std::shared_ptr<world::Terrain> t_terrain);
 
-        WorldGridLayer(const WorldGridLayer& t_other) = delete;
-        WorldGridLayer(WorldGridLayer&& t_other) noexcept = delete;
-        WorldGridLayer& operator=(const WorldGridLayer& t_other) = delete;
-        WorldGridLayer& operator=(WorldGridLayer&& t_other) noexcept = delete;
+        WorldLayer(const WorldLayer& t_other) = delete;
+        WorldLayer(WorldLayer&& t_other) noexcept = delete;
+        WorldLayer& operator=(const WorldLayer& t_other) = delete;
+        WorldLayer& operator=(WorldLayer&& t_other) noexcept = delete;
 
-        ~WorldGridLayer() noexcept override;
+        ~WorldLayer() noexcept override;
 
     protected:
 
@@ -75,9 +125,23 @@ namespace mdcii::layer
         //-------------------------------------------------
 
         /**
+         * Each model matrix is based on this Building Id.
+         */
+        static constexpr auto WATER_BUILDING_ID{ 1201 };
+
+        /**
          * Each model matrix is based on this gfx number.
          */
-        static constexpr auto GRASS_GFX{ 4 };
+        static constexpr auto WATER_GFX{ 758 };
+
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * The Terrain object.
+         */
+        std::shared_ptr<world::Terrain> m_terrain;
 
         //-------------------------------------------------
         // Override
@@ -85,21 +149,17 @@ namespace mdcii::layer
 
         void CreateTiles() override;
         void SortTiles() override;
+
         void CreateModelMatricesContainer() override;
+        void CreateGfxNumbersContainer() override;
+        void CreateBuildingIdsContainer() override;
+
+        void StoreGfxNumbersInGpu() override;
+        void StoreBuildingIdsInGpu() override;
 
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
-
-        /**
-         * Adds some pre-calculations to every Tile object of the Layer,
-         * which are necessary to render the Tile on the screen.
-         *
-         * @param t_tile The Tile object.
-         * @param t_x The x position for Deg0 in the world.
-         * @param t_y The y position for Deg0 in the world.
-         */
-        void PreCalcTile(Tile& t_tile, int32_t t_x, int32_t t_y) const;
 
         /**
          * Creates a model matrix for a given Tile object.

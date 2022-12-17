@@ -48,15 +48,16 @@ namespace mdcii::ogl::buffer
 namespace mdcii::layer
 {
     /**
-     * Layer types for the menu.
+     * Layer types using for rendering islands.
      */
     enum class LayerType
     {
-        COAST,      // renders the Coast Layer
-        TERRAIN,    // renders the Terrain Layer
-        BUILDINGS,  // renders the Buildings Layer
-        MIXED,      // renders the Mixed Layer (Terrain && Buildings)
-        ALL         // renders the Coast Layer and the Mixed Layer
+        COAST,      // renders the coast of an island
+        TERRAIN,    // renders the terrain of an island
+        BUILDINGS,  // renders the buildings of an island
+        MIXED,      // renders the terrain && buildings of an island
+        ALL,        // renders the coast and the mixed stuff of an island
+        NOTHING     // doesn't render anything from an island
     };
 
     /**

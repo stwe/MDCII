@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <glm/vec2.hpp>
 #include "data/json.hpp"
 
 //-------------------------------------------------
@@ -30,6 +31,14 @@ namespace mdcii::state
      * Forward declaration struct Context.
      */
     struct Context;
+}
+
+namespace mdcii::physics
+{
+    /**
+     * Forward declaration struct Aabb.
+     */
+    struct Aabb;
 }
 
 namespace mdcii::layer
@@ -80,6 +89,11 @@ namespace mdcii::world
          * The world y position.
          */
         int32_t worldY{ -1 };
+
+        /**
+         * An Aabb (axis-aligned bounding box) object for collision detection.
+         */
+        std::unique_ptr<physics::Aabb> aabb;
 
         /**
          * A Layer object containing only the coast of the island.
@@ -136,6 +150,20 @@ namespace mdcii::world
          * @param t_json The Json value.
          */
         void InitValuesFromJson(const nlohmann::json& t_json);
+
+        //-------------------------------------------------
+        // Getter
+        //-------------------------------------------------
+
+        /**
+         * Checks whether a given position in this Island.
+         * The Aabb of the Island is used for this test.
+         *
+         * @param t_position The position to be checked.
+         *
+         * @return True or false.
+         */
+        [[nodiscard]] bool IsPositionOnIsland(const glm::ivec2& t_position) const;
 
     protected:
 

@@ -119,7 +119,7 @@ void mdcii::layer::WorldGridLayer::CreateModelMatricesContainer()
 // Helper
 //-------------------------------------------------
 
-void mdcii::layer::WorldGridLayer::PreCalcTile(layer::Tile& t_tile, int32_t t_x, int32_t t_y) const
+void mdcii::layer::WorldGridLayer::PreCalcTile(layer::Tile& t_tile, const int32_t t_x, const int32_t t_y) const
 {
     // set world position for Deg0
     t_tile.worldXDeg0 = t_x;
@@ -144,7 +144,7 @@ void mdcii::layer::WorldGridLayer::PreCalcTile(layer::Tile& t_tile, int32_t t_x,
     t_tile.indices[3] = GetMapIndex(t_x, t_y, world::Rotation::DEG270);
 }
 
-glm::mat4 mdcii::layer::WorldGridLayer::CreateModelMatrix(const layer::Tile& t_tile, world::Zoom t_zoom, world::Rotation t_rotation) const
+glm::mat4 mdcii::layer::WorldGridLayer::CreateModelMatrix(const layer::Tile& t_tile, const world::Zoom t_zoom, const world::Rotation t_rotation) const
 {
     const auto& stadtfldBshTextures{ m_context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
     const auto w{ static_cast<float>(stadtfldBshTextures[GRASS_GFX]->width) };

@@ -62,6 +62,23 @@ void mdcii::world::Terrain::CreateIslandsFromJson(const nlohmann::json& t_json)
 }
 
 //-------------------------------------------------
+// Getter
+//-------------------------------------------------
+
+bool mdcii::world::Terrain::IsPositionOnTerrain(const glm::ivec2& t_position) const
+{
+    for (const auto& island : islands)
+    {
+        if (island->IsPositionOnIsland(t_position))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+//-------------------------------------------------
 // Clean up
 //-------------------------------------------------
 
