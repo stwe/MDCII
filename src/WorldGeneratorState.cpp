@@ -17,62 +17,63 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <imgui.h>
-#include "MainMenuState.h"
+#include "WorldGeneratorState.h"
 #include "MdciiAssert.h"
 #include "ogl/OpenGL.h"
 #include "ogl/Window.h"
 #include "state/StateStack.h"
+#include "world/WorldGenerator.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::MainMenuState::MainMenuState(const state::StateId t_id, std::shared_ptr<state::Context> t_context)
+mdcii::WorldGeneratorState::WorldGeneratorState(const state::StateId t_id, std::shared_ptr<state::Context> t_context)
     : State(t_id, std::move(t_context))
 {
-    Log::MDCII_LOG_DEBUG("[MainMenuState::MainMenuState()] Create MainMenuState.");
+    Log::MDCII_LOG_DEBUG("[WorldGeneratorState::WorldGeneratorState()] Create WorldGeneratorState.");
 
-    MDCII_ASSERT(context, "[MainMenuState::MainMenuState()] Null pointer.")
+    MDCII_ASSERT(context, "[WorldGeneratorState::WorldGeneratorState()] Null pointer.")
 
     Init();
 }
 
-mdcii::MainMenuState::~MainMenuState() noexcept
+mdcii::WorldGeneratorState::~WorldGeneratorState() noexcept
 {
-    Log::MDCII_LOG_DEBUG("[MainMenuState::~MainMenuState()] Destruct MainMenuState.");
+    Log::MDCII_LOG_DEBUG("[WorldGeneratorState::~WorldGeneratorState()] Destruct WorldGeneratorState.");
 }
 
 //-------------------------------------------------
 // Override
 //-------------------------------------------------
 
-void mdcii::MainMenuState::Input()
+void mdcii::WorldGeneratorState::Input()
 {
     // ESC for quit
     if (context->window->IsKeyPressed(GLFW_KEY_ESCAPE))
     {
-        Log::MDCII_LOG_DEBUG("[MainMenuState::Input()] Starts POP MainMenuState.");
+        Log::MDCII_LOG_DEBUG("[WorldGeneratorState::Input()] Starts POP WorldGeneratorState.");
         context->stateStack->PopState(GetStateId());
     }
 }
 
-void mdcii::MainMenuState::Update()
+void mdcii::WorldGeneratorState::Update()
 {
 }
 
-void mdcii::MainMenuState::Render()
+void mdcii::WorldGeneratorState::Render()
 {
 }
 
-void mdcii::MainMenuState::RenderImGui()
+void mdcii::WorldGeneratorState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
     auto winW{ static_cast<float>(context->window->GetWidth()) };
     auto winH{ static_cast<float>(context->window->GetHeight()) };
 
-    ImGui::SetNextWindowSize(ImVec2(174.0f, 128.0f), ImGuiCond_Once);
-    ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 2.5f), ImGui::GetMainViewport()->Pos.y + (winH / 4.0f)), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(550.0f, 300.0f), ImGuiCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 4.0f), ImGui::GetMainViewport()->Pos.y + (winH / 4.0f)), ImGuiCond_Once);
 
     int windowFlags =
         ImGuiWindowFlags_NoTitleBar |
@@ -85,40 +86,15 @@ void mdcii::MainMenuState::RenderImGui()
 
     ImGui::SetNextWindowBgAlpha(0.8f);
 
-    ImGui::Begin("Main Menu", nullptr, windowFlags);
+    ImGui::Begin("World Generator", nullptr, windowFlags);
 
-    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 230, 230, 255));
+    m_worldGenerator->RenderImGui();
 
-    if (ImGui::Button("Create a new world"))
+    if (ImGui::Button("Back to main menu"))
     {
         context->stateStack->PopState(GetStateId());
-        context->stateStack->PushState(state::StateId::WORLD_GENERATOR);
+        context->stateStack->PushState(state::StateId::MAIN_MENU);
     }
-
-    if (ImGui::Button("Start the example"))
-    {
-        context->stateStack->PopState(GetStateId());
-        context->stateStack->PushState(state::StateId::EXAMPLE_GAME);
-    }
-
-    if (ImGui::Button("Start a new game"))
-    {
-        context->stateStack->PopState(GetStateId());
-        context->stateStack->PushState(state::StateId::NEW_GAME);
-    }
-
-    if (ImGui::Button("Load an existing game"))
-    {
-        context->stateStack->PopState(GetStateId());
-        context->stateStack->PushState(state::StateId::LOADED_GAME);
-    }
-
-    if (ImGui::Button("Exit"))
-    {
-        context->stateStack->PopState(GetStateId());
-    }
-
-    ImGui::PopStyleColor();
 
     ImGui::End();
 
@@ -129,10 +105,11 @@ void mdcii::MainMenuState::RenderImGui()
 // Init
 //-------------------------------------------------
 
-void mdcii::MainMenuState::Init()
+void mdcii::WorldGeneratorState::Init()
 {
-    Log::MDCII_LOG_DEBUG("[MainMenuState::Init()] Initializing main menu state...");
+    Log::MDCII_LOG_DEBUG("[WorldGeneratorState::Init()] Initializing world generator state...");
 
+    m_worldGenerator = std::make_unique<world::WorldGenerator>();
 
-    Log::MDCII_LOG_DEBUG("[MainMenuState::Init()] The main menu state was successfully initialized.");
+    Log::MDCII_LOG_DEBUG("[WorldGeneratorState::Init()] The world generator state was successfully initialized.");
 }

@@ -29,7 +29,7 @@ namespace mdcii::layer
     /**
      * The WorldGridLayer contains all the data to render a grid over the world.
      */
-    class WorldGridLayer : public GameLayer
+    class WorldGridLayer: public GameLayer
     {
     public:
         //-------------------------------------------------
@@ -57,8 +57,9 @@ namespace mdcii::layer
          * Constructs a new WorldGridLayer object.
          *
          * @param t_context Access to shared objects.
+         * @param t_world The World object.
          */
-        explicit WorldGridLayer(std::shared_ptr<state::Context> t_context);
+        WorldGridLayer(std::shared_ptr<state::Context> t_context, world::World* t_world);
 
         WorldGridLayer(const WorldGridLayer& t_other) = delete;
         WorldGridLayer(WorldGridLayer&& t_other) noexcept = delete;

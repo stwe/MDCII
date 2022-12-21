@@ -131,6 +131,30 @@ namespace mdcii::world
     {
     public:
         //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * The min width of the world.
+         */
+        static constexpr auto WORLD_MIN_WIDTH{ 50 };
+
+        /**
+         * The min height of the world.
+         */
+        static constexpr auto WORLD_MIN_HEIGHT{ 35 };
+
+        /**
+         * The max width of the world.
+         */
+        static constexpr auto WORLD_MAX_WIDTH{ 500 };
+
+        /**
+         * The max height of the world.
+         */
+        static constexpr auto WORLD_MAX_HEIGHT{ 350 };
+
+        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -142,12 +166,12 @@ namespace mdcii::world
         /**
          * The world width.
          */
-        int32_t worldWidth;
+        int32_t worldWidth{ WORLD_MIN_WIDTH };
 
         /**
          * The world height.
          */
-        int32_t worldHeight;
+        int32_t worldHeight{ WORLD_MIN_HEIGHT };
 
         /**
          * The world rotation.
@@ -162,7 +186,7 @@ namespace mdcii::world
         /**
          * The Terrain object contains all islands with their coasts.
          */
-        std::shared_ptr<Terrain> terrain;
+        std::unique_ptr<Terrain> terrain;
 
         /**
          * An OpenGL texture array for each zoom level.
@@ -175,6 +199,11 @@ namespace mdcii::world
         std::unique_ptr<renderer::TerrainRenderer> terrainRenderer;
 
         /**
+         * A renderer showing grids over the islands.
+         */
+        std::unique_ptr<renderer::GridRenderer> gridRenderer;
+
+        /**
          * A Layer object containing only the deep water area of the world.
          */
         std::unique_ptr<layer::WorldLayer> worldLayer;
@@ -183,11 +212,6 @@ namespace mdcii::world
          * A Layer object to show a world grid.
          */
         std::unique_ptr<layer::WorldGridLayer> worldGridLayer;
-
-        /**
-         * A renderer to render grids.
-         */
-        std::unique_ptr<renderer::GridRenderer> gridRenderer;
 
         /**
          * The MousePicker object.
@@ -220,8 +244,26 @@ namespace mdcii::world
         // Helper
         //-------------------------------------------------
 
+        /**
+         * Checks whether a given position is in the world.
+         *
+         * @param t_x The x position to check.
+         * @param t_y The y position to check.
+         *
+         * @return True or false.
+         */
         [[nodiscard]] bool IsPositionInWorld(int32_t t_x, int32_t t_y) const;
 
+        /**
+         * Projects a position into an isometric position on the screen.
+         *
+         * @param t_x The x position.
+         * @param t_y The y position.
+         * @param t_zoom The zoom to get the tile sizes.
+         * @param t_rotation The position is previously rotated by the specified value.
+         *
+         * @return The isometric coordinates on the screen.
+         */
         [[nodiscard]] glm::vec2 WorldToScreen(int32_t t_x, int32_t t_y, Zoom t_zoom, Rotation t_rotation) const;
 
         //-------------------------------------------------

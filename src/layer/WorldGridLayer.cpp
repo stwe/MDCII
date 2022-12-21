@@ -21,18 +21,19 @@
 #include "state/State.h"
 #include "file/OriginalResourcesManager.h"
 #include "renderer/RenderUtils.h"
+#include "world/World.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::layer::WorldGridLayer::WorldGridLayer(std::shared_ptr<state::Context> t_context)
-    : GameLayer(std::move(t_context))
+mdcii::layer::WorldGridLayer::WorldGridLayer(std::shared_ptr<state::Context> t_context, world::World* t_world)
+    : GameLayer(std::move(t_context), t_world)
 {
     Log::MDCII_LOG_DEBUG("[WorldGridLayer::WorldGridLayer()] Create WorldGridLayer.");
 
-    width = worldWidth;
-    height = worldHeight;
+    width = m_world->worldWidth;
+    height = m_world->worldHeight;
     instancesToRender = width * height;
 }
 

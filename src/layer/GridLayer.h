@@ -29,7 +29,7 @@ namespace mdcii::layer
     /**
      * The GridLayer contains all the data to render a grid over an island.
      */
-    class GridLayer : public GameLayer
+    class GridLayer: public GameLayer
     {
     public:
         //-------------------------------------------------
@@ -52,8 +52,9 @@ namespace mdcii::layer
          * Constructs a new GridLayer object.
          *
          * @param t_context Access to shared objects.
+         * @param t_world The World object.
          */
-        explicit GridLayer(std::shared_ptr<state::Context> t_context);
+        GridLayer(std::shared_ptr<state::Context> t_context, world::World* t_world);
 
         GridLayer(const GridLayer& t_other) = delete;
         GridLayer(GridLayer&& t_other) noexcept = delete;

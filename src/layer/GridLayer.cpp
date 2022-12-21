@@ -26,8 +26,8 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::layer::GridLayer::GridLayer(std::shared_ptr<state::Context> t_context)
-    : GameLayer(std::move(t_context))
+mdcii::layer::GridLayer::GridLayer(std::shared_ptr<state::Context> t_context, world::World* t_world)
+    : GameLayer(std::move(t_context), t_world)
 {
     Log::MDCII_LOG_DEBUG("[GridLayer::GridLayer()] Create GridLayer.");
 }

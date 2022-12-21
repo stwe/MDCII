@@ -60,6 +60,19 @@ namespace mdcii::layer
 
 namespace mdcii::world
 {
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
+    /**
+     * Forward declaration class Terrain.
+     */
+    class Terrain;
+
+    //-------------------------------------------------
+    // Island
+    //-------------------------------------------------
+
     /**
      * Represents an island.
      */
@@ -130,8 +143,9 @@ namespace mdcii::world
          * Constructs an new Island object.
          *
          * @param t_context Access to shared objects.
+         * @param t_terrain The parent Terrain object.
          */
-        explicit Island(std::shared_ptr<state::Context> t_context);
+        Island(std::shared_ptr<state::Context> t_context, Terrain* t_terrain);
 
         Island(const Island& t_other) = delete;
         Island(Island&& t_other) noexcept = delete;
@@ -176,6 +190,11 @@ namespace mdcii::world
          * To have access to the shared objects (Window, Camera, Original-Assets).
          */
         std::shared_ptr<state::Context> m_context;
+
+        /**
+         * The parent Terrain object.
+         */
+        Terrain* m_terrain{ nullptr };
 
         //-------------------------------------------------
         // Layer

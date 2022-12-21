@@ -19,6 +19,7 @@
 #include "Game.h"
 #include "MdciiException.h"
 #include "MainMenuState.h"
+#include "WorldGeneratorState.h"
 #include "GameState.h"
 #include "camera/Camera.h"
 #include "state/StateStack.h"
@@ -57,7 +58,7 @@ void mdcii::Game::Run()
 
 void mdcii::Game::Init()
 {
-    Log::MDCII_LOG_DEBUG("[Game::Init()] Initializing game.");
+    Log::MDCII_LOG_DEBUG("[Game::Init()] Initializing game...");
 
     CreateSharedObjects();
     Start();
@@ -158,21 +159,23 @@ void mdcii::Game::CreateSharedObjects()
 
 void mdcii::Game::Start() const
 {
-    Log::MDCII_LOG_DEBUG("[Game::Start()] Starts the game.");
+    Log::MDCII_LOG_DEBUG("[Game::Start()] Register all game states.");
 
-    // register states
     m_stateStack->RegisterState<MainMenuState>(state::StateId::MAIN_MENU);
+    m_stateStack->RegisterState<WorldGeneratorState>(state::StateId::WORLD_GENERATOR);
     m_stateStack->RegisterState<GameState>(state::StateId::NEW_GAME);
     m_stateStack->RegisterState<GameState>(state::StateId::LOADED_GAME);
     m_stateStack->RegisterState<GameState>(state::StateId::EXAMPLE_GAME);
 
-    // push the configured start state
     if (const auto startStateId{ magic_enum::enum_cast<state::StateId>(INI.Get<std::string>("game", "start_state")) }; startStateId.has_value())
     {
         switch (startStateId.value())
         {
         case state::StateId::MAIN_MENU:
             m_stateStack->PushState(state::StateId::MAIN_MENU);
+            break;
+        case state::StateId::WORLD_GENERATOR:
+            m_stateStack->PushState(state::StateId::WORLD_GENERATOR);
             break;
         case state::StateId::NEW_GAME:
             m_stateStack->PushState(state::StateId::NEW_GAME);
@@ -183,8 +186,7 @@ void mdcii::Game::Start() const
         case state::StateId::EXAMPLE_GAME:
             m_stateStack->PushState(state::StateId::EXAMPLE_GAME);
             break;
-        default:
-            m_stateStack->PushState(state::StateId::NEW_GAME);
+        default:;
         }
     }
     else

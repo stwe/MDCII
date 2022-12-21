@@ -76,8 +76,8 @@ void mdcii::layer::from_json(const nlohmann::json& t_json, Tile& t_tile)
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::layer::TerrainLayer::TerrainLayer(std::shared_ptr<state::Context> t_context, world::Island* t_island)
-    : GameLayer(std::move(t_context))
+mdcii::layer::TerrainLayer::TerrainLayer(std::shared_ptr<state::Context> t_context, world::World* t_world, world::Island* t_island)
+    : GameLayer(std::move(t_context), t_world)
     , m_island{ t_island }
 {
     Log::MDCII_LOG_DEBUG("[TerrainLayer::TerrainLayer()] Create TerrainLayer.");

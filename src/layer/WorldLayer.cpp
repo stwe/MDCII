@@ -21,6 +21,7 @@
 #include "state/State.h"
 #include "file/OriginalResourcesManager.h"
 #include "renderer/RenderUtils.h"
+#include "world/World.h"
 #include "world/Terrain.h"
 #include "ogl/buffer/Ssbo.h"
 
@@ -28,19 +29,13 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::layer::WorldLayer::WorldLayer(std::shared_ptr<state::Context> t_context, std::shared_ptr<world::Terrain> t_terrain)
-    : GameLayer(std::move(t_context))
-    , m_terrain{ std::move(t_terrain) }
+mdcii::layer::WorldLayer::WorldLayer(std::shared_ptr<state::Context> t_context, world::World* t_world)
+    : GameLayer(std::move(t_context), t_world)
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::WorldLayer()] Create WorldLayer.");
 
-    MDCII_ASSERT(m_terrain, "[WorldLayer::WorldLayer()] Null pointer.")
-
-    width = worldWidth;
-    height = worldHeight;
-
-    MDCII_ASSERT(width > 0, "[WorldLayer::WorldLayer()] Invalid width.")
-    MDCII_ASSERT(height > 0, "[WorldLayer::WorldLayer()] Invalid height.")
+    width = m_world->worldWidth;
+    height = m_world->worldHeight;
 }
 
 mdcii::layer::WorldLayer::~WorldLayer() noexcept
@@ -56,11 +51,11 @@ void mdcii::layer::WorldLayer::CreateTiles()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateTiles()] Create and prepare Tile objects for rendering.");
 
-    for (auto worldY{ 0 }; worldY < worldHeight; ++worldY)
+    for (auto worldY{ 0 }; worldY < m_world->worldHeight; ++worldY)
     {
-        for (auto worldX{ 0 }; worldX < worldWidth; ++worldX)
+        for (auto worldX{ 0 }; worldX < m_world->worldWidth; ++worldX)
         {
-            if (!m_terrain->IsPositionOnTerrain(glm::ivec2(worldX, worldY)))
+            if (!m_world->terrain->IsPositionOnTerrain(glm::ivec2(worldX, worldY)))
             {
                 auto tile{ std::make_unique<Tile>() };
 

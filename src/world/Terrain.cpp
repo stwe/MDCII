@@ -25,11 +25,13 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::Terrain::Terrain(std::shared_ptr<state::Context> t_context)
-    : m_context{ std::move(t_context) }
+mdcii::world::Terrain::Terrain(std::shared_ptr<state::Context> t_context, World* t_world)
+    : world{ t_world }
+    , m_context{ std::move(t_context) }
 {
     Log::MDCII_LOG_DEBUG("[Terrain::Terrain()] Create Terrain.");
 
+    MDCII_ASSERT(world, "[Terrain::Terrain()] Null pointer.")
     MDCII_ASSERT(m_context, "[Terrain::Terrain()] Null pointer.")
 }
 
@@ -50,7 +52,7 @@ void mdcii::world::Terrain::CreateIslandsFromJson(const nlohmann::json& t_json)
 
     for (const auto& [k, v] : t_json.items())
     {
-        auto island{ std::make_unique<Island>(m_context) };
+        auto island{ std::make_unique<Island>(m_context, this) };
         island->InitValuesFromJson(v);
 
         islands.emplace_back(std::move(island));
@@ -58,7 +60,7 @@ void mdcii::world::Terrain::CreateIslandsFromJson(const nlohmann::json& t_json)
 
     MDCII_ASSERT(!islands.empty(), "[Terrain::CreateIslandsFromJson()] Missing islands.")
 
-    Log::MDCII_LOG_DEBUG("[Terrain::CreateIslandsFromJson()] The islands have been created successfully.");
+    Log::MDCII_LOG_DEBUG("[Terrain::CreateIslandsFromJson()] {} islands have been created successfully.", islands.size());
 }
 
 //-------------------------------------------------

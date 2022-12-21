@@ -19,6 +19,7 @@
 #pragma once
 
 #include <fstream>
+#include <imgui.h>
 #include "data/json.hpp"
 #include "MdciiException.h"
 #include "Log.h"
@@ -112,5 +113,36 @@ namespace mdcii
         }
 
         return newString;
+    }
+
+    //-------------------------------------------------
+    // ImGui widgets
+    //-------------------------------------------------
+
+    /**
+     * An ImGui-Widget to render a Toggle-Button.
+     *
+     * @param t_strId An Id.
+     * @param t_v A static bool.
+     */
+    static void toggle_button(const std::string& t_strId, bool* t_v)
+    {
+        auto const* colors{ ImGui::GetStyle().Colors };
+        auto pos{ ImGui::GetCursorScreenPos() };
+        auto* drawList{ ImGui::GetWindowDrawList() };
+
+        auto height{ ImGui::GetFrameHeight() };
+        auto width{ height * 1.55f };
+        auto radius{ height * 0.5f };
+
+        ImGui::InvisibleButton(t_strId.c_str(), ImVec2(width, height));
+
+        if (ImGui::IsItemClicked())
+        {
+            *t_v = !*t_v;
+        }
+
+        drawList->AddRectFilled(pos, ImVec2(pos.x + width, pos.y + height), ImGui::GetColorU32(colors[ImGuiCol_ButtonActive]), height * 0.50f);
+        drawList->AddCircleFilled(ImVec2(pos.x + radius + (*t_v ? 1.0f : 0.0f) * (width - radius * 2.0f), pos.y + radius), radius - 1.5f, IM_COL32(255, 255, 255, 255));
     }
 }

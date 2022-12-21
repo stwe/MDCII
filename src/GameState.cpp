@@ -82,7 +82,7 @@ void mdcii::GameState::RenderImGui()
 
 void mdcii::GameState::Init()
 {
-    Log::MDCII_LOG_DEBUG("[GameState::Init()] Initializing game state.");
+    Log::MDCII_LOG_DEBUG("[GameState::Init()] Initializing game state...");
 
     switch (GetStateId())
     {
@@ -95,8 +95,7 @@ void mdcii::GameState::Init()
     case state::StateId::EXAMPLE_GAME:
         m_world = std::make_shared<world::World>(EXAMPLE_GAME_MAP, context, state::StateId::EXAMPLE_GAME);
         break;
-    default:
-        m_world = std::make_shared<world::World>(NEW_GAME_MAP, context, state::StateId::NEW_GAME);
+    default:;
     }
 
     Log::MDCII_LOG_DEBUG("[GameState::Init()] The game state was successfully initialized.");

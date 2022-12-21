@@ -21,18 +21,6 @@
 #include "GameLayer.h"
 
 //-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii::world
-{
-    /**
-     * Forward declaration class Terrain.
-     */
-    class Terrain;
-}
-
-//-------------------------------------------------
 // WorldLayer
 //-------------------------------------------------
 
@@ -106,9 +94,9 @@ namespace mdcii::layer
          * Constructs a new WorldLayer object.
          *
          * @param t_context Access to shared objects.
-         * @param t_terrain The Terrain object for access to all the Island objects.
+         * @param t_world The World object.
          */
-        WorldLayer(std::shared_ptr<state::Context> t_context, std::shared_ptr<world::Terrain> t_terrain);
+        WorldLayer(std::shared_ptr<state::Context> t_context, world::World* t_world);
 
         WorldLayer(const WorldLayer& t_other) = delete;
         WorldLayer(WorldLayer&& t_other) noexcept = delete;
@@ -133,15 +121,6 @@ namespace mdcii::layer
          * Each model matrix is based on this gfx number.
          */
         static constexpr auto WATER_GFX{ 758 };
-
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * The Terrain object.
-         */
-        std::shared_ptr<world::Terrain> m_terrain;
 
         //-------------------------------------------------
         // Override

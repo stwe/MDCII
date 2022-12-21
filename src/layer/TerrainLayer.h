@@ -53,7 +53,7 @@ namespace mdcii::layer
     /**
      * The TerrainLayer contains all the data to render an island.
      */
-    class TerrainLayer : public GameLayer
+    class TerrainLayer: public GameLayer
     {
     public:
         //-------------------------------------------------
@@ -118,9 +118,10 @@ namespace mdcii::layer
          * Constructs a new TerrainLayer object.
          *
          * @param t_context Access to shared objects.
+         * @param t_world The World object.
          * @param t_island The parent Island object.
          */
-        TerrainLayer(std::shared_ptr<state::Context> t_context, world::Island* t_island);
+        TerrainLayer(std::shared_ptr<state::Context> t_context, world::World* t_world, world::Island* t_island);
 
         TerrainLayer(const TerrainLayer& t_other) = delete;
         TerrainLayer(TerrainLayer&& t_other) noexcept = delete;

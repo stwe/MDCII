@@ -41,6 +41,14 @@ namespace mdcii::ogl::buffer
     class Ssbo;
 }
 
+namespace mdcii::world
+{
+    /**
+     * Forward declaration class World.
+     */
+    class World;
+}
+
 //-------------------------------------------------
 // GameLayer
 //-------------------------------------------------
@@ -100,16 +108,6 @@ namespace mdcii::layer
         int32_t height{ -1 };
 
         /**
-         * The world width.
-         */
-        int32_t worldWidth{ -1 };
-
-        /**
-         * The world height.
-         */
-        int32_t worldHeight{ -1 };
-
-        /**
          * The four containers with the model matrices for each zoom.
          * Access: modelMatrices[0/SGFX ... 2/GFX][0/DEG0 ... 3/DEG270][0 ... instances]
          */
@@ -136,8 +134,9 @@ namespace mdcii::layer
          * Constructs a new GameLayer object.
          *
          * @param t_context Access to shared objects.
+         * @param t_world The World object.
          */
-        explicit GameLayer(std::shared_ptr<state::Context> t_context);
+        GameLayer(std::shared_ptr<state::Context> t_context, world::World* t_world);
 
         GameLayer(const GameLayer& t_other) = delete;
         GameLayer(GameLayer&& t_other) noexcept = delete;
@@ -231,6 +230,11 @@ namespace mdcii::layer
          * To have access to the shared objects (Window, Camera, Original-Assets).
          */
         std::shared_ptr<state::Context> m_context;
+
+        /**
+         * The World object.
+         */
+        world::World* m_world{ nullptr };
 
     private:
         //-------------------------------------------------

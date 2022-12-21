@@ -25,6 +25,7 @@
 #include "WorldGui.h"
 #include "MousePicker.h"
 #include "state/State.h"
+#include "state/StateStack.h"
 #include "renderer/TerrainRenderer.h"
 #include "renderer/GridRenderer.h"
 #include "world/Island.h"
@@ -45,12 +46,6 @@ mdcii::world::World::World(std::string t_mapFilePath, std::shared_ptr<state::Con
 
     MDCII_ASSERT(!m_mapFilePath.empty(), "[World::World()] Invalid path given.")
     MDCII_ASSERT(context, "[World::World()] Null pointer.")
-
-    worldWidth = Game::INI.Get<int32_t>("game", "world_width");
-    worldHeight = Game::INI.Get<int32_t>("game", "world_height");
-
-    MDCII_ASSERT(worldWidth > 0, "[World::World()] Invalid width.")
-    MDCII_ASSERT(worldHeight > 0, "[World::World()] Invalid height.")
 
     rotation = Rotation::DEG0;
     zoom = Zoom::GFX;
@@ -183,6 +178,13 @@ void mdcii::world::World::RenderImGui()
     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 230, 230, 255));
 
     ImGui::Separator();
+    if (ImGui::Button("Back to main menu"))
+    {
+        context->stateStack->PopState(m_stateId);
+        context->stateStack->PushState(state::StateId::MAIN_MENU);
+    }
+
+    ImGui::Separator();
     ImGui::Text("Render Islands");
     ImGui::Separator();
     static int e{ magic_enum::enum_integer(m_layerType) };
@@ -269,24 +271,42 @@ void mdcii::world::World::Init()
 {
     Log::MDCII_LOG_DEBUG("[World::Init()] Start initializing the world...");
 
-    terrain = std::make_shared<Terrain>(context);
+    terrain = std::make_unique<Terrain>(context, this);
     tileAtlas = std::make_unique<TileAtlas>();
     terrainRenderer = std::make_unique<renderer::TerrainRenderer>(context, tileAtlas);
 
     nlohmann::json j = read_json_from_file(Game::RESOURCES_REL_PATH + m_mapFilePath);
     for (const auto& [k, v] : j.items())
     {
+        if (k == "world")
+        {
+            worldWidth = v.at("width").get<int32_t>();
+            worldHeight = v.at("height").get<int32_t>();
+
+            if (worldWidth < WORLD_MIN_WIDTH || worldWidth > WORLD_MAX_WIDTH)
+            {
+                throw MDCII_EXCEPTION("[World::Init()] Invalid world width given.");
+            }
+
+            if (worldHeight < WORLD_MIN_HEIGHT || worldHeight > WORLD_MAX_HEIGHT)
+            {
+                throw MDCII_EXCEPTION("[World::Init()] Invalid world height given.");
+            }
+
+            Log::MDCII_LOG_DEBUG("[World::Init()] The width of the world is set to: {}.", worldWidth);
+            Log::MDCII_LOG_DEBUG("[World::Init()] The height of the world is set to: {}.", worldHeight);
+        }
         if (k == "islands")
         {
             terrain->CreateIslandsFromJson(v);
         }
     }
 
-    worldLayer = std::make_unique<layer::WorldLayer>(context, terrain);
+    worldLayer = std::make_unique<layer::WorldLayer>(context, this);
     worldLayer->PrepareCpuDataForRendering();
     worldLayer->PrepareGpuDataForRendering();
 
-    worldGridLayer = std::make_unique<layer::WorldGridLayer>(context);
+    worldGridLayer = std::make_unique<layer::WorldGridLayer>(context, this);
     worldGridLayer->PrepareCpuDataForRendering();
     worldGridLayer->PrepareGpuDataForRendering();
 

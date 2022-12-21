@@ -1,4 +1,8 @@
 {
+  "world": {
+    "width": 50,
+    "height": 35
+  },
   "islands": [
     {
     "width": 8,

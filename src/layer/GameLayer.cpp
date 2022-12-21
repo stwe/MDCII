@@ -18,26 +18,22 @@
 
 #include "GameLayer.h"
 #include "MdciiAssert.h"
-#include "Game.h"
 #include "state/State.h"
 #include "ogl/buffer/Ssbo.h"
+#include "world/World.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::layer::GameLayer::GameLayer(std::shared_ptr<state::Context> t_context)
+mdcii::layer::GameLayer::GameLayer(std::shared_ptr<state::Context> t_context, world::World* t_world)
     : m_context{ std::move(t_context) }
+    , m_world{ t_world }
 {
     Log::MDCII_LOG_DEBUG("[GameLayer::GameLayer()] Create GameLayer.");
 
     MDCII_ASSERT(m_context, "[GameLayer::GameLayer()] Null pointer.")
-
-    worldWidth = Game::INI.Get<int32_t>("game", "world_width");
-    worldHeight = Game::INI.Get<int32_t>("game", "world_height");
-
-    MDCII_ASSERT(worldWidth > 0, "[GameLayer::GameLayer()] Invalid worldWidth.")
-    MDCII_ASSERT(worldHeight > 0, "[GameLayer::GameLayer()] Invalid worldHeight.")
+    MDCII_ASSERT(m_world, "[GameLayer::GameLayer()] Null pointer.")
 }
 
 mdcii::layer::GameLayer::~GameLayer() noexcept
@@ -98,7 +94,7 @@ int32_t mdcii::layer::GameLayer::GetMapIndex(const int32_t t_x, const int32_t t_
 
 glm::vec2 mdcii::layer::GameLayer::WorldToScreen(const int32_t t_x, const int32_t t_y, const world::Zoom t_zoom, const world::Rotation t_rotation) const
 {
-    const auto position{ rotate_position(t_x, t_y, worldWidth, worldHeight, t_rotation) };
+    const auto position{ rotate_position(t_x, t_y, m_world->worldWidth, m_world->worldHeight, t_rotation) };
     return {
         (position.x - position.y) * get_tile_width_half(t_zoom),
         (position.x + position.y) * get_tile_height_half(t_zoom)
