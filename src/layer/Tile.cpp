@@ -52,10 +52,10 @@ void mdcii::layer::Tile::ResetBuildingInfo()
 
 void mdcii::layer::Tile::RenderImGui() const
 {
+    ImGui::Separator();
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0.7f, 0.8f, 0.8f)));
     ImGui::Text("Tile");
     ImGui::PopStyleColor();
-
     ImGui::Separator();
 
     magic_enum::enum_for_each< data::Section>([this] (auto t_section) {

@@ -19,7 +19,7 @@
 #pragma once
 
 #include "GameLayer.h"
-#include "data/json.hpp"
+#include "Tile.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -150,6 +150,15 @@ namespace mdcii::layer
          * @return The Tile object.
          */
         [[nodiscard]] const Tile& GetTile(int32_t t_x, int32_t t_y) const;
+
+        /**
+         * Returns a Tile object.
+         *
+         * @param t_position The DEG0 position.
+         *
+         * @return The Tile object.
+         */
+        [[nodiscard]] const Tile& GetTile(const glm::ivec2& t_position) const;
 
         /**
          * Resets Tile pointer at given instances in tiles and sortedTiles.

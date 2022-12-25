@@ -93,11 +93,54 @@ void mdcii::world::Island::InitValuesFromJson(const nlohmann::json& t_json)
 // Getter
 //-------------------------------------------------
 
-bool mdcii::world::Island::IsPositionOnIsland(const glm::ivec2& t_position) const
+bool mdcii::world::Island::IsWorldPositionInAabb(const glm::ivec2& t_position) const
 {
     MDCII_ASSERT(aabb, "[Island::IsPositionOnIsland()] Null pointer.")
 
     return physics::Aabb::PointVsAabb(t_position, *aabb);
+}
+
+glm::ivec2 mdcii::world::Island::GetIslandPositionFromWorldPosition(const glm::ivec2& t_position) const
+{
+    MDCII_ASSERT(IsWorldPositionInAabb(t_position), "[Island::GetIslandPositionFromWorldPosition()] Invalid world position.")
+
+    return { t_position.x - worldX, t_position.y - worldY };
+}
+
+const mdcii::layer::Tile& mdcii::world::Island::GetCoastTileFromCurrentPosition() const
+{
+    // todo: check is in Island
+    return coastLayer->GetTile(currentPosition);
+}
+
+const mdcii::layer::Tile& mdcii::world::Island::GetTerrainTileFromCurrentPosition() const
+{
+    return terrainLayer->GetTile(currentPosition);
+}
+
+const mdcii::layer::Tile& mdcii::world::Island::GetBuildingTileFromCurrentPosition() const
+{
+    return buildingsLayer->GetTile(currentPosition);
+}
+
+//-------------------------------------------------
+// Render
+//-------------------------------------------------
+
+void mdcii::world::Island::RenderImGui() const
+{
+    ImGui::Separator();
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0.7f, 0.8f, 0.8f)));
+    ImGui::Text("Island");
+    ImGui::PopStyleColor();
+    ImGui::Separator();
+
+    ImGui::Text("Start World x: %d", worldX);
+    ImGui::Text("Start World y: %d", worldY);
+    ImGui::Text("Width: %d", width);
+    ImGui::Text("Height: %d", height);
+    ImGui::Text("Current selected x: %d", currentPosition.x);
+    ImGui::Text("Current selected y: %d", currentPosition.y);
 }
 
 //-------------------------------------------------

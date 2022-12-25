@@ -21,6 +21,7 @@
 #include "state/State.h"
 #include "ogl/buffer/Ssbo.h"
 #include "world/World.h"
+#include "eventpp/utilities/argumentadapter.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -34,11 +35,15 @@ mdcii::layer::GameLayer::GameLayer(std::shared_ptr<state::Context> t_context, wo
 
     MDCII_ASSERT(m_context, "[GameLayer::GameLayer()] Null pointer.")
     MDCII_ASSERT(m_world, "[GameLayer::GameLayer()] Null pointer.")
+
+    AddListeners();
 }
 
 mdcii::layer::GameLayer::~GameLayer() noexcept
 {
     Log::MDCII_LOG_DEBUG("[GameLayer::~GameLayer()] Destruct GameLayer.");
+
+    CleanUp();
 }
 
 //-------------------------------------------------
@@ -53,36 +58,12 @@ const mdcii::layer::GameLayer::Model_Matrices_For_Each_Rotation& mdcii::layer::G
 }
 
 //-------------------------------------------------
-// Tiles
+// Map index
 //-------------------------------------------------
-
-bool mdcii::layer::GameLayer::IsPositionInLayer(const int32_t t_x, const int32_t t_y) const
-{
-    MDCII_ASSERT(width > 0, "[GameLayer::IsPositionInLayer()] Invalid width.")
-    MDCII_ASSERT(height > 0, "[GameLayer::IsPositionInLayer()] Invalid height.")
-
-    if (t_x >= 0 && t_x < width &&
-        t_y >= 0 && t_y < height)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-glm::ivec2 mdcii::layer::GameLayer::RotatePosition(const int32_t t_x, const int32_t t_y, const world::Rotation t_rotation) const
-{
-    MDCII_ASSERT(width > 0, "[GameLayer::RotatePosition()] Invalid width.")
-    MDCII_ASSERT(height > 0, "[GameLayer::RotatePosition()] Invalid height.")
-
-    return rotate_position(t_x, t_y, width, height, t_rotation);
-}
 
 int32_t mdcii::layer::GameLayer::GetMapIndex(const int32_t t_x, const int32_t t_y, const world::Rotation t_rotation) const
 {
-    MDCII_ASSERT(IsPositionInLayer(t_x, t_y), "[GameLayer::GetMapIndex()] Invalid position given.")
-
-    const auto position{ RotatePosition(t_x, t_y, t_rotation) };
+    const auto position{ rotate_position(t_x, t_y, width, height, t_rotation) };
 
     if (t_rotation == world::Rotation::DEG0 || t_rotation == world::Rotation::DEG180)
     {
@@ -92,13 +73,9 @@ int32_t mdcii::layer::GameLayer::GetMapIndex(const int32_t t_x, const int32_t t_
     return position.y * height + position.x;
 }
 
-glm::vec2 mdcii::layer::GameLayer::WorldToScreen(const int32_t t_x, const int32_t t_y, const world::Zoom t_zoom, const world::Rotation t_rotation) const
+int32_t mdcii::layer::GameLayer::GetMapIndex(const glm::ivec2& t_position, const world::Rotation t_rotation) const
 {
-    const auto position{ rotate_position(t_x, t_y, m_world->worldWidth, m_world->worldHeight, t_rotation) };
-    return {
-        (position.x - position.y) * get_tile_width_half(t_zoom),
-        (position.x + position.y) * get_tile_height_half(t_zoom)
-    };
+    return GetMapIndex(t_position.x, t_position.y, t_rotation);
 }
 
 //-------------------------------------------------
@@ -152,4 +129,37 @@ void mdcii::layer::GameLayer::StoreModelMatricesInGpu()
             modelMatricesSsbos.at(zoomInt).at(rotationInt) = std::move(ssbo);
         });
     });
+}
+
+//-------------------------------------------------
+// Init
+//-------------------------------------------------
+
+void mdcii::layer::GameLayer::AddListeners()
+{
+    Log::MDCII_LOG_DEBUG("[GameLayer::AddListeners()] Add event listeners.");
+
+    // OnLeftMouseButtonPressed
+    m_mouseButtonPressed = event::EventManager::event_dispatcher.appendListener(
+        event::MdciiEventType::MOUSE_BUTTON_PRESSED,
+        eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>(
+            [this](const event::MouseButtonPressedEvent& t_event) {
+                if (t_event.button == 0)
+                {
+                    OnLeftMouseButtonPressed();
+                }
+            }
+        )
+    );
+}
+
+//-------------------------------------------------
+// Clean up
+//-------------------------------------------------
+
+void mdcii::layer::GameLayer::CleanUp() const
+{
+    Log::MDCII_LOG_DEBUG("[GameLayer::CleanUp()] CleanUp GameLayer.");
+
+    event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_BUTTON_PRESSED, m_mouseButtonPressed);
 }

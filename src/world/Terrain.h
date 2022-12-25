@@ -20,6 +20,7 @@
 
 #include <glm/vec2.hpp>
 #include "data/json.hpp"
+#include "event/EventManager.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -77,6 +78,11 @@ namespace mdcii::world
          */
         std::vector<std::unique_ptr<Island>> islands;
 
+        /**
+         * Pointer to the currently selected Island.
+         */
+        Island* currentIsland{ nullptr };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -114,14 +120,14 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Checks whether a given position on any Island.
+         * Checks whether a given position on an Island.
          * The Aabb of the Island objects is used for this test.
          *
-         * @param t_position The position to be checked.
+         * @param t_position The world position to be checked.
          *
          * @return True or false.
          */
-        [[nodiscard]] bool IsPositionOnTerrain(const glm::ivec2& t_position) const;
+        [[nodiscard]] bool IsPositionOnAnIsland(const glm::ivec2& t_position) const;
 
     protected:
 
@@ -134,6 +140,29 @@ namespace mdcii::world
          * To have access to the shared objects (Window, Camera, Original-Assets).
          */
         std::shared_ptr<state::Context> m_context;
+
+        /**
+         * The mouse button pressed listener handle.
+         */
+        decltype(event::EventManager::event_dispatcher)::Handle m_mouseButtonPressed;
+
+        //-------------------------------------------------
+        // Event handler
+        //-------------------------------------------------
+
+        /**
+         * Handles left mouse button pressed event.
+         */
+        void OnLeftMouseButtonPressed();
+
+        //-------------------------------------------------
+        // Init
+        //-------------------------------------------------
+
+        /**
+         * Adds event listeners.
+         */
+        void AddListeners();
 
         //-------------------------------------------------
         // Clean up

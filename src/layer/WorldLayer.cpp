@@ -34,8 +34,8 @@ mdcii::layer::WorldLayer::WorldLayer(std::shared_ptr<state::Context> t_context, 
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::WorldLayer()] Create WorldLayer.");
 
-    width = m_world->worldWidth;
-    height = m_world->worldHeight;
+    width = m_world->width;
+    height = m_world->height;
 }
 
 mdcii::layer::WorldLayer::~WorldLayer() noexcept
@@ -51,11 +51,11 @@ void mdcii::layer::WorldLayer::CreateTiles()
 {
     Log::MDCII_LOG_DEBUG("[WorldLayer::CreateTiles()] Create and prepare Tile objects for rendering.");
 
-    for (auto worldY{ 0 }; worldY < m_world->worldHeight; ++worldY)
+    for (auto worldY{ 0 }; worldY < m_world->height; ++worldY)
     {
-        for (auto worldX{ 0 }; worldX < m_world->worldWidth; ++worldX)
+        for (auto worldX{ 0 }; worldX < m_world->width; ++worldX)
         {
-            if (!m_world->terrain->IsPositionOnTerrain(glm::ivec2(worldX, worldY)))
+            if (!m_world->terrain->IsPositionOnAnIsland(glm::ivec2(worldX, worldY)))
             {
                 auto tile{ std::make_unique<Tile>() };
 
@@ -68,10 +68,10 @@ void mdcii::layer::WorldLayer::CreateTiles()
                 magic_enum::enum_for_each<world::Zoom>([this, &tile, &worldX, &worldY](const world::Zoom t_zoom) {
                     std::array<glm::vec2, world::NR_OF_ROTATIONS> positions{};
 
-                    positions[0] = WorldToScreen(worldX, worldY, t_zoom, world::Rotation::DEG0);
-                    positions[1] = WorldToScreen(worldX, worldY, t_zoom, world::Rotation::DEG90);
-                    positions[2] = WorldToScreen(worldX, worldY, t_zoom, world::Rotation::DEG180);
-                    positions[3] = WorldToScreen(worldX, worldY, t_zoom, world::Rotation::DEG270);
+                    positions[0] = m_world->WorldToScreen(worldX, worldY, t_zoom, world::Rotation::DEG0);
+                    positions[1] = m_world->WorldToScreen(worldX, worldY, t_zoom, world::Rotation::DEG90);
+                    positions[2] = m_world->WorldToScreen(worldX, worldY, t_zoom, world::Rotation::DEG180);
+                    positions[3] = m_world->WorldToScreen(worldX, worldY, t_zoom, world::Rotation::DEG270);
 
                     tile->screenPositions.at(magic_enum::enum_integer(t_zoom)) = positions;
                 });

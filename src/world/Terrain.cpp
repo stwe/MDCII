@@ -16,10 +16,14 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <imgui.h>
 #include "Terrain.h"
+#include "World.h"
 #include "MdciiAssert.h"
 #include "Island.h"
+#include "MousePicker.h"
 #include "state/State.h"
+#include "eventpp/utilities/argumentadapter.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -33,6 +37,8 @@ mdcii::world::Terrain::Terrain(std::shared_ptr<state::Context> t_context, World*
 
     MDCII_ASSERT(world, "[Terrain::Terrain()] Null pointer.")
     MDCII_ASSERT(m_context, "[Terrain::Terrain()] Null pointer.")
+
+    AddListeners();
 }
 
 mdcii::world::Terrain::~Terrain() noexcept
@@ -67,11 +73,11 @@ void mdcii::world::Terrain::CreateIslandsFromJson(const nlohmann::json& t_json)
 // Getter
 //-------------------------------------------------
 
-bool mdcii::world::Terrain::IsPositionOnTerrain(const glm::ivec2& t_position) const
+bool mdcii::world::Terrain::IsPositionOnAnIsland(const glm::ivec2& t_position) const
 {
     for (const auto& island : islands)
     {
-        if (island->IsPositionOnIsland(t_position))
+        if (island->IsWorldPositionInAabb(t_position))
         {
             return true;
         }
@@ -81,10 +87,60 @@ bool mdcii::world::Terrain::IsPositionOnTerrain(const glm::ivec2& t_position) co
 }
 
 //-------------------------------------------------
+// Event handler
+//-------------------------------------------------
+
+void mdcii::world::Terrain::OnLeftMouseButtonPressed()
+{
+    // do nothing (return) when the mouse is over the ImGui window
+    if (ImGui::GetIO().WantCaptureMouse)
+    {
+        return;
+    }
+
+    currentIsland = nullptr;
+    for (const auto& island : islands)
+    {
+        if (island->IsWorldPositionInAabb(world->mousePicker->currentPosition))
+        {
+            currentIsland = island.get();
+            Log::MDCII_LOG_DEBUG("[Terrain::OnLeftMouseButtonPressed()] New Island selected. The selected Island starts on world {}, {}.", island->worldX, island->worldY);
+
+            island->currentPosition = island->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition);
+            Log::MDCII_LOG_DEBUG("[Terrain::OnLeftMouseButtonPressed()] The Island is selected on {}, {}.", island->currentPosition.x, island->currentPosition.y);
+        }
+    }
+}
+
+//-------------------------------------------------
+// Init
+//-------------------------------------------------
+
+void mdcii::world::Terrain::AddListeners()
+{
+    Log::MDCII_LOG_DEBUG("[Terrain::AddListeners()] Add event listeners.");
+
+    // OnLeftMouseButtonPressed
+    m_mouseButtonPressed = event::EventManager::event_dispatcher.appendListener(
+        event::MdciiEventType::MOUSE_BUTTON_PRESSED,
+        eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>(
+            [this](const event::MouseButtonPressedEvent& t_event) {
+                if (t_event.button == 0)
+                {
+                    OnLeftMouseButtonPressed();
+                }
+            }
+        )
+    );
+}
+
+//-------------------------------------------------
 // Clean up
 //-------------------------------------------------
 
 void mdcii::world::Terrain::CleanUp() const
 {
     Log::MDCII_LOG_DEBUG("[Terrain::CleanUp()] CleanUp Terrain.");
+
+    event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_BUTTON_PRESSED, m_mouseButtonPressed);
 }

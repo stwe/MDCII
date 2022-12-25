@@ -18,8 +18,7 @@
 
 #pragma once
 
-#include <glm/vec2.hpp>
-#include "data/json.hpp"
+#include "layer/Tile.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -94,12 +93,12 @@ namespace mdcii::world
         int32_t height{ -1 };
 
         /**
-         * The world x position.
+         * The start x position in the world.
          */
         int32_t worldX{ -1 };
 
         /**
-         * The world y position.
+         * The start y position in the world.
          */
         int32_t worldY{ -1 };
 
@@ -129,9 +128,14 @@ namespace mdcii::world
         std::unique_ptr<layer::TerrainLayer> mixedLayer;
 
         /**
-         * A Layer object to show a grid.
+         * A Layer object to show a grid of the terrain.
          */
         std::unique_ptr<layer::GridLayer> gridLayer;
+
+        /**
+         * The current position selected with the mouse.
+         */
+        glm::ivec2 currentPosition{ glm::ivec2(-1) };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -170,14 +174,52 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Checks whether a given position in this Island.
-         * The Aabb of the Island is used for this test.
+         * Checks whether a given position of the world is in the Aabb of this island.
          *
-         * @param t_position The position to be checked.
+         * @param t_position The world position to be checked.
          *
          * @return True or false.
          */
-        [[nodiscard]] bool IsPositionOnIsland(const glm::ivec2& t_position) const;
+        [[nodiscard]] bool IsWorldPositionInAabb(const glm::ivec2& t_position) const;
+
+        /**
+         * Takes a world position and determines the island position from it.
+         *
+         * @param t_position The world position to convert.
+         *
+         * @return The island position.
+         */
+        [[nodiscard]] glm::ivec2 GetIslandPositionFromWorldPosition(const glm::ivec2& t_position) const;
+
+        /**
+         * Returns the tile from the coast layer at the current position.
+         *
+         * @return A Tile object.
+         */
+        [[nodiscard]] const layer::Tile& GetCoastTileFromCurrentPosition() const;
+
+        /**
+         * Returns the tile from the terrain layer at the current position.
+         *
+         * @return A Tile object.
+         */
+        [[nodiscard]] const layer::Tile& GetTerrainTileFromCurrentPosition() const;
+
+        /**
+         * Returns the tile from the buildings layer at the current position.
+         *
+         * @return A Tile object.
+         */
+        [[nodiscard]] const layer::Tile& GetBuildingTileFromCurrentPosition() const;
+
+        //-------------------------------------------------
+        // Render
+        //-------------------------------------------------
+
+        /**
+         * Render ImGui menu.
+         */
+        void RenderImGui() const;
 
     protected:
 

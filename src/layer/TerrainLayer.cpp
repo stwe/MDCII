@@ -20,6 +20,7 @@
 #include "TerrainLayer.h"
 #include "state/State.h"
 #include "world/Island.h"
+#include "world/World.h"
 #include "file/OriginalResourcesManager.h"
 #include "ogl/buffer/Ssbo.h"
 #include "renderer/RenderUtils.h"
@@ -118,6 +119,11 @@ void mdcii::layer::TerrainLayer::CreateTilesFromJson(const nlohmann::json& t_jso
 const mdcii::layer::Tile& mdcii::layer::TerrainLayer::GetTile(const int32_t t_x, const int32_t t_y) const
 {
     return *tiles.at(GetMapIndex(t_x, t_y, world::Rotation::DEG0));
+}
+
+const mdcii::layer::Tile& mdcii::layer::TerrainLayer::GetTile(const glm::ivec2& t_position) const
+{
+    return GetTile(t_position.x, t_position.y);
 }
 
 void mdcii::layer::TerrainLayer::ResetTilePointersAt(const std::array<int32_t, world::NR_OF_ROTATIONS>& t_instanceIds)
@@ -331,10 +337,10 @@ void mdcii::layer::TerrainLayer::PreCalcTile(layer::Tile& t_tile, const int32_t 
     magic_enum::enum_for_each<world::Zoom>([this, t_x, t_y, &t_tile, t_islandPosX, t_islandPosY](const world::Zoom t_zoom) {
         std::array<glm::vec2, world::NR_OF_ROTATIONS> positions{};
 
-        positions[0] = WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG0);
-        positions[1] = WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG90);
-        positions[2] = WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG180);
-        positions[3] = WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG270);
+        positions[0] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG0);
+        positions[1] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG90);
+        positions[2] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG180);
+        positions[3] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG270);
 
         t_tile.screenPositions.at(magic_enum::enum_integer(t_zoom)) = positions;
     });

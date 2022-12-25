@@ -139,8 +139,7 @@ void mdcii::world::WorldGui::ZoomGui() const
 
 void mdcii::world::WorldGui::ShowActionsGui() const
 {
-    /*
-    magic_enum::enum_for_each<World::Action>([this](auto t_val) {
+    magic_enum::enum_for_each<World::Action>([this](const auto t_val) {
         constexpr World::Action action{ t_val };
         constexpr int i{ magic_enum::enum_integer(action) };
 
@@ -178,7 +177,6 @@ void mdcii::world::WorldGui::ShowActionsGui() const
     });
 
     ImGui::NewLine();
-    */
 }
 
 void mdcii::world::WorldGui::ShowBuildingsGui()

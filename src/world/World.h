@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include <string>
-#include <memory>
+#include <magic_enum.hpp>
 #include <glm/vec2.hpp>
+#include "event/EventManager.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -131,8 +131,28 @@ namespace mdcii::world
     {
     public:
         //-------------------------------------------------
+        // Actions
+        //-------------------------------------------------
+
+        /**
+         * The possible world actions.
+         */
+        enum class Action
+        {
+            BUILD,    // Create a building.
+            DEMOLISH, // Demolish a building.
+            STATUS,   // Get information about a tile.
+            OPTIONS,  // Change game settings.
+        };
+
+        //-------------------------------------------------
         // Constants
         //-------------------------------------------------
+
+        /**
+         * The (untranslated) labels of the action buttons.
+         */
+        static constexpr std::array<std::string_view, magic_enum::enum_count<Action>()> ACTION_NAMES{ "Build", "Demolish", "Status", "Options" };
 
         /**
          * The min width of the world.
@@ -166,12 +186,12 @@ namespace mdcii::world
         /**
          * The world width.
          */
-        int32_t worldWidth{ WORLD_MIN_WIDTH };
+        int32_t width{ WORLD_MIN_WIDTH };
 
         /**
          * The world height.
          */
-        int32_t worldHeight{ WORLD_MIN_HEIGHT };
+        int32_t height{ WORLD_MIN_HEIGHT };
 
         /**
          * The world rotation.
@@ -218,6 +238,16 @@ namespace mdcii::world
          */
         std::unique_ptr<MousePicker> mousePicker;
 
+        /**
+         * Indicates which action button is currently active.
+         */
+        std::array<bool, magic_enum::enum_count<Action>()> actionButtons{ false, false, true, false };
+
+        /**
+         * The current action.
+         */
+        Action currentAction{ Action::STATUS };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -253,6 +283,15 @@ namespace mdcii::world
          * @return True or false.
          */
         [[nodiscard]] bool IsPositionInWorld(int32_t t_x, int32_t t_y) const;
+
+        /**
+         * Checks whether a given position is in the world.
+         *
+         * @param t_position The position to check.
+         *
+         * @return True or false.
+         */
+        [[nodiscard]] bool IsPositionInWorld(const glm::ivec2& t_position) const;
 
         /**
          * Projects a position into an isometric position on the screen.
@@ -350,6 +389,35 @@ namespace mdcii::world
          */
         bool m_runAnimations{ true };
 
+        /**
+         * To demolish a building.
+         */
+        int m_demolishTileIndex{ -1 };
+
+        /**
+         * The mouse button pressed listener handle.
+         */
+        decltype(event::EventManager::event_dispatcher)::Handle m_mouseButtonPressed;
+
+        /**
+         * The mouse moved listener handle.
+         */
+        decltype(event::EventManager::event_dispatcher)::Handle m_mouseMoved;
+
+        //-------------------------------------------------
+        // Event handler
+        //-------------------------------------------------
+
+        /**
+         * Handles left mouse button pressed event.
+         */
+        void OnLeftMouseButtonPressed();
+
+        /**
+         * Handles mouse move.
+         */
+        void OnMouseMoved();
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
@@ -358,6 +426,11 @@ namespace mdcii::world
          * Initialize class.
          */
         void Init();
+
+        /**
+         * Adds event listeners.
+         */
+        void AddListeners();
 
         //-------------------------------------------------
         // Clean up

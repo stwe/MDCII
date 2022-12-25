@@ -40,8 +40,8 @@ mdcii::world::MousePicker::MousePicker(world::World* t_world, const ogl::Window&
 
     MDCII_ASSERT(m_world, "[MousePicker::MousePicker()] Null pointer.")
 
-    m_worldWidth = m_world->worldWidth;
-    m_worldHeight = m_world->worldHeight;
+    m_worldWidth = m_world->width;
+    m_worldHeight = m_world->height;
 
     Init();
     AddListeners(t_window, t_camera);
@@ -60,7 +60,7 @@ mdcii::world::MousePicker::~MousePicker() noexcept
 
 void mdcii::world::MousePicker::Render(const ogl::Window& t_window, const camera::Camera& t_camera)
 {
-    if (!inWindow || !m_world->IsPositionInWorld(currentPosition.x, currentPosition.y))
+    if (!inWindow || !m_world->IsPositionInWorld(currentPosition))
     {
         return;
     }

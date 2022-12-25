@@ -24,6 +24,7 @@
 #include "TileAtlas.h"
 #include "WorldGui.h"
 #include "MousePicker.h"
+#include "eventpp/utilities/argumentadapter.h"
 #include "state/State.h"
 #include "state/StateStack.h"
 #include "renderer/TerrainRenderer.h"
@@ -32,6 +33,7 @@
 #include "layer/GridLayer.h"
 #include "layer/WorldLayer.h"
 #include "layer/WorldGridLayer.h"
+#include "file/OriginalResourcesManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -52,6 +54,7 @@ mdcii::world::World::World(std::string t_mapFilePath, std::shared_ptr<state::Con
     m_layerType = layer::LayerType::ALL;
 
     Init();
+    AddListeners();
 }
 
 mdcii::world::World::~World() noexcept
@@ -67,7 +70,7 @@ mdcii::world::World::~World() noexcept
 
 bool mdcii::world::World::IsPositionInWorld(const int32_t t_x, const int32_t t_y) const
 {
-    if (t_x >= 0 && t_x < worldWidth && t_y >= 0 && t_y < worldHeight)
+    if (t_x >= 0 && t_x < width && t_y >= 0 && t_y < height)
     {
         return true;
     }
@@ -75,9 +78,14 @@ bool mdcii::world::World::IsPositionInWorld(const int32_t t_x, const int32_t t_y
     return false;
 }
 
-glm::vec2 mdcii::world::World::WorldToScreen(const int32_t t_x, const int32_t t_y, const world::Zoom t_zoom, const world::Rotation t_rotation) const
+bool mdcii::world::World::IsPositionInWorld(const glm::ivec2& t_position) const
 {
-    const auto position{ rotate_position(t_x, t_y, worldWidth, worldHeight, t_rotation) };
+    return IsPositionInWorld(t_position.x, t_position.y);
+}
+
+glm::vec2 mdcii::world::World::WorldToScreen(const int32_t t_x, const int32_t t_y, const Zoom t_zoom, const Rotation t_rotation) const
+{
+    const auto position{ rotate_position(t_x, t_y, width, height, t_rotation) };
     return {
         (position.x - position.y) * get_tile_width_half(t_zoom),
         (position.x + position.y) * get_tile_height_half(t_zoom)
@@ -183,46 +191,144 @@ void mdcii::world::World::RenderImGui()
         context->stateStack->PopState(m_stateId);
         context->stateStack->PushState(state::StateId::MAIN_MENU);
     }
-
     ImGui::Separator();
-    ImGui::Text("Render Islands");
-    ImGui::Separator();
-    static int e{ magic_enum::enum_integer(m_layerType) };
-    ImGui::RadioButton("Coast", &e, 0);
-    ImGui::SameLine();
-    ImGui::RadioButton("Terrain", &e, 1);
-    ImGui::SameLine();
-    ImGui::RadioButton("Buildings", &e, 2);
-    ImGui::RadioButton("Mixed", &e, 3);
-    ImGui::SameLine();
-    ImGui::RadioButton("All", &e, 4);
-    ImGui::SameLine();
-    ImGui::RadioButton("Nothing", &e, 5);
 
-    ImGui::Checkbox("Island Grids", &m_renderIslandGridLayers);
-
-    if (auto layer{ magic_enum::enum_cast<layer::LayerType>(e) }; layer.has_value())
+    if (ImGui::CollapsingHeader("Render islands"))
     {
-        const auto l{ layer.value() };
-        m_layerType = l;
+        static int e{ magic_enum::enum_integer(m_layerType) };
+        ImGui::RadioButton("Coast", &e, 0);
+        ImGui::SameLine();
+        ImGui::RadioButton("Terrain", &e, 1);
+        ImGui::SameLine();
+        ImGui::RadioButton("Buildings", &e, 2);
+        ImGui::RadioButton("Mixed", &e, 3);
+        ImGui::SameLine();
+        ImGui::RadioButton("All", &e, 4);
+        ImGui::SameLine();
+        ImGui::RadioButton("Nothing", &e, 5);
+
+        ImGui::Checkbox("Island Grids", &m_renderIslandGridLayers);
+
+        if (auto layer{ magic_enum::enum_cast<layer::LayerType>(e) }; layer.has_value())
+        {
+            const auto l{ layer.value() };
+            m_layerType = l;
+        }
     }
 
-    ImGui::Separator();
-    ImGui::Text("Render World");
-    ImGui::Separator();
-    ImGui::Checkbox("World Deep Water", &m_renderWorldLayer);
-    ImGui::Checkbox("World Grid", &m_renderWorldGridLayer);
-    ImGui::Checkbox("Animations", &m_runAnimations);
+    if (ImGui::CollapsingHeader("Render World"))
+    {
+        ImGui::Checkbox("World Deep Water", &m_renderWorldLayer);
+        ImGui::Checkbox("World Grid", &m_renderWorldGridLayer);
+        ImGui::Checkbox("Animations", &m_runAnimations);
+    }
 
-    ImGui::Separator();
-    ImGui::Text("Rotate");
-    ImGui::Separator();
-    m_worldGui->RotateGui();
+    if (ImGui::CollapsingHeader("Rotate"))
+    {
+        m_worldGui->RotateGui();
+    }
 
-    ImGui::Separator();
-    ImGui::Text("Zoom");
-    ImGui::Separator();
-    m_worldGui->ZoomGui();
+    if (ImGui::CollapsingHeader("Zoom"))
+    {
+        m_worldGui->ZoomGui();
+    }
+
+    if (ImGui::CollapsingHeader("Change action"))
+    {
+        m_worldGui->ShowActionsGui();
+    }
+
+    if (currentAction == Action::BUILD)
+    {
+        if (ImGui::CollapsingHeader("Buildings"))
+        {
+            m_demolishTileIndex = -1;
+
+            m_worldGui->ShowBuildingsGui();
+        }
+    }
+
+    if (currentAction == Action::DEMOLISH)
+    {
+        if (m_worldGui->selectedBuilding.HasBuilding())
+        {
+            m_worldGui->selectedBuilding.Reset();
+        }
+
+        if (m_demolishTileIndex >= 0)
+        {
+            /*
+            const auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
+            auto& buildingsTile{ *buildingsLayer.tiles.at(m_demolishTileIndex) };
+
+            // remove all building tiles from Gpu/Cpu
+            if (buildingsTile.HasBuilding())
+            {
+                if (buildingsTile.connectedTiles.empty())
+                {
+                    worldRenderer->DeleteBuildingFromGpu(buildingsTile);
+                    renderer::WorldRenderer::DeleteBuildingFromCpu(buildingsTile);
+                }
+                else
+                {
+                    worldRenderer->DeleteBuildingFromGpu(buildingsTile.connectedTiles);
+                    worldRenderer->DeleteBuildingFromCpu(buildingsTile.connectedTiles);
+                }
+            }
+            */
+        }
+
+        m_demolishTileIndex = -1;
+    }
+
+    if (currentAction == Action::STATUS)
+    {
+        if (m_worldGui->selectedBuilding.HasBuilding())
+        {
+            m_worldGui->selectedBuilding.Reset();
+        }
+
+        if (terrain->currentIsland)
+        {
+            terrain->currentIsland->RenderImGui();
+
+            const auto& terrainTile{ terrain->currentIsland->GetTerrainTileFromCurrentPosition() };
+            const auto& buildingsTile{ terrain->currentIsland->GetBuildingTileFromCurrentPosition() };
+            const auto& coastTile{ terrain->currentIsland->GetCoastTileFromCurrentPosition() };
+
+            if (buildingsTile.HasBuilding())
+            {
+                buildingsTile.RenderImGui();
+                context->originalResourcesManager->GetBuildingById(buildingsTile.buildingId).RenderImGui();
+            }
+            else if (terrainTile.HasBuilding())
+            {
+                terrainTile.RenderImGui();
+                context->originalResourcesManager->GetBuildingById(terrainTile.buildingId).RenderImGui();
+            }
+            else if (coastTile.HasBuilding())
+            {
+                coastTile.RenderImGui();
+                context->originalResourcesManager->GetBuildingById(coastTile.buildingId).RenderImGui();
+            }
+            else
+            {
+                Log::MDCII_LOG_WARN("[World::RenderImGui()] Missing Building-Id");
+            }
+        }
+    }
+
+    if (currentAction == Action::OPTIONS)
+    {
+        m_demolishTileIndex = -1;
+
+        if (m_worldGui->selectedBuilding.HasBuilding())
+        {
+            m_worldGui->selectedBuilding.Reset();
+        }
+
+        m_worldGui->SaveGameGui();
+    }
 
     ImGui::PopStyleColor();
 
@@ -264,6 +370,32 @@ void mdcii::world::World::ZoomWorld(const ChangeZoom t_changeZoom)
 }
 
 //-------------------------------------------------
+// Event handler
+//-------------------------------------------------
+
+void mdcii::world::World::OnLeftMouseButtonPressed()
+{
+    // do nothing (return) when the mouse is over the ImGui window
+    if (ImGui::GetIO().WantCaptureMouse)
+    {
+        return;
+    }
+
+    //Log::MDCII_LOG_DEBUG("[World::OnLeftMouseButtonPressed()] Left mouse button event handler.");
+}
+
+void mdcii::world::World::OnMouseMoved()
+{
+    // do nothing (return) when the mouse is over the ImGui window
+    if (ImGui::GetIO().WantCaptureMouse)
+    {
+        return;
+    }
+
+    //Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] Mouse moved event handler.");
+}
+
+//-------------------------------------------------
 // Init
 //-------------------------------------------------
 
@@ -280,21 +412,21 @@ void mdcii::world::World::Init()
     {
         if (k == "world")
         {
-            worldWidth = v.at("width").get<int32_t>();
-            worldHeight = v.at("height").get<int32_t>();
+            width = v.at("width").get<int32_t>();
+            height = v.at("height").get<int32_t>();
 
-            if (worldWidth < WORLD_MIN_WIDTH || worldWidth > WORLD_MAX_WIDTH)
+            if (width < WORLD_MIN_WIDTH || width > WORLD_MAX_WIDTH)
             {
                 throw MDCII_EXCEPTION("[World::Init()] Invalid world width given.");
             }
 
-            if (worldHeight < WORLD_MIN_HEIGHT || worldHeight > WORLD_MAX_HEIGHT)
+            if (height < WORLD_MIN_HEIGHT || height > WORLD_MAX_HEIGHT)
             {
                 throw MDCII_EXCEPTION("[World::Init()] Invalid world height given.");
             }
 
-            Log::MDCII_LOG_DEBUG("[World::Init()] The width of the world is set to: {}.", worldWidth);
-            Log::MDCII_LOG_DEBUG("[World::Init()] The height of the world is set to: {}.", worldHeight);
+            Log::MDCII_LOG_DEBUG("[World::Init()] The width of the world is set to: {}.", width);
+            Log::MDCII_LOG_DEBUG("[World::Init()] The height of the world is set to: {}.", height);
         }
         if (k == "islands")
         {
@@ -319,6 +451,34 @@ void mdcii::world::World::Init()
     Log::MDCII_LOG_DEBUG("[World::Init()] The world was successfully initialized.");
 }
 
+void mdcii::world::World::AddListeners()
+{
+    Log::MDCII_LOG_DEBUG("[World::AddListeners()] Add event listeners.");
+
+    // OnLeftMouseButtonPressed
+    m_mouseButtonPressed = event::EventManager::event_dispatcher.appendListener(
+        event::MdciiEventType::MOUSE_BUTTON_PRESSED,
+        eventpp::argumentAdapter<void(const event::MouseButtonPressedEvent&)>(
+            [this](const event::MouseButtonPressedEvent& t_event) {
+                if (t_event.button == 0)
+                {
+                    OnLeftMouseButtonPressed();
+                }
+            }
+        )
+    );
+
+    // OnMouseMoved
+    m_mouseMoved = event::EventManager::event_dispatcher.appendListener(
+        event::MdciiEventType::MOUSE_MOVED,
+        eventpp::argumentAdapter<void(const event::MouseMovedEvent&)>(
+            [this]([[maybe_unused]] const event::MouseMovedEvent& t_event) {
+                OnMouseMoved();
+            }
+        )
+    );
+}
+
 //-------------------------------------------------
 // Clean up
 //-------------------------------------------------
@@ -326,4 +486,7 @@ void mdcii::world::World::Init()
 void mdcii::world::World::CleanUp() const
 {
     Log::MDCII_LOG_DEBUG("[World::CleanUp()] CleanUp World.");
+
+    event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_BUTTON_PRESSED, m_mouseButtonPressed);
+    event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_MOVED, m_mouseMoved);
 }

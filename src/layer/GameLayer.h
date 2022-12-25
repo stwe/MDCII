@@ -19,7 +19,9 @@
 #pragma once
 
 #include <glm/mat4x4.hpp>
-#include "Tile.h"
+#include "world/Rotation.h"
+#include "world/Zoom.h"
+#include "event/EventManager.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -160,52 +162,29 @@ namespace mdcii::layer
         [[nodiscard]] const Model_Matrices_For_Each_Rotation& GetModelMatrices(world::Zoom t_zoom) const;
 
         //-------------------------------------------------
-        // Tiles
+        // Map index
         //-------------------------------------------------
-
-        /**
-         * Checks whether a given position is in the Layer.
-         *
-         * @param t_x The x position to check.
-         * @param t_x The y position to check.
-         *
-         * @return True or false.
-         */
-        [[nodiscard]] bool IsPositionInLayer(int32_t t_x, int32_t t_y) const;
-
-        /**
-         * Rotates a Layer position.
-         *
-         * @param t_x The x position to rotate.
-         * @param t_y The y position to rotate.
-         * @param t_rotation The rotation.
-         *
-         * @return The rotated position.
-         */
-        [[nodiscard]] glm::ivec2 RotatePosition(int32_t t_x, int32_t t_y, world::Rotation t_rotation = world::Rotation::DEG0) const;
 
         /**
          * 2D/1D - mapping of a Layer position.
          *
-         * @param t_x The x position.
-         * @param t_y The y position.
-         * @param t_rotation The position is previously rotated by the specified value.
+         * @param t_x The x position on this Layer.
+         * @param t_y The y position on this Layer.
+         * @param t_rotation The given position is previously rotated by the specified value.
          *
          * @return The 1D index.
          */
         [[nodiscard]] int32_t GetMapIndex(int32_t t_x, int32_t t_y, world::Rotation t_rotation) const;
 
         /**
-         * Projects Layer coordinates into an isometric position on the screen.
+         * 2D/1D - mapping of a Layer position.
          *
-         * @param t_x The x position.
-         * @param t_y The y position.
-         * @param t_zoom The zoom to get the tile sizes.
-         * @param t_rotation The position is previously rotated by the specified value.
+         * @param t_position The position on this Layer.
+         * @param t_rotation The given position is previously rotated by the specified value.
          *
-         * @return The isometric coordinates on the screen.
+         * @return The 1D index.
          */
-        [[nodiscard]] glm::vec2 WorldToScreen(int32_t t_x, int32_t t_y, world::Zoom t_zoom, world::Rotation t_rotation = world::Rotation::DEG0) const;
+        [[nodiscard]] int32_t GetMapIndex(const glm::ivec2& t_position, world::Rotation t_rotation) const;
 
         //-------------------------------------------------
         // Prepare rendering
@@ -238,18 +217,47 @@ namespace mdcii::layer
 
     private:
         //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * The mouse button pressed listener handle.
+         */
+        decltype(event::EventManager::event_dispatcher)::Handle m_mouseButtonPressed;
+
+        //-------------------------------------------------
         // Interface
         //-------------------------------------------------
 
-        virtual void CreateTiles() {};
-        virtual void SortTiles() {};
+        virtual void CreateTiles() {}
+        virtual void SortTiles() {}
 
-        virtual void CreateModelMatricesContainer() {};
-        virtual void CreateGfxNumbersContainer() {};
-        virtual void CreateBuildingIdsContainer() {};
+        virtual void CreateModelMatricesContainer() {}
+        virtual void CreateGfxNumbersContainer() {}
+        virtual void CreateBuildingIdsContainer() {}
 
         virtual void StoreModelMatricesInGpu();
-        virtual void StoreGfxNumbersInGpu() {};
-        virtual void StoreBuildingIdsInGpu() {};
+        virtual void StoreGfxNumbersInGpu() {}
+        virtual void StoreBuildingIdsInGpu() {}
+
+        virtual void OnLeftMouseButtonPressed() {}
+
+        //-------------------------------------------------
+        // Init
+        //-------------------------------------------------
+
+        /**
+         * Adds event listeners.
+         */
+        void AddListeners();
+
+        //-------------------------------------------------
+        // Clean up
+        //-------------------------------------------------
+
+        /**
+         * Clean up.
+         */
+        void CleanUp() const;
     };
 }
