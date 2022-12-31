@@ -34,7 +34,7 @@ mdcii::world::WorldGui::WorldGui(World* t_world)
 {
     Log::MDCII_LOG_DEBUG("[WorldGui::WorldGui()] Create WorldGui.");
 
-    MDCII_ASSERT(t_world, "[WorldGui::WorldGui()] Null pointer.")
+    MDCII_ASSERT(m_world, "[WorldGui::WorldGui()] Null pointer.")
 
     data::Text::Init();
     InitBauhausZoom();
@@ -181,10 +181,10 @@ void mdcii::world::WorldGui::ShowActionsGui() const
 
 void mdcii::world::WorldGui::ShowBuildingsGui()
 {
-    if (selectedBuilding.HasBuilding())
+    if (selectedBuildingTile.HasBuilding())
     {
-        const auto it{ data::NON_ROTATABLE_BUILDING_IDS.find(selectedBuilding.buildingId) };
-        it != data::NON_ROTATABLE_BUILDING_IDS.end() ? BuildingGui() : RotatableBuildingGui();
+        const auto it{ data::NON_ROTATABLE_BUILDING_IDS.find(selectedBuildingTile.buildingId) };
+        it != data::NON_ROTATABLE_BUILDING_IDS.end() ? NonRotatableBuildingGui() : RotatableBuildingGui();
     }
 
     BuildingsSectionGui(data::Section::HOUSES);
@@ -233,15 +233,15 @@ void mdcii::world::WorldGui::SaveGameGui()
 // Buildings
 //-------------------------------------------------
 
-void mdcii::world::WorldGui::BuildingGui() const
+void mdcii::world::WorldGui::NonRotatableBuildingGui() const
 {
-    const auto& building{ m_world->context->originalResourcesManager->GetBuildingById(selectedBuilding.buildingId) };
+    const auto& building{ m_world->context->originalResourcesManager->GetBuildingById(selectedBuildingTile.buildingId) };
     const auto& bauhausBshTextures{ m_world->context->originalResourcesManager->GetBauhausBshByZoom(m_bauhausZoom) };
 
     const auto textureWidth{ bauhausBshTextures.at(building.baugfx)->width };
     const auto textureHeight{ bauhausBshTextures.at(building.baugfx)->height };
     auto* const textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(
-        bauhausBshTextures.at(static_cast<size_t>(building.baugfx) + magic_enum::enum_integer(selectedBuilding.rotation))->textureId
+        bauhausBshTextures.at(static_cast<size_t>(building.baugfx) + magic_enum::enum_integer(selectedBuildingTile.rotation))->textureId
     )
     ) };
 
@@ -260,30 +260,30 @@ void mdcii::world::WorldGui::BuildingGui() const
 void mdcii::world::WorldGui::RotatableBuildingGui()
 {
     std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentBuildingRotation") };
-    std::string workshopRotation{ rotation_to_string(selectedBuilding.rotation) };
+    std::string workshopRotation{ rotation_to_string(selectedBuildingTile.rotation) };
     ImGui::TextUnformatted(rotStr.append(": ").append(workshopRotation).c_str());
 
     ImGui::Separator();
 
-    const auto& building{ m_world->context->originalResourcesManager->GetBuildingById(selectedBuilding.buildingId) };
+    const auto& building{ m_world->context->originalResourcesManager->GetBuildingById(selectedBuildingTile.buildingId) };
     const auto& bauhausBshTextures{ m_world->context->originalResourcesManager->GetBauhausBshByZoom(m_bauhausZoom) };
 
     const auto textureWidth{ bauhausBshTextures.at(building.baugfx)->width };
     const auto textureHeight{ bauhausBshTextures.at(building.baugfx)->height };
     auto* const textureId{ reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(
-        bauhausBshTextures.at(static_cast<size_t>(building.baugfx) + magic_enum::enum_integer(selectedBuilding.rotation))->textureId
+        bauhausBshTextures.at(static_cast<size_t>(building.baugfx) + magic_enum::enum_integer(selectedBuildingTile.rotation))->textureId
     )
     ) };
 
     static bool r = false;
     static bool l = false;
-    selectedBuilding.rotation == Rotation::DEG270 ? r = true : r = false;
-    selectedBuilding.rotation == Rotation::DEG0 ? l = true : l = false;
+    selectedBuildingTile.rotation == Rotation::DEG270 ? r = true : r = false;
+    selectedBuildingTile.rotation == Rotation::DEG0 ? l = true : l = false;
 
     ImGui::BeginDisabled(r);
     if (ImGui::Button("->##BuildingRot"))
     {
-        ++selectedBuilding.rotation;
+        ++selectedBuildingTile.rotation;
     }
     if (ImGui::IsItemHovered())
     {
@@ -311,7 +311,7 @@ void mdcii::world::WorldGui::RotatableBuildingGui()
     ImGui::BeginDisabled(l);
     if (ImGui::Button("<-##BuildingRot"))
     {
-        --selectedBuilding.rotation;
+        --selectedBuildingTile.rotation;
     }
     if (ImGui::IsItemHovered())
     {
@@ -354,8 +354,8 @@ void mdcii::world::WorldGui::BuildingsSectionGui(const data::Section t_section)
                 {
                     Log::MDCII_LOG_DEBUG("[WorldGui::BuildingsSectionGui()] Select k: {}, v: {}", std::stoi(k), v);
 
-                    selectedBuilding.buildingId = std::stoi(k);
-                    selectedBuilding.rotation = Rotation::DEG0;
+                    selectedBuildingTile.buildingId = std::stoi(k);
+                    selectedBuildingTile.rotation = Rotation::DEG0;
                 }
 
                 ImGui::TreePop();

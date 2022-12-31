@@ -120,11 +120,11 @@ void mdcii::world::MousePicker::OnMouseMoved(const ogl::Window& t_window, const 
     {
         lastPosition = currentPosition;
         currentPosition = newPosition;
-        newTilePosition = true;
+        tilePositionHasChanged = true;
     }
     else
     {
-        newTilePosition = false;
+        tilePositionHasChanged = false;
     }
 }
 

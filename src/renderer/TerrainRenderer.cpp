@@ -26,6 +26,7 @@
 #include "ogl/resource/TextureUtils.h"
 #include "ogl/buffer/Ssbo.h"
 #include "world/TileAtlas.h"
+#include "world/Island.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -164,6 +165,115 @@ void mdcii::renderer::TerrainRenderer::Render(const layer::TerrainLayer& t_terra
         t_zoom,
         t_rotation
     );
+}
+
+//-------------------------------------------------
+// Add / remove building
+//-------------------------------------------------
+
+void mdcii::renderer::TerrainRenderer::AddBuilding(
+    const layer::Tile& t_selectedBuildingTile,
+    const glm::ivec2& t_startWorldPosition,
+    world::Terrain& t_terrain
+)
+{
+    const auto& building{ m_context->originalResourcesManager->GetBuildingById(t_selectedBuildingTile.buildingId) };
+    if (!t_terrain.IsBuildableOnIslandUnderMouse(t_startWorldPosition, building, t_selectedBuildingTile.rotation))
+    {
+        return;
+    }
+
+    MDCII_ASSERT(t_terrain.tilesToAdd.tiles.empty(), "[TerrainRenderer::AddBuilding()] Invalid number of tiles.")
+
+    const auto& terrainLayer{ t_terrain.tilesToAdd.island->terrainLayer };
+    const auto& mixedLayer{ t_terrain.tilesToAdd.island->mixedLayer };
+
+    for (auto y{ 0 }; y < building.size.h; ++y)
+    {
+        for (auto x{ 0 }; x < building.size.w; ++x)
+        {
+            // rotate building position
+            auto rp{ world::rotate_position(x, y, building.size.h, building.size.w, t_selectedBuildingTile.rotation) };
+            if (t_selectedBuildingTile.rotation == world::Rotation::DEG0 || t_selectedBuildingTile.rotation == world::Rotation::DEG180)
+            {
+                rp = world::rotate_position(x, y, building.size.w, building.size.h, t_selectedBuildingTile.rotation);
+            }
+
+            // calc final world position
+            const auto finalWorldPosition{ glm::ivec2(t_startWorldPosition.x + rp.x, t_startWorldPosition.y + rp.y) };
+
+            // is final world position on island - mandatory, but tested
+            if (t_terrain.currentIslandUnderMouse->IsWorldPositionInAabb(finalWorldPosition))
+            {
+                // get position on island from world position
+                const auto islandPosition{ t_terrain.currentIslandUnderMouse->GetIslandPositionFromWorldPosition(finalWorldPosition) };
+
+                /*
+                const auto& terrainTile{ currentIslandUnderMouse->terrainLayer->GetTile(islandPosition.x, islandPosition.y) };
+                const auto& buildingTile{ currentIslandUnderMouse->buildingsLayer->GetTile(islandPosition.x, islandPosition.y) };
+                */
+
+                // create a Tile pointer for each part of the building
+                auto tile{ std::make_unique<layer::Tile>() };
+                tile->buildingId = building.id;
+                tile->rotation = t_selectedBuildingTile.rotation;
+                tile->x = rp.x;
+                tile->y = rp.y;
+                tile->worldXDeg0 = islandPosition.x;
+                tile->worldYDeg0 = islandPosition.y;
+
+                // pre-calc and set screen positions / indices / gfx
+                //t_terrain.world->PreCalcTile(*tile, t_x + rp.x, t_y + rp.y);
+            }
+        }
+
+        // assert !t_terrain.tilesToAdd.tiles.empty()
+
+        Log::MDCII_LOG_DEBUG("[TerrainRenderer::AddBuilding()] Added building Id {} to Gpu on ({}, {}).", building.id, t_startWorldPosition.x, t_startWorldPosition.y);
+    }
+}
+
+void mdcii::renderer::TerrainRenderer::UpdateGpuData(
+    const int32_t t_instance,
+    layer::TerrainLayer& t_terrainLayer,
+    const world::Zoom t_zoom,
+    const world::Rotation t_rotation,
+    const glm::mat4& t_modelMatrix,
+    const int32_t t_gfxNumber,
+    const int32_t t_buildingId
+)
+{
+    // enum to int
+    const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
+    const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+
+    // bind Vao of the given zoom
+    const auto& vao{ m_vaos.at(zoomInt) };
+    vao->Bind();
+
+    // new model matrix
+    const auto& modelMatricesSsbo{ t_terrainLayer.modelMatricesSsbos.at(zoomInt).at(rotationInt) };
+    modelMatricesSsbo->Bind();
+    ogl::buffer::Ssbo::StoreSubData(static_cast<int32_t>(sizeof(glm::mat4)) * t_instance, sizeof(glm::mat4), &t_modelMatrix);
+    ogl::buffer::Ssbo::Unbind();
+
+    // calc offset
+    const auto rotOffset{ rotationInt * static_cast<int32_t>(sizeof(int32_t)) };
+
+    // new gfx number
+    const auto& gfxNumbersSsbo{ t_terrainLayer.gfxNumbersSsbo };
+    gfxNumbersSsbo->Bind();
+    ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::ivec4)) * t_instance) + rotOffset, sizeof(int32_t), &t_gfxNumber);
+    ogl::buffer::Ssbo::Unbind();
+
+    // new building
+    const auto& buildingsSsbo{ t_terrainLayer.buildingIdsSsbo };
+    buildingsSsbo->Bind();
+    ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::ivec4)) * t_instance) + rotOffset, sizeof(int32_t), &t_buildingId);
+    ogl::buffer::Ssbo::Unbind();
+
+    // unbind Vao
+    ogl::buffer::Vao::Unbind();
 }
 
 //-------------------------------------------------

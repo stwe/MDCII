@@ -19,6 +19,7 @@
 #pragma once
 
 #include "layer/TerrainLayer.h"
+#include "world/Terrain.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -51,16 +52,6 @@ namespace mdcii::world
      * Forward declaration class TileAtlas.
      */
     class TileAtlas;
-
-    /**
-     * Forward declaration enum class Zoom.
-     */
-    enum class Zoom;
-
-    /**
-     * Forward declaration enum class Rotation.
-     */
-    enum class Rotation;
 }
 
 //-------------------------------------------------
@@ -132,6 +123,44 @@ namespace mdcii::renderer
          * @param t_rotation The rotation to render for.
          */
         void Render(const layer::TerrainLayer& t_terrainLayer, world::Zoom t_zoom, world::Rotation t_rotation) const;
+
+        //-------------------------------------------------
+        // Add / remove building
+        //-------------------------------------------------
+
+        /**
+         * Adds a building at a position in the world.
+         *
+         * @param t_selectedBuildingTile The building to add as a tile.
+         * @param t_startWorldPosition The starting position in the world.
+         * @param t_terrain The Terrain object.
+         */
+        void AddBuilding(
+            const layer::Tile& t_selectedBuildingTile,
+            const glm::ivec2& t_startWorldPosition,
+            world::Terrain& t_terrain
+        );
+
+        /**
+         * Updates the Gpu data of a Layer object.
+         *
+         * @param t_instance The instance to change.
+         * @param t_terrainLayer The TerrainLayer object.
+         * @param t_zoom The zoom.
+         * @param t_rotation The rotation.
+         * @param t_modelMatrix The new model matrix.
+         * @param t_gfxNumber The new gfx number.
+         * @param t_buildingId The new Building-Id.
+         */
+        void UpdateGpuData(
+            int32_t t_instance,
+            layer::TerrainLayer& t_terrainLayer,
+            world::Zoom t_zoom,
+            world::Rotation t_rotation,
+            const glm::mat4& t_modelMatrix,
+            int32_t t_gfxNumber,
+            int32_t t_buildingId
+        );
 
     protected:
 

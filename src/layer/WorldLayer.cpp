@@ -55,7 +55,7 @@ void mdcii::layer::WorldLayer::CreateTiles()
     {
         for (auto worldX{ 0 }; worldX < m_world->width; ++worldX)
         {
-            if (!m_world->terrain->IsPositionOnAnIsland(glm::ivec2(worldX, worldY)))
+            if (m_world->terrain->IsWorldPositionInDeepWater(worldX, worldY))
             {
                 auto tile{ std::make_unique<Tile>() };
 

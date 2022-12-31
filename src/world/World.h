@@ -241,12 +241,12 @@ namespace mdcii::world
         /**
          * Indicates which action button is currently active.
          */
-        std::array<bool, magic_enum::enum_count<Action>()> actionButtons{ false, false, true, false };
+        std::array<bool, magic_enum::enum_count<Action>()> actionButtons{ true, false, false, false };
 
         /**
          * The current action.
          */
-        Action currentAction{ Action::STATUS };
+        Action currentAction{ Action::BUILD };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -275,7 +275,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Checks whether a given position is in the world.
+         * Checks whether a given position is in the world width and height.
          *
          * @param t_x The x position to check.
          * @param t_y The y position to check.
@@ -285,7 +285,7 @@ namespace mdcii::world
         [[nodiscard]] bool IsPositionInWorld(int32_t t_x, int32_t t_y) const;
 
         /**
-         * Checks whether a given position is in the world.
+         * Checks whether a given position is in the world width and height.
          *
          * @param t_position The position to check.
          *

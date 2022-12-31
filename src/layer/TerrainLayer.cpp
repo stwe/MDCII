@@ -152,6 +152,130 @@ void mdcii::layer::TerrainLayer::StoreTile(std::unique_ptr<Tile> t_tile)
     });
 }
 
+void mdcii::layer::TerrainLayer::PreCalcTile(layer::Tile& t_tile, const int32_t t_x, const int32_t t_y, const int32_t t_islandPosX, const int32_t t_islandPosY) const
+{
+    // set world position for Deg0
+    t_tile.worldXDeg0 = t_x;
+    t_tile.worldYDeg0 = t_y;
+
+    // pre-calculate the position on the screen for each zoom and each rotation
+    magic_enum::enum_for_each<world::Zoom>([this, t_x, t_y, &t_tile, t_islandPosX, t_islandPosY](const world::Zoom t_zoom) {
+        std::array<glm::vec2, world::NR_OF_ROTATIONS> positions{};
+
+        positions[0] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG0);
+        positions[1] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG90);
+        positions[2] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG180);
+        positions[3] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG270);
+
+        t_tile.screenPositions.at(magic_enum::enum_integer(t_zoom)) = positions;
+    });
+
+    // pre-calculate the index for each rotation for sorting
+    t_tile.indices[0] = GetMapIndex(t_x, t_y, world::Rotation::DEG0);
+    t_tile.indices[1] = GetMapIndex(t_x, t_y, world::Rotation::DEG90);
+    t_tile.indices[2] = GetMapIndex(t_x, t_y, world::Rotation::DEG180);
+    t_tile.indices[3] = GetMapIndex(t_x, t_y, world::Rotation::DEG270);
+
+    // pre-calculate a gfx for each rotation
+    if (t_tile.HasBuilding())
+    {
+        const auto building{ m_context->originalResourcesManager->GetBuildingById(t_tile.buildingId) };
+        const auto gfx0{ building.gfx };
+
+        t_tile.gfxs.push_back(gfx0);
+        if (building.rotate > 0)
+        {
+            t_tile.gfxs.push_back(gfx0 + (1 * building.rotate));
+            t_tile.gfxs.push_back(gfx0 + (2 * building.rotate));
+            t_tile.gfxs.push_back(gfx0 + (3 * building.rotate));
+        }
+    }
+}
+
+int32_t mdcii::layer::TerrainLayer::CalcGfx(const Tile& t_tile, const world::Rotation t_rotation) const
+{
+    const auto& building{ m_context->originalResourcesManager->GetBuildingById(t_tile.buildingId) };
+    auto buildingRotation{ t_tile.rotation };
+    if (building.rotate > 0)
+    {
+        buildingRotation = buildingRotation + t_rotation;
+    }
+    auto gfx{ t_tile.gfxs[magic_enum::enum_integer(buildingRotation)] };
+
+    if (building.size.w > 1 || building.size.h > 1)
+    {
+        // default: orientation 0
+        auto rp{ glm::ivec2(t_tile.x, t_tile.y) };
+
+        if (t_tile.rotation == world::Rotation::DEG270)
+        {
+            rp = rotate_position(
+                t_tile.x, t_tile.y,
+                building.size.w, building.size.h,
+                world::Rotation::DEG90
+            );
+        }
+
+        if (t_tile.rotation == world::Rotation::DEG180)
+        {
+            rp = rotate_position(
+                t_tile.x, t_tile.y,
+                building.size.w, building.size.h,
+                world::Rotation::DEG180
+            );
+        }
+
+        if (t_tile.rotation == world::Rotation::DEG90)
+        {
+            rp = rotate_position(
+                t_tile.x, t_tile.y,
+                building.size.w, building.size.h,
+                world::Rotation::DEG270
+            );
+        }
+
+        const auto offset{ rp.y * building.size.w + rp.x };
+        gfx += offset;
+    }
+
+    return gfx;
+}
+
+glm::mat4 mdcii::layer::TerrainLayer::CreateModelMatrix(const Tile& t_tile, const world::Zoom t_zoom, const world::Rotation t_rotation) const
+{
+    // to definitely create a screen position
+    int32_t gfx{ GRASS_GFX };
+    auto posoffs{ m_context->originalResourcesManager->GetBuildingById(GRASS_BUILDING_ID).posoffs };
+
+    // override gfx && posoffs from above
+    if (t_tile.HasBuilding())
+    {
+        // todo: Daten aus dem Tile (pointer) von sortedTiles nehmen?
+        gfx = CalcGfx(t_tile, t_rotation);
+        posoffs = m_context->originalResourcesManager->GetBuildingById(t_tile.buildingId).posoffs;
+    }
+
+    // get width && height
+    const auto& stadtfldBshTextures{ m_context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
+    const auto w{ static_cast<float>(stadtfldBshTextures[gfx]->width) };
+    const auto h{ static_cast<float>(stadtfldBshTextures[gfx]->height) };
+
+    // get elevation
+    auto elevation{ 0.0f };
+    if (posoffs > 0)
+    {
+        elevation = static_cast<float>(get_elevation(t_zoom));
+    }
+
+    // screen position
+    auto screenPosition{ t_tile.screenPositions.at(magic_enum::enum_integer(t_zoom)).at(magic_enum::enum_integer(t_rotation)) };
+    screenPosition.y -= h - static_cast<float>(get_tile_height(t_zoom));
+    screenPosition.y -= elevation;
+
+    // return model matrix
+    return renderer::RenderUtils::GetModelMatrix(screenPosition, { w, h });
+}
+
 //-------------------------------------------------
 // Override
 //-------------------------------------------------
@@ -168,7 +292,7 @@ void mdcii::layer::TerrainLayer::CreateTiles()
     {
         for (auto x{ 0 }; x < width; ++x)
         {
-            PreCalcTile(*tiles.at(GetMapIndex(x, y, world::Rotation::DEG0)), x, y, m_island->worldX, m_island->worldY);
+            PreCalcTile(*tiles.at(GetMapIndex(x, y, world::Rotation::DEG0)), x, y, m_island->startWorldX, m_island->startWorldY);
         }
     }
 }
@@ -325,128 +449,4 @@ void mdcii::layer::TerrainLayer::StoreBuildingIdsInGpu()
 void mdcii::layer::TerrainLayer::AddTileFromJson(const nlohmann::json& t_json)
 {
     tiles.emplace_back(std::make_unique<Tile>(t_json.get<Tile>()));
-}
-
-void mdcii::layer::TerrainLayer::PreCalcTile(layer::Tile& t_tile, const int32_t t_x, const int32_t t_y, const int32_t t_islandPosX, const int32_t t_islandPosY) const
-{
-    // set world position for Deg0
-    t_tile.worldXDeg0 = t_x;
-    t_tile.worldYDeg0 = t_y;
-
-    // pre-calculate the position on the screen for each zoom and each rotation
-    magic_enum::enum_for_each<world::Zoom>([this, t_x, t_y, &t_tile, t_islandPosX, t_islandPosY](const world::Zoom t_zoom) {
-        std::array<glm::vec2, world::NR_OF_ROTATIONS> positions{};
-
-        positions[0] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG0);
-        positions[1] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG90);
-        positions[2] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG180);
-        positions[3] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG270);
-
-        t_tile.screenPositions.at(magic_enum::enum_integer(t_zoom)) = positions;
-    });
-
-    // pre-calculate the index for each rotation for sorting
-    t_tile.indices[0] = GetMapIndex(t_x, t_y, world::Rotation::DEG0);
-    t_tile.indices[1] = GetMapIndex(t_x, t_y, world::Rotation::DEG90);
-    t_tile.indices[2] = GetMapIndex(t_x, t_y, world::Rotation::DEG180);
-    t_tile.indices[3] = GetMapIndex(t_x, t_y, world::Rotation::DEG270);
-
-    // pre-calculate a gfx for each rotation
-    if (t_tile.HasBuilding())
-    {
-        const auto building{ m_context->originalResourcesManager->GetBuildingById(t_tile.buildingId) };
-        const auto gfx0{ building.gfx };
-
-        t_tile.gfxs.push_back(gfx0);
-        if (building.rotate > 0)
-        {
-            t_tile.gfxs.push_back(gfx0 + (1 * building.rotate));
-            t_tile.gfxs.push_back(gfx0 + (2 * building.rotate));
-            t_tile.gfxs.push_back(gfx0 + (3 * building.rotate));
-        }
-    }
-}
-
-int32_t mdcii::layer::TerrainLayer::CalcGfx(const Tile& t_tile, const world::Rotation t_rotation) const
-{
-    const auto& building{ m_context->originalResourcesManager->GetBuildingById(t_tile.buildingId) };
-    auto buildingRotation{ t_tile.rotation };
-    if (building.rotate > 0)
-    {
-        buildingRotation = buildingRotation + t_rotation;
-    }
-    auto gfx{ t_tile.gfxs[magic_enum::enum_integer(buildingRotation)] };
-
-    if (building.size.w > 1 || building.size.h > 1)
-    {
-        // default: orientation 0
-        auto rp{ glm::ivec2(t_tile.x, t_tile.y) };
-
-        if (t_tile.rotation == world::Rotation::DEG270)
-        {
-            rp = rotate_position(
-                t_tile.x, t_tile.y,
-                building.size.w, building.size.h,
-                world::Rotation::DEG90
-            );
-        }
-
-        if (t_tile.rotation == world::Rotation::DEG180)
-        {
-            rp = rotate_position(
-                t_tile.x, t_tile.y,
-                building.size.w, building.size.h,
-                world::Rotation::DEG180
-            );
-        }
-
-        if (t_tile.rotation == world::Rotation::DEG90)
-        {
-            rp = rotate_position(
-                t_tile.x, t_tile.y,
-                building.size.w, building.size.h,
-                world::Rotation::DEG270
-            );
-        }
-
-        const auto offset{ rp.y * building.size.w + rp.x };
-        gfx += offset;
-    }
-
-    return gfx;
-}
-
-glm::mat4 mdcii::layer::TerrainLayer::CreateModelMatrix(const Tile& t_tile, const world::Zoom t_zoom, const world::Rotation t_rotation) const
-{
-    // to definitely create a screen position
-    int32_t gfx{ GRASS_GFX };
-    auto posoffs{ m_context->originalResourcesManager->GetBuildingById(GRASS_BUILDING_ID).posoffs };
-
-    // override gfx && posoffs from above
-    if (t_tile.HasBuilding())
-    {
-        // todo: Daten aus dem Tile (pointer) von sortedTiles nehmen?
-        gfx = CalcGfx(t_tile, t_rotation);
-        posoffs = m_context->originalResourcesManager->GetBuildingById(t_tile.buildingId).posoffs;
-    }
-
-    // get width && height
-    const auto& stadtfldBshTextures{ m_context->originalResourcesManager->GetStadtfldBshByZoom(t_zoom) };
-    const auto w{ static_cast<float>(stadtfldBshTextures[gfx]->width) };
-    const auto h{ static_cast<float>(stadtfldBshTextures[gfx]->height) };
-
-    // get elevation
-    auto elevation{ 0.0f };
-    if (posoffs > 0)
-    {
-        elevation = static_cast<float>(get_elevation(t_zoom));
-    }
-
-    // screen position
-    auto screenPosition{ t_tile.screenPositions.at(magic_enum::enum_integer(t_zoom)).at(magic_enum::enum_integer(t_rotation)) };
-    screenPosition.y -= h - static_cast<float>(get_tile_height(t_zoom));
-    screenPosition.y -= elevation;
-
-    // return model matrix
-    return renderer::RenderUtils::GetModelMatrix(screenPosition, { w, h });
 }

@@ -93,14 +93,14 @@ namespace mdcii::world
         int32_t height{ -1 };
 
         /**
-         * The start x position in the world.
+         * The start x world position.
          */
-        int32_t worldX{ -1 };
+        int32_t startWorldX{ -1 };
 
         /**
-         * The start y position in the world.
+         * The start y world position.
          */
-        int32_t worldY{ -1 };
+        int32_t startWorldY{ -1 };
 
         /**
          * An Aabb (axis-aligned bounding box) object for collision detection.
@@ -135,7 +135,12 @@ namespace mdcii::world
         /**
          * The current position selected with the mouse.
          */
-        glm::ivec2 currentPosition{ glm::ivec2(-1) };
+        glm::ivec2 currentSelectedPosition{ glm::ivec2(-1) };
+
+        /**
+         * The current position under mouse.
+         */
+        glm::ivec2 currentPositionUnderMouse{ glm::ivec2(-1) };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -174,7 +179,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Checks whether a given position of the world is in the Aabb of this island.
+         * Checks whether a given world position is in the Aabb of this island.
          *
          * @param t_position The world position to be checked.
          *
@@ -192,25 +197,65 @@ namespace mdcii::world
         [[nodiscard]] glm::ivec2 GetIslandPositionFromWorldPosition(const glm::ivec2& t_position) const;
 
         /**
-         * Returns the tile from the coast layer at the current position.
+         * Checks whether a given position is in this island width and height.
          *
-         * @return A Tile object.
+         * @param t_x The x position to check.
+         * @param t_y The y position to check.
+         *
+         * @return True or false.
          */
-        [[nodiscard]] const layer::Tile& GetCoastTileFromCurrentPosition() const;
+        [[nodiscard]] bool IsPositionInIsland(int32_t t_x, int32_t t_y) const;
 
         /**
-         * Returns the tile from the terrain layer at the current position.
+         * Checks whether a given position is in this island width and height.
          *
-         * @return A Tile object.
+         * @param t_position The position to check.
+         *
+         * @return True or false.
          */
-        [[nodiscard]] const layer::Tile& GetTerrainTileFromCurrentPosition() const;
+        [[nodiscard]] bool IsPositionInIsland(const glm::ivec2& t_position) const;
 
         /**
-         * Returns the tile from the buildings layer at the current position.
+         * Returns the tile from the coast layer at the current selected position.
          *
          * @return A Tile object.
          */
-        [[nodiscard]] const layer::Tile& GetBuildingTileFromCurrentPosition() const;
+        [[nodiscard]] const layer::Tile& GetCoastTileFromCurrentSelectedPosition() const;
+
+        /**
+         * Returns the tile from the terrain layer at the current selected position.
+         *
+         * @return A Tile object.
+         */
+        [[nodiscard]] const layer::Tile& GetTerrainTileFromCurrentSelectedPosition() const;
+
+        /**
+         * Returns the tile from the buildings layer at the current selected position.
+         *
+         * @return A Tile object.
+         */
+        [[nodiscard]] const layer::Tile& GetBuildingTileFromCurrentSelectedPosition() const;
+
+        /**
+         * Returns the tile from the coast layer at the current position under mouse.
+         *
+         * @return A Tile object.
+         */
+        [[nodiscard]] const layer::Tile& GetCoastTileFromCurrentPositionUnderMouse() const;
+
+        /**
+         * Returns the tile from the terrain layer at the current position under mouse.
+         *
+         * @return A Tile object.
+         */
+        [[nodiscard]] const layer::Tile& GetTerrainTileFromCurrentPositionUnderMouse() const;
+
+        /**
+         * Returns the tile from the buildings layer at the current position under mouse.
+         *
+         * @return A Tile object.
+         */
+        [[nodiscard]] const layer::Tile& GetBuildingTileFromCurrentPositionUnderMouse() const;
 
         //-------------------------------------------------
         // Render

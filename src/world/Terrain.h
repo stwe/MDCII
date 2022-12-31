@@ -21,10 +21,19 @@
 #include <glm/vec2.hpp>
 #include "data/json.hpp"
 #include "event/EventManager.h"
+#include "data/Buildings.h"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
+
+namespace mdcii::layer
+{
+    /**
+     * Forward declaration struct Tile.
+     */
+    struct Tile;
+}
 
 namespace mdcii::state
 {
@@ -54,6 +63,11 @@ namespace mdcii::world
      */
     class Island;
 
+    /**
+     * Forward declaration enum class Island.
+     */
+    enum class Rotation;
+
     //-------------------------------------------------
     // Terrain
     //-------------------------------------------------
@@ -64,6 +78,20 @@ namespace mdcii::world
     class Terrain
     {
     public:
+        //-------------------------------------------------
+        // Types
+        //-------------------------------------------------
+
+        /**
+         * todo: prototype
+         */
+        struct TilesToAdd
+        {
+            std::vector<std::unique_ptr<layer::Tile>> tiles;
+            Island* island{ nullptr };
+            glm::ivec2 startPosition{ glm::ivec2(-1) };
+        };
+
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
@@ -79,9 +107,19 @@ namespace mdcii::world
         std::vector<std::unique_ptr<Island>> islands;
 
         /**
-         * Pointer to the currently selected Island.
+         * Pointer to the currently selected Island object.
          */
-        Island* currentIsland{ nullptr };
+        Island* currentSelectedIsland{ nullptr };
+
+        /**
+         * Pointer to the currently Island object under the mouse.
+         */
+        Island* currentIslandUnderMouse{ nullptr };
+
+        /**
+         * Tiles to add a building.
+         */
+        TilesToAdd tilesToAdd;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -120,14 +158,34 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Checks whether a given position on an Island.
-         * The Aabb of the Island objects is used for this test.
+         * Checks if a given world position is in deep water.
          *
-         * @param t_position The world position to be checked.
+         * @param t_x The world x position to be checked.
+         * @param t_y The world y position to be checked.
          *
          * @return True or false.
          */
-        [[nodiscard]] bool IsPositionOnAnIsland(const glm::ivec2& t_position) const;
+        [[nodiscard]] bool IsWorldPositionInDeepWater(int32_t t_x, int32_t t_y) const;
+
+        /**
+         * Checks whether the given building can be created at the specified world position on current island under mouse.
+         *
+         * @param t_startWorldPosition The world position to be checked.
+         * @param t_building The building to add.
+         * @param t_buildingRotation The rotation of the building.
+         *
+         * @return True or false.
+         */
+        [[nodiscard]] bool IsBuildableOnIslandUnderMouse(const glm::ivec2& t_startWorldPosition, const data::Building& t_building, Rotation t_buildingRotation) const;
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
+        /**
+         * Renders ImGui menus.
+         */
+        void RenderImGui() const;
 
     protected:
 
@@ -146,6 +204,11 @@ namespace mdcii::world
          */
         decltype(event::EventManager::event_dispatcher)::Handle m_mouseButtonPressed;
 
+        /**
+         * The mouse moved listener handle.
+         */
+        decltype(event::EventManager::event_dispatcher)::Handle m_mouseMoved;
+
         //-------------------------------------------------
         // Event handler
         //-------------------------------------------------
@@ -154,6 +217,11 @@ namespace mdcii::world
          * Handles left mouse button pressed event.
          */
         void OnLeftMouseButtonPressed();
+
+        /**
+         * Handles mouse move.
+         */
+        void OnMouseMoved();
 
         //-------------------------------------------------
         // Init

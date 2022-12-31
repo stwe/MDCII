@@ -24,6 +24,8 @@
 #include "MousePicker.h"
 #include "state/State.h"
 #include "eventpp/utilities/argumentadapter.h"
+#include "layer/TerrainLayer.h"
+#include "file/OriginalResourcesManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -73,17 +75,85 @@ void mdcii::world::Terrain::CreateIslandsFromJson(const nlohmann::json& t_json)
 // Getter
 //-------------------------------------------------
 
-bool mdcii::world::Terrain::IsPositionOnAnIsland(const glm::ivec2& t_position) const
+bool mdcii::world::Terrain::IsWorldPositionInDeepWater(const int32_t t_x, const int32_t t_y) const
 {
     for (const auto& island : islands)
     {
-        if (island->IsWorldPositionInAabb(t_position))
+        if (island->IsWorldPositionInAabb(glm::ivec2(t_x, t_y)))
         {
-            return true;
+            return false;
         }
     }
 
-    return false;
+    return true;
+}
+
+bool mdcii::world::Terrain::IsBuildableOnIslandUnderMouse(const glm::ivec2& t_startWorldPosition, const data::Building& t_building, const Rotation t_buildingRotation) const
+{
+    if (!currentIslandUnderMouse)
+    {
+        return false;
+    }
+
+    for (auto y{ 0 }; y < t_building.size.h; ++y)
+    {
+        for (auto x{ 0 }; x < t_building.size.w; ++x)
+        {
+            // rotate building position
+            auto rp{ world::rotate_position(x, y, t_building.size.h, t_building.size.w, t_buildingRotation) };
+            if (t_buildingRotation == world::Rotation::DEG0 || t_buildingRotation == world::Rotation::DEG180)
+            {
+                rp = world::rotate_position(x, y, t_building.size.w, t_building.size.h, t_buildingRotation);
+            }
+
+            // calc final world position
+            const auto finalWorldPosition{ glm::ivec2(t_startWorldPosition.x + rp.x, t_startWorldPosition.y + rp.y) };
+
+            // is final world position on island
+            if (currentIslandUnderMouse->IsWorldPositionInAabb(finalWorldPosition))
+            {
+                // get position on island from world position
+                const auto islandPosition{ currentIslandUnderMouse->GetIslandPositionFromWorldPosition(finalWorldPosition) };
+
+                // get tiles
+                const auto& terrainTile{ currentIslandUnderMouse->terrainLayer->GetTile(islandPosition.x, islandPosition.y) };
+                const auto& buildingTile{ currentIslandUnderMouse->buildingsLayer->GetTile(islandPosition.x, islandPosition.y) };
+
+                // check if the tile is buildable
+                if (!terrainTile.HasBuilding() || buildingTile.HasBuilding() || m_context->originalResourcesManager->GetBuildingById(terrainTile.buildingId).posoffs == 0)
+                {
+                    return false;
+                }
+            }
+        }
+    }
+
+    Log::MDCII_LOG_DEBUG("[World::IsBuildableOnIslandUnderMouse()] The tile is buildable at world {}, {}", t_startWorldPosition.x, t_startWorldPosition.y);
+
+    return true;
+}
+
+//-------------------------------------------------
+// Logic
+//-------------------------------------------------
+
+void mdcii::world::Terrain::RenderImGui() const
+{
+    if (currentSelectedIsland)
+    {
+        ImGui::Separator();
+        ImGui::Text("Selected Island");
+        ImGui::Separator();
+        currentSelectedIsland->RenderImGui();
+    }
+
+    if (currentIslandUnderMouse)
+    {
+        ImGui::Separator();
+        ImGui::Text("Island under mouse");
+        ImGui::Separator();
+        currentIslandUnderMouse->RenderImGui();
+    }
 }
 
 //-------------------------------------------------
@@ -98,16 +168,37 @@ void mdcii::world::Terrain::OnLeftMouseButtonPressed()
         return;
     }
 
-    currentIsland = nullptr;
+    // set current selected island && current selected position
+    currentSelectedIsland = nullptr;
     for (const auto& island : islands)
     {
         if (island->IsWorldPositionInAabb(world->mousePicker->currentPosition))
         {
-            currentIsland = island.get();
-            Log::MDCII_LOG_DEBUG("[Terrain::OnLeftMouseButtonPressed()] New Island selected. The selected Island starts on world {}, {}.", island->worldX, island->worldY);
+            currentSelectedIsland = island.get();
+            Log::MDCII_LOG_DEBUG("[Terrain::OnLeftMouseButtonPressed()] New Island selected. The selected Island starts on world {}, {}.", island->startWorldX, island->startWorldY);
 
-            island->currentPosition = island->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition);
-            Log::MDCII_LOG_DEBUG("[Terrain::OnLeftMouseButtonPressed()] The Island is selected on {}, {}.", island->currentPosition.x, island->currentPosition.y);
+            island->currentSelectedPosition = island->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition);
+            Log::MDCII_LOG_DEBUG("[Terrain::OnLeftMouseButtonPressed()] The Island is selected on {}, {}.", island->currentSelectedPosition.x, island->currentSelectedPosition.y);
+        }
+    }
+}
+
+void mdcii::world::Terrain::OnMouseMoved()
+{
+    // do nothing (return) when the mouse is over the ImGui window
+    if (ImGui::GetIO().WantCaptureMouse)
+    {
+        return;
+    }
+
+    // set current island under mouse && current position under mouse
+    currentIslandUnderMouse = nullptr;
+    for (const auto& island : islands)
+    {
+        if (island->IsWorldPositionInAabb(world->mousePicker->currentPosition))
+        {
+            currentIslandUnderMouse = island.get();
+            island->currentPositionUnderMouse = island->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition);
         }
     }
 }
@@ -132,6 +223,16 @@ void mdcii::world::Terrain::AddListeners()
             }
         )
     );
+
+    // OnMouseMoved
+    m_mouseMoved = event::EventManager::event_dispatcher.appendListener(
+        event::MdciiEventType::MOUSE_MOVED,
+        eventpp::argumentAdapter<void(const event::MouseMovedEvent&)>(
+            [this]([[maybe_unused]] const event::MouseMovedEvent& t_event) {
+                OnMouseMoved();
+            }
+        )
+    );
 }
 
 //-------------------------------------------------
@@ -143,4 +244,5 @@ void mdcii::world::Terrain::CleanUp() const
     Log::MDCII_LOG_DEBUG("[Terrain::CleanUp()] CleanUp Terrain.");
 
     event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_BUTTON_PRESSED, m_mouseButtonPressed);
+    event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_MOVED, m_mouseMoved);
 }

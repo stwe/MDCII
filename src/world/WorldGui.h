@@ -54,9 +54,9 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * The selected building.
+         * The selected building Tile.
          */
-        layer::Tile selectedBuilding;
+        layer::Tile selectedBuildingTile;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -94,7 +94,7 @@ namespace mdcii::world
 
         /**
          * Shows a menu with the action buttons.
-         * These can be used to switch between Build, Status or Options.
+         * These can be used to switch between Build, Demolish, Status or Options.
          */
         void ShowActionsGui() const;
 
@@ -131,9 +131,9 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * Shows a single selected building.
+         * Shows a single non rotatable selected building.
          */
-        void BuildingGui() const;
+        void NonRotatableBuildingGui() const;
 
         /**
          * Shows a single rotatable selected building.

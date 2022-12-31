@@ -192,6 +192,8 @@ void mdcii::world::World::RenderImGui()
         context->stateStack->PushState(state::StateId::MAIN_MENU);
     }
     ImGui::Separator();
+    m_worldGui->ShowActionsGui();
+    ImGui::Separator();
 
     if (ImGui::CollapsingHeader("Render islands"))
     {
@@ -214,6 +216,8 @@ void mdcii::world::World::RenderImGui()
             const auto l{ layer.value() };
             m_layerType = l;
         }
+
+        terrain->RenderImGui();
     }
 
     if (ImGui::CollapsingHeader("Render World"))
@@ -233,11 +237,6 @@ void mdcii::world::World::RenderImGui()
         m_worldGui->ZoomGui();
     }
 
-    if (ImGui::CollapsingHeader("Change action"))
-    {
-        m_worldGui->ShowActionsGui();
-    }
-
     if (currentAction == Action::BUILD)
     {
         if (ImGui::CollapsingHeader("Buildings"))
@@ -250,32 +249,14 @@ void mdcii::world::World::RenderImGui()
 
     if (currentAction == Action::DEMOLISH)
     {
-        if (m_worldGui->selectedBuilding.HasBuilding())
+        if (m_worldGui->selectedBuildingTile.HasBuilding())
         {
-            m_worldGui->selectedBuilding.Reset();
+            m_worldGui->selectedBuildingTile.Reset();
         }
 
         if (m_demolishTileIndex >= 0)
         {
-            /*
-            const auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
-            auto& buildingsTile{ *buildingsLayer.tiles.at(m_demolishTileIndex) };
-
-            // remove all building tiles from Gpu/Cpu
-            if (buildingsTile.HasBuilding())
-            {
-                if (buildingsTile.connectedTiles.empty())
-                {
-                    worldRenderer->DeleteBuildingFromGpu(buildingsTile);
-                    renderer::WorldRenderer::DeleteBuildingFromCpu(buildingsTile);
-                }
-                else
-                {
-                    worldRenderer->DeleteBuildingFromGpu(buildingsTile.connectedTiles);
-                    worldRenderer->DeleteBuildingFromCpu(buildingsTile.connectedTiles);
-                }
-            }
-            */
+            // todo: remove building
         }
 
         m_demolishTileIndex = -1;
@@ -283,18 +264,16 @@ void mdcii::world::World::RenderImGui()
 
     if (currentAction == Action::STATUS)
     {
-        if (m_worldGui->selectedBuilding.HasBuilding())
+        if (m_worldGui->selectedBuildingTile.HasBuilding())
         {
-            m_worldGui->selectedBuilding.Reset();
+            m_worldGui->selectedBuildingTile.Reset();
         }
 
-        if (terrain->currentIsland)
+        if (terrain->currentSelectedIsland)
         {
-            terrain->currentIsland->RenderImGui();
-
-            const auto& terrainTile{ terrain->currentIsland->GetTerrainTileFromCurrentPosition() };
-            const auto& buildingsTile{ terrain->currentIsland->GetBuildingTileFromCurrentPosition() };
-            const auto& coastTile{ terrain->currentIsland->GetCoastTileFromCurrentPosition() };
+            const auto& terrainTile{ terrain->currentSelectedIsland->GetTerrainTileFromCurrentSelectedPosition() };
+            const auto& buildingsTile{ terrain->currentSelectedIsland->GetBuildingTileFromCurrentSelectedPosition() };
+            const auto& coastTile{ terrain->currentSelectedIsland->GetCoastTileFromCurrentSelectedPosition() };
 
             if (buildingsTile.HasBuilding())
             {
@@ -313,7 +292,7 @@ void mdcii::world::World::RenderImGui()
             }
             else
             {
-                Log::MDCII_LOG_WARN("[World::RenderImGui()] Missing Building-Id");
+                Log::MDCII_LOG_ERROR("[World::RenderImGui()] Missing Building-Id");
             }
         }
     }
@@ -322,9 +301,9 @@ void mdcii::world::World::RenderImGui()
     {
         m_demolishTileIndex = -1;
 
-        if (m_worldGui->selectedBuilding.HasBuilding())
+        if (m_worldGui->selectedBuildingTile.HasBuilding())
         {
-            m_worldGui->selectedBuilding.Reset();
+            m_worldGui->selectedBuildingTile.Reset();
         }
 
         m_worldGui->SaveGameGui();
@@ -381,7 +360,7 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
         return;
     }
 
-    //Log::MDCII_LOG_DEBUG("[World::OnLeftMouseButtonPressed()] Left mouse button event handler.");
+    m_worldGui->selectedBuildingTile.Reset();
 }
 
 void mdcii::world::World::OnMouseMoved()
@@ -392,7 +371,18 @@ void mdcii::world::World::OnMouseMoved()
         return;
     }
 
-    //Log::MDCII_LOG_DEBUG("[World::OnMouseMoved()] Mouse moved event handler.");
+    if (currentAction == Action::BUILD &&
+        IsPositionInWorld(mousePicker->currentPosition) &&
+        m_worldGui->selectedBuildingTile.HasBuilding() &&
+        mousePicker->tilePositionHasChanged
+    )
+    {
+        terrainRenderer->AddBuilding(
+            m_worldGui->selectedBuildingTile,
+            mousePicker->currentPosition,
+            *terrain
+        );
+    }
 }
 
 //-------------------------------------------------

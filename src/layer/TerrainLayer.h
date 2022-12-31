@@ -174,6 +174,39 @@ namespace mdcii::layer
          */
         void StoreTile(std::unique_ptr<Tile> t_tile);
 
+        /**
+         * Adds some pre-calculations to every Tile object of the Layer,
+         * which are necessary to render the Tile on the screen.
+         *
+         * @param t_tile The Tile object.
+         * @param t_x The x position for Deg0 in the world.
+         * @param t_y The y position for Deg0 in the world.
+         * @param t_islandPosX The world x offset.
+         * @param t_islandPosY The world y offset.
+         */
+        void PreCalcTile(Tile& t_tile, int32_t t_x, int32_t t_y, int32_t t_islandPosX, int32_t t_islandPosY) const;
+
+        /**
+         * Calculates the gfx.
+         *
+         * @param t_tile The Tile object.
+         * @param t_rotation The world rotation.
+         *
+         * @return The gfx to use for rendering.
+         */
+        [[nodiscard]] int32_t CalcGfx(const Tile& t_tile, world::Rotation t_rotation) const;
+
+        /**
+         * Creates a model matrix for a given Tile object.
+         *
+         * @param t_tile The Tile object.
+         * @param t_zoom The zoom for which to create the model matrix.
+         * @param t_rotation The rotation for which to create the model matrix.
+         *
+         * @return The model matrix.
+         */
+        [[nodiscard]] glm::mat4 CreateModelMatrix(const Tile& t_tile, world::Zoom t_zoom, world::Rotation t_rotation) const;
+
     protected:
 
     private:
@@ -224,38 +257,5 @@ namespace mdcii::layer
          * @param t_json The Json value.
          */
         void AddTileFromJson(const nlohmann::json& t_json);
-
-        /**
-         * Adds some pre-calculations to every Tile object of the Layer,
-         * which are necessary to render the Tile on the screen.
-         *
-         * @param t_tile The Tile object.
-         * @param t_x The x position for Deg0 in the world.
-         * @param t_y The y position for Deg0 in the world.
-         * @param t_islandPosX The world x offset.
-         * @param t_islandPosY The world y offset.
-         */
-        void PreCalcTile(Tile& t_tile, int32_t t_x, int32_t t_y, int32_t t_islandPosX, int32_t t_islandPosY) const;
-
-        /**
-         * Calculates the gfx.
-         *
-         * @param t_tile The Tile object.
-         * @param t_rotation The world rotation.
-         *
-         * @return The gfx to use for rendering.
-         */
-        [[nodiscard]] int32_t CalcGfx(const Tile& t_tile, world::Rotation t_rotation) const;
-
-        /**
-         * Creates a model matrix for a given Tile object.
-         *
-         * @param t_tile The Tile object.
-         * @param t_zoom The zoom for which to create the model matrix.
-         * @param t_rotation The rotation for which to create the model matrix.
-         *
-         * @return The model matrix.
-         */
-        [[nodiscard]] glm::mat4 CreateModelMatrix(const Tile& t_tile, world::Zoom t_zoom, world::Rotation t_rotation) const;
     };
 }

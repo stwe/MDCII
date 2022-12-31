@@ -69,7 +69,7 @@ namespace mdcii::world
         /**
          * Indicates whether the mouse is in a new tile position since the last movement.
          */
-        bool newTilePosition{ false };
+        bool tilePositionHasChanged{ false };
 
         /**
          * Indicates whether the mouse is in the window.
