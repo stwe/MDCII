@@ -66,6 +66,16 @@ namespace mdcii::layer
         int32_t y{ 0 };
 
         /**
+         * The x position for Deg0 on the parent island.
+         */
+        int32_t islandXDeg0{ -1 };
+
+        /**
+         * The y position for Deg0 on the parent island.
+         */
+        int32_t islandYDeg0{ -1 };
+
+        /**
          * The x position for Deg0 in the world.
          */
         int32_t worldXDeg0{ -1 };

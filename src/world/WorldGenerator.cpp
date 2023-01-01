@@ -266,7 +266,7 @@ void mdcii::world::WorldGenerator::CreateTerrain(
         return t_y * t_width + t_x;
     };
 
-    srand(time(0));
+    srand(static_cast<uint32_t>(time(0)));
 
     // terrain
     for (auto y{ 2 }; y < t_height - 2; ++y)

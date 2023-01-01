@@ -133,14 +133,14 @@ namespace mdcii::world
         std::unique_ptr<layer::GridLayer> gridLayer;
 
         /**
-         * The current position selected with the mouse.
+         * Pointer to the currently selected Tile object.
          */
-        glm::ivec2 currentSelectedPosition{ glm::ivec2(-1) };
+        layer::Tile* currentSelectedTile{ nullptr };
 
         /**
-         * The current position under mouse.
+         * Pointer to the currently Tile object under the mouse.
          */
-        glm::ivec2 currentPositionUnderMouse{ glm::ivec2(-1) };
+        layer::Tile* currentTileUnderMouse{ nullptr };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -214,48 +214,6 @@ namespace mdcii::world
          * @return True or false.
          */
         [[nodiscard]] bool IsPositionInIsland(const glm::ivec2& t_position) const;
-
-        /**
-         * Returns the tile from the coast layer at the current selected position.
-         *
-         * @return A Tile object.
-         */
-        [[nodiscard]] const layer::Tile& GetCoastTileFromCurrentSelectedPosition() const;
-
-        /**
-         * Returns the tile from the terrain layer at the current selected position.
-         *
-         * @return A Tile object.
-         */
-        [[nodiscard]] const layer::Tile& GetTerrainTileFromCurrentSelectedPosition() const;
-
-        /**
-         * Returns the tile from the buildings layer at the current selected position.
-         *
-         * @return A Tile object.
-         */
-        [[nodiscard]] const layer::Tile& GetBuildingTileFromCurrentSelectedPosition() const;
-
-        /**
-         * Returns the tile from the coast layer at the current position under mouse.
-         *
-         * @return A Tile object.
-         */
-        [[nodiscard]] const layer::Tile& GetCoastTileFromCurrentPositionUnderMouse() const;
-
-        /**
-         * Returns the tile from the terrain layer at the current position under mouse.
-         *
-         * @return A Tile object.
-         */
-        [[nodiscard]] const layer::Tile& GetTerrainTileFromCurrentPositionUnderMouse() const;
-
-        /**
-         * Returns the tile from the buildings layer at the current position under mouse.
-         *
-         * @return A Tile object.
-         */
-        [[nodiscard]] const layer::Tile& GetBuildingTileFromCurrentPositionUnderMouse() const;
 
         //-------------------------------------------------
         // Render

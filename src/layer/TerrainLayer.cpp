@@ -126,6 +126,11 @@ const mdcii::layer::Tile& mdcii::layer::TerrainLayer::GetTile(const glm::ivec2& 
     return GetTile(t_position.x, t_position.y);
 }
 
+mdcii::layer::Tile& mdcii::layer::TerrainLayer::GetTile(const glm::ivec2& t_position)
+{
+    return *tiles.at(GetMapIndex(t_position, world::Rotation::DEG0));
+}
+
 void mdcii::layer::TerrainLayer::ResetTilePointersAt(const std::array<int32_t, world::NR_OF_ROTATIONS>& t_instanceIds)
 {
     const auto id0{ t_instanceIds.at(magic_enum::enum_integer(world::Rotation::DEG0)) };
@@ -152,20 +157,24 @@ void mdcii::layer::TerrainLayer::StoreTile(std::unique_ptr<Tile> t_tile)
     });
 }
 
-void mdcii::layer::TerrainLayer::PreCalcTile(layer::Tile& t_tile, const int32_t t_x, const int32_t t_y, const int32_t t_islandPosX, const int32_t t_islandPosY) const
+void mdcii::layer::TerrainLayer::PreCalcTile(layer::Tile& t_tile, const int32_t t_x, const int32_t t_y) const
 {
-    // set world position for Deg0
-    t_tile.worldXDeg0 = t_x;
-    t_tile.worldYDeg0 = t_y;
+    // set island position of the tile for Deg0
+    t_tile.islandXDeg0 = t_x;
+    t_tile.islandYDeg0 = t_y;
+
+    // set world position of the tile for Deg0
+    t_tile.worldXDeg0 = m_island->startWorldX + t_x;
+    t_tile.worldYDeg0 = m_island->startWorldY + t_y;
 
     // pre-calculate the position on the screen for each zoom and each rotation
-    magic_enum::enum_for_each<world::Zoom>([this, t_x, t_y, &t_tile, t_islandPosX, t_islandPosY](const world::Zoom t_zoom) {
+    magic_enum::enum_for_each<world::Zoom>([this, t_x, t_y, &t_tile](const world::Zoom t_zoom) {
         std::array<glm::vec2, world::NR_OF_ROTATIONS> positions{};
 
-        positions[0] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG0);
-        positions[1] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG90);
-        positions[2] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG180);
-        positions[3] = m_world->WorldToScreen(t_x + t_islandPosX, t_y + t_islandPosY, t_zoom, world::Rotation::DEG270);
+        positions[0] = m_world->WorldToScreen(t_tile.worldXDeg0, t_tile.worldYDeg0, t_zoom, world::Rotation::DEG0);
+        positions[1] = m_world->WorldToScreen(t_tile.worldXDeg0, t_tile.worldYDeg0, t_zoom, world::Rotation::DEG90);
+        positions[2] = m_world->WorldToScreen(t_tile.worldXDeg0, t_tile.worldYDeg0, t_zoom, world::Rotation::DEG180);
+        positions[3] = m_world->WorldToScreen(t_tile.worldXDeg0, t_tile.worldYDeg0, t_zoom, world::Rotation::DEG270);
 
         t_tile.screenPositions.at(magic_enum::enum_integer(t_zoom)) = positions;
     });
@@ -292,7 +301,7 @@ void mdcii::layer::TerrainLayer::CreateTiles()
     {
         for (auto x{ 0 }; x < width; ++x)
         {
-            PreCalcTile(*tiles.at(GetMapIndex(x, y, world::Rotation::DEG0)), x, y, m_island->startWorldX, m_island->startWorldY);
+            PreCalcTile(*tiles.at(GetMapIndex(x, y, world::Rotation::DEG0)), x, y);
         }
     }
 }

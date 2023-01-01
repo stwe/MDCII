@@ -217,7 +217,7 @@ void mdcii::world::World::RenderImGui()
             m_layerType = l;
         }
 
-        terrain->RenderImGui();
+        terrain->RenderImGui(); // render selected island && island under mouse
     }
 
     if (ImGui::CollapsingHeader("Render World"))
@@ -271,28 +271,9 @@ void mdcii::world::World::RenderImGui()
 
         if (terrain->currentSelectedIsland)
         {
-            const auto& terrainTile{ terrain->currentSelectedIsland->GetTerrainTileFromCurrentSelectedPosition() };
-            const auto& buildingsTile{ terrain->currentSelectedIsland->GetBuildingTileFromCurrentSelectedPosition() };
-            const auto& coastTile{ terrain->currentSelectedIsland->GetCoastTileFromCurrentSelectedPosition() };
-
-            if (buildingsTile.HasBuilding())
+            if (terrain->currentSelectedIsland->currentSelectedTile)
             {
-                buildingsTile.RenderImGui();
-                context->originalResourcesManager->GetBuildingById(buildingsTile.buildingId).RenderImGui();
-            }
-            else if (terrainTile.HasBuilding())
-            {
-                terrainTile.RenderImGui();
-                context->originalResourcesManager->GetBuildingById(terrainTile.buildingId).RenderImGui();
-            }
-            else if (coastTile.HasBuilding())
-            {
-                coastTile.RenderImGui();
-                context->originalResourcesManager->GetBuildingById(coastTile.buildingId).RenderImGui();
-            }
-            else
-            {
-                Log::MDCII_LOG_ERROR("[World::RenderImGui()] Missing Building-Id");
+                terrain->currentSelectedIsland->currentSelectedTile->RenderImGui();
             }
         }
     }

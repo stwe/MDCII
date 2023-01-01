@@ -168,17 +168,30 @@ void mdcii::world::Terrain::OnLeftMouseButtonPressed()
         return;
     }
 
-    // set current selected island && current selected position
     currentSelectedIsland = nullptr;
-    for (const auto& island : islands)
+    for (auto& island : islands)
     {
         if (island->IsWorldPositionInAabb(world->mousePicker->currentPosition))
         {
             currentSelectedIsland = island.get();
-            Log::MDCII_LOG_DEBUG("[Terrain::OnLeftMouseButtonPressed()] New Island selected. The selected Island starts on world {}, {}.", island->startWorldX, island->startWorldY);
+            currentSelectedIsland->currentSelectedTile = nullptr;
 
-            island->currentSelectedPosition = island->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition);
-            Log::MDCII_LOG_DEBUG("[Terrain::OnLeftMouseButtonPressed()] The Island is selected on {}, {}.", island->currentSelectedPosition.x, island->currentSelectedPosition.y);
+            auto& terrainTile{ currentSelectedIsland->terrainLayer->GetTile(currentSelectedIsland->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition)) };
+            auto& buildingsTile{ currentSelectedIsland->buildingsLayer->GetTile(currentSelectedIsland->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition)) };
+            auto& coastTile{ currentSelectedIsland->coastLayer->GetTile(currentSelectedIsland->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition)) };
+
+            if (buildingsTile.HasBuilding())
+            {
+                currentSelectedIsland->currentSelectedTile = &buildingsTile;
+            }
+            else if (terrainTile.HasBuilding())
+            {
+                currentSelectedIsland->currentSelectedTile = &terrainTile;
+            }
+            else if (coastTile.HasBuilding())
+            {
+                currentSelectedIsland->currentSelectedTile = &coastTile;
+            }
         }
     }
 }
@@ -191,14 +204,30 @@ void mdcii::world::Terrain::OnMouseMoved()
         return;
     }
 
-    // set current island under mouse && current position under mouse
     currentIslandUnderMouse = nullptr;
     for (const auto& island : islands)
     {
         if (island->IsWorldPositionInAabb(world->mousePicker->currentPosition))
         {
             currentIslandUnderMouse = island.get();
-            island->currentPositionUnderMouse = island->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition);
+            currentIslandUnderMouse->currentTileUnderMouse = nullptr;
+
+            auto& terrainTile{ currentIslandUnderMouse->terrainLayer->GetTile(currentIslandUnderMouse->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition)) };
+            auto& buildingsTile{ currentIslandUnderMouse->buildingsLayer->GetTile(currentIslandUnderMouse->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition)) };
+            auto& coastTile{ currentIslandUnderMouse->coastLayer->GetTile(currentIslandUnderMouse->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition)) };
+
+            if (buildingsTile.HasBuilding())
+            {
+                currentIslandUnderMouse->currentTileUnderMouse = &buildingsTile;
+            }
+            else if (terrainTile.HasBuilding())
+            {
+                currentIslandUnderMouse->currentTileUnderMouse = &terrainTile;
+            }
+            else if (coastTile.HasBuilding())
+            {
+                currentIslandUnderMouse->currentTileUnderMouse = &coastTile;
+            }
         }
     }
 }

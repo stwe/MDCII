@@ -161,6 +161,15 @@ namespace mdcii::layer
         [[nodiscard]] const Tile& GetTile(const glm::ivec2& t_position) const;
 
         /**
+         * Returns a Tile object.
+         *
+         * @param t_position The DEG0 position.
+         *
+         * @return The Tile object.
+         */
+        [[nodiscard]] Tile& GetTile(const glm::ivec2& t_position);
+
+        /**
          * Resets Tile pointer at given instances in tiles and sortedTiles.
          *
          * @param t_instanceIds Instances at which the pointer should be deleted.
@@ -179,12 +188,10 @@ namespace mdcii::layer
          * which are necessary to render the Tile on the screen.
          *
          * @param t_tile The Tile object.
-         * @param t_x The x position for Deg0 in the world.
-         * @param t_y The y position for Deg0 in the world.
-         * @param t_islandPosX The world x offset.
-         * @param t_islandPosY The world y offset.
+         * @param t_x The x position for Deg0 on the island.
+         * @param t_y The y position for Deg0 on the island.
          */
-        void PreCalcTile(Tile& t_tile, int32_t t_x, int32_t t_y, int32_t t_islandPosX, int32_t t_islandPosY) const;
+        void PreCalcTile(Tile& t_tile, int32_t t_x, int32_t t_y) const;
 
         /**
          * Calculates the gfx.

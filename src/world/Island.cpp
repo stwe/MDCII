@@ -116,45 +116,10 @@ bool mdcii::world::Island::IsPositionInIsland(const int32_t t_x, const int32_t t
 
     return false;
 }
+
 bool mdcii::world::Island::IsPositionInIsland(const glm::ivec2& t_position) const
 {
     return IsPositionInIsland(t_position.x, t_position.y);
-}
-
-const mdcii::layer::Tile& mdcii::world::Island::GetCoastTileFromCurrentSelectedPosition() const
-{
-    MDCII_ASSERT(IsPositionInIsland(currentSelectedPosition), "[Island::GetCoastTileFromCurrentSelectedPosition()] Invalid position.")
-    return coastLayer->GetTile(currentSelectedPosition);
-}
-
-const mdcii::layer::Tile& mdcii::world::Island::GetTerrainTileFromCurrentSelectedPosition() const
-{
-    MDCII_ASSERT(IsPositionInIsland(currentSelectedPosition), "[Island::GetTerrainTileFromCurrentSelectedPosition()] Invalid position.")
-    return terrainLayer->GetTile(currentSelectedPosition);
-}
-
-const mdcii::layer::Tile& mdcii::world::Island::GetBuildingTileFromCurrentSelectedPosition() const
-{
-    MDCII_ASSERT(IsPositionInIsland(currentSelectedPosition), "[Island::GetBuildingTileFromCurrentSelectedPosition()] Invalid position.")
-    return buildingsLayer->GetTile(currentSelectedPosition);
-}
-
-const mdcii::layer::Tile& mdcii::world::Island::GetCoastTileFromCurrentPositionUnderMouse() const
-{
-    MDCII_ASSERT(IsPositionInIsland(currentPositionUnderMouse), "[Island::GetCoastTileFromCurrentPositionUnderMouse()] Invalid position.")
-    return coastLayer->GetTile(currentPositionUnderMouse);
-}
-
-const mdcii::layer::Tile& mdcii::world::Island::GetTerrainTileFromCurrentPositionUnderMouse() const
-{
-    MDCII_ASSERT(IsPositionInIsland(currentPositionUnderMouse), "[Island::GetTerrainTileFromCurrentPositionUnderMouse()] Invalid position.")
-    return terrainLayer->GetTile(currentPositionUnderMouse);
-}
-
-const mdcii::layer::Tile& mdcii::world::Island::GetBuildingTileFromCurrentPositionUnderMouse() const
-{
-    MDCII_ASSERT(IsPositionInIsland(currentPositionUnderMouse), "[Island::GetBuildingTileFromCurrentPositionUnderMouse()] Invalid position.")
-    return buildingsLayer->GetTile(currentPositionUnderMouse);
 }
 
 //-------------------------------------------------
@@ -167,10 +132,6 @@ void mdcii::world::Island::RenderImGui() const
     ImGui::Text("Start World y: %d", startWorldY);
     ImGui::Text("Width: %d", width);
     ImGui::Text("Height: %d", height);
-    ImGui::Text("Current selected x: %d", currentSelectedPosition.x);
-    ImGui::Text("Current selected y: %d", currentSelectedPosition.y);
-    ImGui::Text("Current x: %d", currentPositionUnderMouse.x);
-    ImGui::Text("Current y: %d", currentPositionUnderMouse.y);
 }
 
 //-------------------------------------------------

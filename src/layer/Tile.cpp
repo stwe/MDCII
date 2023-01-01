@@ -29,6 +29,8 @@ void mdcii::layer::Tile::Reset()
 {
     ResetBuildingInfo();
 
+    islandXDeg0 = -1;
+    islandYDeg0 = -1;
     worldXDeg0 = -1;
     worldYDeg0 = -1;
     screenPositions = {};
@@ -52,13 +54,7 @@ void mdcii::layer::Tile::ResetBuildingInfo()
 
 void mdcii::layer::Tile::RenderImGui() const
 {
-    ImGui::Separator();
-    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(ImColor(0.7f, 0.8f, 0.8f)));
-    ImGui::Text("Tile");
-    ImGui::PopStyleColor();
-    ImGui::Separator();
-
-    magic_enum::enum_for_each< data::Section>([this] (auto t_section) {
+    magic_enum::enum_for_each< data::Section>([this] (const auto t_section) {
         constexpr data::Section section = t_section;
         const auto nameOptional{ data::Text::GetTextForBuildingId(
             section,
@@ -72,10 +68,12 @@ void mdcii::layer::Tile::RenderImGui() const
 
     ImGui::Text("Tile Building-Id: %d", buildingId);
     ImGui::Text("Tile rotation: %s", magic_enum::enum_name(rotation).data());
-    ImGui::Text("X: %d", x);
-    ImGui::Text("Y: %d", y);
-    ImGui::Text("Deg0 World x: %d", worldXDeg0);
-    ImGui::Text("Deg0 World y: %d", worldYDeg0);
+    ImGui::Text("Building x: %d", x);
+    ImGui::Text("Building y: %d", y);
+    ImGui::Text("Island x: %d", islandXDeg0);
+    ImGui::Text("Island y: %d", islandYDeg0);
+    ImGui::Text("World x: %d", worldXDeg0);
+    ImGui::Text("World y: %d", worldYDeg0);
 
     if (ImGui::TreeNode("Indices"))
     {
