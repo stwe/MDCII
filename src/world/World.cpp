@@ -341,6 +341,29 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
         return;
     }
 
+    // build
+    if (IsPositionInWorld(mousePicker->currentPosition) &&
+        currentAction == Action::BUILD &&
+        !terrain->tilesToAdd.tiles.empty()
+    )
+    {
+        // reset Tile pointers and replace with new Tile
+        // todo: method AddToCpu
+        /*
+        auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
+        for (auto& tile : m_tilesToAdd)
+        {
+            buildingsLayer.ResetTilePointersAt(tile->instanceIds);
+            buildingsLayer.StoreTile(std::move(tile));
+        }
+        */
+
+        // clear vector
+        std::vector<std::unique_ptr<layer::Tile>>().swap(terrain->tilesToAdd.tiles);
+    }
+
+    MDCII_ASSERT(terrain->tilesToAdd.tiles.empty(), "[World::OnLeftMouseButtonPressed()] Invalid number of tiles to add.")
+
     m_worldGui->selectedBuildingTile.Reset();
 }
 
@@ -358,10 +381,19 @@ void mdcii::world::World::OnMouseMoved()
         mousePicker->tilePositionHasChanged
     )
     {
+        if (!terrain->tilesToAdd.tiles.empty())
+        {
+            terrainRenderer->DeleteBuilding(*terrain);
+        }
         if (terrain->tilesToAdd.tiles.empty())
         {
             terrainRenderer->AddBuilding(m_worldGui->selectedBuildingTile, mousePicker->currentPosition, *terrain);
         }
+    }
+
+    if (currentAction == Action::BUILD && !IsPositionInWorld(mousePicker->currentPosition) && !terrain->tilesToAdd.tiles.empty())
+    {
+        terrainRenderer->DeleteBuilding(*terrain);
     }
 }
 

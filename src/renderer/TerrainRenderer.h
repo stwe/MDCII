@@ -129,9 +129,24 @@ namespace mdcii::renderer
         //-------------------------------------------------
 
         /**
-         * Adds a building at a position in the world.
+         * Deletes a building from the Gpu.
          *
-         * @param t_selectedBuildingTile The building to add as a tile.
+         * @param t_island The Island object.
+         * @param t_tile The Tile object to delete.
+         */
+        void DeleteBuilding(world::Island& t_island, const layer::Tile& t_tile);
+
+        /**
+         * Deletes a building from the Gpu.
+         *
+         * @param t_terrain The Terrain object.
+         */
+        void DeleteBuilding(world::Terrain& t_terrain);
+
+        /**
+         * Adds a building to the Gpu.
+         *
+         * @param t_selectedBuildingTile The building tile to add.
          * @param t_startWorldPosition The starting position in the world.
          * @param t_terrain The Terrain object.
          */

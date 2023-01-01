@@ -172,6 +172,57 @@ void mdcii::renderer::TerrainRenderer::Render(const layer::TerrainLayer& t_terra
 // Add / remove building
 //-------------------------------------------------
 
+void mdcii::renderer::TerrainRenderer::DeleteBuilding(world::Island& t_island, const layer::Tile& t_tile)
+{
+    MDCII_ASSERT(t_tile.HasBuilding(), "[TerrainRenderer::DeleteBuilding()] No building to delete.")
+
+    Log::MDCII_LOG_DEBUG("[TerrainRenderer::DeleteBuilding()] Delete building with Id {} from the world ({}, {}).", t_tile.buildingId, t_tile.worldXDeg0, t_tile.worldYDeg0);
+
+    magic_enum::enum_for_each<world::Zoom>([this, &t_island, &t_tile](const world::Zoom t_zoom) {
+        magic_enum::enum_for_each<world::Rotation>([this, &t_zoom, &t_island, &t_tile](const world::Rotation t_rotation) {
+            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+            const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
+
+            // to override MIXED layer
+            const auto& tm{ t_island.terrainLayer->modelMatrices[zoomInt][rotationInt] };
+            const auto& tg{ t_island.terrainLayer->gfxNumbers };
+            const auto& tb{ t_island.terrainLayer->buildingIds };
+
+            // delete: update Gpu data of BUILDINGS Layer
+            UpdateGpuData(
+                t_tile.instanceIds[rotationInt],
+                *t_island.buildingsLayer,
+                t_zoom, t_rotation,
+                glm::mat4(), // model matrix
+                -1,          // gfx
+                -1           // building
+            );
+
+            // delete: update Gpu data from MIXED Layer
+            UpdateGpuData(
+                t_tile.instanceIds[rotationInt],
+                *t_island.mixedLayer,
+                t_zoom, t_rotation,
+                tm[t_tile.instanceIds[rotationInt]],
+                tg[t_tile.instanceIds[rotationInt]][rotationInt],
+                tb[t_tile.instanceIds[rotationInt]][rotationInt]
+            );
+        });
+    });
+}
+
+void mdcii::renderer::TerrainRenderer::DeleteBuilding(world::Terrain& t_terrain)
+{
+    MDCII_ASSERT(!t_terrain.tilesToAdd.tiles.empty(), "[TerrainRenderer::DeleteBuilding()] No Tile objects available.")
+    for (const auto& tile : t_terrain.tilesToAdd.tiles)
+    {
+        DeleteBuilding(*t_terrain.tilesToAdd.island, *tile);
+    }
+
+    // clear vector
+    std::vector<std::unique_ptr<layer::Tile>>().swap(t_terrain.tilesToAdd.tiles);
+}
+
 void mdcii::renderer::TerrainRenderer::AddBuilding(
     const layer::Tile& t_selectedBuildingTile,
     const glm::ivec2& t_startWorldPosition,
@@ -246,7 +297,7 @@ void mdcii::renderer::TerrainRenderer::AddBuilding(
                         tile->buildingId
                     );
 
-                    // add: update Gpu data TERRAIN_AND_BUILDINGS
+                    // add: update Gpu data MIXED
                     UpdateGpuData(
                         tile->instanceIds[rotationInt],
                         *t_terrain.currentIslandUnderMouse->mixedLayer,
@@ -277,7 +328,7 @@ void mdcii::renderer::TerrainRenderer::AddBuilding(
         tile->connectedTiles = connected;
     }
 
-    Log::MDCII_LOG_DEBUG("[TerrainRenderer::AddBuilding()] Added building Id {} to Gpu on ({}, {}).", building.id, t_startWorldPosition.x, t_startWorldPosition.y);
+    Log::MDCII_LOG_DEBUG("[TerrainRenderer::AddBuilding()] Added building with Id {} to the world on ({}, {}).", building.id, t_startWorldPosition.x, t_startWorldPosition.y);
 }
 
 void mdcii::renderer::TerrainRenderer::UpdateGpuData(
