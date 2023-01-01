@@ -157,18 +157,10 @@ void mdcii::layer::TerrainLayer::StoreTile(std::unique_ptr<Tile> t_tile)
     });
 }
 
-void mdcii::layer::TerrainLayer::PreCalcTile(layer::Tile& t_tile, const int32_t t_x, const int32_t t_y) const
+void mdcii::layer::TerrainLayer::PreCalcTile(Tile& t_tile) const
 {
-    // set island position of the tile for Deg0
-    t_tile.islandXDeg0 = t_x;
-    t_tile.islandYDeg0 = t_y;
-
-    // set world position of the tile for Deg0
-    t_tile.worldXDeg0 = m_island->startWorldX + t_x;
-    t_tile.worldYDeg0 = m_island->startWorldY + t_y;
-
     // pre-calculate the position on the screen for each zoom and each rotation
-    magic_enum::enum_for_each<world::Zoom>([this, t_x, t_y, &t_tile](const world::Zoom t_zoom) {
+    magic_enum::enum_for_each<world::Zoom>([this, &t_tile](const world::Zoom t_zoom) {
         std::array<glm::vec2, world::NR_OF_ROTATIONS> positions{};
 
         positions[0] = m_world->WorldToScreen(t_tile.worldXDeg0, t_tile.worldYDeg0, t_zoom, world::Rotation::DEG0);
@@ -180,10 +172,10 @@ void mdcii::layer::TerrainLayer::PreCalcTile(layer::Tile& t_tile, const int32_t 
     });
 
     // pre-calculate the index for each rotation for sorting
-    t_tile.indices[0] = GetMapIndex(t_x, t_y, world::Rotation::DEG0);
-    t_tile.indices[1] = GetMapIndex(t_x, t_y, world::Rotation::DEG90);
-    t_tile.indices[2] = GetMapIndex(t_x, t_y, world::Rotation::DEG180);
-    t_tile.indices[3] = GetMapIndex(t_x, t_y, world::Rotation::DEG270);
+    t_tile.indices[0] = GetMapIndex(t_tile.islandXDeg0, t_tile.islandYDeg0, world::Rotation::DEG0);
+    t_tile.indices[1] = GetMapIndex(t_tile.islandXDeg0, t_tile.islandYDeg0, world::Rotation::DEG90);
+    t_tile.indices[2] = GetMapIndex(t_tile.islandXDeg0, t_tile.islandYDeg0, world::Rotation::DEG180);
+    t_tile.indices[3] = GetMapIndex(t_tile.islandXDeg0, t_tile.islandYDeg0, world::Rotation::DEG270);
 
     // pre-calculate a gfx for each rotation
     if (t_tile.HasBuilding())
@@ -199,6 +191,19 @@ void mdcii::layer::TerrainLayer::PreCalcTile(layer::Tile& t_tile, const int32_t 
             t_tile.gfxs.push_back(gfx0 + (3 * building.rotate));
         }
     }
+}
+
+void mdcii::layer::TerrainLayer::PreCalcTile(Tile& t_tile, const int32_t t_x, const int32_t t_y) const
+{
+    // set island position of the tile for Deg0
+    t_tile.islandXDeg0 = t_x;
+    t_tile.islandYDeg0 = t_y;
+
+    // set world position of the tile for Deg0
+    t_tile.worldXDeg0 = m_island->startWorldX + t_tile.islandXDeg0;
+    t_tile.worldYDeg0 = m_island->startWorldY + t_tile.islandYDeg0;
+
+    PreCalcTile(t_tile);
 }
 
 int32_t mdcii::layer::TerrainLayer::CalcGfx(const Tile& t_tile, const world::Rotation t_rotation) const

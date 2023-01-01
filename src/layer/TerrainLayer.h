@@ -188,6 +188,14 @@ namespace mdcii::layer
          * which are necessary to render the Tile on the screen.
          *
          * @param t_tile The Tile object.
+         */
+        void PreCalcTile(Tile& t_tile) const;
+
+        /**
+         * Adds some pre-calculations to every Tile object of the Layer,
+         * which are necessary to render the Tile on the screen.
+         *
+         * @param t_tile The Tile object.
          * @param t_x The x position for Deg0 on the island.
          * @param t_y The y position for Deg0 on the island.
          */

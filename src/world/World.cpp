@@ -358,11 +358,10 @@ void mdcii::world::World::OnMouseMoved()
         mousePicker->tilePositionHasChanged
     )
     {
-        terrainRenderer->AddBuilding(
-            m_worldGui->selectedBuildingTile,
-            mousePicker->currentPosition,
-            *terrain
-        );
+        if (terrain->tilesToAdd.tiles.empty())
+        {
+            terrainRenderer->AddBuilding(m_worldGui->selectedBuildingTile, mousePicker->currentPosition, *terrain);
+        }
     }
 }
 

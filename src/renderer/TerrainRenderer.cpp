@@ -16,6 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <glm/gtx/hash.hpp>
 #include "TerrainRenderer.h"
 #include "RenderUtils.h"
 #include "state/State.h"
@@ -200,37 +201,83 @@ void mdcii::renderer::TerrainRenderer::AddBuilding(
             }
 
             // calc final world position
-            const auto finalWorldPosition{ glm::ivec2(t_startWorldPosition.x + rp.x, t_startWorldPosition.y + rp.y) };
+            const auto buildingWorldPosition{ glm::ivec2(t_startWorldPosition.x + rp.x, t_startWorldPosition.y + rp.y) };
+            MDCII_ASSERT(t_terrain.currentIslandUnderMouse->IsWorldPositionInAabb(buildingWorldPosition), "[TerrainRenderer::AddBuilding()] Invalid world position.")
 
-            // is final world position on island - mandatory, but tested
-            if (t_terrain.currentIslandUnderMouse->IsWorldPositionInAabb(finalWorldPosition))
-            {
-                // get position on island from world position
-                const auto islandPosition{ t_terrain.currentIslandUnderMouse->GetIslandPositionFromWorldPosition(finalWorldPosition) };
+            // get position on island from world position
+            const auto buildingIslandPosition{ t_terrain.currentIslandUnderMouse->GetIslandPositionFromWorldPosition(buildingWorldPosition) };
 
-                /*
-                const auto& terrainTile{ currentIslandUnderMouse->terrainLayer->GetTile(islandPosition.x, islandPosition.y) };
-                const auto& buildingTile{ currentIslandUnderMouse->buildingsLayer->GetTile(islandPosition.x, islandPosition.y) };
-                */
+            // create a Tile pointer for each part of the building
+            auto tile{ std::make_unique<layer::Tile>() };
+            tile->buildingId = building.id;
+            tile->rotation = t_selectedBuildingTile.rotation;
+            tile->x = rp.x;
+            tile->y = rp.y;
+            tile->islandXDeg0 = buildingIslandPosition.x;
+            tile->islandYDeg0 = buildingIslandPosition.y;
+            tile->worldXDeg0 = buildingWorldPosition.x;
+            tile->worldYDeg0 = buildingWorldPosition.y;
 
-                // create a Tile pointer for each part of the building
-                auto tile{ std::make_unique<layer::Tile>() };
-                tile->buildingId = building.id;
-                tile->rotation = t_selectedBuildingTile.rotation;
-                tile->x = rp.x;
-                tile->y = rp.y;
-                tile->worldXDeg0 = islandPosition.x;
-                tile->worldYDeg0 = islandPosition.y;
+            // pre-calc screen positions / indices / gfx
+            t_terrain.currentIslandUnderMouse->terrainLayer->PreCalcTile(*tile);
 
-                // pre-calc and set screen positions / indices / gfx
-                //t_terrain.world->PreCalcTile(*tile, t_x + rp.x, t_y + rp.y);
-            }
+            // copy the instances Ids from Terrain Layer Tile at the same position
+            magic_enum::enum_for_each<world::Rotation>([&t_terrain, &tile](const world::Rotation t_rotation) {
+                const auto r{ magic_enum::enum_integer(t_rotation) };
+                tile->instanceIds[r] = t_terrain.currentIslandUnderMouse->terrainLayer->instanceIds.at(glm::ivec3(tile->worldXDeg0, tile->worldYDeg0, r));
+            });
+
+            // create Gpu data for each zoom and each rotation
+            magic_enum::enum_for_each<world::Zoom>([this, &t_terrain, &tile](const world::Zoom t_zoom) {
+                magic_enum::enum_for_each<world::Rotation>([this, &t_terrain, &tile, &t_zoom](const world::Rotation t_rotation) {
+                    const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+
+                    // create new Gpu data
+                    const auto modelMatrix{ t_terrain.currentIslandUnderMouse->mixedLayer->CreateModelMatrix(*tile, t_zoom, t_rotation) };
+                    const auto gfxNumber{ t_terrain.currentIslandUnderMouse->mixedLayer->CalcGfx(*tile, t_rotation) };
+
+                    // add: update Gpu data BUILDINGS
+                    UpdateGpuData(
+                        tile->instanceIds[rotationInt],
+                        *t_terrain.currentIslandUnderMouse->buildingsLayer,
+                        t_zoom, t_rotation,
+                        modelMatrix,
+                        gfxNumber,
+                        tile->buildingId
+                    );
+
+                    // add: update Gpu data TERRAIN_AND_BUILDINGS
+                    UpdateGpuData(
+                        tile->instanceIds[rotationInt],
+                        *t_terrain.currentIslandUnderMouse->mixedLayer,
+                        t_zoom, t_rotation,
+                        modelMatrix,
+                        gfxNumber,
+                        tile->buildingId
+                    );
+                });
+            });
+
+            t_terrain.tilesToAdd.tiles.emplace_back(std::move(tile));
+            t_terrain.tilesToAdd.island = t_terrain.currentIslandUnderMouse;
+            t_terrain.tilesToAdd.startPosition = t_startWorldPosition;
         }
-
-        // assert !t_terrain.tilesToAdd.tiles.empty()
-
-        Log::MDCII_LOG_DEBUG("[TerrainRenderer::AddBuilding()] Added building Id {} to Gpu on ({}, {}).", building.id, t_startWorldPosition.x, t_startWorldPosition.y);
     }
+
+    MDCII_ASSERT(t_terrain.tilesToAdd.tiles.size() == building.size.w * building.size.h, "[TerrainRenderer::AddBuilding()] Invalid number of created tiles.")
+
+    std::vector<int32_t> connected;
+    for (const auto& tile : t_terrain.tilesToAdd.tiles)
+    {
+        connected.push_back(tile->indices[0]);
+    }
+
+    for (const auto& tile : t_terrain.tilesToAdd.tiles)
+    {
+        tile->connectedTiles = connected;
+    }
+
+    Log::MDCII_LOG_DEBUG("[TerrainRenderer::AddBuilding()] Added building Id {} to Gpu on ({}, {}).", building.id, t_startWorldPosition.x, t_startWorldPosition.y);
 }
 
 void mdcii::renderer::TerrainRenderer::UpdateGpuData(
