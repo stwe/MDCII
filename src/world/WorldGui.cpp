@@ -26,6 +26,7 @@
 #include "state/State.h"
 #include "data/Text.h"
 #include "file/OriginalResourcesManager.h"
+#include "layer/TerrainLayer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -211,26 +212,55 @@ void mdcii::world::WorldGui::SaveGameGui()
     {
         Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] Start saving the game in file {}...", fileName);
 
-        nlohmann::json j;
-        nlohmann::json t = nlohmann::json::object();
-        nlohmann::json b = nlohmann::json::object();
+        nlohmann::json json;
+
         std::ofstream file{ fileName };
         if (!file)
         {
             throw MDCII_EXCEPTION("[WorldGui::SaveGameGui()] Error while opening file " + fileName + ".");
         }
 
-        /*
-        j["width"] = m_world->width;
-        j["height"] = m_world->height;
-        j["layers"] = nlohmann::json::array();
-        t["terrain"] = m_world->GetLayer(WorldLayerType::TERRAIN).tiles;
-        b["buildings"] = m_world->GetLayer(WorldLayerType::BUILDINGS).tiles;
-        j["layers"].push_back(t);
-        j["layers"].push_back(b);
-        */
+        // write world
+        auto worldJson = nlohmann::json::object();
+        worldJson["width"] = m_world->width;
+        worldJson["height"] = m_world->height;
+        json["world"] = worldJson;
 
-        file << j;
+        // write islands
+        auto islandsJson = nlohmann::json::array();
+
+        for (const auto& island : m_world->terrain->islands)
+        {
+            // island
+            auto islandJson = nlohmann::json::object();
+            islandJson["width"] = island->width;
+            islandJson["height"] = island->height;
+            islandJson["x"] = island->startWorldX;
+            islandJson["y"] = island->startWorldY;
+            islandJson["layers"] = nlohmann::json::array();
+
+            // coast
+            auto c = nlohmann::json::object();
+            c["coast"] = island->coastLayer->tiles;
+
+            // terrain
+            auto t = nlohmann::json::object();
+            t["terrain"] = island->terrainLayer->tiles;
+
+            // buildings
+            auto b = nlohmann::json::object();
+            b["buildings"] = island->buildingsLayer->tiles;
+
+            islandJson["layers"].push_back(c);
+            islandJson["layers"].push_back(t);
+            islandJson["layers"].push_back(b);
+
+            islandsJson.push_back(islandJson);
+        }
+
+        json["islands"] = islandsJson;
+
+        file << json;
 
         Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] The game has been successfully saved in file {}.", fileName);
     }
