@@ -19,6 +19,8 @@
 #include <imgui.h>
 #include "WorldGui.h"
 #include "World.h"
+#include "Terrain.h"
+#include "Island.h"
 #include "MdciiAssert.h"
 #include "Game.h"
 #include "state/State.h"
@@ -166,6 +168,11 @@ void mdcii::world::WorldGui::ShowActionsGui() const
             if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), World::ACTION_NAMES[i].data()).c_str()))
             {
                 std::fill(m_world->actionButtons.begin(), m_world->actionButtons.end(), false);
+                if (m_world->terrain->currentSelectedIsland && m_world->terrain->currentSelectedIsland->currentSelectedTile)
+                {
+                    m_world->terrain->currentSelectedIsland->currentSelectedTile = nullptr;
+                    m_world->terrain->currentSelectedIsland = nullptr;
+                }
                 m_world->actionButtons[i] = true;
                 m_world->currentAction = action;
 

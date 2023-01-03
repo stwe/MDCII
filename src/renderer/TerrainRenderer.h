@@ -125,7 +125,7 @@ namespace mdcii::renderer
         void Render(const layer::TerrainLayer& t_terrainLayer, world::Zoom t_zoom, world::Rotation t_rotation) const;
 
         //-------------------------------------------------
-        // Add / remove building
+        // Remove / add building - Gpu
         //-------------------------------------------------
 
         /**
@@ -134,14 +134,14 @@ namespace mdcii::renderer
          * @param t_island The Island object.
          * @param t_tile The Tile object to delete.
          */
-        void DeleteBuilding(world::Island& t_island, const layer::Tile& t_tile);
+        void DeleteBuildingFromGpu(world::Island& t_island, const layer::Tile& t_tile);
 
         /**
          * Deletes a building from the Gpu.
          *
          * @param t_terrain The Terrain object.
          */
-        void DeleteBuilding(world::Terrain& t_terrain);
+        void DeleteBuildingFromGpu(world::Terrain& t_terrain);
 
         /**
          * Adds a building to the Gpu.
@@ -150,7 +150,7 @@ namespace mdcii::renderer
          * @param t_startWorldPosition The starting position in the world.
          * @param t_terrain The Terrain object.
          */
-        void AddBuilding(
+        void AddBuildingToGpu(
             const layer::Tile& t_selectedBuildingTile,
             const glm::ivec2& t_startWorldPosition,
             world::Terrain& t_terrain
@@ -176,6 +176,19 @@ namespace mdcii::renderer
             int32_t t_gfxNumber,
             int32_t t_buildingId
         );
+
+        //-------------------------------------------------
+        // Remove / add building - Cpu
+        //-------------------------------------------------
+
+        /**
+         * Deletes a building from the Cpu.
+         *
+         * @param t_tile Tile object where building information should be deleted/overwritten.
+         */
+        void DeleteBuildingFromCpu(layer::Tile& t_tile) const;
+
+        void AddBuildingToCpu(world::Terrain& t_terrain);
 
     protected:
 

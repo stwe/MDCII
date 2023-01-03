@@ -241,8 +241,6 @@ void mdcii::world::World::RenderImGui()
     {
         if (ImGui::CollapsingHeader("Buildings"))
         {
-            m_demolishTileIndex = -1;
-
             m_worldGui->ShowBuildingsGui();
         }
     }
@@ -254,12 +252,32 @@ void mdcii::world::World::RenderImGui()
             m_worldGui->selectedBuildingTile.Reset();
         }
 
-        if (m_demolishTileIndex >= 0)
+        if (terrain->currentSelectedIsland)
         {
-            // todo: remove building
+            if (terrain->currentSelectedIsland->currentSelectedTile && terrain->currentSelectedIsland->currentSelectedTile->HasBuilding())
+            {
+                // todo: store parent layer ptr in tile
+                const auto& buildingsLayer{ terrain->currentSelectedIsland->buildingsLayer };
+                const auto idx{ terrain->currentSelectedIsland->currentSelectedTile->indices.at(0) };
+                if (buildingsLayer->tiles.at(idx)->HasBuilding())
+                {
+                    if (terrain->currentSelectedIsland->currentSelectedTile->connectedTiles.empty())
+                    {
+                        terrainRenderer->DeleteBuildingFromGpu(*terrain->currentSelectedIsland, *terrain->currentSelectedIsland->currentSelectedTile);
+                        terrainRenderer->DeleteBuildingFromCpu(*terrain->currentSelectedIsland->currentSelectedTile);
+                    }
+                    else
+                    {
+                        for (const auto tileIndex : terrain->currentSelectedIsland->currentSelectedTile->connectedTiles)
+                        {
+                            auto& tile{ buildingsLayer->tiles.at(tileIndex) };
+                            terrainRenderer->DeleteBuildingFromGpu(*terrain->currentSelectedIsland, *tile);
+                            terrainRenderer->DeleteBuildingFromCpu(*tile);
+                        }
+                    }
+                }
+            }
         }
-
-        m_demolishTileIndex = -1;
     }
 
     if (currentAction == Action::STATUS)
@@ -280,8 +298,6 @@ void mdcii::world::World::RenderImGui()
 
     if (currentAction == Action::OPTIONS)
     {
-        m_demolishTileIndex = -1;
-
         if (m_worldGui->selectedBuildingTile.HasBuilding())
         {
             m_worldGui->selectedBuildingTile.Reset();
@@ -347,19 +363,7 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
         !terrain->tilesToAdd.tiles.empty()
     )
     {
-        // reset Tile pointers and replace with new Tile
-        // todo: method AddToCpu
-        /*
-        auto& buildingsLayer{ GetLayer(WorldLayerType::BUILDINGS) };
-        for (auto& tile : m_tilesToAdd)
-        {
-            buildingsLayer.ResetTilePointersAt(tile->instanceIds);
-            buildingsLayer.StoreTile(std::move(tile));
-        }
-        */
-
-        // clear vector
-        std::vector<std::unique_ptr<layer::Tile>>().swap(terrain->tilesToAdd.tiles);
+        terrainRenderer->AddBuildingToCpu(*terrain);
     }
 
     MDCII_ASSERT(terrain->tilesToAdd.tiles.empty(), "[World::OnLeftMouseButtonPressed()] Invalid number of tiles to add.")
@@ -383,17 +387,17 @@ void mdcii::world::World::OnMouseMoved()
     {
         if (!terrain->tilesToAdd.tiles.empty())
         {
-            terrainRenderer->DeleteBuilding(*terrain);
+            terrainRenderer->DeleteBuildingFromGpu(*terrain);
         }
         if (terrain->tilesToAdd.tiles.empty())
         {
-            terrainRenderer->AddBuilding(m_worldGui->selectedBuildingTile, mousePicker->currentPosition, *terrain);
+            terrainRenderer->AddBuildingToGpu(m_worldGui->selectedBuildingTile, mousePicker->currentPosition, *terrain);
         }
     }
 
     if (currentAction == Action::BUILD && !IsPositionInWorld(mousePicker->currentPosition) && !terrain->tilesToAdd.tiles.empty())
     {
-        terrainRenderer->DeleteBuilding(*terrain);
+        terrainRenderer->DeleteBuildingFromGpu(*terrain);
     }
 }
 

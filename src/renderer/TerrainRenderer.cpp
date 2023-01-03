@@ -169,14 +169,14 @@ void mdcii::renderer::TerrainRenderer::Render(const layer::TerrainLayer& t_terra
 }
 
 //-------------------------------------------------
-// Add / remove building
+// Remove / add building - Gpu
 //-------------------------------------------------
 
-void mdcii::renderer::TerrainRenderer::DeleteBuilding(world::Island& t_island, const layer::Tile& t_tile)
+void mdcii::renderer::TerrainRenderer::DeleteBuildingFromGpu(world::Island& t_island, const layer::Tile& t_tile)
 {
-    MDCII_ASSERT(t_tile.HasBuilding(), "[TerrainRenderer::DeleteBuilding()] No building to delete.")
+    MDCII_ASSERT(t_tile.HasBuilding(), "[TerrainRenderer::DeleteBuildingFromGpu()] No building to delete.")
 
-    Log::MDCII_LOG_DEBUG("[TerrainRenderer::DeleteBuilding()] Delete building with Id {} from the world ({}, {}).", t_tile.buildingId, t_tile.worldXDeg0, t_tile.worldYDeg0);
+    Log::MDCII_LOG_DEBUG("[TerrainRenderer::DeleteBuildingFromGpu()] Delete building with Id {} from the world ({}, {}).", t_tile.buildingId, t_tile.worldXDeg0, t_tile.worldYDeg0);
 
     magic_enum::enum_for_each<world::Zoom>([this, &t_island, &t_tile](const world::Zoom t_zoom) {
         magic_enum::enum_for_each<world::Rotation>([this, &t_zoom, &t_island, &t_tile](const world::Rotation t_rotation) {
@@ -211,19 +211,19 @@ void mdcii::renderer::TerrainRenderer::DeleteBuilding(world::Island& t_island, c
     });
 }
 
-void mdcii::renderer::TerrainRenderer::DeleteBuilding(world::Terrain& t_terrain)
+void mdcii::renderer::TerrainRenderer::DeleteBuildingFromGpu(world::Terrain& t_terrain)
 {
-    MDCII_ASSERT(!t_terrain.tilesToAdd.tiles.empty(), "[TerrainRenderer::DeleteBuilding()] No Tile objects available.")
+    MDCII_ASSERT(!t_terrain.tilesToAdd.tiles.empty(), "[TerrainRenderer::DeleteBuildingFromGpu()] No Tile objects available.")
     for (const auto& tile : t_terrain.tilesToAdd.tiles)
     {
-        DeleteBuilding(*t_terrain.tilesToAdd.island, *tile);
+        DeleteBuildingFromGpu(*t_terrain.tilesToAdd.island, *tile);
     }
 
     // clear vector
     std::vector<std::unique_ptr<layer::Tile>>().swap(t_terrain.tilesToAdd.tiles);
 }
 
-void mdcii::renderer::TerrainRenderer::AddBuilding(
+void mdcii::renderer::TerrainRenderer::AddBuildingToGpu(
     const layer::Tile& t_selectedBuildingTile,
     const glm::ivec2& t_startWorldPosition,
     world::Terrain& t_terrain
@@ -235,7 +235,7 @@ void mdcii::renderer::TerrainRenderer::AddBuilding(
         return;
     }
 
-    MDCII_ASSERT(t_terrain.tilesToAdd.tiles.empty(), "[TerrainRenderer::AddBuilding()] Invalid number of tiles.")
+    MDCII_ASSERT(t_terrain.tilesToAdd.tiles.empty(), "[TerrainRenderer::AddBuildingToGpu()] Invalid number of tiles.")
 
     const auto& terrainLayer{ t_terrain.tilesToAdd.island->terrainLayer };
     const auto& mixedLayer{ t_terrain.tilesToAdd.island->mixedLayer };
@@ -253,7 +253,7 @@ void mdcii::renderer::TerrainRenderer::AddBuilding(
 
             // calc final world position
             const auto buildingWorldPosition{ glm::ivec2(t_startWorldPosition.x + rp.x, t_startWorldPosition.y + rp.y) };
-            MDCII_ASSERT(t_terrain.currentIslandUnderMouse->IsWorldPositionInAabb(buildingWorldPosition), "[TerrainRenderer::AddBuilding()] Invalid world position.")
+            MDCII_ASSERT(t_terrain.currentIslandUnderMouse->IsWorldPositionInAabb(buildingWorldPosition), "[TerrainRenderer::AddBuildingToGpu()] Invalid world position.")
 
             // get position on island from world position
             const auto buildingIslandPosition{ t_terrain.currentIslandUnderMouse->GetIslandPositionFromWorldPosition(buildingWorldPosition) };
@@ -315,7 +315,7 @@ void mdcii::renderer::TerrainRenderer::AddBuilding(
         }
     }
 
-    MDCII_ASSERT(t_terrain.tilesToAdd.tiles.size() == building.size.w * building.size.h, "[TerrainRenderer::AddBuilding()] Invalid number of created tiles.")
+    MDCII_ASSERT(t_terrain.tilesToAdd.tiles.size() == building.size.w * building.size.h, "[TerrainRenderer::AddBuildingToGpu()] Invalid number of created tiles.")
 
     std::vector<int32_t> connected;
     for (const auto& tile : t_terrain.tilesToAdd.tiles)
@@ -328,7 +328,7 @@ void mdcii::renderer::TerrainRenderer::AddBuilding(
         tile->connectedTiles = connected;
     }
 
-    Log::MDCII_LOG_DEBUG("[TerrainRenderer::AddBuilding()] Added building with Id {} to the world on ({}, {}).", building.id, t_startWorldPosition.x, t_startWorldPosition.y);
+    Log::MDCII_LOG_DEBUG("[TerrainRenderer::AddBuildingToGpu()] Added building with Id {} to the world on ({}, {}).", building.id, t_startWorldPosition.x, t_startWorldPosition.y);
 }
 
 void mdcii::renderer::TerrainRenderer::UpdateGpuData(
@@ -372,6 +372,37 @@ void mdcii::renderer::TerrainRenderer::UpdateGpuData(
 
     // unbind Vao
     ogl::buffer::Vao::Unbind();
+}
+
+//-------------------------------------------------
+// Remove / add building - Cpu
+//-------------------------------------------------
+
+void mdcii::renderer::TerrainRenderer::DeleteBuildingFromCpu(layer::Tile& t_tile) const
+{
+    MDCII_ASSERT(t_tile.HasBuilding(), "[TerrainRenderer::DeleteBuildingFromCpu()] No building to delete.")
+
+    Log::MDCII_LOG_DEBUG("[TerrainRenderer::DeleteBuildingFromCpu()] Delete building Id {} Cpu data of Tile in world ({}, {}).", t_tile.buildingId, t_tile.worldXDeg0, t_tile.worldYDeg0);
+
+    t_tile.ResetBuildingInfo();
+}
+
+void mdcii::renderer::TerrainRenderer::AddBuildingToCpu(world::Terrain& t_terrain)
+{
+    MDCII_ASSERT(!t_terrain.tilesToAdd.tiles.empty(), "[TerrainRenderer::AddBuildingToCpu()] No Tile objects available.")
+
+    // reset Tile pointers and replace with new tile
+    auto& buildingsLayer{ t_terrain.tilesToAdd.island->buildingsLayer };
+    for (auto& tile : t_terrain.tilesToAdd.tiles)
+    {
+        Log::MDCII_LOG_DEBUG("[TerrainRenderer::AddBuildingToCpu()] Add building Id {} Cpu data of Tile to world ({}, {}).", tile->buildingId, tile->worldXDeg0, tile->worldYDeg0);
+
+        buildingsLayer->ResetTilePointersAt(tile->instanceIds);
+        buildingsLayer->StoreTile(std::move(tile));
+    }
+
+    // clear vector
+    std::vector<std::unique_ptr<layer::Tile>>().swap(t_terrain.tilesToAdd.tiles);
 }
 
 //-------------------------------------------------

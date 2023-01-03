@@ -390,11 +390,6 @@ namespace mdcii::world
         bool m_runAnimations{ true };
 
         /**
-         * To demolish a building.
-         */
-        int m_demolishTileIndex{ -1 };
-
-        /**
          * The mouse button pressed listener handle.
          */
         decltype(event::EventManager::event_dispatcher)::Handle m_mouseButtonPressed;
