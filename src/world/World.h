@@ -21,6 +21,7 @@
 #include <magic_enum.hpp>
 #include <glm/vec2.hpp>
 #include "event/EventManager.h"
+#include "data/json.hpp"
 
 //-------------------------------------------------
 // Forward declarations
@@ -436,4 +437,10 @@ namespace mdcii::world
          */
         void CleanUp() const;
     };
+
+    //-------------------------------------------------
+    // Json
+    //-------------------------------------------------
+
+    void to_json(nlohmann::json& t_json, const World& t_world);
 }

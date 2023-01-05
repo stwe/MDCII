@@ -233,4 +233,10 @@ namespace mdcii::world
          */
         void CreateLayersFromJson(const nlohmann::json& t_json);
     };
+
+    //-------------------------------------------------
+    // Json
+    //-------------------------------------------------
+
+    void to_json(nlohmann::json& t_json, const Island& t_island);
 }

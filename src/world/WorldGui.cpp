@@ -229,24 +229,19 @@ void mdcii::world::WorldGui::SaveGameGui()
             throw MDCII_EXCEPTION("[WorldGui::SaveGameGui()] Error while opening file " + fileName + ".");
         }
 
-        // write world
-        // todo: to_json && meta data
-        auto worldJson = nlohmann::json::object();
-        worldJson["width"] = m_world->width;
-        worldJson["height"] = m_world->height;
-        json["world"] = worldJson;
+        // version
+        json["version"] = Game::VERSION;
 
-        // write islands
+        // world
+        json["world"] = *m_world;
+
+        // islands
         auto islandsJson = nlohmann::json::array();
-
         for (const auto& island : m_world->terrain->islands)
         {
             // island
             auto islandJson = nlohmann::json::object();
-            islandJson["width"] = island->width;
-            islandJson["height"] = island->height;
-            islandJson["x"] = island->startWorldX;
-            islandJson["y"] = island->startWorldY;
+            islandJson = *island;
             islandJson["layers"] = nlohmann::json::array();
 
             // coast

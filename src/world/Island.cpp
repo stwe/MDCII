@@ -202,3 +202,17 @@ void mdcii::world::Island::CreateLayersFromJson(const nlohmann::json& t_json)
     gridLayer->PrepareCpuDataForRendering();
     gridLayer->PrepareGpuDataForRendering();
 }
+
+//-------------------------------------------------
+// Json
+//-------------------------------------------------
+
+void mdcii::world::to_json(nlohmann::json& t_json, const Island& t_island)
+{
+    t_json = nlohmann::json{
+        { "width", t_island.width },
+        { "height", t_island.height },
+        { "x", t_island.startWorldX },
+        { "y", t_island.startWorldY }
+    };
+}

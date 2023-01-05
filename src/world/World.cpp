@@ -376,6 +376,11 @@ void mdcii::world::World::Init()
     nlohmann::json j = read_json_from_file(Game::RESOURCES_REL_PATH + m_mapFilePath);
     for (const auto& [k, v] : j.items())
     {
+        if (k == "version" && v.get<std::string>() != Game::VERSION)
+        {
+            throw MDCII_EXCEPTION("[World::Init()] Invalid map file format.");
+        }
+
         if (k == "world")
         {
             width = v.at("width").get<int32_t>();
@@ -455,4 +460,16 @@ void mdcii::world::World::CleanUp() const
 
     event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_BUTTON_PRESSED, m_mouseButtonPressed);
     event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_MOVED, m_mouseMoved);
+}
+
+//-------------------------------------------------
+// Json
+//-------------------------------------------------
+
+void mdcii::world::to_json(nlohmann::json& t_json, const World& t_world)
+{
+    t_json = nlohmann::json{
+        { "width", t_world.width },
+        { "height", t_world.height }
+    };
 }
