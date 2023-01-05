@@ -78,6 +78,7 @@ void mdcii::layer::Tile::RenderImGui() const
 
     ImGui::Text("Tile Building-Id: %d", buildingId);
     ImGui::Text("Tile rotation: %s", magic_enum::enum_name(rotation).data());
+    ImGui::Text("Layer type: %s", magic_enum::enum_name(layerType).data());
     ImGui::Text("Building x: %d", x);
     ImGui::Text("Building y: %d", y);
     ImGui::Text("Island x: %d", islandXDeg0);
