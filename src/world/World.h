@@ -365,9 +365,9 @@ namespace mdcii::world
         std::unique_ptr<WorldGui> m_worldGui;
 
         /**
-         * To change the current Layer.
+         * The Layer types to render.
          */
-        layer::LayerType m_layerType;
+        layer::LayerType m_layerTypeToRender;
 
         /**
          * Toggles world deep water rendering on and off.

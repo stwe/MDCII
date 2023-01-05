@@ -96,7 +96,7 @@ namespace mdcii::world
          * Shows a menu with the action buttons.
          * These can be used to switch between Build, Demolish, Status or Options.
          */
-        void ShowActionsGui() const;
+        void ShowActionsGui();
 
         /**
          * Shows a menu for selecting a building.

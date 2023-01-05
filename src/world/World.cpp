@@ -51,7 +51,7 @@ mdcii::world::World::World(std::string t_mapFilePath, std::shared_ptr<state::Con
 
     rotation = Rotation::DEG0;
     zoom = Zoom::GFX;
-    m_layerType = layer::LayerType::ALL;
+    m_layerTypeToRender = layer::LayerType::ALL;
 
     Init();
     AddListeners();
@@ -108,29 +108,29 @@ void mdcii::world::World::Render() const
 {
     for(const auto& island : terrain->islands)
     {
-        if (m_layerType != layer::LayerType::NOTHING)
+        if (m_layerTypeToRender != layer::LayerType::NOTHING)
         {
-            if (m_layerType == layer::LayerType::COAST)
+            if (m_layerTypeToRender == layer::LayerType::COAST)
             {
                 terrainRenderer->Render(*island->coastLayer, zoom, rotation);
             }
 
-            if (m_layerType == layer::LayerType::TERRAIN)
+            if (m_layerTypeToRender == layer::LayerType::TERRAIN)
             {
                 terrainRenderer->Render(*island->terrainLayer, zoom, rotation);
             }
 
-            if (m_layerType == layer::LayerType::BUILDINGS)
+            if (m_layerTypeToRender == layer::LayerType::BUILDINGS)
             {
                 terrainRenderer->Render(*island->buildingsLayer, zoom, rotation);
             }
 
-            if (m_layerType == layer::LayerType::MIXED)
+            if (m_layerTypeToRender == layer::LayerType::MIXED)
             {
                 terrainRenderer->Render(*island->mixedLayer, zoom, rotation);
             }
 
-            if (m_layerType == layer::LayerType::ALL)
+            if (m_layerTypeToRender == layer::LayerType::ALL)
             {
                 terrainRenderer->Render(*island->coastLayer, zoom, rotation);
                 terrainRenderer->Render(*island->mixedLayer, zoom, rotation);
@@ -197,7 +197,7 @@ void mdcii::world::World::RenderImGui()
 
     if (ImGui::CollapsingHeader("Render islands"))
     {
-        static int e{ magic_enum::enum_integer(m_layerType) };
+        static int e{ magic_enum::enum_integer(m_layerTypeToRender) };
         ImGui::RadioButton("Coast", &e, 0);
         ImGui::SameLine();
         ImGui::RadioButton("Terrain", &e, 1);
@@ -214,7 +214,7 @@ void mdcii::world::World::RenderImGui()
         if (auto layer{ magic_enum::enum_cast<layer::LayerType>(e) }; layer.has_value())
         {
             const auto l{ layer.value() };
-            m_layerType = l;
+            m_layerTypeToRender = l;
         }
 
         terrain->RenderImGui(); // render selected island && island under mouse
@@ -237,72 +237,32 @@ void mdcii::world::World::RenderImGui()
         m_worldGui->ZoomGui();
     }
 
-    if (currentAction == Action::BUILD)
+    if (currentAction == Action::BUILD && ImGui::CollapsingHeader("Buildings"))
     {
-        if (ImGui::CollapsingHeader("Buildings"))
+        m_worldGui->ShowBuildingsGui();
+    }
+
+    if (currentAction == Action::DEMOLISH && terrain->IsCurrentSelectedTileRemovable())
+    {
+        if (terrain->currentSelectedIsland->currentSelectedTile->connectedTiles.empty())
         {
-            m_worldGui->ShowBuildingsGui();
+            terrainRenderer->DeleteBuildingFromGpu(*terrain->currentSelectedIsland, *terrain->currentSelectedIsland->currentSelectedTile);
+            renderer::TerrainRenderer::DeleteBuildingFromCpu(*terrain->currentSelectedIsland->currentSelectedTile);
+        }
+        else
+        {
+            terrainRenderer->DeleteBuildingFromGpu(*terrain->currentSelectedIsland, terrain->currentSelectedIsland->currentSelectedTile->connectedTiles);
+            renderer::TerrainRenderer::DeleteBuildingFromCpu(*terrain->currentSelectedIsland, terrain->currentSelectedIsland->currentSelectedTile->connectedTiles);
         }
     }
 
-    if (currentAction == Action::DEMOLISH)
+    if (currentAction == Action::STATUS && terrain->currentSelectedIsland && terrain->currentSelectedIsland->currentSelectedTile)
     {
-        if (m_worldGui->selectedBuildingTile.HasBuilding())
-        {
-            m_worldGui->selectedBuildingTile.Reset();
-        }
-
-        if (terrain->currentSelectedIsland)
-        {
-            if (terrain->currentSelectedIsland->currentSelectedTile && terrain->currentSelectedIsland->currentSelectedTile->HasBuilding())
-            {
-                // todo: store parent layer ptr in tile
-                const auto& buildingsLayer{ terrain->currentSelectedIsland->buildingsLayer };
-                const auto idx{ terrain->currentSelectedIsland->currentSelectedTile->indices.at(0) };
-                if (buildingsLayer->tiles.at(idx)->HasBuilding())
-                {
-                    if (terrain->currentSelectedIsland->currentSelectedTile->connectedTiles.empty())
-                    {
-                        terrainRenderer->DeleteBuildingFromGpu(*terrain->currentSelectedIsland, *terrain->currentSelectedIsland->currentSelectedTile);
-                        terrainRenderer->DeleteBuildingFromCpu(*terrain->currentSelectedIsland->currentSelectedTile);
-                    }
-                    else
-                    {
-                        for (const auto tileIndex : terrain->currentSelectedIsland->currentSelectedTile->connectedTiles)
-                        {
-                            auto& tile{ buildingsLayer->tiles.at(tileIndex) };
-                            terrainRenderer->DeleteBuildingFromGpu(*terrain->currentSelectedIsland, *tile);
-                            terrainRenderer->DeleteBuildingFromCpu(*tile);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (currentAction == Action::STATUS)
-    {
-        if (m_worldGui->selectedBuildingTile.HasBuilding())
-        {
-            m_worldGui->selectedBuildingTile.Reset();
-        }
-
-        if (terrain->currentSelectedIsland)
-        {
-            if (terrain->currentSelectedIsland->currentSelectedTile)
-            {
-                terrain->currentSelectedIsland->currentSelectedTile->RenderImGui();
-            }
-        }
+        terrain->currentSelectedIsland->currentSelectedTile->RenderImGui();
     }
 
     if (currentAction == Action::OPTIONS)
     {
-        if (m_worldGui->selectedBuildingTile.HasBuilding())
-        {
-            m_worldGui->selectedBuildingTile.Reset();
-        }
-
         m_worldGui->SaveGameGui();
     }
 
@@ -363,7 +323,7 @@ void mdcii::world::World::OnLeftMouseButtonPressed()
         !terrain->tilesToAdd.tiles.empty()
     )
     {
-        terrainRenderer->AddBuildingToCpu(*terrain);
+        renderer::TerrainRenderer::AddBuildingToCpu(*terrain);
     }
 
     MDCII_ASSERT(terrain->tilesToAdd.tiles.empty(), "[World::OnLeftMouseButtonPressed()] Invalid number of tiles to add.")

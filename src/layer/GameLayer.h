@@ -100,6 +100,11 @@ namespace mdcii::layer
         //-------------------------------------------------
 
         /**
+         * The type of the Layer.
+         */
+        LayerType layerType{ LayerType::NOTHING };
+
+        /**
          * The Layer width.
          */
         int32_t width{ -1 };

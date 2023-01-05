@@ -120,8 +120,9 @@ namespace mdcii::layer
          * @param t_context Access to shared objects.
          * @param t_world The World object.
          * @param t_island The parent Island object.
+         * @param t_layerType The type of this Layer.
          */
-        TerrainLayer(std::shared_ptr<state::Context> t_context, world::World* t_world, world::Island* t_island);
+        TerrainLayer(std::shared_ptr<state::Context> t_context, world::World* t_world, world::Island* t_island, LayerType t_layerType);
 
         TerrainLayer(const TerrainLayer& t_other) = delete;
         TerrainLayer(TerrainLayer&& t_other) noexcept = delete;

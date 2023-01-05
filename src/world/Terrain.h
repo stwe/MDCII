@@ -83,13 +83,12 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * todo: prototype
+         * Used to add a building.
          */
         struct TilesToAdd
         {
             std::vector<std::unique_ptr<layer::Tile>> tiles;
             Island* island{ nullptr };
-            glm::ivec2 startPosition{ glm::ivec2(-1) };
         };
 
         //-------------------------------------------------
@@ -177,6 +176,13 @@ namespace mdcii::world
          * @return True or false.
          */
         [[nodiscard]] bool IsBuildableOnIslandUnderMouse(const glm::ivec2& t_startWorldPosition, const data::Building& t_building, Rotation t_buildingRotation) const;
+
+        /**
+         * Checks whether the building on the currently selected tile can be removed.
+         *
+         * @return True or false.
+         */
+        [[nodiscard]] bool IsCurrentSelectedTileRemovable() const;
 
         //-------------------------------------------------
         // Logic

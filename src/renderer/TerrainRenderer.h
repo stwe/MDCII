@@ -132,16 +132,24 @@ namespace mdcii::renderer
          * Deletes a building from the Gpu.
          *
          * @param t_island The Island object.
-         * @param t_tile The Tile object to delete.
+         * @param t_tile The Tile object of the building to delete.
          */
         void DeleteBuildingFromGpu(world::Island& t_island, const layer::Tile& t_tile);
 
         /**
          * Deletes a building from the Gpu.
          *
-         * @param t_terrain The Terrain object.
+         * @param t_terrain The Terrain object for access to the temp building tiles (tilesToAdd).
          */
         void DeleteBuildingFromGpu(world::Terrain& t_terrain);
+
+        /**
+         * Deletes a building from the Gpu.
+         *
+         * @param t_island The Island object.
+         * @param t_tileIndices The Tile object indices of the building to delete.
+         */
+        void DeleteBuildingFromGpu(world::Island& t_island, const std::vector<int32_t>& t_tileIndices);
 
         /**
          * Adds a building to the Gpu.
@@ -186,9 +194,22 @@ namespace mdcii::renderer
          *
          * @param t_tile Tile object where building information should be deleted/overwritten.
          */
-        void DeleteBuildingFromCpu(layer::Tile& t_tile) const;
+        static void DeleteBuildingFromCpu(layer::Tile& t_tile);
 
-        void AddBuildingToCpu(world::Terrain& t_terrain);
+        /**
+         * Deletes a building from the Cpu.
+         *
+         * @param t_island The Island object.
+         * @param t_tileIndices The tile indices of the building.
+         */
+        static void DeleteBuildingFromCpu(world::Island& t_island, const std::vector<int32_t>& t_tileIndices);
+
+        /**
+         * Adds a building to the Cpu.
+         *
+         * @param t_terrain The Terrain object for access to the temp building tiles (tilesToAdd).
+         */
+        static void AddBuildingToCpu(world::Terrain& t_terrain);
 
     protected:
 

@@ -77,11 +77,17 @@ void mdcii::layer::from_json(const nlohmann::json& t_json, Tile& t_tile)
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::layer::TerrainLayer::TerrainLayer(std::shared_ptr<state::Context> t_context, world::World* t_world, world::Island* t_island)
+mdcii::layer::TerrainLayer::TerrainLayer(
+    std::shared_ptr<state::Context> t_context,
+    world::World* t_world,
+    world::Island* t_island,
+    const LayerType t_layerType
+)
     : GameLayer(std::move(t_context), t_world)
     , m_island{ t_island }
 {
-    Log::MDCII_LOG_DEBUG("[TerrainLayer::TerrainLayer()] Create TerrainLayer.");
+    Log::MDCII_LOG_DEBUG("[TerrainLayer::TerrainLayer()] Create TerrainLayer of type {}.", magic_enum::enum_name(t_layerType));
+    layerType = t_layerType;
 
     MDCII_ASSERT(m_island, "[TerrainLayer::TerrainLayer()] Null pointer.")
 
@@ -463,4 +469,5 @@ void mdcii::layer::TerrainLayer::StoreBuildingIdsInGpu()
 void mdcii::layer::TerrainLayer::AddTileFromJson(const nlohmann::json& t_json)
 {
     tiles.emplace_back(std::make_unique<Tile>(t_json.get<Tile>()));
+    tiles.back()->layerType = layerType;
 }

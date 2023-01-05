@@ -20,6 +20,16 @@
 #include "Tile.h"
 #include "Game.h"
 #include "data/Text.h"
+#include "GameLayer.h"
+
+//-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
+mdcii::layer::Tile::Tile()
+{
+    layerType = LayerType::NOTHING;
+}
 
 //-------------------------------------------------
 // Helper

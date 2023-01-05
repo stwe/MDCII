@@ -132,9 +132,17 @@ bool mdcii::world::Terrain::IsBuildableOnIslandUnderMouse(const glm::ivec2& t_st
         }
     }
 
-    Log::MDCII_LOG_DEBUG("[Terrain::IsBuildableOnIslandUnderMouse()] The tile is buildable at world ({}, {}).", t_startWorldPosition.x, t_startWorldPosition.y);
+    Log::MDCII_LOG_DEBUG("[Terrain::IsBuildableOnIslandUnderMouse()] The tile is buildable at world position ({}, {}).", t_startWorldPosition.x, t_startWorldPosition.y);
 
     return true;
+}
+
+bool mdcii::world::Terrain::IsCurrentSelectedTileRemovable() const
+{
+    return currentSelectedIsland &&
+        currentSelectedIsland->currentSelectedTile &&
+        currentSelectedIsland->currentSelectedTile->HasBuilding() &&
+        currentSelectedIsland->currentSelectedTile->layerType == layer::LayerType::BUILDINGS;
 }
 
 //-------------------------------------------------
@@ -173,7 +181,7 @@ void mdcii::world::Terrain::OnLeftMouseButtonPressed()
     }
 
     currentSelectedIsland = nullptr;
-    for (auto& island : islands)
+    for (auto const& island : islands)
     {
         if (island->IsWorldPositionInAabb(world->mousePicker->currentPosition))
         {

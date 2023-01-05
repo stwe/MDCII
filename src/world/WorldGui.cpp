@@ -140,7 +140,7 @@ void mdcii::world::WorldGui::ZoomGui() const
     ImGui::EndDisabled();
 }
 
-void mdcii::world::WorldGui::ShowActionsGui() const
+void mdcii::world::WorldGui::ShowActionsGui()
 {
     magic_enum::enum_for_each<World::Action>([this](const auto t_val) {
         constexpr World::Action action{ t_val };
@@ -169,11 +169,20 @@ void mdcii::world::WorldGui::ShowActionsGui() const
             if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), World::ACTION_NAMES[i].data()).c_str()))
             {
                 std::fill(m_world->actionButtons.begin(), m_world->actionButtons.end(), false);
+
+                // reset current selected island && selected tile
                 if (m_world->terrain->currentSelectedIsland && m_world->terrain->currentSelectedIsland->currentSelectedTile)
                 {
                     m_world->terrain->currentSelectedIsland->currentSelectedTile = nullptr;
                     m_world->terrain->currentSelectedIsland = nullptr;
                 }
+
+                // reset selected building
+                if (action != world::World::Action::BUILD && selectedBuildingTile.HasBuilding())
+                {
+                    selectedBuildingTile.Reset();
+                }
+
                 m_world->actionButtons[i] = true;
                 m_world->currentAction = action;
 
@@ -221,6 +230,7 @@ void mdcii::world::WorldGui::SaveGameGui()
         }
 
         // write world
+        // todo: to_json && meta data
         auto worldJson = nlohmann::json::object();
         worldJson["width"] = m_world->width;
         worldJson["height"] = m_world->height;

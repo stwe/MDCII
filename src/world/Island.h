@@ -196,25 +196,6 @@ namespace mdcii::world
          */
         [[nodiscard]] glm::ivec2 GetIslandPositionFromWorldPosition(const glm::ivec2& t_position) const;
 
-        /**
-         * Checks whether a given position is in this island width and height.
-         *
-         * @param t_x The x position to check.
-         * @param t_y The y position to check.
-         *
-         * @return True or false.
-         */
-        [[nodiscard]] bool IsPositionInIsland(int32_t t_x, int32_t t_y) const;
-
-        /**
-         * Checks whether a given position is in this island width and height.
-         *
-         * @param t_position The position to check.
-         *
-         * @return True or false.
-         */
-        [[nodiscard]] bool IsPositionInIsland(const glm::ivec2& t_position) const;
-
         //-------------------------------------------------
         // Render
         //-------------------------------------------------

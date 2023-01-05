@@ -27,11 +27,28 @@
 
 namespace mdcii::layer
 {
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
+    /**
+     * Forward declaration enum class LayerType.
+     */
+    enum class LayerType;
+
+    //-------------------------------------------------
+    // Tile
+    //-------------------------------------------------
+
     /**
      * Represents a single part of a Layer object.
      */
     struct Tile
     {
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
         /**
          * The Building Id from the haeuser.cod file.
          */
@@ -110,6 +127,17 @@ namespace mdcii::layer
          * If a building requires more than 1x1 tiles, all indices are stored here.
          */
         std::vector<int32_t> connectedTiles{};
+
+        /**
+         * The parent LayerType.
+         */
+        LayerType layerType;
+
+        //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        Tile();
 
         //-------------------------------------------------
         // Helper

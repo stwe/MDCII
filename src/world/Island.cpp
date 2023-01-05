@@ -107,21 +107,6 @@ glm::ivec2 mdcii::world::Island::GetIslandPositionFromWorldPosition(const glm::i
     return { t_position.x - startWorldX, t_position.y - startWorldY };
 }
 
-bool mdcii::world::Island::IsPositionInIsland(const int32_t t_x, const int32_t t_y) const
-{
-    if (t_x >= 0 && t_x < width && t_y >= 0 && t_y < height)
-    {
-        return true;
-    }
-
-    return false;
-}
-
-bool mdcii::world::Island::IsPositionInIsland(const glm::ivec2& t_position) const
-{
-    return IsPositionInIsland(t_position.x, t_position.y);
-}
-
 //-------------------------------------------------
 // Render
 //-------------------------------------------------
@@ -148,7 +133,7 @@ void mdcii::world::Island::CreateLayersFromJson(const nlohmann::json& t_json)
         {
             if (layerNameJson == "coast")
             {
-                coastLayer = std::make_unique<layer::TerrainLayer>(m_context, m_terrain->world, this);
+                coastLayer = std::make_unique<layer::TerrainLayer>(m_context, m_terrain->world, this, layer::LayerType::COAST);
                 coastLayer->CreateTilesFromJson(layerTilesJson);
                 coastLayer->PrepareCpuDataForRendering();
                 coastLayer->PrepareGpuDataForRendering();
@@ -156,7 +141,7 @@ void mdcii::world::Island::CreateLayersFromJson(const nlohmann::json& t_json)
 
             if (layerNameJson == "terrain")
             {
-                terrainLayer = std::make_unique<layer::TerrainLayer>(m_context, m_terrain->world, this);
+                terrainLayer = std::make_unique<layer::TerrainLayer>(m_context, m_terrain->world, this, layer::LayerType::TERRAIN);
                 terrainLayer->CreateTilesFromJson(layerTilesJson);
                 terrainLayer->PrepareCpuDataForRendering();
                 terrainLayer->PrepareGpuDataForRendering();
@@ -164,7 +149,7 @@ void mdcii::world::Island::CreateLayersFromJson(const nlohmann::json& t_json)
 
             if (layerNameJson == "buildings")
             {
-                buildingsLayer = std::make_unique<layer::TerrainLayer>(m_context, m_terrain->world, this);
+                buildingsLayer = std::make_unique<layer::TerrainLayer>(m_context, m_terrain->world, this, layer::LayerType::BUILDINGS);
                 buildingsLayer->CreateTilesFromJson(layerTilesJson);
                 buildingsLayer->PrepareCpuDataForRendering();
                 buildingsLayer->PrepareGpuDataForRendering();
@@ -175,7 +160,7 @@ void mdcii::world::Island::CreateLayersFromJson(const nlohmann::json& t_json)
     MDCII_ASSERT(terrainLayer, "[Island::CreateLayersFromJson()] Null pointer.")
     MDCII_ASSERT(buildingsLayer, "[Island::CreateLayersFromJson()] Null pointer.")
 
-    mixedLayer = std::make_unique<layer::TerrainLayer>(m_context, m_terrain->world, this);
+    mixedLayer = std::make_unique<layer::TerrainLayer>(m_context, m_terrain->world, this, layer::LayerType::MIXED);
     mixedLayer->instancesToRender = terrainLayer->instancesToRender;
     mixedLayer->modelMatrices = terrainLayer->modelMatrices;
     mixedLayer->gfxNumbers = terrainLayer->gfxNumbers;
