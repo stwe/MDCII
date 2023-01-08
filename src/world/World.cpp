@@ -270,6 +270,7 @@ void mdcii::world::World::RenderImGui()
 
     ImGui::End();
 
+    context->camera->RenderImGui();
     mousePicker->RenderImGui();
 }
 

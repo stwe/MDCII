@@ -28,6 +28,9 @@
 
 namespace mdcii::world
 {
+    /**
+     * Forward declaration enum class Zoom.
+     */
     enum class Zoom;
 }
 
@@ -63,14 +66,19 @@ namespace mdcii::camera
         //-------------------------------------------------
 
         /**
-         * The position of the camera.
-         */
-        glm::vec2 position{ 0.0f };
-
-        /**
-         * The current zoom.
+         * The current world zoom.
          */
         world::Zoom zoom;
+
+        /**
+         * The world position of the camera.
+         */
+        glm::ivec2 worldPosition{ 0 };
+
+        /**
+         * The screen position of the camera.
+         */
+        glm::vec2 position{ 0.0f };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -95,6 +103,15 @@ namespace mdcii::camera
          * @return The created view matrix.
          */
         [[nodiscard]] glm::mat4 GetViewMatrix() const noexcept;
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
+        /**
+         * Renders ImGui stuff.
+         */
+        void RenderImGui();
 
     protected:
 

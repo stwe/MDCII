@@ -97,12 +97,12 @@ void mdcii::world::MousePicker::RenderImGui() const
 
     ImGui::SetNextWindowBgAlpha(0.8f);
 
-    ImGui::Begin("Mouse Picker", nullptr, windowFlags);
+    ImGui::Begin("Mouse", nullptr, windowFlags);
 
     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 230, 230, 255));
 
-    ImGui::Text("Current position x: %d, y: %d", currentPosition.x, currentPosition.y);
-    ImGui::Text("Old position x: %d, y: %d", lastPosition.x, lastPosition.y);
+    ImGui::Text("Current mouse position x: %d, y: %d", currentPosition.x, currentPosition.y);
+    ImGui::Text("Old mouse position x: %d, y: %d", lastPosition.x, lastPosition.y);
 
     ImGui::PopStyleColor();
 
@@ -138,11 +138,6 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     const auto cell{ glm::ivec2(mouse.x / get_tile_width(m_world->zoom), (mouse.y + get_elevation(m_world->zoom)) / get_tile_height(m_world->zoom)) };
     const auto offsetIntoCell{ glm::ivec2(mouse.x % get_tile_width(m_world->zoom), (mouse.y + get_elevation(m_world->zoom)) % get_tile_height(m_world->zoom)) };
 
-    const glm::ivec2 origin{
-        static_cast<int>(t_camera.position.x) / get_tile_width(m_world->zoom),
-        static_cast<int>(t_camera.position.y) / get_tile_height(m_world->zoom)
-    };
-
     const auto* pixelCol{ m_cheatImages.at(magic_enum::enum_integer(m_world->zoom)) + (4_uz * (static_cast<size_t>(offsetIntoCell.y) * get_tile_width(m_world->zoom) + offsetIntoCell.x)) };
     const auto r = pixelCol[0];
     const auto g = pixelCol[1];
@@ -153,8 +148,8 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     if (m_world->rotation == Rotation::DEG0)
     {
         result = glm::ivec2(
-            (cell.y + origin.y) + (cell.x + origin.x),
-            (cell.y + origin.y) - (cell.x + origin.x)
+            (cell.y + t_camera.worldPosition.y) + (cell.x + t_camera.worldPosition.x),
+            (cell.y + t_camera.worldPosition.y) - (cell.x + t_camera.worldPosition.x)
         );
 
         if (r == 255 && g == 0 && b == 0)
@@ -178,8 +173,8 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     if (m_world->rotation == Rotation::DEG90)
     {
         result = glm::ivec2(
-            (cell.y + origin.y) - (cell.x + origin.x),
-            m_worldWidth - 1 - ((cell.x + origin.x) + (cell.y + origin.y))
+            (cell.y + t_camera.worldPosition.y) - (cell.x + t_camera.worldPosition.x),
+            m_worldWidth - 1 - ((cell.x + t_camera.worldPosition.x) + (cell.y + t_camera.worldPosition.y))
         );
 
         if (r == 255 && g == 0 && b == 0)
@@ -203,8 +198,8 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     if (m_world->rotation == Rotation::DEG180)
     {
         result = glm::ivec2(
-            m_worldWidth - 1 - ((cell.y + origin.y) + (cell.x + origin.x)),
-            m_worldHeight - 1 - ((cell.y + origin.y) - (cell.x + origin.x))
+            m_worldWidth - 1 - ((cell.y + t_camera.worldPosition.y) + (cell.x + t_camera.worldPosition.x)),
+            m_worldHeight - 1 - ((cell.y + t_camera.worldPosition.y) - (cell.x + t_camera.worldPosition.x))
         );
 
         if (r == 255 && g == 0 && b == 0)
@@ -228,8 +223,8 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     if (m_world->rotation == Rotation::DEG270)
     {
         result = glm::ivec2(
-            m_worldHeight - 1 - ((cell.y + origin.y) - (cell.x + origin.x)),
-            (cell.y + origin.y) + (cell.x + origin.x)
+            m_worldHeight - 1 - ((cell.y + t_camera.worldPosition.y) - (cell.x + t_camera.worldPosition.x)),
+            (cell.y + t_camera.worldPosition.y) + (cell.x + t_camera.worldPosition.x)
         );
 
         if (r == 255 && g == 0 && b == 0)

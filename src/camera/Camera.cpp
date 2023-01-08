@@ -31,14 +31,23 @@ mdcii::camera::Camera::Camera()
 {
     Log::MDCII_LOG_DEBUG("[Camera::Camera()] Create Camera.");
 
-    const auto pos{ Game::INI.GetVector<float>("camera", "position") };
-    position = glm::vec2(pos[0], pos[1]);
+    zoom = world::Zoom::GFX;
 
-    Log::MDCII_LOG_DEBUG("[Camera::Camera()] Set the camera position to (x: {}, y: {}).", position.x, position.y);
+    const auto pos{ Game::INI.GetVector<int32_t>("camera", "world_position") };
+    if (pos.size() != 2)
+    {
+        throw MDCII_EXCEPTION("[Camera::Camera()] Invalid world position given.");
+    }
+
+    worldPosition = glm::ivec2(pos[0], pos[1]);
+
+    position.x = static_cast<float>(worldPosition.x) * static_cast<float>(get_tile_width(zoom));
+    position.y = static_cast<float>(worldPosition.y) * static_cast<float>(get_tile_height(zoom));
+
+    Log::MDCII_LOG_DEBUG("[Camera::Camera()] Set the camera world position to ({}, {}).", worldPosition.x, worldPosition.y);
+    Log::MDCII_LOG_DEBUG("[Camera::Camera()] Set the camera screen position to ({}, {}).", position.x, position.y);
 
     AddListeners();
-
-    zoom = world::Zoom::GFX;
 }
 
 mdcii::camera::Camera::~Camera() noexcept
@@ -61,31 +70,67 @@ glm::mat4 mdcii::camera::Camera::GetViewMatrix() const noexcept
 }
 
 //-------------------------------------------------
+// Logic
+//-------------------------------------------------
+
+void mdcii::camera::Camera::RenderImGui()
+{
+    int windowFlags =
+        ImGuiWindowFlags_NoTitleBar |
+        ImGuiWindowFlags_NoCollapse |
+        //ImGuiWindowFlags_NoResize |
+        //ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoBringToFrontOnFocus |
+        ImGuiWindowFlags_NoNavFocus;
+    //ImGuiWindowFlags_NoBackground;
+
+    ImGui::SetNextWindowBgAlpha(0.8f);
+
+    ImGui::Begin("Camera", nullptr, windowFlags);
+
+    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 230, 230, 255));
+
+    ImGui::Text("Camera world position x: %d, y: %d", worldPosition.x, worldPosition.y);
+    ImGui::Text("Camera screen position x: %.2f, y: %.2f", position.x, position.y);
+
+    ImGui::PopStyleColor();
+
+    ImGui::End();
+}
+
+//-------------------------------------------------
 // Helper
 //-------------------------------------------------
 
 void mdcii::camera::Camera::ProcessKeyboard(const Direction t_direction)
 {
+    const auto yTileOff{ glm::ivec2(0, 1) };
+    const auto xTileOff{ glm::ivec2(1, 0) };
+
     const auto yOff{ glm::vec2(0.0f, get_tile_height(zoom)) };
     const auto xOff{ glm::vec2(get_tile_width(zoom), 0.0f) };
 
     if (t_direction == Direction::UP)
     {
+        worldPosition -= yTileOff;
         position -= yOff;
     }
 
     if (t_direction == Direction::DOWN)
     {
+        worldPosition += yTileOff;
         position += yOff;
     }
 
     if (t_direction == Direction::LEFT)
     {
+        worldPosition -= xTileOff;
         position -= xOff;
     }
 
     if (t_direction == Direction::RIGHT)
     {
+        worldPosition += xTileOff;
         position += xOff;
     }
 }
