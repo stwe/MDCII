@@ -16,11 +16,9 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include <imgui.h>
 #include "World.h"
 #include "Game.h"
 #include "MdciiAssert.h"
-#include "Terrain.h"
 #include "TileAtlas.h"
 #include "WorldGui.h"
 #include "MousePicker.h"
@@ -29,11 +27,9 @@
 #include "state/StateStack.h"
 #include "renderer/TerrainRenderer.h"
 #include "renderer/GridRenderer.h"
-#include "world/Island.h"
 #include "layer/GridLayer.h"
 #include "layer/WorldLayer.h"
 #include "layer/WorldGridLayer.h"
-#include "file/OriginalResourcesManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -108,6 +104,11 @@ void mdcii::world::World::Render() const
 {
     for(const auto& island : terrain->islands)
     {
+        if (context->camera->IsIslandNotInCamera(zoom, rotation, *island))
+        {
+            continue;
+        }
+
         if (m_layerTypeToRender != layer::LayerType::NOTHING)
         {
             if (m_layerTypeToRender == layer::LayerType::COAST)
@@ -165,7 +166,7 @@ void mdcii::world::World::Render() const
 
 void mdcii::world::World::RenderImGui()
 {
-    auto winW{ static_cast<float>(context->window->GetWidth()) };
+    auto winW{ static_cast<float>(context->window->width) };
 
     ImGui::SetNextWindowSize(ImVec2(290.0f, 675.0f), ImGuiCond_Once);
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 1.4f), 4.0f + ImGui::GetMainViewport()->Pos.y), ImGuiCond_Once);
@@ -195,7 +196,7 @@ void mdcii::world::World::RenderImGui()
     m_worldGui->ShowActionsGui();
     ImGui::Separator();
 
-    if (ImGui::CollapsingHeader("Render islands"))
+    if (ImGui::CollapsingHeader("Islands"))
     {
         static int e{ magic_enum::enum_integer(m_layerTypeToRender) };
         ImGui::RadioButton("Coast", &e, 0);
@@ -220,7 +221,7 @@ void mdcii::world::World::RenderImGui()
         terrain->RenderImGui(); // render selected island && island under mouse
     }
 
-    if (ImGui::CollapsingHeader("Render World"))
+    if (ImGui::CollapsingHeader("World"))
     {
         ImGui::Checkbox("World Deep Water", &m_renderWorldLayer);
         ImGui::Checkbox("World Grid", &m_renderWorldGridLayer);
@@ -235,6 +236,21 @@ void mdcii::world::World::RenderImGui()
     if (ImGui::CollapsingHeader("Zoom"))
     {
         m_worldGui->ZoomGui();
+    }
+
+    if (ImGui::CollapsingHeader("Camera"))
+    {
+        context->camera->RenderImGui();
+    }
+
+    if (ImGui::CollapsingHeader("Culling"))
+    {
+        for (const auto& island : terrain->islands)
+        {
+            ImGui::Text("Island (%d, %d)", island->startWorldX, island->startWorldY);
+            ImGui::SameLine();
+            ImGui::Text(" rendered: %s", context->camera->IsIslandNotInCamera(zoom, rotation, *island) ? "no" : "yes");
+        }
     }
 
     if (currentAction == Action::BUILD && ImGui::CollapsingHeader("Buildings"))
@@ -270,7 +286,6 @@ void mdcii::world::World::RenderImGui()
 
     ImGui::End();
 
-    context->camera->RenderImGui();
     mousePicker->RenderImGui();
 }
 

@@ -36,6 +36,12 @@ mdcii::world::Island::Island(std::shared_ptr<state::Context> t_context, Terrain*
 
     MDCII_ASSERT(m_context, "[Island::Island()] Null pointer.")
     MDCII_ASSERT(m_terrain, "[Island::Island()] Null pointer.")
+
+    magic_enum::enum_for_each<Zoom>([this](const Zoom t_zoom) {
+        const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
+        max.at(zoomInt).fill(glm::vec2(-10000000.0f));
+        min.at(zoomInt).fill(glm::vec2(10000000.0f));
+    });
 }
 
 mdcii::world::Island::~Island() noexcept

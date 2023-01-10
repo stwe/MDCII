@@ -152,7 +152,7 @@ void mdcii::Game::CreateSharedObjects()
     Log::MDCII_LOG_DEBUG("[Game::CreateSharedObjects()] Create shared objects.");
 
     m_window = std::make_shared<ogl::Window>();
-    m_camera = std::make_shared<camera::Camera>();
+    m_camera = std::make_shared<camera::Camera>(m_window->width, m_window->height);
     m_originalResourcesManager = std::make_shared<file::OriginalResourcesManager>();
     m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::Context>(m_window, m_camera, m_originalResourcesManager));
 }

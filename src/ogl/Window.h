@@ -57,6 +57,20 @@ namespace mdcii::ogl
         static constexpr auto MIN_HEIGHT{ 480 };
 
         //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * The width of the window.
+         */
+        int32_t width{ MIN_WIDTH };
+
+        /**
+         * The height of the window.
+         */
+        int32_t height{ MIN_HEIGHT };
+
+        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
@@ -74,8 +88,6 @@ namespace mdcii::ogl
         //-------------------------------------------------
 
         [[nodiscard]] const std::string& GetTitle() const;
-        [[nodiscard]] int GetWidth() const;
-        [[nodiscard]] int GetHeight() const;
         [[nodiscard]] const glm::mat4& GetOrthographicProjectionMatrix() const;
         [[nodiscard]] GLFWwindow* GetWindowHandle() const;
 
@@ -170,16 +182,6 @@ namespace mdcii::ogl
          * The title of the window.
          */
         std::string m_title{ "MDCII" };
-
-        /**
-         * The width of the window.
-         */
-        int m_width{ MIN_WIDTH };
-
-        /**
-         * The height of the window.
-         */
-        int m_height{ MIN_HEIGHT };
 
         /**
          * The orthographic projection matrix.

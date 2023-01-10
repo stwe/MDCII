@@ -292,8 +292,35 @@ glm::mat4 mdcii::layer::TerrainLayer::CreateModelMatrix(const Tile& t_tile, cons
     screenPosition.y -= h - static_cast<float>(get_tile_height(t_zoom));
     screenPosition.y -= elevation;
 
-    // return model matrix
-    return renderer::RenderUtils::GetModelMatrix(screenPosition, { w, h });
+    // calc model matrix
+    auto mat{ renderer::RenderUtils::GetModelMatrix(screenPosition, { w, h }) };
+
+    // update min/max screen positions
+    if (layerType == LayerType::COAST)
+    {
+        const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
+        const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+
+        if (mat[3].x > m_island->max.at(zoomInt).at(rotationInt).x)
+        {
+            m_island->max.at(zoomInt).at(rotationInt).x = mat[3].x;
+        }
+        if (mat[3].y > m_island->max.at(zoomInt).at(rotationInt).y)
+        {
+            m_island->max.at(zoomInt).at(rotationInt).y = mat[3].y;
+        }
+
+        if (mat[3].x < m_island->min.at(zoomInt).at(rotationInt).x)
+        {
+            m_island->min.at(zoomInt).at(rotationInt).x = mat[3].x;
+        }
+        if (mat[3].y < m_island->min.at(zoomInt).at(rotationInt).y)
+        {
+            m_island->min.at(zoomInt).at(rotationInt).y = mat[3].y;
+        }
+    }
+
+    return mat;
 }
 
 //-------------------------------------------------

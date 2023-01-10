@@ -19,18 +19,20 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "Game.h"
 #include "Camera.h"
-#include "Log.h"
 #include "eventpp/utilities/argumentadapter.h"
-#include "world/Zoom.h"
+#include "physics/Aabb.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::camera::Camera::Camera()
+mdcii::camera::Camera::Camera(const int32_t t_windowWidth, const int32_t t_windowHeight)
+    : m_windowWidth{ t_windowWidth }
+    , m_windowHeight{ t_windowHeight }
 {
     Log::MDCII_LOG_DEBUG("[Camera::Camera()] Create Camera.");
 
+    // todo: config?
     zoom = world::Zoom::GFX;
 
     const auto pos{ Game::INI.GetVector<int32_t>("camera", "world_position") };
@@ -46,6 +48,8 @@ mdcii::camera::Camera::Camera()
 
     Log::MDCII_LOG_DEBUG("[Camera::Camera()] Set the camera world position to ({}, {}).", worldPosition.x, worldPosition.y);
     Log::MDCII_LOG_DEBUG("[Camera::Camera()] Set the camera screen position to ({}, {}).", position.x, position.y);
+
+    aabb = std::make_unique<physics::Aabb>(position, glm::ivec2(m_windowWidth, m_windowHeight));
 
     AddListeners();
 }
@@ -70,32 +74,32 @@ glm::mat4 mdcii::camera::Camera::GetViewMatrix() const noexcept
 }
 
 //-------------------------------------------------
+// Culling
+//-------------------------------------------------
+
+bool mdcii::camera::Camera::IsIslandNotInCamera(const world::Zoom t_zoom, const world::Rotation t_rotation, const world::Island& t_island) const
+{
+    const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
+    const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+
+    // todo: pre-calc
+    const auto islandAabb{ physics::Aabb(
+        glm::ivec2(t_island.min.at(zoomInt).at(rotationInt).x, t_island.min.at(zoomInt).at(rotationInt).y),
+        glm::ivec2((t_island.max.at(zoomInt).at(rotationInt).x + static_cast<float>(get_tile_width(zoom))) - t_island.min.at(zoomInt).at(rotationInt).x,
+                   (t_island.max.at(zoomInt).at(rotationInt).y + static_cast<float>(get_tile_height(zoom))) - t_island.min.at(zoomInt).at(rotationInt).y)
+    ) };
+
+    return !physics::Aabb::AabbVsAabb(islandAabb, *aabb);
+}
+
+//-------------------------------------------------
 // Logic
 //-------------------------------------------------
 
 void mdcii::camera::Camera::RenderImGui()
 {
-    int windowFlags =
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoCollapse |
-        //ImGuiWindowFlags_NoResize |
-        //ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoBringToFrontOnFocus |
-        ImGuiWindowFlags_NoNavFocus;
-    //ImGuiWindowFlags_NoBackground;
-
-    ImGui::SetNextWindowBgAlpha(0.8f);
-
-    ImGui::Begin("Camera", nullptr, windowFlags);
-
-    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 230, 230, 255));
-
-    ImGui::Text("Camera world position x: %d, y: %d", worldPosition.x, worldPosition.y);
-    ImGui::Text("Camera screen position x: %.2f, y: %.2f", position.x, position.y);
-
-    ImGui::PopStyleColor();
-
-    ImGui::End();
+    ImGui::Text("Camera world (%d, %d)", worldPosition.x, worldPosition.y);
+    ImGui::Text("Camera screen (%.2f, %.2f)", position.x, position.y);
 }
 
 //-------------------------------------------------
@@ -133,6 +137,8 @@ void mdcii::camera::Camera::ProcessKeyboard(const Direction t_direction)
         worldPosition += xTileOff;
         position += xOff;
     }
+
+    aabb->position = position;
 }
 
 //-------------------------------------------------

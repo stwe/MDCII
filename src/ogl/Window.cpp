@@ -52,16 +52,6 @@ const std::string& mdcii::ogl::Window::GetTitle() const
     return m_title;
 }
 
-int mdcii::ogl::Window::GetWidth() const
-{
-    return m_width;
-}
-
-int mdcii::ogl::Window::GetHeight() const
-{
-    return m_height;
-}
-
 const glm::mat4& mdcii::ogl::Window::GetOrthographicProjectionMatrix() const
 {
     return m_orthographicProjectionMatrix;
@@ -113,7 +103,8 @@ bool mdcii::ogl::Window::IsMouseButtonPressed(const int t_button) const
 
 glm::vec2 mdcii::ogl::Window::GetMousePosition() const
 {
-    double x, y;
+    double x;
+    double y;
     glfwGetCursorPos(m_windowHandle, &x, &y);
     return { static_cast<float>(x), static_cast<float>(y) };
 }
@@ -156,14 +147,14 @@ void mdcii::ogl::Window::LoadConfig()
 {
     Log::MDCII_LOG_DEBUG("[Window::LoadConfig()] Load values from config file.");
 
-    m_width = Game::INI.Get<int>("window", "width");
-    m_height = Game::INI.Get<int>("window", "height");
+    width = Game::INI.Get<int>("window", "width");
+    height = Game::INI.Get<int>("window", "height");
 
-    m_width = std::max(m_width, MIN_WIDTH);
-    m_height = std::max(m_height, MIN_HEIGHT);
+    width = std::max(width, MIN_WIDTH);
+    height = std::max(height, MIN_HEIGHT);
 
-    Log::MDCII_LOG_INFO("Game window width: {}", m_width);
-    Log::MDCII_LOG_INFO("Game window height: {}", m_height);
+    Log::MDCII_LOG_INFO("Game window width: {}", width);
+    Log::MDCII_LOG_INFO("Game window height: {}", height);
 }
 
 void mdcii::ogl::Window::InitWindow()
@@ -194,7 +185,7 @@ void mdcii::ogl::Window::InitWindow()
     glfwWindowHint(GLFW_SAMPLES, 4);
 
     // Create the GLFW window.
-    m_windowHandle = glfwCreateWindow(m_width, m_height, m_title.c_str(), nullptr, nullptr);
+    m_windowHandle = glfwCreateWindow(width, height, m_title.c_str(), nullptr, nullptr);
     if (!m_windowHandle)
     {
         glfwTerminate();
@@ -209,18 +200,17 @@ void mdcii::ogl::Window::InitWindow()
     }
 
     // Center our window.
-    glfwSetWindowPos(GetWindowHandle(), (primaryMonitor->width - m_width) / 2, (primaryMonitor->height - m_height) / 2);
+    glfwSetWindowPos(GetWindowHandle(), (primaryMonitor->width - width) / 2, (primaryMonitor->height - height) / 2);
 
     // Make the OpenGL context current.
     glfwMakeContextCurrent(GetWindowHandle());
 
     // Update viewport.
-    glViewport(0, 0, m_width, m_height);
+    glViewport(0, 0, width, height);
 
     // Initialize GLEW.
     Log::MDCII_LOG_DEBUG("[Window::InitWindow()] Initializing GLEW.");
-    const auto err{ glewInit() };
-    if (err != GLEW_OK)
+    if (const auto err{ glewInit() }; err != GLEW_OK)
     {
         throw MDCII_EXCEPTION("[Window::InitWindow()] Unable to initialize GLEW." + std::string(reinterpret_cast<const char*>(glewGetErrorString(err))));
     }
@@ -275,8 +265,8 @@ void mdcii::ogl::Window::UpdateOrthographicProjectionMatrix()
 {
     m_orthographicProjectionMatrix = glm::ortho(
         0.0f,
-        static_cast<float>(m_width),
-        static_cast<float>(m_height),
+        static_cast<float>(width),
+        static_cast<float>(height),
         0.0f,
         -1.0f,
         1.0f

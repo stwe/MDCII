@@ -80,13 +80,13 @@ void mdcii::world::MousePicker::Render(const ogl::Window& t_window, const camera
 
 void mdcii::world::MousePicker::RenderImGui() const
 {
-    auto winW{ static_cast<float>(m_world->context->window->GetWidth()) };
-    auto winH{ static_cast<float>(m_world->context->window->GetHeight()) };
+    auto winW{ static_cast<float>(m_world->context->window->width) };
+    auto winH{ static_cast<float>(m_world->context->window->height) };
 
     ImGui::SetNextWindowSize(ImVec2(290.0f, 48.0f), ImGuiCond_Once);
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 1.4f), ImGui::GetMainViewport()->Pos.y + winH - (winH / 8.0f) + 12.0f), ImGuiCond_Once);
 
-    int windowFlags =
+    const int32_t windowFlags =
         ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_NoCollapse |
         ImGuiWindowFlags_NoResize |

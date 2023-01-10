@@ -21,17 +21,18 @@
 #include <glm/vec2.hpp>
 #include <glm/mat4x4.hpp>
 #include "event/EventManager.h"
+#include "world/Island.h"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::world
+namespace mdcii::physics
 {
     /**
-     * Forward declaration enum class Zoom.
+     * Forward declaration struct Aabb.
      */
-    enum class Zoom;
+    struct Aabb;
 }
 
 //-------------------------------------------------
@@ -80,11 +81,24 @@ namespace mdcii::camera
          */
         glm::vec2 position{ 0.0f };
 
+        /**
+         * An Aabb (axis-aligned bounding box) object for collision detection.
+         */
+        std::unique_ptr<physics::Aabb> aabb;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        Camera();
+        Camera() = delete;
+
+        /**
+         * Constructs an new Camera object.
+         *
+         * @param t_windowWidth The window width.
+         * @param t_windowHeight The window height.
+         */
+        Camera(int32_t t_windowWidth, int32_t t_windowHeight);
 
         Camera(const Camera& t_other) = delete;
         Camera(Camera&& t_other) noexcept = delete;
@@ -105,6 +119,21 @@ namespace mdcii::camera
         [[nodiscard]] glm::mat4 GetViewMatrix() const noexcept;
 
         //-------------------------------------------------
+        // Culling
+        //-------------------------------------------------
+
+        /**
+         * Checks if there is an island in the camera's field of view.
+         *
+         * @param t_zoom The world zoom.
+         * @param t_rotation The world rotation.
+         * @param t_island The island to check.
+         *
+         * @return True or false.
+         */
+        [[nodiscard]] bool IsIslandNotInCamera(world::Zoom t_zoom, world::Rotation t_rotation, const world::Island& t_island) const;
+
+        //-------------------------------------------------
         // Logic
         //-------------------------------------------------
 
@@ -119,6 +148,16 @@ namespace mdcii::camera
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
+
+        /**
+         * The window width.
+         */
+        int32_t m_windowWidth{ -1 };
+
+        /**
+         * The window height.
+         */
+        int32_t m_windowHeight{ -1 };
 
         /**
          * The key pressed listener handle.

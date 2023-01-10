@@ -108,6 +108,16 @@ namespace mdcii::world
         std::unique_ptr<physics::Aabb> aabb;
 
         /**
+         * The max screen position for each rotation.
+         */
+        std::array<std::array<glm::vec2, NR_OF_ROTATIONS>, NR_OF_ZOOMS> max{};
+
+        /**
+         * The min screen position for each rotation.
+         */
+        std::array<std::array<glm::vec2, NR_OF_ROTATIONS>, NR_OF_ZOOMS> min{};
+
+        /**
          * A Layer object containing only the coast of the island.
          */
         std::unique_ptr<layer::TerrainLayer> coastLayer;

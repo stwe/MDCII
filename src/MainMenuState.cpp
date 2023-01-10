@@ -68,13 +68,13 @@ void mdcii::MainMenuState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    auto winW{ static_cast<float>(context->window->GetWidth()) };
-    auto winH{ static_cast<float>(context->window->GetHeight()) };
+    auto winW{ static_cast<float>(context->window->width) };
+    auto winH{ static_cast<float>(context->window->height) };
 
     ImGui::SetNextWindowSize(ImVec2(174.0f, 128.0f), ImGuiCond_Once);
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 2.5f), ImGui::GetMainViewport()->Pos.y + (winH / 4.0f)), ImGuiCond_Once);
 
-    int windowFlags =
+    const int32_t windowFlags =
         ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_NoCollapse |
         ImGuiWindowFlags_NoResize |
