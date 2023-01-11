@@ -66,7 +66,10 @@ void mdcii::world::MousePicker::Render(const ogl::Window& t_window, const camera
     }
 
     auto screenPosition{ m_world->WorldToScreen(currentPosition.x, currentPosition.y, m_world->zoom, m_world->rotation) };
-    screenPosition.y -= static_cast<float>(get_elevation(m_world->zoom));
+    if (calcForIslandTerrain)
+    {
+        screenPosition.y -= static_cast<float>(get_elevation(m_world->zoom));
+    }
 
     m_renderer->RenderTile(
         renderer::RenderUtils::GetModelMatrix(
@@ -83,7 +86,7 @@ void mdcii::world::MousePicker::RenderImGui() const
     auto winW{ static_cast<float>(m_world->context->window->width) };
     auto winH{ static_cast<float>(m_world->context->window->height) };
 
-    ImGui::SetNextWindowSize(ImVec2(290.0f, 48.0f), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(290.0f, 64.0f), ImGuiCond_Once);
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 1.4f), ImGui::GetMainViewport()->Pos.y + winH - (winH / 8.0f) + 12.0f), ImGuiCond_Once);
 
     const int32_t windowFlags =
@@ -101,8 +104,9 @@ void mdcii::world::MousePicker::RenderImGui() const
 
     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 230, 230, 255));
 
-    ImGui::Text("Current mouse position x: %d, y: %d", currentPosition.x, currentPosition.y);
-    ImGui::Text("Old mouse position x: %d, y: %d", lastPosition.x, lastPosition.y);
+    ImGui::Text("Terrain mode: %s", calcForIslandTerrain ? "yes" : "no");
+    ImGui::Text("Current mouse position: (%d, %d)", currentPosition.x, currentPosition.y);
+    ImGui::Text("Old mouse position: (%d, %d)", lastPosition.x, lastPosition.y);
 
     ImGui::PopStyleColor();
 
@@ -135,8 +139,20 @@ void mdcii::world::MousePicker::OnMouseMoved(const ogl::Window& t_window, const 
 glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_window, const camera::Camera& t_camera) const
 {
     const auto mouse{ glm::ivec2(t_window.GetMouseX(), t_window.GetMouseY()) };
-    const auto cell{ glm::ivec2(mouse.x / get_tile_width(m_world->zoom), (mouse.y + get_elevation(m_world->zoom)) / get_tile_height(m_world->zoom)) };
-    const auto offsetIntoCell{ glm::ivec2(mouse.x % get_tile_width(m_world->zoom), (mouse.y + get_elevation(m_world->zoom)) % get_tile_height(m_world->zoom)) };
+
+    glm::ivec2 cell;
+    glm::ivec2 offsetIntoCell;
+
+    if (calcForIslandTerrain)
+    {
+        cell = glm::ivec2(mouse.x / get_tile_width(m_world->zoom), (mouse.y + get_elevation(m_world->zoom)) / get_tile_height(m_world->zoom));
+        offsetIntoCell = glm::ivec2(mouse.x % get_tile_width(m_world->zoom), (mouse.y + get_elevation(m_world->zoom)) % get_tile_height(m_world->zoom));
+    }
+    else
+    {
+        cell = glm::ivec2(mouse.x / get_tile_width(m_world->zoom), mouse.y / get_tile_height(m_world->zoom));
+        offsetIntoCell = glm::ivec2(mouse.x % get_tile_width(m_world->zoom), mouse.y % get_tile_height(m_world->zoom));
+    }
 
     const auto* pixelCol{ m_cheatImages.at(magic_enum::enum_integer(m_world->zoom)) + (4_uz * (static_cast<size_t>(offsetIntoCell.y) * get_tile_width(m_world->zoom) + offsetIntoCell.x)) };
     const auto r = pixelCol[0];

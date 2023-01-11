@@ -196,6 +196,17 @@ void mdcii::world::World::RenderImGui()
     m_worldGui->ShowActionsGui();
     ImGui::Separator();
 
+    ImGui::Checkbox("Select on terrain", &mousePicker->calcForIslandTerrain);
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, IM_COL32(66, 104, 188, 255));
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
+        ImGui::SetTooltip("%s", "This must be enabled to select buildings on the island.");
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
+    }
+    ImGui::Separator();
+
     if (ImGui::CollapsingHeader("Islands"))
     {
         static int e{ magic_enum::enum_integer(m_layerTypeToRender) };

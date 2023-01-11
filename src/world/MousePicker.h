@@ -76,6 +76,12 @@ namespace mdcii::world
          */
         bool inWindow{ false };
 
+        /**
+         * Specifies whether the terrain height should be taken into
+         * account when calculating the positions.
+         */
+        bool calcForIslandTerrain{ false };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
