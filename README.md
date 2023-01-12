@@ -1,16 +1,14 @@
 # MDCII
 
-Ein weiteres 1602 Projekt. Der Fokus liegt hier jedoch nicht in dem 
-Einlesen der Originaldateien, sondern darin, eine editierbare isometrische
-Spielewelt zu erschaffen.
+Another 1602 AD project. However, the focus here is not on reading the original files, but on creating an editable
+isometric game world.
 
-Es wird das Originalspiel benötigt. In der `config.ini` müssen die Pfade angepasst werden.
+The original game is needed. In the `config.ini` the paths must be adapted.
 
-Für einen Programmstart werden sog. Tile-Atlas Grafiken benötigt, die zunächst erstellt werden müssen. Dazu befindet
-sich der `TileAtlasCreator` im Verzeichnis `install`.
+For a program start so called tile atlas graphics are needed, which have to be created first. For this purpose the
+`TileAtlasCreator` is located in the `install` directory.
 
-**Der erste Start dauert länger, da die `haeuser.cod` eingelesen wird.**
-
+**The first start takes longer, because the `haeuser.cod` will be parsed.**
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ffb066523c4064ab513bef2f8d4628)](https://www.codacy.com/gh/stwe/MDCII/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stwe/MDCII&amp;utm_campaign=Badge_Grade)
 
