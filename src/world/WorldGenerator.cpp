@@ -23,6 +23,7 @@
 #include "Game.h"
 #include "MdciiUtils.h"
 #include "layer/TerrainLayer.h"
+#include "data/BuildingIds.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -273,19 +274,19 @@ void mdcii::world::WorldGenerator::CreateTerrain(
     {
         for (auto x{ 2 }; x < t_width - 2; ++x)
         {
-            auto id{ GRASS };
+            auto id{ data::GRASS_BUILDING_ID };
             if (t_south)
             {
                 if (auto r{ (rand() % 10) }; r >= 7)
                 {
-                    id = SOUTH_TREES.at(rand() % 11);
+                    id = data::SOUTH_TREES.at(rand() % 11);
                 }
             }
             else
             {
                 if (auto r{ (rand() % 10) }; r >= 7)
                 {
-                    id = NORTH_TREES.at(rand() % 11);
+                    id = data::NORTH_TREES.at(rand() % 11);
                 }
             }
 
@@ -302,34 +303,34 @@ void mdcii::world::WorldGenerator::CreateTerrain(
     }
 
     // corners
-    t_terrainTiles.at(mapIndex(2, 2))->buildingId = BANK_CORNER; // top left
+    t_terrainTiles.at(mapIndex(2, 2))->buildingId = data::BANK_CORNER_BUILDING_ID; // top left
     t_terrainTiles.at(mapIndex(2, 2))->rotation = Rotation::DEG90;
 
-    t_terrainTiles.at(mapIndex(t_width - 3, 2))->buildingId = BANK_CORNER; // top right
+    t_terrainTiles.at(mapIndex(t_width - 3, 2))->buildingId = data::BANK_CORNER_BUILDING_ID; // top right
     t_terrainTiles.at(mapIndex(t_width - 3, 2))->rotation = Rotation::DEG180;
 
-    t_terrainTiles.at(mapIndex(t_width - 3, t_height - 3))->buildingId = BANK_CORNER; // bottom right
+    t_terrainTiles.at(mapIndex(t_width - 3, t_height - 3))->buildingId = data::BANK_CORNER_BUILDING_ID; // bottom right
     t_terrainTiles.at(mapIndex(t_width - 3, t_height - 3))->rotation = Rotation::DEG270;
 
-    t_terrainTiles.at(mapIndex(2, t_height - 3))->buildingId = BANK_CORNER; // bottom left
+    t_terrainTiles.at(mapIndex(2, t_height - 3))->buildingId = data::BANK_CORNER_BUILDING_ID; // bottom left
     t_terrainTiles.at(mapIndex(2, t_height - 3))->rotation = Rotation::DEG0;
 
     // borders
     for (auto x{ 3 }; x < t_width - 3; ++x)
     {
-        t_terrainTiles.at(mapIndex(x, 2))->buildingId = BANK;
+        t_terrainTiles.at(mapIndex(x, 2))->buildingId = data::BANK_BUILDING_ID;
         t_terrainTiles.at(mapIndex(x, 2))->rotation = Rotation::DEG180;
 
-        t_terrainTiles.at(mapIndex(x, t_height - 3))->buildingId = BANK;
+        t_terrainTiles.at(mapIndex(x, t_height - 3))->buildingId = data::BANK_BUILDING_ID;
         t_terrainTiles.at(mapIndex(x, t_height - 3))->rotation = Rotation::DEG0;
     }
 
     for (auto y{ 3 }; y < t_height - 3; ++y)
     {
-        t_terrainTiles.at(mapIndex(2, y))->buildingId = BANK;
+        t_terrainTiles.at(mapIndex(2, y))->buildingId = data::BANK_BUILDING_ID;
         t_terrainTiles.at(mapIndex(2, y))->rotation = Rotation::DEG90;
 
-        t_terrainTiles.at(mapIndex(t_width - 3, y))->buildingId = BANK;
+        t_terrainTiles.at(mapIndex(t_width - 3, y))->buildingId = data::BANK_BUILDING_ID;
         t_terrainTiles.at(mapIndex(t_width - 3, y))->rotation = Rotation::DEG270;
     }
 }
@@ -362,7 +363,7 @@ void mdcii::world::WorldGenerator::CreateCoast(
                 y == 0 || y == 1 || y == t_height - 1 || y == t_height - 2)
             {
                 auto terrainTile{ std::make_unique<layer::Tile>() };
-                terrainTile->buildingId = COAST_WATER;
+                terrainTile->buildingId = data::SHALLOW_WATER_BUILDING_ID;
                 terrainTile->rotation = Rotation::DEG0;
                 terrainTile->x = 0;
                 terrainTile->y = 0;
@@ -375,34 +376,34 @@ void mdcii::world::WorldGenerator::CreateCoast(
     }
 
     // corners
-    t_coastTiles.at(mapIndex(1, 1))->buildingId = COAST_CORNER; // top left
+    t_coastTiles.at(mapIndex(1, 1))->buildingId = data::BEACH_CORNER_BUILDING_ID; // top left
     t_coastTiles.at(mapIndex(1, 1))->rotation = Rotation::DEG90;
 
-    t_coastTiles.at(mapIndex(t_width - 2, 1))->buildingId = COAST_CORNER; // top right
+    t_coastTiles.at(mapIndex(t_width - 2, 1))->buildingId = data::BEACH_CORNER_BUILDING_ID; // top right
     t_coastTiles.at(mapIndex(t_width - 2, 1))->rotation = Rotation::DEG180;
 
-    t_coastTiles.at(mapIndex(t_width - 2, t_height - 2))->buildingId = COAST_CORNER; // bottom right
+    t_coastTiles.at(mapIndex(t_width - 2, t_height - 2))->buildingId = data::BEACH_CORNER_BUILDING_ID; // bottom right
     t_coastTiles.at(mapIndex(t_width - 2, t_height - 2))->rotation = Rotation::DEG270;
 
-    t_coastTiles.at(mapIndex(1, t_height - 2))->buildingId = COAST_CORNER; // bottom left
+    t_coastTiles.at(mapIndex(1, t_height - 2))->buildingId = data::BEACH_CORNER_BUILDING_ID; // bottom left
     t_coastTiles.at(mapIndex(1, t_height - 2))->rotation = Rotation::DEG0;
 
     // borders
     for (auto x{ 2 }; x < t_width - 2; ++x)
     {
-        t_coastTiles.at(mapIndex(x, 1))->buildingId = COAST;
+        t_coastTiles.at(mapIndex(x, 1))->buildingId = data::BEACH_BUILDING_ID;
         t_coastTiles.at(mapIndex(x, 1))->rotation = Rotation::DEG270;
 
-        t_coastTiles.at(mapIndex(x, t_height - 2))->buildingId = 1205;
+        t_coastTiles.at(mapIndex(x, t_height - 2))->buildingId = data::BEACH_BUILDING_ID;
         t_coastTiles.at(mapIndex(x, t_height - 2))->rotation = Rotation::DEG90;
     }
 
     for (auto y{ 2 }; y < t_height - 2; ++y)
     {
-        t_coastTiles.at(mapIndex(1, y))->buildingId = COAST;
+        t_coastTiles.at(mapIndex(1, y))->buildingId = data::BEACH_BUILDING_ID;
         t_coastTiles.at(mapIndex(1, y))->rotation = Rotation::DEG180;
 
-        t_coastTiles.at(mapIndex(t_width - 2, y))->buildingId = 1205;
+        t_coastTiles.at(mapIndex(t_width - 2, y))->buildingId = data::BEACH_BUILDING_ID;
         t_coastTiles.at(mapIndex(t_width - 2, y))->rotation = Rotation::DEG0;
     }
 }

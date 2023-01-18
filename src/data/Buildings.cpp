@@ -19,9 +19,7 @@
 #include <imgui.h>
 #include <magic_enum.hpp>
 #include "Buildings.h"
-#include "Game.h"
 #include "Log.h"
-#include "Text.h"
 #include "cod/CodParser.h"
 
 mdcii::data::Buildings::Buildings(const std::string& t_codFilePath)
@@ -57,7 +55,7 @@ void mdcii::data::Buildings::GenerateBuildings(const std::string& t_codFilePath)
     Log::MDCII_LOG_DEBUG("[Buildings::GenerateBuildings()] The buildings were generated successfully.");
 }
 
-mdcii::data::Building mdcii::data::Buildings::GenerateBuilding(const cod_pb::Object* t_obj) const
+mdcii::data::Building mdcii::data::Buildings::GenerateBuilding(const cod_pb::Object* t_obj)
 {
     Building building;
 

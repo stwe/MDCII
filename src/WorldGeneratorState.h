@@ -27,9 +27,9 @@
 namespace mdcii::world
 {
     /**
-     * Forward declaration class WorldGenerator.
+     * Forward declaration class WorldGenerator2.
      */
-    class WorldGenerator;
+    class WorldGenerator2;
 }
 
 //-------------------------------------------------
@@ -82,9 +82,9 @@ namespace mdcii
         //-------------------------------------------------
 
         /**
-         * The WorldGenerator object.
+         * The WorldGenerator2 object.
          */
-        std::unique_ptr<world::WorldGenerator> m_worldGenerator;
+        std::unique_ptr<world::WorldGenerator2> m_worldGenerator2;
 
         //-------------------------------------------------
         // Init

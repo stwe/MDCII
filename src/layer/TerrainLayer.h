@@ -227,20 +227,6 @@ namespace mdcii::layer
 
     private:
         //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        /**
-         * If no data is available, the model matrix is based on this Building Id.
-         */
-        static constexpr auto GRASS_BUILDING_ID{ 101 };
-
-        /**
-         * If no data is available, the model matrix is based on this gfx number.
-         */
-        static constexpr auto GRASS_GFX{ 4 };
-
-        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 

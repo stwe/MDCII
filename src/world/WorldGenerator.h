@@ -47,22 +47,6 @@ namespace mdcii::world
     {
     public:
         //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        static constexpr auto GRASS{ 101 };
-
-        static constexpr auto BANK{ 1011 };
-        static constexpr auto BANK_CORNER{ 1051 };
-
-        static constexpr auto COAST_WATER{ 1203 };
-        static constexpr auto COAST{ 1205 };
-        static constexpr auto COAST_CORNER{ 1207 };
-
-        static constexpr std::array<int32_t, 11> NORTH_TREES{ 1304, 1306, 1308, 1310, 1312, 1314, 1316, 1318, 1320, 1322, 1324 };
-        static constexpr std::array<int32_t, 11> SOUTH_TREES{ 1352, 1354, 1356, 1358, 1360, 1362, 1364, 1366, 1368, 1370, 1372 };
-
-        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 

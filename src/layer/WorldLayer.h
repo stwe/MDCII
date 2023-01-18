@@ -110,20 +110,6 @@ namespace mdcii::layer
 
     private:
         //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        /**
-         * Each model matrix is based on this Building Id.
-         */
-        static constexpr auto WATER_BUILDING_ID{ 1201 };
-
-        /**
-         * Each model matrix is based on this gfx number.
-         */
-        static constexpr auto WATER_GFX{ 758 };
-
-        //-------------------------------------------------
         // Override
         //-------------------------------------------------
 

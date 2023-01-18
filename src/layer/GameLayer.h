@@ -77,6 +77,20 @@ namespace mdcii::layer
     {
     public:
         //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * Used to calculate a model matrix.
+         */
+        static constexpr auto GRASS_GFX{ 4 };
+
+        /**
+         * Used to calculate a model matrix.
+         */
+        static constexpr auto WATER_GFX{ 758 };
+
+        //-------------------------------------------------
         // Types
         //-------------------------------------------------
 

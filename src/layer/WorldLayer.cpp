@@ -24,6 +24,7 @@
 #include "world/World.h"
 #include "world/Terrain.h"
 #include "ogl/buffer/Ssbo.h"
+#include "data/BuildingIds.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -61,7 +62,7 @@ void mdcii::layer::WorldLayer::CreateTiles()
 
                 tile->worldXDeg0 = worldX;
                 tile->worldYDeg0 = worldY;
-                tile->buildingId = WATER_BUILDING_ID;
+                tile->buildingId = data::DEEP_WATER_BUILDING_ID;
                 tile->rotation = world::Rotation::DEG0;
 
                 // pre-calculate the position on the screen for each zoom and each rotation

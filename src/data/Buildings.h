@@ -20,9 +20,6 @@
 
 #include <map>
 #include <vector>
-#include <cstdint>
-#include <string>
-#include <unordered_set>
 
 //-------------------------------------------------
 // Forward declarations
@@ -35,20 +32,6 @@ namespace cod_pb
 
 namespace mdcii::data
 {
-    //-------------------------------------------------
-    // IDs
-    //-------------------------------------------------
-
-    /**
-     * Contains the building IDs that are not shown in different rotations.
-     */
-    const std::unordered_set<int32_t> NON_ROTATABLE_BUILDING_IDS{ 605, 1073, 1331 };
-
-    /**
-     * Contains the IDs of the buildings that can only be built on the coast.
-     */
-    const std::unordered_set<int32_t> WATER_RELATED_BUILDING_IDS{ 1073, 1075 };
-
     //-------------------------------------------------
     // Kind
     //-------------------------------------------------
@@ -529,6 +512,6 @@ namespace mdcii::data
          *
          * @return a Building object.
          */
-        Building GenerateBuilding(const cod_pb::Object* t_obj) const;
+        static Building GenerateBuilding(const cod_pb::Object* t_obj) ;
     };
 }

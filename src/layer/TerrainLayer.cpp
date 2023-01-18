@@ -24,6 +24,7 @@
 #include "file/OriginalResourcesManager.h"
 #include "ogl/buffer/Ssbo.h"
 #include "renderer/RenderUtils.h"
+#include "data/BuildingIds.h"
 
 void mdcii::layer::to_json(nlohmann::json& t_json, const std::shared_ptr<Tile>& t_tile)
 {
@@ -265,7 +266,7 @@ glm::mat4 mdcii::layer::TerrainLayer::CreateModelMatrix(const Tile& t_tile, cons
 {
     // to definitely create a screen position
     int32_t gfx{ GRASS_GFX };
-    auto posoffs{ m_context->originalResourcesManager->GetBuildingById(GRASS_BUILDING_ID).posoffs };
+    auto posoffs{ m_context->originalResourcesManager->GetBuildingById(data::GRASS_BUILDING_ID).posoffs };
 
     // override gfx && posoffs from above
     if (t_tile.HasBuilding())

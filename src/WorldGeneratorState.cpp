@@ -22,7 +22,7 @@
 #include "ogl/OpenGL.h"
 #include "ogl/Window.h"
 #include "state/StateStack.h"
-#include "world/WorldGenerator.h"
+#include "world/WorldGenerator2.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -72,10 +72,10 @@ void mdcii::WorldGeneratorState::RenderImGui()
     auto winW{ static_cast<float>(context->window->width) };
     auto winH{ static_cast<float>(context->window->height) };
 
-    ImGui::SetNextWindowSize(ImVec2(550.0f, 300.0f), ImGuiCond_Once);
-    ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 4.0f), ImGui::GetMainViewport()->Pos.y + (winH / 4.0f)), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(290.0f, winH - 8.0f), ImGuiCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 1.4f), 4.0f + ImGui::GetMainViewport()->Pos.y), ImGuiCond_Once);
 
-    const int32_t windowFlags =
+    int windowFlags =
         ImGuiWindowFlags_NoTitleBar |
         ImGuiWindowFlags_NoCollapse |
         ImGuiWindowFlags_NoResize |
@@ -88,7 +88,7 @@ void mdcii::WorldGeneratorState::RenderImGui()
 
     ImGui::Begin("World Generator", nullptr, windowFlags);
 
-    m_worldGenerator->RenderImGui();
+    m_worldGenerator2->RenderImGui();
 
     if (ImGui::Button("Back to main menu"))
     {
@@ -109,7 +109,7 @@ void mdcii::WorldGeneratorState::Init()
 {
     Log::MDCII_LOG_DEBUG("[WorldGeneratorState::Init()] Initializing world generator state...");
 
-    m_worldGenerator = std::make_unique<world::WorldGenerator>();
+    m_worldGenerator2 = std::make_unique<world::WorldGenerator2>();
 
     Log::MDCII_LOG_DEBUG("[WorldGeneratorState::Init()] The world generator state was successfully initialized.");
 }

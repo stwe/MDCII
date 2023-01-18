@@ -24,6 +24,7 @@
 #include "MdciiAssert.h"
 #include "Game.h"
 #include "state/State.h"
+#include "data/BuildingIds.h"
 #include "data/Text.h"
 #include "file/OriginalResourcesManager.h"
 #include "layer/TerrainLayer.h"
