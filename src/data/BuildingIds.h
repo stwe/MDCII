@@ -42,6 +42,7 @@ namespace mdcii::data
     static constexpr auto GRASS_BUILDING_ID{ 101 };
 
     static constexpr auto BANK_BUILDING_ID{ 1011 };
+    static constexpr auto BANK_CORNER_INSIDE_BUILDING_ID{ 1031 };
     static constexpr auto BANK_CORNER_BUILDING_ID{ 1051 };
 
     // height = 0

@@ -65,12 +65,39 @@ namespace mdcii::world
         // Types
         //-------------------------------------------------
 
-        enum class Directions
+        /**
+         * Possible neighbor flags.
+         * Each flag can set by using the OR operator.
+         */
+        enum NeighborFlag : uint8_t
+        {
+            NORTH = 1,
+            EAST = 2,
+            SOUTH = 4,
+            WEST = 8
+        };
+
+        /**
+         * The order of the indices of the neighbors.
+         */
+        enum class Direction
         {
             N, S, W, E,
             NE, NW, SW, SE
         };
 
+        /**
+         * Represents the type or Id of a terrain position (water, island, embankment ...).
+         */
+        struct MapValue
+        {
+            int32_t value{ -1 };
+            uint8_t neighborFlag{ 0 };
+        };
+
+        /**
+         * Encapsulates a single position on the map.
+         */
         struct Position
         {
             /**
@@ -81,12 +108,15 @@ namespace mdcii::world
             int32_t x{ -1 };
             int32_t y{ -1 };
             double elevation{ 0.0 };
-            int32_t mapValue{ -1 };
+            MapValue mapValue{};
             std::array<int32_t, 8> neighborIndices{ -1, -1, -1, -1, -1, -1, -1, -1 };
 
             [[nodiscard]] bool IsElevationAboveWaterLevel() const { return elevation >= WATER_LEVEL; }
         };
 
+        /**
+         * Represents the map.
+         */
         struct Map
         {
             std::vector<Position> positions;
@@ -138,25 +168,20 @@ namespace mdcii::world
          */
         static constexpr auto MAP_BANK{ 99 };
 
-        /**
-         * Represents the embankment in a specified rotation.
-         */
         static constexpr auto MAP_BANK_ROT0{ 2 };
-
-        /**
-         * Represents the embankment in a specified rotation.
-         */
         static constexpr auto MAP_BANK_ROT1{ 3 };
-
-        /**
-         * Represents the embankment in a specified rotation.
-         */
         static constexpr auto MAP_BANK_ROT2{ 4 };
-
-        /**
-         * Represents the embankment in a specified rotation.
-         */
         static constexpr auto MAP_BANK_ROT3{ 5 };
+
+        static constexpr auto MAP_BANK_CORNER_INSIDE_ROT0{ 6 };
+        static constexpr auto MAP_BANK_CORNER_INSIDE_ROT1{ 7 };
+        static constexpr auto MAP_BANK_CORNER_INSIDE_ROT2{ 8 };
+        static constexpr auto MAP_BANK_CORNER_INSIDE_ROT3{ 9 };
+
+        static constexpr auto MAP_BANK_CORNER_ROT0{ 10 };
+        static constexpr auto MAP_BANK_CORNER_ROT1{ 11 };
+        static constexpr auto MAP_BANK_CORNER_ROT2{ 12 };
+        static constexpr auto MAP_BANK_CORNER_ROT3{ 13 };
 
         //-------------------------------------------------
         // Member
