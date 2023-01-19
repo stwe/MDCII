@@ -15,6 +15,13 @@ For a program start so called tile atlas graphics are needed, which have to be c
 <img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/01-01-2023.png" width="500" height="400" />
 
 
+**19.01.2023** The project includes a new island generator that can create an island based on Perlin Noise.
+The class is in a very early stage of development, so we shouldn't expect too much right now. An example of an
+island created with Seed 1276 and a Frequency of 0.102 can be seen here:
+
+<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/19-01-2023.png" width="500" height="400" />
+
+
 ## Build
 
 ### Requirements
