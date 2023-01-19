@@ -323,13 +323,15 @@ void mdcii::world::World::ZoomWorld(const ChangeZoom t_changeZoom)
     {
     case ChangeZoom::ZOOM_IN:
         ++zoom;
-        context->camera->zoom = zoom;
         break;
     case ChangeZoom::ZOOM_OUT:
         --zoom;
-        context->camera->zoom = zoom;
         break;
     }
+
+    context->camera->zoom = zoom;
+    context->camera->position.x = static_cast<float>(context->camera->worldPosition.x) * static_cast<float>(get_tile_width(zoom));
+    context->camera->position.y = static_cast<float>(context->camera->worldPosition.y) * static_cast<float>(get_tile_height(zoom));
 }
 
 //-------------------------------------------------
