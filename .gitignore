@@ -45,8 +45,9 @@ conanbuildinfo.cmake
 !/resources/textures/gfx/*
 !/resources/textures/mgfx/*
 !/resources/textures/sgfx/*
-!/resources/data/ExampleMap.json
-!/resources/data/NewWorld.json
-!/resources/data/Savegame.json
-!/resources/data/Menus.json
 !/resources/data/Buildings.json
+!/resources/data/ExampleMap.json
+!/resources/data/Menus.json
+!/resources/data/NewWorld.json
+!/resources/data/NoiseWorld.json
+!/resources/data/Savegame.json
