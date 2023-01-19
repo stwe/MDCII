@@ -76,15 +76,16 @@ As this project relies on multiple 3rd-Party Libs, I created a `conanfile_win.tx
 
 ```txt
 [requires]
-glfw/3.3.7
+glfw/3.3.8
 glew/2.2.0
 glm/0.9.9.8
-spdlog/1.10.0
+spdlog/1.11.0
 imgui/1.86
-magic_enum/0.8.0
+magic_enum/0.8.2
 freetype/2.12.1
 protobuf/3.21.1
 gtest/1.12.1
+zlib/1.2.13
 
 [generators]
 premake
@@ -135,15 +136,16 @@ I created a `conanfile.txt` with all the requirements.
 
 ```txt
 [requires]
-glfw/3.3.7
+glfw/3.3.8
 glew/2.2.0
 glm/0.9.9.8
-spdlog/1.10.0
+spdlog/1.11.0
 imgui/1.86
-magic_enum/0.8.0
+magic_enum/0.8.2
 freetype/2.12.1
 protobuf/3.21.1
 gtest/1.12.1
+zlib/1.2.13
 
 [generators]
 cmake

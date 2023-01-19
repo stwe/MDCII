@@ -18,6 +18,7 @@
 
 #include <imgui.h>
 #include <random>
+#include <filesystem>
 #include "WorldGenerator2.h"
 #include "World.h"
 #include "MdciiAssert.h"
