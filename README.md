@@ -191,7 +191,7 @@ $ conan profile update settings.compiler.libcxx=libstdc++11 default  # Sets libc
 
 On my Debian testing system (bookworm) the Conan profile currently looks like this:
 
-**The conf section should look like this so that missing packages are automatically installed. Conan will then ask for the password.**
+**Note: The [conf] section should look like this so that missing packages are automatically installed. Conan will then ask for the password.**
 
 ```txt
 [settings]
@@ -200,7 +200,7 @@ os_build=Linux
 arch=x86_64
 arch_build=x86_64
 compiler=gcc
-compiler.version=12
+compiler.version=12.2
 compiler.libcxx=libstdc++11
 build_type=Release
 
