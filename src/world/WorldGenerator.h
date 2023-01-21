@@ -43,7 +43,7 @@ namespace mdcii::world
     /**
      * Creates a custom world map.
      */
-    class WorldGenerator
+    class [[deprecated("use WorldGenerator2 instead")]] WorldGenerator
     {
     public:
         //-------------------------------------------------

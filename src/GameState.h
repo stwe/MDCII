@@ -49,9 +49,15 @@ namespace mdcii
         // Constants
         //-------------------------------------------------
 
-        inline static const std::string EXAMPLE_GAME_MAP{ Game::INI.Get<std::string>("content", "example_game_map") };
-        inline static const std::string NEW_GAME_MAP{ Game::INI.Get<std::string>("content", "new_game_map") };
-        inline static const std::string SAVE_GAME_MAP{ Game::INI.Get<std::string>("content", "save_game_map") };
+        /**
+         * The file extension for map files.
+         */
+        const std::string MAP_FILE_EXTENSION{ ".map" };
+
+        /**
+         * The file extension for save game files.
+         */
+        const std::string SAVE_GAME_FILE_EXTENSION{ ".sav" };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -94,6 +100,27 @@ namespace mdcii
          * The World object.
          */
         std::shared_ptr<world::World> m_world;
+
+        /**
+         * A list of map files.
+         */
+        std::vector<std::string> m_mapFiles;
+
+        /**
+         * A list of saved game files.
+         */
+        std::vector<std::string> m_savedGameFiles;
+
+        //-------------------------------------------------
+        // ImGui
+        //-------------------------------------------------
+
+        /**
+         * Provides a simple mechanism to choose a file.
+         *
+         * @param t_files A list of files.
+         */
+        void RenderFileChooser(std::vector<std::string>& t_files);
 
         //-------------------------------------------------
         // Init

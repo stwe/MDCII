@@ -16,6 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <imgui.h>
 #include "World.h"
 #include "Game.h"
 #include "MdciiAssert.h"
@@ -402,7 +403,7 @@ void mdcii::world::World::Init()
     tileAtlas = std::make_unique<TileAtlas>();
     terrainRenderer = std::make_unique<renderer::TerrainRenderer>(context, tileAtlas);
 
-    nlohmann::json j = read_json_from_file(Game::RESOURCES_REL_PATH + m_mapFilePath);
+    nlohmann::json j = read_json_from_file(m_mapFilePath);
     for (const auto& [k, v] : j.items())
     {
         if (k == "version" && v.get<std::string>() != Game::VERSION)

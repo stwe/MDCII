@@ -18,11 +18,7 @@
 
 #pragma once
 
-#include <fstream>
-#include <imgui.h>
 #include "data/json.hpp"
-#include "MdciiException.h"
-#include "Log.h"
 
 //-------------------------------------------------
 // Operators
@@ -50,30 +46,17 @@ namespace mdcii
      *
      * @return The Json value.
      */
-    [[nodiscard]] static nlohmann::json read_json_from_file(const std::string& t_filePath)
-    {
-        Log::MDCII_LOG_DEBUG("[read_json_from_file] Starts creating Json value from file {}...", t_filePath);
+    [[nodiscard]] nlohmann::json read_json_from_file(const std::string& t_filePath);
 
-        nlohmann::json j;
-
-        std::ifstream jsonFile;
-        jsonFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-
-        try
-        {
-            jsonFile.open(t_filePath);
-            j = nlohmann::json::parse(jsonFile);
-            jsonFile.close();
-        }
-        catch (const std::ifstream::failure&)
-        {
-            throw MDCII_EXCEPTION("[read_json_from_file()] Exception caught while loading file " + t_filePath + ".");
-        }
-
-        Log::MDCII_LOG_DEBUG("[read_json_from_file] The Json value was created successfully.");
-
-        return j;
-    }
+    /**
+     * Searches for files in the specified path with a given extension.
+     *
+     * @param t_relPath The relative path to the RESOURCES_REL_PATH.
+     * @param t_extension Search for files with this extension.
+     *
+     * @return A list of found files.
+     */
+    [[nodiscard]] std::vector<std::string> get_files_list(const std::string& t_relPath, const std::string& t_extension);
 
     //-------------------------------------------------
     // Strings
@@ -86,16 +69,7 @@ namespace mdcii
      *
      * @return The converted string.
      */
-    [[nodiscard]] static std::string to_lower_case(const std::string& t_string)
-    {
-        auto newString{ t_string };
-        for (auto& c : newString)
-        {
-            c = static_cast<char>(std::tolower(c));
-        }
-
-        return newString;
-    }
+    [[nodiscard]] std::string to_lower_case(const std::string& t_string);
 
     /**
      * Convert a string to upper case.
@@ -104,16 +78,7 @@ namespace mdcii
      *
      * @return The converted string.
      */
-    [[nodiscard]] static std::string to_upper_case(const std::string& t_string)
-    {
-        auto newString{ t_string };
-        for (auto& c : newString)
-        {
-            c = static_cast<char>(std::toupper(c));
-        }
-
-        return newString;
-    }
+    [[nodiscard]] std::string to_upper_case(const std::string& t_string);
 
     //-------------------------------------------------
     // ImGui widgets
@@ -125,24 +90,20 @@ namespace mdcii
      * @param t_strId An Id.
      * @param t_v A static bool.
      */
-    static void toggle_button(const std::string& t_strId, bool* t_v)
-    {
-        auto const* colors{ ImGui::GetStyle().Colors };
-        auto pos{ ImGui::GetCursorScreenPos() };
-        auto* drawList{ ImGui::GetWindowDrawList() };
+    void toggle_imgui_button(const std::string& t_strId, bool* t_v);
 
-        auto height{ ImGui::GetFrameHeight() };
-        auto width{ height * 1.55f };
-        auto radius{ height * 0.5f };
+    //-------------------------------------------------
+    // ImGui helper
+    //-------------------------------------------------
 
-        ImGui::InvisibleButton(t_strId.c_str(), ImVec2(width, height));
-
-        if (ImGui::IsItemClicked())
-        {
-            *t_v = !*t_v;
-        }
-
-        drawList->AddRectFilled(pos, ImVec2(pos.x + width, pos.y + height), ImGui::GetColorU32(colors[ImGuiCol_ButtonActive]), height * 0.50f);
-        drawList->AddCircleFilled(ImVec2(pos.x + radius + (*t_v ? 1.0f : 0.0f) * (width - radius * 2.0f), pos.y + radius), radius - 1.5f, IM_COL32(255, 255, 255, 255));
-    }
+    /**
+     *
+     *
+     * @param t_vec
+     * @param t_index
+     * @param t_outText
+     *
+     * @return True or false.
+     */
+    [[nodiscard]] bool vector_getter(void* t_vec, int32_t t_index, const char** t_outText);
 }

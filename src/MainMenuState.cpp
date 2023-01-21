@@ -71,7 +71,7 @@ void mdcii::MainMenuState::RenderImGui()
     auto winW{ static_cast<float>(context->window->width) };
     auto winH{ static_cast<float>(context->window->height) };
 
-    ImGui::SetNextWindowSize(ImVec2(174.0f, 128.0f), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(174.0f, 104.0f), ImGuiCond_Once);
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 2.5f), ImGui::GetMainViewport()->Pos.y + (winH / 4.0f)), ImGuiCond_Once);
 
     const int32_t windowFlags =
@@ -93,12 +93,6 @@ void mdcii::MainMenuState::RenderImGui()
     {
         context->stateStack->PopState(GetStateId());
         context->stateStack->PushState(state::StateId::WORLD_GENERATOR);
-    }
-
-    if (ImGui::Button("Start the example"))
-    {
-        context->stateStack->PopState(GetStateId());
-        context->stateStack->PushState(state::StateId::EXAMPLE_GAME);
     }
 
     if (ImGui::Button("Start a new game"))

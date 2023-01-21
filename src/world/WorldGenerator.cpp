@@ -16,9 +16,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <imgui.h>
 #include <filesystem>
 #include <deque>
 #include "WorldGenerator.h"
+#include "Log.h"
 #include "world/World.h"
 #include "Game.h"
 #include "MdciiUtils.h"
@@ -110,7 +112,7 @@ void mdcii::world::WorldGenerator::RenderImGui()
                     }
                     if (column == 4)
                     {
-                        toggle_button("s", &s.at(row));
+                        toggle_imgui_button("s", &s.at(row));
                     }
                     ImGui::PopID();
                 }

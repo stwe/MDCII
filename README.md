@@ -1,11 +1,13 @@
 # MDCII
 
-Another 1602 AD project. However, the focus here is not on reading the original files, but on creating an editable
+Another unofficial 1602 AD project. However, the focus here is not on reading the original files, but on creating an editable
 isometric game world.
+
+You must have a copy of the original game installed on your computer.
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ffb066523c4064ab513bef2f8d4628)](https://www.codacy.com/gh/stwe/MDCII/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stwe/MDCII&amp;utm_campaign=Badge_Grade)
 
-<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/01-01-2023.png" width="500" height="400" />
+<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/01-01-2023.png" width="500" height="400" alt="" />
 
 
 * [Compiling MDCII](#compiling-mdcii)
@@ -275,13 +277,23 @@ In the MDCII `config.ini` the paths must be adapted.
 The class is in a very early stage of development, so we shouldn't expect too much right now. An example of an
 island created with `Seed = 1276` and a `Frequency of 0.102` can be seen here:
 
-<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/19-01-2023.png" width="500" height="400" />
+<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/19-01-2023.png" width="500" height="400" alt="" />
 
 ## Roadmap
 
+I don't have any more features planned for version 0.1. It's primarily about bug fixes and refactoring
+of some classes. The WorldGenerator2 e.g. needs to be refactored and the menus needs to be translated.
+
 ### MDCII v0.1 (current)
 
+* refactoring menus and add missing translations
+* refactoring of WorldGenerator2 to be able to create multiple islands
+
 ### MDCII v0.2
+
+* it should be possible to build roads; another Layer may be created for this
+* animations should be possible showing how residents brings goods from A to B; for this the A* algorithm can be implemented
+* further down my priority list: the terrain is to be expanded to include rivers and mountains
 
 ## Reporting bugs
 

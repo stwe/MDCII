@@ -348,5 +348,25 @@ namespace mdcii::world
          * @param t_buildingsTiles The created Tile objects.
          */
         void CreateBuildingsTiles(std::vector<std::shared_ptr<layer::Tile>>& t_buildingsTiles) const;
+
+        //-------------------------------------------------
+        // File
+        //-------------------------------------------------
+
+        /**
+         * Creates a new file.
+         *
+         * @param t_fileName The name of the file.
+         *
+         * @return True or false if error while creating.
+         */
+        [[nodiscard]] bool CreateFile(const std::string& t_fileName);
+
+        /**
+         * Writes the given Json to the newly created file.
+         *
+         * @param t_j The Json to write.
+         */
+        void WriteJsonToFile(const nlohmann::json& t_j);
     };
 }

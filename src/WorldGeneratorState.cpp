@@ -72,8 +72,8 @@ void mdcii::WorldGeneratorState::RenderImGui()
     auto winW{ static_cast<float>(context->window->width) };
     auto winH{ static_cast<float>(context->window->height) };
 
-    ImGui::SetNextWindowSize(ImVec2(290.0f, winH - 8.0f), ImGuiCond_Once);
-    ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 1.4f), 4.0f + ImGui::GetMainViewport()->Pos.y), ImGuiCond_Once);
+    ImGui::SetNextWindowSize(ImVec2(338.0f, winH - 8.0f), ImGuiCond_Once);
+    ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 1.5f), 4.0f + ImGui::GetMainViewport()->Pos.y), ImGuiCond_Once);
 
     int windowFlags =
         ImGuiWindowFlags_NoTitleBar |

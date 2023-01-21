@@ -26,9 +26,6 @@
 #include "layer/TerrainLayer.h"
 #include "data/BuildingIds.h"
 
-// todo
-#define CREATE_FILE
-
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
@@ -81,17 +78,48 @@ void mdcii::world::WorldGenerator2::RenderImGui()
         AlignEmbankment();
     }
 
-#ifdef CREATE_FILE
-    if (ImGui::Button("Save map"))
+    struct TextFilters
     {
-        nlohmann::json j;
+        static int FilterAZ(ImGuiInputTextCallbackData* data)
+        {
+            if (auto c{ data->EventChar }; !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
+            {
+                return 1;
+            }
 
-        AddWorldValues(j, worldWidth, worldHeight);
-        AddIslandValues(j, 1, 1);
+            return 0;
+        }
+    };
 
-        m_file << j;
+    static char f[64] = "";
+    static bool printError{ false };
+
+    if (!m_map.positions.empty())
+    {
+        ImGui::InputText("enter filename", f, 64, ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CallbackCharFilter, TextFilters::FilterAZ);
+        if (ImGui::Button("Save map") && f[0] != 0)
+        {
+            if (CreateFile(f))
+            {
+                nlohmann::json j;
+
+                AddWorldValues(j, worldWidth, worldHeight);
+                AddIslandValues(j, 1, 1);
+                WriteJsonToFile(j);
+
+                printError = false;
+            }
+            else
+            {
+                printError = true;
+            }
+        }
     }
-#endif
+
+    if (printError)
+    {
+        ImGui::Text("Error while creating file.");
+    }
 
     RenderElevationsImGui();
     RenderMapImGui();
@@ -246,7 +274,7 @@ void mdcii::world::WorldGenerator2::RenderLegendImGui()
     ImGui::Separator();
     ImGui::Text("1. Set values");
     ImGui::Text("2. Press Create new map");
-    ImGui::Text("3. Press Save map");
+    ImGui::Text("3. Enter filename and press Save map");
     ImGui::Text("4. Load the map via Main Menu");
     ImGui::Text("   - Start a new game -");
 
@@ -568,22 +596,6 @@ void mdcii::world::WorldGenerator2::Init()
 {
     Log::MDCII_LOG_DEBUG("[WorldGenerator2::Init()] Initializing world generator...");
 
-#ifdef CREATE_FILE
-    const auto fileName{ Game::RESOURCES_REL_PATH + "data/NoiseWorld.json" };
-    if (std::filesystem::exists(fileName))
-    {
-        Log::MDCII_LOG_WARN("[WorldGenerator2::Init()] The {} file already exists.", fileName);
-
-        return;
-    }
-
-    m_file.open(fileName);
-    if (!m_file.is_open())
-    {
-        throw MDCII_EXCEPTION("[WorldGenerator2::Init()] Error while opening file " + fileName + ".");
-    }
-#endif
-
     Log::MDCII_LOG_DEBUG("[WorldGenerator2::Init()] The world generator was successfully initialized.");
 }
 
@@ -770,4 +782,38 @@ void mdcii::world::WorldGenerator2::CreateBuildingsTiles(std::vector<std::shared
             t_buildingsTiles.emplace_back(std::make_unique<layer::Tile>());
         }
     }
+}
+
+//-------------------------------------------------
+// File
+//-------------------------------------------------
+
+bool mdcii::world::WorldGenerator2::CreateFile(const std::string& t_fileName)
+{
+    const auto fileName{ Game::RESOURCES_REL_PATH + "map/" + t_fileName + ".map" };
+    if (std::filesystem::exists(fileName))
+    {
+        Log::MDCII_LOG_WARN("[WorldGenerator2::Init()] The {} file already exists.", fileName);
+
+        return false;
+    }
+
+    Log::MDCII_LOG_DEBUG("[WorldGenerator2::CreateFile()] Create new file {}.", t_fileName);
+
+    m_file.open(fileName);
+    if (!m_file.is_open())
+    {
+        throw MDCII_EXCEPTION("[WorldGenerator2::Init()] Error while opening file " + fileName + ".");
+    }
+
+    return true;
+}
+
+void mdcii::world::WorldGenerator2::WriteJsonToFile(const nlohmann::json& t_j)
+{
+    MDCII_ASSERT(m_file.is_open(), "[WorldGenerator2::WriteJsonToFile()] File open error.")
+
+    m_file << t_j;
+
+    Log::MDCII_LOG_DEBUG("[WorldGenerator2::WriteJsonToFile()] Json successfully written to file.");
 }

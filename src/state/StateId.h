@@ -33,7 +33,6 @@ namespace mdcii::state
         WORLD_GENERATOR,
         NEW_GAME,
         LOADED_GAME,
-        EXAMPLE_GAME,
         ALL
     };
 }

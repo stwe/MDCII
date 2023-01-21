@@ -16,8 +16,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <imgui.h>
 #include "GameState.h"
 #include "MdciiAssert.h"
+#include "MdciiUtils.h"
 #include "ogl/OpenGL.h"
 #include "ogl/Window.h"
 #include "world/World.h"
@@ -58,21 +60,81 @@ void mdcii::GameState::Input()
 
 void mdcii::GameState::Update()
 {
-    m_world->Update();
+    if (m_world)
+    {
+        m_world->Update();
+    }
 }
 
 void mdcii::GameState::Render()
 {
-    m_world->Render();
+    if (m_world)
+    {
+        m_world->Render();
+    }
 }
 
 void mdcii::GameState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    m_world->RenderImGui();
+    if (!m_world)
+    {
+        ImGui::Begin("Choose file");
+
+        switch (GetStateId())
+        {
+        case state::StateId::NEW_GAME:
+            RenderFileChooser(m_mapFiles);
+            break;
+        case state::StateId::LOADED_GAME:
+            RenderFileChooser(m_savedGameFiles);
+            break;
+        default:;
+        }
+
+        if (ImGui::Button("Back to main menu"))
+        {
+            context->stateStack->PopState(GetStateId());
+            context->stateStack->PushState(state::StateId::MAIN_MENU);
+        }
+
+        ImGui::End();
+    }
+    else
+    {
+        m_world->RenderImGui();
+    }
 
     ogl::Window::ImGuiEnd();
+}
+
+//-------------------------------------------------
+// ImGui
+//-------------------------------------------------
+
+void mdcii::GameState::RenderFileChooser(std::vector<std::string>& t_files)
+{
+    static int32_t fileIndex{ 0 };
+
+    if (t_files.empty())
+    {
+        ImGui::Text("Missing files.");
+    }
+    else
+    {
+        ImGui::ListBox(
+            "Choose a file",
+            &fileIndex,
+            vector_getter,
+            &t_files,
+            static_cast<int32_t>(t_files.size())
+        );
+        if (ImGui::Button("Load file"))
+        {
+            m_world = std::make_shared<world::World>(t_files.at(fileIndex), context, GetStateId());
+        }
+    }
 }
 
 //-------------------------------------------------
@@ -83,19 +145,8 @@ void mdcii::GameState::Init()
 {
     Log::MDCII_LOG_DEBUG("[GameState::Init()] Initializing game state...");
 
-    switch (GetStateId())
-    {
-    case state::StateId::NEW_GAME:
-        m_world = std::make_shared<world::World>(NEW_GAME_MAP, context, state::StateId::NEW_GAME);
-        break;
-    case state::StateId::LOADED_GAME:
-        m_world = std::make_shared<world::World>(SAVE_GAME_MAP, context, state::StateId::LOADED_GAME);
-        break;
-    case state::StateId::EXAMPLE_GAME:
-        m_world = std::make_shared<world::World>(EXAMPLE_GAME_MAP, context, state::StateId::EXAMPLE_GAME);
-        break;
-    default:;
-    }
+    m_mapFiles = get_files_list("map/", MAP_FILE_EXTENSION);
+    m_savedGameFiles = get_files_list("save/", SAVE_GAME_FILE_EXTENSION);
 
     Log::MDCII_LOG_DEBUG("[GameState::Init()] The game state was successfully initialized.");
 }
