@@ -21,7 +21,6 @@
 #include <fstream>
 #include <vector>
 #include <memory>
-#include "FastNoiseLite.h"
 #include "data/json.hpp"
 
 //-------------------------------------------------
@@ -111,6 +110,14 @@ namespace mdcii::world
             MapValue mapValue{};
             std::array<int32_t, 8> neighborIndices{ -1, -1, -1, -1, -1, -1, -1, -1 };
 
+            Position() = delete;
+
+            Position(const int32_t t_x, const int32_t t_y, const double t_elevation)
+                : x{ t_x }
+                , y{ t_y }
+                , elevation{ t_elevation }
+            {}
+
             [[nodiscard]] bool IsElevationAboveWaterLevel() const { return elevation >= WATER_LEVEL; }
         };
 
@@ -193,11 +200,6 @@ namespace mdcii::world
         std::ofstream m_file;
 
         /**
-         * The FastNoiseLite lib.
-         */
-        FastNoiseLite m_fastNoise;
-
-        /**
          * The generated map.
          */
         Map m_map;
@@ -218,44 +220,92 @@ namespace mdcii::world
          * @param t_frequency The noise frequency.
          * @param t_width The width of the map/island.
          * @param t_height The height of the map/island.
+         *
+         * @return List of Position objects.
          */
-        void CreateElevations(int32_t t_seed, float t_frequency, int32_t t_width, int32_t t_height);
+        [[nodiscard]] static std::vector<Position> CreateElevations(int32_t t_seed, float t_frequency, int32_t t_width, int32_t t_height);
 
         /**
-         * Stores the neighbor indices for each position.
+         * Stores the neighbor indices for each Position object.
+         *
+         * @param t_positions A list of Position objects.
+         * @param t_width The width of the map/island.
+         * @param t_height The height of the map/island.
          */
-        void StoreNeighbors();
-
-        /**
-         * Renders a legend for the map.
-         */
-        static void RenderLegendImGui() ;
-
-        /**
-         * Colored output of the created elevations with ImGui.
-         */
-        void RenderElevationsImGui() const;
+        static void StoreNeighbors(std::vector<Position>& t_positions, int32_t t_width, int32_t t_height);
 
         /**
          * Splits elevation values into water and terrain.
          * The method is a first coarse filter and creates an island.
+         *
+         * @param t_positions A list of Position objects.
          */
-        void SplitElevationsInWaterAndTerrain();
+        static void SplitElevationsInWaterAndTerrain(std::vector<Position>& t_positions);
 
         /**
          * Creates embankment default values.
+         *
+         * @param t_positions A list of Position objects.
          */
-        void AddEmbankment();
+        static void AddDefaultEmbankment(std::vector<Position>& t_positions);
+
+        /**
+         * Checks if a terrain position has a neighbor on water.
+         *
+         * @param t_positions A list of Position objects.
+         * @param t_position The position to check.
+         *
+         * @return True or false.
+         */
+        [[nodiscard]] static bool IsMapTerrainPositionOnSeaSide(const std::vector<Position>& t_positions, const Position& t_position);
+
+        /**
+         * Creates embankment neighbor values.
+         *
+         * @param t_positions A list of Position objects.
+         */
+        static void CreateEmbankmentNeighbors(std::vector<Position>& t_positions);
+
+        [[nodiscard]] static bool FilterEmbankment(std::vector<Position>& t_positions);
 
         /**
          * Sets a different map value for each rotation of the embankment.
+         *
+         * @param t_positions A list of Position objects.
          */
-        void AlignEmbankment();
+        static void AlignEmbankment(std::vector<Position>& t_positions);
 
         /**
-         * Colored output of the map with ImGui.
+         * Renders a legend for the map.
          */
-        void RenderMapImGui() const;
+        static void RenderLegendImGui();
+
+        /**
+         * Colored output of the created elevations with ImGui.
+         *
+         * @param t_positions A list of Position objects.
+         * @param t_width The width of the map/island.
+         * @param t_height The height of the map/island.
+         */
+        static void RenderElevationValuesImGui(const std::vector<Position>& t_positions, int32_t t_width, int32_t t_height);
+
+        /**
+         * Colored output of the map values with ImGui.
+         *
+         * @param t_positions A list of Position objects.
+         * @param t_width The width of the map/island.
+         * @param t_height The height of the map/island.
+         */
+        static void RenderMapValuesImGui(const std::vector<Position>& t_positions, int32_t t_width, int32_t t_height);
+
+        /**
+         * Colored output of the map neighbor values with ImGui.
+         *
+         * @param t_positions A list of Position objects.
+         * @param t_width The width of the map/island.
+         * @param t_height The height of the map/island.
+         */
+        static void RenderMapNeighborValuesImGui(const std::vector<Position>& t_positions, int32_t t_width, int32_t t_height);
 
         //-------------------------------------------------
         // Json
@@ -280,15 +330,6 @@ namespace mdcii::world
         void AddIslandValues(nlohmann::json& t_j, int32_t t_worldX, int32_t t_worldY);
 
         //-------------------------------------------------
-        // Init
-        //-------------------------------------------------
-
-        /**
-         * Initialize class.
-         */
-        void Init();
-
-        //-------------------------------------------------
         // Helper
         //-------------------------------------------------
 
@@ -302,15 +343,6 @@ namespace mdcii::world
          * @return The 1D index.
          */
         [[nodiscard]] static int32_t GetIndex(int32_t t_x, int32_t t_y, int32_t t_width);
-
-        /**
-         * Checks if a position is on land and has a neighbor on water.
-         *
-         * @param t_position The position to check.
-         *
-         * @return True or false.
-         */
-        [[nodiscard]] bool IsMapTerrainPositionOnSeaSide(const Position& t_position);
 
         /**
          * Creates a Tile.
