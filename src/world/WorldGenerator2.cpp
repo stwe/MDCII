@@ -47,19 +47,21 @@ mdcii::world::WorldGenerator2::~WorldGenerator2() noexcept
 
 void mdcii::world::WorldGenerator2::RenderImGui()
 {
-    static int32_t islandWidth{ 20 };
-    static int32_t islandHeight{ 20 };
-    static int32_t seed{ 5744 };
-    static float frequency{ 0.167f };
-
     static int32_t worldWidth{ World::WORLD_MIN_WIDTH };
     static int32_t worldHeight{ World::WORLD_MIN_HEIGHT };
+
+    static bool south{ false };
+
+    static int32_t islandWidth{ 20 };
+    static int32_t islandHeight{ 20 };
+    static int32_t seed{ 4659 };
+    static float frequency{ 0.126f };
 
     ImGui::Separator();
     ImGui::SliderInt("World width ", &worldWidth, World::WORLD_MIN_WIDTH, World::WORLD_MAX_WIDTH);
     ImGui::SliderInt("World height", &worldHeight, World::WORLD_MIN_HEIGHT, World::WORLD_MAX_HEIGHT);
     ImGui::Separator();
-    ImGui::Checkbox("South", &m_south);
+    ImGui::Checkbox("South", &south);
     ImGui::SliderInt("Island width", &islandWidth, 20, 60);
     ImGui::SliderInt("Island height", &islandHeight, 20, 60);
     ImGui::SliderInt("Seed", &seed, 100, 9000);
@@ -77,29 +79,25 @@ void mdcii::world::WorldGenerator2::RenderImGui()
         SplitElevationsInWaterAndTerrain(createdPositions);
         AddDefaultEmbankment(createdPositions);
         CreateEmbankmentNeighbors(createdPositions);
+        ValidateEmbankment(createdPositions);
+        AlignEmbankment(createdPositions);
 
-        // todo:
-        auto b = FilterEmbankment(createdPositions);
-
-        //AlignEmbankment(createdPositions);
-
-        // swap for render positions
+        // swap
         currentPositions = std::move(createdPositions);
     }
 
-    // shows a legend
+    if (ImGui::Button("Reset"))
+    {
+        std::vector<Position>().swap(currentPositions);
+    }
+
     RenderLegendImGui();
-
-    // shows the elevation value of each Position object
     RenderElevationValuesImGui(currentPositions, islandWidth, islandHeight);
-
-    // shows the map value of each Position object
     RenderMapValuesImGui(currentPositions, islandWidth, islandHeight);
-
-    // shows the map neighbor value of each Position object
     RenderMapNeighborValuesImGui(currentPositions, islandWidth, islandHeight);
 
-    /*
+    // save button
+
     struct TextFilters
     {
         static int FilterAZ(ImGuiInputTextCallbackData* data)
@@ -116,7 +114,7 @@ void mdcii::world::WorldGenerator2::RenderImGui()
     static char f[64] = "";
     static bool printError{ false };
 
-    if (!m_map.positions.empty())
+    if (!currentPositions.empty())
     {
         ImGui::InputText("enter filename", f, 64, ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CallbackCharFilter, TextFilters::FilterAZ);
         if (ImGui::Button("Save map") && f[0] != 0)
@@ -126,7 +124,7 @@ void mdcii::world::WorldGenerator2::RenderImGui()
                 nlohmann::json j;
 
                 AddWorldValues(j, worldWidth, worldHeight);
-                AddIslandValues(j, 1, 1);
+                AddIslandValues(j, currentPositions, islandWidth, islandHeight, 1, 1, south);
                 WriteJsonToFile(j);
 
                 printError = false;
@@ -142,14 +140,18 @@ void mdcii::world::WorldGenerator2::RenderImGui()
     {
         ImGui::Text("Error while creating file.");
     }
-    */
 }
 
 //-------------------------------------------------
 // Create
 //-------------------------------------------------
 
-std::vector<mdcii::world::WorldGenerator2::Position> mdcii::world::WorldGenerator2::CreateElevations(const int32_t t_seed, const float t_frequency, const int32_t t_width, const int32_t t_height)
+std::vector<mdcii::world::WorldGenerator2::Position> mdcii::world::WorldGenerator2::CreateElevations(
+    const int32_t t_seed,
+    const float t_frequency,
+    const int32_t t_width,
+    const int32_t t_height
+)
 {
     Log::MDCII_LOG_DEBUG("[WorldGenerator2::CreateElevations()] Create elevations for a 2D map using Perlin Noise.");
 
@@ -305,6 +307,13 @@ void mdcii::world::WorldGenerator2::CreateEmbankmentNeighbors(std::vector<Positi
 
     Log::MDCII_LOG_DEBUG("[WorldGenerator2::CreateEmbankmentNeighbors()] Create embankment neighbor values.");
 
+    // reset
+    for (auto& position : t_positions)
+    {
+        position.mapValue.neighborFlag = 0;
+    }
+
+    // set neighbors
     for (auto& position : t_positions)
     {
         if (position.mapValue.value == MAP_BANK)
@@ -336,10 +345,28 @@ void mdcii::world::WorldGenerator2::CreateEmbankmentNeighbors(std::vector<Positi
     }
 }
 
-// todo
-bool mdcii::world::WorldGenerator2::FilterEmbankment(std::vector<Position>& t_positions)
+void mdcii::world::WorldGenerator2::ValidateEmbankment(std::vector<Position>& t_positions)
 {
-    Log::MDCII_LOG_DEBUG("[WorldGenerator2::FilterEmbankment()] Filter embankment neighbor values.");
+    // remove embankment positions with one or three neighbors
+    while (RemoveInvalidEmbankment(t_positions))
+    {
+        AddDefaultEmbankment(t_positions);
+        CreateEmbankmentNeighbors(t_positions);
+    }
+
+    // remove embankment positions with no neighbors
+    for (auto& position : t_positions)
+    {
+        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 0)
+        {
+            position.mapValue.value = MAP_WATER;
+        }
+    }
+}
+
+bool mdcii::world::WorldGenerator2::RemoveInvalidEmbankment(std::vector<Position>& t_positions)
+{
+    Log::MDCII_LOG_DEBUG("[WorldGenerator2::RemoveInvalidEmbankment()] Check for invalid embankment positions.");
 
     for (auto& position : t_positions)
     {
@@ -408,7 +435,7 @@ void mdcii::world::WorldGenerator2::AlignEmbankment(std::vector<Position>& t_pos
         return;
     }
 
-    Log::MDCII_LOG_DEBUG("[WorldGenerator2::AlignEmbankment()] Sets a different map value for each rotation of the embankment.");
+    Log::MDCII_LOG_DEBUG("[WorldGenerator2::AlignEmbankment()] Sets the final map value for each rotation of the embankment.");
 
     // set map Ids - brute force
     for (auto& position : t_positions)
@@ -523,6 +550,10 @@ void mdcii::world::WorldGenerator2::AlignEmbankment(std::vector<Position>& t_pos
         }
     }
 }
+
+//-------------------------------------------------
+// ImGui
+//-------------------------------------------------
 
 void mdcii::world::WorldGenerator2::RenderLegendImGui()
 {
@@ -809,7 +840,15 @@ void mdcii::world::WorldGenerator2::AddWorldValues(nlohmann::json& t_j, const in
     t_j["world"] = { { "width", t_worldWidth }, { "height", t_worldHeight } };
 }
 
-void mdcii::world::WorldGenerator2::AddIslandValues(nlohmann::json& t_j, const int32_t t_worldX, const int32_t t_worldY)
+void mdcii::world::WorldGenerator2::AddIslandValues(
+    nlohmann::json& t_j,
+    const std::vector<Position>& t_positions,
+    const int32_t t_width,
+    const int32_t t_height,
+    const int32_t t_worldX,
+    const int32_t t_worldY,
+    const bool t_south
+)
 {
     Log::MDCII_LOG_DEBUG("[WorldGenerator2::AddIslandValues()] Adds Json values for an new island.");
 
@@ -822,15 +861,15 @@ void mdcii::world::WorldGenerator2::AddIslandValues(nlohmann::json& t_j, const i
     nlohmann::json b = nlohmann::json::object();
     nlohmann::json i = nlohmann::json::object();
 
-    i["width"] = m_map.width;
-    i["height"] = m_map.height;
+    i["width"] = t_width;
+    i["height"] = t_height;
     i["x"] = t_worldX;
     i["y"] = t_worldY;
     i["layers"] = nlohmann::json::array();
 
-    CreateTerrainTiles(terrainTiles);
-    CreateCoastTiles(coastTiles);
-    CreateBuildingsTiles(buildingsTiles);
+    CreateTerrainTiles(terrainTiles, t_positions, t_width, t_height, t_south);
+    CreateCoastTiles(coastTiles, t_positions, t_width, t_height);
+    CreateBuildingsTiles(buildingsTiles, t_positions, t_width, t_height);
     c["coast"] = coastTiles;
     t["terrain"] = terrainTiles;
     b["buildings"] = buildingsTiles;
@@ -868,13 +907,19 @@ std::unique_ptr<mdcii::layer::Tile> mdcii::world::WorldGenerator2::CreateTile(co
 // Create Tiles
 //-------------------------------------------------
 
-void mdcii::world::WorldGenerator2::CreateTerrainTiles(std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles) const
+void mdcii::world::WorldGenerator2::CreateTerrainTiles(
+    std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles,
+    const std::vector<Position>& t_positions,
+    const int32_t t_width,
+    const int32_t t_height,
+    const bool t_south
+)
 {
-    MDCII_ASSERT(!m_map.positions.empty(), "[WorldGenerator2::CreateTerrainTiles()] Missing map values.")
+    Log::MDCII_LOG_DEBUG("[WorldGenerator2::CreateTerrainTiles()] Create terrain tiles.");
 
-    for (auto y{ 0 }; y < m_map.height; ++y)
+    for (auto y{ 0 }; y < t_height; ++y)
     {
-        for (auto x{ 0 }; x < m_map.width; ++x)
+        for (auto x{ 0 }; x < t_width; ++x)
         {
             t_terrainTiles.emplace_back(std::make_unique<layer::Tile>());
         }
@@ -884,17 +929,17 @@ void mdcii::world::WorldGenerator2::CreateTerrainTiles(std::vector<std::shared_p
     std::mt19937 gen(rd());
     std::uniform_int_distribution randInRange(0, 10);
 
-    for (auto y{ 0 }; y < m_map.height; ++y)
+    for (auto y{ 0 }; y < t_height; ++y)
     {
-        for (auto x{ 0 }; x < m_map.width; ++x)
+        for (auto x{ 0 }; x < t_width; ++x)
         {
-            const auto idx{ GetIndex(x, y, m_map.width) };
-            const auto val{ m_map.positions.at(idx).mapValue.value };
+            const auto idx{ GetIndex(x, y, t_width) };
+            const auto val{ t_positions.at(idx).mapValue.value };
 
             if (val == MAP_TERRAIN)
             {
                 auto id{ data::GRASS_BUILDING_ID };
-                if (m_south)
+                if (t_south)
                 {
                     if (const auto r{ randInRange(gen) }; r >= 7)
                     {
@@ -975,24 +1020,29 @@ void mdcii::world::WorldGenerator2::CreateTerrainTiles(std::vector<std::shared_p
     }
 }
 
-void mdcii::world::WorldGenerator2::CreateCoastTiles(std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles) const
+void mdcii::world::WorldGenerator2::CreateCoastTiles(
+    std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles,
+    const std::vector<Position>& t_positions,
+    const int32_t t_width,
+    const int32_t t_height
+)
 {
-    MDCII_ASSERT(!m_map.positions.empty(), "[WorldGenerator2::CreateCoastTiles()] Missing map values.")
+    Log::MDCII_LOG_DEBUG("[WorldGenerator2::CreateCoastTiles()] Create coast tiles.");
 
-    for (auto y{ 0 }; y < m_map.height; ++y)
+    for (auto y{ 0 }; y < t_height; ++y)
     {
-        for (auto x{ 0 }; x < m_map.width; ++x)
+        for (auto x{ 0 }; x < t_width; ++x)
         {
             t_coastTiles.emplace_back(std::make_unique<layer::Tile>());
         }
     }
 
-    for (auto y{ 0 }; y < m_map.height; ++y)
+    for (auto y{ 0 }; y < t_height; ++y)
     {
-        for (auto x{ 0 }; x < m_map.width; ++x)
+        for (auto x{ 0 }; x < t_width; ++x)
         {
-            const auto idx{ GetIndex(x, y, m_map.width) };
-            const auto val{ m_map.positions.at(idx).mapValue.value };
+            const auto idx{ GetIndex(x, y, t_width) };
+            const auto val{ t_positions.at(idx).mapValue.value };
 
             if (val == MAP_WATER)
             {
@@ -1002,13 +1052,18 @@ void mdcii::world::WorldGenerator2::CreateCoastTiles(std::vector<std::shared_ptr
     }
 }
 
-void mdcii::world::WorldGenerator2::CreateBuildingsTiles(std::vector<std::shared_ptr<layer::Tile>>& t_buildingsTiles) const
+void mdcii::world::WorldGenerator2::CreateBuildingsTiles(
+    std::vector<std::shared_ptr<layer::Tile>>& t_buildingsTiles,
+    const std::vector<Position>& t_positions,
+    const int32_t t_width,
+    const int32_t t_height
+)
 {
-    MDCII_ASSERT(!m_map.positions.empty(), "[WorldGenerator2::CreateBuildingsTiles()] Missing map values.")
+    Log::MDCII_LOG_DEBUG("[WorldGenerator2::CreateBuildingsTiles()] Create building tiles.");
 
-    for (auto y{ 0 }; y < m_map.height; ++y)
+    for (auto y{ 0 }; y < t_height; ++y)
     {
-        for (auto x{ 0 }; x < m_map.width; ++x)
+        for (auto x{ 0 }; x < t_width; ++x)
         {
             t_buildingsTiles.emplace_back(std::make_unique<layer::Tile>());
         }

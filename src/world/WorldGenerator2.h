@@ -61,6 +61,31 @@ namespace mdcii::world
     {
     public:
         //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        WorldGenerator2();
+
+        WorldGenerator2(const WorldGenerator2& t_other) = delete;
+        WorldGenerator2(WorldGenerator2&& t_other) noexcept = delete;
+        WorldGenerator2& operator=(const WorldGenerator2& t_other) = delete;
+        WorldGenerator2& operator=(WorldGenerator2&& t_other) noexcept = delete;
+
+        ~WorldGenerator2() noexcept;
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
+        /**
+         * Renders ImGui menus.
+         */
+        void RenderImGui();
+
+    protected:
+
+    private:
+        //-------------------------------------------------
         // Types
         //-------------------------------------------------
 
@@ -77,7 +102,7 @@ namespace mdcii::world
         };
 
         /**
-         * The order of the indices of the neighbors.
+         * The order of the neighbor indices.
          */
         enum class Direction
         {
@@ -121,41 +146,6 @@ namespace mdcii::world
             [[nodiscard]] bool IsElevationAboveWaterLevel() const { return elevation >= WATER_LEVEL; }
         };
 
-        /**
-         * Represents the map.
-         */
-        struct Map
-        {
-            std::vector<Position> positions;
-            int32_t width{ -1 };
-            int32_t height{ -1 };
-        };
-
-        //-------------------------------------------------
-        // Ctors. / Dtor.
-        //-------------------------------------------------
-
-        WorldGenerator2();
-
-        WorldGenerator2(const WorldGenerator2& t_other) = delete;
-        WorldGenerator2(WorldGenerator2&& t_other) noexcept = delete;
-        WorldGenerator2& operator=(const WorldGenerator2& t_other) = delete;
-        WorldGenerator2& operator=(WorldGenerator2&& t_other) noexcept = delete;
-
-        ~WorldGenerator2() noexcept;
-
-        //-------------------------------------------------
-        // Logic
-        //-------------------------------------------------
-
-        /**
-         * Renders ImGui menus.
-         */
-        void RenderImGui();
-
-    protected:
-
-    private:
         //-------------------------------------------------
         // Constants
         //-------------------------------------------------
@@ -174,6 +164,8 @@ namespace mdcii::world
          * Represents the embankment before set rotations.
          */
         static constexpr auto MAP_BANK{ 99 };
+
+        // Embankment
 
         static constexpr auto MAP_BANK_ROT0{ 2 };
         static constexpr auto MAP_BANK_ROT1{ 3 };
@@ -195,19 +187,9 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * The file in which the map will be saved.
+         * The file in which will the generated map will be saved.
          */
         std::ofstream m_file;
-
-        /**
-         * The generated map.
-         */
-        Map m_map;
-
-        /**
-         * If true then trees will be created for a southern island.
-         */
-        bool m_south{ false };
 
         //-------------------------------------------------
         // Create
@@ -218,8 +200,8 @@ namespace mdcii::world
          *
          * @param t_seed Any random number.
          * @param t_frequency The noise frequency.
-         * @param t_width The width of the map/island.
-         * @param t_height The height of the map/island.
+         * @param t_width The width of the island.
+         * @param t_height The height of the island.
          *
          * @return List of Position objects.
          */
@@ -229,8 +211,8 @@ namespace mdcii::world
          * Stores the neighbor indices for each Position object.
          *
          * @param t_positions A list of Position objects.
-         * @param t_width The width of the map/island.
-         * @param t_height The height of the map/island.
+         * @param t_width The width of the island.
+         * @param t_height The height of the island.
          */
         static void StoreNeighbors(std::vector<Position>& t_positions, int32_t t_width, int32_t t_height);
 
@@ -266,14 +248,33 @@ namespace mdcii::world
          */
         static void CreateEmbankmentNeighbors(std::vector<Position>& t_positions);
 
-        [[nodiscard]] static bool FilterEmbankment(std::vector<Position>& t_positions);
+        /**
+         * Removes invalid positions of the embankment.
+         * These are positions of the embankment with no, one or three neighbors.
+         *
+         * @param t_positions A list of Position objects.
+         */
+        static void ValidateEmbankment(std::vector<Position>& t_positions);
 
         /**
-         * Sets a different map value for each rotation of the embankment.
+         * Removes embankment positions with one or three neighbors.
+         *
+         * @param t_positions A list of Position objects.
+         *
+         * @return True if a position is removed, otherwise false.
+         */
+        [[nodiscard]] static bool RemoveInvalidEmbankment(std::vector<Position>& t_positions);
+
+        /**
+         * Sets the final map value for each rotation of the embankment.
          *
          * @param t_positions A list of Position objects.
          */
         static void AlignEmbankment(std::vector<Position>& t_positions);
+
+        //-------------------------------------------------
+        // ImGui
+        //-------------------------------------------------
 
         /**
          * Renders a legend for the map.
@@ -284,8 +285,8 @@ namespace mdcii::world
          * Colored output of the created elevations with ImGui.
          *
          * @param t_positions A list of Position objects.
-         * @param t_width The width of the map/island.
-         * @param t_height The height of the map/island.
+         * @param t_width The width of the island.
+         * @param t_height The height of the island.
          */
         static void RenderElevationValuesImGui(const std::vector<Position>& t_positions, int32_t t_width, int32_t t_height);
 
@@ -293,8 +294,8 @@ namespace mdcii::world
          * Colored output of the map values with ImGui.
          *
          * @param t_positions A list of Position objects.
-         * @param t_width The width of the map/island.
-         * @param t_height The height of the map/island.
+         * @param t_width The width of the island.
+         * @param t_height The height of the island.
          */
         static void RenderMapValuesImGui(const std::vector<Position>& t_positions, int32_t t_width, int32_t t_height);
 
@@ -302,8 +303,8 @@ namespace mdcii::world
          * Colored output of the map neighbor values with ImGui.
          *
          * @param t_positions A list of Position objects.
-         * @param t_width The width of the map/island.
-         * @param t_height The height of the map/island.
+         * @param t_width The width of the island.
+         * @param t_height The height of the island.
          */
         static void RenderMapNeighborValuesImGui(const std::vector<Position>& t_positions, int32_t t_width, int32_t t_height);
 
@@ -324,10 +325,22 @@ namespace mdcii::world
          * Adds an island to an Json value.
          *
          * @param t_j The Json where the values will be added.
-         * @param t_worldX The x position in the world.
-         * @param t_worldY The y position in the world.
+         * @param t_positions A list of Position objects.
+         * @param t_width The width of the island.
+         * @param t_height The height of the island.
+         * @param t_worldX The x position of the island in the world.
+         * @param t_worldY The y position of the island in the world.
+         * @param t_south Generates trees for a southern island else for a northern one.
          */
-        void AddIslandValues(nlohmann::json& t_j, int32_t t_worldX, int32_t t_worldY);
+        static void AddIslandValues(
+            nlohmann::json& t_j,
+            const std::vector<Position>& t_positions,
+            int32_t t_width,
+            int32_t t_height,
+            int32_t t_worldX,
+            int32_t t_worldY,
+            bool t_south
+        );
 
         //-------------------------------------------------
         // Helper
@@ -338,7 +351,7 @@ namespace mdcii::world
          *
          * @param t_x The x position.
          * @param t_y The y position.
-         * @param t_width The width of the 2D map.
+         * @param t_width The width of a 2D map.
          *
          * @return The 1D index.
          */
@@ -354,7 +367,7 @@ namespace mdcii::world
          *
          * @return The created Tile object pointer.
          */
-        static std::unique_ptr<layer::Tile> CreateTile(int32_t t_id, int32_t t_worldX, int32_t t_worldY, Rotation t_rotation) ;
+        static std::unique_ptr<layer::Tile> CreateTile(int32_t t_id, int32_t t_worldX, int32_t t_worldY, Rotation t_rotation);
 
         //-------------------------------------------------
         // Create Tiles
@@ -363,23 +376,49 @@ namespace mdcii::world
         /**
          * Creates Tile objects for the TerrainLayer.
          *
-         * @param t_terrainTiles The created Tile objects.
+         * @param t_terrainTiles The Tile objects.
+         * @param t_positions A list of Position objects.
+         * @param t_width The width of the Layer.
+         * @param t_height The height of the Layer.
+         * @param t_south Generates trees for a southern island else for a northern one.
          */
-        void CreateTerrainTiles(std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles) const;
+        static void CreateTerrainTiles(
+            std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles,
+            const std::vector<Position>& t_positions,
+            int32_t t_width,
+            int32_t t_height,
+            bool t_south
+        );
 
         /**
          * Creates Tile objects for the CoastLayer.
          *
-         * @param t_coastTiles The created Tile objects.
+         * @param t_coastTiles The Tile objects.
+         * @param t_positions A list of Position objects.
+         * @param t_width The width of the Layer.
+         * @param t_height The height of the Layer.
          */
-        void CreateCoastTiles(std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles) const;
+        static void CreateCoastTiles(
+            std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles,
+            const std::vector<Position>& t_positions,
+            int32_t t_width,
+            int32_t t_height
+        );
 
         /**
          * Creates Tile objects for the BuildingsLayer.
          *
-         * @param t_buildingsTiles The created Tile objects.
+         * @param t_buildingsTiles The Tile objects.
+         * @param t_positions A list of Position objects.
+         * @param t_width The width of the Layer.
+         * @param t_height The height of the Layer.
          */
-        void CreateBuildingsTiles(std::vector<std::shared_ptr<layer::Tile>>& t_buildingsTiles) const;
+        static void CreateBuildingsTiles(
+            std::vector<std::shared_ptr<layer::Tile>>& t_buildingsTiles,
+            const std::vector<Position>& t_positions,
+            int32_t t_width,
+            int32_t t_height
+        );
 
         //-------------------------------------------------
         // File
