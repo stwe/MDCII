@@ -54,8 +54,8 @@ void mdcii::world::WorldGenerator2::RenderImGui()
 
     static int32_t islandWidth{ 20 };
     static int32_t islandHeight{ 20 };
-    static int32_t seed{ 4659 };
-    static float frequency{ 0.126f };
+    static int32_t seed{ 4181 };
+    static float frequency{ 0.201f };
 
     ImGui::Separator();
     ImGui::SliderInt("World width ", &worldWidth, World::WORLD_MIN_WIDTH, World::WORLD_MAX_WIDTH);
@@ -102,12 +102,12 @@ void mdcii::world::WorldGenerator2::RenderImGui()
     {
         static int FilterAZ(ImGuiInputTextCallbackData* data)
         {
-            if (auto c{ data->EventChar }; !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')))
+            if (auto c{ data->EventChar }; (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
             {
-                return 1;
+                return 0;
             }
 
-            return 0;
+            return 1;
         }
     };
 
@@ -347,7 +347,9 @@ void mdcii::world::WorldGenerator2::CreateEmbankmentNeighbors(std::vector<Positi
 
 void mdcii::world::WorldGenerator2::ValidateEmbankment(std::vector<Position>& t_positions)
 {
-    // remove embankment positions with one or three neighbors
+    Log::MDCII_LOG_DEBUG("[WorldGenerator2::ValidateEmbankment()] Check for invalid embankment positions.");
+
+    // remove invalid embankment positions
     while (RemoveInvalidEmbankment(t_positions))
     {
         AddDefaultEmbankment(t_positions);
@@ -366,10 +368,9 @@ void mdcii::world::WorldGenerator2::ValidateEmbankment(std::vector<Position>& t_
 
 bool mdcii::world::WorldGenerator2::RemoveInvalidEmbankment(std::vector<Position>& t_positions)
 {
-    Log::MDCII_LOG_DEBUG("[WorldGenerator2::RemoveInvalidEmbankment()] Check for invalid embankment positions.");
-
     for (auto& position : t_positions)
     {
+        // one neighbor
         if (position.mapValue.neighborFlag == 1)
         {
             position.mapValue.value = MAP_WATER;
@@ -394,30 +395,48 @@ bool mdcii::world::WorldGenerator2::RemoveInvalidEmbankment(std::vector<Position
             return true;
         }
 
+        // some positions with three neighbors
         if (position.mapValue.neighborFlag == 7)
         {
-            position.mapValue.value = MAP_WATER;
-            return true;
+            const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
+            if (e != -1 && t_positions.at(e).mapValue.neighborFlag != 12 && t_positions.at(e).mapValue.neighborFlag != 9)
+            {
+                position.mapValue.value = MAP_WATER;
+                return true;
+            }
         }
 
-        if (position.mapValue.neighborFlag == 11)
+        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 11)
         {
-            position.mapValue.value = MAP_WATER;
-            return true;
+            const auto n{ position.neighborIndices.at(magic_enum::enum_integer(Direction::N)) };
+            if (n != -1 && t_positions.at(n).mapValue.neighborFlag != 12 && t_positions.at(n).mapValue.neighborFlag != 6)
+            {
+                position.mapValue.value = MAP_WATER;
+                return true;
+            }
         }
 
-        if (position.mapValue.neighborFlag == 13)
+        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 13)
         {
-            position.mapValue.value = MAP_WATER;
-            return true;
+            const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
+            if (w != -1 && t_positions.at(w).mapValue.neighborFlag != 6 && t_positions.at(w).mapValue.neighborFlag != 3)
+            {
+                position.mapValue.value = MAP_WATER;
+                return true;
+            }
         }
 
-        if (position.mapValue.neighborFlag == 14)
+        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 14)
         {
-            position.mapValue.value = MAP_WATER;
-            return true;
+            const auto s{ position.neighborIndices.at(magic_enum::enum_integer(Direction::S)) };
+            if (s != -1 && t_positions.at(s).mapValue.neighborFlag != 9 && t_positions.at(s).mapValue.neighborFlag != 3)
+            {
+                position.mapValue.value = MAP_WATER;
+                return true;
+            }
         }
 
+        // more than three neighbors
         if (position.mapValue.neighborFlag == 15)
         {
             position.mapValue.value = MAP_WATER;
@@ -507,6 +526,95 @@ void mdcii::world::WorldGenerator2::AlignEmbankment(std::vector<Position>& t_pos
             const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
 
             if (e != -1 && t_positions.at(e).mapValue.value == MAP_TERRAIN)
+            {
+                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT2;
+            }
+        }
+
+        // corners - inside / three neighbors
+        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 7)
+        {
+            const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
+
+            /*
+             * 7 12
+             */
+            if (e != -1 && t_positions.at(e).mapValue.neighborFlag == 12)
+            {
+                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT0;
+            }
+
+            /*
+             * 7 9
+             */
+            if (e != -1 && t_positions.at(e).mapValue.neighborFlag == 9)
+            {
+                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT1;
+            }
+        }
+
+        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 11)
+        {
+            const auto n{ position.neighborIndices.at(magic_enum::enum_integer(Direction::N)) };
+
+            /*
+             * 12
+             * 11
+             */
+            if (n != -1 && t_positions.at(n).mapValue.neighborFlag == 12)
+            {
+                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT0;
+            }
+
+            /*
+             *  6
+             * 11
+             */
+            if (n != -1 && t_positions.at(n).mapValue.neighborFlag == 6)
+            {
+                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT3;
+            }
+        }
+
+        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 13)
+        {
+            const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
+
+            /*
+             * 6 13
+             */
+            if (w != -1 && t_positions.at(w).mapValue.neighborFlag == 6)
+            {
+                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT3;
+            }
+
+            /*
+             * 3 13
+             */
+            if (w != -1 && t_positions.at(w).mapValue.neighborFlag == 3)
+            {
+                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT2;
+            }
+        }
+
+        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 14)
+        {
+            const auto s{ position.neighborIndices.at(magic_enum::enum_integer(Direction::S)) };
+
+            /*
+             * 14
+             *  9
+             */
+            if (s != -1 && t_positions.at(s).mapValue.neighborFlag == 9)
+            {
+                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT1;
+            }
+
+            /*
+             * 14
+             *  3
+             */
+            if (s != -1 && t_positions.at(s).mapValue.neighborFlag == 3)
             {
                 position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT2;
             }

@@ -249,15 +249,14 @@ namespace mdcii::world
         static void CreateEmbankmentNeighbors(std::vector<Position>& t_positions);
 
         /**
-         * Removes invalid positions of the embankment.
-         * These are positions of the embankment with no, one or three neighbors.
+         * Validate positions of the embankment.
          *
          * @param t_positions A list of Position objects.
          */
         static void ValidateEmbankment(std::vector<Position>& t_positions);
 
         /**
-         * Removes embankment positions with one or three neighbors.
+         * Removes invalid embankment positions.
          *
          * @param t_positions A list of Position objects.
          *
