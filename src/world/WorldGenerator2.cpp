@@ -55,7 +55,7 @@ void mdcii::world::WorldGenerator2::RenderImGui()
     static int32_t islandWidth{ 20 };
     static int32_t islandHeight{ 20 };
     static int32_t seed{ 4181 };
-    static float frequency{ 0.201f };
+    static float frequency{ 0.086f };
 
     ImGui::Separator();
     ImGui::SliderInt("World width ", &worldWidth, World::WORLD_MIN_WIDTH, World::WORLD_MAX_WIDTH);
@@ -77,10 +77,14 @@ void mdcii::world::WorldGenerator2::RenderImGui()
         auto createdPositions{ CreateElevations(seed, frequency, islandWidth, islandHeight) };
         StoreNeighbors(createdPositions, islandWidth, islandHeight);
         SplitElevationsInWaterAndTerrain(createdPositions);
+
         AddDefaultEmbankment(createdPositions);
         CreateEmbankmentNeighbors(createdPositions);
         ValidateEmbankment(createdPositions);
-        AlignEmbankment(createdPositions);
+
+        AddDefaultBeach(createdPositions);
+
+        SetFinalEmbankment(createdPositions);
 
         // swap
         currentPositions = std::move(createdPositions);
@@ -278,7 +282,6 @@ void mdcii::world::WorldGenerator2::AddDefaultEmbankment(std::vector<Position>& 
 
     for (auto& position : t_positions)
     {
-        // if a position is on terrain and a neighbor is water, set default embankment for the position
         if (position.mapValue.value == MAP_TERRAIN && IsMapTerrainPositionOnSeaSide(t_positions, position))
         {
             position.mapValue.value = MAP_BANK;
@@ -295,6 +298,36 @@ bool mdcii::world::WorldGenerator2::IsMapTerrainPositionOnSeaSide(const std::vec
 
     return std::any_of(t_position.neighborIndices.begin(), t_position.neighborIndices.end(), [&t_positions](const int32_t t_idx) {
         return t_idx != -1 && t_positions.at(t_idx).mapValue.value == MAP_WATER;
+    });
+}
+
+void mdcii::world::WorldGenerator2::AddDefaultBeach(std::vector<Position>& t_positions)
+{
+    if (t_positions.empty())
+    {
+        return;
+    }
+
+    Log::MDCII_LOG_DEBUG("[WorldGenerator2::AddEmbankment()] Create beach default values.");
+
+    for (auto& position : t_positions)
+    {
+        if (position.mapValue.value == MAP_WATER && IsMapWaterPositionOnBankSide(t_positions, position))
+        {
+            position.mapValue.value = MAP_BEACH;
+        }
+    }
+}
+
+bool mdcii::world::WorldGenerator2::IsMapWaterPositionOnBankSide(const std::vector<Position>& t_positions, const Position& t_position)
+{
+    if (t_position.mapValue.value != MAP_WATER)
+    {
+        return false;
+    }
+
+    return std::any_of(t_position.neighborIndices.begin(), t_position.neighborIndices.end(), [&t_positions](const int32_t t_idx) {
+        return t_idx != -1 && t_positions.at(t_idx).mapValue.value == MAP_BANK;
     });
 }
 
@@ -447,7 +480,7 @@ bool mdcii::world::WorldGenerator2::RemoveInvalidEmbankment(std::vector<Position
     return false;
 }
 
-void mdcii::world::WorldGenerator2::AlignEmbankment(std::vector<Position>& t_positions)
+void mdcii::world::WorldGenerator2::SetFinalEmbankment(std::vector<Position>& t_positions)
 {
     if (t_positions.empty())
     {
@@ -623,8 +656,8 @@ void mdcii::world::WorldGenerator2::AlignEmbankment(std::vector<Position>& t_pos
         // corners
         if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 12)
         {
-            const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
-            if (e != -1 && t_positions.at(e).mapValue.value == MAP_WATER)
+            const auto sw{ position.neighborIndices.at(magic_enum::enum_integer(Direction::SW)) };
+            if (sw != -1 && t_positions.at(sw).mapValue.value == MAP_TERRAIN || t_positions.at(sw).mapValue.value == MAP_BANK)
             {
                 position.mapValue.value = MAP_BANK_CORNER_ROT2;
             }
@@ -632,8 +665,8 @@ void mdcii::world::WorldGenerator2::AlignEmbankment(std::vector<Position>& t_pos
 
         if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 9)
         {
-            const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
-            if (e != -1 && t_positions.at(e).mapValue.value == MAP_WATER)
+            const auto nw{ position.neighborIndices.at(magic_enum::enum_integer(Direction::NW)) };
+            if (nw != -1 && t_positions.at(nw).mapValue.value == MAP_TERRAIN || t_positions.at(nw).mapValue.value == MAP_BANK)
             {
                 position.mapValue.value = MAP_BANK_CORNER_ROT3;
             }
@@ -641,8 +674,8 @@ void mdcii::world::WorldGenerator2::AlignEmbankment(std::vector<Position>& t_pos
 
         if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 3)
         {
-            const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
-            if (w != -1 && t_positions.at(w).mapValue.value == MAP_WATER)
+            const auto ne{ position.neighborIndices.at(magic_enum::enum_integer(Direction::NE)) };
+            if (ne != -1 && t_positions.at(ne).mapValue.value == MAP_TERRAIN || t_positions.at(ne).mapValue.value == MAP_BANK)
             {
                 position.mapValue.value = MAP_BANK_CORNER_ROT0;
             }
@@ -650,8 +683,8 @@ void mdcii::world::WorldGenerator2::AlignEmbankment(std::vector<Position>& t_pos
 
         if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 6)
         {
-            const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
-            if (w != -1 && t_positions.at(w).mapValue.value == MAP_WATER)
+            const auto se{ position.neighborIndices.at(magic_enum::enum_integer(Direction::SE)) };
+            if (se != -1 && t_positions.at(se).mapValue.value == MAP_TERRAIN || t_positions.at(se).mapValue.value == MAP_BANK)
             {
                 position.mapValue.value = MAP_BANK_CORNER_ROT1;
             }
@@ -678,7 +711,11 @@ void mdcii::world::WorldGenerator2::RenderLegendImGui()
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-    ImGui::Text("# (or other yellow chars) Embankment");
+    ImGui::Text("# Embankment");
+    ImGui::PopStyleColor();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 200, 200, 255));
+    ImGui::Text("= Beach");
     ImGui::PopStyleColor();
 
     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
@@ -777,83 +814,26 @@ void mdcii::world::WorldGenerator2::RenderMapValuesImGui(const std::vector<Posit
                     ImGui::PopStyleColor();
                     break;
                 case MAP_BANK:
+                case MAP_BANK_ROT0:
+                case MAP_BANK_ROT1:
+                case MAP_BANK_ROT2:
+                case MAP_BANK_ROT3:
+                case MAP_BANK_CORNER_INSIDE_ROT0:
+                case MAP_BANK_CORNER_INSIDE_ROT1:
+                case MAP_BANK_CORNER_INSIDE_ROT2:
+                case MAP_BANK_CORNER_INSIDE_ROT3:
+                case MAP_BANK_CORNER_ROT0:
+                case MAP_BANK_CORNER_ROT1:
+                case MAP_BANK_CORNER_ROT2:
+                case MAP_BANK_CORNER_ROT3:
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
                     ImGui::Text("#");
                     ImGui::SameLine();
                     ImGui::PopStyleColor();
                     break;
-
-                case MAP_BANK_ROT0:
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-                    ImGui::Text("|");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
-                    break;
-                case MAP_BANK_ROT1:
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-                    ImGui::Text("<");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
-                    break;
-                case MAP_BANK_ROT2:
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-                    ImGui::Text("^");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
-                    break;
-                case MAP_BANK_ROT3:
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-                    ImGui::Text(">");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
-                    break;
-
-                case MAP_BANK_CORNER_INSIDE_ROT0:
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-                    ImGui::Text("0");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
-                    break;
-                case MAP_BANK_CORNER_INSIDE_ROT1:
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-                    ImGui::Text("1");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
-                    break;
-                case MAP_BANK_CORNER_INSIDE_ROT2:
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-                    ImGui::Text("2");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
-                    break;
-                case MAP_BANK_CORNER_INSIDE_ROT3:
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-                    ImGui::Text("3");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
-                    break;
-
-                case MAP_BANK_CORNER_ROT0:
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-                    ImGui::Text("c");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
-                    break;
-                case MAP_BANK_CORNER_ROT1:
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-                    ImGui::Text("o");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
-                    break;
-                case MAP_BANK_CORNER_ROT2:
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-                    ImGui::Text("r");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
-                    break;
-                case MAP_BANK_CORNER_ROT3:
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-                    ImGui::Text("n");
+                case MAP_BEACH:
+                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 200, 200, 255));
+                    ImGui::Text("=");
                     ImGui::SameLine();
                     ImGui::PopStyleColor();
                     break;
@@ -1124,6 +1104,13 @@ void mdcii::world::WorldGenerator2::CreateTerrainTiles(
             {
                 t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG270);
             }
+
+            /*
+            if (val == MAP_BEACH)
+            {
+                t_terrainTiles.at(idx) = CreateTile(1205, x, y, Rotation::DEG0);
+            }
+            */
         }
     }
 }

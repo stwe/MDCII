@@ -165,6 +165,11 @@ namespace mdcii::world
          */
         static constexpr auto MAP_BANK{ 99 };
 
+        /**
+         * Represents the beach before set rotations.
+         */
+        static constexpr auto MAP_BEACH{ 100 };
+
         // Embankment
 
         static constexpr auto MAP_BANK_ROT0{ 2 };
@@ -242,6 +247,23 @@ namespace mdcii::world
         [[nodiscard]] static bool IsMapTerrainPositionOnSeaSide(const std::vector<Position>& t_positions, const Position& t_position);
 
         /**
+         * Creates beach default values.
+         *
+         * @param t_positions A list of Position objects.
+         */
+        static void AddDefaultBeach(std::vector<Position>& t_positions);
+
+        /**
+         * Checks if a water position has an embankment neighbor.
+         *
+         * @param t_positions A list of Position objects.
+         * @param t_position The position to check.
+         *
+         * @return True or false.
+         */
+        [[nodiscard]] static bool IsMapWaterPositionOnBankSide(const std::vector<Position>& t_positions, const Position& t_position);
+
+        /**
          * Creates embankment neighbor values.
          *
          * @param t_positions A list of Position objects.
@@ -269,7 +291,7 @@ namespace mdcii::world
          *
          * @param t_positions A list of Position objects.
          */
-        static void AlignEmbankment(std::vector<Position>& t_positions);
+        static void SetFinalEmbankment(std::vector<Position>& t_positions);
 
         //-------------------------------------------------
         // ImGui
