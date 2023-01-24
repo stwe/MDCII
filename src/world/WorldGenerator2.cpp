@@ -16,11 +16,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include <imgui.h>
 #include <random>
 #include <filesystem>
 #include "WorldGenerator2.h"
 #include "FastNoiseLite.h"
+#include "imgui_stdlib.h"
 #include "World.h"
 #include "MdciiAssert.h"
 #include "Game.h"
@@ -75,14 +75,15 @@ void mdcii::world::WorldGenerator2::RenderImGui()
     if (ImGui::Button("Create new map"))
     {
         auto createdPositions{ CreateElevations(seed, frequency, islandWidth, islandHeight) };
-        StoreNeighbors(createdPositions, islandWidth, islandHeight);
+        StoreNeighborsIndices(createdPositions, islandWidth, islandHeight);
         SplitElevationsInWaterAndTerrain(createdPositions);
 
-        AddDefaultEmbankment(createdPositions);
-        CreateEmbankmentNeighbors(createdPositions);
+        AddEmbankment(createdPositions);
+        CreateNeighbors(createdPositions, MapType::EMBANKMENT);
         ValidateEmbankment(createdPositions);
 
-        AddDefaultBeach(createdPositions);
+        AddBeach(createdPositions);
+        CreateNeighbors(createdPositions, MapType::BEACH);
 
         SetFinalEmbankment(createdPositions);
 
@@ -97,31 +98,16 @@ void mdcii::world::WorldGenerator2::RenderImGui()
 
     RenderLegendImGui();
     RenderElevationValuesImGui(currentPositions, islandWidth, islandHeight);
-    RenderMapValuesImGui(currentPositions, islandWidth, islandHeight);
+    RenderMapTypesImGui(currentPositions, islandWidth, islandHeight);
     RenderMapNeighborValuesImGui(currentPositions, islandWidth, islandHeight);
 
     // save button
-
-    struct TextFilters
-    {
-        static int FilterAZ(ImGuiInputTextCallbackData* data)
-        {
-            if (auto c{ data->EventChar }; (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
-            {
-                return 0;
-            }
-
-            return 1;
-        }
-    };
-
-    static char f[64] = "";
-    static bool printError{ false };
-
+    static std::string f;
+    static bool error{ false };
     if (!currentPositions.empty())
     {
-        ImGui::InputText("enter filename", f, 64, ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CallbackCharFilter, TextFilters::FilterAZ);
-        if (ImGui::Button("Save map") && f[0] != 0)
+        ImGui::InputText("Enter filename", &f, ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CallbackCharFilter, TextFilters::FilterAZ09);
+        if (ImGui::Button("Save map") && !f.empty())
         {
             if (CreateFile(f))
             {
@@ -130,24 +116,22 @@ void mdcii::world::WorldGenerator2::RenderImGui()
                 AddWorldValues(j, worldWidth, worldHeight);
                 AddIslandValues(j, currentPositions, islandWidth, islandHeight, 1, 1, south);
                 WriteJsonToFile(j);
-
-                printError = false;
             }
             else
             {
-                printError = true;
+                error = true;
             }
         }
-    }
 
-    if (printError)
-    {
-        ImGui::Text("Error while creating file.");
+        if (error)
+        {
+            ImGui::Text("Error while creating file.");
+        }
     }
 }
 
 //-------------------------------------------------
-// Create
+// Elevations
 //-------------------------------------------------
 
 std::vector<mdcii::world::WorldGenerator2::Position> mdcii::world::WorldGenerator2::CreateElevations(
@@ -196,13 +180,12 @@ std::vector<mdcii::world::WorldGenerator2::Position> mdcii::world::WorldGenerato
     return positions;
 }
 
-void mdcii::world::WorldGenerator2::StoreNeighbors(std::vector<Position>& t_positions, const int32_t t_width, const int32_t t_height)
-{
-    if (t_positions.empty())
-    {
-        return;
-    }
+//-------------------------------------------------
+// Neighbor indices
+//-------------------------------------------------
 
+void mdcii::world::WorldGenerator2::StoreNeighborsIndices(std::vector<Position>& t_positions, const int32_t t_width, const int32_t t_height)
+{
     Log::MDCII_LOG_DEBUG("[WorldGenerator2::StoreNeighbors()] Stores the neighbor indices of each Position object.");
 
     for (auto y{ 0 }; y < t_height; ++y)
@@ -256,123 +239,111 @@ void mdcii::world::WorldGenerator2::StoreNeighbors(std::vector<Position>& t_posi
     }
 }
 
+//-------------------------------------------------
+// Map types
+//-------------------------------------------------
+
 void mdcii::world::WorldGenerator2::SplitElevationsInWaterAndTerrain(std::vector<Position>& t_positions)
 {
-    if (t_positions.empty())
-    {
-        return;
-    }
-
     Log::MDCII_LOG_DEBUG("[WorldGenerator2::SplitElevationsInWaterAndTerrain()] Split elevation values into water and terrain.");
 
     for (auto& position : t_positions)
     {
-        position.IsElevationAboveWaterLevel() ? position.mapValue.value = MAP_TERRAIN : position.mapValue.value = MAP_WATER;
-    }
-}
-
-void mdcii::world::WorldGenerator2::AddDefaultEmbankment(std::vector<Position>& t_positions)
-{
-    if (t_positions.empty())
-    {
-        return;
-    }
-
-    Log::MDCII_LOG_DEBUG("[WorldGenerator2::AddEmbankment()] Create embankment default values.");
-
-    for (auto& position : t_positions)
-    {
-        if (position.mapValue.value == MAP_TERRAIN && IsMapTerrainPositionOnSeaSide(t_positions, position))
+        if (position.IsElevationAboveWaterLevel())
         {
-            position.mapValue.value = MAP_BANK;
+            position.positionInfo.type = MapType::TERRAIN;
+            position.positionInfo.tileInfo.id = data::GRASS_BUILDING_ID;
+            position.positionInfo.tileInfo.rotation = Rotation::DEG0;
+        }
+        else
+        {
+            position.positionInfo.type = MapType::WATER;
+            position.positionInfo.tileInfo.id = data::SHALLOW_WATER_BUILDING_ID;
+            position.positionInfo.tileInfo.rotation = Rotation::DEG0;
         }
     }
 }
 
-bool mdcii::world::WorldGenerator2::IsMapTerrainPositionOnSeaSide(const std::vector<Position>& t_positions, const Position& t_position)
+void mdcii::world::WorldGenerator2::AddEmbankment(std::vector<Position>& t_positions)
 {
-    if (t_position.mapValue.value != MAP_TERRAIN)
-    {
-        return false;
-    }
-
-    return std::any_of(t_position.neighborIndices.begin(), t_position.neighborIndices.end(), [&t_positions](const int32_t t_idx) {
-        return t_idx != -1 && t_positions.at(t_idx).mapValue.value == MAP_WATER;
-    });
-}
-
-void mdcii::world::WorldGenerator2::AddDefaultBeach(std::vector<Position>& t_positions)
-{
-    if (t_positions.empty())
-    {
-        return;
-    }
-
-    Log::MDCII_LOG_DEBUG("[WorldGenerator2::AddEmbankment()] Create beach default values.");
+    Log::MDCII_LOG_DEBUG("[WorldGenerator2::AddEmbankment()] Add embankment map type to positions.");
 
     for (auto& position : t_positions)
     {
-        if (position.mapValue.value == MAP_WATER && IsMapWaterPositionOnBankSide(t_positions, position))
+        if (position.positionInfo.type == MapType::TERRAIN && HasNeighborMapType(t_positions, position, MapType::WATER))
         {
-            position.mapValue.value = MAP_BEACH;
+            position.positionInfo.type = MapType::EMBANKMENT;
+
+            // set in another method
+            position.positionInfo.tileInfo.id = -1;
+            position.positionInfo.tileInfo.rotation = Rotation::DEG0;
         }
     }
 }
 
-bool mdcii::world::WorldGenerator2::IsMapWaterPositionOnBankSide(const std::vector<Position>& t_positions, const Position& t_position)
+void mdcii::world::WorldGenerator2::AddBeach(std::vector<Position>& t_positions)
 {
-    if (t_position.mapValue.value != MAP_WATER)
-    {
-        return false;
-    }
+    Log::MDCII_LOG_DEBUG("[WorldGenerator2::AddBeach()] Add beach map type to positions.");
 
-    return std::any_of(t_position.neighborIndices.begin(), t_position.neighborIndices.end(), [&t_positions](const int32_t t_idx) {
-        return t_idx != -1 && t_positions.at(t_idx).mapValue.value == MAP_BANK;
+    for (auto& position : t_positions)
+    {
+        if (position.positionInfo.type == MapType::WATER && HasNeighborMapType(t_positions, position, MapType::EMBANKMENT))
+        {
+            position.positionInfo.type = MapType::BEACH;
+
+            // set in another method
+            position.positionInfo.tileInfo.id = -1;
+            position.positionInfo.tileInfo.rotation = Rotation::DEG0;
+        }
+    }
+}
+
+bool mdcii::world::WorldGenerator2::HasNeighborMapType(const std::vector<Position>& t_positions, const Position& t_position, const MapType t_mapType)
+{
+    return std::any_of(t_position.neighborIndices.begin(), t_position.neighborIndices.end(), [&t_positions, t_mapType](const int32_t t_idx) {
+        return t_idx != -1 && t_positions.at(t_idx).positionInfo.type == t_mapType;
     });
 }
 
-void mdcii::world::WorldGenerator2::CreateEmbankmentNeighbors(std::vector<Position>& t_positions)
+void mdcii::world::WorldGenerator2::CreateNeighbors(std::vector<Position>& t_positions, const MapType t_mapType)
 {
-    if (t_positions.empty())
-    {
-        return;
-    }
+    Log::MDCII_LOG_DEBUG("[WorldGenerator2::CreateNeighbors()] Create neighbor values for map type {}.", magic_enum::enum_name(t_mapType));
 
-    Log::MDCII_LOG_DEBUG("[WorldGenerator2::CreateEmbankmentNeighbors()] Create embankment neighbor values.");
+    const auto mapTypeInt{ magic_enum::enum_integer(t_mapType) };
 
     // reset
     for (auto& position : t_positions)
     {
-        position.mapValue.neighborFlag = 0;
+        position.positionInfo.neighborFlags.at(mapTypeInt) = 0;
     }
 
     // set neighbors
     for (auto& position : t_positions)
     {
-        if (position.mapValue.value == MAP_BANK)
+        if (position.positionInfo.type == t_mapType)
         {
             // north
-            if (const auto n{ position.neighborIndices.at(magic_enum::enum_integer(Direction::N)) }; n != -1 && t_positions.at(n).mapValue.value == MAP_BANK)
+            if (const auto n{ position.neighborIndices.at(magic_enum::enum_integer(Direction::N)) }; n != -1 && t_positions.at(n).positionInfo.type == t_mapType)
             {
-                position.mapValue.neighborFlag = NeighborFlag::NORTH;
+                position.positionInfo.neighborFlags.at(mapTypeInt) = NeighborFlag::NORTH;
             }
 
             // east
-            if (const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) }; e != -1 && t_positions.at(e).mapValue.value == MAP_BANK)
+            if (const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) }; e != -1 && t_positions.at(e).positionInfo.type == t_mapType)
             {
-                position.mapValue.neighborFlag |= NeighborFlag::EAST;
+                position.positionInfo.neighborFlags.at(mapTypeInt) |= NeighborFlag::EAST;
             }
 
             // south
-            if (const auto s{ position.neighborIndices.at(magic_enum::enum_integer(Direction::S)) }; s != -1 && t_positions.at(s).mapValue.value == MAP_BANK)
+            if (const auto s{ position.neighborIndices.at(magic_enum::enum_integer(Direction::S)) }; s != -1 && t_positions.at(s).positionInfo.type == t_mapType)
             {
-                position.mapValue.neighborFlag |= NeighborFlag::SOUTH;
+                position.positionInfo.neighborFlags.at(mapTypeInt) |= NeighborFlag::SOUTH;
             }
 
             // west
-            if (const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) }; w != -1 && t_positions.at(w).mapValue.value == MAP_BANK)
+            if (const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) }; w != -1 && t_positions.at(w).positionInfo.type == t_mapType)
             {
-                position.mapValue.neighborFlag |= NeighborFlag::WEST;
+                position.positionInfo.neighborFlags.at(mapTypeInt) |= NeighborFlag::WEST;
             }
         }
     }
@@ -385,16 +356,18 @@ void mdcii::world::WorldGenerator2::ValidateEmbankment(std::vector<Position>& t_
     // remove invalid embankment positions
     while (RemoveInvalidEmbankment(t_positions))
     {
-        AddDefaultEmbankment(t_positions);
-        CreateEmbankmentNeighbors(t_positions);
+        AddEmbankment(t_positions);
+        CreateNeighbors(t_positions, MapType::EMBANKMENT);
     }
 
     // remove embankment positions with no neighbors
     for (auto& position : t_positions)
     {
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 0)
+        if (position.positionInfo.type == MapType::EMBANKMENT && position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 0)
         {
-            position.mapValue.value = MAP_WATER;
+            position.positionInfo.type = MapType::WATER;
+            position.positionInfo.tileInfo.id = data::SHALLOW_WATER_BUILDING_ID;
+            position.positionInfo.tileInfo.rotation = Rotation::DEG0;
         }
     }
 }
@@ -404,75 +377,93 @@ bool mdcii::world::WorldGenerator2::RemoveInvalidEmbankment(std::vector<Position
     for (auto& position : t_positions)
     {
         // one neighbor
-        if (position.mapValue.neighborFlag == 1)
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 1)
         {
-            position.mapValue.value = MAP_WATER;
+            position.positionInfo.type = MapType::WATER;
+            position.positionInfo.tileInfo.id = data::SHALLOW_WATER_BUILDING_ID;
+            position.positionInfo.tileInfo.rotation = Rotation::DEG0;
             return true;
         }
 
-        if (position.mapValue.neighborFlag == 2)
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 2)
         {
-            position.mapValue.value = MAP_WATER;
+            position.positionInfo.type = MapType::WATER;
+            position.positionInfo.tileInfo.id = data::SHALLOW_WATER_BUILDING_ID;
+            position.positionInfo.tileInfo.rotation = Rotation::DEG0;
             return true;
         }
 
-        if (position.mapValue.neighborFlag == 4)
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 4)
         {
-            position.mapValue.value = MAP_WATER;
+            position.positionInfo.type = MapType::WATER;
+            position.positionInfo.tileInfo.id = data::SHALLOW_WATER_BUILDING_ID;
+            position.positionInfo.tileInfo.rotation = Rotation::DEG0;
             return true;
         }
 
-        if (position.mapValue.neighborFlag == 8)
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 8)
         {
-            position.mapValue.value = MAP_WATER;
+            position.positionInfo.type = MapType::WATER;
+            position.positionInfo.tileInfo.id = data::SHALLOW_WATER_BUILDING_ID;
+            position.positionInfo.tileInfo.rotation = Rotation::DEG0;
             return true;
         }
 
         // some positions with three neighbors
-        if (position.mapValue.neighborFlag == 7)
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 7)
         {
             const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
-            if (e != -1 && t_positions.at(e).mapValue.neighborFlag != 12 && t_positions.at(e).mapValue.neighborFlag != 9)
+            if (e != -1 && t_positions.at(e).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) != 12 && t_positions.at(e).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) != 9)
             {
-                position.mapValue.value = MAP_WATER;
+                position.positionInfo.type = MapType::WATER;
+                position.positionInfo.tileInfo.id = data::SHALLOW_WATER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG0;
                 return true;
             }
         }
 
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 11)
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 11)
         {
             const auto n{ position.neighborIndices.at(magic_enum::enum_integer(Direction::N)) };
-            if (n != -1 && t_positions.at(n).mapValue.neighborFlag != 12 && t_positions.at(n).mapValue.neighborFlag != 6)
+            if (n != -1 && t_positions.at(n).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) != 12 && t_positions.at(n).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) != 6)
             {
-                position.mapValue.value = MAP_WATER;
+                position.positionInfo.type = MapType::WATER;
+                position.positionInfo.tileInfo.id = data::SHALLOW_WATER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG0;
                 return true;
             }
         }
 
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 13)
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 13)
         {
             const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
-            if (w != -1 && t_positions.at(w).mapValue.neighborFlag != 6 && t_positions.at(w).mapValue.neighborFlag != 3)
+            if (w != -1 && t_positions.at(w).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) != 6 && t_positions.at(w).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) != 3)
             {
-                position.mapValue.value = MAP_WATER;
+                position.positionInfo.type = MapType::WATER;
+                position.positionInfo.tileInfo.id = data::SHALLOW_WATER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG0;
                 return true;
             }
         }
 
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 14)
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 14)
         {
             const auto s{ position.neighborIndices.at(magic_enum::enum_integer(Direction::S)) };
-            if (s != -1 && t_positions.at(s).mapValue.neighborFlag != 9 && t_positions.at(s).mapValue.neighborFlag != 3)
+            if (s != -1 && t_positions.at(s).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) != 9 && t_positions.at(s).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) != 3)
             {
-                position.mapValue.value = MAP_WATER;
+                position.positionInfo.type = MapType::WATER;
+                position.positionInfo.tileInfo.id = data::SHALLOW_WATER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG0;
                 return true;
             }
         }
 
         // more than three neighbors
-        if (position.mapValue.neighborFlag == 15)
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 15)
         {
-            position.mapValue.value = MAP_WATER;
+            position.positionInfo.type = MapType::WATER;
+            position.positionInfo.tileInfo.id = data::SHALLOW_WATER_BUILDING_ID;
+            position.positionInfo.tileInfo.rotation = Rotation::DEG0;
             return true;
         }
     }
@@ -482,211 +473,231 @@ bool mdcii::world::WorldGenerator2::RemoveInvalidEmbankment(std::vector<Position
 
 void mdcii::world::WorldGenerator2::SetFinalEmbankment(std::vector<Position>& t_positions)
 {
-    if (t_positions.empty())
-    {
-        return;
-    }
-
-    Log::MDCII_LOG_DEBUG("[WorldGenerator2::AlignEmbankment()] Sets the final map value for each rotation of the embankment.");
+    Log::MDCII_LOG_DEBUG("[WorldGenerator2::SetFinalEmbankment()] Sets the final map value for each rotation of the embankment.");
 
     // set map Ids - brute force
     for (auto& position : t_positions)
     {
-        // left - right - top - bottom
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 5)
+        if (position.positionInfo.type == MapType::EMBANKMENT)
         {
-            const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
-            const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
-
-            if (e != -1 && t_positions.at(e).mapValue.value == MAP_TERRAIN)
+            // left - right - top - bottom
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 5)
             {
-                position.mapValue.value = MAP_BANK_ROT1;
-            }
-            if (w != -1 && t_positions.at(w).mapValue.value == MAP_TERRAIN)
-            {
-                position.mapValue.value = MAP_BANK_ROT3;
-            }
-        }
+                const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
+                const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
 
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 10)
-        {
-            const auto n{ position.neighborIndices.at(magic_enum::enum_integer(Direction::N)) };
-            const auto s{ position.neighborIndices.at(magic_enum::enum_integer(Direction::S)) };
+                if (e != -1 && t_positions.at(e).positionInfo.type == MapType::TERRAIN)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG90;
+                }
 
-            if (n != -1 && t_positions.at(n).mapValue.value == MAP_TERRAIN)
-            {
-                position.mapValue.value = MAP_BANK_ROT0;
-            }
-            if (s != -1 && t_positions.at(s).mapValue.value == MAP_TERRAIN)
-            {
-                position.mapValue.value = MAP_BANK_ROT2;
-            }
-        }
-
-        // corners - inside
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 6)
-        {
-            const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
-
-            if (w != -1 && t_positions.at(w).mapValue.value == MAP_TERRAIN)
-            {
-                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT1;
-            }
-        }
-
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 9)
-        {
-            const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
-
-            if (e != -1 && t_positions.at(e).mapValue.value == MAP_TERRAIN)
-            {
-                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT3;
-            }
-        }
-
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 3)
-        {
-            const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
-
-            if (w != -1 && t_positions.at(w).mapValue.value == MAP_TERRAIN)
-            {
-                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT0;
-            }
-        }
-
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 12)
-        {
-            const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
-
-            if (e != -1 && t_positions.at(e).mapValue.value == MAP_TERRAIN)
-            {
-                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT2;
-            }
-        }
-
-        // corners - inside / three neighbors
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 7)
-        {
-            const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
-
-            /*
-             * 7 12
-             */
-            if (e != -1 && t_positions.at(e).mapValue.neighborFlag == 12)
-            {
-                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT0;
+                if (w != -1 && t_positions.at(w).positionInfo.type == MapType::TERRAIN)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG270;
+                }
             }
 
-            /*
-             * 7 9
-             */
-            if (e != -1 && t_positions.at(e).mapValue.neighborFlag == 9)
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 10)
             {
-                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT1;
-            }
-        }
+                const auto n{ position.neighborIndices.at(magic_enum::enum_integer(Direction::N)) };
+                const auto s{ position.neighborIndices.at(magic_enum::enum_integer(Direction::S)) };
 
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 11)
-        {
-            const auto n{ position.neighborIndices.at(magic_enum::enum_integer(Direction::N)) };
+                if (n != -1 && t_positions.at(n).positionInfo.type == MapType::TERRAIN)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG0;
+                }
 
-            /*
-             * 12
-             * 11
-             */
-            if (n != -1 && t_positions.at(n).mapValue.neighborFlag == 12)
-            {
-                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT0;
+                if (s != -1 && t_positions.at(s).positionInfo.type == MapType::TERRAIN)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG180;
+                }
             }
 
-            /*
-             *  6
-             * 11
-             */
-            if (n != -1 && t_positions.at(n).mapValue.neighborFlag == 6)
+            // corners - inside
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 6)
             {
-                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT3;
-            }
-        }
+                const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
 
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 13)
-        {
-            const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
-
-            /*
-             * 6 13
-             */
-            if (w != -1 && t_positions.at(w).mapValue.neighborFlag == 6)
-            {
-                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT3;
+                if (w != -1 && t_positions.at(w).positionInfo.type == MapType::TERRAIN)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_INSIDE_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG90;
+                }
             }
 
-            /*
-             * 3 13
-             */
-            if (w != -1 && t_positions.at(w).mapValue.neighborFlag == 3)
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 9)
             {
-                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT2;
-            }
-        }
+                const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
 
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 14)
-        {
-            const auto s{ position.neighborIndices.at(magic_enum::enum_integer(Direction::S)) };
-
-            /*
-             * 14
-             *  9
-             */
-            if (s != -1 && t_positions.at(s).mapValue.neighborFlag == 9)
-            {
-                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT1;
+                if (e != -1 && t_positions.at(e).positionInfo.type == MapType::TERRAIN)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_INSIDE_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG270;
+                }
             }
 
-            /*
-             * 14
-             *  3
-             */
-            if (s != -1 && t_positions.at(s).mapValue.neighborFlag == 3)
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 3)
             {
-                position.mapValue.value = MAP_BANK_CORNER_INSIDE_ROT2;
-            }
-        }
+                const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
 
-        // corners
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 12)
-        {
-            const auto sw{ position.neighborIndices.at(magic_enum::enum_integer(Direction::SW)) };
-            if (sw != -1 && t_positions.at(sw).mapValue.value == MAP_TERRAIN || t_positions.at(sw).mapValue.value == MAP_BANK)
-            {
-                position.mapValue.value = MAP_BANK_CORNER_ROT2;
+                if (w != -1 && t_positions.at(w).positionInfo.type == MapType::TERRAIN)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_INSIDE_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG0;
+                }
             }
-        }
 
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 9)
-        {
-            const auto nw{ position.neighborIndices.at(magic_enum::enum_integer(Direction::NW)) };
-            if (nw != -1 && t_positions.at(nw).mapValue.value == MAP_TERRAIN || t_positions.at(nw).mapValue.value == MAP_BANK)
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 12)
             {
-                position.mapValue.value = MAP_BANK_CORNER_ROT3;
+                const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
+
+                if (e != -1 && t_positions.at(e).positionInfo.type == MapType::TERRAIN)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_INSIDE_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG180;
+                }
             }
-        }
 
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 3)
-        {
-            const auto ne{ position.neighborIndices.at(magic_enum::enum_integer(Direction::NE)) };
-            if (ne != -1 && t_positions.at(ne).mapValue.value == MAP_TERRAIN || t_positions.at(ne).mapValue.value == MAP_BANK)
+            // corners - inside / three neighbors
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 7)
             {
-                position.mapValue.value = MAP_BANK_CORNER_ROT0;
+                const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
+
+                /*
+                 * 7 12
+                 */
+                if (e != -1 && t_positions.at(e).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 12)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_INSIDE_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG0;
+                }
+
+                /*
+                 * 7 9
+                 */
+                if (e != -1 && t_positions.at(e).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 9)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_INSIDE_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG90;
+                }
             }
-        }
 
-        if (position.mapValue.value == MAP_BANK && position.mapValue.neighborFlag == 6)
-        {
-            const auto se{ position.neighborIndices.at(magic_enum::enum_integer(Direction::SE)) };
-            if (se != -1 && t_positions.at(se).mapValue.value == MAP_TERRAIN || t_positions.at(se).mapValue.value == MAP_BANK)
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 11)
             {
-                position.mapValue.value = MAP_BANK_CORNER_ROT1;
+                const auto n{ position.neighborIndices.at(magic_enum::enum_integer(Direction::N)) };
+
+                /*
+                 * 12
+                 * 11
+                 */
+                if (n != -1 && t_positions.at(n).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 12)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_INSIDE_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG0;
+                }
+
+                /*
+                 *  6
+                 * 11
+                 */
+                if (n != -1 && t_positions.at(n).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 6)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_INSIDE_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG270;
+                }
+            }
+
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 13)
+            {
+                const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
+
+                /*
+                 * 6 13
+                 */
+                if (w != -1 && t_positions.at(w).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 6)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_INSIDE_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG270;
+                }
+
+                /*
+                 * 3 13
+                 */
+                if (w != -1 && t_positions.at(w).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 3)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_INSIDE_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG180;
+                }
+            }
+
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 14)
+            {
+                const auto s{ position.neighborIndices.at(magic_enum::enum_integer(Direction::S)) };
+
+                /*
+                 * 14
+                 *  9
+                 */
+                if (s != -1 && t_positions.at(s).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 9)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_INSIDE_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG90;
+                }
+
+                /*
+                 * 14
+                 *  3
+                 */
+                if (s != -1 && t_positions.at(s).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 3)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_INSIDE_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG180;
+                }
+            }
+
+            // corners
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 12)
+            {
+                const auto sw{ position.neighborIndices.at(magic_enum::enum_integer(Direction::SW)) };
+                if (sw != -1 && t_positions.at(sw).positionInfo.type == MapType::TERRAIN || t_positions.at(sw).positionInfo.type == MapType::EMBANKMENT)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG180;
+                }
+            }
+
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 9)
+            {
+                const auto nw{ position.neighborIndices.at(magic_enum::enum_integer(Direction::NW)) };
+                if (nw != -1 && t_positions.at(nw).positionInfo.type == MapType::TERRAIN || t_positions.at(nw).positionInfo.type == MapType::EMBANKMENT)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG270;
+                }
+            }
+
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 3)
+            {
+                const auto ne{ position.neighborIndices.at(magic_enum::enum_integer(Direction::NE)) };
+                if (ne != -1 && t_positions.at(ne).positionInfo.type == MapType::TERRAIN || t_positions.at(ne).positionInfo.type == MapType::EMBANKMENT)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG0;
+                }
+            }
+
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) == 6)
+            {
+                const auto se{ position.neighborIndices.at(magic_enum::enum_integer(Direction::SE)) };
+                if (se != -1 && t_positions.at(se).positionInfo.type == MapType::TERRAIN || t_positions.at(se).positionInfo.type == MapType::EMBANKMENT)
+                {
+                    position.positionInfo.tileInfo.id = data::BANK_CORNER_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG90;
+                }
             }
         }
     }
@@ -786,12 +797,12 @@ void mdcii::world::WorldGenerator2::RenderElevationValuesImGui(const std::vector
     ImGui::End();
 }
 
-void mdcii::world::WorldGenerator2::RenderMapValuesImGui(const std::vector<Position>& t_positions, const int32_t t_width, const int32_t t_height)
+void mdcii::world::WorldGenerator2::RenderMapTypesImGui(const std::vector<Position>& t_positions, const int32_t t_width, const int32_t t_height)
 {
-    ImGui::Begin("Map values");
+    ImGui::Begin("Map types");
     if (t_positions.empty())
     {
-        ImGui::Text("No map values available");
+        ImGui::Text("No map types available");
     }
     else
     {
@@ -799,45 +810,32 @@ void mdcii::world::WorldGenerator2::RenderMapValuesImGui(const std::vector<Posit
         {
             for (auto x{ 0 }; x < t_width; ++x)
             {
-                switch (t_positions.at(GetIndex(x, y, t_width)).mapValue.value)
+                switch (t_positions.at(GetIndex(x, y, t_width)).positionInfo.type)
                 {
-                case MAP_WATER:
+                case MapType::WATER:
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
                     ImGui::Text("~");
                     ImGui::SameLine();
                     ImGui::PopStyleColor();
                     break;
-                case MAP_TERRAIN:
+                case MapType::TERRAIN:
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
                     ImGui::Text("*");
                     ImGui::SameLine();
                     ImGui::PopStyleColor();
                     break;
-                case MAP_BANK:
-                case MAP_BANK_ROT0:
-                case MAP_BANK_ROT1:
-                case MAP_BANK_ROT2:
-                case MAP_BANK_ROT3:
-                case MAP_BANK_CORNER_INSIDE_ROT0:
-                case MAP_BANK_CORNER_INSIDE_ROT1:
-                case MAP_BANK_CORNER_INSIDE_ROT2:
-                case MAP_BANK_CORNER_INSIDE_ROT3:
-                case MAP_BANK_CORNER_ROT0:
-                case MAP_BANK_CORNER_ROT1:
-                case MAP_BANK_CORNER_ROT2:
-                case MAP_BANK_CORNER_ROT3:
+                case MapType::EMBANKMENT:
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
                     ImGui::Text("#");
                     ImGui::SameLine();
                     ImGui::PopStyleColor();
                     break;
-                case MAP_BEACH:
+                case MapType::BEACH:
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 200, 200, 255));
                     ImGui::Text("=");
                     ImGui::SameLine();
                     ImGui::PopStyleColor();
                     break;
-
                 default:
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
                     ImGui::Text("?");
@@ -867,37 +865,34 @@ void mdcii::world::WorldGenerator2::RenderMapNeighborValuesImGui(const std::vect
         {
             for (auto x{ 0 }; x < t_width; ++x)
             {
-                switch (t_positions.at(GetIndex(x, y, t_width)).mapValue.value)
+                const auto idx{ GetIndex(x, y, t_width) };
+                switch (t_positions.at(idx).positionInfo.type)
                 {
-                case MAP_WATER:
+                case MapType::WATER:
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
                     ImGui::Text(" ~");
                     ImGui::SameLine();
                     ImGui::PopStyleColor();
                     break;
-                case MAP_TERRAIN:
+                case MapType::TERRAIN:
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
                     ImGui::Text(" *");
                     ImGui::SameLine();
                     ImGui::PopStyleColor();
                     break;
-                case MAP_BANK:
-                case MAP_BANK_ROT0:
-                case MAP_BANK_ROT1:
-                case MAP_BANK_ROT2:
-                case MAP_BANK_ROT3:
-                case MAP_BANK_CORNER_INSIDE_ROT0:
-                case MAP_BANK_CORNER_INSIDE_ROT1:
-                case MAP_BANK_CORNER_INSIDE_ROT2:
-                case MAP_BANK_CORNER_INSIDE_ROT3:
-                case MAP_BANK_CORNER_ROT0:
-                case MAP_BANK_CORNER_ROT1:
-                case MAP_BANK_CORNER_ROT2:
-                case MAP_BANK_CORNER_ROT3:
+                case MapType::EMBANKMENT:
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(200, 200, 0, 255));
-                    t_positions.at(GetIndex(x, y, t_width)).mapValue.neighborFlag  < 10 ?
-                        ImGui::Text(" %d", t_positions.at(GetIndex(x, y, t_width)).mapValue.neighborFlag) :
-                        ImGui::Text("%d", t_positions.at(GetIndex(x, y, t_width)).mapValue.neighborFlag);
+                    t_positions.at(idx).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)) < 10 ?
+                        ImGui::Text(" %d", t_positions.at(GetIndex(x, y, t_width)).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT))) :
+                        ImGui::Text("%d", t_positions.at(GetIndex(x, y, t_width)).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::EMBANKMENT)));
+                    ImGui::SameLine();
+                    ImGui::PopStyleColor();
+                    break;
+                case MapType::BEACH:
+                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 200, 200, 255));
+                    t_positions.at(idx).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) < 10 ?
+                        ImGui::Text(" %d", t_positions.at(GetIndex(x, y, t_width)).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH))) :
+                        ImGui::Text("%d", t_positions.at(GetIndex(x, y, t_width)).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)));
                     ImGui::SameLine();
                     ImGui::PopStyleColor();
                     break;
@@ -1022,11 +1017,15 @@ void mdcii::world::WorldGenerator2::CreateTerrainTiles(
         for (auto x{ 0 }; x < t_width; ++x)
         {
             const auto idx{ GetIndex(x, y, t_width) };
-            const auto val{ t_positions.at(idx).mapValue.value };
 
-            if (val == MAP_TERRAIN)
+            const auto mapType{ t_positions.at(idx).positionInfo.type };
+            auto id{ t_positions.at(idx).positionInfo.tileInfo.id };
+            const auto rotation{ t_positions.at(idx).positionInfo.tileInfo.rotation };
+
+            if (mapType == MapType::TERRAIN)
             {
-                auto id{ data::GRASS_BUILDING_ID };
+                MDCII_ASSERT(id != -1, "[WorldGenerator2::CreateTerrainTiles()] Invalid Building Id.")
+
                 if (t_south)
                 {
                     if (const auto r{ randInRange(gen) }; r >= 7)
@@ -1042,75 +1041,15 @@ void mdcii::world::WorldGenerator2::CreateTerrainTiles(
                     }
                 }
 
-                t_terrainTiles.at(idx) = CreateTile(id, x, y, Rotation::DEG0);
+                t_terrainTiles.at(idx) = CreateTile(id, x, y, rotation);
             }
 
-            if (val == MAP_BANK_ROT0)
+            if (mapType == MapType::EMBANKMENT)
             {
-                t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG0);
-            }
+                MDCII_ASSERT(id != -1, "[WorldGenerator2::CreateTerrainTiles()] Invalid Building Id.")
 
-            if (val == MAP_BANK_ROT1)
-            {
-                t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG90);
+                t_terrainTiles.at(idx) = CreateTile(id, x, y, rotation);
             }
-
-            if (val == MAP_BANK_ROT2)
-            {
-                t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG180);
-            }
-
-            if (val == MAP_BANK_ROT3)
-            {
-                t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG270);
-            }
-
-            if (val == MAP_BANK_CORNER_INSIDE_ROT0)
-            {
-                t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG0);
-            }
-
-            if (val == MAP_BANK_CORNER_INSIDE_ROT1)
-            {
-                t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG90);
-            }
-
-            if (val == MAP_BANK_CORNER_INSIDE_ROT2)
-            {
-                t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG180);
-            }
-
-            if (val == MAP_BANK_CORNER_INSIDE_ROT3)
-            {
-                t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG270);
-            }
-
-            if (val == MAP_BANK_CORNER_ROT0)
-            {
-                t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG0);
-            }
-
-            if (val == MAP_BANK_CORNER_ROT1)
-            {
-                t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG90);
-            }
-
-            if (val == MAP_BANK_CORNER_ROT2)
-            {
-                t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG180);
-            }
-
-            if (val == MAP_BANK_CORNER_ROT3)
-            {
-                t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG270);
-            }
-
-            /*
-            if (val == MAP_BEACH)
-            {
-                t_terrainTiles.at(idx) = CreateTile(1205, x, y, Rotation::DEG0);
-            }
-            */
         }
     }
 }
@@ -1137,19 +1076,30 @@ void mdcii::world::WorldGenerator2::CreateCoastTiles(
         for (auto x{ 0 }; x < t_width; ++x)
         {
             const auto idx{ GetIndex(x, y, t_width) };
-            const auto val{ t_positions.at(idx).mapValue.value };
 
-            if (val == MAP_WATER)
+            const auto mapType{ t_positions.at(idx).positionInfo.type };
+            const auto id{ t_positions.at(idx).positionInfo.tileInfo.id };
+            const auto rotation{ t_positions.at(idx).positionInfo.tileInfo.rotation };
+
+            if (mapType == MapType::WATER)
             {
-                t_coastTiles.at(idx) = CreateTile(data::SHALLOW_WATER_BUILDING_ID, x, y, Rotation::DEG0);
+                t_coastTiles.at(idx) = CreateTile(id, x, y, rotation);
             }
+
+            // todo:
+            /*
+            if (mapType == MapType::BEACH)
+            {
+
+            }
+            */
         }
     }
 }
 
 void mdcii::world::WorldGenerator2::CreateBuildingsTiles(
     std::vector<std::shared_ptr<layer::Tile>>& t_buildingsTiles,
-    const std::vector<Position>& t_positions,
+    [[maybe_unused]] const std::vector<Position>& t_positions,
     const int32_t t_width,
     const int32_t t_height
 )

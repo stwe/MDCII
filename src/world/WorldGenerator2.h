@@ -18,9 +18,9 @@
 
 #pragma once
 
+#include <imgui.h>
 #include <fstream>
-#include <vector>
-#include <memory>
+#include "Rotation.h"
 #include "data/json.hpp"
 
 //-------------------------------------------------
@@ -90,6 +90,22 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
+         * Textfilter using for input filenames.
+         */
+        struct TextFilters
+        {
+            static int FilterAZ09(ImGuiInputTextCallbackData* t_data)
+            {
+                if (auto c{ t_data->EventChar }; (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+                {
+                    return 0;
+                }
+
+                return 1;
+            }
+        };
+
+        /**
          * Possible neighbor flags.
          * Each flag can set by using the OR operator.
          */
@@ -102,21 +118,38 @@ namespace mdcii::world
         };
 
         /**
-         * The order of the neighbor indices.
+         * The order of the neighbor indices in Position.
          */
         enum class Direction
         {
-            N, S, W, E,
-            NE, NW, SW, SE
+            N, S, W, E, NE, NW, SW, SE
         };
 
         /**
-         * Represents the type or Id of a terrain position (water, island, embankment ...).
+         * A map type for each position.
          */
-        struct MapValue
+        enum class MapType
         {
-            int32_t value{ -1 };
-            uint8_t neighborFlag{ 0 };
+            WATER, TERRAIN, EMBANKMENT, BEACH
+        };
+
+        /**
+         * Building Id and rotation.
+         */
+        struct TileInfo
+        {
+            int32_t id{ -1 };
+            Rotation rotation{ Rotation::DEG0 };
+        };
+
+        /**
+         * Some info about a position.
+         */
+        struct PositionInfo
+        {
+            MapType type{ MapType::WATER };
+            TileInfo tileInfo{};
+            std::array<uint8_t, 4> neighborFlags{ 0, 0, 0, 0 };
         };
 
         /**
@@ -132,7 +165,7 @@ namespace mdcii::world
             int32_t x{ -1 };
             int32_t y{ -1 };
             double elevation{ 0.0 };
-            MapValue mapValue{};
+            PositionInfo positionInfo{};
             std::array<int32_t, 8> neighborIndices{ -1, -1, -1, -1, -1, -1, -1, -1 };
 
             Position() = delete;
@@ -149,26 +182,6 @@ namespace mdcii::world
         //-------------------------------------------------
         // Constants
         //-------------------------------------------------
-
-        /**
-         * Represents water on the map.
-         */
-        static constexpr auto MAP_WATER{ 0 };
-
-        /**
-         * Represents terrain on the map.
-         */
-        static constexpr auto MAP_TERRAIN{ 1 };
-
-        /**
-         * Represents the embankment before set rotations.
-         */
-        static constexpr auto MAP_BANK{ 99 };
-
-        /**
-         * Represents the beach before set rotations.
-         */
-        static constexpr auto MAP_BEACH{ 100 };
 
         // Embankment
 
@@ -197,7 +210,7 @@ namespace mdcii::world
         std::ofstream m_file;
 
         //-------------------------------------------------
-        // Create
+        // Elevations
         //-------------------------------------------------
 
         /**
@@ -212,6 +225,10 @@ namespace mdcii::world
          */
         [[nodiscard]] static std::vector<Position> CreateElevations(int32_t t_seed, float t_frequency, int32_t t_width, int32_t t_height);
 
+        //-------------------------------------------------
+        // Neighbor indices
+        //-------------------------------------------------
+
         /**
          * Stores the neighbor indices for each Position object.
          *
@@ -219,7 +236,11 @@ namespace mdcii::world
          * @param t_width The width of the island.
          * @param t_height The height of the island.
          */
-        static void StoreNeighbors(std::vector<Position>& t_positions, int32_t t_width, int32_t t_height);
+        static void StoreNeighborsIndices(std::vector<Position>& t_positions, int32_t t_width, int32_t t_height);
+
+        //-------------------------------------------------
+        // Map types
+        //-------------------------------------------------
 
         /**
          * Splits elevation values into water and terrain.
@@ -230,45 +251,41 @@ namespace mdcii::world
         static void SplitElevationsInWaterAndTerrain(std::vector<Position>& t_positions);
 
         /**
-         * Creates embankment default values.
+         * Adds the Embankment map type to the given positions.
          *
          * @param t_positions A list of Position objects.
          */
-        static void AddDefaultEmbankment(std::vector<Position>& t_positions);
+        static void AddEmbankment(std::vector<Position>& t_positions);
 
         /**
-         * Checks if a terrain position has a neighbor on water.
+         * Adds the Beach map type to the given positions.
          *
          * @param t_positions A list of Position objects.
-         * @param t_position The position to check.
+         */
+        static void AddBeach(std::vector<Position>& t_positions);
+
+        /**
+         * Checks if a position has a given neighbor map type.
+         *
+         * @param t_positions A list of Position objects.
+         * @param t_position The Position object to check.
+         * @param t_mapType The neighbor type whose presence is to be checked.
          *
          * @return True or false.
          */
-        [[nodiscard]] static bool IsMapTerrainPositionOnSeaSide(const std::vector<Position>& t_positions, const Position& t_position);
+        [[nodiscard]] static bool HasNeighborMapType(
+            const std::vector<Position>& t_positions,
+            const Position& t_position,
+            MapType t_mapType
+        );
 
         /**
-         * Creates beach default values.
+         * Creates neighbor values for the given map type.
          *
          * @param t_positions A list of Position objects.
+         * @param t_mapType The map type.
          */
-        static void AddDefaultBeach(std::vector<Position>& t_positions);
-
-        /**
-         * Checks if a water position has an embankment neighbor.
-         *
-         * @param t_positions A list of Position objects.
-         * @param t_position The position to check.
-         *
-         * @return True or false.
-         */
-        [[nodiscard]] static bool IsMapWaterPositionOnBankSide(const std::vector<Position>& t_positions, const Position& t_position);
-
-        /**
-         * Creates embankment neighbor values.
-         *
-         * @param t_positions A list of Position objects.
-         */
-        static void CreateEmbankmentNeighbors(std::vector<Position>& t_positions);
+        static void CreateNeighbors(std::vector<Position>& t_positions, MapType t_mapType);
 
         /**
          * Validate positions of the embankment.
@@ -312,13 +329,13 @@ namespace mdcii::world
         static void RenderElevationValuesImGui(const std::vector<Position>& t_positions, int32_t t_width, int32_t t_height);
 
         /**
-         * Colored output of the map values with ImGui.
+         * Colored output of the map types with ImGui.
          *
          * @param t_positions A list of Position objects.
          * @param t_width The width of the island.
          * @param t_height The height of the island.
          */
-        static void RenderMapValuesImGui(const std::vector<Position>& t_positions, int32_t t_width, int32_t t_height);
+        static void RenderMapTypesImGui(const std::vector<Position>& t_positions, int32_t t_width, int32_t t_height);
 
         /**
          * Colored output of the map neighbor values with ImGui.
