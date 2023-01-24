@@ -86,6 +86,7 @@ void mdcii::world::WorldGenerator2::RenderImGui()
         CreateNeighbors(createdPositions, MapType::BEACH);
 
         SetFinalEmbankment(createdPositions);
+        SetFinalBeach(createdPositions);
 
         // swap
         currentPositions = std::move(createdPositions);
@@ -703,6 +704,235 @@ void mdcii::world::WorldGenerator2::SetFinalEmbankment(std::vector<Position>& t_
     }
 }
 
+void mdcii::world::WorldGenerator2::SetFinalBeach(std::vector<Position>& t_positions)
+{
+    for (auto& position : t_positions)
+    {
+        if (position.positionInfo.type == MapType::BEACH)
+        {
+            // left - right - top - bottom
+            if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 5)
+            {
+                const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
+                const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
+
+                if (e != -1 && t_positions.at(e).positionInfo.type == MapType::EMBANKMENT)
+                {
+                    position.positionInfo.tileInfo.id = data::BEACH_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG180;
+                }
+
+                if (w != -1 && t_positions.at(w).positionInfo.type == MapType::EMBANKMENT)
+                {
+                    position.positionInfo.tileInfo.id = data::BEACH_BUILDING_ID;
+                    position.positionInfo.tileInfo.rotation = Rotation::DEG0;
+                }
+            }
+        }
+
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 10)
+        {
+            const auto n{ position.neighborIndices.at(magic_enum::enum_integer(Direction::N)) };
+            const auto s{ position.neighborIndices.at(magic_enum::enum_integer(Direction::S)) };
+
+            if (n != -1 && t_positions.at(n).positionInfo.type == MapType::EMBANKMENT)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG90;
+            }
+
+            if (s != -1 && t_positions.at(s).positionInfo.type == MapType::EMBANKMENT)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG270;
+            }
+        }
+
+        // corners - inside
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 6)
+        {
+            const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
+
+            if (w != -1 && t_positions.at(w).positionInfo.type == MapType::EMBANKMENT)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_INSIDE_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG270;
+            }
+        }
+
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 9)
+        {
+            const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
+
+            if (e != -1 && t_positions.at(e).positionInfo.type == MapType::EMBANKMENT)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_INSIDE_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG90;
+            }
+        }
+
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 3)
+        {
+            const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
+
+            if (w != -1 && t_positions.at(w).positionInfo.type == MapType::EMBANKMENT)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_INSIDE_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG180;
+            }
+        }
+
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 12)
+        {
+            const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
+
+            if (e != -1 && t_positions.at(e).positionInfo.type == MapType::EMBANKMENT)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_INSIDE_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG0;
+            }
+        }
+
+        // todo corner vs corner inside - / three neighbors
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 7)
+        {
+            const auto e{ position.neighborIndices.at(magic_enum::enum_integer(Direction::E)) };
+
+            /*
+             * 7 12
+             */
+            if (e != -1 && t_positions.at(e).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 12)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG0;
+            }
+
+            /*
+             * 7 9
+             */
+            if (e != -1 && t_positions.at(e).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 9)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG90;
+            }
+        }
+
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 11)
+        {
+            const auto n{ position.neighborIndices.at(magic_enum::enum_integer(Direction::N)) };
+
+            /*
+             * 12
+             * 11
+             */
+            if (n != -1 && t_positions.at(n).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 12)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG0;
+            }
+
+            /*
+             *  6
+             * 11
+             */
+            if (n != -1 && t_positions.at(n).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 6)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG270;
+            }
+        }
+
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 13)
+        {
+            const auto w{ position.neighborIndices.at(magic_enum::enum_integer(Direction::W)) };
+
+            /*
+             * 6 13
+             */
+            if (w != -1 && t_positions.at(w).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 6)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG270;
+            }
+
+            /*
+             * 3 13
+             */
+            if (w != -1 && t_positions.at(w).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 3)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG180;
+            }
+        }
+
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 14)
+        {
+            const auto s{ position.neighborIndices.at(magic_enum::enum_integer(Direction::S)) };
+
+            /*
+             * 14
+             *  9
+             */
+            if (s != -1 && t_positions.at(s).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 9)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG90;
+            }
+
+            /*
+             * 14
+             *  3
+             */
+            if (s != -1 && t_positions.at(s).positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 3)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG180;
+            }
+        }
+
+        // corners
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 12)
+        {
+            const auto sw{ position.neighborIndices.at(magic_enum::enum_integer(Direction::SW)) };
+            if (sw != -1 && t_positions.at(sw).positionInfo.type == MapType::EMBANKMENT)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG180;
+            }
+        }
+
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 9)
+        {
+            const auto nw{ position.neighborIndices.at(magic_enum::enum_integer(Direction::NW)) };
+            if (nw != -1 && t_positions.at(nw).positionInfo.type == MapType::EMBANKMENT)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG270;
+            }
+        }
+
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 3)
+        {
+            const auto ne{ position.neighborIndices.at(magic_enum::enum_integer(Direction::NE)) };
+            if (ne != -1 && t_positions.at(ne).positionInfo.type == MapType::EMBANKMENT)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG0;
+            }
+        }
+
+        if (position.positionInfo.neighborFlags.at(magic_enum::enum_integer(MapType::BEACH)) == 6)
+        {
+            const auto se{ position.neighborIndices.at(magic_enum::enum_integer(Direction::SE)) };
+            if (se != -1 && t_positions.at(se).positionInfo.type == MapType::EMBANKMENT)
+            {
+                position.positionInfo.tileInfo.id = data::BEACH_CORNER_BUILDING_ID;
+                position.positionInfo.tileInfo.rotation = Rotation::DEG90;
+            }
+        }
+    }
+}
+
 //-------------------------------------------------
 // ImGui
 //-------------------------------------------------
@@ -1086,13 +1316,11 @@ void mdcii::world::WorldGenerator2::CreateCoastTiles(
                 t_coastTiles.at(idx) = CreateTile(id, x, y, rotation);
             }
 
-            // todo:
-            /*
-            if (mapType == MapType::BEACH)
+            // todo
+            if (mapType == MapType::BEACH && id != -1)
             {
-
+                t_coastTiles.at(idx) = CreateTile(id, x, y, rotation);
             }
-            */
         }
     }
 }

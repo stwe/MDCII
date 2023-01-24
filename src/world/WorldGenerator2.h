@@ -310,6 +310,13 @@ namespace mdcii::world
          */
         static void SetFinalEmbankment(std::vector<Position>& t_positions);
 
+        /**
+         * Sets the final map value for each rotation of the beach.
+         *
+         * @param t_positions A list of Position objects.
+         */
+        static void SetFinalBeach(std::vector<Position>& t_positions);
+
         //-------------------------------------------------
         // ImGui
         //-------------------------------------------------

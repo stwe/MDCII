@@ -51,6 +51,7 @@ namespace mdcii::data
     static constexpr auto SHALLOW_WATER_BUILDING_ID{ 1203 };
 
     static constexpr auto BEACH_BUILDING_ID{ 1205 };
+    static constexpr auto BEACH_CORNER_INSIDE_BUILDING_ID{ 1206 };
     static constexpr auto BEACH_CORNER_BUILDING_ID{ 1207 };
 
     static constexpr std::array NORTH_TREES{ 1304, 1306, 1308, 1310, 1312, 1314, 1316, 1318, 1320, 1322, 1324 };
