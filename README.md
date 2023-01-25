@@ -13,7 +13,7 @@ You must have a copy of the original game installed on your computer.
 * [Compiling MDCII](#compiling-mdcii)
 * [Running MDCII](#running-mdcii)
 * [Devlog](#devlog)
-* [Roadmap](#roadmap)
+* [Roadmap](#roadmap-mdcii-v02)
 * [Reporting bugs](#reporting-bugs)
 * [License](#license)
 
@@ -273,24 +273,20 @@ In the MDCII `config.ini` the paths must be adapted.
 
 ## Devlog
 
-**19.01.2023** The project includes a new island generator that can create an island based on Perlin Noise.
+**25.01.2023** The project includes a world generator that can create an island based on Perlin Noise.
 The class is in a very early stage of development, so we shouldn't expect too much right now. An example of an
-island created with `Seed = 1276` and a `Frequency of 0.102` can be seen here:
+island created with `Seed = 4181` and a `Frequency of 0.086f` can be seen here:
 
-<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/19-01-2023.png" width="500" height="400" alt="" />
+<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/25-01-2023.png" width="500" height="400" alt="" />
 
-## Roadmap
+## Roadmap MDCII v0.2
 
 I don't have any more features planned for version 0.1. It's primarily about bug fixes and refactoring
-of some classes. The WorldGenerator2 e.g. needs to be refactored and the menus needs to be translated.
-
-### MDCII v0.1 (current)
+of some classes.
 
 * refactoring menus and add missing translations
-* refactoring of WorldGenerator2 to be able to create multiple islands
-
-### MDCII v0.2
-
+* World Generator2 is renamed to IslandGenerator; the files created in this way becomes a new file extension.
+* a new editor combines the islands created with the island generator into a map/world
 * it should be possible to build roads; another Layer may be created for this
 * animations should be possible showing how residents brings goods from A to B; for this the A* algorithm can be implemented
 * further down my priority list: the terrain is to be expanded to include rivers and mountains
