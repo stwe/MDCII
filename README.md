@@ -273,6 +273,8 @@ In the MDCII `config.ini` the paths must be adapted.
 
 ## Devlog
 
+**28.01.2023** Add a tag for v0.1.
+
 **25.01.2023** The project includes a world generator that can create an island based on Perlin Noise.
 The class is in a very early stage of development, so we shouldn't expect too much right now. An example of an
 island created with `Seed = 4181` and a `Frequency of 0.086f` can be seen here:
@@ -281,12 +283,9 @@ island created with `Seed = 4181` and a `Frequency of 0.086f` can be seen here:
 
 ## Roadmap MDCII v0.2
 
-I don't have any more features planned for version 0.1. It's primarily about bug fixes and refactoring
-of some classes.
-
 * refactoring menus and add missing translations
 * World Generator2 is renamed to IslandGenerator; the files created in this way becomes a new file extension.
-* a new editor combines the islands created with the island generator into a map/world
+* a new editor combines the islands created with the IslandGenerator into a map/world
 * it should be possible to build roads; another Layer may be created for this
 * animations should be possible showing how residents brings goods from A to B; for this the A* algorithm can be implemented
 * further down my priority list: the terrain is to be expanded to include rivers and mountains
