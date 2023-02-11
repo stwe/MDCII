@@ -1149,6 +1149,7 @@ void mdcii::world::WorldGenerator2::AddWorldValues(nlohmann::json& t_j, const in
 {
     Log::MDCII_LOG_DEBUG("[WorldGenerator2::AddWorldValues()] Adds world Json values.");
 
+    t_j["version"] = Game::VERSION;
     t_j["world"] = { { "width", t_worldWidth }, { "height", t_worldHeight } };
 }
 
