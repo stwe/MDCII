@@ -16,13 +16,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include <fstream>
 #include <filesystem>
 #include <imgui.h>
 #include "MdciiUtils.h"
 #include "Game.h"
 #include "MdciiException.h"
 #include "Log.h"
+#include "world/imgui_stdlib.h"
 
 //-------------------------------------------------
 // Files
@@ -30,7 +30,7 @@
 
 nlohmann::json mdcii::read_json_from_file(const std::string& t_filePath)
 {
-    Log::MDCII_LOG_DEBUG("[read_json_from_file] Starts creating Json value from file {}...", t_filePath);
+    Log::MDCII_LOG_DEBUG("[read_json_from_file()] Starts creating Json value from file {}...", t_filePath);
 
     nlohmann::json j;
 
@@ -48,7 +48,7 @@ nlohmann::json mdcii::read_json_from_file(const std::string& t_filePath)
         throw MDCII_EXCEPTION("[read_json_from_file()] Exception caught while loading file " + t_filePath + ".");
     }
 
-    Log::MDCII_LOG_DEBUG("[read_json_from_file] The Json value was created successfully.");
+    Log::MDCII_LOG_DEBUG("[read_json_from_file()] The Json value was created successfully.");
 
     return j;
 }
@@ -65,6 +65,26 @@ std::vector<std::string> mdcii::get_files_list(const std::string& t_relPath, con
     }
 
     return results;
+}
+
+bool mdcii::create_file(const std::string& t_fileName, std::ofstream& t_file)
+{
+    if (std::filesystem::exists(t_fileName))
+    {
+        Log::MDCII_LOG_WARN("[create_file()] The {} file already exists.", t_fileName);
+
+        return false;
+    }
+
+    Log::MDCII_LOG_DEBUG("[create_file()] Create new file {}.", t_fileName);
+
+    t_file.open(t_fileName);
+    if (!t_file.is_open())
+    {
+        throw MDCII_EXCEPTION("[create_file()] Error while opening file " + t_fileName + ".");
+    }
+
+    return true;
 }
 
 //-------------------------------------------------
@@ -157,6 +177,18 @@ bool mdcii::begin_bottom_right(const char* t_name, const float t_offset)
         | ImGuiWindowFlags_NoSavedSettings;
 
     return ImGui::Begin(t_name, nullptr, flags);
+}
+
+void mdcii::save_file_button(const char* t_label, std::string* t_str)
+{
+    ImGui::InputText(t_label, t_str, ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CallbackCharFilter, [](ImGuiInputTextCallbackData* t_data) {
+        if (auto c{ t_data->EventChar }; (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+        {
+            return 0;
+        }
+
+        return 1;
+    });
 }
 
 //-------------------------------------------------

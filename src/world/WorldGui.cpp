@@ -214,65 +214,90 @@ void mdcii::world::WorldGui::ShowBuildingsGui()
 
 void mdcii::world::WorldGui::SaveGameGui()
 {
-    // get_files_list to get existing filenames
+    ImGui::Separator();
 
-    /*
-    const auto fileName{ Game::RESOURCES_REL_PATH + Game::INI.Get<std::string>("content", "save_game_map") };
+    static bool error{ false };
+    static bool saved{ false };
+    static std::string fileName;
+    save_file_button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame").c_str(), &fileName);
 
-    const auto str{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame") + fileName };
-    if (ImGui::Button(str.c_str()))
+    if (!fileName.empty())
     {
-        Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] Start saving the game in file {}...", fileName);
-
-        nlohmann::json json;
-
-        std::ofstream file{ fileName };
-        if (!file)
+        if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Save").c_str()))
         {
-            throw MDCII_EXCEPTION("[WorldGui::SaveGameGui()] Error while opening file " + fileName + ".");
+            fileName.append(".sav");
+
+            std::ofstream file;
+            if (create_file(Game::RESOURCES_REL_PATH + "save/" + fileName, file))
+            {
+                nlohmann::json json;
+
+                // version
+                json["version"] = Game::VERSION;
+
+                // world
+                json["world"] = *m_world;
+
+                // islands
+                auto islandsJson = nlohmann::json::array();
+                for (const auto& island : m_world->terrain->islands)
+                {
+                    // island
+                    auto islandJson = nlohmann::json::object();
+                    islandJson = *island;
+                    islandJson["layers"] = nlohmann::json::array();
+
+                    // coast
+                    auto c = nlohmann::json::object();
+                    c["coast"] = island->coastLayer->tiles;
+
+                    // terrain
+                    auto t = nlohmann::json::object();
+                    t["terrain"] = island->terrainLayer->tiles;
+
+                    // buildings
+                    auto b = nlohmann::json::object();
+                    b["buildings"] = island->buildingsLayer->tiles;
+
+                    islandJson["layers"].push_back(c);
+                    islandJson["layers"].push_back(t);
+                    islandJson["layers"].push_back(b);
+
+                    islandsJson.push_back(islandJson);
+                }
+
+                json["islands"] = islandsJson;
+
+                file << json;
+
+                Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] The game has been successfully saved in file {}.", fileName);
+
+                saved = true;
+
+                fileName.clear();
+            }
+            else
+            {
+                error = true;
+                saved = false;
+                fileName.clear();
+            }
         }
-
-        // version
-        json["version"] = Game::VERSION;
-
-        // world
-        json["world"] = *m_world;
-
-        // islands
-        auto islandsJson = nlohmann::json::array();
-        for (const auto& island : m_world->terrain->islands)
-        {
-            // island
-            auto islandJson = nlohmann::json::object();
-            islandJson = *island;
-            islandJson["layers"] = nlohmann::json::array();
-
-            // coast
-            auto c = nlohmann::json::object();
-            c["coast"] = island->coastLayer->tiles;
-
-            // terrain
-            auto t = nlohmann::json::object();
-            t["terrain"] = island->terrainLayer->tiles;
-
-            // buildings
-            auto b = nlohmann::json::object();
-            b["buildings"] = island->buildingsLayer->tiles;
-
-            islandJson["layers"].push_back(c);
-            islandJson["layers"].push_back(t);
-            islandJson["layers"].push_back(b);
-
-            islandsJson.push_back(islandJson);
-        }
-
-        json["islands"] = islandsJson;
-
-        file << json;
-
-        Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] The game has been successfully saved in file {}.", fileName);
     }
-    */
+
+    if (error)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveError").c_str());
+        ImGui::PopStyleColor();
+    }
+
+    if (saved)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveSuccess").c_str());
+        ImGui::PopStyleColor();
+    }
 }
 
 //-------------------------------------------------

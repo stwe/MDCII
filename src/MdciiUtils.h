@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <fstream>
 #include "data/json.hpp"
 
 //-------------------------------------------------
@@ -57,6 +58,16 @@ namespace mdcii
      * @return A list of found files.
      */
     [[nodiscard]] std::vector<std::string> get_files_list(const std::string& t_relPath, const std::string& t_extension);
+
+    /**
+     * Creates and opens a new file.
+     *
+     * @param t_fileName The name of the file.
+     * @param t_file The opened file.
+     *
+     * @return True or false if error while creating.
+     */
+    [[nodiscard]] bool create_file(const std::string& t_fileName, std::ofstream& t_file);
 
     //-------------------------------------------------
     // Strings
@@ -120,6 +131,14 @@ namespace mdcii
      * @return Return false to indicate the window is collapsed or fully clipped.
      */
     bool begin_bottom_right(const char* t_name, float t_offset);
+
+    /**
+     * A text field used to enter a file name.
+     *
+     * @param t_label The label of the text field.
+     * @param t_str The entered text.
+     */
+    void save_file_button(const char* t_label, std::string* t_str);
 
     //-------------------------------------------------
     // ImGui helper

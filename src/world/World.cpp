@@ -168,9 +168,9 @@ void mdcii::world::World::Render() const
 
 void mdcii::world::World::RenderImGui()
 {
-    begin_right("World", 322.0f);
+    begin_right("World", 342.0f);
 
-    ImGui::SetWindowSize({ 321.0f, 600.0f });
+    ImGui::SetWindowSize({ 341.0f, 600.0f });
 
     ImGui::Separator();
 
