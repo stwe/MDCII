@@ -393,6 +393,12 @@ void mdcii::world::World::Init()
     terrainRenderer = std::make_unique<renderer::TerrainRenderer>(context, tileAtlas);
 
     nlohmann::json j = read_json_from_file(m_mapFilePath);
+
+    if (!j.contains("version") || !j.contains("world") || !j.contains("islands"))
+    {
+        throw MDCII_EXCEPTION("[World::Init()] Invalid map file format.");
+    }
+
     for (const auto& [k, v] : j.items())
     {
         if (k == "version" && v.get<std::string>() != Game::VERSION)
