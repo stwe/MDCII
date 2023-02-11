@@ -18,11 +18,14 @@
 
 #include <imgui.h>
 #include "WorldGeneratorState.h"
+#include "Game.h"
 #include "MdciiAssert.h"
+#include "MdciiUtils.h"
 #include "ogl/OpenGL.h"
 #include "ogl/Window.h"
 #include "state/StateStack.h"
 #include "world/WorldGenerator2.h"
+#include "data/Text.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -69,28 +72,14 @@ void mdcii::WorldGeneratorState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    auto winW{ static_cast<float>(context->window->width) };
-    auto winH{ static_cast<float>(context->window->height) };
+    begin_right("Editor", 322.0f);
 
-    ImGui::SetNextWindowSize(ImVec2(338.0f, winH - 8.0f), ImGuiCond_Once);
-    ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 1.5f), 4.0f + ImGui::GetMainViewport()->Pos.y), ImGuiCond_Once);
-
-    int windowFlags =
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoBringToFrontOnFocus |
-        ImGuiWindowFlags_NoNavFocus;
-    //ImGuiWindowFlags_NoBackground;
-
-    ImGui::SetNextWindowBgAlpha(0.8f);
-
-    ImGui::Begin("World Generator", nullptr, windowFlags);
+    ImGui::SetWindowSize({ 321.0f, 600.0f });
 
     m_worldGenerator2->RenderImGui();
 
-    if (ImGui::Button("Back to main menu"))
+    auto bt{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "BackTo") };
+    if (ImGui::Button(bt.append(" ").append(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "MainMenu")).c_str()))
     {
         context->stateStack->PopState(GetStateId());
         context->stateStack->PushState(state::StateId::MAIN_MENU);

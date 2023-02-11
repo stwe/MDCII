@@ -31,6 +31,7 @@
 #include "layer/GridLayer.h"
 #include "layer/WorldLayer.h"
 #include "layer/WorldGridLayer.h"
+#include "data/Text.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -167,28 +168,14 @@ void mdcii::world::World::Render() const
 
 void mdcii::world::World::RenderImGui()
 {
-    auto winW{ static_cast<float>(context->window->width) };
+    begin_right("World", 322.0f);
 
-    ImGui::SetNextWindowSize(ImVec2(290.0f, 675.0f), ImGuiCond_Once);
-    ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 1.4f), 4.0f + ImGui::GetMainViewport()->Pos.y), ImGuiCond_Once);
-
-    int windowFlags =
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoBringToFrontOnFocus |
-        ImGuiWindowFlags_NoNavFocus;
-    //ImGuiWindowFlags_NoBackground;
-
-    ImGui::SetNextWindowBgAlpha(0.8f);
-
-    ImGui::Begin("World", nullptr, windowFlags);
-
-    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 230, 230, 255));
+    ImGui::SetWindowSize({ 321.0f, 600.0f });
 
     ImGui::Separator();
-    if (ImGui::Button("Back to main menu"))
+
+    auto bt{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "BackTo") };
+    if (ImGui::Button(bt.append(" ").append(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "MainMenu")).c_str()))
     {
         context->stateStack->PopState(m_stateId);
         context->stateStack->PushState(state::StateId::MAIN_MENU);
@@ -197,32 +184,32 @@ void mdcii::world::World::RenderImGui()
     m_worldGui->ShowActionsGui();
     ImGui::Separator();
 
-    ImGui::Checkbox("Select on terrain", &mousePicker->calcForIslandTerrain);
+    ImGui::Checkbox(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "TerrainMode").c_str(), &mousePicker->calcForIslandTerrain);
     if (ImGui::IsItemHovered())
     {
         ImGui::PushStyleColor(ImGuiCol_PopupBg, IM_COL32(66, 104, 188, 255));
         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
-        ImGui::SetTooltip("%s", "This must be enabled to select buildings on the island.");
+        ImGui::SetTooltip("%s", data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "TerrainModeTooltip").c_str());
         ImGui::PopStyleColor();
         ImGui::PopStyleColor();
     }
     ImGui::Separator();
 
-    if (ImGui::CollapsingHeader("Islands"))
+    if (ImGui::CollapsingHeader(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Islands").c_str()))
     {
         static int e{ magic_enum::enum_integer(m_layerTypeToRender) };
-        ImGui::RadioButton("Coast", &e, 0);
+        ImGui::RadioButton(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Coast").c_str(), &e, 0);
         ImGui::SameLine();
-        ImGui::RadioButton("Terrain", &e, 1);
+        ImGui::RadioButton(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Terrain").c_str(), &e, 1);
         ImGui::SameLine();
-        ImGui::RadioButton("Buildings", &e, 2);
-        ImGui::RadioButton("Mixed", &e, 3);
+        ImGui::RadioButton(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Buildings").c_str(), &e, 2);
+        ImGui::RadioButton(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Mixed").c_str(), &e, 3);
         ImGui::SameLine();
-        ImGui::RadioButton("All", &e, 4);
+        ImGui::RadioButton(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "All").c_str(), &e, 4);
         ImGui::SameLine();
-        ImGui::RadioButton("Nothing", &e, 5);
+        ImGui::RadioButton(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Nothing").c_str(), &e, 5);
 
-        ImGui::Checkbox("Island Grids", &m_renderIslandGridLayers);
+        ImGui::Checkbox(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "IslandGrids").c_str(), &m_renderIslandGridLayers);
 
         if (auto layer{ magic_enum::enum_cast<layer::LayerType>(e) }; layer.has_value())
         {
@@ -233,39 +220,43 @@ void mdcii::world::World::RenderImGui()
         terrain->RenderImGui(); // render selected island && island under mouse
     }
 
-    if (ImGui::CollapsingHeader("World"))
+    if (ImGui::CollapsingHeader(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "World").c_str()))
     {
-        ImGui::Checkbox("World Deep Water", &m_renderWorldLayer);
-        ImGui::Checkbox("World Grid", &m_renderWorldGridLayer);
-        ImGui::Checkbox("Animations", &m_runAnimations);
+        ImGui::Checkbox(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "WorldDeepWater").c_str(), &m_renderWorldLayer);
+        ImGui::Checkbox(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "WorldGrid").c_str(), &m_renderWorldGridLayer);
+        ImGui::Checkbox(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Animations").c_str(), &m_runAnimations);
     }
 
-    if (ImGui::CollapsingHeader("Rotate"))
+    if (ImGui::CollapsingHeader(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Rotation").c_str()))
     {
         m_worldGui->RotateGui();
     }
 
-    if (ImGui::CollapsingHeader("Zoom"))
+    if (ImGui::CollapsingHeader(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Zoom").c_str()))
     {
         m_worldGui->ZoomGui();
     }
 
-    if (ImGui::CollapsingHeader("Camera"))
+    if (ImGui::CollapsingHeader(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Camera").c_str()))
     {
         context->camera->RenderImGui();
     }
 
-    if (ImGui::CollapsingHeader("Culling"))
+    if (ImGui::CollapsingHeader(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Culling").c_str()))
     {
         for (const auto& island : terrain->islands)
         {
-            ImGui::Text("Island (%d, %d)", island->startWorldX, island->startWorldY);
+            const auto i{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Island") + ": (%d, %d)" };
+            const auto c{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Culling") + ": %s" };
+            ImGui::Text(i.c_str(), island->startWorldX, island->startWorldY);
             ImGui::SameLine();
-            ImGui::Text(" rendered: %s", context->camera->IsIslandNotInCamera(zoom, rotation, *island) ? "no" : "yes");
+            ImGui::Text(c.c_str(), context->camera->IsIslandNotInCamera(zoom, rotation, *island)
+                            ? data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "No").c_str()
+                            : data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Yes").c_str());
         }
     }
 
-    if (currentAction == Action::BUILD && ImGui::CollapsingHeader("Buildings"))
+    if (currentAction == Action::BUILD && ImGui::CollapsingHeader(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Buildings").c_str()))
     {
         m_worldGui->ShowBuildingsGui();
     }
@@ -293,8 +284,6 @@ void mdcii::world::World::RenderImGui()
     {
         m_worldGui->SaveGameGui();
     }
-
-    ImGui::PopStyleColor();
 
     ImGui::End();
 

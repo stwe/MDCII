@@ -28,6 +28,7 @@
 #include "state/State.h"
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/stb_image.h"
+#include "data/Text.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -83,32 +84,19 @@ void mdcii::world::MousePicker::Render(const ogl::Window& t_window, const camera
 
 void mdcii::world::MousePicker::RenderImGui() const
 {
-    auto winW{ static_cast<float>(m_world->context->window->width) };
-    auto winH{ static_cast<float>(m_world->context->window->height) };
+    begin_bottom_right("Mouse", 322.0f);
 
-    ImGui::SetNextWindowSize(ImVec2(290.0f, 64.0f), ImGuiCond_Once);
-    ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 1.4f), ImGui::GetMainViewport()->Pos.y + winH - (winH / 8.0f) + 12.0f), ImGuiCond_Once);
+    ImGui::SetWindowSize({ 321.0f, 65.0f });
 
-    const int32_t windowFlags =
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoBringToFrontOnFocus |
-        ImGuiWindowFlags_NoNavFocus;
-    //ImGuiWindowFlags_NoBackground;
+    const auto terrainMode{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "TerrainMode") + ": %s" };
+    const auto mousePos{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentMousePosition") + ": (%d, %d)" };
+    const auto oldMousePos{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "OldMousePosition") + ": (%d, %d)" };
 
-    ImGui::SetNextWindowBgAlpha(0.8f);
-
-    ImGui::Begin("Mouse", nullptr, windowFlags);
-
-    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 230, 230, 255));
-
-    ImGui::Text("Terrain mode: %s", calcForIslandTerrain ? "yes" : "no");
-    ImGui::Text("Current mouse position: (%d, %d)", currentPosition.x, currentPosition.y);
-    ImGui::Text("Old mouse position: (%d, %d)", lastPosition.x, lastPosition.y);
-
-    ImGui::PopStyleColor();
+    ImGui::Text(terrainMode.c_str(), calcForIslandTerrain
+                    ? data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Yes").c_str()
+                    : data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "No").c_str());
+    ImGui::Text(mousePos.c_str(), currentPosition.x, currentPosition.y);
+    ImGui::Text(oldMousePos.c_str(), lastPosition.x, lastPosition.y);
 
     ImGui::End();
 }

@@ -90,18 +90,47 @@ namespace mdcii
      * @param t_strId An Id.
      * @param t_v A static bool.
      */
-    void toggle_imgui_button(const std::string& t_strId, bool* t_v);
+    [[maybe_unused]] void toggle_imgui_button(const std::string& t_strId, bool* t_v);
+
+    /**
+     * A custom Begin() with centered window.
+     *
+     * @param t_name The name of the window.
+     *
+     * @return Return false to indicate the window is collapsed or fully clipped.
+     */
+    bool begin_centered(const char* t_name);
+
+    /**
+     * A custom Begin() with right aligned window.
+     *
+     * @param t_name The name of the window.
+     * @param t_offset Offset in x direction.
+     *
+     * @return Return false to indicate the window is collapsed or fully clipped.
+     */
+    bool begin_right(const char* t_name, float t_offset);
+
+    /**
+     * A custom Begin() with bottom right aligned window.
+     *
+     * @param t_name The name of the window.
+     * @param t_offset Offset in x direction.
+     *
+     * @return Return false to indicate the window is collapsed or fully clipped.
+     */
+    bool begin_bottom_right(const char* t_name, float t_offset);
 
     //-------------------------------------------------
     // ImGui helper
     //-------------------------------------------------
 
     /**
+     * Helper to use std::vector with ImGui Listbox.
      *
-     *
-     * @param t_vec
-     * @param t_index
-     * @param t_outText
+     * @param t_vec A std::vector of strings.
+     * @param t_index The index of an element in the std::vector.
+     * @param t_outText The text showing in the ListBox.
      *
      * @return True or false.
      */

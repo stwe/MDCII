@@ -40,7 +40,6 @@ mdcii::world::WorldGui::WorldGui(World* t_world)
 
     MDCII_ASSERT(m_world, "[WorldGui::WorldGui()] Null pointer.")
 
-    data::Text::Init();
     InitBauhausZoom();
 }
 
@@ -215,6 +214,9 @@ void mdcii::world::WorldGui::ShowBuildingsGui()
 
 void mdcii::world::WorldGui::SaveGameGui()
 {
+    // get_files_list to get existing filenames
+
+    /*
     const auto fileName{ Game::RESOURCES_REL_PATH + Game::INI.Get<std::string>("content", "save_game_map") };
 
     const auto str{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame") + fileName };
@@ -270,6 +272,7 @@ void mdcii::world::WorldGui::SaveGameGui()
 
         Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] The game has been successfully saved in file {}.", fileName);
     }
+    */
 }
 
 //-------------------------------------------------

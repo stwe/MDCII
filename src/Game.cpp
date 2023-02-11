@@ -25,6 +25,7 @@
 #include "state/StateStack.h"
 #include "ogl/Window.h"
 #include "file/OriginalResourcesManager.h"
+#include "data/Text.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -160,6 +161,8 @@ void mdcii::Game::CreateSharedObjects()
 void mdcii::Game::Start() const
 {
     Log::MDCII_LOG_DEBUG("[Game::Start()] Register all game states.");
+
+    data::Text::Init();
 
     m_stateStack->RegisterState<MainMenuState>(state::StateId::MAIN_MENU);
     m_stateStack->RegisterState<WorldGeneratorState>(state::StateId::WORLD_GENERATOR);

@@ -97,7 +97,7 @@ std::string mdcii::to_upper_case(const std::string& t_string)
 // ImGui widgets
 //-------------------------------------------------
 
-void mdcii::toggle_imgui_button(const std::string& t_strId, bool* t_v)
+[[maybe_unused]] void mdcii::toggle_imgui_button(const std::string& t_strId, bool* t_v)
 {
     auto const* colors{ ImGui::GetStyle().Colors };
     auto pos{ ImGui::GetCursorScreenPos() };
@@ -116,6 +116,47 @@ void mdcii::toggle_imgui_button(const std::string& t_strId, bool* t_v)
 
     drawList->AddRectFilled(pos, ImVec2(pos.x + width, pos.y + height), ImGui::GetColorU32(colors[ImGuiCol_ButtonActive]), height * 0.50f);
     drawList->AddCircleFilled(ImVec2(pos.x + radius + (*t_v ? 1.0f : 0.0f) * (width - radius * 2.0f), pos.y + radius), radius - 1.5f, IM_COL32(255, 255, 255, 255));
+}
+
+bool mdcii::begin_centered(const char* t_name)
+{
+    const auto center{ ImGui::GetMainViewport()->GetCenter() };
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove
+        | ImGuiWindowFlags_NoDecoration
+        | ImGuiWindowFlags_AlwaysAutoResize
+        | ImGuiWindowFlags_NoSavedSettings;
+
+    return ImGui::Begin(t_name, nullptr, flags);
+}
+
+bool mdcii::begin_right(const char* t_name, const float t_offset)
+{
+    ImGui::SetNextWindowPos(
+        { ImGui::GetMainViewport()->Size.x - t_offset, 0.0f },
+        ImGuiCond_Appearing
+    );
+
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove
+        | ImGuiWindowFlags_NoDecoration
+        | ImGuiWindowFlags_NoSavedSettings;
+
+    return ImGui::Begin(t_name, nullptr, flags);
+}
+
+bool mdcii::begin_bottom_right(const char* t_name, const float t_offset)
+{
+    ImGui::SetNextWindowPos(
+        { ImGui::GetMainViewport()->Size.x - t_offset, ImGui::GetMainViewport()->Size.y - 65.0f },
+        ImGuiCond_Appearing
+    );
+
+    ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove
+        | ImGuiWindowFlags_NoDecoration
+        | ImGuiWindowFlags_NoSavedSettings;
+
+    return ImGui::Begin(t_name, nullptr, flags);
 }
 
 //-------------------------------------------------

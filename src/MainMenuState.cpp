@@ -18,10 +18,13 @@
 
 #include <imgui.h>
 #include "MainMenuState.h"
+#include "Game.h"
 #include "MdciiAssert.h"
+#include "MdciiUtils.h"
 #include "ogl/OpenGL.h"
 #include "ogl/Window.h"
 #include "state/StateStack.h"
+#include "data/Text.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -68,51 +71,30 @@ void mdcii::MainMenuState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    auto winW{ static_cast<float>(context->window->width) };
-    auto winH{ static_cast<float>(context->window->height) };
+    begin_centered("MainMenu");
 
-    ImGui::SetNextWindowSize(ImVec2(174.0f, 104.0f), ImGuiCond_Once);
-    ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->Pos.x + (winW / 2.5f), ImGui::GetMainViewport()->Pos.y + (winH / 4.0f)), ImGuiCond_Once);
-
-    const int32_t windowFlags =
-        ImGuiWindowFlags_NoTitleBar |
-        ImGuiWindowFlags_NoCollapse |
-        ImGuiWindowFlags_NoResize |
-        ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoBringToFrontOnFocus |
-        ImGuiWindowFlags_NoNavFocus;
-    //ImGuiWindowFlags_NoBackground;
-
-    ImGui::SetNextWindowBgAlpha(0.8f);
-
-    ImGui::Begin("Main Menu", nullptr, windowFlags);
-
-    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(230, 230, 230, 255));
-
-    if (ImGui::Button("Create a new world"))
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Editor").c_str()))
     {
         context->stateStack->PopState(GetStateId());
         context->stateStack->PushState(state::StateId::WORLD_GENERATOR);
     }
 
-    if (ImGui::Button("Start a new game"))
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "NewGame").c_str()))
     {
         context->stateStack->PopState(GetStateId());
         context->stateStack->PushState(state::StateId::NEW_GAME);
     }
 
-    if (ImGui::Button("Load an existing game"))
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "LoadGame").c_str()))
     {
         context->stateStack->PopState(GetStateId());
         context->stateStack->PushState(state::StateId::LOADED_GAME);
     }
 
-    if (ImGui::Button("Exit"))
+    if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Exit").c_str()))
     {
         context->stateStack->PopState(GetStateId());
     }
-
-    ImGui::PopStyleColor();
 
     ImGui::End();
 
@@ -126,7 +108,6 @@ void mdcii::MainMenuState::RenderImGui()
 void mdcii::MainMenuState::Init()
 {
     Log::MDCII_LOG_DEBUG("[MainMenuState::Init()] Initializing main menu state...");
-
 
     Log::MDCII_LOG_DEBUG("[MainMenuState::Init()] The main menu state was successfully initialized.");
 }

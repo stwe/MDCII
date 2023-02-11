@@ -76,7 +76,7 @@ namespace mdcii
         /**
          * The current version of this game.
          */
-        static constexpr std::string_view VERSION{ "0.1" };
+        static constexpr std::string_view VERSION{ "0.2-DEV" };
 
         /**
          * 60 updates per second.

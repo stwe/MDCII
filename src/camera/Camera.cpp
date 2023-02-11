@@ -23,6 +23,7 @@
 #include "Log.h"
 #include "eventpp/utilities/argumentadapter.h"
 #include "physics/Aabb.h"
+#include "data/Text.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -100,8 +101,10 @@ bool mdcii::camera::Camera::IsIslandNotInCamera(const world::Zoom t_zoom, const 
 
 void mdcii::camera::Camera::RenderImGui()
 {
-    ImGui::Text("Camera world (%d, %d)", worldPosition.x, worldPosition.y);
-    ImGui::Text("Camera screen (%.2f, %.2f)", position.x, position.y);
+    const auto w{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CameraWorldPosition") + " (%d, %d)" };
+    const auto s{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "cameraScreenPosition") + " (%.2f, %.2f)" };
+    ImGui::Text(w.c_str(), worldPosition.x, worldPosition.y);
+    ImGui::Text(s.c_str(), position.x, position.y);
 }
 
 //-------------------------------------------------

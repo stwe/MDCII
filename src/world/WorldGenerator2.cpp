@@ -57,7 +57,6 @@ void mdcii::world::WorldGenerator2::RenderImGui()
     static int32_t seed{ 4181 };       // 5049
     static float frequency{ 0.086f };  // 0.191
 
-    ImGui::Separator();
     ImGui::SliderInt("World width ", &worldWidth, World::WORLD_MIN_WIDTH, World::WORLD_MAX_WIDTH);
     ImGui::SliderInt("World height", &worldHeight, World::WORLD_MIN_HEIGHT, World::WORLD_MAX_HEIGHT);
     ImGui::Separator();

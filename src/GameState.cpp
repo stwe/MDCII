@@ -24,6 +24,7 @@
 #include "ogl/Window.h"
 #include "world/World.h"
 #include "state/StateStack.h"
+#include "data/Text.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -80,7 +81,7 @@ void mdcii::GameState::RenderImGui()
 
     if (!m_world)
     {
-        ImGui::Begin("Choose file");
+        begin_centered("Choose a file");
 
         switch (GetStateId())
         {
@@ -93,7 +94,8 @@ void mdcii::GameState::RenderImGui()
         default:;
         }
 
-        if (ImGui::Button("Back to main menu"))
+        auto bt{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "BackTo") };
+        if (ImGui::Button(bt.append(" ").append(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "MainMenu")).c_str()))
         {
             context->stateStack->PopState(GetStateId());
             context->stateStack->PushState(state::StateId::MAIN_MENU);
@@ -119,18 +121,18 @@ void mdcii::GameState::RenderFileChooser(std::vector<std::string>& t_files)
 
     if (t_files.empty())
     {
-        ImGui::Text("Missing files.");
+        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "MissingFiles").c_str());
     }
     else
     {
         ImGui::ListBox(
-            "Choose a file",
+            data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ChooseFile").c_str(),
             &fileIndex,
             vector_getter,
             &t_files,
             static_cast<int32_t>(t_files.size())
         );
-        if (ImGui::Button("Load file"))
+        if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "LoadFile").c_str()))
         {
             m_world = std::make_shared<world::World>(t_files.at(fileIndex), context, GetStateId());
         }
