@@ -47,6 +47,7 @@ mdcii::world::WorldGenerator2::~WorldGenerator2() noexcept
 
 void mdcii::world::WorldGenerator2::RenderImGui()
 {
+    /*
     static int32_t worldWidth{ World::WORLD_MIN_WIDTH };
     static int32_t worldHeight{ World::WORLD_MIN_HEIGHT };
 
@@ -128,6 +129,7 @@ void mdcii::world::WorldGenerator2::RenderImGui()
             ImGui::Text("Error while creating file.");
         }
     }
+    */
 }
 
 //-------------------------------------------------

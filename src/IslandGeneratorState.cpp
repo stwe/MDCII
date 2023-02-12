@@ -17,66 +17,66 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <imgui.h>
-#include "WorldGeneratorState.h"
-#include "Game.h"
+#include "IslandGeneratorState.h"
 #include "MdciiAssert.h"
 #include "MdciiUtils.h"
+#include "Game.h"
 #include "ogl/OpenGL.h"
 #include "ogl/Window.h"
 #include "state/StateStack.h"
-#include "world/WorldGenerator2.h"
+#include "world/IslandGenerator.h"
 #include "data/Text.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::WorldGeneratorState::WorldGeneratorState(const state::StateId t_id, std::shared_ptr<state::Context> t_context)
+mdcii::IslandGeneratorState::IslandGeneratorState(mdcii::state::StateId t_id, std::shared_ptr<state::Context> t_context)
     : State(t_id, std::move(t_context))
 {
-    Log::MDCII_LOG_DEBUG("[WorldGeneratorState::WorldGeneratorState()] Create WorldGeneratorState.");
+    Log::MDCII_LOG_DEBUG("[IslandGeneratorState::IslandGeneratorState()] Create IslandGeneratorState.");
 
-    MDCII_ASSERT(context, "[WorldGeneratorState::WorldGeneratorState()] Null pointer.")
+    MDCII_ASSERT(context, "[IslandGeneratorState::IslandGeneratorState()] Null pointer.")
 
     Init();
 }
 
-mdcii::WorldGeneratorState::~WorldGeneratorState() noexcept
+mdcii::IslandGeneratorState::~IslandGeneratorState() noexcept
 {
-    Log::MDCII_LOG_DEBUG("[WorldGeneratorState::~WorldGeneratorState()] Destruct WorldGeneratorState.");
+    Log::MDCII_LOG_DEBUG("[IslandGeneratorState::~IslandGeneratorState()] Destruct IslandGeneratorState.");
 }
 
 //-------------------------------------------------
 // Override
 //-------------------------------------------------
 
-void mdcii::WorldGeneratorState::Input()
+void mdcii::IslandGeneratorState::Input()
 {
     // ESC for quit
     if (context->window->IsKeyPressed(GLFW_KEY_ESCAPE))
     {
-        Log::MDCII_LOG_DEBUG("[WorldGeneratorState::Input()] Starts POP WorldGeneratorState.");
+        Log::MDCII_LOG_DEBUG("[IslandGeneratorState::Input()] Starts POP IslandGeneratorState.");
         context->stateStack->PopState(GetStateId());
     }
 }
 
-void mdcii::WorldGeneratorState::Update()
+void mdcii::IslandGeneratorState::Update()
 {
 }
 
-void mdcii::WorldGeneratorState::Render()
+void mdcii::IslandGeneratorState::Render()
 {
 }
 
-void mdcii::WorldGeneratorState::RenderImGui()
+void mdcii::IslandGeneratorState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    begin_right("WorldGeneratorState", 322.0f);
+    begin_right("IslandGeneratorState", 322.0f);
 
     ImGui::SetWindowSize({ 321.0f, 600.0f });
 
-    m_worldGenerator2->RenderImGui();
+    m_islandGenerator->RenderImGui();
 
     auto bt{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "BackTo") };
     if (ImGui::Button(bt.append(" ").append(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "MainMenu")).c_str()))
@@ -94,11 +94,11 @@ void mdcii::WorldGeneratorState::RenderImGui()
 // Init
 //-------------------------------------------------
 
-void mdcii::WorldGeneratorState::Init()
+void mdcii::IslandGeneratorState::Init()
 {
-    Log::MDCII_LOG_DEBUG("[WorldGeneratorState::Init()] Initializing world generator state...");
+    Log::MDCII_LOG_DEBUG("[IslandGeneratorState::Init()] Initializing island generator state...");
 
-    m_worldGenerator2 = std::make_unique<world::WorldGenerator2>();
+    m_islandGenerator = std::make_unique<world::IslandGenerator>();
 
-    Log::MDCII_LOG_DEBUG("[WorldGeneratorState::Init()] The world generator state was successfully initialized.");
+    Log::MDCII_LOG_DEBUG("[IslandGeneratorState::Init()] The island generator state was successfully initialized.");
 }

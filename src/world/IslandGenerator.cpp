@@ -16,24 +16,24 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#pragma once
+#include "IslandGenerator.h"
 
-namespace mdcii::state
+//-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
+mdcii::world::IslandGenerator::IslandGenerator()
 {
-    //-------------------------------------------------
-    // StateId
-    //-------------------------------------------------
+}
 
-    /**
-     * The unique identifiers of the State objects.
-     */
-    enum class StateId
-    {
-        MAIN_MENU,
-        ISLAND_GENERATOR,
-        WORLD_GENERATOR,
-        NEW_GAME,
-        LOADED_GAME,
-        ALL
-    };
+mdcii::world::IslandGenerator::~IslandGenerator() noexcept
+{
+}
+
+//-------------------------------------------------
+// Logic
+//-------------------------------------------------
+
+void mdcii::world::IslandGenerator::RenderImGui()
+{
 }

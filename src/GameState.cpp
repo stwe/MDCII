@@ -81,7 +81,7 @@ void mdcii::GameState::RenderImGui()
 
     if (!m_world)
     {
-        begin_centered("Choose a file");
+        begin_centered("GameState");
 
         switch (GetStateId())
         {

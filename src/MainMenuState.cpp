@@ -71,12 +71,36 @@ void mdcii::MainMenuState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    begin_centered("MainMenu");
+    begin_centered("MainMenuState");
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Editor").c_str()))
     {
-        context->stateStack->PopState(GetStateId());
-        context->stateStack->PushState(state::StateId::WORLD_GENERATOR);
+        ImGui::OpenPopup(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SelectEditor").c_str());
+    }
+
+    if (ImGui::BeginPopupModal(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SelectEditor").c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "IslandEditor").c_str(), ImVec2(120,0)))
+        {
+            context->stateStack->PopState(GetStateId());
+            context->stateStack->PushState(state::StateId::ISLAND_GENERATOR);
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+
+        if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "WorldEditor").c_str(), ImVec2(120,0)))
+        {
+            context->stateStack->PopState(GetStateId());
+            context->stateStack->PushState(state::StateId::WORLD_GENERATOR);
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+
+        if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Cancel").c_str(), ImVec2(120,0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
     }
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "NewGame").c_str()))

@@ -19,6 +19,7 @@
 #include "Game.h"
 #include "MdciiException.h"
 #include "MainMenuState.h"
+#include "IslandGeneratorState.h"
 #include "WorldGeneratorState.h"
 #include "GameState.h"
 #include "camera/Camera.h"
@@ -165,6 +166,7 @@ void mdcii::Game::Start() const
     data::Text::Init();
 
     m_stateStack->RegisterState<MainMenuState>(state::StateId::MAIN_MENU);
+    m_stateStack->RegisterState<IslandGeneratorState>(state::StateId::ISLAND_GENERATOR);
     m_stateStack->RegisterState<WorldGeneratorState>(state::StateId::WORLD_GENERATOR);
     m_stateStack->RegisterState<GameState>(state::StateId::NEW_GAME);
     m_stateStack->RegisterState<GameState>(state::StateId::LOADED_GAME);
@@ -175,6 +177,9 @@ void mdcii::Game::Start() const
         {
         case state::StateId::MAIN_MENU:
             m_stateStack->PushState(state::StateId::MAIN_MENU);
+            break;
+        case state::StateId::ISLAND_GENERATOR:
+            m_stateStack->PushState(state::StateId::ISLAND_GENERATOR);
             break;
         case state::StateId::WORLD_GENERATOR:
             m_stateStack->PushState(state::StateId::WORLD_GENERATOR);

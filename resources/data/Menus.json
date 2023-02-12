@@ -2,7 +2,11 @@
   "de": {
     "MainMenu": "Hauptmenü",
     "BackTo": "Zurück zum",
+    "Cancel": "Abbruch",
     "Editor": "Editor",
+    "WorldEditor": "Welteditor",
+    "IslandEditor": "Inseleditor",
+    "SelectEditor": "Editor wählen",
     "NewGame": "Starte ein neues Spiel",
     "LoadGame": "Spielstand laden",
     "Exit": "Beenden",
@@ -61,7 +65,11 @@
   "en": {
     "MainMenu": "Main menu",
     "BackTo": "Back to",
+    "Cancel": "Cancel",
     "Editor": "Editor",
+    "WorldEditor": "World Editor",
+    "IslandEditor": "Island Editor",
+    "SelectEditor": "Select editor",
     "NewGame": "Start a new game",
     "LoadGame": "Load an existing game",
     "Exit": "Exit",
