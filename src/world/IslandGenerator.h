@@ -18,10 +18,21 @@
 
 #pragma once
 
-#include <vector>
-#include <cstdint>
-#include <unordered_map>
 #include <unordered_set>
+#include <magic_enum.hpp>
+#include "data/json.hpp"
+
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::layer
+{
+    /**
+     * Forward declaration struct Tile.
+     */
+    struct Tile;
+}
 
 //-------------------------------------------------
 // IslandGenerator
@@ -29,6 +40,19 @@
 
 namespace mdcii::world
 {
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
+    /**
+     * Forward declaration enum class Rotation.
+     */
+    enum class Rotation;
+
+    //-------------------------------------------------
+    // IslandGenerator
+    //-------------------------------------------------
+
     class IslandGenerator
     {
     public:
@@ -55,29 +79,20 @@ namespace mdcii::world
 
     private:
         //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        static constexpr auto WATER_LEVEL{ 0.5 };
-        static constexpr auto TERRAIN{ 1 };
-        static constexpr auto WATER{ 0 };
-
-        const std::unordered_map<int32_t, const char*> m_tiles = {
-            { 383, "eaol" }, { 479, "eaor" }, { 507, "eaul" }, { 510, "eaur" },
-            { 278, "eior" }, { 279, "eior" }, { 406, "eior" }, { 407, "eior" },
-            { 360, "eiul" }, { 361, "eiul" }, { 489, "eiul" }, { 488, "eiul" },
-            { 267, "eiol" }, { 299, "eiol" }, { 303, "eiol" }, { 271, "eiol" },
-            { 496, "eiur" }, { 468, "eiur" }, { 464, "eiur" }, { 500, "eiur" },
-            { 319, "g_o_" }, { 287, "g_o_" }, { 415, "g_o_" }, { 447, "g_o_" },
-            { 505, "g_u_" }, { 504, "g_u_" }, { 508, "g_u_" }, { 509, "g_u_" },
-            { 367, "g_l_" }, { 363, "g_l_" }, { 491, "g_l_" }, { 495, "g_l_" },
-            { 471, "g_r_" }, { 470, "g_r_" }, { 502, "g_r_" }, { 503, "g_r_" },
-        };
-
-        //-------------------------------------------------
         // Types
         //-------------------------------------------------
 
+        /**
+         * For the rough classification of the map elevation values.
+         */
+        enum class MapType
+        {
+            WATER, TERRAIN
+        };
+
+        /**
+         * To calculate the bitmask.
+         */
         enum NeighborFlag
         {
             GRASS_FLAG = 0,
@@ -96,22 +111,203 @@ namespace mdcii::world
             WATER_FLAG = 256
         };
 
+        enum class AbstractTileType
+        {
+            UNKNOWN, INVALID,
+
+            WATER, GRASS,
+
+            /**
+             *     COTL    COTR
+             *     x----------x
+             *     |          |
+             *     x----------x
+             *     COBL    COBR
+             */
+            CORNER_OUT_TL, CORNER_OUT_TR, CORNER_OUT_BL, CORNER_OUT_BR,
+
+            /**
+             *     -----------
+             *     |         |
+             * ----x         x----
+             *     CITL      CITR
+             */
+             CORNER_IN_TL, CORNER_IN_TR,
+
+            /**
+             *     CIBL      CIBR
+             * ----x         x----
+             *     |         |
+             *     -----------
+             */
+             CORNER_IN_BL, CORNER_IN_BR,
+
+            /**
+             *          TOP
+             *      ----------
+             *      |        |
+             * LEFT |        | RIGHT
+             *      |        |
+             *      ----------
+             *        BOTTOM
+             */
+            TOP, BOTTOM, LEFT, RIGHT
+        };
+
+        //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * Elevation values above this value are used as terrain, all others as water.
+         */
+        static constexpr auto WATER_LEVEL{ 0.5 };
+
+        // Temp code
+        static constexpr auto WORLD_WIDTH{ 64 };
+        static constexpr auto WORLD_HEIGHT{ 64 };
+
+        /**
+         * Known mappings Bitmask to TileType.
+         */
+        const std::unordered_map<int32_t, AbstractTileType> m_bitmaskTileTypes = {
+            { 511, AbstractTileType::WATER },
+            { 0, AbstractTileType::GRASS },
+
+            { 383, AbstractTileType::CORNER_OUT_TL },
+            { 479, AbstractTileType::CORNER_OUT_TR },
+            { 507, AbstractTileType::CORNER_OUT_BL },
+            { 510, AbstractTileType::CORNER_OUT_BR },
+
+            { 267, AbstractTileType::CORNER_IN_TL },
+            { 271, AbstractTileType::CORNER_IN_TL },
+            { 299, AbstractTileType::CORNER_IN_TL },
+            { 303, AbstractTileType::CORNER_IN_TL },
+            { 431, AbstractTileType::CORNER_IN_TL },
+
+            { 278, AbstractTileType::CORNER_IN_TR },
+            { 279, AbstractTileType::CORNER_IN_TR },
+            { 406, AbstractTileType::CORNER_IN_TR },
+            { 407, AbstractTileType::CORNER_IN_TR },
+            { 439, AbstractTileType::CORNER_IN_TR },
+
+            { 360, AbstractTileType::CORNER_IN_BL },
+            { 361, AbstractTileType::CORNER_IN_BL },
+            { 365, AbstractTileType::CORNER_IN_BL },
+            { 488, AbstractTileType::CORNER_IN_BL },
+            { 489, AbstractTileType::CORNER_IN_BL },
+
+            { 464, AbstractTileType::CORNER_IN_BR },
+            { 468, AbstractTileType::CORNER_IN_BR },
+            { 496, AbstractTileType::CORNER_IN_BR },
+            { 500, AbstractTileType::CORNER_IN_BR },
+            { 501, AbstractTileType::CORNER_IN_BR },
+
+            { 287, AbstractTileType::TOP },
+            { 319, AbstractTileType::TOP },
+            { 415, AbstractTileType::TOP },
+            { 447, AbstractTileType::TOP },
+
+            { 504, AbstractTileType::BOTTOM },
+            { 505, AbstractTileType::BOTTOM },
+            { 508, AbstractTileType::BOTTOM },
+            { 509, AbstractTileType::BOTTOM },
+
+            { 363, AbstractTileType::LEFT },
+            { 367, AbstractTileType::LEFT },
+            { 491, AbstractTileType::LEFT },
+            { 495, AbstractTileType::LEFT },
+
+            { 470, AbstractTileType::RIGHT },
+            { 471, AbstractTileType::RIGHT },
+            { 502, AbstractTileType::RIGHT },
+            { 503, AbstractTileType::RIGHT }
+        };
+
+        const std::unordered_map<AbstractTileType, int32_t> m_tileTypeBitmasks = {
+            { AbstractTileType::WATER, 511 },
+            { AbstractTileType::GRASS, 0 },
+            { AbstractTileType::CORNER_OUT_TL, 383 },
+            { AbstractTileType::CORNER_IN_TL, 267 },
+            { AbstractTileType::CORNER_IN_TR, 278 },
+            { AbstractTileType::CORNER_IN_BL, 360 },
+            { AbstractTileType::CORNER_IN_BR, 464 },
+            { AbstractTileType::TOP, 287 },
+            { AbstractTileType::BOTTOM, 504 },
+            { AbstractTileType::LEFT, 363 },
+            { AbstractTileType::RIGHT, 470 },
+        };
+
+        /**
+         * A char for each TileType.
+         */
+        const std::unordered_map<AbstractTileType, const char*> m_tileTypeChars = {
+            { AbstractTileType::UNKNOWN, "?" },
+            { AbstractTileType::INVALID, "╳" },
+
+            { AbstractTileType::WATER, "~" },
+            { AbstractTileType::GRASS, "░" },
+
+            { AbstractTileType::CORNER_OUT_TL, "╭" },
+            { AbstractTileType::CORNER_OUT_TR, "╮" },
+            { AbstractTileType::CORNER_OUT_BL, "╰" },
+            { AbstractTileType::CORNER_OUT_BR, "╯" },
+
+            { AbstractTileType::CORNER_IN_TL, "┘" },
+            { AbstractTileType::CORNER_IN_TR, "└" },
+            { AbstractTileType::CORNER_IN_BL, "┐" },
+            { AbstractTileType::CORNER_IN_BR, "┌" },
+
+            { AbstractTileType::TOP, "─" },
+            { AbstractTileType::BOTTOM, "─" },
+            { AbstractTileType::LEFT, "│" },
+            { AbstractTileType::RIGHT, "│" },
+        };
+
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
-        inline static int32_t m_width{ 20 };
-        inline static int32_t m_height{ 20 };
+        /**
+         * Generate trees for an island in the south or north.
+         */
+        inline static bool m_south{ false };
 
-        std::vector<int32_t> m_terrainValues;
+        /**
+         * The width of the island.
+         */
+        inline static int32_t m_width{ 33 };
+
+        /**
+         * The height of the island.
+         */
+        inline static int32_t m_height{ 30 };
+
+        /**
+         * Stores a map type for each position.
+         */
+        std::vector<MapType> m_terrainValues;
+
+        /**
+         * Stores a bitmask value for each position.
+         */
         std::vector<int32_t> m_bitmaskValues;
+
+        /**
+         * Stores invalid positions.
+         */
         std::unordered_set<int32_t> m_invalid;
+
+        /**
+         * A flag that controls the rendering of ImGui menus.
+         */
+        bool m_render{ true };
 
         //-------------------------------------------------
         // Noise
         //-------------------------------------------------
 
-        void CalcTerrainValues(int32_t t_seed, float t_frequency, int32_t t_width, int32_t t_height);
+        void CalcMapTypes(int32_t t_seed, float t_frequency, int32_t t_width, int32_t t_height);
         void CalcBitmaskValues();
 
         //-------------------------------------------------
@@ -132,14 +328,75 @@ namespace mdcii::world
         // ImGui
         //-------------------------------------------------
 
-        void RenderTerrainValuesImGui();
+        /**
+         * The map has been divided into terrain and water. The method shows the values.
+         */
+        void RenderMapTypesImGui();
+
+        /**
+         * Shows the calculated bitmask values.
+         */
         void RenderBitmaskValuesImGui();
-        void RenderTilesImGui();
+
+        /**
+         * Shows the calculated bitmask values as characters.
+         */
+        void RenderBitmaskValuesAsCharsImGui();
+
+        /**
+         * Save data to file.
+         */
+        void SaveIslandImGui();
+
+        //-------------------------------------------------
+        // Json
+        //-------------------------------------------------
+
+        void AddIslandJson(nlohmann::json& t_json);
+
+        //-------------------------------------------------
+        // Tiles
+        //-------------------------------------------------
+
+        /**
+         * Creates Tile objects for the TerrainLayer.
+         *
+         * @param t_terrainTiles The Tile objects.
+         */
+        void CreateTerrainTiles(std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles);
+
+        /**
+         * Creates Tile objects for the CoastLayer.
+         *
+         * @param t_coastTiles The Tile objects.
+         */
+        void CreateCoastTiles(std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles);
+
+        /**
+         * Creates Tile objects for the BuildingsLayer.
+         *
+         * @param t_buildingsTiles The Tile objects.
+         */
+        void CreateBuildingsTiles(std::vector<std::shared_ptr<layer::Tile>>& t_buildingsTiles);
+
+        /**
+         * Creates a Tile.
+         *
+         * @param t_id The Building Id.
+         * @param t_worldX The world x position.
+         * @param t_worldY The world y position.
+         * @param t_rotation The rotation of the building.
+         *
+         * @return The created Tile object pointer.
+         */
+        static std::unique_ptr<layer::Tile> CreateTile(int32_t t_id, int32_t t_worldX, int32_t t_worldY, Rotation t_rotation);
 
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
 
         static int32_t GetIndex(int32_t t_x, int32_t t_y, int32_t t_width);
+
+        void Reset();
     };
 }

@@ -24,6 +24,7 @@ build
 *.blend
 *.obj
 *.ttf
+*.otf
 *.ini
 *.lock
 *.json
@@ -51,3 +52,5 @@ conanbuildinfo.cmake
 !/resources/data/NewWorld.json
 !/resources/data/NoiseWorld.json
 !/resources/data/Savegame.json
+!/resources/font/DejaVuSansMono.ttf
+

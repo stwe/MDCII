@@ -245,6 +245,13 @@ void mdcii::ogl::Window::InitImGui() const
     ImGui_ImplGlfw_InitForOpenGL(m_windowHandle, false);
     ImGui_ImplOpenGL3_Init("#version 330 core");
 
+    // setup fonts
+    ImGuiIO& io = ImGui::GetIO();
+    auto fontPath{ Game::RESOURCES_REL_PATH + "font/DejaVuSansMono.ttf" };
+    static ImWchar ranges[] = { 0x20, 0xFFFF, 0 };
+    io.Fonts->AddFontDefault();
+    io.Fonts->AddFontFromFileTTF(fontPath.c_str(), 12, nullptr, ranges);
+
     // setup style
     ImGui::StyleColorsDark();
 }
