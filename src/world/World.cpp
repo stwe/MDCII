@@ -399,13 +399,18 @@ void mdcii::world::World::Init()
         throw MDCII_EXCEPTION("[World::Init()] Invalid map file format.");
     }
 
+    // version
     for (const auto& [k, v] : j.items())
     {
         if (k == "version" && v.get<std::string>() != Game::VERSION)
         {
             throw MDCII_EXCEPTION("[World::Init()] Invalid map file format.");
         }
+    }
 
+    // world
+    for (const auto& [k, v] : j.items())
+    {
         if (k == "world")
         {
             width = v.at("width").get<int32_t>();
@@ -424,6 +429,11 @@ void mdcii::world::World::Init()
             Log::MDCII_LOG_DEBUG("[World::Init()] The width of the world is set to: {}.", width);
             Log::MDCII_LOG_DEBUG("[World::Init()] The height of the world is set to: {}.", height);
         }
+    }
+
+    // islands
+    for (const auto& [k, v] : j.items())
+    {
         if (k == "islands")
         {
             terrain->CreateIslandsFromJson(v);
