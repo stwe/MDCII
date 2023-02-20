@@ -163,9 +163,9 @@ namespace mdcii::world
          */
         static constexpr auto WATER_LEVEL{ 0.5 };
 
-        // Temp code
-        static constexpr auto WORLD_WIDTH{ 64 };
-        static constexpr auto WORLD_HEIGHT{ 64 };
+        // todo rotation fails
+        static constexpr auto WORLD_WIDTH{ 100 }; // 50
+        static constexpr auto WORLD_HEIGHT{ 70 }; // 35
 
         /**
          * Known mappings Bitmask to TileType.

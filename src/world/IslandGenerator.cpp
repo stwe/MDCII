@@ -510,7 +510,7 @@ void mdcii::world::IslandGenerator::SaveIslandImGui()
             {
                 nlohmann::json json;
 
-                // todo: save island data only / new fileformat
+                // todo: save island data only for the new *.isl file format
                 json["version"] = Game::VERSION;
                 json["world"] = { { "width", WORLD_WIDTH }, { "height", WORLD_HEIGHT } };
 
@@ -567,8 +567,8 @@ void mdcii::world::IslandGenerator::AddIslandJson(nlohmann::json& t_json)
 
     i["width"] = m_width;
     i["height"] = m_height;
-    i["x"] = 2;              // todo: island start x position in the world
-    i["y"] = 2;              // todo: island start y position in the world
+    i["x"] = 2;              // todo: remove island start x position in the world
+    i["y"] = 2;              // todo: remove island start y position in the world
     i["layers"] = nlohmann::json::array();
 
     CreateTerrainTiles(terrainTiles);
@@ -615,7 +615,6 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_p
             switch (m_terrainValues.at(idx))
             {
             case MapType::TERRAIN:
-                // create tree or grass
                 if (m_south)
                 {
                     if (const auto r{ randInRange(gen) }; r >= 7)
@@ -638,25 +637,57 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_p
                         t_terrainTiles.at(idx) = CreateTile(data::GRASS_BUILDING_ID, x, y, Rotation::DEG0);
                     }
                 }
-
                 break;
             case MapType::WATER:
-                if (bitmask == 511)
+                if (bitmask > 255 && bitmask <= 510)
                 {
-                    // todo: deep water
-                }
-                else
-                {
-                    /*
-                    if (m_txtTiles.count(bitmask))
+                    if (m_bitmaskTileTypes.count(bitmask))
                     {
-                        // todo corners
+                        switch (m_bitmaskTileTypes.at(bitmask))
+                        {
+                        case AbstractTileType::TOP:
+                            t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG180);
+                            break;
+                        case AbstractTileType::BOTTOM:
+                            t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG0);
+                            break;
+                        case AbstractTileType::LEFT:
+                            t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG90);
+                            break;
+                        case AbstractTileType::RIGHT:
+                            t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG270);
+                            break;
+
+                        case AbstractTileType::CORNER_OUT_TL:
+                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG90);
+                            break;
+                        case AbstractTileType::CORNER_OUT_TR:
+                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG180);
+                            break;
+                        case AbstractTileType::CORNER_OUT_BL:
+                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG0);
+                            break;
+                        case AbstractTileType::CORNER_OUT_BR:
+                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG270);
+                            break;
+
+                        case AbstractTileType::CORNER_IN_TL:
+                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG270);
+                            break;
+                        case AbstractTileType::CORNER_IN_TR:
+                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG0);
+                            break;
+                        case AbstractTileType::CORNER_IN_BL:
+                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG180);
+                            break;
+                        case AbstractTileType::CORNER_IN_BR:
+                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG90);
+                            break;
+
+                        default:
+                            t_terrainTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG0);
+                        }
                     }
-                    else
-                    {
-                        // todo: invalid
-                    }
-                    */
                 }
                 break;
             default:;
