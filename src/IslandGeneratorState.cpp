@@ -74,7 +74,7 @@ void mdcii::IslandGeneratorState::RenderImGui()
 
     begin_right("IslandGeneratorState", 342.0f);
 
-    ImGui::SetWindowSize({ 341.0f, 600.0f });
+    ImGui::SetWindowSize({ 341.0f, 640.0f });
 
     m_islandGenerator->RenderImGui();
 

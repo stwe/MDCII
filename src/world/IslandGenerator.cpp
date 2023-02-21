@@ -75,50 +75,41 @@ void mdcii::world::IslandGenerator::RenderImGui()
         Reset();
     }
 
+    ImGui::Separator();
+    ImGui::Checkbox("Show/hide Map types", &m_renderMapTypes);
+    ImGui::Checkbox("Show/hide bitmask values", &m_renderBitmaskValues);
     if (ImGui::Button("Noise"))
     {
         CalcMapTypes(seed, frequency, m_width, m_height);
-    }
-
-    if (!m_terrainValues.empty() && ImGui::Button("Calc bitmask values"))
-    {
         CalcBitmaskValues();
     }
 
-    RenderMapTypesImGui();
-    RenderBitmaskValuesImGui();
-    RenderBitmaskValuesAsCharsImGui();
+    if (m_renderMapTypes)
+    {
+        RenderMapTypesImGui();
+    }
 
+    if (m_renderBitmaskValues)
+    {
+        RenderBitmaskValuesImGui();
+    }
+
+    RenderBitmaskValuesAsCharsImGui();
     SaveIslandImGui();
 
+    ImGui::Separator();
     ImFontAtlas* atlas = ImGui::GetIO().Fonts;
     ImGui::PushFont(atlas->Fonts[1]);
 
-    if (!m_invalid.empty())
+    for (const auto [k, v] : m_tileTypeBitmasks)
     {
-        ImGui::Separator();
-        ImGui::Text("Invalid positions found.");
-
-        static auto mode{ m_tileTypeBitmasks.at(AbstractTileType::GRASS) };
-        for (const auto [k, v] : m_tileTypeBitmasks)
+        const auto id{ std::string(m_tileTypeChars.at(k)).append(" ").append(magic_enum::enum_name(k)).append("##").append(std::to_string(v)) };
+        if (ImGui::RadioButton(id.c_str(), m_bitmask_radio_button == v))
         {
-            const auto id{ std::string(m_tileTypeChars.at(k)).append(" ").append(magic_enum::enum_name(k)).append("##").append(std::to_string(v)) };
-            if (ImGui::RadioButton(id.c_str(), mode == v))
-            {
-                mode = v;
-            }
+            m_bitmask_radio_button = v;
         }
-
-        for (auto idx : m_invalid)
-        {
-            if (auto id{ "Change index " + std::to_string(idx).append("##").append(std::to_string(idx)) }; ImGui::Button(id.c_str()))
-            {
-                m_bitmaskValues.at(idx) = mode;
-            }
-        }
-
-        ImGui::Separator();
     }
+    ImGui::Separator();
 
     ImGui::PopFont();
 }
@@ -439,29 +430,40 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
                 if (bitmask == 0) // terrain
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+                    ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 64, 0, 255));
                 }
                 else if (bitmask > 0 && bitmask <= 255) // terrain before embankment
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 175, 0, 255));
+                    ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 32, 0, 255));
                 }
                 else if (bitmask > 255 && bitmask <= 510) // embankment
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 0, 255));
+                    ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(64, 64, 0, 255));
                 }
                 else if (bitmask == 511) // water
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
+                    ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 64, 255));
                 }
 
                 if (m_bitmaskTileTypes.count(bitmask))
                 {
-                    ImGui::TextUnformatted(m_tileTypeChars.at(m_bitmaskTileTypes.at(bitmask)));
+                    if (auto id{ std::string(m_tileTypeChars.at(m_bitmaskTileTypes.at(bitmask))).append("##").append(std::to_string(idx)) }; ImGui::Button(id.c_str()))
+                    {
+                        m_bitmaskValues.at(idx) = m_bitmask_radio_button;
+                    }
                 }
                 else
                 {
                     if (bitmask < 256) // terrain before embankment
                     {
-                        ImGui::TextUnformatted(m_tileTypeChars.at(AbstractTileType::GRASS));
+                        // use grass
+                        if (auto id{ std::string(m_tileTypeChars.at(AbstractTileType::GRASS)).append("##").append(std::to_string(idx)) }; ImGui::Button(id.c_str()))
+                        {
+                            m_bitmaskValues.at(idx) = m_bitmask_radio_button;
+                        }
                     }
                     else // invalid
                     {
@@ -470,13 +472,17 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
                             m_invalid.insert(idx);
                         }
 
-                        ImGui::PopStyleColor();
+                        ImGui::PopStyleColor(2);
                         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-                        ImGui::TextUnformatted(m_tileTypeChars.at(AbstractTileType::INVALID));
+                        ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(64, 0, 0, 255));
+                        if (auto id{ std::string(m_tileTypeChars.at(AbstractTileType::INVALID)).append("##").append(std::to_string(idx)) }; ImGui::Button(id.c_str()))
+                        {
+                            m_bitmaskValues.at(idx) = m_bitmask_radio_button;
+                        }
                     }
                 }
                 ImGui::SameLine();
-                ImGui::PopStyleColor();
+                ImGui::PopStyleColor(2);
             }
 
             ImGui::Text("");
@@ -492,6 +498,15 @@ void mdcii::world::IslandGenerator::SaveIslandImGui()
     if (m_bitmaskValues.empty() || m_terrainValues.empty() || !m_render)
     {
         return;
+    }
+
+    if (!m_invalid.empty())
+    {
+        ImGui::Separator();
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+        ImGui::Text("Invalid positions found.");
+        ImGui::Text("Change the invalid values before save.");
+        ImGui::PopStyleColor();
     }
 
     static bool error{ false };
@@ -612,9 +627,8 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_p
             const auto idx{ GetIndex(x, y, m_width) };
             const auto bitmask{ m_bitmaskValues.at(idx) };
 
-            switch (m_terrainValues.at(idx))
+            if (bitmask >= 0 && bitmask <= 255) // terrain
             {
-            case MapType::TERRAIN:
                 if (m_south)
                 {
                     if (const auto r{ randInRange(gen) }; r >= 7)
@@ -637,60 +651,56 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_p
                         t_terrainTiles.at(idx) = CreateTile(data::GRASS_BUILDING_ID, x, y, Rotation::DEG0);
                     }
                 }
-                break;
-            case MapType::WATER:
-                if (bitmask > 255 && bitmask <= 510)
+            }
+            else if (bitmask > 255 && bitmask <= 510) // embankment
+            {
+                if (m_bitmaskTileTypes.count(bitmask))
                 {
-                    if (m_bitmaskTileTypes.count(bitmask))
+                    switch (m_bitmaskTileTypes.at(bitmask))
                     {
-                        switch (m_bitmaskTileTypes.at(bitmask))
-                        {
-                        case AbstractTileType::TOP:
-                            t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG180);
-                            break;
-                        case AbstractTileType::BOTTOM:
-                            t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG0);
-                            break;
-                        case AbstractTileType::LEFT:
-                            t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG90);
-                            break;
-                        case AbstractTileType::RIGHT:
-                            t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG270);
-                            break;
+                    case AbstractTileType::TOP:
+                        t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG180);
+                        break;
+                    case AbstractTileType::BOTTOM:
+                        t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG0);
+                        break;
+                    case AbstractTileType::LEFT:
+                        t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG90);
+                        break;
+                    case AbstractTileType::RIGHT:
+                        t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG270);
+                        break;
 
-                        case AbstractTileType::CORNER_OUT_TL:
-                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG90);
-                            break;
-                        case AbstractTileType::CORNER_OUT_TR:
-                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG180);
-                            break;
-                        case AbstractTileType::CORNER_OUT_BL:
-                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG0);
-                            break;
-                        case AbstractTileType::CORNER_OUT_BR:
-                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG270);
-                            break;
+                    case AbstractTileType::CORNER_OUT_TL:
+                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG90);
+                        break;
+                    case AbstractTileType::CORNER_OUT_TR:
+                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG180);
+                        break;
+                    case AbstractTileType::CORNER_OUT_BL:
+                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG0);
+                        break;
+                    case AbstractTileType::CORNER_OUT_BR:
+                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG270);
+                        break;
 
-                        case AbstractTileType::CORNER_IN_TL:
-                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG270);
-                            break;
-                        case AbstractTileType::CORNER_IN_TR:
-                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG0);
-                            break;
-                        case AbstractTileType::CORNER_IN_BL:
-                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG180);
-                            break;
-                        case AbstractTileType::CORNER_IN_BR:
-                            t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG90);
-                            break;
+                    case AbstractTileType::CORNER_IN_TL:
+                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG270);
+                        break;
+                    case AbstractTileType::CORNER_IN_TR:
+                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG0);
+                        break;
+                    case AbstractTileType::CORNER_IN_BL:
+                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG180);
+                        break;
+                    case AbstractTileType::CORNER_IN_BR:
+                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG90);
+                        break;
 
-                        default:
-                            t_terrainTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG0);
-                        }
+                    default:
+                        t_terrainTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG0);
                     }
                 }
-                break;
-            default:;
             }
         }
     }

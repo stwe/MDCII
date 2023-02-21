@@ -111,10 +111,19 @@ namespace mdcii::world
             WATER_FLAG = 256
         };
 
+        /**
+         * Common tile types that can be mapped to bitmasks.
+         */
         enum class AbstractTileType
         {
+            /**
+             * For unknown or invalid bitmask values.
+             */
             UNKNOWN, INVALID,
 
+            /**
+             * For bitmask values which representing water or grass.
+             */
             WATER, GRASS,
 
             /**
@@ -163,12 +172,12 @@ namespace mdcii::world
          */
         static constexpr auto WATER_LEVEL{ 0.5 };
 
-        // todo rotation fails
-        static constexpr auto WORLD_WIDTH{ 100 }; // 50
-        static constexpr auto WORLD_HEIGHT{ 70 }; // 35
+        // todo: temp code
+        static constexpr auto WORLD_WIDTH{ 100 };
+        static constexpr auto WORLD_HEIGHT{ 70 };
 
         /**
-         * Known mappings Bitmask to TileType.
+         * Known bitmask values that can be mapped to tile types.
          */
         const std::unordered_map<int32_t, AbstractTileType> m_bitmaskTileTypes = {
             { 511, AbstractTileType::WATER },
@@ -224,10 +233,16 @@ namespace mdcii::world
             { 503, AbstractTileType::RIGHT }
         };
 
+        /**
+         * The first bitmask value for each tile type.
+         */
         const std::unordered_map<AbstractTileType, int32_t> m_tileTypeBitmasks = {
             { AbstractTileType::WATER, 511 },
             { AbstractTileType::GRASS, 0 },
             { AbstractTileType::CORNER_OUT_TL, 383 },
+            { AbstractTileType::CORNER_OUT_TR, 479 },
+            { AbstractTileType::CORNER_OUT_BL, 507 },
+            { AbstractTileType::CORNER_OUT_BR, 510 },
             { AbstractTileType::CORNER_IN_TL, 267 },
             { AbstractTileType::CORNER_IN_TR, 278 },
             { AbstractTileType::CORNER_IN_BL, 360 },
@@ -239,7 +254,7 @@ namespace mdcii::world
         };
 
         /**
-         * A char for each TileType.
+         * A char for each tile type.
          */
         const std::unordered_map<AbstractTileType, const char*> m_tileTypeChars = {
             { AbstractTileType::UNKNOWN, "?" },
@@ -284,7 +299,22 @@ namespace mdcii::world
         inline static int32_t m_height{ 30 };
 
         /**
-         * Stores a map type for each position.
+         * The current selected radio button (default: 0/grass).
+         */
+        inline static int32_t m_bitmask_radio_button{ 0 };
+
+        /**
+         * Show/hide map types.
+         */
+        inline static bool m_render_map_types{ false };
+
+        /**
+         * Show/hide bitmask values.
+         */
+        inline static bool m_render_bitmask_values{ false };
+
+        /**
+         * Stores a map type (water or terrain) for each position.
          */
         std::vector<MapType> m_terrainValues;
 
@@ -295,11 +325,12 @@ namespace mdcii::world
 
         /**
          * Stores invalid positions.
+         * A position is invalid if the calculated bitmask value cannot be mapped to a tile type.
          */
         std::unordered_set<int32_t> m_invalid;
 
         /**
-         * A flag that controls the rendering of ImGui menus.
+         * A helper flag that controls the rendering of ImGui menus.
          */
         bool m_render{ true };
 
@@ -344,7 +375,7 @@ namespace mdcii::world
         void RenderBitmaskValuesAsCharsImGui();
 
         /**
-         * Save data to file.
+         * Save island to file.
          */
         void SaveIslandImGui();
 
