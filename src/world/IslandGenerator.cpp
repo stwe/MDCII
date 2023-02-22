@@ -76,20 +76,20 @@ void mdcii::world::IslandGenerator::RenderImGui()
     }
 
     ImGui::Separator();
-    ImGui::Checkbox("Show/hide Map types", &m_renderMapTypes);
-    ImGui::Checkbox("Show/hide bitmask values", &m_renderBitmaskValues);
+    ImGui::Checkbox("Show/hide Map types", &m_render_map_types);
+    ImGui::Checkbox("Show/hide bitmask values", &m_render_bitmask_values);
     if (ImGui::Button("Noise"))
     {
         CalcMapTypes(seed, frequency, m_width, m_height);
         CalcBitmaskValues();
     }
 
-    if (m_renderMapTypes)
+    if (m_render_map_types)
     {
         RenderMapTypesImGui();
     }
 
-    if (m_renderBitmaskValues)
+    if (m_render_bitmask_values)
     {
         RenderBitmaskValuesImGui();
     }
@@ -618,7 +618,10 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_p
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution randInRange(0, 10);
+    std::uniform_int_distribution randForTrees(0, 10);
+    std::uniform_int_distribution randForEmbankment(0, 9);
+    std::uniform_int_distribution randForEmbankmentCorner(0, 2);
+    std::uniform_int_distribution randForEmbankmentCornerInside(0, 3);
 
     for (auto y{ 0 }; y < m_height; ++y)
     {
@@ -631,9 +634,9 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_p
             {
                 if (m_south)
                 {
-                    if (const auto r{ randInRange(gen) }; r >= 7)
+                    if (const auto r{ randForTrees(gen) }; r >= 7)
                     {
-                        t_terrainTiles.at(idx) = CreateTile(data::SOUTH_TREES.at(randInRange(gen)), x, y, Rotation::DEG0);
+                        t_terrainTiles.at(idx) = CreateTile(data::SOUTH_TREES_BUILDING_IDS.at(randForTrees(gen)), x, y, Rotation::DEG0);
                     }
                     else
                     {
@@ -642,9 +645,9 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_p
                 }
                 else
                 {
-                    if (const auto r{ randInRange(gen) }; r >= 7)
+                    if (const auto r{ randForTrees(gen) }; r >= 7)
                     {
-                        t_terrainTiles.at(idx) = CreateTile(data::NORTH_TREES.at(randInRange(gen)), x, y, Rotation::DEG0);
+                        t_terrainTiles.at(idx) = CreateTile(data::NORTH_TREES_BUILDING_IDS.at(randForTrees(gen)), x, y, Rotation::DEG0);
                     }
                     else
                     {
@@ -659,42 +662,42 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_p
                     switch (m_bitmaskTileTypes.at(bitmask))
                     {
                     case AbstractTileType::TOP:
-                        t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG180);
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(gen)), x, y, Rotation::DEG180);
                         break;
                     case AbstractTileType::BOTTOM:
-                        t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG0);
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(gen)), x, y, Rotation::DEG0);
                         break;
                     case AbstractTileType::LEFT:
-                        t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG90);
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(gen)), x, y, Rotation::DEG90);
                         break;
                     case AbstractTileType::RIGHT:
-                        t_terrainTiles.at(idx) = CreateTile(data::BANK_BUILDING_ID, x, y, Rotation::DEG270);
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(gen)), x, y, Rotation::DEG270);
                         break;
 
                     case AbstractTileType::CORNER_OUT_TL:
-                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG90);
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(gen)), x, y, Rotation::DEG90);
                         break;
                     case AbstractTileType::CORNER_OUT_TR:
-                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG180);
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(gen)), x, y, Rotation::DEG180);
                         break;
                     case AbstractTileType::CORNER_OUT_BL:
-                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG0);
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(gen)), x, y, Rotation::DEG0);
                         break;
                     case AbstractTileType::CORNER_OUT_BR:
-                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_BUILDING_ID, x, y, Rotation::DEG270);
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(gen)), x, y, Rotation::DEG270);
                         break;
 
                     case AbstractTileType::CORNER_IN_TL:
-                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG270);
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(gen)), x, y, Rotation::DEG270);
                         break;
                     case AbstractTileType::CORNER_IN_TR:
-                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG0);
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(gen)), x, y, Rotation::DEG0);
                         break;
                     case AbstractTileType::CORNER_IN_BL:
-                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG180);
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(gen)), x, y, Rotation::DEG180);
                         break;
                     case AbstractTileType::CORNER_IN_BR:
-                        t_terrainTiles.at(idx) = CreateTile(data::BANK_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG90);
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(gen)), x, y, Rotation::DEG90);
                         break;
 
                     default:

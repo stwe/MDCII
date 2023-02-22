@@ -45,6 +45,10 @@ namespace mdcii::data
     static constexpr auto BANK_CORNER_INSIDE_BUILDING_ID{ 1031 };
     static constexpr auto BANK_CORNER_BUILDING_ID{ 1051 };
 
+    static constexpr std::array EMBANKMENT_CORNER_INSIDE_BUILDING_IDS{ 1031, 1032, 1033, 1034 };
+    static constexpr std::array EMBANKMENT_CORNER_BUILDING_IDS{ 1051, 1052, 1053 };
+    static constexpr std::array EMBANKMENT_BUILDING_IDS{ 1011, 1012, 1013, 1014, 1015, 1016, 1017, 1018, 1019, 1020 };
+
     // height = 0
 
     static constexpr auto DEEP_WATER_BUILDING_ID{ 1201 };
@@ -54,6 +58,6 @@ namespace mdcii::data
     static constexpr auto BEACH_CORNER_INSIDE_BUILDING_ID{ 1206 };
     static constexpr auto BEACH_CORNER_BUILDING_ID{ 1207 };
 
-    static constexpr std::array NORTH_TREES{ 1304, 1306, 1308, 1310, 1312, 1314, 1316, 1318, 1320, 1322, 1324 };
-    static constexpr std::array SOUTH_TREES{ 1352, 1354, 1356, 1358, 1360, 1362, 1364, 1366, 1368, 1370, 1372 };
+    static constexpr std::array NORTH_TREES_BUILDING_IDS{ 1304, 1306, 1308, 1310, 1312, 1314, 1316, 1318, 1320, 1322, 1324 };
+    static constexpr std::array SOUTH_TREES_BUILDING_IDS{ 1352, 1354, 1356, 1358, 1360, 1362, 1364, 1366, 1368, 1370, 1372 };
 }

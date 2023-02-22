@@ -1262,14 +1262,14 @@ void mdcii::world::WorldGenerator2::CreateTerrainTiles(
                 {
                     if (const auto r{ randInRange(gen) }; r >= 7)
                     {
-                        id = data::SOUTH_TREES.at(randInRange(gen));
+                        id = data::SOUTH_TREES_BUILDING_IDS.at(randInRange(gen));
                     }
                 }
                 else
                 {
                     if (const auto r{ randInRange(gen) }; r >= 7)
                     {
-                        id = data::NORTH_TREES.at(randInRange(gen));
+                        id = data::NORTH_TREES_BUILDING_IDS.at(randInRange(gen));
                     }
                 }
 
