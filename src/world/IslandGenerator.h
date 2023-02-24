@@ -316,12 +316,22 @@ namespace mdcii::world
         /**
          * Stores a map type (water or terrain) for each position.
          */
-        std::vector<MapType> m_terrainValues;
+        std::vector<MapType> m_grassToBankMap;
+
+        /**
+         * Stores a map type (water or terrain) for each position.
+         */
+        std::vector<MapType> m_bankToWaterMap;
 
         /**
          * Stores a bitmask value for each position.
          */
-        std::vector<int32_t> m_bitmaskValues;
+        std::vector<int32_t> m_bitmaskGrassToBank;
+
+        /**
+         * Stores a bitmask value for each position.
+         */
+        std::vector<int32_t> m_bitmaskBankToWater;
 
         /**
          * Stores invalid positions.
@@ -339,35 +349,37 @@ namespace mdcii::world
         //-------------------------------------------------
 
         void CalcMapTypes(int32_t t_seed, float t_frequency, int32_t t_width, int32_t t_height);
-        void CalcBitmaskValues();
+        void CalcBankToWater();
+
+        static void CalcBitmaskValues(const std::vector<MapType>& t_map, std::vector<int32_t>& t_bitmasks) ;
 
         //-------------------------------------------------
         // Bitmasking
         //-------------------------------------------------
 
-        int32_t GetNorthValue(int32_t t_x, int32_t t_y);
-        int32_t GetEastValue(int32_t t_x, int32_t t_y);
-        int32_t GetSouthValue(int32_t t_x, int32_t t_y);
-        int32_t GetWestValue(int32_t t_x, int32_t t_y);
+        static int32_t GetNorthValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y);
+        static int32_t GetEastValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y);
+        static int32_t GetSouthValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y);
+        static int32_t GetWestValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y);
 
-        int32_t GetNorthWestValue(int32_t t_x, int32_t t_y);
-        int32_t GetNorthEastValue(int32_t t_x, int32_t t_y);
-        int32_t GetSouthWestValue(int32_t t_x, int32_t t_y);
-        int32_t GetSouthEastValue(int32_t t_x, int32_t t_y);
+        static int32_t GetNorthWestValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y);
+        static int32_t GetNorthEastValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y);
+        static int32_t GetSouthWestValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y);
+        static int32_t GetSouthEastValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y);
 
         //-------------------------------------------------
         // ImGui
         //-------------------------------------------------
 
         /**
-         * The map has been divided into terrain and water. The method shows the values.
+         * Shows the given map values.
          */
-        void RenderMapTypesImGui();
+        void RenderMapTypesImGui(const std::vector<MapType>& t_map, const std::string& t_title) const;
 
         /**
-         * Shows the calculated bitmask values.
+         * Shows the given bitmask values.
          */
-        void RenderBitmaskValuesImGui();
+        void RenderBitmaskValuesImGui(const std::vector<int32_t>& t_bitmasks, const std::string& t_title) const;
 
         /**
          * Shows the calculated bitmask values as characters.

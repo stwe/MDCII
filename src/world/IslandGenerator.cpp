@@ -81,17 +81,22 @@ void mdcii::world::IslandGenerator::RenderImGui()
     if (ImGui::Button("Noise"))
     {
         CalcMapTypes(seed, frequency, m_width, m_height);
-        CalcBitmaskValues();
+        CalcBitmaskValues(m_grassToBankMap, m_bitmaskGrassToBank);
+
+        CalcBankToWater();
+        CalcBitmaskValues(m_bankToWaterMap, m_bitmaskBankToWater);
     }
 
     if (m_render_map_types)
     {
-        RenderMapTypesImGui();
+        RenderMapTypesImGui(m_grassToBankMap, "Grass2Bank Map types");
+        RenderMapTypesImGui(m_bankToWaterMap, "Bank2Water Map types");
     }
 
     if (m_render_bitmask_values)
     {
-        RenderBitmaskValuesImGui();
+        RenderBitmaskValuesImGui(m_bitmaskGrassToBank, "Grass2Bank Bitmask values");
+        RenderBitmaskValuesImGui(m_bitmaskBankToWater, "Bank2Water Bitmask values");
     }
 
     RenderBitmaskValuesAsCharsImGui();
@@ -120,7 +125,7 @@ void mdcii::world::IslandGenerator::RenderImGui()
 
 void mdcii::world::IslandGenerator::CalcMapTypes(int32_t t_seed, float t_frequency, int32_t t_width, int32_t t_height)
 {
-    Log::MDCII_LOG_DEBUG("[IslandGenerator::CalcTerrainValues()] Create elevations for a 2D map using Perlin Noise.");
+    Log::MDCII_LOG_DEBUG("[IslandGenerator::CalcMapTypes()] Create elevations for a 2D map using Perlin Noise.");
 
     FastNoiseLite fn;
     fn.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
@@ -155,20 +160,30 @@ void mdcii::world::IslandGenerator::CalcMapTypes(int32_t t_seed, float t_frequen
         }
     }
 
-    Log::MDCII_LOG_DEBUG("[IslandGenerator::CalcTerrainValues()] Split elevation values into water and terrain.");
+    Log::MDCII_LOG_DEBUG("[IslandGenerator::CalcMapTypes()] Split elevation values into water and terrain.");
 
     for (const auto elevation : elevations)
     {
         elevation > WATER_LEVEL
-            ? m_terrainValues.push_back(MapType::TERRAIN)
-            : m_terrainValues.push_back(MapType::WATER);
+            ? m_grassToBankMap.push_back(MapType::TERRAIN)
+            : m_grassToBankMap.push_back(MapType::WATER);
     }
 }
 
-void mdcii::world::IslandGenerator::CalcBitmaskValues()
+void mdcii::world::IslandGenerator::CalcBankToWater()
 {
-    m_bitmaskValues.resize(m_width * m_height);
-    std::fill(m_bitmaskValues.begin(), m_bitmaskValues.end(), 0);
+    for (const auto bitmask : m_bitmaskGrassToBank)
+    {
+        bitmask == 511
+            ? m_bankToWaterMap.push_back(MapType::WATER)
+            : m_bankToWaterMap.push_back(MapType::TERRAIN);
+    }
+}
+
+void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>& t_map, std::vector<int32_t>& t_bitmasks)
+{
+    t_bitmasks.resize(m_width * m_height);
+    std::fill(t_bitmasks.begin(), t_bitmasks.end(), 0);
 
     for (auto y{ 0 }; y < m_height; ++y)
     {
@@ -177,23 +192,23 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues()
             const auto idx{ GetIndex(x, y, m_width) };
             auto result{ static_cast<int>(GRASS_FLAG) };
 
-            if (m_terrainValues.at(idx) == MapType::WATER)
+            if (t_map.at(idx) == MapType::WATER)
             {
                 result = static_cast<int>(WATER_FLAG);
             }
 
-            result += GetNorthWestValue(x, y);
-            result += GetNorthValue(x, y);
-            result += GetNorthEastValue(x, y);
+            result += GetNorthWestValue(t_map, x, y);
+            result += GetNorthValue(t_map, x, y);
+            result += GetNorthEastValue(t_map, x, y);
 
-            result += GetWestValue(x, y);
-            result += GetEastValue(x, y);
+            result += GetWestValue(t_map, x, y);
+            result += GetEastValue(t_map, x, y);
 
-            result += GetSouthWestValue(x, y);
-            result += GetSouthValue(x, y);
-            result += GetSouthEastValue(x, y);
+            result += GetSouthWestValue(t_map, x, y);
+            result += GetSouthValue(t_map, x, y);
+            result += GetSouthEastValue(t_map, x, y);
 
-            m_bitmaskValues.at(idx) = result;
+            t_bitmasks.at(idx) = result;
         }
     }
 }
@@ -202,14 +217,14 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues()
 // Bitmasking
 //-------------------------------------------------
 
-int32_t mdcii::world::IslandGenerator::GetNorthValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetNorthValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y)
 {
     if (t_y - 1 < 0)
     {
         return static_cast<int>(NORTH_FLAG);
     }
 
-    if (m_terrainValues.at(GetIndex(t_x, t_y - 1, m_width)) == MapType::WATER)
+    if (t_map.at(GetIndex(t_x, t_y - 1, m_width)) == MapType::WATER)
     {
         return static_cast<int>(NORTH_FLAG);
     }
@@ -217,14 +232,14 @@ int32_t mdcii::world::IslandGenerator::GetNorthValue(const int32_t t_x, const in
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetEastValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetEastValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y)
 {
     if (t_x + 1 >= m_width)
     {
         return static_cast<int>(EAST_FLAG);
     }
 
-    if (m_terrainValues.at(GetIndex(t_x + 1, t_y, m_width)) == MapType::WATER)
+    if (t_map.at(GetIndex(t_x + 1, t_y, m_width)) == MapType::WATER)
     {
         return static_cast<int>(EAST_FLAG);
     }
@@ -232,14 +247,14 @@ int32_t mdcii::world::IslandGenerator::GetEastValue(const int32_t t_x, const int
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetSouthValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetSouthValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y)
 {
     if (t_y + 1 >= m_height)
     {
         return static_cast<int>(SOUTH_FLAG);
     }
 
-    if (m_terrainValues.at(GetIndex(t_x, t_y + 1, m_width)) == MapType::WATER)
+    if (t_map.at(GetIndex(t_x, t_y + 1, m_width)) == MapType::WATER)
     {
         return static_cast<int>(SOUTH_FLAG);
     }
@@ -247,14 +262,14 @@ int32_t mdcii::world::IslandGenerator::GetSouthValue(const int32_t t_x, const in
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetWestValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetWestValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y)
 {
     if (t_x - 1 < 0)
     {
         return static_cast<int>(WEST_FLAG);
     }
 
-    if (m_terrainValues.at(GetIndex(t_x - 1, t_y, m_width)) == MapType::WATER)
+    if (t_map.at(GetIndex(t_x - 1, t_y, m_width)) == MapType::WATER)
     {
         return static_cast<int>(WEST_FLAG);
     }
@@ -262,14 +277,14 @@ int32_t mdcii::world::IslandGenerator::GetWestValue(const int32_t t_x, const int
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetNorthWestValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetNorthWestValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y)
 {
     if (t_x - 1 < 0 || t_y - 1 < 0)
     {
         return static_cast<int>(NORTH_WEST_FLAG);
     }
 
-    if (m_terrainValues.at(GetIndex(t_x - 1, t_y - 1, m_width)) == MapType::WATER)
+    if (t_map.at(GetIndex(t_x - 1, t_y - 1, m_width)) == MapType::WATER)
     {
         return static_cast<int>(NORTH_WEST_FLAG);
     }
@@ -277,14 +292,14 @@ int32_t mdcii::world::IslandGenerator::GetNorthWestValue(const int32_t t_x, cons
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetNorthEastValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetNorthEastValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y)
 {
     if (t_x + 1 >= m_width || t_y - 1 < 0)
     {
         return static_cast<int>(NORTH_EAST_FLAG);
     }
 
-    if (m_terrainValues.at(GetIndex(t_x + 1, t_y - 1, m_width)) == MapType::WATER)
+    if (t_map.at(GetIndex(t_x + 1, t_y - 1, m_width)) == MapType::WATER)
     {
         return static_cast<int>(NORTH_EAST_FLAG);
     }
@@ -292,14 +307,14 @@ int32_t mdcii::world::IslandGenerator::GetNorthEastValue(const int32_t t_x, cons
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetSouthWestValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetSouthWestValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y)
 {
     if (t_x - 1 < 0 || t_y + 1 >= m_height)
     {
         return static_cast<int>(SOUTH_WEST_FLAG);
     }
 
-    if (m_terrainValues.at(GetIndex(t_x - 1, t_y + 1, m_width)) == MapType::WATER)
+    if (t_map.at(GetIndex(t_x - 1, t_y + 1, m_width)) == MapType::WATER)
     {
         return static_cast<int>(SOUTH_WEST_FLAG);
     }
@@ -307,14 +322,14 @@ int32_t mdcii::world::IslandGenerator::GetSouthWestValue(const int32_t t_x, cons
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetSouthEastValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetSouthEastValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y)
 {
     if (t_x + 1 >= m_width || t_y + 1 >= m_height)
     {
         return static_cast<int>(SOUTH_EAST_FLAG);
     }
 
-    if (m_terrainValues.at(GetIndex(t_x + 1, t_y + 1, m_width)) == MapType::WATER)
+    if (t_map.at(GetIndex(t_x + 1, t_y + 1, m_width)) == MapType::WATER)
     {
         return static_cast<int>(SOUTH_EAST_FLAG);
     }
@@ -326,10 +341,10 @@ int32_t mdcii::world::IslandGenerator::GetSouthEastValue(const int32_t t_x, cons
 // ImGui
 //-------------------------------------------------
 
-void mdcii::world::IslandGenerator::RenderMapTypesImGui()
+void mdcii::world::IslandGenerator::RenderMapTypesImGui(const std::vector<MapType>& t_map, const std::string& t_title) const
 {
-    ImGui::Begin("Map types (Terrain/Water)");
-    if (m_terrainValues.empty() || !m_render)
+    ImGui::Begin(t_title.c_str());
+    if (t_map.empty() || !m_render)
     {
         ImGui::Text("No values available.");
     }
@@ -339,7 +354,7 @@ void mdcii::world::IslandGenerator::RenderMapTypesImGui()
         {
             for (auto x{ 0 }; x < m_width; ++x)
             {
-                const auto& mapType{ m_terrainValues.at(GetIndex(x, y, m_width)) };
+                const auto& mapType{ t_map.at(GetIndex(x, y, m_width)) };
                 if (mapType == MapType::TERRAIN)
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
@@ -363,10 +378,10 @@ void mdcii::world::IslandGenerator::RenderMapTypesImGui()
     ImGui::End();
 }
 
-void mdcii::world::IslandGenerator::RenderBitmaskValuesImGui()
+void mdcii::world::IslandGenerator::RenderBitmaskValuesImGui(const std::vector<int32_t>& t_bitmasks, const std::string& t_title) const
 {
-    ImGui::Begin("Bitmask values");
-    if (m_bitmaskValues.empty() || m_terrainValues.empty() || !m_render)
+    ImGui::Begin(t_title.c_str());
+    if (t_bitmasks.empty() || !m_render)
     {
         ImGui::Text("No values available.");
     }
@@ -377,7 +392,7 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesImGui()
             for (auto x{ 0 }; x < m_width; ++x)
             {
                 const auto idx{ GetIndex(x, y, m_width) };
-                const auto bitmask{ m_bitmaskValues.at(idx) };
+                const auto bitmask{ t_bitmasks.at(idx) };
 
                 if (bitmask == 0) // terrain
                 {
@@ -414,7 +429,12 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
     ImGui::PushFont(atlas->Fonts[1]);
 
     ImGui::Begin("Resolved bitmask values");
-    if (m_bitmaskValues.empty() || m_terrainValues.empty() || !m_render)
+    if (m_bitmaskGrassToBank.empty() ||
+        m_grassToBankMap.empty() ||
+        m_bitmaskBankToWater.empty() ||
+        m_bankToWaterMap.empty() ||
+        !m_render
+    )
     {
         ImGui::Text("No values available.");
     }
@@ -425,7 +445,7 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
             for (auto x{ 0 }; x < m_width; ++x)
             {
                 const auto idx{ GetIndex(x, y, m_width) };
-                const auto bitmask{ m_bitmaskValues.at(idx) };
+                const auto bitmask{ m_bitmaskGrassToBank.at(idx) };
 
                 if (bitmask == 0) // terrain
                 {
@@ -452,7 +472,7 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
                 {
                     if (auto id{ std::string(m_tileTypeChars.at(m_bitmaskTileTypes.at(bitmask))).append("##").append(std::to_string(idx)) }; ImGui::Button(id.c_str()))
                     {
-                        m_bitmaskValues.at(idx) = m_bitmask_radio_button;
+                        m_bitmaskGrassToBank.at(idx) = m_bitmask_radio_button;
                     }
                 }
                 else
@@ -462,7 +482,7 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
                         // use grass
                         if (auto id{ std::string(m_tileTypeChars.at(AbstractTileType::GRASS)).append("##").append(std::to_string(idx)) }; ImGui::Button(id.c_str()))
                         {
-                            m_bitmaskValues.at(idx) = m_bitmask_radio_button;
+                            m_bitmaskGrassToBank.at(idx) = m_bitmask_radio_button;
                         }
                     }
                     else // invalid
@@ -477,7 +497,7 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
                         ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(64, 0, 0, 255));
                         if (auto id{ std::string(m_tileTypeChars.at(AbstractTileType::INVALID)).append("##").append(std::to_string(idx)) }; ImGui::Button(id.c_str()))
                         {
-                            m_bitmaskValues.at(idx) = m_bitmask_radio_button;
+                            m_bitmaskGrassToBank.at(idx) = m_bitmask_radio_button;
                         }
                     }
                 }
@@ -495,7 +515,12 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
 
 void mdcii::world::IslandGenerator::SaveIslandImGui()
 {
-    if (m_bitmaskValues.empty() || m_terrainValues.empty() || !m_render)
+    if (m_bitmaskGrassToBank.empty() ||
+        m_grassToBankMap.empty() ||
+        m_bitmaskBankToWater.empty() ||
+        m_bankToWaterMap.empty() ||
+        !m_render
+    )
     {
         return;
     }
@@ -628,7 +653,7 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_p
         for (auto x{ 0 }; x < m_width; ++x)
         {
             const auto idx{ GetIndex(x, y, m_width) };
-            const auto bitmask{ m_bitmaskValues.at(idx) };
+            const auto bitmask{ m_bitmaskGrassToBank.at(idx) };
 
             if (bitmask >= 0 && bitmask <= 255) // terrain
             {
@@ -726,9 +751,9 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
         for (auto x{ 0 }; x < m_width; ++x)
         {
             const auto idx{ GetIndex(x, y, m_width) };
-            const auto bitmask{ m_bitmaskValues.at(idx) };
+            const auto bitmask{ m_bitmaskGrassToBank.at(idx) };
 
-            switch (m_terrainValues.at(idx))
+            switch (m_grassToBankMap.at(idx))
             {
             case MapType::TERRAIN:
                 break;
@@ -787,8 +812,12 @@ void mdcii::world::IslandGenerator::Reset()
 {
     m_render = false;
 
-    std::vector<MapType>().swap(m_terrainValues);
-    std::vector<int32_t>().swap(m_bitmaskValues);
+    std::vector<MapType>().swap(m_grassToBankMap);
+    std::vector<int32_t>().swap(m_bitmaskGrassToBank);
+
+    std::vector<MapType>().swap(m_bankToWaterMap);
+    std::vector<int32_t>().swap(m_bitmaskBankToWater);
+
     std::unordered_set<int32_t>().swap(m_invalid);
 
     m_render = true;
