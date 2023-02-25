@@ -445,64 +445,11 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
             for (auto x{ 0 }; x < m_width; ++x)
             {
                 const auto idx{ GetIndex(x, y, m_width) };
-                const auto bitmask{ m_bitmaskGrassToBank.at(idx) };
+                const auto grassToBankBitmask{ m_bitmaskGrassToBank.at(idx) };
+                const auto bankToWaterBitmask{ m_bitmaskBankToWater.at(idx) };
 
-                if (bitmask == 0) // terrain
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
-                    ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 64, 0, 255));
-                }
-                else if (bitmask > 0 && bitmask <= 255) // terrain before embankment
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 175, 0, 255));
-                    ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 32, 0, 255));
-                }
-                else if (bitmask > 255 && bitmask <= 510) // embankment
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 0, 255));
-                    ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(64, 64, 0, 255));
-                }
-                else if (bitmask == 511) // water
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
-                    ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(0, 0, 64, 255));
-                }
-
-                if (m_bitmaskTileTypes.count(bitmask))
-                {
-                    if (auto id{ std::string(m_tileTypeChars.at(m_bitmaskTileTypes.at(bitmask))).append("##").append(std::to_string(idx)) }; ImGui::Button(id.c_str()))
-                    {
-                        m_bitmaskGrassToBank.at(idx) = m_bitmask_radio_button;
-                    }
-                }
-                else
-                {
-                    if (bitmask < 256) // terrain before embankment
-                    {
-                        // use grass
-                        if (auto id{ std::string(m_tileTypeChars.at(AbstractTileType::GRASS)).append("##").append(std::to_string(idx)) }; ImGui::Button(id.c_str()))
-                        {
-                            m_bitmaskGrassToBank.at(idx) = m_bitmask_radio_button;
-                        }
-                    }
-                    else // invalid
-                    {
-                        if (m_invalid.count(idx) == 0)
-                        {
-                            m_invalid.insert(idx);
-                        }
-
-                        ImGui::PopStyleColor(2);
-                        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-                        ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(64, 0, 0, 255));
-                        if (auto id{ std::string(m_tileTypeChars.at(AbstractTileType::INVALID)).append("##").append(std::to_string(idx)) }; ImGui::Button(id.c_str()))
-                        {
-                            m_bitmaskGrassToBank.at(idx) = m_bitmask_radio_button;
-                        }
-                    }
-                }
-                ImGui::SameLine();
-                ImGui::PopStyleColor(2);
+                SetImGuiColor(grassToBankBitmask, bankToWaterBitmask);
+                RenderImGuiButton(grassToBankBitmask, bankToWaterBitmask, idx);
             }
 
             ImGui::Text("");
@@ -586,6 +533,140 @@ void mdcii::world::IslandGenerator::SaveIslandImGui()
         ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveSuccess").c_str());
         ImGui::PopStyleColor();
     }
+}
+
+void mdcii::world::IslandGenerator::SetImGuiColor(const int32_t t_grassToBankBitmask, const int32_t t_bankToWaterBitmask)
+{
+    if (t_grassToBankBitmask == 0) // terrain
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(92, 248, 20, 255));
+        ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(46, 124, 10, 255));
+    }
+    else if (t_grassToBankBitmask > 0 && t_grassToBankBitmask <= 255) // terrain before embankment
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(206, 248, 20, 255));
+        ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(103, 124, 10, 255));
+    }
+    else if (t_grassToBankBitmask > 255 && t_grassToBankBitmask <= 510) // embankment
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(248, 177, 20, 255));
+        ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(124, 88, 10, 255));
+    }
+    else if (t_grassToBankBitmask == 511) // water
+    {
+        if (t_bankToWaterBitmask > 255 && t_bankToWaterBitmask <= 510)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(158, 185, 244, 255));
+            ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(79, 92, 122, 255));
+        }
+        else
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(41, 106, 249, 255));
+            ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(20, 53, 124, 255));
+        }
+    }
+}
+
+void mdcii::world::IslandGenerator::RenderImGuiButton(const int32_t t_grassToBankBitmask, const int32_t t_bankToWaterBitmask, const int32_t t_idx)
+{
+    // pure water
+    if (t_grassToBankBitmask == 511 && t_bankToWaterBitmask == 511)
+    {
+        if (auto id{ std::string(m_tileTypeChars.at(m_bitmaskTileTypes.at(t_grassToBankBitmask))).append("##").append(std::to_string(t_idx)) }; ImGui::Button(id.c_str()))
+        {
+            m_bitmaskGrassToBank.at(t_idx) = m_bitmask_radio_button;
+        }
+    }
+
+    // pure terrain
+    if (t_grassToBankBitmask == 0)
+    {
+        if (auto id{ std::string(m_tileTypeChars.at(m_bitmaskTileTypes.at(t_grassToBankBitmask))).append("##").append(std::to_string(t_idx)) }; ImGui::Button(id.c_str()))
+        {
+            m_bitmaskGrassToBank.at(t_idx) = m_bitmask_radio_button;
+        }
+    }
+
+    // transition from the embankment to the water
+    if (t_grassToBankBitmask == 511 && t_bankToWaterBitmask != 511)
+    {
+        // the bitmask could be invalid
+        if (m_bitmaskTileTypes.count(t_bankToWaterBitmask))
+        {
+            if (auto id{ std::string(m_tileTypeChars.at(m_bitmaskTileTypes.at(t_bankToWaterBitmask))).append("##").append(std::to_string(t_idx)) }; ImGui::Button(id.c_str()))
+            {
+                if (m_bitmask_radio_button > 255 && m_bitmask_radio_button <= 511)
+                {
+                    m_bitmaskBankToWater.at(t_idx) = m_bitmask_radio_button;
+                }
+                else
+                {
+                    Log::MDCII_LOG_WARN("[IslandGenerator::RenderImGuiButton()] Invalid radio button");
+                }
+            }
+        }
+        else
+        {
+            if (m_invalid.count(t_idx) == 0)
+            {
+                Log::MDCII_LOG_WARN("[IslandGenerator::RenderImGuiButton()] Store index {} as invalid.", t_idx);
+                m_invalid.insert(t_idx);
+            }
+
+            ImGui::PopStyleColor(2);
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+            ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(79, 92, 122, 255));
+            if (auto id{ std::string(m_tileTypeChars.at(AbstractTileType::INVALID)).append("##").append(std::to_string(t_idx)) }; ImGui::Button(id.c_str()))
+            {
+                if (m_bitmask_radio_button > 255 && m_bitmask_radio_button <= 511)
+                {
+                    m_bitmaskBankToWater.at(t_idx) = m_bitmask_radio_button;
+                }
+                else
+                {
+                    Log::MDCII_LOG_WARN("[IslandGenerator::RenderImGuiButton()] Invalid radio button");
+                }
+            }
+        }
+    }
+
+    // rest
+    if (t_grassToBankBitmask > 0 && t_grassToBankBitmask <= 510)
+    {
+        if (m_bitmaskTileTypes.count(t_grassToBankBitmask))
+        {
+            if (auto id{ std::string(m_tileTypeChars.at(m_bitmaskTileTypes.at(t_grassToBankBitmask))).append("##").append(std::to_string(t_idx)) }; ImGui::Button(id.c_str()))
+            {
+                m_bitmaskGrassToBank.at(t_idx) = m_bitmask_radio_button;
+            }
+        }
+        else if (t_grassToBankBitmask < 256)
+        {
+            if (auto id{ std::string(m_tileTypeChars.at(AbstractTileType::GRASS)).append("##").append(std::to_string(t_idx)) }; ImGui::Button(id.c_str()))
+            {
+                m_bitmaskGrassToBank.at(t_idx) = m_bitmask_radio_button;
+            }
+        }
+        else
+        {
+            if (m_invalid.count(t_idx) == 0)
+            {
+                Log::MDCII_LOG_WARN("[IslandGenerator::RenderImGuiButton()] Store index {} as invalid.", t_idx);
+                m_invalid.insert(t_idx);
+            }
+
+            ImGui::PopStyleColor(2);
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+            ImGui::PushStyleColor(ImGuiCol_Button, IM_COL32(64, 0, 0, 255));
+            if (auto id{ std::string(m_tileTypeChars.at(AbstractTileType::INVALID)).append("##").append(std::to_string(t_idx)) }; ImGui::Button(id.c_str()))
+            {
+                m_bitmaskGrassToBank.at(t_idx) = m_bitmask_radio_button;
+            }
+        }
+    }
+
+    ImGui::SameLine();
+    ImGui::PopStyleColor(2);
 }
 
 //-------------------------------------------------
@@ -726,7 +807,7 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_p
                         break;
 
                     default:
-                        t_terrainTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG0);
+                        t_terrainTiles.at(idx) = CreateTile(data::GRASS_BUILDING_ID, x, y, Rotation::DEG0);
                     }
                 }
             }
@@ -751,19 +832,61 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
         for (auto x{ 0 }; x < m_width; ++x)
         {
             const auto idx{ GetIndex(x, y, m_width) };
-            const auto bitmask{ m_bitmaskGrassToBank.at(idx) };
+            const auto bitmask{ m_bitmaskBankToWater.at(idx) };
 
-            switch (m_grassToBankMap.at(idx))
+            if (bitmask > 255 && bitmask <= 510)
             {
-            case MapType::TERRAIN:
-                break;
-            case MapType::WATER:
-                if (bitmask == 511)
+                if (m_bitmaskTileTypes.count(bitmask))
                 {
-                    t_coastTiles.at(idx) = CreateTile(data::SHALLOW_WATER_BUILDING_ID, x, y, Rotation::DEG0);
+                    switch (m_bitmaskTileTypes.at(bitmask))
+                    {
+                    case AbstractTileType::TOP:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG270);
+                        break;
+                    case AbstractTileType::BOTTOM:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG90);
+                        break;
+                    case AbstractTileType::LEFT:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG180);
+                        break;
+                    case AbstractTileType::RIGHT:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG0);
+                        break;
+
+                    case AbstractTileType::CORNER_OUT_TL:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_BUILDING_ID, x, y, Rotation::DEG90);
+                        break;
+                    case AbstractTileType::CORNER_OUT_TR:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_BUILDING_ID, x, y, Rotation::DEG180);
+                        break;
+                    case AbstractTileType::CORNER_OUT_BL:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_BUILDING_ID, x, y, Rotation::DEG0);
+                        break;
+                    case AbstractTileType::CORNER_OUT_BR:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_BUILDING_ID, x, y, Rotation::DEG270);
+                        break;
+
+                    case AbstractTileType::CORNER_IN_TL:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG90);
+                        break;
+                    case AbstractTileType::CORNER_IN_TR:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG180);
+                        break;
+                    case AbstractTileType::CORNER_IN_BL:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG0);
+                        break;
+                    case AbstractTileType::CORNER_IN_BR:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG270);
+                        break;
+
+                    default:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG0);
+                    }
                 }
-                break;
-            default:;
+            }
+            else
+            {
+                // todo: shallow water
             }
         }
     }

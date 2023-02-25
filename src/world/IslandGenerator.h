@@ -391,6 +391,9 @@ namespace mdcii::world
          */
         void SaveIslandImGui();
 
+        static void SetImGuiColor(int32_t t_grassToBankBitmask, int32_t t_bankToWaterBitmask);
+        void RenderImGuiButton(int32_t t_grassToBankBitmask, int32_t t_bankToWaterBitmask, int32_t t_idx);
+
         //-------------------------------------------------
         // Json
         //-------------------------------------------------
