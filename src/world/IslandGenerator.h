@@ -160,7 +160,9 @@ namespace mdcii::world
              *      ----------
              *        BOTTOM
              */
-            TOP, BOTTOM, LEFT, RIGHT
+            TOP, BOTTOM, LEFT, RIGHT,
+
+            MOUTH_TOP, MOUTH_BOTTOM, MOUTH_LEFT, MOUTH_RIGHT
         };
 
         //-------------------------------------------------
@@ -230,7 +232,13 @@ namespace mdcii::world
             { 470, AbstractTileType::RIGHT },
             { 471, AbstractTileType::RIGHT },
             { 502, AbstractTileType::RIGHT },
-            { 503, AbstractTileType::RIGHT }
+            { 503, AbstractTileType::RIGHT },
+
+            { 263, AbstractTileType::MOUTH_TOP },
+            { 448, AbstractTileType::MOUTH_BOTTOM },
+            { 296, AbstractTileType::MOUTH_LEFT },
+            { 352, AbstractTileType::MOUTH_BOTTOM },
+            // todo: right
         };
 
         /**
@@ -277,6 +285,11 @@ namespace mdcii::world
             { AbstractTileType::BOTTOM, "─" },
             { AbstractTileType::LEFT, "│" },
             { AbstractTileType::RIGHT, "│" },
+
+            { AbstractTileType::MOUTH_TOP, "╦" },
+            { AbstractTileType::MOUTH_BOTTOM, "╩" },
+            { AbstractTileType::MOUTH_LEFT, "╠" },
+            { AbstractTileType::MOUTH_RIGHT, "╣" },
         };
 
         //-------------------------------------------------

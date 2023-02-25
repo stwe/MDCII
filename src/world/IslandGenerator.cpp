@@ -47,8 +47,8 @@ mdcii::world::IslandGenerator::~IslandGenerator() noexcept
 
 void mdcii::world::IslandGenerator::RenderImGui()
 {
-    static int32_t seed{ 4412 };
-    static float frequency{ 0.167f };
+    static int32_t seed{ 5990 };
+    static float frequency{ 0.116f };
 
     if (ImGui::Checkbox("South", &m_south))
     {
@@ -879,6 +879,19 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
                         t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG270);
                         break;
 
+                    case AbstractTileType::MOUTH_TOP:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_MOUTH_BUILDING_ID, x, y, Rotation::DEG180);
+                        break;
+                    case AbstractTileType::MOUTH_BOTTOM:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_MOUTH_BUILDING_ID, x, y, Rotation::DEG0);
+                        break;
+                    case AbstractTileType::MOUTH_LEFT:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_MOUTH_BUILDING_ID, x, y, Rotation::DEG90);
+                        break;
+                    case AbstractTileType::MOUTH_RIGHT:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_MOUTH_BUILDING_ID, x, y, Rotation::DEG270);
+                        break;
+
                     default:
                         t_coastTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG0);
                     }
@@ -887,6 +900,7 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
             else
             {
                 // todo: shallow water
+                t_coastTiles.at(idx) = CreateTile(data::DEEP_WATER_BUILDING_ID, x, y, Rotation::DEG0);
             }
         }
     }
