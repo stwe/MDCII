@@ -146,11 +146,11 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
         for (auto x{ 0 }; x < m_width; ++x)
         {
             const auto idx{ GetIndex(x, y, m_width) };
-            auto result{ static_cast<int>(GRASS_FLAG) };
+            auto result{ static_cast<int>(TERRAIN_FLAG) };
 
             if (t_map.at(idx) == MapType::WATER)
             {
-                result = static_cast<int>(WATER_FLAG);
+                result = static_cast<int>(EMBANKMENT_FLAG);
             }
 
             result += GetNorthWestValue(t_map, x, y, MapType::WATER);
@@ -168,11 +168,10 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
         }
     }
 
-
     auto i{ 0 };
     for (const auto bitmask : m_bitmaskValues)
     {
-        if (bitmask >= 256 && bitmask < 511)
+        if (const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) }; mapTypeCol.mapType == MapType::EMBANKMENT)
         {
             m_map.at(i) = MapType::EMBANKMENT;
         }
@@ -181,6 +180,8 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
     }
 
     /*
+    std::fill(t_bitmaskValues.begin(), t_bitmaskValues.end(), 0);
+
     for (auto y{ 0 }; y < m_height; ++y)
     {
         for (auto x{ 0 }; x < m_width; ++x)
@@ -188,9 +189,14 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
             const auto idx{ GetIndex(x, y, m_width) };
             auto result{ static_cast<int>(GRASS_FLAG) };
 
+            if (t_map.at(idx) == MapType::EMBANKMENT)
+            {
+                result = static_cast<int>(EMBANKMENT_FLAG);
+            }
+
             if (t_map.at(idx) == MapType::WATER)
             {
-                result = static_cast<int>(WATER_FLAG);
+                result = static_cast<int>(SHALLOW_WATER_FLAG);
             }
 
             result += GetNorthWestValue(t_map, x, y, MapType::WATER);
@@ -204,11 +210,20 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
             result += GetSouthValue(t_map, x, y, MapType::WATER);
             result += GetSouthEastValue(t_map, x, y, MapType::WATER);
 
-            if (result > 511)
-            {
-                t_bitmaskValues.at(idx) = result;
-            }
+            t_bitmaskValues.at(idx) = result;
         }
+    }
+
+    i = 0;
+    for (const auto bitmask : m_bitmaskValues)
+    {
+        const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) };
+        if (mapTypeCol.mapType == MapType::SHALLOW_WATER)
+        {
+            m_map.at(i) = MapType::SHALLOW_WATER;
+        }
+
+        i++;
     }
     */
 }
@@ -357,22 +372,43 @@ void mdcii::world::IslandGenerator::RenderMapTypesImGui(const std::vector<MapTyp
                 const auto& mapType{ t_map.at(GetIndex(x, y, m_width)) };
                 if (mapType == MapType::TERRAIN)
                 {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+                    ImGui::PushStyleColor(ImGuiCol_Text, TERRAIN_COL);
                     ImGui::Text("%i", magic_enum::enum_integer(MapType::TERRAIN));
                     ImGui::SameLine();
                     ImGui::PopStyleColor();
                 }
                 else if (mapType == MapType::EMBANKMENT)
                 {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 0, 255));
+                    ImGui::PushStyleColor(ImGuiCol_Text, EMBANKMENT_COL);
                     ImGui::Text("%i", magic_enum::enum_integer(MapType::EMBANKMENT));
                     ImGui::SameLine();
                     ImGui::PopStyleColor();
                 }
-                else
+                else if (mapType == MapType::COAST)
                 {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
+                    ImGui::PushStyleColor(ImGuiCol_Text, COAST_COL);
+                    ImGui::Text("%i", magic_enum::enum_integer(MapType::COAST));
+                    ImGui::SameLine();
+                    ImGui::PopStyleColor();
+                }
+                else if (mapType == MapType::SHALLOW_WATER)
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, SHALLOW_WATER_COL);
+                    ImGui::Text("%i", magic_enum::enum_integer(MapType::SHALLOW_WATER));
+                    ImGui::SameLine();
+                    ImGui::PopStyleColor();
+                }
+                else if (mapType == MapType::WATER)
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, WATER_COL);
                     ImGui::Text("%i", magic_enum::enum_integer(MapType::WATER));
+                    ImGui::SameLine();
+                    ImGui::PopStyleColor();
+                }
+                else // MapType::INVALID
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, INVALID_COL);
+                    ImGui::Text("%i", magic_enum::enum_integer(MapType::INVALID));
                     ImGui::SameLine();
                     ImGui::PopStyleColor();
                 }
@@ -401,29 +437,10 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesImGui(const std::vector<i
                 const auto idx{ GetIndex(x, y, m_width) };
                 const auto bitmask{ t_bitmasks.at(idx) };
 
-                // grass
-                if (bitmask == 0)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
-                }
-                else if (bitmask == 511)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
-                }
-                else if (bitmask > 0 && bitmask <= 255) // grass
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(22, 227, 15, 255));
-                }
-                else if (bitmask >= 256 && bitmask < 511) // embankment
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 0, 255));
-                }
-                else
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-                }
+                const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) };
+                ImGui::PushStyleColor(ImGuiCol_Text, mapTypeCol.color);
 
-                ImGui::Text("%03i", bitmask);
+                ImGui::Text("%04i", bitmask);
                 ImGui::SameLine();
                 ImGui::PopStyleColor();
             }
@@ -456,4 +473,45 @@ void mdcii::world::IslandGenerator::Reset()
     std::vector<int32_t>().swap(m_bitmaskValues);
 
     m_render = true;
+}
+
+mdcii::world::IslandGenerator::MapTypeCol mdcii::world::IslandGenerator::Bitmask2MapTypeCol(const int32_t t_bitmask)
+{
+    if (t_bitmask == 0)
+    {
+        return { MapType::TERRAIN, TERRAIN_COL };
+    }
+    else if (t_bitmask > 0 && t_bitmask <= 255)
+    {
+        return { MapType::TERRAIN, TERRAIN_BORDER_COL };
+    }
+    else if (t_bitmask >= 256 && t_bitmask < 511)
+    {
+        return { MapType::EMBANKMENT, EMBANKMENT_COL };
+    }
+    if (t_bitmask == 511)
+    {
+        return { MapType::WATER, WATER_COL };
+    }
+
+    /*
+    if (t_bitmask == 767)
+    {
+        return { MapType::WATER, WATER_COL };
+    }
+    else if (t_bitmask > 0 && t_bitmask <= 255)
+    {
+        return { MapType::TERRAIN, IM_COL32(22, 227, 15, 255) };
+    }
+    else if (t_bitmask >= 256 && t_bitmask < 511)
+    {
+        return { MapType::EMBANKMENT, EMBANKMENT_COL };
+    }
+    else if (t_bitmask >= 512 && t_bitmask <= 766)
+    {
+        return { MapType::SHALLOW_WATER, SHALLOW_WATER_COL };
+    }
+    */
+
+    return { MapType::INVALID, INVALID_COL };
 }

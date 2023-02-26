@@ -87,7 +87,12 @@ namespace mdcii::world
          */
         enum class MapType
         {
-            WATER, TERRAIN, EMBANKMENT
+            WATER,
+            SHALLOW_WATER,
+            COAST,
+            EMBANKMENT,
+            TERRAIN,
+            INVALID
         };
 
         /**
@@ -95,7 +100,8 @@ namespace mdcii::world
          */
         enum NeighborFlag
         {
-            GRASS_FLAG = 0,
+            // -----------------------------
+            TERRAIN_FLAG = 0,
 
             NORTH_WEST_FLAG = 1,
             NORTH_FLAG = 2,
@@ -107,10 +113,17 @@ namespace mdcii::world
             SOUTH_WEST_FLAG = 32,
             SOUTH_FLAG = 64,
             SOUTH_EAST_FLAG = 128,
+            // ----------------------------- = 255
 
-            WATER_FLAG = 256,
+            EMBANKMENT_FLAG = 256, // 256 + 255 = 511
+            COAST_FLAG = 512,
+            SHALLOW_FLAG = 1024
+        };
 
-            EMBANKMENT_FLAG = 512
+        struct MapTypeCol
+        {
+            MapType mapType;
+            ImU32 color;
         };
 
         //-------------------------------------------------
@@ -121,6 +134,16 @@ namespace mdcii::world
          * Elevation values above this value are used as terrain, all others as water.
          */
         static constexpr auto WATER_LEVEL{ 0.5 };
+
+        // ImGui colors
+
+        static constexpr ImU32 TERRAIN_COL{ IM_COL32(0, 255, 0, 255) };
+        static constexpr ImU32 TERRAIN_BORDER_COL{ IM_COL32(22, 227, 15, 255) };
+        static constexpr ImU32 EMBANKMENT_COL{ IM_COL32(255, 255, 0, 255) };
+        static constexpr ImU32 COAST_COL{ IM_COL32(80, 192, 248, 255) };
+        static constexpr ImU32 SHALLOW_WATER_COL{ IM_COL32(7, 69, 235, 255) };
+        static constexpr ImU32 WATER_COL{ IM_COL32(0, 0, 255, 255) };
+        static constexpr ImU32 INVALID_COL{ IM_COL32(255, 0, 0, 255) };
 
         //-------------------------------------------------
         // Member
@@ -198,5 +221,7 @@ namespace mdcii::world
         static int32_t GetIndex(int32_t t_x, int32_t t_y, int32_t t_width);
 
         void Reset();
+
+        static MapTypeCol Bitmask2MapTypeCol(int32_t t_bitmask);
     };
 }
