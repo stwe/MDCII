@@ -141,6 +141,7 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
     t_bitmaskValues.resize(m_width * m_height);
     std::fill(t_bitmaskValues.begin(), t_bitmaskValues.end(), 0);
 
+    // embankment
     for (auto y{ 0 }; y < m_height; ++y)
     {
         for (auto x{ 0 }; x < m_width; ++x)
@@ -169,7 +170,7 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
     }
 
     auto i{ 0 };
-    for (const auto bitmask : m_bitmaskValues)
+    for (const auto bitmask : t_bitmaskValues)
     {
         if (const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) }; mapTypeCol.mapType == MapType::EMBANKMENT)
         {
@@ -179,24 +180,22 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
         i++;
     }
 
-    /*
-    std::fill(t_bitmaskValues.begin(), t_bitmaskValues.end(), 0);
-
+    // coast
     for (auto y{ 0 }; y < m_height; ++y)
     {
         for (auto x{ 0 }; x < m_width; ++x)
         {
             const auto idx{ GetIndex(x, y, m_width) };
-            auto result{ static_cast<int>(GRASS_FLAG) };
+            auto result{ static_cast<int>(TERRAIN_FLAG) };
+
+            if (t_map.at(idx) == MapType::WATER)
+            {
+                result = static_cast<int>(COAST_FLAG);
+            }
 
             if (t_map.at(idx) == MapType::EMBANKMENT)
             {
                 result = static_cast<int>(EMBANKMENT_FLAG);
-            }
-
-            if (t_map.at(idx) == MapType::WATER)
-            {
-                result = static_cast<int>(SHALLOW_WATER_FLAG);
             }
 
             result += GetNorthWestValue(t_map, x, y, MapType::WATER);
@@ -210,22 +209,23 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
             result += GetSouthValue(t_map, x, y, MapType::WATER);
             result += GetSouthEastValue(t_map, x, y, MapType::WATER);
 
-            t_bitmaskValues.at(idx) = result;
+            if (t_map.at(idx) != MapType::TERRAIN)
+            {
+                t_bitmaskValues.at(idx) = result;
+            }
         }
     }
 
     i = 0;
-    for (const auto bitmask : m_bitmaskValues)
+    for (const auto bitmask : t_bitmaskValues)
     {
-        const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) };
-        if (mapTypeCol.mapType == MapType::SHALLOW_WATER)
+        if (const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) }; mapTypeCol.mapType == MapType::COAST)
         {
-            m_map.at(i) = MapType::SHALLOW_WATER;
+            m_map.at(i) = MapType::COAST;
         }
 
         i++;
     }
-    */
 }
 
 //-------------------------------------------------
@@ -489,29 +489,14 @@ mdcii::world::IslandGenerator::MapTypeCol mdcii::world::IslandGenerator::Bitmask
     {
         return { MapType::EMBANKMENT, EMBANKMENT_COL };
     }
-    if (t_bitmask == 511)
+    else if (t_bitmask >= 512 && t_bitmask <= 766)
     {
-        return { MapType::WATER, WATER_COL };
+        return { MapType::COAST, COAST_COL };
     }
-
-    /*
     if (t_bitmask == 767)
     {
         return { MapType::WATER, WATER_COL };
     }
-    else if (t_bitmask > 0 && t_bitmask <= 255)
-    {
-        return { MapType::TERRAIN, IM_COL32(22, 227, 15, 255) };
-    }
-    else if (t_bitmask >= 256 && t_bitmask < 511)
-    {
-        return { MapType::EMBANKMENT, EMBANKMENT_COL };
-    }
-    else if (t_bitmask >= 512 && t_bitmask <= 766)
-    {
-        return { MapType::SHALLOW_WATER, SHALLOW_WATER_COL };
-    }
-    */
 
     return { MapType::INVALID, INVALID_COL };
 }
