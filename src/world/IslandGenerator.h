@@ -115,9 +115,9 @@ namespace mdcii::world
             SOUTH_EAST_FLAG = 128,
             // ----------------------------- = 255
 
-            EMBANKMENT_FLAG = 256, // 256 + 255 = 511
+            EMBANKMENT_FLAG = 256,
             COAST_FLAG = 512,
-            SHALLOW_FLAG = 1024
+            SHALLOW_FLAG = 768
         };
 
         struct MapTypeCol

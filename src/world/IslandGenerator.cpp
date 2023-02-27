@@ -226,6 +226,58 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
 
         i++;
     }
+
+    // shallow water
+    for (auto y{ 0 }; y < m_height; ++y)
+    {
+        for (auto x{ 0 }; x < m_width; ++x)
+        {
+            const auto idx{ GetIndex(x, y, m_width) };
+            auto result{ static_cast<int>(TERRAIN_FLAG) };
+
+            if (t_map.at(idx) == MapType::WATER)
+            {
+                result = static_cast<int>(SHALLOW_FLAG);
+            }
+
+            if (t_map.at(idx) == MapType::EMBANKMENT)
+            {
+                result = static_cast<int>(EMBANKMENT_FLAG);
+            }
+
+            if (t_map.at(idx) == MapType::COAST)
+            {
+                result = static_cast<int>(COAST_FLAG);
+            }
+
+            result += GetNorthWestValue(t_map, x, y, MapType::WATER);
+            result += GetNorthValue(t_map, x, y, MapType::WATER);
+            result += GetNorthEastValue(t_map, x, y, MapType::WATER);
+
+            result += GetWestValue(t_map, x, y, MapType::WATER);
+            result += GetEastValue(t_map, x, y, MapType::WATER);
+
+            result += GetSouthWestValue(t_map, x, y, MapType::WATER);
+            result += GetSouthValue(t_map, x, y, MapType::WATER);
+            result += GetSouthEastValue(t_map, x, y, MapType::WATER);
+
+            if (t_map.at(idx) != MapType::TERRAIN)
+            {
+                t_bitmaskValues.at(idx) = result;
+            }
+        }
+    }
+
+    i = 0;
+    for (const auto bitmask : t_bitmaskValues)
+    {
+        if (const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) }; mapTypeCol.mapType == MapType::SHALLOW_WATER)
+        {
+            m_map.at(i) = MapType::SHALLOW_WATER;
+        }
+
+        i++;
+    }
 }
 
 //-------------------------------------------------
@@ -489,11 +541,15 @@ mdcii::world::IslandGenerator::MapTypeCol mdcii::world::IslandGenerator::Bitmask
     {
         return { MapType::EMBANKMENT, EMBANKMENT_COL };
     }
-    else if (t_bitmask >= 512 && t_bitmask <= 766)
+    else if (t_bitmask >= 512 && t_bitmask < 767)
     {
         return { MapType::COAST, COAST_COL };
     }
-    if (t_bitmask == 767)
+    else if (t_bitmask >= 768 && t_bitmask < 1023)
+    {
+        return { MapType::SHALLOW_WATER, SHALLOW_WATER_COL };
+    }
+    else if (t_bitmask == 1023)
     {
         return { MapType::WATER, WATER_COL };
     }
