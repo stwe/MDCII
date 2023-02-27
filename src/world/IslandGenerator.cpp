@@ -77,11 +77,11 @@ void mdcii::world::IslandGenerator::RenderImGui()
     if (ImGui::Button("Noise"))
     {
         CalcMapTypes(seed, frequency, m_width, m_height);
-        CalcBitmaskValues(m_map, m_bitmaskValues);
+        CalcBitmaskValues();
     }
 
-    RenderMapTypesImGui(m_map, "Map types");
-    RenderBitmaskValuesImGui(m_bitmaskValues, "Bitmask values");
+    RenderMapTypesImGui("Map types");
+    RenderBitmaskValuesImGui("Bitmask values");
 }
 
 //-------------------------------------------------
@@ -136,10 +136,10 @@ void mdcii::world::IslandGenerator::CalcMapTypes(const int32_t t_seed, const flo
 }
 
 
-void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>& t_map, std::vector<int32_t>& t_bitmaskValues)
+void mdcii::world::IslandGenerator::CalcBitmaskValues()
 {
-    t_bitmaskValues.resize(m_width * m_height);
-    std::fill(t_bitmaskValues.begin(), t_bitmaskValues.end(), 0);
+    m_bitmaskValues.resize(m_width * m_height);
+    std::fill(m_bitmaskValues.begin(), m_bitmaskValues.end(), 0);
 
     // embankment
     for (auto y{ 0 }; y < m_height; ++y)
@@ -149,28 +149,28 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
             const auto idx{ GetIndex(x, y, m_width) };
             auto result{ static_cast<int>(TERRAIN_FLAG) };
 
-            if (t_map.at(idx) == MapType::WATER)
+            if (m_map.at(idx) == MapType::WATER)
             {
                 result = static_cast<int>(EMBANKMENT_FLAG);
             }
 
-            result += GetNorthWestValue(t_map, x, y, MapType::WATER);
-            result += GetNorthValue(t_map, x, y, MapType::WATER);
-            result += GetNorthEastValue(t_map, x, y, MapType::WATER);
+            result += GetNorthWestValue(x, y);
+            result += GetNorthValue(x, y);
+            result += GetNorthEastValue(x, y);
 
-            result += GetWestValue(t_map, x, y, MapType::WATER);
-            result += GetEastValue(t_map, x, y, MapType::WATER);
+            result += GetWestValue(x, y);
+            result += GetEastValue(x, y);
 
-            result += GetSouthWestValue(t_map, x, y, MapType::WATER);
-            result += GetSouthValue(t_map, x, y, MapType::WATER);
-            result += GetSouthEastValue(t_map, x, y, MapType::WATER);
+            result += GetSouthWestValue(x, y);
+            result += GetSouthValue(x, y);
+            result += GetSouthEastValue(x, y);
 
-            t_bitmaskValues.at(idx) = result;
+            m_bitmaskValues.at(idx) = result;
         }
     }
 
     auto i{ 0 };
-    for (const auto bitmask : t_bitmaskValues)
+    for (const auto bitmask : m_bitmaskValues)
     {
         if (const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) }; mapTypeCol.mapType == MapType::EMBANKMENT)
         {
@@ -188,36 +188,36 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
             const auto idx{ GetIndex(x, y, m_width) };
             auto result{ static_cast<int>(TERRAIN_FLAG) };
 
-            if (t_map.at(idx) == MapType::WATER)
+            if (m_map.at(idx) == MapType::WATER)
             {
                 result = static_cast<int>(COAST_FLAG);
             }
 
-            if (t_map.at(idx) == MapType::EMBANKMENT)
+            if (m_map.at(idx) == MapType::EMBANKMENT)
             {
                 result = static_cast<int>(EMBANKMENT_FLAG);
             }
 
-            result += GetNorthWestValue(t_map, x, y, MapType::WATER);
-            result += GetNorthValue(t_map, x, y, MapType::WATER);
-            result += GetNorthEastValue(t_map, x, y, MapType::WATER);
+            result += GetNorthWestValue(x, y);
+            result += GetNorthValue(x, y);
+            result += GetNorthEastValue(x, y);
 
-            result += GetWestValue(t_map, x, y, MapType::WATER);
-            result += GetEastValue(t_map, x, y, MapType::WATER);
+            result += GetWestValue(x, y);
+            result += GetEastValue(x, y);
 
-            result += GetSouthWestValue(t_map, x, y, MapType::WATER);
-            result += GetSouthValue(t_map, x, y, MapType::WATER);
-            result += GetSouthEastValue(t_map, x, y, MapType::WATER);
+            result += GetSouthWestValue(x, y);
+            result += GetSouthValue(x, y);
+            result += GetSouthEastValue(x, y);
 
-            if (t_map.at(idx) != MapType::TERRAIN)
+            if (m_map.at(idx) != MapType::TERRAIN)
             {
-                t_bitmaskValues.at(idx) = result;
+                m_bitmaskValues.at(idx) = result;
             }
         }
     }
 
     i = 0;
-    for (const auto bitmask : t_bitmaskValues)
+    for (const auto bitmask : m_bitmaskValues)
     {
         if (const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) }; mapTypeCol.mapType == MapType::COAST)
         {
@@ -235,41 +235,41 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
             const auto idx{ GetIndex(x, y, m_width) };
             auto result{ static_cast<int>(TERRAIN_FLAG) };
 
-            if (t_map.at(idx) == MapType::WATER)
+            if (m_map.at(idx) == MapType::WATER)
             {
                 result = static_cast<int>(SHALLOW_FLAG);
             }
 
-            if (t_map.at(idx) == MapType::EMBANKMENT)
+            if (m_map.at(idx) == MapType::EMBANKMENT)
             {
                 result = static_cast<int>(EMBANKMENT_FLAG);
             }
 
-            if (t_map.at(idx) == MapType::COAST)
+            if (m_map.at(idx) == MapType::COAST)
             {
                 result = static_cast<int>(COAST_FLAG);
             }
 
-            result += GetNorthWestValue(t_map, x, y, MapType::WATER);
-            result += GetNorthValue(t_map, x, y, MapType::WATER);
-            result += GetNorthEastValue(t_map, x, y, MapType::WATER);
+            result += GetNorthWestValue(x, y);
+            result += GetNorthValue(x, y);
+            result += GetNorthEastValue(x, y);
 
-            result += GetWestValue(t_map, x, y, MapType::WATER);
-            result += GetEastValue(t_map, x, y, MapType::WATER);
+            result += GetWestValue(x, y);
+            result += GetEastValue(x, y);
 
-            result += GetSouthWestValue(t_map, x, y, MapType::WATER);
-            result += GetSouthValue(t_map, x, y, MapType::WATER);
-            result += GetSouthEastValue(t_map, x, y, MapType::WATER);
+            result += GetSouthWestValue(x, y);
+            result += GetSouthValue(x, y);
+            result += GetSouthEastValue(x, y);
 
-            if (t_map.at(idx) != MapType::TERRAIN)
+            if (m_map.at(idx) != MapType::TERRAIN)
             {
-                t_bitmaskValues.at(idx) = result;
+                m_bitmaskValues.at(idx) = result;
             }
         }
     }
 
     i = 0;
-    for (const auto bitmask : t_bitmaskValues)
+    for (const auto bitmask : m_bitmaskValues)
     {
         if (const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) }; mapTypeCol.mapType == MapType::SHALLOW_WATER)
         {
@@ -284,14 +284,14 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues(const std::vector<MapType>
 // Bitmasking
 //-------------------------------------------------
 
-int32_t mdcii::world::IslandGenerator::GetNorthValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y, const MapType t_mapType)
+int32_t mdcii::world::IslandGenerator::GetNorthValue(const int32_t t_x, const int32_t t_y)
 {
     if (t_y - 1 < 0)
     {
         return static_cast<int>(NORTH_FLAG);
     }
 
-    if (t_map.at(GetIndex(t_x, t_y - 1, m_width)) == t_mapType)
+    if (m_map.at(GetIndex(t_x, t_y - 1, m_width)) == MapType::WATER)
     {
         return static_cast<int>(NORTH_FLAG);
     }
@@ -299,14 +299,14 @@ int32_t mdcii::world::IslandGenerator::GetNorthValue(const std::vector<MapType>&
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetEastValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y, const MapType t_mapType)
+int32_t mdcii::world::IslandGenerator::GetEastValue(const int32_t t_x, const int32_t t_y)
 {
     if (t_x + 1 >= m_width)
     {
         return static_cast<int>(EAST_FLAG);
     }
 
-    if (t_map.at(GetIndex(t_x + 1, t_y, m_width)) == t_mapType)
+    if (m_map.at(GetIndex(t_x + 1, t_y, m_width)) == MapType::WATER)
     {
         return static_cast<int>(EAST_FLAG);
     }
@@ -314,14 +314,14 @@ int32_t mdcii::world::IslandGenerator::GetEastValue(const std::vector<MapType>& 
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetSouthValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y, const MapType t_mapType)
+int32_t mdcii::world::IslandGenerator::GetSouthValue(const int32_t t_x, const int32_t t_y)
 {
     if (t_y + 1 >= m_height)
     {
         return static_cast<int>(SOUTH_FLAG);
     }
 
-    if (t_map.at(GetIndex(t_x, t_y + 1, m_width)) == t_mapType)
+    if (m_map.at(GetIndex(t_x, t_y + 1, m_width)) == MapType::WATER)
     {
         return static_cast<int>(SOUTH_FLAG);
     }
@@ -329,14 +329,14 @@ int32_t mdcii::world::IslandGenerator::GetSouthValue(const std::vector<MapType>&
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetWestValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y, const MapType t_mapType)
+int32_t mdcii::world::IslandGenerator::GetWestValue(const int32_t t_x, const int32_t t_y)
 {
     if (t_x - 1 < 0)
     {
         return static_cast<int>(WEST_FLAG);
     }
 
-    if (t_map.at(GetIndex(t_x - 1, t_y, m_width)) == t_mapType)
+    if (m_map.at(GetIndex(t_x - 1, t_y, m_width)) == MapType::WATER)
     {
         return static_cast<int>(WEST_FLAG);
     }
@@ -344,14 +344,14 @@ int32_t mdcii::world::IslandGenerator::GetWestValue(const std::vector<MapType>& 
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetNorthWestValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y, const MapType t_mapType)
+int32_t mdcii::world::IslandGenerator::GetNorthWestValue(const int32_t t_x, const int32_t t_y)
 {
     if (t_x - 1 < 0 || t_y - 1 < 0)
     {
         return static_cast<int>(NORTH_WEST_FLAG);
     }
 
-    if (t_map.at(GetIndex(t_x - 1, t_y - 1, m_width)) == t_mapType)
+    if (m_map.at(GetIndex(t_x - 1, t_y - 1, m_width)) == MapType::WATER)
     {
         return static_cast<int>(NORTH_WEST_FLAG);
     }
@@ -359,14 +359,14 @@ int32_t mdcii::world::IslandGenerator::GetNorthWestValue(const std::vector<MapTy
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetNorthEastValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y, const MapType t_mapType)
+int32_t mdcii::world::IslandGenerator::GetNorthEastValue(const int32_t t_x, const int32_t t_y)
 {
     if (t_x + 1 >= m_width || t_y - 1 < 0)
     {
         return static_cast<int>(NORTH_EAST_FLAG);
     }
 
-    if (t_map.at(GetIndex(t_x + 1, t_y - 1, m_width)) == t_mapType)
+    if (m_map.at(GetIndex(t_x + 1, t_y - 1, m_width)) == MapType::WATER)
     {
         return static_cast<int>(NORTH_EAST_FLAG);
     }
@@ -374,14 +374,14 @@ int32_t mdcii::world::IslandGenerator::GetNorthEastValue(const std::vector<MapTy
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetSouthWestValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y, const MapType t_mapType)
+int32_t mdcii::world::IslandGenerator::GetSouthWestValue(const int32_t t_x, const int32_t t_y)
 {
     if (t_x - 1 < 0 || t_y + 1 >= m_height)
     {
         return static_cast<int>(SOUTH_WEST_FLAG);
     }
 
-    if (t_map.at(GetIndex(t_x - 1, t_y + 1, m_width)) == t_mapType)
+    if (m_map.at(GetIndex(t_x - 1, t_y + 1, m_width)) == MapType::WATER)
     {
         return static_cast<int>(SOUTH_WEST_FLAG);
     }
@@ -389,14 +389,14 @@ int32_t mdcii::world::IslandGenerator::GetSouthWestValue(const std::vector<MapTy
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetSouthEastValue(const std::vector<MapType>& t_map, const int32_t t_x, const int32_t t_y, const MapType t_mapType)
+int32_t mdcii::world::IslandGenerator::GetSouthEastValue(const int32_t t_x, const int32_t t_y)
 {
     if (t_x + 1 >= m_width || t_y + 1 >= m_height)
     {
         return static_cast<int>(SOUTH_EAST_FLAG);
     }
 
-    if (t_map.at(GetIndex(t_x + 1, t_y + 1, m_width)) == t_mapType)
+    if (m_map.at(GetIndex(t_x + 1, t_y + 1, m_width)) == MapType::WATER)
     {
         return static_cast<int>(SOUTH_EAST_FLAG);
     }
@@ -408,10 +408,10 @@ int32_t mdcii::world::IslandGenerator::GetSouthEastValue(const std::vector<MapTy
 // ImGui
 //-------------------------------------------------
 
-void mdcii::world::IslandGenerator::RenderMapTypesImGui(const std::vector<MapType>& t_map, const std::string& t_title) const
+void mdcii::world::IslandGenerator::RenderMapTypesImGui(const std::string& t_title) const
 {
     ImGui::Begin(t_title.c_str());
-    if (t_map.empty() || !m_render)
+    if (m_map.empty() || !m_render)
     {
         ImGui::Text("No values available.");
     }
@@ -421,7 +421,7 @@ void mdcii::world::IslandGenerator::RenderMapTypesImGui(const std::vector<MapTyp
         {
             for (auto x{ 0 }; x < m_width; ++x)
             {
-                const auto& mapType{ t_map.at(GetIndex(x, y, m_width)) };
+                const auto& mapType{ m_map.at(GetIndex(x, y, m_width)) };
                 if (mapType == MapType::TERRAIN)
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, TERRAIN_COL);
@@ -473,10 +473,10 @@ void mdcii::world::IslandGenerator::RenderMapTypesImGui(const std::vector<MapTyp
     ImGui::End();
 }
 
-void mdcii::world::IslandGenerator::RenderBitmaskValuesImGui(const std::vector<int32_t>& t_bitmasks, const std::string& t_title) const
+void mdcii::world::IslandGenerator::RenderBitmaskValuesImGui(const std::string& t_title) const
 {
     ImGui::Begin(t_title.c_str());
-    if (t_bitmasks.empty() || !m_render)
+    if (m_bitmaskValues.empty() || !m_render)
     {
         ImGui::Text("No values available.");
     }
@@ -487,7 +487,7 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesImGui(const std::vector<i
             for (auto x{ 0 }; x < m_width; ++x)
             {
                 const auto idx{ GetIndex(x, y, m_width) };
-                const auto bitmask{ t_bitmasks.at(idx) };
+                const auto bitmask{ m_bitmaskValues.at(idx) };
 
                 const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) };
                 ImGui::PushStyleColor(ImGuiCol_Text, mapTypeCol.color);

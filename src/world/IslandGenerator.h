@@ -184,21 +184,21 @@ namespace mdcii::world
         //-------------------------------------------------
 
         void CalcMapTypes(int32_t t_seed, float t_frequency, int32_t t_width, int32_t t_height);
-        void CalcBitmaskValues(const std::vector<MapType>& t_map, std::vector<int32_t>& t_bitmaskValues);
+        void CalcBitmaskValues();
 
         //-------------------------------------------------
         // Bitmasking
         //-------------------------------------------------
 
-        static int32_t GetNorthValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y, MapType t_mapType);
-        static int32_t GetEastValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y, MapType t_mapType);
-        static int32_t GetSouthValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y, MapType t_mapType);
-        static int32_t GetWestValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y, MapType t_mapType);
+        int32_t GetNorthValue(int32_t t_x, int32_t t_y);
+        int32_t GetEastValue(int32_t t_x, int32_t t_y);
+        int32_t GetSouthValue(int32_t t_x, int32_t t_y);
+        int32_t GetWestValue(int32_t t_x, int32_t t_y);
 
-        static int32_t GetNorthWestValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y, MapType t_mapType);
-        static int32_t GetNorthEastValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y, MapType t_mapType);
-        static int32_t GetSouthWestValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y, MapType t_mapType);
-        static int32_t GetSouthEastValue(const std::vector<MapType>& t_map, int32_t t_x, int32_t t_y, MapType t_mapType);
+        int32_t GetNorthWestValue(int32_t t_x, int32_t t_y);
+        int32_t GetNorthEastValue(int32_t t_x, int32_t t_y);
+        int32_t GetSouthWestValue(int32_t t_x, int32_t t_y);
+        int32_t GetSouthEastValue(int32_t t_x, int32_t t_y);
 
         //-------------------------------------------------
         // ImGui
@@ -207,12 +207,12 @@ namespace mdcii::world
         /**
          * Shows the given map values.
          */
-        void RenderMapTypesImGui(const std::vector<MapType>& t_map, const std::string& t_title) const;
+        void RenderMapTypesImGui(const std::string& t_title) const;
 
         /**
          * Shows the given bitmask values.
          */
-        void RenderBitmaskValuesImGui(const std::vector<int32_t>& t_bitmasks, const std::string& t_title) const;
+        void RenderBitmaskValuesImGui(const std::string& t_title) const;
 
         //-------------------------------------------------
         // Helper
