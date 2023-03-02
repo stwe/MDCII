@@ -80,8 +80,9 @@ void mdcii::world::IslandGenerator::RenderImGui()
         CalcBitmaskValues();
     }
 
-    RenderMapTypesImGui("Map types");
-    RenderBitmaskValuesImGui("Bitmask values");
+    RenderMapTypesImGui();
+    RenderBitmaskValuesImGui();
+    RenderBitmaskValuesAsCharsImGui();
 }
 
 //-------------------------------------------------
@@ -141,143 +142,9 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues()
     m_bitmaskValues.resize(m_width * m_height);
     std::fill(m_bitmaskValues.begin(), m_bitmaskValues.end(), 0);
 
-    // embankment
-    for (auto y{ 0 }; y < m_height; ++y)
-    {
-        for (auto x{ 0 }; x < m_width; ++x)
-        {
-            const auto idx{ GetIndex(x, y, m_width) };
-            auto result{ static_cast<int>(TERRAIN_FLAG) };
-
-            if (m_map.at(idx) == MapType::WATER)
-            {
-                result = static_cast<int>(EMBANKMENT_FLAG);
-            }
-
-            result += GetNorthWestValue(x, y);
-            result += GetNorthValue(x, y);
-            result += GetNorthEastValue(x, y);
-
-            result += GetWestValue(x, y);
-            result += GetEastValue(x, y);
-
-            result += GetSouthWestValue(x, y);
-            result += GetSouthValue(x, y);
-            result += GetSouthEastValue(x, y);
-
-            m_bitmaskValues.at(idx) = result;
-        }
-    }
-
-    auto i{ 0 };
-    for (const auto bitmask : m_bitmaskValues)
-    {
-        if (const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) }; mapTypeCol.mapType == MapType::EMBANKMENT)
-        {
-            m_map.at(i) = MapType::EMBANKMENT;
-        }
-
-        i++;
-    }
-
-    // coast
-    for (auto y{ 0 }; y < m_height; ++y)
-    {
-        for (auto x{ 0 }; x < m_width; ++x)
-        {
-            const auto idx{ GetIndex(x, y, m_width) };
-            auto result{ static_cast<int>(TERRAIN_FLAG) };
-
-            if (m_map.at(idx) == MapType::WATER)
-            {
-                result = static_cast<int>(COAST_FLAG);
-            }
-
-            if (m_map.at(idx) == MapType::EMBANKMENT)
-            {
-                result = static_cast<int>(EMBANKMENT_FLAG);
-            }
-
-            result += GetNorthWestValue(x, y);
-            result += GetNorthValue(x, y);
-            result += GetNorthEastValue(x, y);
-
-            result += GetWestValue(x, y);
-            result += GetEastValue(x, y);
-
-            result += GetSouthWestValue(x, y);
-            result += GetSouthValue(x, y);
-            result += GetSouthEastValue(x, y);
-
-            if (m_map.at(idx) != MapType::TERRAIN)
-            {
-                m_bitmaskValues.at(idx) = result;
-            }
-        }
-    }
-
-    i = 0;
-    for (const auto bitmask : m_bitmaskValues)
-    {
-        if (const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) }; mapTypeCol.mapType == MapType::COAST)
-        {
-            m_map.at(i) = MapType::COAST;
-        }
-
-        i++;
-    }
-
-    // shallow water
-    for (auto y{ 0 }; y < m_height; ++y)
-    {
-        for (auto x{ 0 }; x < m_width; ++x)
-        {
-            const auto idx{ GetIndex(x, y, m_width) };
-            auto result{ static_cast<int>(TERRAIN_FLAG) };
-
-            if (m_map.at(idx) == MapType::WATER)
-            {
-                result = static_cast<int>(SHALLOW_FLAG);
-            }
-
-            if (m_map.at(idx) == MapType::EMBANKMENT)
-            {
-                result = static_cast<int>(EMBANKMENT_FLAG);
-            }
-
-            if (m_map.at(idx) == MapType::COAST)
-            {
-                result = static_cast<int>(COAST_FLAG);
-            }
-
-            result += GetNorthWestValue(x, y);
-            result += GetNorthValue(x, y);
-            result += GetNorthEastValue(x, y);
-
-            result += GetWestValue(x, y);
-            result += GetEastValue(x, y);
-
-            result += GetSouthWestValue(x, y);
-            result += GetSouthValue(x, y);
-            result += GetSouthEastValue(x, y);
-
-            if (m_map.at(idx) != MapType::TERRAIN)
-            {
-                m_bitmaskValues.at(idx) = result;
-            }
-        }
-    }
-
-    i = 0;
-    for (const auto bitmask : m_bitmaskValues)
-    {
-        if (const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) }; mapTypeCol.mapType == MapType::SHALLOW_WATER)
-        {
-            m_map.at(i) = MapType::SHALLOW_WATER;
-        }
-
-        i++;
-    }
+    AddMapType(MapType::EMBANKMENT);
+    AddMapType(MapType::COAST);
+    AddMapType(MapType::SHALLOW_WATER);
 }
 
 //-------------------------------------------------
@@ -408,9 +275,9 @@ int32_t mdcii::world::IslandGenerator::GetSouthEastValue(const int32_t t_x, cons
 // ImGui
 //-------------------------------------------------
 
-void mdcii::world::IslandGenerator::RenderMapTypesImGui(const std::string& t_title) const
+void mdcii::world::IslandGenerator::RenderMapTypesImGui() const
 {
-    ImGui::Begin(t_title.c_str());
+    ImGui::Begin("Map types");
     if (m_map.empty() || !m_render)
     {
         ImGui::Text("No values available.");
@@ -473,9 +340,9 @@ void mdcii::world::IslandGenerator::RenderMapTypesImGui(const std::string& t_tit
     ImGui::End();
 }
 
-void mdcii::world::IslandGenerator::RenderBitmaskValuesImGui(const std::string& t_title) const
+void mdcii::world::IslandGenerator::RenderBitmaskValuesImGui() const
 {
-    ImGui::Begin(t_title.c_str());
+    ImGui::Begin("Bitmask values");
     if (m_bitmaskValues.empty() || !m_render)
     {
         ImGui::Text("No values available.");
@@ -501,6 +368,103 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesImGui(const std::string& 
         }
     }
 
+    ImGui::End();
+}
+
+void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
+{
+    ImFontAtlas* atlas = ImGui::GetIO().Fonts;
+    ImGui::PushFont(atlas->Fonts[1]);
+
+    ImGui::Begin("Resolved bitmask values");
+    if (m_bitmaskValues.empty() || !m_render)
+    {
+        ImGui::Text("No values available.");
+    }
+    else
+    {
+        for (auto y{ 0 }; y < m_height; ++y)
+        {
+            for (auto x{ 0 }; x < m_width; ++x)
+            {
+                const auto idx{ GetIndex(x, y, m_width) };
+                const auto bitmask{ m_bitmaskValues.at(idx) };
+
+                switch (m_map.at(idx))
+                {
+                case MapType::WATER:
+                    ImGui::PushStyleColor(ImGuiCol_Text, WATER_COL);
+                    ImGui::Text("~");
+                    ImGui::SameLine();
+                    ImGui::PopStyleColor();
+                    break;
+                case MapType::SHALLOW_WATER:
+                    if (const auto& tileTypes{ m_bitmaskTileTypes.at(MapType::SHALLOW_WATER) }; tileTypes.count(bitmask))
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Text, SHALLOW_WATER_COL);
+                        ImGui::TextUnformatted(m_tileTypeChars.at(tileTypes.at(bitmask)));
+                        ImGui::SameLine();
+                        ImGui::PopStyleColor();
+                    }
+                    else
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Text, INVALID_COL);
+                        ImGui::Text("?");
+                        ImGui::SameLine();
+                        ImGui::PopStyleColor();
+                    }
+                    break;
+                case MapType::COAST:
+                    if (const auto& tileTypes{ m_bitmaskTileTypes.at(MapType::COAST) }; tileTypes.count(bitmask))
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Text, COAST_COL);
+                        ImGui::TextUnformatted(m_tileTypeChars.at(tileTypes.at(bitmask)));
+                        ImGui::SameLine();
+                        ImGui::PopStyleColor();
+                    }
+                    else
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Text, INVALID_COL);
+                        ImGui::Text("?");
+                        ImGui::SameLine();
+                        ImGui::PopStyleColor();
+                    }
+                    break;
+                case MapType::EMBANKMENT:
+                    if (const auto& tileTypes{ m_bitmaskTileTypes.at(MapType::EMBANKMENT) }; tileTypes.count(bitmask))
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Text, EMBANKMENT_COL);
+                        ImGui::TextUnformatted(m_tileTypeChars.at(tileTypes.at(bitmask)));
+                        ImGui::SameLine();
+                        ImGui::PopStyleColor();
+                    }
+                    else
+                    {
+                        ImGui::PushStyleColor(ImGuiCol_Text, INVALID_COL);
+                        ImGui::Text("?");
+                        ImGui::SameLine();
+                        ImGui::PopStyleColor();
+                    }
+                    break;
+                case MapType::TERRAIN:
+                    ImGui::PushStyleColor(ImGuiCol_Text, TERRAIN_COL);
+                    ImGui::Text("#");
+                    ImGui::SameLine();
+                    ImGui::PopStyleColor();
+                    break;
+                default:
+                    ImGui::PushStyleColor(ImGuiCol_Text, INVALID_COL);
+                    ImGui::Text("x");
+                    ImGui::SameLine();
+                    ImGui::PopStyleColor();
+                }
+            }
+
+            ImGui::Text("");
+        }
+    }
+
+    ImGui::PopFont();
     ImGui::End();
 }
 
@@ -555,4 +519,85 @@ mdcii::world::IslandGenerator::MapTypeCol mdcii::world::IslandGenerator::Bitmask
     }
 
     return { MapType::INVALID, INVALID_COL };
+}
+
+void mdcii::world::IslandGenerator::AddMapType(mdcii::world::IslandGenerator::MapType t_mapType)
+{
+    for (auto y{ 0 }; y < m_height; ++y)
+    {
+        for (auto x{ 0 }; x < m_width; ++x)
+        {
+            const auto idx{ GetIndex(x, y, m_width) };
+            auto result{ static_cast<int>(TERRAIN_FLAG) };
+
+            if (m_map.at(idx) == MapType::WATER)
+            {
+                switch (t_mapType)
+                {
+                case MapType::SHALLOW_WATER:
+                    result = static_cast<int>(SHALLOW_FLAG);
+                    break;
+                case MapType::COAST:
+                    result = static_cast<int>(COAST_FLAG);
+                    break;
+                case MapType::EMBANKMENT:
+                    result = static_cast<int>(EMBANKMENT_FLAG);
+                    break;
+                default:;
+                }
+            }
+
+            if (m_map.at(idx) == MapType::EMBANKMENT)
+            {
+                result = static_cast<int>(EMBANKMENT_FLAG);
+            }
+
+            if (m_map.at(idx) == MapType::COAST)
+            {
+                result = static_cast<int>(COAST_FLAG);
+            }
+
+            result += GetNorthWestValue(x, y);
+            result += GetNorthValue(x, y);
+            result += GetNorthEastValue(x, y);
+
+            result += GetWestValue(x, y);
+            result += GetEastValue(x, y);
+
+            result += GetSouthWestValue(x, y);
+            result += GetSouthValue(x, y);
+            result += GetSouthEastValue(x, y);
+
+            switch (t_mapType)
+            {
+            case MapType::EMBANKMENT:
+                m_bitmaskValues.at(idx) = result;
+                break;
+            case MapType::COAST:
+                if (m_map.at(idx) != MapType::TERRAIN && m_map.at(idx) != MapType::EMBANKMENT)
+                {
+                    m_bitmaskValues.at(idx) = result;
+                }
+                break;
+            case MapType::SHALLOW_WATER:
+                if (m_map.at(idx) != MapType::TERRAIN && m_map.at(idx) != MapType::EMBANKMENT && m_map.at(idx) != MapType::COAST)
+                {
+                    m_bitmaskValues.at(idx) = result;
+                }
+                break;
+            default:;
+            }
+        }
+    }
+
+    auto i{ 0 };
+    for (const auto bitmask : m_bitmaskValues)
+    {
+        if (const auto mapTypeCol{ Bitmask2MapTypeCol(bitmask) }; mapTypeCol.mapType == t_mapType)
+        {
+            m_map.at(i) = t_mapType;
+        }
+
+        i++;
+    }
 }
