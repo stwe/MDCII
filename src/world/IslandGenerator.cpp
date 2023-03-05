@@ -44,8 +44,8 @@ mdcii::world::IslandGenerator::~IslandGenerator() noexcept
 
 void mdcii::world::IslandGenerator::RenderImGui()
 {
-    static int32_t seed{ 5990 };
-    static float frequency{ 0.116f };
+    static auto seed{ 5990 };
+    static auto frequency{ 0.116f };
 
     if (ImGui::Checkbox("South", &m_south))
     {
@@ -78,6 +78,14 @@ void mdcii::world::IslandGenerator::RenderImGui()
     {
         CalcMapTypes(seed, frequency, m_width, m_height);
         CalcBitmaskValues();
+        m_noise = true;
+    }
+
+    if (m_noise)
+    {
+        ImGui::Separator();
+        RenderEditMenuImGui();
+        ImGui::Separator();
     }
 
     RenderMapTypesImGui();
@@ -139,6 +147,8 @@ void mdcii::world::IslandGenerator::CalcMapTypes(const int32_t t_seed, const flo
 
 void mdcii::world::IslandGenerator::CalcBitmaskValues()
 {
+    Log::MDCII_LOG_DEBUG("[IslandGenerator::CalcBitmaskValues()] Calc bitmask values.");
+
     m_bitmaskValues.resize(m_width * m_height);
     std::fill(m_bitmaskValues.begin(), m_bitmaskValues.end(), 0);
 
@@ -278,7 +288,7 @@ int32_t mdcii::world::IslandGenerator::GetSouthEastValue(const int32_t t_x, cons
 void mdcii::world::IslandGenerator::RenderMapTypesImGui() const
 {
     ImGui::Begin("Map types");
-    if (m_map.empty() || !m_render)
+    if (m_map.empty())
     {
         ImGui::Text("No values available.");
     }
@@ -343,7 +353,7 @@ void mdcii::world::IslandGenerator::RenderMapTypesImGui() const
 void mdcii::world::IslandGenerator::RenderBitmaskValuesImGui() const
 {
     ImGui::Begin("Bitmask values");
-    if (m_bitmaskValues.empty() || !m_render)
+    if (m_bitmaskValues.empty())
     {
         ImGui::Text("No values available.");
     }
@@ -377,7 +387,7 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
     ImGui::PushFont(atlas->Fonts[1]);
 
     ImGui::Begin("Resolved bitmask values");
-    if (m_bitmaskValues.empty() || !m_render)
+    if (m_bitmaskValues.empty())
     {
         ImGui::Text("No values available.");
     }
@@ -393,70 +403,61 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
                 switch (m_map.at(idx))
                 {
                 case MapType::WATER:
-                    ImGui::PushStyleColor(ImGuiCol_Text, WATER_COL);
-                    ImGui::Text("~");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
+                    RenderCharButtonImGui(MapType::WATER, "~", idx, [this, idx]() {
+                        UpdateBySelection(idx);
+                    });
                     break;
                 case MapType::SHALLOW_WATER:
-                    if (const auto& tileTypes{ m_bitmaskTileTypes.at(MapType::SHALLOW_WATER) }; tileTypes.count(bitmask))
+                    if (IsTileTypeKnown(MapType::SHALLOW_WATER, bitmask))
                     {
-                        ImGui::PushStyleColor(ImGuiCol_Text, SHALLOW_WATER_COL);
-                        ImGui::TextUnformatted(m_tileTypeChars.at(tileTypes.at(bitmask)));
-                        ImGui::SameLine();
-                        ImGui::PopStyleColor();
+                        RenderCharButtonImGui(MapType::SHALLOW_WATER, m_tileTypeChars.at(GetTileType(MapType::SHALLOW_WATER, bitmask)), idx, [this, idx]() {
+                            UpdateBySelection(idx);
+                        });
                     }
                     else
                     {
-                        ImGui::PushStyleColor(ImGuiCol_Text, INVALID_COL);
-                        ImGui::Text("?");
-                        ImGui::SameLine();
-                        ImGui::PopStyleColor();
+                        RenderCharButtonImGui(MapType::INVALID, "?", idx, [this, idx]() {
+                            UpdateBySelection(idx);
+                        });
                     }
                     break;
                 case MapType::COAST:
-                    if (const auto& tileTypes{ m_bitmaskTileTypes.at(MapType::COAST) }; tileTypes.count(bitmask))
+                    if (IsTileTypeKnown(MapType::COAST, bitmask))
                     {
-                        ImGui::PushStyleColor(ImGuiCol_Text, COAST_COL);
-                        ImGui::TextUnformatted(m_tileTypeChars.at(tileTypes.at(bitmask)));
-                        ImGui::SameLine();
-                        ImGui::PopStyleColor();
+                        RenderCharButtonImGui(MapType::COAST, m_tileTypeChars.at(GetTileType(MapType::COAST, bitmask)), idx, [this, idx]() {
+                            UpdateBySelection(idx);
+                        });
                     }
                     else
                     {
-                        ImGui::PushStyleColor(ImGuiCol_Text, INVALID_COL);
-                        ImGui::Text("?");
-                        ImGui::SameLine();
-                        ImGui::PopStyleColor();
+                        RenderCharButtonImGui(MapType::INVALID, "?", idx, [this, idx]() {
+                            UpdateBySelection(idx);
+                        });
                     }
                     break;
                 case MapType::EMBANKMENT:
-                    if (const auto& tileTypes{ m_bitmaskTileTypes.at(MapType::EMBANKMENT) }; tileTypes.count(bitmask))
+                    if (IsTileTypeKnown(MapType::EMBANKMENT, bitmask))
                     {
-                        ImGui::PushStyleColor(ImGuiCol_Text, EMBANKMENT_COL);
-                        ImGui::TextUnformatted(m_tileTypeChars.at(tileTypes.at(bitmask)));
-                        ImGui::SameLine();
-                        ImGui::PopStyleColor();
+                        RenderCharButtonImGui(MapType::EMBANKMENT, m_tileTypeChars.at(GetTileType(MapType::EMBANKMENT, bitmask)), idx, [this, idx]() {
+                            UpdateBySelection(idx);
+                        });
                     }
                     else
                     {
-                        ImGui::PushStyleColor(ImGuiCol_Text, INVALID_COL);
-                        ImGui::Text("?");
-                        ImGui::SameLine();
-                        ImGui::PopStyleColor();
+                        RenderCharButtonImGui(MapType::INVALID, "?", idx, [this, idx]() {
+                            UpdateBySelection(idx);
+                        });
                     }
                     break;
                 case MapType::TERRAIN:
-                    ImGui::PushStyleColor(ImGuiCol_Text, TERRAIN_COL);
-                    ImGui::Text("#");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
+                    RenderCharButtonImGui(MapType::TERRAIN, "+", idx, [this, idx]() {
+                        UpdateBySelection(idx);
+                    });
                     break;
                 default:
-                    ImGui::PushStyleColor(ImGuiCol_Text, INVALID_COL);
-                    ImGui::Text("x");
-                    ImGui::SameLine();
-                    ImGui::PopStyleColor();
+                    RenderCharButtonImGui(MapType::INVALID, "?", idx, [this, idx]() {
+                        UpdateBySelection(idx);
+                    });
                 }
             }
 
@@ -466,6 +467,91 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
 
     ImGui::PopFont();
     ImGui::End();
+}
+
+void mdcii::world::IslandGenerator::RenderCharButtonImGui(const MapType t_mapType, std::string t_char, const int32_t t_index, const std::function<void()>& t_func)
+{
+    switch (t_mapType)
+    {
+    case MapType::WATER:
+        ImGui::PushStyleColor(ImGuiCol_Text, WATER_COL);
+        ImGui::PushStyleColor(ImGuiCol_Button, WATER_BUTTON_COL);
+        break;
+    case MapType::SHALLOW_WATER:
+        ImGui::PushStyleColor(ImGuiCol_Text, SHALLOW_WATER_COL);
+        ImGui::PushStyleColor(ImGuiCol_Button, SHALLOW_WATER_BUTTON_COL);
+        break;
+    case MapType::COAST:
+        ImGui::PushStyleColor(ImGuiCol_Text, COAST_COL);
+        ImGui::PushStyleColor(ImGuiCol_Button, COAST_BUTTON_COL);
+        break;
+    case MapType::EMBANKMENT:
+        ImGui::PushStyleColor(ImGuiCol_Text, EMBANKMENT_COL);
+        ImGui::PushStyleColor(ImGuiCol_Button, EMBANKMENT_BUTTON_COL);
+        break;
+    case MapType::TERRAIN:
+        ImGui::PushStyleColor(ImGuiCol_Text, TERRAIN_COL);
+        ImGui::PushStyleColor(ImGuiCol_Button, TERRAIN_BUTTON_COL);
+        break;
+    default:
+        ImGui::PushStyleColor(ImGuiCol_Text, INVALID_COL);
+        ImGui::PushStyleColor(ImGuiCol_Button, INVALID_BUTTON_COL);
+    }
+
+    if (auto id{ t_char.append("##").append(std::to_string(t_index)) }; ImGui::Button(id.c_str()))
+    {
+        t_func();
+    }
+
+    ImGui::SameLine();
+    ImGui::PopStyleColor(2);
+}
+
+void mdcii::world::IslandGenerator::RenderEditMenuImGui()
+{
+    if (ImGui::BeginCombo("Set map type", MAP_TYPES_STRINGS.at(magic_enum::enum_integer(m_selMapType))))
+    {
+        for (auto i{ 0 }; i < MAP_TYPES_STRINGS.size(); ++i)
+        {
+            const auto mapTypeOpt{ magic_enum::enum_cast<MapType>(i) };
+            auto mapType{ MapType::WATER };
+            if (mapTypeOpt.has_value())
+            {
+                mapType = mapTypeOpt.value();
+            }
+
+            const bool isSelected = (m_selMapType == mapType);
+            if (ImGui::Selectable(MAP_TYPES_STRINGS[i], isSelected))
+            {
+                m_selMapType = mapType;
+            }
+
+            if (isSelected)
+            {
+                ImGui::SetItemDefaultFocus();
+            }
+        }
+
+        ImGui::EndCombo();
+    }
+
+    ImFontAtlas* atlas = ImGui::GetIO().Fonts;
+    ImGui::PushFont(atlas->Fonts[1]);
+
+    for (const auto [tileType, tileChar] : m_tileTypeChars)
+    {
+        if (m_bitmaskTileTypes.count(m_selMapType) && m_tileTypeChars.count(tileType))
+        {
+            const auto id{ std::string(tileChar).append(" ").append(magic_enum::enum_name(tileType)).append("##").append(magic_enum::enum_name(m_selMapType)) };
+            if (ImGui::RadioButton(id.c_str(), m_sel_tile_type_button == tileType))
+            {
+                Log::MDCII_LOG_DEBUG("[IslandGenerator::RenderEditMenuImGui()] Selected tile type {}::{}.", magic_enum::enum_name(m_selMapType), magic_enum::enum_name(tileType));
+                m_sel_tile_type_button = tileType;
+            }
+        }
+    }
+
+    ImGui::PopFont();
 }
 
 //-------------------------------------------------
@@ -483,12 +569,12 @@ int32_t mdcii::world::IslandGenerator::GetIndex(const int32_t t_x, const int32_t
 
 void mdcii::world::IslandGenerator::Reset()
 {
-    m_render = false;
+    Log::MDCII_LOG_DEBUG("[IslandGenerator::Reset()] Reset all values.");
+
+    m_noise = false;
 
     std::vector<MapType>().swap(m_map);
     std::vector<int32_t>().swap(m_bitmaskValues);
-
-    m_render = true;
 }
 
 mdcii::world::IslandGenerator::MapTypeCol mdcii::world::IslandGenerator::Bitmask2MapTypeCol(const int32_t t_bitmask)
@@ -521,8 +607,12 @@ mdcii::world::IslandGenerator::MapTypeCol mdcii::world::IslandGenerator::Bitmask
     return { MapType::INVALID, INVALID_COL };
 }
 
-void mdcii::world::IslandGenerator::AddMapType(mdcii::world::IslandGenerator::MapType t_mapType)
+void mdcii::world::IslandGenerator::AddMapType(const MapType t_mapType)
 {
+    MDCII_ASSERT(t_mapType == MapType::SHALLOW_WATER || t_mapType == MapType::COAST || t_mapType == MapType::EMBANKMENT, "[IslandGenerator::AddMapType()] Invalid map type.")
+
+    Log::MDCII_LOG_DEBUG("[IslandGenerator::AddMapType()] Add bitmask values for map type {}.", magic_enum::enum_name(t_mapType));
+
     for (auto y{ 0 }; y < m_height; ++y)
     {
         for (auto x{ 0 }; x < m_width; ++x)
@@ -599,5 +689,34 @@ void mdcii::world::IslandGenerator::AddMapType(mdcii::world::IslandGenerator::Ma
         }
 
         i++;
+    }
+}
+
+bool mdcii::world::IslandGenerator::IsTileTypeKnown(const MapType t_mapType, const int32_t t_bitmask) const
+{
+    if (const auto& tileTypes{ m_bitmaskTileTypes.at(t_mapType) }; tileTypes.count(t_bitmask))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+mdcii::world::IslandGenerator::TileType mdcii::world::IslandGenerator::GetTileType(const MapType t_mapType, const int32_t t_bitmask) const
+{
+    MDCII_ASSERT(IsTileTypeKnown(t_mapType, t_bitmask), "[IslandGenerator::GetTileType()] Unknown tile type.")
+
+    return m_bitmaskTileTypes.at(t_mapType).at(t_bitmask);
+}
+
+void mdcii::world::IslandGenerator::UpdateBySelection(const int32_t t_index)
+{
+    for (auto it{ m_bitmaskTileTypes.at(m_selMapType).begin() }; it != m_bitmaskTileTypes.at(m_selMapType).end(); ++it)
+    {
+        if (it->second == m_sel_tile_type_button)
+        {
+            m_map.at(t_index) = m_selMapType;
+            m_bitmaskValues.at(t_index) = it->first;
+        }
     }
 }

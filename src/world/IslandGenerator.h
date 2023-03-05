@@ -133,11 +133,6 @@ namespace mdcii::world
         enum class TileType
         {
             /**
-             * For invalid bitmask values.
-             */
-            INVALID,
-
-            /**
              *     COTL    COTR
              *     x----------x
              *     |          |
@@ -177,6 +172,11 @@ namespace mdcii::world
         //-------------------------------------------------
         // Constants
         //-------------------------------------------------
+
+        /**
+         * Menu string for some map types.
+         */
+        static constexpr std::array MAP_TYPES_STRINGS = { "Water", "Shallow", "Coast", "Embankment", "Terrain" };
 
         /**
          * Known embankment bitmask values.
@@ -329,8 +329,6 @@ namespace mdcii::world
          * A char for each tile type.
          */
         const std::unordered_map<TileType, const char*> m_tileTypeChars = {
-            { TileType::INVALID, "x" },
-
             { TileType::CORNER_OUT_TL, "╭" },
             { TileType::CORNER_OUT_TR, "╮" },
             { TileType::CORNER_OUT_BL, "╰" },
@@ -348,7 +346,7 @@ namespace mdcii::world
         };
 
         /**
-         * Known bitmask tile types by map type.
+         * The tile type for bitmask values by map type.
          */
         const std::unordered_map<MapType, std::unordered_map<int32_t, TileType>> m_bitmaskTileTypes = {
             { MapType::EMBANKMENT, m_embankmentBitmaskTileTypes },
@@ -362,12 +360,24 @@ namespace mdcii::world
         static constexpr auto WATER_LEVEL{ 0.5 };
 
         static constexpr ImU32 TERRAIN_COL{ IM_COL32(0, 255, 0, 255) };
+        static constexpr ImU32 TERRAIN_BUTTON_COL{ IM_COL32(0, 127, 0, 255) };
+
         static constexpr ImU32 TERRAIN_BORDER_COL{ IM_COL32(22, 227, 15, 255) };
+
         static constexpr ImU32 EMBANKMENT_COL{ IM_COL32(255, 255, 0, 255) };
+        static constexpr ImU32 EMBANKMENT_BUTTON_COL{ IM_COL32(127, 127, 0, 255) };
+
         static constexpr ImU32 COAST_COL{ IM_COL32(80, 192, 248, 255) };
+        static constexpr ImU32 COAST_BUTTON_COL{ IM_COL32(40, 96, 124, 255) };
+
         static constexpr ImU32 SHALLOW_WATER_COL{ IM_COL32(7, 69, 235, 255) };
+        static constexpr ImU32 SHALLOW_WATER_BUTTON_COL{ IM_COL32(3, 34, 117, 255) };
+
         static constexpr ImU32 WATER_COL{ IM_COL32(0, 0, 255, 255) };
+        static constexpr ImU32 WATER_BUTTON_COL{ IM_COL32(0, 0, 127, 255) };
+
         static constexpr ImU32 INVALID_COL{ IM_COL32(255, 0, 0, 255) };
+        static constexpr ImU32 INVALID_BUTTON_COL{ IM_COL32(127, 0, 0, 255) };
 
         //-------------------------------------------------
         // Member
@@ -401,7 +411,17 @@ namespace mdcii::world
         /**
          * A helper flag that controls the rendering of ImGui menus.
          */
-        bool m_render{ true };
+        bool m_noise{ false };
+
+        /**
+         * The currently selected map type.
+         */
+        MapType m_selMapType{ MapType::WATER };
+
+        /**
+         * The currently selected tile type.
+         */
+        inline static TileType m_sel_tile_type_button{ TileType::CORNER_OUT_TL };
 
         //-------------------------------------------------
         // Noise
@@ -443,16 +463,82 @@ namespace mdcii::world
          */
         void RenderBitmaskValuesAsCharsImGui();
 
+        /**
+         * Renders a button for the given map type.
+         *
+         * @param t_mapType The map type of the button.
+         * @param t_char A character for the button.
+         * @param t_index The index within the map.
+         * @param t_func A callback function run if button pressed.
+         */
+        static void RenderCharButtonImGui(MapType t_mapType, std::string t_char, int32_t t_index, const std::function<void()>& t_func) ;
+
+        /**
+         * Menu to edit the island.
+         */
+        void RenderEditMenuImGui();
+
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
 
-        static int32_t GetIndex(int32_t t_x, int32_t t_y, int32_t t_width);
+        /**
+         * Calc 2D array indices into 1D array index.
+         *
+         * @param t_x The x position.
+         * @param t_y The y position.
+         * @param t_width The array width.
+         *
+         * @return The index.
+         */
+        [[nodiscard]] static int32_t GetIndex(int32_t t_x, int32_t t_y, int32_t t_width);
 
+        /**
+         * Resets all values for a new island.
+         */
         void Reset();
 
-        static MapTypeCol Bitmask2MapTypeCol(int32_t t_bitmask);
+        /**
+         * Returns a map type and color for the given bitmask.
+         *
+         * @param t_bitmask The bitmask.
+         *
+         * @return Map type and color.
+         */
+        [[nodiscard]] static MapTypeCol Bitmask2MapTypeCol(int32_t t_bitmask);
 
+        /**
+         * Adds a map type (SHALLOW_WATER, COAST, EMBANKMENT) to the island.
+         *
+         * @param t_mapType The map type to add.
+         */
         void AddMapType(MapType t_mapType);
+
+        /**
+         * Checks whether there is a tile type for the specified map type and bitmask.
+         *
+         * @param t_mapType A map type.
+         * @param t_bitmask A bitmask.
+         *
+         * @return True or false.
+         */
+        [[nodiscard]] bool IsTileTypeKnown(MapType t_mapType, int32_t t_bitmask) const;
+
+        /**
+         * Returns the tile type for the map type and bitmask.
+         *
+         * @param t_mapType A map type.
+         * @param t_bitmask A bitmask.
+         *
+         * @return The tile type.
+         */
+        [[nodiscard]] TileType GetTileType(MapType t_mapType, int32_t t_bitmask) const;
+
+        /**
+         * Updates the tile type.
+         *
+         * @param t_index The index within the map.
+         */
+        void UpdateBySelection(int32_t t_index);
     };
 }
