@@ -132,6 +132,8 @@ namespace mdcii::world
          */
         enum class TileType
         {
+            WATER, TERRAIN,
+
             /**
              *     COTL    COTR
              *     x----------x
@@ -329,6 +331,9 @@ namespace mdcii::world
          * A char for each tile type.
          */
         const std::unordered_map<TileType, const char*> m_tileTypeChars = {
+            { TileType::WATER, "~" },
+            { TileType::TERRAIN, "+" },
+
             { TileType::CORNER_OUT_TL, "╭" },
             { TileType::CORNER_OUT_TR, "╮" },
             { TileType::CORNER_OUT_BL, "╰" },
@@ -478,6 +483,11 @@ namespace mdcii::world
          */
         void RenderEditMenuImGui();
 
+        /**
+         * Save island to file.
+         */
+        void SaveIslandImGui();
+
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
@@ -540,5 +550,48 @@ namespace mdcii::world
          * @param t_index The index within the map.
          */
         void UpdateBySelection(int32_t t_index);
+
+        //-------------------------------------------------
+        // Json
+        //-------------------------------------------------
+
+        void AddIslandJson(nlohmann::json& t_json);
+
+        //-------------------------------------------------
+        // Tiles
+        //-------------------------------------------------
+
+        /**
+         * Creates Tile objects for the TerrainLayer.
+         *
+         * @param t_terrainTiles The Tile objects.
+         */
+        void CreateTerrainTiles(std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles);
+
+        /**
+         * Creates Tile objects for the CoastLayer.
+         *
+         * @param t_coastTiles The Tile objects.
+         */
+        void CreateCoastTiles(std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles);
+
+        /**
+         * Creates Tile objects for the BuildingsLayer.
+         *
+         * @param t_buildingsTiles The Tile objects.
+         */
+        void CreateBuildingsTiles(std::vector<std::shared_ptr<layer::Tile>>& t_buildingsTiles);
+
+        /**
+         * Creates a Tile.
+         *
+         * @param t_id The Building Id.
+         * @param t_worldX The world x position.
+         * @param t_worldY The world y position.
+         * @param t_rotation The rotation of the building.
+         *
+         * @return The created Tile object pointer.
+         */
+        static std::unique_ptr<layer::Tile> CreateTile(int32_t t_id, int32_t t_worldX, int32_t t_worldY, Rotation t_rotation);
     };
 }

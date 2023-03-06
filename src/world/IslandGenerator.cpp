@@ -21,8 +21,11 @@
 #include "IslandGenerator.h"
 #include "FastNoiseLite.h"
 #include "MdciiAssert.h"
+#include "MdciiUtils.h"
+#include "Game.h"
 #include "data/Text.h"
 #include "data/BuildingIds.h"
+#include "layer/TerrainLayer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -91,6 +94,7 @@ void mdcii::world::IslandGenerator::RenderImGui()
     RenderMapTypesImGui();
     RenderBitmaskValuesImGui();
     RenderBitmaskValuesAsCharsImGui();
+    SaveIslandImGui();
 }
 
 //-------------------------------------------------
@@ -403,7 +407,7 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
                 switch (m_map.at(idx))
                 {
                 case MapType::WATER:
-                    RenderCharButtonImGui(MapType::WATER, "~", idx, [this, idx]() {
+                    RenderCharButtonImGui(MapType::WATER, m_tileTypeChars.at(TileType::WATER), idx, [this, idx]() {
                         UpdateBySelection(idx);
                     });
                     break;
@@ -450,7 +454,7 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
                     }
                     break;
                 case MapType::TERRAIN:
-                    RenderCharButtonImGui(MapType::TERRAIN, "+", idx, [this, idx]() {
+                    RenderCharButtonImGui(MapType::TERRAIN, m_tileTypeChars.at(TileType::TERRAIN), idx, [this, idx]() {
                         UpdateBySelection(idx);
                     });
                     break;
@@ -540,18 +544,98 @@ void mdcii::world::IslandGenerator::RenderEditMenuImGui()
 
     for (const auto [tileType, tileChar] : m_tileTypeChars)
     {
-        if (m_bitmaskTileTypes.count(m_selMapType) && m_tileTypeChars.count(tileType))
+        if (m_bitmaskTileTypes.count(m_selMapType))
         {
-            const auto id{ std::string(tileChar).append(" ").append(magic_enum::enum_name(tileType)).append("##").append(magic_enum::enum_name(m_selMapType)) };
-            if (ImGui::RadioButton(id.c_str(), m_sel_tile_type_button == tileType))
+            auto b{ false };
+            for (auto it{ m_bitmaskTileTypes.at(m_selMapType).begin() }; it != m_bitmaskTileTypes.at(m_selMapType).end(); ++it)
             {
-                Log::MDCII_LOG_DEBUG("[IslandGenerator::RenderEditMenuImGui()] Selected tile type {}::{}.", magic_enum::enum_name(m_selMapType), magic_enum::enum_name(tileType));
-                m_sel_tile_type_button = tileType;
+                if (it->second == tileType)
+                {
+                    b = true;
+                }
             }
+
+            if (b)
+            {
+                const auto id{ std::string(tileChar).append(" ").append(magic_enum::enum_name(tileType)).append("##").append(magic_enum::enum_name(m_selMapType)) };
+                if (ImGui::RadioButton(id.c_str(), m_sel_tile_type_button == tileType))
+                {
+                    m_sel_tile_type_button = tileType;
+                }
+            }
+        }
+        else if (m_selMapType == MapType::WATER && tileType == TileType::WATER)
+        {
+            m_sel_tile_type_button = TileType::WATER;
+        }
+        else if (m_selMapType == MapType::TERRAIN && tileType == TileType::TERRAIN)
+        {
+            m_sel_tile_type_button = TileType::TERRAIN;
         }
     }
 
     ImGui::PopFont();
+}
+
+void mdcii::world::IslandGenerator::SaveIslandImGui()
+{
+    if (m_map.empty() || m_bitmaskValues.empty())
+    {
+        return;
+    }
+
+    static bool error{ false };
+    static bool saved{ false };
+    static std::string fileName;
+    save_file_button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame").c_str(), &fileName);
+
+    if (!fileName.empty())
+    {
+        if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Save").c_str()))
+        {
+            fileName.append(".map");
+
+            std::ofstream file;
+            if (create_file(Game::RESOURCES_REL_PATH + "map/" + fileName, file))
+            {
+                nlohmann::json json;
+
+                // todo: save island data only for the new *.isl file format
+                json["version"] = Game::VERSION;
+                json["world"] = { { "width", 64 }, { "height", 64 } };
+
+                AddIslandJson(json);
+
+                file << json;
+
+                Log::MDCII_LOG_DEBUG("[IslandGenerator::SaveIslandImGui()] The island has been successfully saved in file {}.", fileName);
+
+                saved = true;
+
+                fileName.clear();
+            }
+            else
+            {
+                error = true;
+                saved = false;
+                fileName.clear();
+            }
+        }
+    }
+
+    if (error)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveError").c_str());
+        ImGui::PopStyleColor();
+    }
+
+    if (saved)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveSuccess").c_str());
+        ImGui::PopStyleColor();
+    }
 }
 
 //-------------------------------------------------
@@ -711,12 +795,271 @@ mdcii::world::IslandGenerator::TileType mdcii::world::IslandGenerator::GetTileTy
 
 void mdcii::world::IslandGenerator::UpdateBySelection(const int32_t t_index)
 {
-    for (auto it{ m_bitmaskTileTypes.at(m_selMapType).begin() }; it != m_bitmaskTileTypes.at(m_selMapType).end(); ++it)
+    m_map.at(t_index) = m_selMapType;
+
+    if (m_selMapType == MapType::WATER)
     {
-        if (it->second == m_sel_tile_type_button)
+        m_bitmaskValues.at(t_index) = 1023;
+    }
+    else if (m_selMapType == MapType::TERRAIN)
+    {
+        m_bitmaskValues.at(t_index) = 0;
+    }
+    else
+    {
+        for (auto it{ m_bitmaskTileTypes.at(m_selMapType).begin() }; it != m_bitmaskTileTypes.at(m_selMapType).end(); ++it)
         {
-            m_map.at(t_index) = m_selMapType;
-            m_bitmaskValues.at(t_index) = it->first;
+            if (it->second == m_sel_tile_type_button)
+            {
+                m_bitmaskValues.at(t_index) = it->first;
+            }
         }
     }
+}
+
+//-------------------------------------------------
+// Json
+//-------------------------------------------------
+
+void mdcii::world::IslandGenerator::AddIslandJson(nlohmann::json& t_json)
+{
+    Log::MDCII_LOG_DEBUG("[IslandGenerator::AddIslandJson()] Adds Json values for an new island.");
+
+    std::vector<std::shared_ptr<layer::Tile>> coastTiles;
+    std::vector<std::shared_ptr<layer::Tile>> terrainTiles;
+    std::vector<std::shared_ptr<layer::Tile>> buildingsTiles;
+
+    nlohmann::json c = nlohmann::json::object();
+    nlohmann::json t = nlohmann::json::object();
+    nlohmann::json b = nlohmann::json::object();
+    nlohmann::json i = nlohmann::json::object();
+
+    i["width"] = m_width;
+    i["height"] = m_height;
+    i["x"] = 2;              // todo: remove island start x position in the world
+    i["y"] = 2;              // todo: remove island start y position in the world
+    i["layers"] = nlohmann::json::array();
+
+    CreateTerrainTiles(terrainTiles);
+    CreateCoastTiles(coastTiles);
+    CreateBuildingsTiles(buildingsTiles);
+    c["coast"] = coastTiles;
+    t["terrain"] = terrainTiles;
+    b["buildings"] = buildingsTiles;
+
+    i["layers"].push_back(c);
+    i["layers"].push_back(t);
+    i["layers"].push_back(b);
+
+    t_json["islands"].push_back(i);
+}
+
+//-------------------------------------------------
+// Tiles
+//-------------------------------------------------
+
+void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles)
+{
+    Log::MDCII_LOG_DEBUG("[IslandGenerator::CreateTerrainTiles()] Create terrain tiles.");
+
+    for (auto y{ 0 }; y < m_height; ++y)
+    {
+        for (auto x{ 0 }; x < m_width; ++x)
+        {
+            t_terrainTiles.emplace_back(std::make_unique<layer::Tile>());
+        }
+    }
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution randForTrees(0, 10);
+    std::uniform_int_distribution randForEmbankment(0, 9);
+    std::uniform_int_distribution randForEmbankmentCorner(0, 2);
+    std::uniform_int_distribution randForEmbankmentCornerInside(0, 3);
+
+    for (auto y{ 0 }; y < m_height; ++y)
+    {
+        for (auto x{ 0 }; x < m_width; ++x)
+        {
+            const auto idx{ GetIndex(x, y, m_width) };
+            const auto bitmask{ m_bitmaskValues.at(idx) };
+
+            if (bitmask >= 0 && bitmask <= 255) // terrain
+            {
+                if (m_south)
+                {
+                    if (const auto r{ randForTrees(gen) }; r >= 7)
+                    {
+                        t_terrainTiles.at(idx) = CreateTile(data::SOUTH_TREES_BUILDING_IDS.at(randForTrees(gen)), x, y, Rotation::DEG0);
+                    }
+                    else
+                    {
+                        t_terrainTiles.at(idx) = CreateTile(data::GRASS_BUILDING_ID, x, y, Rotation::DEG0);
+                    }
+                }
+                else
+                {
+                    if (const auto r{ randForTrees(gen) }; r >= 7)
+                    {
+                        t_terrainTiles.at(idx) = CreateTile(data::NORTH_TREES_BUILDING_IDS.at(randForTrees(gen)), x, y, Rotation::DEG0);
+                    }
+                    else
+                    {
+                        t_terrainTiles.at(idx) = CreateTile(data::GRASS_BUILDING_ID, x, y, Rotation::DEG0);
+                    }
+                }
+            }
+            else if (bitmask > 255 && bitmask <= 510) // embankment
+            {
+                if (m_bitmaskTileTypes.at(MapType::EMBANKMENT).count(bitmask))
+                {
+                    switch (m_bitmaskTileTypes.at(MapType::EMBANKMENT).at(bitmask))
+                    {
+                    case TileType::TOP:
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(gen)), x, y, Rotation::DEG180);
+                        break;
+                    case TileType::BOTTOM:
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(gen)), x, y, Rotation::DEG0);
+                        break;
+                    case TileType::LEFT:
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(gen)), x, y, Rotation::DEG90);
+                        break;
+                    case TileType::RIGHT:
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(gen)), x, y, Rotation::DEG270);
+                        break;
+
+                    case TileType::CORNER_OUT_TL:
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(gen)), x, y, Rotation::DEG90);
+                        break;
+                    case TileType::CORNER_OUT_TR:
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(gen)), x, y, Rotation::DEG180);
+                        break;
+                    case TileType::CORNER_OUT_BL:
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(gen)), x, y, Rotation::DEG0);
+                        break;
+                    case TileType::CORNER_OUT_BR:
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(gen)), x, y, Rotation::DEG270);
+                        break;
+
+                    case TileType::CORNER_IN_TL:
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(gen)), x, y, Rotation::DEG270);
+                        break;
+                    case TileType::CORNER_IN_TR:
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(gen)), x, y, Rotation::DEG0);
+                        break;
+                    case TileType::CORNER_IN_BL:
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(gen)), x, y, Rotation::DEG180);
+                        break;
+                    case TileType::CORNER_IN_BR:
+                        t_terrainTiles.at(idx) = CreateTile(data::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(gen)), x, y, Rotation::DEG90);
+                        break;
+
+                    default:
+                        t_terrainTiles.at(idx) = CreateTile(data::GRASS_BUILDING_ID, x, y, Rotation::DEG0);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles)
+{
+    Log::MDCII_LOG_DEBUG("[IslandGenerator::CreateCoastTiles()] Create coast tiles.");
+
+    for (auto y{ 0 }; y < m_height; ++y)
+    {
+        for (auto x{ 0 }; x < m_width; ++x)
+        {
+            t_coastTiles.emplace_back(std::make_unique<layer::Tile>());
+        }
+    }
+
+    for (auto y{ 0 }; y < m_height; ++y)
+    {
+        for (auto x{ 0 }; x < m_width; ++x)
+        {
+            const auto idx{ GetIndex(x, y, m_width) };
+            const auto bitmask{ m_bitmaskValues.at(idx) };
+
+            if (m_map.at(idx) == MapType::COAST)
+            {
+                const auto& bitmaskTileTypes{ m_bitmaskTileTypes.at(MapType::COAST) };
+
+                if (bitmaskTileTypes.count(bitmask))
+                {
+                    switch (bitmaskTileTypes.at(bitmask))
+                    {
+                    case TileType::TOP:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG270);
+                        break;
+                    case TileType::BOTTOM:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG90);
+                        break;
+                    case TileType::LEFT:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG180);
+                        break;
+                    case TileType::RIGHT:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG0);
+                        break;
+
+                    case TileType::CORNER_OUT_TL:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_BUILDING_ID, x, y, Rotation::DEG90);
+                        break;
+                    case TileType::CORNER_OUT_TR:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_BUILDING_ID, x, y, Rotation::DEG180);
+                        break;
+                    case TileType::CORNER_OUT_BL:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_BUILDING_ID, x, y, Rotation::DEG0);
+                        break;
+                    case TileType::CORNER_OUT_BR:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_BUILDING_ID, x, y, Rotation::DEG270);
+                        break;
+
+                    case TileType::CORNER_IN_TL:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG90);
+                        break;
+                    case TileType::CORNER_IN_TR:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG180);
+                        break;
+                    case TileType::CORNER_IN_BL:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG0);
+                        break;
+                    case TileType::CORNER_IN_BR:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG270);
+                        break;
+
+                    default:
+                        t_coastTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG0);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void mdcii::world::IslandGenerator::CreateBuildingsTiles(std::vector<std::shared_ptr<layer::Tile>>& t_buildingsTiles)
+{
+    Log::MDCII_LOG_DEBUG("[IslandGenerator::CreateBuildingsTiles()] Create building tiles.");
+
+    for (auto y{ 0 }; y < m_height; ++y)
+    {
+        for (auto x{ 0 }; x < m_width; ++x)
+        {
+            t_buildingsTiles.emplace_back(std::make_unique<layer::Tile>());
+        }
+    }
+}
+
+std::unique_ptr<mdcii::layer::Tile> mdcii::world::IslandGenerator::CreateTile(const int32_t t_id, const int32_t t_worldX, const int32_t t_worldY, const Rotation t_rotation)
+{
+    std::unique_ptr<mdcii::layer::Tile> tile{ std::make_unique<layer::Tile>() };
+    tile->buildingId = t_id;
+    tile->rotation = t_rotation;
+    tile->x = 0;
+    tile->y = 0;
+    tile->worldXDeg0 = t_worldX;
+    tile->worldYDeg0 = t_worldY;
+
+    return tile;
 }
