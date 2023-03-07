@@ -580,7 +580,7 @@ namespace mdcii::world
          *
          * @param t_buildingsTiles The Tile objects.
          */
-        void CreateBuildingsTiles(std::vector<std::shared_ptr<layer::Tile>>& t_buildingsTiles);
+        static void CreateBuildingsTiles(std::vector<std::shared_ptr<layer::Tile>>& t_buildingsTiles);
 
         /**
          * Creates a Tile.

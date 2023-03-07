@@ -51,8 +51,11 @@ namespace mdcii::data
 
     // height = 0
 
-    static constexpr auto DEEP_WATER_BUILDING_ID{ 1201 };
     static constexpr auto SHALLOW_WATER_BUILDING_ID{ 1203 };
+    static constexpr auto SHALLOW_TO_MEDIUM_WATER_BUILDING_ID{ 1202 };
+    static constexpr auto MEDIUM_WATER_BUILDING_ID{ 1204 };
+    static constexpr auto MEDIUM_TO_DEEP_WATER_BUILDING_ID{ 1209 };
+    static constexpr auto DEEP_WATER_BUILDING_ID{ 1201 };
 
     static constexpr auto BEACH_BUILDING_ID{ 1205 };
     static constexpr auto BEACH_CORNER_INSIDE_BUILDING_ID{ 1206 };

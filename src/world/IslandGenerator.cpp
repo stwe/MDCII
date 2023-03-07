@@ -985,7 +985,6 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
             if (m_map.at(idx) == MapType::COAST)
             {
                 const auto& bitmaskTileTypes{ m_bitmaskTileTypes.at(MapType::COAST) };
-
                 if (bitmaskTileTypes.count(bitmask))
                 {
                     switch (bitmaskTileTypes.at(bitmask))
@@ -1033,6 +1032,36 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
                         t_coastTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG0);
                     }
                 }
+            }
+            else if (m_map.at(idx) == MapType::SHALLOW_WATER)
+            {
+                const auto& bitmaskTileTypes{ m_bitmaskTileTypes.at(MapType::SHALLOW_WATER) };
+                if (bitmaskTileTypes.count(bitmask))
+                {
+                    switch (bitmaskTileTypes.at(bitmask))
+                    {
+                    case TileType::CORNER_OUT_TL:
+                        t_coastTiles.at(idx) = CreateTile(data::SHALLOW_TO_MEDIUM_WATER_BUILDING_ID, x, y, Rotation::DEG270);
+                        break;
+                    case TileType::CORNER_OUT_TR:
+                        t_coastTiles.at(idx) = CreateTile(data::SHALLOW_TO_MEDIUM_WATER_BUILDING_ID, x, y, Rotation::DEG0);
+                        break;
+                    case TileType::CORNER_OUT_BL:
+                        t_coastTiles.at(idx) = CreateTile(data::SHALLOW_TO_MEDIUM_WATER_BUILDING_ID, x, y, Rotation::DEG180);
+                        break;
+                    case TileType::CORNER_OUT_BR:
+                        t_coastTiles.at(idx) = CreateTile(data::SHALLOW_TO_MEDIUM_WATER_BUILDING_ID, x, y, Rotation::DEG90);
+                        break;
+
+                    default:
+                        t_coastTiles.at(idx) = CreateTile(data::SHALLOW_WATER_BUILDING_ID, x, y, Rotation::DEG0);
+                    }
+                }
+            }
+            else
+            {
+                // todo: Medium
+                t_coastTiles.at(idx) = CreateTile(data::DEEP_WATER_BUILDING_ID, x, y, Rotation::DEG0);
             }
         }
     }
