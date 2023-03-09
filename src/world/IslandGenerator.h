@@ -88,6 +88,7 @@ namespace mdcii::world
         enum class MapType
         {
             WATER,
+            MEDIUM_WATER,
             SHALLOW_WATER,
             COAST,
             EMBANKMENT,
@@ -124,7 +125,10 @@ namespace mdcii::world
 
             EMBANKMENT_FLAG = 256,
             COAST_FLAG = 512,
-            SHALLOW_FLAG = 768
+            SHALLOW_FLAG = 768,
+            MEDIUM_FLAG = 1024,
+
+            WATER_FLAG = 1279
         };
 
         /**
@@ -178,7 +182,7 @@ namespace mdcii::world
         /**
          * Menu string for some map types.
          */
-        static constexpr std::array MAP_TYPES_STRINGS = { "Water", "Shallow", "Coast", "Embankment", "Terrain" };
+        static constexpr std::array MAP_TYPES_STRINGS = { "Water", "Medium", "Shallow", "Coast", "Embankment", "Terrain" };
 
         /**
          * Known embankment bitmask values.
@@ -292,8 +296,8 @@ namespace mdcii::world
 
             { 779, TileType::CORNER_IN_TL },
             { 783, TileType::CORNER_IN_TL },
-            { 815, TileType::CORNER_IN_TL },
             { 811, TileType::CORNER_IN_TL },
+            { 815, TileType::CORNER_IN_TL },
 
             { 790, TileType::CORNER_IN_TR },
             { 791, TileType::CORNER_IN_TR },
@@ -328,6 +332,52 @@ namespace mdcii::world
         };
 
         /**
+         * Known medium bitmask values.
+         */
+        const std::unordered_map<int32_t, TileType> m_mediumBitmaskTileTypes = {
+            { 895+256, TileType::CORNER_OUT_TL },
+            { 991+256, TileType::CORNER_OUT_TR },
+            { 1019+256, TileType::CORNER_OUT_BL },
+            { 1022+256, TileType::CORNER_OUT_BR },
+
+            { 779+256, TileType::CORNER_IN_TL },
+            { 783+256, TileType::CORNER_IN_TL },
+            { 815+256, TileType::CORNER_IN_TL },
+            { 811+256, TileType::CORNER_IN_TL },
+
+            { 790+256, TileType::CORNER_IN_TR },
+            { 791+256, TileType::CORNER_IN_TR },
+            { 918+256, TileType::CORNER_IN_TR },
+            { 919+256, TileType::CORNER_IN_TR },
+
+            { 872+256, TileType::CORNER_IN_BL },
+            { 873+256, TileType::CORNER_IN_BL },
+            { 1000+256, TileType::CORNER_IN_BL },
+            { 1001+256, TileType::CORNER_IN_BL },
+
+            { 976+256, TileType::CORNER_IN_BR },
+            { 980+256, TileType::CORNER_IN_BR },
+            { 1008+256, TileType::CORNER_IN_BR },
+            { 1012+256, TileType::CORNER_IN_BR },
+
+            { 799+272, TileType::TOP },
+            { 831+288, TileType::TOP },
+            { 927+352, TileType::TOP },
+
+            { 1016+256, TileType::BOTTOM },
+            { 1017+256, TileType::BOTTOM },
+            { 1020+256, TileType::BOTTOM },
+
+            { 875+256, TileType::LEFT },
+            { 879+256, TileType::LEFT },
+            { 1003+256, TileType::LEFT },
+
+            { 982+256, TileType::RIGHT },
+            { 983+256, TileType::RIGHT },
+            { 1014+256, TileType::RIGHT },
+        };
+
+        /**
          * A char for each tile type.
          */
         const std::unordered_map<TileType, const char*> m_tileTypeChars = {
@@ -356,7 +406,8 @@ namespace mdcii::world
         const std::unordered_map<MapType, std::unordered_map<int32_t, TileType>> m_bitmaskTileTypes = {
             { MapType::EMBANKMENT, m_embankmentBitmaskTileTypes },
             { MapType::COAST, m_coastBitmaskTileTypes },
-            { MapType::SHALLOW_WATER, m_shallowBitmaskTileTypes }
+            { MapType::SHALLOW_WATER, m_shallowBitmaskTileTypes },
+            { MapType::MEDIUM_WATER, m_mediumBitmaskTileTypes }
         };
 
         /**
@@ -372,14 +423,17 @@ namespace mdcii::world
         static constexpr ImU32 EMBANKMENT_COL{ IM_COL32(255, 255, 0, 255) };
         static constexpr ImU32 EMBANKMENT_BUTTON_COL{ IM_COL32(127, 127, 0, 255) };
 
-        static constexpr ImU32 COAST_COL{ IM_COL32(80, 192, 248, 255) };
-        static constexpr ImU32 COAST_BUTTON_COL{ IM_COL32(40, 96, 124, 255) };
+        static constexpr ImU32 COAST_COL{ IM_COL32(225, 171, 92, 255) };
+        static constexpr ImU32 COAST_BUTTON_COL{ IM_COL32(112, 85, 46, 255) };
 
-        static constexpr ImU32 SHALLOW_WATER_COL{ IM_COL32(7, 69, 235, 255) };
-        static constexpr ImU32 SHALLOW_WATER_BUTTON_COL{ IM_COL32(3, 34, 117, 255) };
+        static constexpr ImU32 SHALLOW_WATER_COL{ IM_COL32(80, 192, 248, 255)  };
+        static constexpr ImU32 SHALLOW_WATER_BUTTON_COL{ IM_COL32(40, 96, 124, 255)};
 
-        static constexpr ImU32 WATER_COL{ IM_COL32(0, 0, 255, 255) };
-        static constexpr ImU32 WATER_BUTTON_COL{ IM_COL32(0, 0, 127, 255) };
+        static constexpr ImU32 MEDIUM_WATER_COL{ IM_COL32(51, 86, 248, 255) };
+        static constexpr ImU32 MEDIUM_WATER_BUTTON_COL{ IM_COL32(25, 43, 124, 255) };
+
+        static constexpr ImU32 WATER_COL{ IM_COL32(2, 46, 249, 255) };
+        static constexpr ImU32 WATER_BUTTON_COL{ IM_COL32(1, 24, 124, 255) };
 
         static constexpr ImU32 INVALID_COL{ IM_COL32(255, 0, 0, 255) };
         static constexpr ImU32 INVALID_BUTTON_COL{ IM_COL32(127, 0, 0, 255) };
