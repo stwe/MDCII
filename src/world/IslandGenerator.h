@@ -136,7 +136,7 @@ namespace mdcii::world
          */
         enum class TileType
         {
-            WATER, TERRAIN,
+            WATER, MEDIUM, SHALLOW, TERRAIN,
 
             /**
              *     COTL    COTR
@@ -184,14 +184,21 @@ namespace mdcii::world
          */
         static constexpr std::array MAP_TYPES_STRINGS = { "Water", "Medium", "Shallow", "Coast", "Embankment", "Terrain" };
 
+        // Known bitmask values.
+
+        static constexpr int32_t CORNER_OUT_TL{ 383 };
+        static constexpr int32_t CORNER_OUT_TR{ 479 };
+        static constexpr int32_t CORNER_OUT_BL{ 507 };
+        static constexpr int32_t CORNER_OUT_BR{ 510 };
+
         /**
          * Known embankment bitmask values.
          */
         const std::unordered_map<int32_t, TileType> m_embankmentBitmaskTileTypes = {
-            { 383, TileType::CORNER_OUT_TL },
-            { 479, TileType::CORNER_OUT_TR },
-            { 507, TileType::CORNER_OUT_BL },
-            { 510, TileType::CORNER_OUT_BR },
+            { CORNER_OUT_TL, TileType::CORNER_OUT_TL },
+            { CORNER_OUT_TR, TileType::CORNER_OUT_TR },
+            { CORNER_OUT_BL, TileType::CORNER_OUT_BL },
+            { CORNER_OUT_BR, TileType::CORNER_OUT_BR },
 
             { 267, TileType::CORNER_IN_TL },
             { 271, TileType::CORNER_IN_TL },
@@ -242,10 +249,10 @@ namespace mdcii::world
          * Known coast bitmask values.
          */
         const std::unordered_map<int32_t, TileType> m_coastBitmaskTileTypes = {
-            { 639, TileType::CORNER_OUT_TL },
-            { 735, TileType::CORNER_OUT_TR },
-            { 763, TileType::CORNER_OUT_BL },
-            { 766, TileType::CORNER_OUT_BR },
+            { CORNER_OUT_TL + 256, TileType::CORNER_OUT_TL },
+            { CORNER_OUT_TR + 256, TileType::CORNER_OUT_TR },
+            { CORNER_OUT_BL + 256, TileType::CORNER_OUT_BL },
+            { CORNER_OUT_BR + 256, TileType::CORNER_OUT_BR },
 
             { 523, TileType::CORNER_IN_TL },
             { 527, TileType::CORNER_IN_TL },
@@ -289,92 +296,20 @@ namespace mdcii::world
          * Known shallow bitmask values.
          */
         const std::unordered_map<int32_t, TileType> m_shallowBitmaskTileTypes = {
-            { 895, TileType::CORNER_OUT_TL },
-            { 991, TileType::CORNER_OUT_TR },
-            { 1019, TileType::CORNER_OUT_BL },
-            { 1022, TileType::CORNER_OUT_BR },
-
-            { 779, TileType::CORNER_IN_TL },
-            { 783, TileType::CORNER_IN_TL },
-            { 811, TileType::CORNER_IN_TL },
-            { 815, TileType::CORNER_IN_TL },
-
-            { 790, TileType::CORNER_IN_TR },
-            { 791, TileType::CORNER_IN_TR },
-            { 918, TileType::CORNER_IN_TR },
-            { 919, TileType::CORNER_IN_TR },
-
-            { 872, TileType::CORNER_IN_BL },
-            { 873, TileType::CORNER_IN_BL },
-            { 1000, TileType::CORNER_IN_BL },
-            { 1001, TileType::CORNER_IN_BL },
-
-            { 976, TileType::CORNER_IN_BR },
-            { 980, TileType::CORNER_IN_BR },
-            { 1008, TileType::CORNER_IN_BR },
-            { 1012, TileType::CORNER_IN_BR },
-
-            { 799, TileType::TOP },
-            { 831, TileType::TOP },
-            { 927, TileType::TOP },
-
-            { 1016, TileType::BOTTOM },
-            { 1017, TileType::BOTTOM },
-            { 1020, TileType::BOTTOM },
-
-            { 875, TileType::LEFT },
-            { 879, TileType::LEFT },
-            { 1003, TileType::LEFT },
-
-            { 982, TileType::RIGHT },
-            { 983, TileType::RIGHT },
-            { 1014, TileType::RIGHT },
+            { CORNER_OUT_TL + 256 + 256, TileType::CORNER_OUT_TL },
+            { CORNER_OUT_TR + 256 + 256, TileType::CORNER_OUT_TR },
+            { CORNER_OUT_BL + 256 + 256, TileType::CORNER_OUT_BL },
+            { CORNER_OUT_BR + 256 + 256, TileType::CORNER_OUT_BR },
         };
 
         /**
          * Known medium bitmask values.
          */
         const std::unordered_map<int32_t, TileType> m_mediumBitmaskTileTypes = {
-            { 895+256, TileType::CORNER_OUT_TL },
-            { 991+256, TileType::CORNER_OUT_TR },
-            { 1019+256, TileType::CORNER_OUT_BL },
-            { 1022+256, TileType::CORNER_OUT_BR },
-
-            { 779+256, TileType::CORNER_IN_TL },
-            { 783+256, TileType::CORNER_IN_TL },
-            { 815+256, TileType::CORNER_IN_TL },
-            { 811+256, TileType::CORNER_IN_TL },
-
-            { 790+256, TileType::CORNER_IN_TR },
-            { 791+256, TileType::CORNER_IN_TR },
-            { 918+256, TileType::CORNER_IN_TR },
-            { 919+256, TileType::CORNER_IN_TR },
-
-            { 872+256, TileType::CORNER_IN_BL },
-            { 873+256, TileType::CORNER_IN_BL },
-            { 1000+256, TileType::CORNER_IN_BL },
-            { 1001+256, TileType::CORNER_IN_BL },
-
-            { 976+256, TileType::CORNER_IN_BR },
-            { 980+256, TileType::CORNER_IN_BR },
-            { 1008+256, TileType::CORNER_IN_BR },
-            { 1012+256, TileType::CORNER_IN_BR },
-
-            { 799+272, TileType::TOP },
-            { 831+288, TileType::TOP },
-            { 927+352, TileType::TOP },
-
-            { 1016+256, TileType::BOTTOM },
-            { 1017+256, TileType::BOTTOM },
-            { 1020+256, TileType::BOTTOM },
-
-            { 875+256, TileType::LEFT },
-            { 879+256, TileType::LEFT },
-            { 1003+256, TileType::LEFT },
-
-            { 982+256, TileType::RIGHT },
-            { 983+256, TileType::RIGHT },
-            { 1014+256, TileType::RIGHT },
+            { CORNER_OUT_TL + 256 + 256 + 256, TileType::CORNER_OUT_TL },
+            { CORNER_OUT_TR + 256 + 256 + 256, TileType::CORNER_OUT_TR },
+            { CORNER_OUT_BL + 256 + 256 + 256, TileType::CORNER_OUT_BL },
+            { CORNER_OUT_BR + 256 + 256 + 256, TileType::CORNER_OUT_BR },
         };
 
         /**
@@ -382,6 +317,8 @@ namespace mdcii::world
          */
         const std::unordered_map<TileType, const char*> m_tileTypeChars = {
             { TileType::WATER, "~" },
+            { TileType::MEDIUM, "*" },
+            { TileType::SHALLOW, "°" },
             { TileType::TERRAIN, "+" },
 
             { TileType::CORNER_OUT_TL, "╭" },
@@ -410,11 +347,6 @@ namespace mdcii::world
             { MapType::MEDIUM_WATER, m_mediumBitmaskTileTypes }
         };
 
-        /**
-         * Elevation values above this value are used as terrain, all others as water.
-         */
-        static constexpr auto WATER_LEVEL{ 0.5 };
-
         static constexpr ImU32 TERRAIN_COL{ IM_COL32(0, 255, 0, 255) };
         static constexpr ImU32 TERRAIN_BUTTON_COL{ IM_COL32(0, 127, 0, 255) };
 
@@ -441,6 +373,11 @@ namespace mdcii::world
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
+
+        /**
+         * Elevation values above this value are used as terrain, all others as water.
+         */
+        inline static float m_water_level{ 0.5f };
 
         /**
          * Generate trees for an island in the south or north.

@@ -75,6 +75,11 @@ void mdcii::world::IslandGenerator::RenderImGui()
         Reset();
     }
 
+    if (ImGui::SliderFloat("Water level", &m_water_level, 0.5f, 0.8f))
+    {
+        Reset();
+    }
+
     ImGui::Separator();
 
     if (ImGui::Button("Noise"))
@@ -134,7 +139,7 @@ void mdcii::world::IslandGenerator::CalcMapTypes(const int32_t t_seed, const flo
                 return t_x * (1.0 - t_t) + t_y * t_t;
             };
 
-            elevations.push_back(lerp(e, 1.0 - d, WATER_LEVEL));
+            elevations.push_back(lerp(e, 1.0 - d, static_cast<double>(m_water_level)));
         }
     }
 
@@ -142,7 +147,7 @@ void mdcii::world::IslandGenerator::CalcMapTypes(const int32_t t_seed, const flo
 
     for (const auto elevation : elevations)
     {
-        elevation > WATER_LEVEL
+        elevation > static_cast<double>(m_water_level)
             ? m_map.push_back(MapType::TERRAIN)
             : m_map.push_back(MapType::WATER);
     }
@@ -432,7 +437,7 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
                     }
                     else
                     {
-                        RenderCharButtonImGui(MapType::INVALID, "?", idx, [this, idx]() {
+                        RenderCharButtonImGui(MapType::SHALLOW_WATER, m_tileTypeChars.at(TileType::SHALLOW), idx, [this, idx]() {
                             UpdateBySelection(idx);
                         });
                     }
@@ -446,7 +451,7 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
                     }
                     else
                     {
-                        RenderCharButtonImGui(MapType::INVALID, "?", idx, [this, idx]() {
+                        RenderCharButtonImGui(MapType::MEDIUM_WATER, m_tileTypeChars.at(TileType::MEDIUM), idx, [this, idx]() {
                             UpdateBySelection(idx);
                         });
                     }
@@ -563,6 +568,22 @@ void mdcii::world::IslandGenerator::RenderEditMenuImGui()
                 if (ImGui::RadioButton(id.c_str(), m_sel_tile_type_button == tileType))
                 {
                     m_sel_tile_type_button = tileType;
+                }
+            }
+            else if (m_selMapType == MapType::MEDIUM_WATER && tileType == TileType::MEDIUM)
+            {
+                const auto id{ std::string(tileChar).append(" ").append(magic_enum::enum_name(TileType::MEDIUM)).append("##").append(magic_enum::enum_name(MapType::MEDIUM_WATER)) };
+                if (ImGui::RadioButton(id.c_str(), m_sel_tile_type_button == TileType::MEDIUM))
+                {
+                    m_sel_tile_type_button = TileType::MEDIUM;
+                }
+            }
+            else if (m_selMapType == MapType::SHALLOW_WATER && tileType == TileType::SHALLOW)
+            {
+                const auto id{ std::string(tileChar).append(" ").append(magic_enum::enum_name(TileType::SHALLOW)).append("##").append(magic_enum::enum_name(MapType::SHALLOW_WATER)) };
+                if (ImGui::RadioButton(id.c_str(), m_sel_tile_type_button == TileType::SHALLOW))
+                {
+                    m_sel_tile_type_button = TileType::SHALLOW;
                 }
             }
         }
@@ -819,11 +840,19 @@ void mdcii::world::IslandGenerator::UpdateBySelection(const int32_t t_index)
 
     if (m_selMapType == MapType::WATER)
     {
-        m_bitmaskValues.at(t_index) = 1023;
+        m_bitmaskValues.at(t_index) = WATER_FLAG;
     }
     else if (m_selMapType == MapType::TERRAIN)
     {
-        m_bitmaskValues.at(t_index) = 0;
+        m_bitmaskValues.at(t_index) = TERRAIN_FLAG;
+    }
+    else if (m_selMapType == MapType::MEDIUM_WATER)
+    {
+        m_bitmaskValues.at(t_index) = MEDIUM_FLAG;
+    }
+    else if (m_selMapType == MapType::SHALLOW_WATER)
+    {
+        m_bitmaskValues.at(t_index) = SHALLOW_FLAG;
     }
     else
     {
@@ -1047,7 +1076,6 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
                     case TileType::CORNER_IN_BR:
                         t_coastTiles.at(idx) = CreateTile(data::BEACH_CORNER_INSIDE_BUILDING_ID, x, y, Rotation::DEG270);
                         break;
-
                     default:
                         t_coastTiles.at(idx) = CreateTile(data::BEACH_BUILDING_ID, x, y, Rotation::DEG0);
                     }
@@ -1072,10 +1100,12 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
                     case TileType::CORNER_OUT_BR:
                         t_coastTiles.at(idx) = CreateTile(data::SHALLOW_TO_MEDIUM_WATER_BUILDING_ID, x, y, Rotation::DEG90);
                         break;
-
-                    default:
-                        t_coastTiles.at(idx) = CreateTile(data::SHALLOW_WATER_BUILDING_ID, x, y, Rotation::DEG0);
+                    default:;
                     }
+                }
+                else
+                {
+                    t_coastTiles.at(idx) = CreateTile(data::SHALLOW_WATER_BUILDING_ID, x, y, Rotation::DEG0);
                 }
             }
             else if (m_map.at(idx) == MapType::MEDIUM_WATER)
@@ -1097,10 +1127,12 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
                     case TileType::CORNER_OUT_BR:
                         t_coastTiles.at(idx) = CreateTile(data::MEDIUM_TO_DEEP_WATER_BUILDING_ID, x, y, Rotation::DEG90);
                         break;
-
-                    default:
-                        t_coastTiles.at(idx) = CreateTile(data::MEDIUM_WATER_BUILDING_ID, x, y, Rotation::DEG0);
+                    default:;
                     }
+                }
+                else
+                {
+                    t_coastTiles.at(idx) = CreateTile(data::MEDIUM_WATER_BUILDING_ID, x, y, Rotation::DEG0);
                 }
             }
             else
