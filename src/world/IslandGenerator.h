@@ -23,6 +23,19 @@
 #include "data/json.hpp"
 
 //-------------------------------------------------
+// Temporarily and for debugging purposes only
+//-------------------------------------------------
+
+#define SAVE_AS_MAP
+//#undef SAVE_AS_MAP
+#ifdef SAVE_AS_MAP
+    #define MAP_WIDTH 64
+    #define MAP_HEIGHT 64
+    #define ISLAND_MAP_X 2
+    #define ISLAND_MAP_Y 2
+#endif
+
+//-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
 

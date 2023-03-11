@@ -616,6 +616,7 @@ void mdcii::world::IslandGenerator::SaveIslandImGui()
     {
         if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Save").c_str()))
         {
+#ifdef SAVE_AS_MAP
             fileName.append(".map");
 
             std::ofstream file;
@@ -623,9 +624,26 @@ void mdcii::world::IslandGenerator::SaveIslandImGui()
             {
                 nlohmann::json json;
 
-                // todo: save island data only for the new *.isl file format
                 json["version"] = Game::VERSION;
-                json["world"] = { { "width", 64 }, { "height", 64 } };
+                json["world"] = { { "width", MAP_WIDTH }, { "height", MAP_HEIGHT } };
+
+                AddIslandJson(json);
+
+                file << json;
+
+                Log::MDCII_LOG_DEBUG("[IslandGenerator::SaveIslandImGui()] The map has been successfully saved in file {}.", fileName);
+
+                saved = true;
+
+                fileName.clear();
+            }
+#else
+            fileName.append(".isl");
+
+            std::ofstream file;
+            if (create_file(Game::RESOURCES_REL_PATH + "island/" + fileName, file))
+            {
+                nlohmann::json json;
 
                 AddIslandJson(json);
 
@@ -637,6 +655,7 @@ void mdcii::world::IslandGenerator::SaveIslandImGui()
 
                 fileName.clear();
             }
+#endif
             else
             {
                 error = true;
@@ -883,15 +902,14 @@ void mdcii::world::IslandGenerator::AddIslandJson(nlohmann::json& t_json)
     nlohmann::json b = nlohmann::json::object();
     nlohmann::json i = nlohmann::json::object();
 
-    i["width"] = m_width;
-    i["height"] = m_height;
-    i["x"] = 2;              // todo: remove island start x position in the world
-    i["y"] = 2;              // todo: remove island start y position in the world
-    i["layers"] = nlohmann::json::array();
-
     CreateTerrainTiles(terrainTiles);
     CreateCoastTiles(coastTiles);
     CreateBuildingsTiles(buildingsTiles);
+
+    i["width"] = m_width;
+    i["height"] = m_height;
+    i["layers"] = nlohmann::json::array();
+
     c["coast"] = coastTiles;
     t["terrain"] = terrainTiles;
     b["buildings"] = buildingsTiles;
@@ -900,7 +918,15 @@ void mdcii::world::IslandGenerator::AddIslandJson(nlohmann::json& t_json)
     i["layers"].push_back(t);
     i["layers"].push_back(b);
 
+#ifdef SAVE_AS_MAP
+    i["x"] = ISLAND_MAP_X;
+    i["y"] = ISLAND_MAP_Y;
     t_json["islands"].push_back(i);
+#else
+    i["x"] = -1;
+    i["y"] = -1;
+    t_json = i;
+#endif
 }
 
 //-------------------------------------------------
