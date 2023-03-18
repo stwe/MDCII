@@ -42,15 +42,12 @@ conanbuildinfo.cmake
 
 !/create.bat
 !/config.ini
+
+!/resources/data/Buildings.json
+!/resources/data/Menus.json
 !/resources/devlog/*
+!/resources/font/DejaVuSansMono.ttf
 !/resources/textures/gfx/*
 !/resources/textures/mgfx/*
 !/resources/textures/sgfx/*
-!/resources/data/Buildings.json
-!/resources/data/ExampleMap.json
-!/resources/data/Menus.json
-!/resources/data/NewWorld.json
-!/resources/data/NoiseWorld.json
-!/resources/data/Savegame.json
-!/resources/font/DejaVuSansMono.ttf
 

@@ -21,11 +21,15 @@
 #include "IslandGenerator.h"
 #include "FastNoiseLite.h"
 #include "MdciiAssert.h"
-#include "MdciiUtils.h"
 #include "Game.h"
 #include "data/Text.h"
 #include "data/BuildingIds.h"
 #include "layer/TerrainLayer.h"
+#ifdef SAVE_AS_MAP
+    #include "file/MapFile.h"
+#else
+    #include "file/IslandFile.h"
+#endif
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -616,43 +620,26 @@ void mdcii::world::IslandGenerator::SaveIslandImGui()
     {
         if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Save").c_str()))
         {
+            std::vector<std::shared_ptr<layer::Tile>> coastTiles;
+            std::vector<std::shared_ptr<layer::Tile>> terrainTiles;
+            CreateTerrainTiles(terrainTiles);
+            CreateCoastTiles(coastTiles);
 #ifdef SAVE_AS_MAP
-            fileName.append(".map");
-
-            std::ofstream file;
-            if (create_file(Game::RESOURCES_REL_PATH + "map/" + fileName, file))
+            file::MapFile mapFile{ fileName };
+            mapFile.AddWorldData(MAP_WIDTH, MAP_HEIGHT);
+            mapFile.AddIsland(ISLAND_MAP_X, ISLAND_MAP_Y, m_width, m_height, terrainTiles, coastTiles);
+            if (mapFile.SaveJsonToFile())
             {
-                nlohmann::json json;
-
-                json["version"] = Game::VERSION;
-                json["world"] = { { "width", MAP_WIDTH }, { "height", MAP_HEIGHT } };
-
-                AddIslandJson(json);
-
-                file << json;
-
-                Log::MDCII_LOG_DEBUG("[IslandGenerator::SaveIslandImGui()] The map has been successfully saved in file {}.", fileName);
-
                 saved = true;
-
                 fileName.clear();
             }
 #else
-            fileName.append(".isl");
-
-            std::ofstream file;
-            if (create_file(Game::RESOURCES_REL_PATH + "island/" + fileName, file))
+            file::IslandFile islandFile{ fileName };
+            islandFile.AddStartPosition(-1, -1);
+            islandFile.AddData(m_width, m_height, terrainTiles, coastTiles);
+            if (islandFile.SaveJsonToFile())
             {
-                nlohmann::json json;
-
-                AddIslandJson(json);
-
-                file << json;
-
-                Log::MDCII_LOG_DEBUG("[IslandGenerator::SaveIslandImGui()] The island has been successfully saved in file {}.", fileName);
-
                 saved = true;
-
                 fileName.clear();
             }
 #endif
@@ -883,50 +870,6 @@ void mdcii::world::IslandGenerator::UpdateBySelection(const int32_t t_index)
             }
         }
     }
-}
-
-//-------------------------------------------------
-// Json
-//-------------------------------------------------
-
-void mdcii::world::IslandGenerator::AddIslandJson(nlohmann::json& t_json)
-{
-    Log::MDCII_LOG_DEBUG("[IslandGenerator::AddIslandJson()] Adds Json values for an new island.");
-
-    std::vector<std::shared_ptr<layer::Tile>> coastTiles;
-    std::vector<std::shared_ptr<layer::Tile>> terrainTiles;
-    std::vector<std::shared_ptr<layer::Tile>> buildingsTiles;
-
-    nlohmann::json c = nlohmann::json::object();
-    nlohmann::json t = nlohmann::json::object();
-    nlohmann::json b = nlohmann::json::object();
-    nlohmann::json i = nlohmann::json::object();
-
-    CreateTerrainTiles(terrainTiles);
-    CreateCoastTiles(coastTiles);
-    CreateBuildingsTiles(buildingsTiles);
-
-    i["width"] = m_width;
-    i["height"] = m_height;
-    i["layers"] = nlohmann::json::array();
-
-    c["coast"] = coastTiles;
-    t["terrain"] = terrainTiles;
-    b["buildings"] = buildingsTiles;
-
-    i["layers"].push_back(c);
-    i["layers"].push_back(t);
-    i["layers"].push_back(b);
-
-#ifdef SAVE_AS_MAP
-    i["x"] = ISLAND_MAP_X;
-    i["y"] = ISLAND_MAP_Y;
-    t_json["islands"].push_back(i);
-#else
-    i["x"] = -1;
-    i["y"] = -1;
-    t_json = i;
-#endif
 }
 
 //-------------------------------------------------
@@ -1165,19 +1108,6 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
             {
                 t_coastTiles.at(idx) = CreateTile(data::DEEP_WATER_BUILDING_ID, x, y, Rotation::DEG0);
             }
-        }
-    }
-}
-
-void mdcii::world::IslandGenerator::CreateBuildingsTiles(std::vector<std::shared_ptr<layer::Tile>>& t_buildingsTiles)
-{
-    Log::MDCII_LOG_DEBUG("[IslandGenerator::CreateBuildingsTiles()] Create building tiles.");
-
-    for (auto y{ 0 }; y < m_height; ++y)
-    {
-        for (auto x{ 0 }; x < m_width; ++x)
-        {
-            t_buildingsTiles.emplace_back(std::make_unique<layer::Tile>());
         }
     }
 }

@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <unordered_set>
-#include <magic_enum.hpp>
 #include "data/json.hpp"
 
 //-------------------------------------------------
@@ -556,12 +554,6 @@ namespace mdcii::world
         void UpdateBySelection(int32_t t_index);
 
         //-------------------------------------------------
-        // Json
-        //-------------------------------------------------
-
-        void AddIslandJson(nlohmann::json& t_json);
-
-        //-------------------------------------------------
         // Tiles
         //-------------------------------------------------
 
@@ -578,13 +570,6 @@ namespace mdcii::world
          * @param t_coastTiles The Tile objects.
          */
         void CreateCoastTiles(std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles);
-
-        /**
-         * Creates Tile objects for the BuildingsLayer.
-         *
-         * @param t_buildingsTiles The Tile objects.
-         */
-        static void CreateBuildingsTiles(std::vector<std::shared_ptr<layer::Tile>>& t_buildingsTiles);
 
         /**
          * Creates a Tile.
