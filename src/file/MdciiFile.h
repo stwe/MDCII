@@ -37,6 +37,11 @@ namespace mdcii::file
         //-------------------------------------------------
 
         /**
+         * The name of the file.
+         */
+        std::string fileName;
+
+        /**
          * The current Json value.
          */
         nlohmann::json json;
@@ -62,20 +67,32 @@ namespace mdcii::file
         virtual ~MdciiFile() noexcept;
 
         //-------------------------------------------------
-        // Save
+        // Save && load
         //-------------------------------------------------
 
         /**
          * Saves the Json value in a file.
+         * If the file already exists, the method returns false.
          *
          * @return True if success or false if error while saving.
          */
         [[nodiscard]] bool SaveJsonToFile();
 
+        /**
+         * Loads the Json value from a file. The method checks whether the file exists.
+         * If the file doesn't exist, the method returns false.
+         *
+         * @return True if success or false if error while loading.
+         */
+        [[nodiscard]] bool LoadJsonFromFile();
+
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
 
+        /**
+         * Clears the content of the current Json value.
+         */
         void ClearJson();
 
     protected:
@@ -86,11 +103,6 @@ namespace mdcii::file
         //-------------------------------------------------
 
         /**
-         * The name of the file.
-         */
-        std::string m_fileName;
-
-        /**
          * Init flag.
          */
         bool m_initialized{ false };
@@ -99,6 +111,7 @@ namespace mdcii::file
         // Override
         //-------------------------------------------------
 
+        [[nodiscard]] virtual bool CheckFileFormat() const = 0;
         [[nodiscard]] virtual std::string GetFileExtension() const = 0;
         [[nodiscard]] virtual std::string GetRelPath() const = 0;
 

@@ -392,6 +392,7 @@ void mdcii::world::World::Init()
     tileAtlas = std::make_unique<TileAtlas>();
     terrainRenderer = std::make_unique<renderer::TerrainRenderer>(context, tileAtlas);
 
+    // todo: MapFile class
     nlohmann::json j = read_json_from_file(m_mapFilePath);
 
     if (!j.contains("version") || !j.contains("world") || !j.contains("islands"))

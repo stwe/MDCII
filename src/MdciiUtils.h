@@ -50,24 +50,6 @@ namespace mdcii
     [[nodiscard]] nlohmann::json read_json_from_file(const std::string& t_filePath);
 
     /**
-     * Reads and deserialize a Json file.
-     *
-     * @param t_filePath The path to the Json file.
-     *
-     * @return The Json value.
-     */
-    [[nodiscard]] nlohmann::json read_world_json_from_file(const std::string& t_filePath);
-
-    /**
-     * Reads and deserialize a Json file.
-     *
-     * @param t_filePath The path to the Json file.
-     *
-     * @return The Json value.
-     */
-    [[nodiscard]] nlohmann::json read_islands_json_from_file(const std::string& t_filePath);
-
-    /**
      * Searches for files in the specified path with a given extension.
      *
      * @param t_relPath The relative path to the RESOURCES_REL_PATH.
@@ -83,7 +65,7 @@ namespace mdcii
      * @param t_fileName The name of the file.
      * @param t_file The opened file.
      *
-     * @return True or false if error while creating (e.g. if the file already exists).
+     * @return True if success or false if error while creating (e.g. if the file already exists).
      */
     [[nodiscard]] bool create_file(const std::string& t_fileName, std::ofstream& t_file);
 

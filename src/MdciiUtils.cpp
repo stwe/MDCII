@@ -53,16 +53,6 @@ nlohmann::json mdcii::read_json_from_file(const std::string& t_filePath)
     return j;
 }
 
-nlohmann::json mdcii::read_world_json_from_file(const std::string& t_filePath)
-{
-    return nlohmann::json();
-}
-
-nlohmann::json mdcii::read_islands_json_from_file(const std::string& t_filePath)
-{
-    return nlohmann::json();
-}
-
 std::vector<std::string> mdcii::get_files_list(const std::string& t_relPath, const std::string& t_extension)
 {
     std::vector<std::string> results;

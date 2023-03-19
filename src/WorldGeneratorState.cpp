@@ -26,6 +26,7 @@
 #include "ogl/Window.h"
 #include "state/StateStack.h"
 #include "data/Text.h"
+#include "file/MapFile.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -127,6 +128,8 @@ void mdcii::WorldGeneratorState::Init()
 
 void mdcii::WorldGeneratorState::RenderIslandsImGui()
 {
+    static bool saved{ false };
+
     ImGui::SliderInt("Island start x", &m_map_x, 0, m_world_width - m_islandWidth - 1);
     ImGui::SliderInt("Island start y", &m_map_y, 0, m_world_height - m_islandHeight - 1);
 
@@ -134,7 +137,29 @@ void mdcii::WorldGeneratorState::RenderIslandsImGui()
     {
         Log::MDCII_LOG_DEBUG("[WorldGeneratorState::RenderIslandsImGui()] Save data.");
 
-        // todo: eine Map Datei erstellen mit den Daten der Insel
+
+        ////////////////////////////////////////////
+
+        // todo: hardcoded
+        file::MapFile newMapFile{ "test" };
+        newMapFile.AddWorldData(128, 128);
+        if (newMapFile.AddIslandFromFile(1, 1, "Island24x24") && newMapFile.AddIslandFromFile(30, 10, "Island36x28"))
+        {
+            saved = newMapFile.SaveJsonToFile();
+        }
+        else
+        {
+            saved = false;
+        }
+
+        ////////////////////////////////////////////
+    }
+
+    if (saved)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveSuccess").c_str());
+        ImGui::PopStyleColor();
     }
 }
 

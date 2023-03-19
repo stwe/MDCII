@@ -77,8 +77,7 @@ namespace mdcii::file
             const std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles
         );
 
-        // todo
-        void AddIslandFromFile(const std::string& t_fileName);
+        [[nodiscard]] bool AddIslandFromFile(int32_t t_startMapX, int32_t t_startMapY, const std::string& t_islandFileName);
 
     protected:
 
@@ -87,6 +86,7 @@ namespace mdcii::file
         // Override
         //-------------------------------------------------
 
+        [[nodiscard]] bool CheckFileFormat() const override;
         [[nodiscard]] std::string GetFileExtension() const override;
         [[nodiscard]] std::string GetRelPath() const override;
     };

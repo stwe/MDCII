@@ -61,14 +61,45 @@ void mdcii::file::MapFile::AddIsland(
     json["islands"].push_back(islandJson);
 }
 
-void mdcii::file::MapFile::AddIslandFromFile(const std::string& t_fileName)
+bool mdcii::file::MapFile::AddIslandFromFile(const int32_t t_startMapX, const int32_t t_startMapY, const std::string& t_islandFileName)
 {
-    // todo
+    if (IslandFile islandFile{ t_islandFileName }; islandFile.LoadJsonFromFile())
+    {
+        islandFile.AddStartPosition(t_startMapX, t_startMapY);
+        json["islands"].push_back(islandFile.json);
+
+        return true;
+    }
+
+    return false;
+
+    /*
+    // newMapFile.AddIslandFromFile(1, 1, Game::RESOURCES_REL_PATH + "island/" + "Island24x24.isl");
+    nlohmann::json j = read_json_from_file(t_islandFileName); // todo throws exception
+    j["x"] = t_startMapX;
+    j["y"] = t_startMapY;
+    json["islands"].push_back(j);
+    */
 }
 
 //-------------------------------------------------
 // Override
 //-------------------------------------------------
+
+bool mdcii::file::MapFile::CheckFileFormat() const
+{
+    Log::MDCII_LOG_DEBUG("[MapFile::CheckFileFormat()] Check file format for map file {}.", fileName);
+
+    if (json.contains("version") && json.contains("world") && json.contains("islands"))
+    {
+        Log::MDCII_LOG_DEBUG("[MapFile::CheckFileFormat()] The file {} is a valid map file.", fileName);
+        return true;
+    }
+
+    Log::MDCII_LOG_WARN("[MapFile::CheckFileFormat()] Invalid map file format found in file {}.", fileName);
+
+    return false;
+}
 
 std::string mdcii::file::MapFile::GetFileExtension() const
 {

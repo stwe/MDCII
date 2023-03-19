@@ -26,11 +26,11 @@
 //-------------------------------------------------
 
 mdcii::file::MdciiFile::MdciiFile(std::string t_fileName)
-    : m_fileName{ std::move(t_fileName) }
+    : fileName{ std::move(t_fileName) }
 {
     Log::MDCII_LOG_DEBUG("[MdciiFile::MdciiFile()] Create MdciiFile.");
 
-    MDCII_ASSERT(!m_fileName.empty(), "[MdciiFile::MdciiFile()] Invalid file name.")
+    MDCII_ASSERT(!fileName.empty(), "[MdciiFile::MdciiFile()] Invalid file name.")
 }
 
 mdcii::file::MdciiFile::~MdciiFile() noexcept
@@ -39,24 +39,44 @@ mdcii::file::MdciiFile::~MdciiFile() noexcept
 }
 
 //-------------------------------------------------
-// Save
+// Save && load
 //-------------------------------------------------
 
 bool mdcii::file::MdciiFile::SaveJsonToFile()
 {
     Init();
 
-    Log::MDCII_LOG_DEBUG("[MdciiFile::SaveJsonToFile()] Start saving Json value to file {}.", m_fileName);
+    Log::MDCII_LOG_DEBUG("[MdciiFile::SaveJsonToFile()] Start saving Json value to file {}.", fileName);
 
-    if (std::ofstream file; create_file(Game::RESOURCES_REL_PATH + GetRelPath() + m_fileName, file))
+    if (std::ofstream file; create_file(fileName, file))
     {
         file << json;
-        Log::MDCII_LOG_DEBUG("[MdciiFile::SaveJsonToFile()] The Json value has been successfully saved in file {}.", m_fileName);
+        Log::MDCII_LOG_DEBUG("[MdciiFile::SaveJsonToFile()] The Json value has been successfully saved in file {}.", fileName);
 
         return true;
     }
 
-    Log::MDCII_LOG_WARN("[MdciiFile::SaveJsonToFile()] An error occurred while saving Json value to file {}.", m_fileName);
+    Log::MDCII_LOG_WARN("[MdciiFile::SaveJsonToFile()] An error occurred while saving Json value to file {}.", fileName);
+
+    return false;
+}
+
+bool mdcii::file::MdciiFile::LoadJsonFromFile()
+{
+    Init();
+
+    Log::MDCII_LOG_DEBUG("[MdciiFile::LoadJsonFromFile()] Start loading Json value from file {}.", fileName);
+
+    if (std::filesystem::exists(fileName))
+    {
+        Log::MDCII_LOG_DEBUG("[MdciiFile::LoadJsonFromFile()] The {} file exists.", fileName);
+
+        json = read_json_from_file(fileName);
+
+        return CheckFileFormat();
+    }
+
+    Log::MDCII_LOG_WARN("[MdciiFile::LoadJsonFromFile()] File {} does not exist.", fileName);
 
     return false;
 }
@@ -80,7 +100,7 @@ void mdcii::file::MdciiFile::Init()
     {
         Log::MDCII_LOG_DEBUG("[MdciiFile::Init()] Initialize class.");
 
-        m_fileName.append(GetFileExtension());
+        fileName = Game::RESOURCES_REL_PATH + GetRelPath() + fileName.append(GetFileExtension());
         m_initialized = true;
     }
 }

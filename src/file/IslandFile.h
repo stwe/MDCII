@@ -91,6 +91,7 @@ namespace mdcii::file
         // Override
         //-------------------------------------------------
 
+        [[nodiscard]] bool CheckFileFormat() const override;
         [[nodiscard]] std::string GetFileExtension() const override;
         [[nodiscard]] std::string GetRelPath() const override;
     };

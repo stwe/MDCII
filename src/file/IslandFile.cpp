@@ -94,6 +94,21 @@ void mdcii::file::IslandFile::AddData(
 // Override
 //-------------------------------------------------
 
+bool mdcii::file::IslandFile::CheckFileFormat() const
+{
+    Log::MDCII_LOG_DEBUG("[IslandFile::CheckFileFormat()] Check file format for island file {}.", fileName);
+
+    if (json.contains("width") && json.contains("height") && json.contains("x") && json.contains("y") && json.contains("layers"))
+    {
+        Log::MDCII_LOG_DEBUG("[IslandFile::CheckFileFormat()] The file {} is a valid island file.", fileName);
+        return true;
+    }
+
+    Log::MDCII_LOG_WARN("[IslandFile::CheckFileFormat()] Invalid island file format found in file {}.", fileName);
+
+    return false;
+}
+
 std::string mdcii::file::IslandFile::GetFileExtension() const
 {
     return ".isl";
