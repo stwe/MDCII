@@ -9,6 +9,7 @@
 /install/TileAtlasCreator/out
 /install/TileAtlasCreator/target
 build
+cmake
 
 # Files
 *.sln
