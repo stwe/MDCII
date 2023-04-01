@@ -140,6 +140,14 @@ namespace mdcii
      */
     void save_file_button(const char* t_label, std::string* t_str);
 
+    /**
+     * A ListBox showing files.
+     *
+     * @param t_files The files to display.
+     * @param t_currentItem The index of the currently selected file.
+     */
+    void file_chooser(std::vector<std::string>& t_files, int* t_currentItem);
+
     //-------------------------------------------------
     // ImGui helper
     //-------------------------------------------------

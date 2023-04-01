@@ -21,7 +21,7 @@
 #include "state/State.h"
 #include "file/OriginalResourcesManager.h"
 #include "renderer/RenderUtils.h"
-#include "world/World.h"
+#include "world/GameWorld.h"
 #include "world/Terrain.h"
 #include "ogl/buffer/Ssbo.h"
 #include "data/BuildingIds.h"
@@ -56,34 +56,16 @@ void mdcii::layer::WorldLayer::CreateTiles()
     {
         for (auto worldX{ 0 }; worldX < m_world->width; ++worldX)
         {
-            if (m_world->terrain->IsWorldPositionInDeepWater(worldX, worldY))
+            if (auto const* gameWorld{ dynamic_cast<world::GameWorld*>(m_world) }; gameWorld != nullptr)
             {
-                auto tile{ std::make_unique<Tile>() };
-
-                tile->worldXDeg0 = worldX;
-                tile->worldYDeg0 = worldY;
-                tile->buildingId = data::DEEP_WATER_BUILDING_ID;
-                tile->rotation = world::Rotation::DEG0;
-
-                // pre-calculate the position on the screen for each zoom and each rotation
-                magic_enum::enum_for_each<world::Zoom>([this, &tile, &worldX, &worldY](const world::Zoom t_zoom) {
-                    std::array<glm::vec2, world::NR_OF_ROTATIONS> positions{};
-
-                    positions[0] = m_world->WorldToScreen(worldX, worldY, t_zoom, world::Rotation::DEG0);
-                    positions[1] = m_world->WorldToScreen(worldX, worldY, t_zoom, world::Rotation::DEG90);
-                    positions[2] = m_world->WorldToScreen(worldX, worldY, t_zoom, world::Rotation::DEG180);
-                    positions[3] = m_world->WorldToScreen(worldX, worldY, t_zoom, world::Rotation::DEG270);
-
-                    tile->screenPositions.at(magic_enum::enum_integer(t_zoom)) = positions;
-                });
-
-                // pre-calculate the index for each rotation for sorting
-                tile->indices[0] = GetMapIndex(worldX, worldY, world::Rotation::DEG0);
-                tile->indices[1] = GetMapIndex(worldX, worldY, world::Rotation::DEG90);
-                tile->indices[2] = GetMapIndex(worldX, worldY, world::Rotation::DEG180);
-                tile->indices[3] = GetMapIndex(worldX, worldY, world::Rotation::DEG270);
-
-                tiles.emplace_back(std::move(tile));
+                if (gameWorld->terrain->IsWorldPositionInDeepWater(worldX, worldY))
+                {
+                    AddDeepWaterTile(worldX, worldY);
+                }
+            }
+            else
+            {
+                AddDeepWaterTile(worldX, worldY);
             }
         }
     }
@@ -241,6 +223,36 @@ void mdcii::layer::WorldLayer::StoreBuildingIdsInGpu()
 //-------------------------------------------------
 // Helper
 //-------------------------------------------------
+
+void mdcii::layer::WorldLayer::AddDeepWaterTile(const int32_t t_x, const int32_t t_y)
+{
+    auto tile{ std::make_unique<Tile>() };
+
+    tile->worldXDeg0 = t_x;
+    tile->worldYDeg0 = t_y;
+    tile->buildingId = data::DEEP_WATER_BUILDING_ID;
+    tile->rotation = world::Rotation::DEG0;
+
+    // pre-calculate the position on the screen for each zoom and each rotation
+    magic_enum::enum_for_each<world::Zoom>([this, &tile, t_x, t_y](const world::Zoom t_zoom) {
+        std::array<glm::vec2, world::NR_OF_ROTATIONS> positions{};
+
+        positions[0] = m_world->WorldToScreen(t_x, t_y, t_zoom, world::Rotation::DEG0);
+        positions[1] = m_world->WorldToScreen(t_x, t_y, t_zoom, world::Rotation::DEG90);
+        positions[2] = m_world->WorldToScreen(t_x, t_y, t_zoom, world::Rotation::DEG180);
+        positions[3] = m_world->WorldToScreen(t_x, t_y, t_zoom, world::Rotation::DEG270);
+
+        tile->screenPositions.at(magic_enum::enum_integer(t_zoom)) = positions;
+    });
+
+    // pre-calculate the index for each rotation for sorting
+    tile->indices[0] = GetMapIndex(t_x, t_y, world::Rotation::DEG0);
+    tile->indices[1] = GetMapIndex(t_x, t_y, world::Rotation::DEG90);
+    tile->indices[2] = GetMapIndex(t_x, t_y, world::Rotation::DEG180);
+    tile->indices[3] = GetMapIndex(t_x, t_y, world::Rotation::DEG270);
+
+    tiles.emplace_back(std::move(tile));
+}
 
 glm::mat4 mdcii::layer::WorldLayer::CreateModelMatrix(const layer::Tile& t_tile, const world::Zoom t_zoom, const world::Rotation t_rotation) const
 {

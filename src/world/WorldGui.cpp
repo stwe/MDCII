@@ -18,7 +18,7 @@
 
 #include <imgui.h>
 #include "WorldGui.h"
-#include "World.h"
+#include "GameWorld.h"
 #include "Terrain.h"
 #include "Island.h"
 #include "MdciiAssert.h"
@@ -142,54 +142,61 @@ void mdcii::world::WorldGui::ZoomGui() const
 
 void mdcii::world::WorldGui::ShowActionsGui()
 {
-    magic_enum::enum_for_each<World::Action>([this](const auto t_val) {
-        constexpr World::Action action{ t_val };
+    magic_enum::enum_for_each<GameWorld::Action>([this](const auto t_val) {
+        constexpr GameWorld::Action action{ t_val };
         constexpr int i{ magic_enum::enum_integer(action) };
 
-        if (m_world->actionButtons[i])
+        if (auto* gameWorld{ dynamic_cast<GameWorld*>(m_world) }; gameWorld != nullptr)
         {
-            ImGui::PushID(i);
-            ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.6f, 0.6f)));
-            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.7f, 0.7f)));
-            ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.8f, 0.8f)));
-
-            ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), World::ACTION_NAMES[i].data()).c_str());
-            if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && action != m_world->currentAction)
+            if (gameWorld->actionButtons[i])
             {
-                m_world->actionButtons[i] = !m_world->actionButtons[i];
+                ImGui::PushID(i);
+                ImGui::PushStyleColor(ImGuiCol_Button, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.6f, 0.6f)));
+                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.7f, 0.7f)));
+                ImGui::PushStyleColor(ImGuiCol_ButtonActive, static_cast<ImVec4>(ImColor::HSV(7.0f, 0.8f, 0.8f)));
+
+                ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), GameWorld::ACTION_NAMES[i].data()).c_str());
+                if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && action != gameWorld->currentAction)
+                {
+                    gameWorld->actionButtons[i] = !gameWorld->actionButtons[i];
+                }
+
+                ImGui::PopStyleColor(3);
+                ImGui::PopID();
+
+                ImGui::SameLine();
             }
+            else
+            {
+                if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), GameWorld::ACTION_NAMES[i].data()).c_str()))
+                {
+                    std::fill(gameWorld->actionButtons.begin(), gameWorld->actionButtons.end(), false);
 
-            ImGui::PopStyleColor(3);
-            ImGui::PopID();
+                    // reset current selected island && selected tile
+                    if (gameWorld->terrain->currentSelectedIsland && gameWorld->terrain->currentSelectedIsland->currentSelectedTile)
+                    {
+                        gameWorld->terrain->currentSelectedIsland->currentSelectedTile = nullptr;
+                        gameWorld->terrain->currentSelectedIsland = nullptr;
+                    }
 
-            ImGui::SameLine();
+                    // reset selected building
+                    if (action != GameWorld::Action::BUILD && selectedBuildingTile.HasBuilding())
+                    {
+                        selectedBuildingTile.Reset();
+                    }
+
+                    gameWorld->actionButtons[i] = true;
+                    gameWorld->currentAction = action;
+
+                    Log::MDCII_LOG_DEBUG("[WorldGui::ShowActionsGui()] Change to action: {}", magic_enum::enum_name(gameWorld->currentAction));
+                }
+
+                ImGui::SameLine();
+            }
         }
         else
         {
-            if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), World::ACTION_NAMES[i].data()).c_str()))
-            {
-                std::fill(m_world->actionButtons.begin(), m_world->actionButtons.end(), false);
-
-                // reset current selected island && selected tile
-                if (m_world->terrain->currentSelectedIsland && m_world->terrain->currentSelectedIsland->currentSelectedTile)
-                {
-                    m_world->terrain->currentSelectedIsland->currentSelectedTile = nullptr;
-                    m_world->terrain->currentSelectedIsland = nullptr;
-                }
-
-                // reset selected building
-                if (action != world::World::Action::BUILD && selectedBuildingTile.HasBuilding())
-                {
-                    selectedBuildingTile.Reset();
-                }
-
-                m_world->actionButtons[i] = true;
-                m_world->currentAction = action;
-
-                Log::MDCII_LOG_DEBUG("[WorldGui::ShowActionsGui()] Change to action: {}", magic_enum::enum_name(m_world->currentAction));
-            }
-
-            ImGui::SameLine();
+            ImGui::Text("Menu not available.");
         }
     });
 
@@ -214,89 +221,97 @@ void mdcii::world::WorldGui::ShowBuildingsGui()
 
 void mdcii::world::WorldGui::SaveGameGui()
 {
-    ImGui::Separator();
-
-    static bool error{ false };
-    static bool saved{ false };
-    static std::string fileName;
-    save_file_button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame").c_str(), &fileName);
-
-    if (!fileName.empty())
+    if (auto const* gameWorld{ dynamic_cast<GameWorld*>(m_world) }; gameWorld != nullptr)
     {
-        if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Save").c_str()))
+        ImGui::Separator();
+
+        static bool error{ false };
+        static bool saved{ false };
+        static std::string fileName;
+        save_file_button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame").c_str(), &fileName);
+
+        if (!fileName.empty())
         {
-            fileName.append(".sav");
-
-            std::ofstream file;
-            if (create_file(Game::RESOURCES_REL_PATH + "save/" + fileName, file))
+            if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Save").c_str()))
             {
-                nlohmann::json json;
+                // todo: savegame file class
+                fileName.append(".sav");
 
-                // version
-                json["version"] = Game::VERSION;
-
-                // world
-                json["world"] = *m_world;
-
-                // islands
-                auto islandsJson = nlohmann::json::array();
-                for (const auto& island : m_world->terrain->islands)
+                std::ofstream file;
+                if (create_file(Game::RESOURCES_REL_PATH + "save/" + fileName, file))
                 {
-                    // island
-                    auto islandJson = nlohmann::json::object();
-                    islandJson = *island;
-                    islandJson["layers"] = nlohmann::json::array();
+                    nlohmann::json json;
 
-                    // coast
-                    auto c = nlohmann::json::object();
-                    c["coast"] = island->coastLayer->tiles;
+                    // version
+                    json["version"] = Game::VERSION;
 
-                    // terrain
-                    auto t = nlohmann::json::object();
-                    t["terrain"] = island->terrainLayer->tiles;
+                    // world
+                    json["world"] = *gameWorld;
 
-                    // buildings
-                    auto b = nlohmann::json::object();
-                    b["buildings"] = island->buildingsLayer->tiles;
+                    // islands
+                    auto islandsJson = nlohmann::json::array();
+                    for (const auto& island : gameWorld->terrain->islands)
+                    {
+                        // island
+                        auto islandJson = nlohmann::json::object();
+                        islandJson = *island;
+                        islandJson["layers"] = nlohmann::json::array();
 
-                    islandJson["layers"].push_back(c);
-                    islandJson["layers"].push_back(t);
-                    islandJson["layers"].push_back(b);
+                        // coast
+                        auto c = nlohmann::json::object();
+                        c["coast"] = island->coastLayer->tiles;
 
-                    islandsJson.push_back(islandJson);
+                        // terrain
+                        auto t = nlohmann::json::object();
+                        t["terrain"] = island->terrainLayer->tiles;
+
+                        // buildings
+                        auto b = nlohmann::json::object();
+                        b["buildings"] = island->buildingsLayer->tiles;
+
+                        islandJson["layers"].push_back(c);
+                        islandJson["layers"].push_back(t);
+                        islandJson["layers"].push_back(b);
+
+                        islandsJson.push_back(islandJson);
+                    }
+
+                    json["islands"] = islandsJson;
+
+                    file << json;
+
+                    Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] The game has been successfully saved in file {}.", fileName);
+
+                    saved = true;
+
+                    fileName.clear();
                 }
-
-                json["islands"] = islandsJson;
-
-                file << json;
-
-                Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] The game has been successfully saved in file {}.", fileName);
-
-                saved = true;
-
-                fileName.clear();
-            }
-            else
-            {
-                error = true;
-                saved = false;
-                fileName.clear();
+                else
+                {
+                    error = true;
+                    saved = false;
+                    fileName.clear();
+                }
             }
         }
-    }
 
-    if (error)
-    {
-        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveError").c_str());
-        ImGui::PopStyleColor();
-    }
+        if (error)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+            ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveError").c_str());
+            ImGui::PopStyleColor();
+        }
 
-    if (saved)
+        if (saved)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+            ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveSuccess").c_str());
+            ImGui::PopStyleColor();
+        }
+    }
+    else
     {
-        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
-        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveSuccess").c_str());
-        ImGui::PopStyleColor();
+        ImGui::Text("Menu not available.");
     }
 }
 

@@ -54,9 +54,9 @@ namespace mdcii::world
     //-------------------------------------------------
 
     /**
-     * Forward declaration class World.
+     * Forward declaration class GameWorld.
      */
-    class World;
+    class GameWorld;
 
     /**
      * Forward declaration class Island.
@@ -96,9 +96,9 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * The parent World object.
+         * The parent GameWorld object.
          */
-        World* world{ nullptr };
+        GameWorld* gameWorld{ nullptr };
 
         /**
          * The Island objects of the Terrain.
@@ -130,9 +130,9 @@ namespace mdcii::world
          * Constructs a new Terrain object.
          *
          * @param t_context Access to shared objects.
-         * @param t_world The parent World object.
+         * @param t_gameWorld The parent GameWorld object.
          */
-        Terrain(std::shared_ptr<state::Context> t_context, World* t_world);
+        Terrain(std::shared_ptr<state::Context> t_context, GameWorld* t_gameWorld);
 
         Terrain(const Terrain& t_other) = delete;
         Terrain(Terrain&& t_other) noexcept = delete;
@@ -201,7 +201,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * To have access to the shared objects (Window, Camera, Original-Assets).
+         * To have access to the shared objects (Window, Camera, Original-Assets, Mdcii-Assets).
          */
         std::shared_ptr<state::Context> m_context;
 

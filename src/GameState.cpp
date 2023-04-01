@@ -20,11 +20,12 @@
 #include "GameState.h"
 #include "MdciiAssert.h"
 #include "MdciiUtils.h"
-#include "ogl/OpenGL.h"
+#include "Game.h"
 #include "ogl/Window.h"
-#include "world/World.h"
+#include "world/GameWorld.h"
 #include "state/StateStack.h"
 #include "data/Text.h"
+#include "file/MdciiResourcesManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -36,8 +37,6 @@ mdcii::GameState::GameState(const state::StateId t_id, std::shared_ptr<state::Co
     Log::MDCII_LOG_DEBUG("[GameState::GameState()] Create GameState.");
 
     MDCII_ASSERT(context, "[GameState::GameState()] Null pointer.")
-
-    Init();
 }
 
 mdcii::GameState::~GameState() noexcept
@@ -55,23 +54,23 @@ void mdcii::GameState::Input()
     if (context->window->IsKeyPressed(GLFW_KEY_ESCAPE))
     {
         Log::MDCII_LOG_DEBUG("[GameState::Input()] Starts POP GameState.");
-        context->stateStack->PopState(GetStateId());
+        context->stateStack->PopState(id);
     }
 }
 
 void mdcii::GameState::Update()
 {
-    if (m_world)
+    if (m_gameWorld)
     {
-        m_world->Update();
+        m_gameWorld->Update();
     }
 }
 
 void mdcii::GameState::Render()
 {
-    if (m_world)
+    if (m_gameWorld)
     {
-        m_world->Render();
+        m_gameWorld->Render();
     }
 }
 
@@ -79,17 +78,17 @@ void mdcii::GameState::RenderImGui()
 {
     ogl::Window::ImGuiBegin();
 
-    if (!m_world)
+    if (!m_gameWorld)
     {
         begin_centered("GameState");
 
-        switch (GetStateId())
+        switch (id)
         {
         case state::StateId::NEW_GAME:
-            RenderFileChooser(m_mapFiles);
+            RenderFileChooser(context->mdciiResourcesManager->mapFiles);
             break;
         case state::StateId::LOADED_GAME:
-            RenderFileChooser(m_savedGameFiles);
+            RenderFileChooser(context->mdciiResourcesManager->saveGameFiles);
             break;
         default:;
         }
@@ -97,7 +96,7 @@ void mdcii::GameState::RenderImGui()
         auto bt{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "BackTo") };
         if (ImGui::Button(bt.append(" ").append(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "MainMenu")).c_str()))
         {
-            context->stateStack->PopState(GetStateId());
+            context->stateStack->PopState(id);
             context->stateStack->PushState(state::StateId::MAIN_MENU);
         }
 
@@ -105,7 +104,7 @@ void mdcii::GameState::RenderImGui()
     }
     else
     {
-        m_world->RenderImGui();
+        m_gameWorld->RenderImGui();
     }
 
     ogl::Window::ImGuiEnd();
@@ -125,30 +124,10 @@ void mdcii::GameState::RenderFileChooser(std::vector<std::string>& t_files)
     }
     else
     {
-        ImGui::ListBox(
-            data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ChooseFile").c_str(),
-            &fileIndex,
-            vector_getter,
-            &t_files,
-            static_cast<int32_t>(t_files.size())
-        );
+        file_chooser(t_files, &fileIndex);
         if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "LoadFile").c_str()))
         {
-            m_world = std::make_shared<world::World>(t_files.at(fileIndex), context, GetStateId());
+            m_gameWorld = std::make_shared<world::GameWorld>(context, id, t_files.at(fileIndex));
         }
     }
-}
-
-//-------------------------------------------------
-// Init
-//-------------------------------------------------
-
-void mdcii::GameState::Init()
-{
-    Log::MDCII_LOG_DEBUG("[GameState::Init()] Initializing game state...");
-
-    m_mapFiles = get_files_list("map/", MAP_FILE_EXTENSION);
-    m_savedGameFiles = get_files_list("save/", SAVE_GAME_FILE_EXTENSION);
-
-    Log::MDCII_LOG_DEBUG("[GameState::Init()] The game state was successfully initialized.");
 }

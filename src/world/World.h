@@ -18,32 +18,13 @@
 
 #pragma once
 
-#include <magic_enum.hpp>
+#include <string>
+#include <memory>
 #include <glm/vec2.hpp>
-#include "event/EventManager.h"
-#include "data/json.hpp"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
-
-namespace mdcii::layer
-{
-    /**
-     * Forward declaration enum class LayerType.
-     */
-    enum class LayerType;
-
-    /**
-     * Forward declaration class WorldLayer.
-     */
-    class WorldLayer;
-
-    /**
-     * Forward declaration class WorldGridLayer.
-     */
-    class WorldGridLayer;
-}
 
 namespace mdcii::state
 {
@@ -58,19 +39,6 @@ namespace mdcii::state
     enum class StateId;
 }
 
-namespace mdcii::renderer
-{
-    /**
-     * Forward declaration class TerrainRenderer.
-     */
-    class TerrainRenderer;
-
-    /**
-     * Forward declaration class GridRenderer.
-     */
-    class GridRenderer;
-}
-
 //-------------------------------------------------
 // World
 //-------------------------------------------------
@@ -82,19 +50,9 @@ namespace mdcii::world
     //-------------------------------------------------
 
     /**
-     * Forward declaration class Terrain.
-     */
-    class Terrain;
-
-    /**
      * Forward declaration enum class Rotation.
      */
     enum class Rotation;
-
-    /**
-     * Forward declaration enum class ChangeRotation.
-     */
-    enum class ChangeRotation;
 
     /**
      * Forward declaration enum class Zoom.
@@ -102,19 +60,14 @@ namespace mdcii::world
     enum class Zoom;
 
     /**
+     * Forward declaration enum class ChangeRotation.
+     */
+    enum class ChangeRotation;
+
+    /**
      * Forward declaration enum class ChangeZoom.
      */
     enum class ChangeZoom;
-
-    /**
-     * Forward declaration class TileAtlas.
-     */
-    class TileAtlas;
-
-    /**
-     * Forward declaration class WorldGui.
-     */
-    class WorldGui;
 
     /**
      * Forward declaration class MousePicker.
@@ -126,34 +79,14 @@ namespace mdcii::world
     //-------------------------------------------------
 
     /**
-     * Represents the world including all islands and the ocean/deep water area.
+     * The world base class.
      */
     class World
     {
     public:
         //-------------------------------------------------
-        // Actions
-        //-------------------------------------------------
-
-        /**
-         * The possible world actions.
-         */
-        enum class Action
-        {
-            BUILD,    // Create a building.
-            DEMOLISH, // Demolish a building.
-            STATUS,   // Get information about a tile.
-            OPTIONS,  // Change game settings.
-        };
-
-        //-------------------------------------------------
         // Constants
         //-------------------------------------------------
-
-        /**
-         * The (untranslated) labels of the action buttons.
-         */
-        static constexpr std::array<std::string_view, magic_enum::enum_count<Action>()> ACTION_NAMES{ "Build", "Demolish", "Status", "Options" };
 
         /**
          * The min width of the world.
@@ -180,9 +113,14 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * To have access to the shared objects (Window, Camera, Original-Assets).
+         * To have access to the shared objects (Window, Camera, Original-Assets, Mdcii-Assets).
          */
         std::shared_ptr<state::Context> context;
+
+        /**
+         * The parent StateId.
+         */
+        state::StateId stateId;
 
         /**
          * The world width.
@@ -205,49 +143,9 @@ namespace mdcii::world
         Zoom zoom;
 
         /**
-         * The Terrain object contains all islands with their coasts.
-         */
-        std::unique_ptr<Terrain> terrain;
-
-        /**
-         * An OpenGL texture array for each zoom level.
-         */
-        std::shared_ptr<world::TileAtlas> tileAtlas;
-
-        /**
-         * A renderer to render all islands with their coasts.
-         */
-        std::unique_ptr<renderer::TerrainRenderer> terrainRenderer;
-
-        /**
-         * A renderer showing grids over the islands.
-         */
-        std::unique_ptr<renderer::GridRenderer> gridRenderer;
-
-        /**
-         * A Layer object containing only the deep water area of the world.
-         */
-        std::unique_ptr<layer::WorldLayer> worldLayer;
-
-        /**
-         * A Layer object to show a world grid.
-         */
-        std::unique_ptr<layer::WorldGridLayer> worldGridLayer;
-
-        /**
-         * The MousePicker object.
+         * A MousePicker object for the world.
          */
         std::unique_ptr<MousePicker> mousePicker;
-
-        /**
-         * Indicates which action button is currently active.
-         */
-        std::array<bool, magic_enum::enum_count<Action>()> actionButtons{ true, false, false, false };
-
-        /**
-         * The current action.
-         */
-        Action currentAction{ Action::BUILD };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -258,18 +156,54 @@ namespace mdcii::world
         /**
          * Constructs a new World object.
          *
-         * @param t_mapFilePath The path to the Json map file.
          * @param t_context Access to shared objects.
          * @param t_stateId The parent StateId.
          */
-        World(std::string t_mapFilePath, std::shared_ptr<state::Context> t_context, state::StateId t_stateId);
+        World(std::shared_ptr<state::Context> t_context, state::StateId t_stateId);
 
         World(const World& t_other) = delete;
         World(World&& t_other) noexcept = delete;
         World& operator=(const World& t_other) = delete;
         World& operator=(World&& t_other) noexcept = delete;
 
-        ~World() noexcept;
+        virtual ~World() noexcept;
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
+        /**
+         * Updates the world.
+         */
+        virtual void Update() = 0;
+
+        /**
+         * Renders the world.
+         */
+        virtual void Render() = 0;
+
+        /**
+         * Renders ImGui menus.
+         */
+        virtual void RenderImGui() = 0;
+
+        //-------------------------------------------------
+        // Rotate && Zoom
+        //-------------------------------------------------
+
+        /**
+         * Changes the rotation of the world.
+         *
+         * @param t_changeRotation Rotate left or right.
+         */
+        virtual void RotateWorld(ChangeRotation t_changeRotation);
+
+        /**
+         * Changes the zoom of the world.
+         *
+         * @param t_changeZoom Zoom in or out.
+         */
+        virtual void ZoomWorld(ChangeZoom t_changeZoom);
 
         //-------------------------------------------------
         // Helper
@@ -306,141 +240,9 @@ namespace mdcii::world
          */
         [[nodiscard]] glm::vec2 WorldToScreen(int32_t t_x, int32_t t_y, Zoom t_zoom, Rotation t_rotation) const;
 
-        //-------------------------------------------------
-        // Logic
-        //-------------------------------------------------
-
-        /**
-         * Updates the world.
-         */
-        void Update() const;
-
-        /**
-         * Renders the world.
-         */
-        void Render() const;
-
-        /**
-         * Renders ImGui menus.
-         */
-        void RenderImGui();
-
-        //-------------------------------------------------
-        // Rotate && Zoom
-        //-------------------------------------------------
-
-        /**
-         * Changes the rotation of the world.
-         *
-         * @param t_changeRotation Rotate left or right.
-         */
-        void RotateWorld(ChangeRotation t_changeRotation);
-
-        /**
-         * Changes the zoom of the world.
-         *
-         * @param t_changeZoom Zoom in or out.
-         */
-        void ZoomWorld(ChangeZoom t_changeZoom);
-
     protected:
 
     private:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
 
-        /**
-         * The parent StateId.
-         */
-        state::StateId m_stateId;
-
-        /**
-         * The path to the Json map file.
-         */
-        std::string m_mapFilePath;
-
-        /**
-         * ImGui menus for the game.
-         */
-        std::unique_ptr<WorldGui> m_worldGui;
-
-        /**
-         * The Layer types to render.
-         */
-        layer::LayerType m_layerTypeToRender;
-
-        /**
-         * Toggles world deep water rendering on and off.
-         */
-        bool m_renderWorldLayer{ true };
-
-        /**
-         * Toggles world grid rendering on and off.
-         */
-        bool m_renderWorldGridLayer{ false };
-
-        /**
-         * Toggles island grid rendering on and off.
-         */
-        bool m_renderIslandGridLayers{ false };
-
-        /**
-         * Toggles animations on and off.
-         */
-        bool m_runAnimations{ true };
-
-        /**
-         * The mouse button pressed listener handle.
-         */
-        decltype(event::EventManager::event_dispatcher)::Handle m_mouseButtonPressed;
-
-        /**
-         * The mouse moved listener handle.
-         */
-        decltype(event::EventManager::event_dispatcher)::Handle m_mouseMoved;
-
-        //-------------------------------------------------
-        // Event handler
-        //-------------------------------------------------
-
-        /**
-         * Handles left mouse button pressed event.
-         */
-        void OnLeftMouseButtonPressed();
-
-        /**
-         * Handles mouse move.
-         */
-        void OnMouseMoved();
-
-        //-------------------------------------------------
-        // Init
-        //-------------------------------------------------
-
-        /**
-         * Initialize class.
-         */
-        void Init();
-
-        /**
-         * Adds event listeners.
-         */
-        void AddListeners();
-
-        //-------------------------------------------------
-        // Clean up
-        //-------------------------------------------------
-
-        /**
-         * Clean up.
-         */
-        void CleanUp() const;
     };
-
-    //-------------------------------------------------
-    // Json
-    //-------------------------------------------------
-
-    void to_json(nlohmann::json& t_json, const World& t_world);
 }

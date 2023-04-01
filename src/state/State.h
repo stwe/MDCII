@@ -47,6 +47,11 @@ namespace mdcii::file
      * Forward declaration class OriginalResourcesManager.
      */
     class OriginalResourcesManager;
+
+    /**
+     * Forward declaration class MdciiResourcesManager.
+     */
+    class MdciiResourcesManager;
 }
 
 //-------------------------------------------------
@@ -78,16 +83,19 @@ namespace mdcii::state
         Context(
             std::shared_ptr<ogl::Window> t_window,
             std::shared_ptr<camera::Camera> t_camera,
-            std::shared_ptr<file::OriginalResourcesManager> t_originalResourcesManager
+            std::shared_ptr<file::OriginalResourcesManager> t_originalResourcesManager,
+            std::shared_ptr<file::MdciiResourcesManager> t_mdciiResourcesManager
         )
             : window{ std::move(t_window) }
             , camera{ std::move(t_camera) }
             , originalResourcesManager{ std::move(t_originalResourcesManager) }
+            , mdciiResourcesManager{  std::move(t_mdciiResourcesManager) }
         {}
 
         std::shared_ptr<ogl::Window> window;
         std::shared_ptr<camera::Camera> camera;
         std::shared_ptr<file::OriginalResourcesManager> originalResourcesManager;
+        std::shared_ptr<file::MdciiResourcesManager> mdciiResourcesManager;
 
         StateStack* stateStack{ nullptr };
     };
@@ -105,6 +113,11 @@ namespace mdcii::state
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
+
+        /**
+         * The unique identifier of this State.
+         */
+        StateId id;
 
         /**
          * Works as a holder of shared objects between all States.
@@ -133,12 +146,6 @@ namespace mdcii::state
         virtual ~State() noexcept;
 
         //-------------------------------------------------
-        // Getter
-        //-------------------------------------------------
-
-        [[nodiscard]] StateId GetStateId() const { return m_id; }
-
-        //-------------------------------------------------
         // Logic
         //-------------------------------------------------
 
@@ -157,13 +164,6 @@ namespace mdcii::state
     protected:
 
     private:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
 
-        /**
-         * The unique identifier of this State.
-         */
-        StateId m_id;
     };
 }

@@ -47,6 +47,11 @@ namespace mdcii::file
      * Forward declaration class OriginalResourcesManager.
      */
     class OriginalResourcesManager;
+
+    /**
+     * Forward declaration class MdciiResourcesManager.
+     */
+    class MdciiResourcesManager;
 }
 
 namespace mdcii::state
@@ -139,6 +144,11 @@ namespace mdcii
          * Resources of the original game needed here.
          */
         std::shared_ptr<file::OriginalResourcesManager> m_originalResourcesManager;
+
+        /**
+         * Own maps and islands.
+         */
+        std::shared_ptr<file::MdciiResourcesManager> m_mdciiResourcesManager;
 
         /**
          * This game is organized with states.

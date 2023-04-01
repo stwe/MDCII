@@ -18,9 +18,19 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
 #include "state/State.h"
+
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::world
+{
+    /**
+     * Forward declaration class GeneratorWorld.
+     */
+    class GeneratorWorld;
+}
 
 //-------------------------------------------------
 // WorldGeneratorState
@@ -71,24 +81,9 @@ namespace mdcii
         // Member
         //-------------------------------------------------
 
-        std::vector<std::string> m_islandFiles;
-        inline static int32_t m_world_width{ 64 };
-        inline static int32_t m_world_height{ 64 };
-        inline static int32_t m_map_x{ 0 };
-        inline static int32_t m_map_y{ 0 };
-        int32_t m_islandWidth{ -1 };
-        int32_t m_islandHeight{ -1 };
-
-        //-------------------------------------------------
-        // Init
-        //-------------------------------------------------
-
         /**
-         * Initializes the state.
+         * The GeneratorWorld object.
          */
-        void Init();
-
-        void RenderIslandsImGui();
-        void RenderWorld();
+        std::shared_ptr<world::GeneratorWorld> m_generatorWorld;
     };
 }

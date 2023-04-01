@@ -56,7 +56,7 @@ void mdcii::IslandGeneratorState::Input()
     if (context->window->IsKeyPressed(GLFW_KEY_ESCAPE))
     {
         Log::MDCII_LOG_DEBUG("[IslandGeneratorState::Input()] Starts POP IslandGeneratorState.");
-        context->stateStack->PopState(GetStateId());
+        context->stateStack->PopState(id);
     }
 }
 
@@ -81,7 +81,7 @@ void mdcii::IslandGeneratorState::RenderImGui()
     auto bt{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "BackTo") };
     if (ImGui::Button(bt.append(" ").append(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "MainMenu")).c_str()))
     {
-        context->stateStack->PopState(GetStateId());
+        context->stateStack->PopState(id);
         context->stateStack->PushState(state::StateId::MAIN_MENU);
     }
 

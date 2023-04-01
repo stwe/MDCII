@@ -26,6 +26,7 @@
 #include "state/StateStack.h"
 #include "ogl/Window.h"
 #include "file/OriginalResourcesManager.h"
+#include "file/MdciiResourcesManager.h"
 #include "data/Text.h"
 
 //-------------------------------------------------
@@ -156,7 +157,8 @@ void mdcii::Game::CreateSharedObjects()
     m_window = std::make_shared<ogl::Window>();
     m_camera = std::make_shared<camera::Camera>(m_window->width, m_window->height);
     m_originalResourcesManager = std::make_shared<file::OriginalResourcesManager>();
-    m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::Context>(m_window, m_camera, m_originalResourcesManager));
+    m_mdciiResourcesManager = std::make_shared<file::MdciiResourcesManager>();
+    m_stateStack = std::make_unique<state::StateStack>(std::make_unique<state::Context>(m_window, m_camera, m_originalResourcesManager, m_mdciiResourcesManager));
 }
 
 void mdcii::Game::Start() const

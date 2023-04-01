@@ -127,6 +127,8 @@ namespace mdcii::layer
         // Helper
         //-------------------------------------------------
 
+        void AddDeepWaterTile(int32_t t_x, int32_t t_y);
+
         /**
          * Creates a model matrix for a given Tile object.
          *

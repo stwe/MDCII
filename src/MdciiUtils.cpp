@@ -23,6 +23,7 @@
 #include "MdciiException.h"
 #include "Log.h"
 #include "world/imgui_stdlib.h"
+#include "data/Text.h"
 
 //-------------------------------------------------
 // Files
@@ -189,6 +190,17 @@ void mdcii::save_file_button(const char* t_label, std::string* t_str)
 
         return 1;
     });
+}
+
+void mdcii::file_chooser(std::vector<std::string>& t_files, int* t_currentItem)
+{
+    ImGui::ListBox(
+        data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ChooseFile").c_str(),
+        t_currentItem,
+        vector_getter,
+        &t_files,
+        static_cast<int32_t>(t_files.size())
+    );
 }
 
 //-------------------------------------------------

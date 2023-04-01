@@ -126,7 +126,7 @@ void mdcii::state::StateStack::ApplyPendingChanges()
             break;
         case Action::POP:
             // removes the last element in the vector
-            MDCII_ASSERT(change.id == m_stack.back()->GetStateId(), "[StateStack::ApplyPendingChanges()] Invalid POP operation.")
+            MDCII_ASSERT(change.id == m_stack.back()->id, "[StateStack::ApplyPendingChanges()] Invalid POP operation.")
             m_stack.pop_back();
             Log::MDCII_LOG_INFO("[StateStack::ApplyPendingChanges()] Stack size is {} after POP state {}.", m_stack.size(), magic_enum::enum_name(change.id));
             break;

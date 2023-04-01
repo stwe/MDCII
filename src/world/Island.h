@@ -223,7 +223,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * To have access to the shared objects (Window, Camera, Original-Assets).
+         * To have access to the shared objects (Window, Camera, Original-Assets, Mdcii-Assets).
          */
         std::shared_ptr<state::Context> m_context;
 

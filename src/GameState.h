@@ -18,8 +18,9 @@
 
 #pragma once
 
+#include <vector>
+#include <string>
 #include "state/State.h"
-#include "Game.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -28,9 +29,9 @@
 namespace mdcii::world
 {
     /**
-     * Forward declaration class World.
+     * Forward declaration class GameWorld.
      */
-    class World;
+    class GameWorld;
 }
 
 //-------------------------------------------------
@@ -45,20 +46,6 @@ namespace mdcii
     class GameState: public state::State
     {
     public:
-        //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        /**
-         * The file extension for map files.
-         */
-        const std::string MAP_FILE_EXTENSION{ ".map" };
-
-        /**
-         * The file extension for save game files.
-         */
-        const std::string SAVE_GAME_FILE_EXTENSION{ ".sav" };
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -97,19 +84,9 @@ namespace mdcii
         //-------------------------------------------------
 
         /**
-         * The World object.
+         * The GameWorld object.
          */
-        std::shared_ptr<world::World> m_world;
-
-        /**
-         * A list of map files.
-         */
-        std::vector<std::string> m_mapFiles;
-
-        /**
-         * A list of saved game files.
-         */
-        std::vector<std::string> m_savedGameFiles;
+        std::shared_ptr<world::GameWorld> m_gameWorld;
 
         //-------------------------------------------------
         // ImGui
@@ -121,14 +98,5 @@ namespace mdcii
          * @param t_files A list of files.
          */
         void RenderFileChooser(std::vector<std::string>& t_files);
-
-        //-------------------------------------------------
-        // Init
-        //-------------------------------------------------
-
-        /**
-         * Initializes the state.
-         */
-        void Init();
     };
 }

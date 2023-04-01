@@ -16,40 +16,37 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include "State.h"
-#include "MdciiAssert.h"
-#include "ogl/Window.h"
-#include "ogl/OpenGL.h"
+#include "MdciiResourcesManager.h"
+#include "Log.h"
+#include "MdciiUtils.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::state::State::State(const StateId t_id, std::shared_ptr<Context> t_context)
-    : id{ t_id }
-    , context{ std::move(t_context) }
+mdcii::file::MdciiResourcesManager::MdciiResourcesManager()
 {
-    Log::MDCII_LOG_DEBUG("[State::State()] Create State.");
+    Log::MDCII_LOG_DEBUG("[MdciiResourcesManager::MdciiResourcesManager()] Create MdciiResourcesManager.");
 
-    MDCII_ASSERT(context, "[State::State()] Null pointer")
+    LoadFiles();
 }
 
-mdcii::state::State::~State() noexcept
+mdcii::file::MdciiResourcesManager::~MdciiResourcesManager() noexcept
 {
-    Log::MDCII_LOG_DEBUG("[State::~State()] Destruct State.");
+    Log::MDCII_LOG_DEBUG("[MdciiResourcesManager::~MdciiResourcesManager()] Destruct MdciiResourcesManager.");
 }
 
 //-------------------------------------------------
-// Frame
+// Init
 //-------------------------------------------------
 
-void mdcii::state::State::StartFrame()
+void mdcii::file::MdciiResourcesManager::LoadFiles()
 {
-    ogl::OpenGL::SetClearColor(0.39f, 0.58f, 0.93f, 1.0f);
-    ogl::OpenGL::Clear();
-}
+    Log::MDCII_LOG_DEBUG("[MdciiResourcesManager::LoadFiles()] Start loading files...");
 
-void mdcii::state::State::EndFrame() const
-{
-    context->window->SwapBuffersAndCallEvents();
+    mapFiles = get_files_list(MAP_FILE_REL_PATH, MAP_FILE_EXTENSION);
+    saveGameFiles = get_files_list(SAVE_GAME_FILE_REL_PATH, SAVE_GAME_FILE_EXTENSION);
+    islandFiles = get_files_list(ISLAND_FILE_REL_PATH, ISLAND_FILE_EXTENSION);
+
+    Log::MDCII_LOG_DEBUG("[MdciiResourcesManager::LoadFiles()] All files have been loaded successfully.");
 }

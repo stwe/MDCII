@@ -55,7 +55,7 @@ void mdcii::MainMenuState::Input()
     if (context->window->IsKeyPressed(GLFW_KEY_ESCAPE))
     {
         Log::MDCII_LOG_DEBUG("[MainMenuState::Input()] Starts POP MainMenuState.");
-        context->stateStack->PopState(GetStateId());
+        context->stateStack->PopState(id);
     }
 }
 
@@ -82,7 +82,7 @@ void mdcii::MainMenuState::RenderImGui()
     {
         if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "IslandEditor").c_str(), ImVec2(120,0)))
         {
-            context->stateStack->PopState(GetStateId());
+            context->stateStack->PopState(id);
             context->stateStack->PushState(state::StateId::ISLAND_GENERATOR);
             ImGui::CloseCurrentPopup();
         }
@@ -90,7 +90,7 @@ void mdcii::MainMenuState::RenderImGui()
 
         if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "WorldEditor").c_str(), ImVec2(120,0)))
         {
-            context->stateStack->PopState(GetStateId());
+            context->stateStack->PopState(id);
             context->stateStack->PushState(state::StateId::WORLD_GENERATOR);
             ImGui::CloseCurrentPopup();
         }
@@ -105,19 +105,19 @@ void mdcii::MainMenuState::RenderImGui()
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "NewGame").c_str()))
     {
-        context->stateStack->PopState(GetStateId());
+        context->stateStack->PopState(id);
         context->stateStack->PushState(state::StateId::NEW_GAME);
     }
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "LoadGame").c_str()))
     {
-        context->stateStack->PopState(GetStateId());
+        context->stateStack->PopState(id);
         context->stateStack->PushState(state::StateId::LOADED_GAME);
     }
 
     if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Exit").c_str()))
     {
-        context->stateStack->PopState(GetStateId());
+        context->stateStack->PopState(id);
     }
 
     ImGui::End();
