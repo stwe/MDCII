@@ -27,6 +27,7 @@
 #include "data/BuildingIds.h"
 #include "data/Text.h"
 #include "file/OriginalResourcesManager.h"
+#include "file/SavegameFile.h"
 #include "layer/TerrainLayer.h"
 
 //-------------------------------------------------
@@ -228,70 +229,24 @@ void mdcii::world::WorldGui::SaveGameGui()
         static bool error{ false };
         static bool saved{ false };
         static std::string fileName;
+
         save_file_button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame").c_str(), &fileName);
 
-        if (!fileName.empty())
+        if (!fileName.empty() && ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Save").c_str()))
         {
-            if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Save").c_str()))
+            file::SavegameFile savegameFile{ fileName };
+            savegameFile.AddGameWorld(gameWorld);
+
+            if (savegameFile.SaveJsonToFile())
             {
-                // todo: savegame file class
-                fileName.append(".sav");
-
-                std::ofstream file;
-                if (create_file(Game::RESOURCES_REL_PATH + "save/" + fileName, file))
-                {
-                    nlohmann::json json;
-
-                    // version
-                    json["version"] = Game::VERSION;
-
-                    // world
-                    json["world"] = *gameWorld;
-
-                    // islands
-                    auto islandsJson = nlohmann::json::array();
-                    for (const auto& island : gameWorld->terrain->islands)
-                    {
-                        // island
-                        auto islandJson = nlohmann::json::object();
-                        islandJson = *island;
-                        islandJson["layers"] = nlohmann::json::array();
-
-                        // coast
-                        auto c = nlohmann::json::object();
-                        c["coast"] = island->coastLayer->tiles;
-
-                        // terrain
-                        auto t = nlohmann::json::object();
-                        t["terrain"] = island->terrainLayer->tiles;
-
-                        // buildings
-                        auto b = nlohmann::json::object();
-                        b["buildings"] = island->buildingsLayer->tiles;
-
-                        islandJson["layers"].push_back(c);
-                        islandJson["layers"].push_back(t);
-                        islandJson["layers"].push_back(b);
-
-                        islandsJson.push_back(islandJson);
-                    }
-
-                    json["islands"] = islandsJson;
-
-                    file << json;
-
-                    Log::MDCII_LOG_DEBUG("[WorldGui::SaveGameGui()] The game has been successfully saved in file {}.", fileName);
-
-                    saved = true;
-
-                    fileName.clear();
-                }
-                else
-                {
-                    error = true;
-                    saved = false;
-                    fileName.clear();
-                }
+                saved = true;
+                fileName.clear();
+            }
+            else
+            {
+                error = true;
+                saved = false;
+                fileName.clear();
             }
         }
 

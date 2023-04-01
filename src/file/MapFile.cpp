@@ -72,14 +72,6 @@ bool mdcii::file::MapFile::AddIslandFromFile(const int32_t t_startMapX, const in
     }
 
     return false;
-
-    /*
-    // newMapFile.AddIslandFromFile(1, 1, Game::RESOURCES_REL_PATH + "island/" + "Island24x24.isl");
-    nlohmann::json j = read_json_from_file(t_islandFileName); // todo throws exception
-    j["x"] = t_startMapX;
-    j["y"] = t_startMapY;
-    json["islands"].push_back(j);
-    */
 }
 
 //-------------------------------------------------

@@ -435,10 +435,41 @@ void mdcii::world::GameWorld::CleanUp() const
 // Json
 //-------------------------------------------------
 
-void mdcii::world::to_json(nlohmann::json& t_json, const World& t_world)
+void mdcii::world::to_json(nlohmann::json& t_json, const GameWorld& t_gameWorld)
 {
-    t_json = nlohmann::json{
-        { "width", t_world.width },
-        { "height", t_world.height }
-    };
+    // version
+    t_json["version"] = Game::VERSION;
+
+    // world
+    t_json["world"] = { { "width", t_gameWorld.width }, { "height", t_gameWorld.height } };
+
+    // islands
+    auto islandsJson = nlohmann::json::array();
+    for (const auto& island : t_gameWorld.terrain->islands)
+    {
+        // island
+        auto islandJson = nlohmann::json::object();
+        islandJson = *island;
+        islandJson["layers"] = nlohmann::json::array();
+
+        // coast
+        auto c = nlohmann::json::object();
+        c["coast"] = island->coastLayer->tiles;
+
+        // terrain
+        auto t = nlohmann::json::object();
+        t["terrain"] = island->terrainLayer->tiles;
+
+        // buildings
+        auto b = nlohmann::json::object();
+        b["buildings"] = island->buildingsLayer->tiles;
+
+        islandJson["layers"].push_back(c);
+        islandJson["layers"].push_back(t);
+        islandJson["layers"].push_back(b);
+
+        islandsJson.push_back(islandJson);
+    }
+
+    t_json["islands"] = islandsJson;
 }

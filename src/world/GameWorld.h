@@ -296,5 +296,5 @@ namespace mdcii::world
     // Json
     //-------------------------------------------------
 
-    void to_json(nlohmann::json& t_json, const World& t_world);
+    void to_json(nlohmann::json& t_json, const GameWorld& t_gameWorld);
 }
