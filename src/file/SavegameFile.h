@@ -68,6 +68,11 @@ namespace mdcii::file
         // Json
         //-------------------------------------------------
 
+        /**
+         * Adds Json values of the given GameWorld object.
+         *
+         * @param t_gameWorld The GameWorld to convert.
+         */
         void AddGameWorld(world::GameWorld const* t_gameWorld);
 
     protected:
@@ -77,7 +82,9 @@ namespace mdcii::file
         // Override
         //-------------------------------------------------
 
-        [[nodiscard]] bool CheckFileFormat() const override;
+        [[nodiscard]] bool ValidateJson() const override;
+        [[nodiscard]] bool ValidateObject() const override;
+
         [[nodiscard]] std::string GetFileExtension() const override;
         [[nodiscard]] std::string GetRelPath() const override;
     };

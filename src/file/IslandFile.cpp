@@ -39,41 +39,19 @@ mdcii::file::IslandFile::~IslandFile() noexcept
 // Json
 //-------------------------------------------------
 
-void mdcii::file::IslandFile::AddStartPosition(const int32_t t_startMapX, const int32_t t_startMapY)
-{
-    AddStartPosition(json, t_startMapX, t_startMapY);
-}
-
-void mdcii::file::IslandFile::AddData(
+void mdcii::file::IslandFile::SetData(
     const int32_t t_width, const int32_t t_height,
     const std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles,
     const std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles
 )
 {
-    AddData(json, t_width, t_height, t_terrainTiles, t_coastTiles);
-}
+    json["x"] = -1;
+    json["y"] = -1;
 
-void mdcii::file::IslandFile::AddStartPosition(nlohmann::json& t_json, const int32_t t_startMapX, const int32_t t_startMapY)
-{
-    t_json["x"] = t_startMapX;
-    t_json["y"] = t_startMapY;
-}
+    json["width"] = t_width;
+    json["height"] = t_height;
 
-void mdcii::file::IslandFile::AddWidthAndHeight(nlohmann::json& t_json, const int32_t t_width, const int32_t t_height)
-{
-    t_json["width"] = t_width;
-    t_json["height"] = t_height;
-}
-
-void mdcii::file::IslandFile::AddData(
-    nlohmann::json& t_json,
-    const int32_t t_width, const int32_t t_height,
-    const std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles, const std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles
-)
-{
-    AddWidthAndHeight(t_json, t_width, t_height);
-
-    t_json["layers"] = nlohmann::json::array();
+    json["layers"] = nlohmann::json::array();
     nlohmann::json t = nlohmann::json::object();
     nlohmann::json c = nlohmann::json::object();
     nlohmann::json b = nlohmann::json::object();
@@ -85,28 +63,50 @@ void mdcii::file::IslandFile::AddData(
     std::generate(buildingsTiles.begin(), buildingsTiles.end(), []() { return std::make_unique<layer::Tile>(); } );
     b["buildings"] = buildingsTiles;
 
-    t_json["layers"].push_back(t);
-    t_json["layers"].push_back(c);
-    t_json["layers"].push_back(b);
+    json["layers"].push_back(t);
+    json["layers"].push_back(c);
+    json["layers"].push_back(b);
 }
 
 //-------------------------------------------------
 // Override
 //-------------------------------------------------
 
-bool mdcii::file::IslandFile::CheckFileFormat() const
+bool mdcii::file::IslandFile::ValidateJson() const
 {
-    Log::MDCII_LOG_DEBUG("[IslandFile::CheckFileFormat()] Check file format for island file {}.", fileName);
+    Log::MDCII_LOG_DEBUG("[IslandFile::ValidateJson()] Check Json value in island file {}.", fileName);
 
-    if (json.contains("width") && json.contains("height") && json.contains("x") && json.contains("y") && json.contains("layers"))
+    if (!json.empty() &&
+        json.contains("width") &&
+        json.contains("height") &&
+        json.contains("x") &&
+        json.contains("y") &&
+        json.contains("layers")
+    )
     {
-        Log::MDCII_LOG_DEBUG("[IslandFile::CheckFileFormat()] The file {} is a valid island file.", fileName);
+        Log::MDCII_LOG_DEBUG("[IslandFile::ValidateJson()]  The Json value in island file {} is valid.", fileName);
         return true;
     }
 
-    Log::MDCII_LOG_WARN("[IslandFile::CheckFileFormat()] Invalid island file format found in file {}.", fileName);
+    Log::MDCII_LOG_WARN("[IslandFile::ValidateJson()] Found invalid Json value in map file {}.", fileName);
 
     return false;
+}
+
+bool mdcii::file::IslandFile::ValidateObject() const
+{
+    Log::MDCII_LOG_DEBUG("[IslandFile::ValidateObject()] Check object values in island file {}.", fileName);
+
+    // an island file is for multiple maps and should not store a start position
+    if (json.at("x").get<int32_t>() != -1 || json.at("y").get<int32_t>() != -1)
+    {
+        Log::MDCII_LOG_WARN("[IslandFile::ValidateObject()] Found invalid object values in island file {}.", fileName);
+        return false;
+    }
+
+    Log::MDCII_LOG_DEBUG("[IslandFile::ValidateObject()] The object values in island file {} are valid.", fileName);
+
+    return true;
 }
 
 std::string mdcii::file::IslandFile::GetFileExtension() const

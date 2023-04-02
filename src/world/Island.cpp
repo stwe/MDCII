@@ -216,10 +216,25 @@ void mdcii::world::Island::CreateLayersFromJson(const nlohmann::json& t_json)
 
 void mdcii::world::to_json(nlohmann::json& t_json, const Island& t_island)
 {
-    t_json = nlohmann::json{
-        { "width", t_island.width },
-        { "height", t_island.height },
-        { "x", t_island.startWorldX },
-        { "y", t_island.startWorldY }
-    };
+    // size && position
+    t_json["width"] = t_island.width;
+    t_json["height"] = t_island.height;
+    t_json["x"] = t_island.startWorldX;
+    t_json["y"] = t_island.startWorldY;
+
+    // layers
+    t_json["layers"] = nlohmann::json::array();
+
+    auto c = nlohmann::json::object();
+    c["coast"] = t_island.coastLayer->tiles;
+
+    auto t = nlohmann::json::object();
+    t["terrain"] = t_island.terrainLayer->tiles;
+
+    auto b = nlohmann::json::object();
+    b["buildings"] = t_island.buildingsLayer->tiles;
+
+    t_json["layers"].push_back(c);
+    t_json["layers"].push_back(t);
+    t_json["layers"].push_back(b);
 }

@@ -19,8 +19,7 @@
 #include "MapFile.h"
 #include "IslandFile.h"
 #include "Log.h"
-#include "Game.h"
-#include "layer/TerrainLayer.h"
+#include "world/GeneratorWorld.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -41,32 +40,20 @@ mdcii::file::MapFile::~MapFile() noexcept
 // Json
 //-------------------------------------------------
 
-void mdcii::file::MapFile::AddWorldData(const int32_t t_width, const int32_t t_height)
+void mdcii::file::MapFile::AddGeneratorWorld(const world::GeneratorWorld* t_generatorWorld)
 {
-    json["version"] = Game::VERSION;
-    json["world"] = { { "width", t_width }, { "height", t_height } };
-}
-
-void mdcii::file::MapFile::AddIsland(
-    const int32_t t_startMapX, const int32_t t_startMapY,
-    const int32_t t_width, const int32_t t_height,
-    const std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles,
-    const std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles
-)
-{
-    nlohmann::json islandJson;
-    file::IslandFile::AddStartPosition(islandJson, t_startMapX, t_startMapY);
-    file::IslandFile::AddData(islandJson, t_width, t_height, t_terrainTiles, t_coastTiles);
-
-    json["islands"].push_back(islandJson);
+    json = *t_generatorWorld;
 }
 
 bool mdcii::file::MapFile::AddIslandFromFile(const int32_t t_startMapX, const int32_t t_startMapY, const std::string& t_islandFileName)
 {
     if (IslandFile islandFile{ t_islandFileName }; islandFile.LoadJsonFromFile())
     {
-        islandFile.AddStartPosition(t_startMapX, t_startMapY);
-        json["islands"].push_back(islandFile.json);
+        auto islandJson = islandFile.json;
+        islandJson["x"] = t_startMapX;
+        islandJson["y"] = t_startMapY;
+
+        json["islands"].push_back(islandJson);
 
         return true;
     }
@@ -78,19 +65,43 @@ bool mdcii::file::MapFile::AddIslandFromFile(const int32_t t_startMapX, const in
 // Override
 //-------------------------------------------------
 
-bool mdcii::file::MapFile::CheckFileFormat() const
+bool mdcii::file::MapFile::ValidateJson() const
 {
-    Log::MDCII_LOG_DEBUG("[MapFile::CheckFileFormat()] Check file format for map file {}.", fileName);
+    Log::MDCII_LOG_DEBUG("[MapFile::ValidateJson()] Check Json value in map file {}.", fileName);
 
-    if (json.contains("version") && json.contains("world") && json.contains("islands"))
+    if (!json.empty() &&
+        json.contains("version") &&
+        json.contains("world") &&
+        json.contains("width") &&
+        json.contains("height") &&
+        json.contains("islands"))
     {
-        Log::MDCII_LOG_DEBUG("[MapFile::CheckFileFormat()] The file {} is a valid map file.", fileName);
+        Log::MDCII_LOG_DEBUG("[MapFile::ValidateJson()] The Json value in map file {} is valid.", fileName);
         return true;
     }
 
-    Log::MDCII_LOG_WARN("[MapFile::CheckFileFormat()] Invalid map file format found in file {}.", fileName);
+    Log::MDCII_LOG_WARN("[MapFile::ValidateJson()] Found invalid Json value in map file {}.", fileName);
 
     return false;
+}
+
+bool mdcii::file::MapFile::ValidateObject() const
+{
+    Log::MDCII_LOG_DEBUG("[MapFile::ValidateObject()] Check object values in map file {}.", fileName);
+
+    const auto w = json.at("width").get<int32_t>();
+    const auto h = json.at("height").get<int32_t>();
+
+    if (w < world::World::WORLD_MIN_WIDTH || w > world::World::WORLD_MAX_WIDTH ||
+        h < world::World::WORLD_MIN_HEIGHT || h > world::World::WORLD_MAX_HEIGHT)
+    {
+        Log::MDCII_LOG_WARN("[MapFile::ValidateObject()] Found invalid object values in map file {}.", fileName);
+        return false;
+    }
+
+    Log::MDCII_LOG_DEBUG("[MapFile::ValidateObject()] The object values in map file {} are valid.", fileName);
+
+    return true;
 }
 
 std::string mdcii::file::MapFile::GetFileExtension() const

@@ -24,12 +24,12 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::layer
+namespace mdcii::world
 {
     /**
-     * Forward declaration struct Tile.
+     * Forward declaration class GeneratorWorld.
      */
-    struct Tile;
+    class GeneratorWorld;
 }
 
 //-------------------------------------------------
@@ -68,15 +68,22 @@ namespace mdcii::file
         // Json
         //-------------------------------------------------
 
-        void AddWorldData(int32_t t_width, int32_t t_height);
+        /**
+         * Adds Json values of the given GeneratorWorld object.
+         *
+         * @param t_generatorWorld The GeneratorWorld to convert.
+         */
+        void AddGeneratorWorld(world::GeneratorWorld const* t_generatorWorld);
 
-        void AddIsland(
-            int32_t t_startMapX, int32_t t_startMapY,
-            int32_t t_width, int32_t t_height,
-            const std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles,
-            const std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles
-        );
-
+        /**
+         * Adds Json values of an island from a file.
+         *
+         * @param t_startMapX The start x position in the world.
+         * @param t_startMapY The start y position in the world.
+         * @param t_islandFileName The filename of the island.
+         *
+         * @return True if success, otherwise false.
+         */
         [[nodiscard]] bool AddIslandFromFile(int32_t t_startMapX, int32_t t_startMapY, const std::string& t_islandFileName);
 
     protected:
@@ -86,7 +93,9 @@ namespace mdcii::file
         // Override
         //-------------------------------------------------
 
-        [[nodiscard]] bool CheckFileFormat() const override;
+        [[nodiscard]] bool ValidateJson() const override;
+        [[nodiscard]] bool ValidateObject() const override;
+
         [[nodiscard]] std::string GetFileExtension() const override;
         [[nodiscard]] std::string GetRelPath() const override;
     };

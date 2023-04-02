@@ -68,17 +68,15 @@ namespace mdcii::file
         // Json
         //-------------------------------------------------
 
-        void AddStartPosition(int32_t t_startMapX, int32_t t_startMapY);
-        void AddData(
-            int32_t t_width, int32_t t_height,
-            const std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles,
-            const std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles
-        );
-
-        static void AddStartPosition(nlohmann::json& t_json, int32_t t_startMapX, int32_t t_startMapY);
-        static void AddWidthAndHeight(nlohmann::json& t_json, int32_t t_width, int32_t t_height);
-        static void AddData(
-            nlohmann::json& t_json,
+        /**
+         * Sets the Json value.
+         *
+         * @param t_width The island width
+         * @param t_height The island height.
+         * @param t_terrainTiles The terrain tiles of the island.
+         * @param t_coastTiles The coast tiles of the island.
+         */
+        void SetData(
             int32_t t_width, int32_t t_height,
             const std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles,
             const std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles
@@ -91,7 +89,9 @@ namespace mdcii::file
         // Override
         //-------------------------------------------------
 
-        [[nodiscard]] bool CheckFileFormat() const override;
+        [[nodiscard]] bool ValidateJson() const override;
+        [[nodiscard]] bool ValidateObject() const override;
+
         [[nodiscard]] std::string GetFileExtension() const override;
         [[nodiscard]] std::string GetRelPath() const override;
     };

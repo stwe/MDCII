@@ -48,19 +48,43 @@ void mdcii::file::SavegameFile::AddGameWorld(world::GameWorld const* t_gameWorld
 // Override
 //-------------------------------------------------
 
-bool mdcii::file::SavegameFile::CheckFileFormat() const
+bool mdcii::file::SavegameFile::ValidateJson() const
 {
-    Log::MDCII_LOG_DEBUG("[SavegameFile::CheckFileFormat()] Check file format for save-game file {}.", fileName);
+    Log::MDCII_LOG_DEBUG("[SavegameFile::ValidateJson()] Check Json value in save-game file {}.", fileName);
 
-    if (json.contains("version") && json.contains("world") && json.contains("islands"))
+    if (!json.empty() &&
+        json.contains("version") &&
+        json.contains("world") &&
+        json.contains("width") &&
+        json.contains("height") &&
+        json.contains("islands"))
     {
-        Log::MDCII_LOG_DEBUG("[SavegameFile::CheckFileFormat()] The file {} is a valid save-game file.", fileName);
+        Log::MDCII_LOG_DEBUG("[SavegameFile::ValidateJson()] The Json value in save-game file {} is valid.", fileName);
         return true;
     }
 
-    Log::MDCII_LOG_WARN("[SavegameFile::CheckFileFormat()] Invalid save-game file format found in file {}.", fileName);
+    Log::MDCII_LOG_WARN("[SavegameFile::ValidateJson()] Found invalid Json value in save-game file {}.", fileName);
 
     return false;
+}
+
+bool mdcii::file::SavegameFile::ValidateObject() const
+{
+    Log::MDCII_LOG_DEBUG("[SavegameFile::ValidateObject()] Check object values in save-game file {}.", fileName);
+
+    const auto w = json.at("width").get<int32_t>();
+    const auto h = json.at("height").get<int32_t>();
+
+    if (w < world::World::WORLD_MIN_WIDTH || w > world::World::WORLD_MAX_WIDTH ||
+        h < world::World::WORLD_MIN_HEIGHT || h > world::World::WORLD_MAX_HEIGHT)
+    {
+        Log::MDCII_LOG_WARN("[SavegameFile::ValidateObject()] Found invalid object values in save-game file {}.", fileName);
+        return false;
+    }
+
+    Log::MDCII_LOG_DEBUG("[SavegameFile::ValidateObject()] The object values in save-game file {} are valid.", fileName);
+
+    return true;
 }
 
 std::string mdcii::file::SavegameFile::GetFileExtension() const

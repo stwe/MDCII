@@ -44,9 +44,14 @@ mdcii::file::MdciiFile::~MdciiFile() noexcept
 
 bool mdcii::file::MdciiFile::SaveJsonToFile()
 {
-    Init();
+    InitFileName();
 
     Log::MDCII_LOG_DEBUG("[MdciiFile::SaveJsonToFile()] Start saving Json value to file {}.", fileName);
+
+    if (!ValidateJson() || !ValidateObject())
+    {
+        return false;
+    }
 
     if (std::ofstream file; create_file(fileName, file))
     {
@@ -63,17 +68,16 @@ bool mdcii::file::MdciiFile::SaveJsonToFile()
 
 bool mdcii::file::MdciiFile::LoadJsonFromFile()
 {
-    Init();
+    InitFileName();
 
     Log::MDCII_LOG_DEBUG("[MdciiFile::LoadJsonFromFile()] Start loading Json value from file {}.", fileName);
 
     if (std::filesystem::exists(fileName))
     {
-        Log::MDCII_LOG_DEBUG("[MdciiFile::LoadJsonFromFile()] The {} file exists.", fileName);
-
         json = read_json_from_file(fileName);
+        Log::MDCII_LOG_DEBUG("[MdciiFile::LoadJsonFromFile()] The Json value was successfully read from file {}.", fileName);
 
-        return CheckFileFormat();
+        return ValidateJson() && ValidateObject();
     }
 
     Log::MDCII_LOG_WARN("[MdciiFile::LoadJsonFromFile()] File {} does not exist.", fileName);
@@ -82,25 +86,16 @@ bool mdcii::file::MdciiFile::LoadJsonFromFile()
 }
 
 //-------------------------------------------------
-// Helper
-//-------------------------------------------------
-
-void mdcii::file::MdciiFile::ClearJson()
-{
-    json.clear();
-}
-
-//-------------------------------------------------
 // Init
 //-------------------------------------------------
 
-void mdcii::file::MdciiFile::Init()
+void mdcii::file::MdciiFile::InitFileName()
 {
-    if (!m_initialized)
+    if (!m_initializedFile)
     {
-        Log::MDCII_LOG_DEBUG("[MdciiFile::Init()] Initialize class.");
-
         fileName = Game::RESOURCES_REL_PATH + GetRelPath() + fileName.append(GetFileExtension());
-        m_initialized = true;
+        m_initializedFile = true;
+
+        Log::MDCII_LOG_DEBUG("[MdciiFile::InitFileName()] The full path to the file was initialized to {}.", fileName);
     }
 }

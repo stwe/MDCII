@@ -86,15 +86,6 @@ namespace mdcii::file
          */
         [[nodiscard]] bool LoadJsonFromFile();
 
-        //-------------------------------------------------
-        // Helper
-        //-------------------------------------------------
-
-        /**
-         * Clears the content of the current Json value.
-         */
-        void ClearJson();
-
     protected:
 
     private:
@@ -103,16 +94,40 @@ namespace mdcii::file
         //-------------------------------------------------
 
         /**
-         * Init flag.
+         * If this flag was set, the file name was appended with the full path.
          */
-        bool m_initialized{ false };
+        bool m_initializedFile{ false };
 
         //-------------------------------------------------
         // Override
         //-------------------------------------------------
 
-        [[nodiscard]] virtual bool CheckFileFormat() const = 0;
+        /**
+         * Checks the Json value for specific entries.
+         *
+         * @return True if valid, false otherwise.
+         */
+        [[nodiscard]] virtual bool ValidateJson() const = 0;
+
+        /**
+         * Converts certain Json values into objects and checks whether these object values are valid.
+         *
+         * @return True if valid, false otherwise.
+         */
+        [[nodiscard]] virtual bool ValidateObject() const { return true; }
+
+        /**
+         * Returns the file extension.
+         *
+         * @return The file extension (e.g. ".map").
+         */
         [[nodiscard]] virtual std::string GetFileExtension() const = 0;
+
+        /**
+         * Returns the relative path to the file.
+         *
+         * @return The relative path (e.g. "map/").
+         */
         [[nodiscard]] virtual std::string GetRelPath() const = 0;
 
         //-------------------------------------------------
@@ -120,8 +135,8 @@ namespace mdcii::file
         //-------------------------------------------------
 
         /**
-         * Initializes the class.
+         * Initializes the file name.
          */
-        void Init();
+        void InitFileName();
     };
 }
