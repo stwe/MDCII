@@ -25,11 +25,7 @@
 #include "data/Text.h"
 #include "data/BuildingIds.h"
 #include "layer/TerrainLayer.h"
-#ifdef SAVE_AS_MAP
-    #include "file/MapFile.h"
-#else
-    #include "file/IslandFile.h"
-#endif
+#include "file/IslandFile.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -624,25 +620,14 @@ void mdcii::world::IslandGenerator::SaveIslandImGui()
             std::vector<std::shared_ptr<layer::Tile>> terrainTiles;
             CreateTerrainTiles(terrainTiles);
             CreateCoastTiles(coastTiles);
-#ifdef SAVE_AS_MAP
-            file::MapFile mapFile{ fileName };
-            mapFile.AddWorldData(MAP_WIDTH, MAP_HEIGHT);
-            mapFile.AddIsland(ISLAND_MAP_X, ISLAND_MAP_Y, m_width, m_height, terrainTiles, coastTiles);
-            if (mapFile.SaveJsonToFile())
-            {
-                saved = true;
-                fileName.clear();
-            }
-#else
+
             file::IslandFile islandFile{ fileName };
-            islandFile.AddStartPosition(-1, -1);
-            islandFile.AddData(m_width, m_height, terrainTiles, coastTiles);
+            islandFile.SetData(m_width, m_height, terrainTiles, coastTiles);
             if (islandFile.SaveJsonToFile())
             {
                 saved = true;
                 fileName.clear();
             }
-#endif
             else
             {
                 error = true;

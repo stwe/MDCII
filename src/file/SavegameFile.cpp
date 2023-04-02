@@ -55,8 +55,8 @@ bool mdcii::file::SavegameFile::ValidateJson() const
     if (!json.empty() &&
         json.contains("version") &&
         json.contains("world") &&
-        json.contains("width") &&
-        json.contains("height") &&
+        json["world"].contains("width") &&
+        json["world"].contains("height") &&
         json.contains("islands"))
     {
         Log::MDCII_LOG_DEBUG("[SavegameFile::ValidateJson()] The Json value in save-game file {} is valid.", fileName);
@@ -72,8 +72,8 @@ bool mdcii::file::SavegameFile::ValidateObject() const
 {
     Log::MDCII_LOG_DEBUG("[SavegameFile::ValidateObject()] Check object values in save-game file {}.", fileName);
 
-    const auto w = json.at("width").get<int32_t>();
-    const auto h = json.at("height").get<int32_t>();
+    const auto w = json.at("world").at("width").get<int32_t>();
+    const auto h = json.at("world").at("height").get<int32_t>();
 
     if (w < world::World::WORLD_MIN_WIDTH || w > world::World::WORLD_MAX_WIDTH ||
         h < world::World::WORLD_MIN_HEIGHT || h > world::World::WORLD_MAX_HEIGHT)
