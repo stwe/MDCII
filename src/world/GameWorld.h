@@ -172,9 +172,9 @@ namespace mdcii::world
          *
          * @param t_context Access to shared objects.
          * @param t_stateId The parent StateId.
-         * @param t_mapFilePath The path to the Json map file.
+         * @param t_filePath The path to the file containing our map or savegame data.
          */
-        GameWorld(std::shared_ptr<state::Context> t_context, state::StateId t_stateId, std::string t_mapFilePath);
+        GameWorld(std::shared_ptr<state::Context> t_context, state::StateId t_stateId, std::string t_filePath);
 
         GameWorld(const GameWorld& t_other) = delete;
         GameWorld(GameWorld&& t_other) noexcept = delete;
@@ -210,9 +210,9 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * The path to the Json map file.
+         * The path to the file containing our map or savegame data.
          */
-        std::string m_mapFilePath;
+        std::string m_filePath;
 
         /**
          * ImGui menus for the game.

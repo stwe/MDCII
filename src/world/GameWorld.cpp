@@ -32,18 +32,20 @@
 #include "layer/WorldLayer.h"
 #include "layer/WorldGridLayer.h"
 #include "data/Text.h"
+#include "file/SavegameFile.h"
+#include "file/MapFile.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::GameWorld::GameWorld(std::shared_ptr<state::Context> t_context, const state::StateId t_stateId, std::string t_mapFilePath)
+mdcii::world::GameWorld::GameWorld(std::shared_ptr<state::Context> t_context, const state::StateId t_stateId, std::string t_filePath)
     : World(std::move(t_context), t_stateId)
-    , m_mapFilePath{ std::move(t_mapFilePath) }
+    , m_filePath{ std::move(t_filePath) }
 {
-    Log::MDCII_LOG_DEBUG("[GameWorld::GameWorld()] Create GameWorld from {}.", m_mapFilePath);
+    Log::MDCII_LOG_DEBUG("[GameWorld::GameWorld()] Create GameWorld from {}.", m_filePath);
 
-    MDCII_ASSERT(!m_mapFilePath.empty(), "[GameWorld::GameWorld()] Invalid path given.")
+    MDCII_ASSERT(!m_filePath.empty(), "[GameWorld::GameWorld()] Invalid file path given.")
 
     m_layerTypeToRender = layer::LayerType::ALL;
 
@@ -326,54 +328,30 @@ void mdcii::world::GameWorld::Init()
     tileAtlas = std::make_unique<TileAtlas>();
     terrainRenderer = std::make_unique<renderer::TerrainRenderer>(context, tileAtlas);
 
-    // todo: MapFile class
-    nlohmann::json j = read_json_from_file(m_mapFilePath);
-
-    if (!j.contains("version") || !j.contains("world") || !j.contains("islands"))
+    nlohmann::json json;
+    if (stateId == state::StateId::NEW_GAME)
     {
-        throw MDCII_EXCEPTION("[GameWorld::Init()] Invalid map file format.");
-    }
-
-    // version
-    for (const auto& [k, v] : j.items())
-    {
-        if (k == "version" && v.get<std::string>() != Game::VERSION)
+        if (file::MapFile mapFile{ m_filePath }; mapFile.LoadJsonFromFile())
         {
-            throw MDCII_EXCEPTION("[GameWorld::Init()] Invalid map file format.");
+            json = mapFile.json;
         }
     }
+    else
+    {
+        if (file::SavegameFile savegameFile{ m_filePath }; savegameFile.LoadJsonFromFile())
+        {
+            json = savegameFile.json;
+        }
+    }
+
+    MDCII_ASSERT(!json.empty(), "[GameWorld::Init()] Invalid Json value.")
 
     // world
-    for (const auto& [k, v] : j.items())
-    {
-        if (k == "world")
-        {
-            width = v.at("width").get<int32_t>();
-            height = v.at("height").get<int32_t>();
-
-            if (width < WORLD_MIN_WIDTH || width > WORLD_MAX_WIDTH)
-            {
-                throw MDCII_EXCEPTION("[GameWorld::Init()] Invalid game world width given.");
-            }
-
-            if (height < WORLD_MIN_HEIGHT || height > WORLD_MAX_HEIGHT)
-            {
-                throw MDCII_EXCEPTION("[GameWorld::Init()] Invalid game world height given.");
-            }
-
-            Log::MDCII_LOG_DEBUG("[GameWorld::Init()] The width of the game world is set to: {}.", width);
-            Log::MDCII_LOG_DEBUG("[GameWorld::Init()] The height of the game world is set to: {}.", height);
-        }
-    }
+    width = json["world"].at("width").get<int32_t>();
+    height = json["world"].at("height").get<int32_t>();
 
     // islands
-    for (const auto& [k, v] : j.items())
-    {
-        if (k == "islands")
-        {
-            terrain->CreateIslandsFromJson(v);
-        }
-    }
+    terrain->CreateIslandsFromJson(json["islands"]);
 
     worldLayer = std::make_unique<layer::WorldLayer>(context, this);
     worldLayer->PrepareCpuDataForRendering();
@@ -450,24 +428,6 @@ void mdcii::world::to_json(nlohmann::json& t_json, const GameWorld& t_gameWorld)
         // island
         auto islandJson = nlohmann::json::object();
         islandJson = *island;
-        islandJson["layers"] = nlohmann::json::array();
-
-        // coast
-        auto c = nlohmann::json::object();
-        c["coast"] = island->coastLayer->tiles;
-
-        // terrain
-        auto t = nlohmann::json::object();
-        t["terrain"] = island->terrainLayer->tiles;
-
-        // buildings
-        auto b = nlohmann::json::object();
-        b["buildings"] = island->buildingsLayer->tiles;
-
-        islandJson["layers"].push_back(c);
-        islandJson["layers"].push_back(t);
-        islandJson["layers"].push_back(b);
-
         islandsJson.push_back(islandJson);
     }
 

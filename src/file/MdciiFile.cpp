@@ -91,10 +91,9 @@ bool mdcii::file::MdciiFile::LoadJsonFromFile()
 
 void mdcii::file::MdciiFile::InitFileName()
 {
-    if (!m_initializedFile)
+    if (fileName.find(Game::RESOURCES_REL_PATH + GetRelPath()) == std::string::npos)
     {
         fileName = Game::RESOURCES_REL_PATH + GetRelPath() + fileName.append(GetFileExtension());
-        m_initializedFile = true;
 
         Log::MDCII_LOG_DEBUG("[MdciiFile::InitFileName()] The full path to the file was initialized to {}.", fileName);
     }

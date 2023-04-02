@@ -90,15 +90,6 @@ namespace mdcii::file
 
     private:
         //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * If this flag was set, the file name was appended with the full path.
-         */
-        bool m_initializedFile{ false };
-
-        //-------------------------------------------------
         // Override
         //-------------------------------------------------
 
