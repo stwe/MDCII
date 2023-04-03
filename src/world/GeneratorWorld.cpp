@@ -45,6 +45,7 @@ mdcii::world::GeneratorWorld::GeneratorWorld(std::shared_ptr<state::Context> t_c
     width = t_width;
     height = t_height;
 
+    terrain = std::make_unique<Terrain>(context, this);
     tileAtlas = std::make_unique<TileAtlas>();
     terrainRenderer = std::make_unique<renderer::TerrainRenderer>(context, tileAtlas);
 
@@ -79,14 +80,30 @@ void mdcii::world::GeneratorWorld::Update()
 
 void mdcii::world::GeneratorWorld::Render()
 {
-    terrainRenderer->Render(
-        worldLayer->modelMatricesSsbos,
-        *worldLayer->gfxNumbersSsbo,
-        *worldLayer->buildingIdsSsbo,
-        worldLayer->instancesToRender,
-        zoom,
-        rotation
-    );
+    if (m_renderDeepWater)
+    {
+        terrainRenderer->Render(
+            worldLayer->modelMatricesSsbos,
+            *worldLayer->gfxNumbersSsbo,
+            *worldLayer->buildingIdsSsbo,
+            worldLayer->instancesToRender,
+            zoom,
+            rotation
+        );
+    }
+
+    ogl::OpenGL::EnableAlphaBlending();
+
+    if (m_renderIslands)
+    {
+        for (const auto& island : terrain->islands)
+        {
+            terrainRenderer->Render(*island->coastLayer, zoom, rotation);
+            terrainRenderer->Render(*island->mixedLayer, zoom, rotation);
+        }
+    }
+
+    ogl::OpenGL::DisableBlending();
 
     mousePicker->Render(*context->window, *context->camera);
 }
@@ -116,6 +133,9 @@ void mdcii::world::GeneratorWorld::RenderImGui()
     RenderIslandFileChooser(context->mdciiResourcesManager->islandFiles);
 
     ImGui::Separator();
+
+    ImGui::Checkbox("Render deep water", &m_renderDeepWater);
+    ImGui::Checkbox("Render islands", &m_renderIslands);
 
     m_worldGui->RotateGui();
     m_worldGui->ZoomGui();
@@ -202,12 +222,12 @@ void mdcii::world::GeneratorWorld::RenderIslandFileChooser(std::vector<std::stri
 
         if (ImGui::Button("Add island"))
         {
-            Log::MDCII_LOG_DEBUG("Add island at ({}, {})", x, y);
+            Log::MDCII_LOG_DEBUG("[GeneratorWorld::RenderIslandFileChooser()] Add island at ({}, {})", x, y);
 
             file::IslandFile islandFile{ context->mdciiResourcesManager->islandFiles.at(fileIndex) };
             if (islandFile.LoadJsonFromFile())
             {
-
+                terrain->AddIslandFromJson(islandFile.json, x, y);
             }
         }
     }
@@ -223,4 +243,33 @@ void mdcii::world::GeneratorWorld::CleanUp() const
 
     event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_BUTTON_PRESSED, m_mouseButtonPressed);
     event::EventManager::event_dispatcher.removeListener(event::MdciiEventType::MOUSE_MOVED, m_mouseMoved);
+}
+
+//-------------------------------------------------
+// Json
+//-------------------------------------------------
+
+void mdcii::world::to_json(nlohmann::json& t_json, const GeneratorWorld& t_generatorWorld)
+{
+    // version
+    t_json["version"] = Game::VERSION;
+
+    // world
+    t_json["world"] = { { "width", t_generatorWorld.width }, { "height", t_generatorWorld.height } };
+
+    // islands
+    auto islandsJson = nlohmann::json::array();
+
+    // todo: islands Json
+    /*
+    for (const auto& island : t_generatorWorld.terrain->islands)
+    {
+        // island
+        auto islandJson = nlohmann::json::object();
+        islandJson = *island;
+        islandsJson.push_back(islandJson);
+    }
+    */
+
+    t_json["islands"] = islandsJson;
 }

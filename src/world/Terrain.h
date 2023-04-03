@@ -54,9 +54,9 @@ namespace mdcii::world
     //-------------------------------------------------
 
     /**
-     * Forward declaration class GameWorld.
+     * Forward declaration class World.
      */
-    class GameWorld;
+    class World;
 
     /**
      * Forward declaration class Island.
@@ -96,9 +96,9 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * The parent GameWorld object.
+         * The parent World object.
          */
-        GameWorld* gameWorld{ nullptr };
+        World* world{ nullptr };
 
         /**
          * The Island objects of the Terrain.
@@ -130,9 +130,9 @@ namespace mdcii::world
          * Constructs a new Terrain object.
          *
          * @param t_context Access to shared objects.
-         * @param t_gameWorld The parent GameWorld object.
+         * @param t_world The parent world object.
          */
-        Terrain(std::shared_ptr<state::Context> t_context, GameWorld* t_gameWorld);
+        Terrain(std::shared_ptr<state::Context> t_context, World* t_world);
 
         Terrain(const Terrain& t_other) = delete;
         Terrain(Terrain&& t_other) noexcept = delete;
@@ -151,6 +151,22 @@ namespace mdcii::world
          * @param t_json The Json value.
          */
         void CreateIslandsFromJson(const nlohmann::json& t_json);
+
+        /**
+         * Creates an Island objet from the Json value and adds it to the terrain.
+         *
+         * @param t_json The Json value.
+         */
+        void AddIslandFromJson(const nlohmann::json& t_json);
+
+        /**
+         * Creates an Island objet from the Json value and adds it to the terrain.
+         *
+         * @param t_json The Json value.
+         * @param t_startWorldX The start x world position.
+         * @param t_startWorldY The start y world position.
+         */
+        void AddIslandFromJson(nlohmann::json& t_json, int32_t t_startWorldX, int32_t t_startWorldY);
 
         //-------------------------------------------------
         // Getter

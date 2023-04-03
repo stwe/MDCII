@@ -18,7 +18,7 @@
 
 #include <imgui.h>
 #include "Terrain.h"
-#include "GameWorld.h"
+#include "World.h"
 #include "MdciiAssert.h"
 #include "Island.h"
 #include "MousePicker.h"
@@ -31,13 +31,13 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::Terrain::Terrain(std::shared_ptr<state::Context> t_context, GameWorld* t_gameWorld)
-    : gameWorld{ t_gameWorld }
+mdcii::world::Terrain::Terrain(std::shared_ptr<state::Context> t_context, World* t_world)
+    : world{ t_world }
     , m_context{ std::move(t_context) }
 {
     Log::MDCII_LOG_DEBUG("[Terrain::Terrain()] Create Terrain.");
 
-    MDCII_ASSERT(gameWorld, "[Terrain::Terrain()] Null pointer.")
+    MDCII_ASSERT(world, "[Terrain::Terrain()] Null pointer.")
     MDCII_ASSERT(m_context, "[Terrain::Terrain()] Null pointer.")
 
     AddListeners();
@@ -60,15 +60,28 @@ void mdcii::world::Terrain::CreateIslandsFromJson(const nlohmann::json& t_json)
 
     for (const auto& [k, v] : t_json.items())
     {
-        auto island{ std::make_unique<Island>(m_context, this) };
-        island->InitValuesFromJson(v);
-
-        islands.emplace_back(std::move(island));
+        AddIslandFromJson(v);
     }
 
     MDCII_ASSERT(!islands.empty(), "[Terrain::CreateIslandsFromJson()] Missing islands.")
 
     Log::MDCII_LOG_DEBUG("[Terrain::CreateIslandsFromJson()] {} islands have been created successfully.", islands.size());
+}
+
+void mdcii::world::Terrain::AddIslandFromJson(const nlohmann::json& t_json)
+{
+    auto island{ std::make_unique<Island>(m_context, this) };
+    island->InitValuesFromJson(t_json);
+
+    islands.emplace_back(std::move(island));
+}
+
+void mdcii::world::Terrain::AddIslandFromJson(nlohmann::json& t_json, const int32_t t_startWorldX, const int32_t t_startWorldY)
+{
+    t_json.at("x") = t_startWorldX;
+    t_json.at("y") = t_startWorldY;
+
+    AddIslandFromJson(t_json);
 }
 
 //-------------------------------------------------
@@ -183,14 +196,14 @@ void mdcii::world::Terrain::OnLeftMouseButtonPressed()
     currentSelectedIsland = nullptr;
     for (auto const& island : islands)
     {
-        if (island->IsWorldPositionInAabb(gameWorld->mousePicker->currentPosition))
+        if (island->IsWorldPositionInAabb(world->mousePicker->currentPosition))
         {
             currentSelectedIsland = island.get();
             currentSelectedIsland->currentSelectedTile = nullptr;
 
-            auto& terrainTile{ currentSelectedIsland->terrainLayer->GetTile(currentSelectedIsland->GetIslandPositionFromWorldPosition(gameWorld->mousePicker->currentPosition)) };
-            auto& buildingsTile{ currentSelectedIsland->buildingsLayer->GetTile(currentSelectedIsland->GetIslandPositionFromWorldPosition(gameWorld->mousePicker->currentPosition)) };
-            auto& coastTile{ currentSelectedIsland->coastLayer->GetTile(currentSelectedIsland->GetIslandPositionFromWorldPosition(gameWorld->mousePicker->currentPosition)) };
+            auto& terrainTile{ currentSelectedIsland->terrainLayer->GetTile(currentSelectedIsland->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition)) };
+            auto& buildingsTile{ currentSelectedIsland->buildingsLayer->GetTile(currentSelectedIsland->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition)) };
+            auto& coastTile{ currentSelectedIsland->coastLayer->GetTile(currentSelectedIsland->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition)) };
 
             if (buildingsTile.HasBuilding())
             {
@@ -219,14 +232,14 @@ void mdcii::world::Terrain::OnMouseMoved()
     currentIslandUnderMouse = nullptr;
     for (const auto& island : islands)
     {
-        if (island->IsWorldPositionInAabb(gameWorld->mousePicker->currentPosition))
+        if (island->IsWorldPositionInAabb(world->mousePicker->currentPosition))
         {
             currentIslandUnderMouse = island.get();
             currentIslandUnderMouse->currentTileUnderMouse = nullptr;
 
-            auto& terrainTile{ currentIslandUnderMouse->terrainLayer->GetTile(currentIslandUnderMouse->GetIslandPositionFromWorldPosition(gameWorld->mousePicker->currentPosition)) };
-            auto& buildingsTile{ currentIslandUnderMouse->buildingsLayer->GetTile(currentIslandUnderMouse->GetIslandPositionFromWorldPosition(gameWorld->mousePicker->currentPosition)) };
-            auto& coastTile{ currentIslandUnderMouse->coastLayer->GetTile(currentIslandUnderMouse->GetIslandPositionFromWorldPosition(gameWorld->mousePicker->currentPosition)) };
+            auto& terrainTile{ currentIslandUnderMouse->terrainLayer->GetTile(currentIslandUnderMouse->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition)) };
+            auto& buildingsTile{ currentIslandUnderMouse->buildingsLayer->GetTile(currentIslandUnderMouse->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition)) };
+            auto& coastTile{ currentIslandUnderMouse->coastLayer->GetTile(currentIslandUnderMouse->GetIslandPositionFromWorldPosition(world->mousePicker->currentPosition)) };
 
             if (buildingsTile.HasBuilding())
             {

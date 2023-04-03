@@ -21,6 +21,7 @@
 #include <vector>
 #include "World.h"
 #include "event/EventManager.h"
+#include "data/json.hpp"
 
 //-------------------------------------------------
 // Forward declarations
@@ -58,6 +59,11 @@ namespace mdcii::world
     //-------------------------------------------------
 
     /**
+     * Forward declaration class Terrain.
+     */
+    class Terrain;
+
+    /**
      * Forward declaration class TileAtlas.
      */
     class TileAtlas;
@@ -80,6 +86,11 @@ namespace mdcii::world
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
+
+        /**
+         * The Terrain object contains all islands with their coasts.
+         */
+        std::unique_ptr<Terrain> terrain;
 
         /**
          * An OpenGL texture array for each zoom level.
@@ -156,6 +167,16 @@ namespace mdcii::world
         std::unique_ptr<WorldGui> m_worldGui;
 
         /**
+         * Toggles deep water rendering on and off.
+         */
+        bool m_renderDeepWater{ true };
+
+        /**
+         * Toggles islands rendering on and off.
+         */
+        bool m_renderIslands{ true };
+
+        /**
          * The mouse button pressed listener handle.
          */
         decltype(event::EventManager::event_dispatcher)::Handle m_mouseButtonPressed;
@@ -208,4 +229,10 @@ namespace mdcii::world
          */
         void CleanUp() const;
     };
+
+    //-------------------------------------------------
+    // Json
+    //-------------------------------------------------
+
+    void to_json(nlohmann::json& t_json, const GeneratorWorld& t_generatorWorld);
 }

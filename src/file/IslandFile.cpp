@@ -98,7 +98,8 @@ bool mdcii::file::IslandFile::ValidateObject() const
     Log::MDCII_LOG_DEBUG("[IslandFile::ValidateObject()] Check object values in island file {}.", fileName);
 
     // an island file is for multiple maps and should not store a start position
-    if (json.at("x").get<int32_t>() != -1 || json.at("y").get<int32_t>() != -1)
+    if (json.at("x").get<int32_t>() != -1 || json.at("y").get<int32_t>() != -1 ||
+        json.at("width").get<int32_t>() <= 0 || json.at("height").get<int32_t>() <= 0)
     {
         Log::MDCII_LOG_WARN("[IslandFile::ValidateObject()] Found invalid object values in island file {}.", fileName);
         return false;
