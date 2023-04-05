@@ -16,7 +16,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include <imgui.h>
 #include "MousePicker.h"
 #include "World.h"
 #include "Rotation.h"
@@ -29,6 +28,7 @@
 #include "ogl/resource/ResourceManager.h"
 #include "ogl/resource/stb_image.h"
 #include "data/Text.h"
+#include "vendor/imgui/imgui.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

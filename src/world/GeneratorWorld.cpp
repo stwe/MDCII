@@ -16,7 +16,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include <imgui.h>
 #include "GeneratorWorld.h"
 #include "Game.h"
 #include "Log.h"
@@ -32,6 +31,7 @@
 #include "file/MdciiResourcesManager.h"
 #include "file/IslandFile.h"
 #include "eventpp/utilities/argumentadapter.h"
+#include "vendor/imgui/imgui.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

@@ -17,13 +17,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <filesystem>
-#include <imgui.h>
 #include "MdciiUtils.h"
 #include "Game.h"
 #include "MdciiException.h"
 #include "Log.h"
-#include "world/imgui_stdlib.h"
 #include "data/Text.h"
+#include "vendor/imgui/imgui.h"
+#include "vendor/imgui/imgui_stdlib.h"
 
 //-------------------------------------------------
 // Files

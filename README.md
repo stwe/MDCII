@@ -24,7 +24,6 @@ You must have a copy of the original game installed on your computer.
 * [GLEW](http://glew.sourceforge.net/)
 * [GLM](https://github.com/g-truc/glm)
 * [spdlog](https://github.com/gabime/spdlog)
-* [Dear ImGui](https://github.com/ocornut/imgui)
 * [Magic Enum C++](https://github.com/Neargye/magic_enum)
 * [FreeType](https://freetype.org/)
 * [Protocol Buffers](https://github.com/protocolbuffers/protobuf)

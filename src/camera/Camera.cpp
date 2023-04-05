@@ -17,13 +17,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <glm/gtc/matrix_transform.hpp>
-#include <imgui.h>
 #include "Game.h"
 #include "Camera.h"
 #include "Log.h"
 #include "eventpp/utilities/argumentadapter.h"
 #include "physics/Aabb.h"
 #include "data/Text.h"
+#include "vendor/imgui/imgui.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

@@ -19,6 +19,7 @@
 #pragma once
 
 #include "data/json.hpp"
+#include "vendor/imgui/imgui.h"
 
 //-------------------------------------------------
 // Forward declarations

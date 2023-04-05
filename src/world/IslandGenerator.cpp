@@ -17,7 +17,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <random>
-#include <imgui.h>
 #include "IslandGenerator.h"
 #include "FastNoiseLite.h"
 #include "MdciiAssert.h"
@@ -26,6 +25,7 @@
 #include "data/BuildingIds.h"
 #include "layer/TerrainLayer.h"
 #include "file/IslandFile.h"
+#include "vendor/imgui/imgui.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

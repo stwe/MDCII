@@ -22,8 +22,8 @@
 #include "Log.h"
 #include "MdciiException.h"
 #include "event/EventManager.h"
-#include "imgui/imgui_impl_opengl3.h"
-#include "imgui/imgui_impl_glfw.h"
+#include "vendor/imgui/imgui_impl_opengl3.h"
+#include "vendor/imgui/imgui_impl_glfw.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
