@@ -18,13 +18,17 @@ You must have a copy of the original game installed on your computer.
 
 ## Compiling MDCII
 
+I switched the package manager from Conan to Vcpkg, which makes the package management nice and clean.
+Clion supports Vcpkg since the latest version.
+However, MDCII must first be adapted to the latest ImGui, so it is currently not usable.
+
 ### Requirements
 
 * [GLFW](https://www.glfw.org/)
 * [GLEW](http://glew.sourceforge.net/)
 * [GLM](https://github.com/g-truc/glm)
 * [spdlog](https://github.com/gabime/spdlog)
-* [Magic Enum C++](https://github.com/Neargye/magic_enum)
+* [imgui](https://github.com/ocornut/imgui)
 * [FreeType](https://freetype.org/)
 * [Protocol Buffers](https://github.com/protocolbuffers/protobuf)
 * C++ 17 Compiler (Gcc or MSVC)
@@ -37,15 +41,15 @@ You must have a copy of the original game installed on your computer.
 
 #### Win with Visual Studio 2022 and Premake
 
-The process is switched to Conan 2.0.
+
 
 #### Win with MinGW64 and Cmake
 
-The process is switched to Conan 2.0.
+
 
 #### Linux with Cmake
 
-The process is switched to Conan 2.0.
+
 
 ## Running MDCII
 
@@ -58,14 +62,9 @@ In the MDCII `config.ini` the paths must be adapted.
 
 **The first start takes longer, because the `haeuser.cod` will be parsed.**
 
-## Devlog
-
-**28.01.2023** Add a tag for v0.1.
-
 ## Roadmap MDCII v0.2
 
 * refactoring menus and add missing translations
-* World Generator2 is renamed to IslandGenerator; the files created in this way becomes a new file extension.
 * a new editor combines the islands created with the IslandGenerator into a map/world
 * it should be possible to build roads; another Layer may be created for this
 * animations should be possible showing how residents brings goods from A to B; for this the A* algorithm can be implemented

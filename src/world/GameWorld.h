@@ -18,10 +18,10 @@
 
 #pragma once
 
-#include <magic_enum.hpp>
 #include "World.h"
 #include "event/EventManager.h"
-#include "data/json.hpp"
+#include "vendor/nlohmann/json.hpp"
+#include "vendor/enum/magic_enum.hpp"
 
 //-------------------------------------------------
 // Forward declarations

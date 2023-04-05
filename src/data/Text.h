@@ -18,11 +18,11 @@
 
 #pragma once
 
-#include <magic_enum.hpp>
 #include <string>
 #include <map>
 #include <optional>
-#include "json.hpp"
+#include "vendor/nlohmann/json.hpp"
+#include "vendor/enum/magic_enum.hpp"
 
 namespace mdcii::data
 {

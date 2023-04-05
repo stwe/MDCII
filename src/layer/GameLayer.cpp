@@ -21,7 +21,7 @@
 #include "state/State.h"
 #include "ogl/buffer/Ssbo.h"
 #include "world/World.h"
-#include "eventpp/utilities/argumentadapter.h"
+#include "vendor/eventpp/utilities/argumentadapter.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

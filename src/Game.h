@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "ini/ini.h"
-#include "ecs/entt.hpp"
+#include "vendor/ini/ini.h"
+#include "vendor/entt/entt.hpp"
 
 //-------------------------------------------------
 // Forward declarations

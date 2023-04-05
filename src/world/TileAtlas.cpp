@@ -21,8 +21,8 @@
 #include "Log.h"
 #include "MdciiException.h"
 #include "ogl/resource/TextureUtils.h"
-#include "ogl/resource/stb_image.h"
 #include "ogl/OpenGL.h"
+#include "vendor/stb/stb_image.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

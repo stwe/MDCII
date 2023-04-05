@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "data/json.hpp"
-#include "vendor/imgui/imgui.h"
+#include <imgui.h>
+#include "vendor/nlohmann/json.hpp"
 
 //-------------------------------------------------
 // Forward declarations

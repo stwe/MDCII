@@ -21,7 +21,7 @@
 #include <vector>
 #include "World.h"
 #include "event/EventManager.h"
-#include "data/json.hpp"
+#include "vendor/nlohmann/json.hpp"
 
 //-------------------------------------------------
 // Forward declarations

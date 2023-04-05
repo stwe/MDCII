@@ -19,9 +19,9 @@
 #pragma once
 
 #include <glm/vec2.hpp>
-#include "data/json.hpp"
 #include "event/EventManager.h"
 #include "data/Buildings.h"
+#include "vendor/nlohmann/json.hpp"
 
 //-------------------------------------------------
 // Forward declarations

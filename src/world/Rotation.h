@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include <magic_enum.hpp>
 #include <glm/vec2.hpp>
 #include "MdciiException.h"
+#include "vendor/enum/magic_enum.hpp"
 
 namespace mdcii::world
 {

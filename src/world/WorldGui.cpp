@@ -16,6 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <imgui.h>
 #include "WorldGui.h"
 #include "GameWorld.h"
 #include "Terrain.h"
@@ -28,7 +29,6 @@
 #include "file/OriginalResourcesManager.h"
 #include "file/SavegameFile.h"
 #include "layer/TerrainLayer.h"
-#include "vendor/imgui/imgui.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

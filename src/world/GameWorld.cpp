@@ -16,13 +16,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <imgui.h>
 #include "GameWorld.h"
 #include "Game.h"
 #include "MdciiAssert.h"
 #include "TileAtlas.h"
 #include "WorldGui.h"
 #include "MousePicker.h"
-#include "eventpp/utilities/argumentadapter.h"
 #include "state/State.h"
 #include "state/StateStack.h"
 #include "renderer/TerrainRenderer.h"
@@ -33,7 +33,7 @@
 #include "data/Text.h"
 #include "file/SavegameFile.h"
 #include "file/MapFile.h"
-#include "vendor/imgui/imgui.h"
+#include "vendor/eventpp/utilities/argumentadapter.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

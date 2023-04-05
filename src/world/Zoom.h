@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <magic_enum.hpp>
 #include "MdciiUtils.h"
+#include "vendor/enum/magic_enum.hpp"
 
 namespace mdcii::world
 {

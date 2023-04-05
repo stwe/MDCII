@@ -16,16 +16,16 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <imgui.h>
 #include "Terrain.h"
 #include "World.h"
 #include "MdciiAssert.h"
 #include "Island.h"
 #include "MousePicker.h"
 #include "state/State.h"
-#include "eventpp/utilities/argumentadapter.h"
 #include "layer/TerrainLayer.h"
 #include "file/OriginalResourcesManager.h"
-#include "vendor/imgui/imgui.h"
+#include "vendor/eventpp/utilities/argumentadapter.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

@@ -12,10 +12,9 @@ file(GLOB_RECURSE SRC_FILES
 find_package(glfw3 CONFIG REQUIRED)
 find_package(GLEW CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
-find_package(magic_enum CONFIG REQUIRED)
-find_package(Freetype CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+find_package(Freetype CONFIG REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
 
 message("Building with CMake version: ${CMAKE_VERSION}")
@@ -31,14 +30,14 @@ else()
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src)
+
 target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW)
 target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
-target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog)
-target_link_libraries(${PROJECT_NAME} PRIVATE magic_enum::magic_enum)
-target_link_libraries(${PROJECT_NAME} PRIVATE freetype)
 target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
-target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::protobuf protobuf::libprotoc protobuf::libprotobuf)
+target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+target_link_libraries(${PROJECT_NAME} PRIVATE freetype)
+target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
 
 # copy config.ini
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

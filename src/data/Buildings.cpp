@@ -16,11 +16,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include <magic_enum.hpp>
+#include <imgui.h>
 #include "Buildings.h"
 #include "Log.h"
 #include "cod/CodParser.h"
-#include "vendor/imgui/imgui.h"
+#include "vendor/enum/magic_enum.hpp"
 
 mdcii::data::Buildings::Buildings(const std::string& t_codFilePath)
 {

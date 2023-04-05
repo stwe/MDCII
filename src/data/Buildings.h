@@ -20,6 +20,8 @@
 
 #include <map>
 #include <vector>
+#include <cstdint>
+#include <string>
 
 //-------------------------------------------------
 // Forward declarations

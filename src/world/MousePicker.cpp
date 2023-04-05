@@ -16,19 +16,19 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <imgui.h>
 #include "MousePicker.h"
 #include "World.h"
 #include "Rotation.h"
 #include "MdciiAssert.h"
 #include "Game.h"
-#include "eventpp/utilities/argumentadapter.h"
 #include "renderer/TileRenderer.h"
 #include "renderer/RenderUtils.h"
 #include "state/State.h"
 #include "ogl/resource/ResourceManager.h"
-#include "ogl/resource/stb_image.h"
 #include "data/Text.h"
-#include "vendor/imgui/imgui.h"
+#include "vendor/eventpp/utilities/argumentadapter.h"
+#include "vendor/stb/stb_image.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

@@ -17,11 +17,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <fstream>
-#include <magic_enum.hpp>
 #include "Text.h"
 #include "Game.h"
 #include "Log.h"
 #include "MdciiException.h"
+#include "vendor/enum/magic_enum.hpp"
 
 //-------------------------------------------------
 // Init

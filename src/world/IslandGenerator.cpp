@@ -16,6 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <imgui.h>
 #include <random>
 #include "IslandGenerator.h"
 #include "FastNoiseLite.h"
@@ -25,7 +26,6 @@
 #include "data/BuildingIds.h"
 #include "layer/TerrainLayer.h"
 #include "file/IslandFile.h"
-#include "vendor/imgui/imgui.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

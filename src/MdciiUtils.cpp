@@ -16,13 +16,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <imgui.h>
 #include <filesystem>
 #include "MdciiUtils.h"
 #include "Game.h"
 #include "MdciiException.h"
 #include "Log.h"
 #include "data/Text.h"
-#include "vendor/imgui/imgui.h"
 #include "vendor/imgui/imgui_stdlib.h"
 
 //-------------------------------------------------

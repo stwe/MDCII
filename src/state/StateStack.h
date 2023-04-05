@@ -18,11 +18,11 @@
 
 #pragma once
 
-#include <magic_enum.hpp>
 #include <vector>
 #include <unordered_map>
 #include "StateId.h"
 #include "Log.h"
+#include "vendor/enum/magic_enum.hpp"
 
 //-------------------------------------------------
 // StateStack

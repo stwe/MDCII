@@ -19,8 +19,8 @@
 #pragma once
 
 #include "Event.h"
-#include "eventpp/eventdispatcher.h"
 #include "ogl/OpenGL.h"
+#include "vendor/eventpp/eventdispatcher.h"
 
 //-------------------------------------------------
 // EventManager
