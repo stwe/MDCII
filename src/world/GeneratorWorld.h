@@ -30,6 +30,11 @@
 namespace mdcii::layer
 {
     /**
+     * Forward declaration struct Tile.
+     */
+    struct Tile;
+
+    /**
      * Forward declaration class WorldLayer.
      */
     class WorldLayer;
@@ -175,6 +180,11 @@ namespace mdcii::world
          * Toggles islands rendering on and off.
          */
         bool m_renderIslands{ true };
+
+        /**
+         * Pointer to the currently selected Tile object.
+         */
+        layer::Tile* m_currentSelectedTile{ nullptr };
 
         /**
          * The mouse button pressed listener handle.

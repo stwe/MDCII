@@ -140,6 +140,13 @@ void mdcii::world::GeneratorWorld::RenderImGui()
     m_worldGui->RotateGui();
     m_worldGui->ZoomGui();
 
+    ImGui::Separator();
+
+    if (m_currentSelectedTile)
+    {
+        m_currentSelectedTile->RenderImGui();
+    }
+
     ImGui::End();
 
     mousePicker->RenderImGui();
@@ -155,6 +162,16 @@ void mdcii::world::GeneratorWorld::OnLeftMouseButtonPressed()
     if (ImGui::GetIO().WantCaptureMouse)
     {
         return;
+    }
+
+    // todo: highlight the tile so that you can see where the island will be inserted
+    if (IsPositionInWorld(mousePicker->currentPosition))
+    {
+        const auto index{ worldLayer->GetMapIndex(mousePicker->currentPosition, Rotation::DEG0) };
+        if (const auto& tile{ worldLayer->tiles.at(index) }; tile->HasBuilding())
+        {
+            m_currentSelectedTile = tile.get();
+        }
     }
 }
 
