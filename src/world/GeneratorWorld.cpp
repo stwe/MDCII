@@ -220,7 +220,7 @@ void mdcii::world::GeneratorWorld::AddListeners()
 // ImGui
 //-------------------------------------------------
 
-void mdcii::world::GeneratorWorld::RenderIslandFileChooser(std::vector<std::string>& t_files)
+void mdcii::world::GeneratorWorld::RenderIslandFileChooser(std::vector<std::string>& t_files) const
 {
     static int32_t fileIndex{ 0 };
     static int32_t x{ 0 };
@@ -241,8 +241,7 @@ void mdcii::world::GeneratorWorld::RenderIslandFileChooser(std::vector<std::stri
         {
             Log::MDCII_LOG_DEBUG("[GeneratorWorld::RenderIslandFileChooser()] Add island at ({}, {})", x, y);
 
-            file::IslandFile islandFile{ context->mdciiResourcesManager->islandFiles.at(fileIndex) };
-            if (islandFile.LoadJsonFromFile())
+            if (file::IslandFile islandFile{ context->mdciiResourcesManager->islandFiles.at(fileIndex) }; islandFile.LoadJsonFromFile())
             {
                 terrain->AddIslandFromJson(islandFile.json, x, y);
             }

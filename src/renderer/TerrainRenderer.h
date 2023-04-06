@@ -134,14 +134,14 @@ namespace mdcii::renderer
          * @param t_island The Island object.
          * @param t_tile The Tile object of the building to delete.
          */
-        void DeleteBuildingFromGpu(world::Island& t_island, const layer::Tile& t_tile);
+        void DeleteBuildingFromGpu(world::Island& t_island, const layer::Tile& t_tile) const;
 
         /**
          * Deletes a building from the Gpu.
          *
          * @param t_terrain The Terrain object for access to the temp building tiles (tilesToAdd).
          */
-        void DeleteBuildingFromGpu(world::Terrain& t_terrain);
+        void DeleteBuildingFromGpu(world::Terrain& t_terrain) const;
 
         /**
          * Deletes a building from the Gpu.
@@ -149,7 +149,7 @@ namespace mdcii::renderer
          * @param t_island The Island object.
          * @param t_tileIndices The Tile object indices of the building to delete.
          */
-        void DeleteBuildingFromGpu(world::Island& t_island, const std::vector<int32_t>& t_tileIndices);
+        void DeleteBuildingFromGpu(world::Island& t_island, const std::vector<int32_t>& t_tileIndices) const;
 
         /**
          * Adds a building to the Gpu.
@@ -162,7 +162,7 @@ namespace mdcii::renderer
             const layer::Tile& t_selectedBuildingTile,
             const glm::ivec2& t_startWorldPosition,
             world::Terrain& t_terrain
-        );
+        ) const;
 
         /**
          * Updates the Gpu data of a Layer object.
@@ -177,13 +177,13 @@ namespace mdcii::renderer
          */
         void UpdateGpuData(
             int32_t t_instance,
-            layer::TerrainLayer& t_terrainLayer,
+            const layer::TerrainLayer& t_terrainLayer,
             world::Zoom t_zoom,
             world::Rotation t_rotation,
             const glm::mat4& t_modelMatrix,
             int32_t t_gfxNumber,
             int32_t t_buildingId
-        );
+        ) const;
 
         //-------------------------------------------------
         // Remove / add building - Cpu
@@ -202,7 +202,7 @@ namespace mdcii::renderer
          * @param t_island The Island object.
          * @param t_tileIndices The tile indices of the building.
          */
-        static void DeleteBuildingFromCpu(world::Island& t_island, const std::vector<int32_t>& t_tileIndices);
+        static void DeleteBuildingFromCpu(const world::Island& t_island, const std::vector<int32_t>& t_tileIndices);
 
         /**
          * Adds a building to the Cpu.

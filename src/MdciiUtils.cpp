@@ -121,12 +121,12 @@ std::string mdcii::to_upper_case(const std::string& t_string)
 [[maybe_unused]] void mdcii::toggle_imgui_button(const std::string& t_strId, bool* t_v)
 {
     auto const* colors{ ImGui::GetStyle().Colors };
-    auto pos{ ImGui::GetCursorScreenPos() };
+    const auto pos{ ImGui::GetCursorScreenPos() };
     auto* drawList{ ImGui::GetWindowDrawList() };
 
-    auto height{ ImGui::GetFrameHeight() };
-    auto width{ height * 1.55f };
-    auto radius{ height * 0.5f };
+    const auto height{ ImGui::GetFrameHeight() };
+    const auto width{ height * 1.55f };
+    const auto radius{ height * 0.5f };
 
     ImGui::InvisibleButton(t_strId.c_str(), ImVec2(width, height));
 
@@ -144,10 +144,7 @@ bool mdcii::begin_centered(const char* t_name)
     const auto center{ ImGui::GetMainViewport()->GetCenter() };
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
 
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoDecoration
-        | ImGuiWindowFlags_AlwaysAutoResize
-        | ImGuiWindowFlags_NoSavedSettings;
+    constexpr ImGuiWindowFlags flags{ ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings };
 
     return ImGui::Begin(t_name, nullptr, flags);
 }
@@ -159,9 +156,7 @@ bool mdcii::begin_right(const char* t_name, const float t_offset)
         ImGuiCond_Appearing
     );
 
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoDecoration
-        | ImGuiWindowFlags_NoSavedSettings;
+    constexpr ImGuiWindowFlags flags{ ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings };
 
     return ImGui::Begin(t_name, nullptr, flags);
 }
@@ -173,9 +168,7 @@ bool mdcii::begin_bottom_right(const char* t_name, const float t_offset)
         ImGuiCond_Appearing
     );
 
-    ImGuiWindowFlags flags = ImGuiWindowFlags_NoMove
-        | ImGuiWindowFlags_NoDecoration
-        | ImGuiWindowFlags_NoSavedSettings;
+    constexpr ImGuiWindowFlags flags{ ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings };
 
     return ImGui::Begin(t_name, nullptr, flags);
 }
@@ -183,7 +176,7 @@ bool mdcii::begin_bottom_right(const char* t_name, const float t_offset)
 void mdcii::save_file_button(const char* t_label, std::string* t_str)
 {
     ImGui::InputText(t_label, t_str, ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CallbackCharFilter, [](ImGuiInputTextCallbackData* t_data) {
-        if (auto c{ t_data->EventChar }; (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+        if (const auto c{ t_data->EventChar }; (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
         {
             return 0;
         }
@@ -209,7 +202,7 @@ void mdcii::file_chooser(std::vector<std::string>& t_files, int* t_currentItem)
 
 bool mdcii::vector_getter(void* t_vec, const int32_t t_index, const char** t_outText)
 {
-    auto &vector{ *static_cast<std::vector<std::string>*>(t_vec) };
+    const auto &vector{ *static_cast<std::vector<std::string>*>(t_vec) };
     if (t_index < 0 || t_index >= static_cast<int>(vector.size()))
     {
         return false;

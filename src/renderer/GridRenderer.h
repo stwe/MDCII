@@ -98,6 +98,7 @@ namespace mdcii::renderer
          * Renders a GridLayer with the specified zoom and rotation.
          *
          * @param t_modelMatricesSsbos The model matrices Ssbos.
+         * @param t_instancesToRender The number of instances to render.
          * @param t_zoom The zoom to render for.
          * @param t_rotation The rotation to render for.
          */

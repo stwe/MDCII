@@ -432,15 +432,15 @@ namespace mdcii::world
         // Bitmasking
         //-------------------------------------------------
 
-        int32_t GetNorthValue(int32_t t_x, int32_t t_y);
-        int32_t GetEastValue(int32_t t_x, int32_t t_y);
-        int32_t GetSouthValue(int32_t t_x, int32_t t_y);
-        int32_t GetWestValue(int32_t t_x, int32_t t_y);
+        [[nodiscard]] int32_t GetNorthValue(int32_t t_x, int32_t t_y) const;
+        [[nodiscard]] int32_t GetEastValue(int32_t t_x, int32_t t_y) const;
+        [[nodiscard]] int32_t GetSouthValue(int32_t t_x, int32_t t_y) const;
+        [[nodiscard]] int32_t GetWestValue(int32_t t_x, int32_t t_y) const;
 
-        int32_t GetNorthWestValue(int32_t t_x, int32_t t_y);
-        int32_t GetNorthEastValue(int32_t t_x, int32_t t_y);
-        int32_t GetSouthWestValue(int32_t t_x, int32_t t_y);
-        int32_t GetSouthEastValue(int32_t t_x, int32_t t_y);
+        [[nodiscard]] int32_t GetNorthWestValue(int32_t t_x, int32_t t_y) const;
+        [[nodiscard]] int32_t GetNorthEastValue(int32_t t_x, int32_t t_y) const;
+        [[nodiscard]] int32_t GetSouthWestValue(int32_t t_x, int32_t t_y) const;
+        [[nodiscard]] int32_t GetSouthEastValue(int32_t t_x, int32_t t_y) const;
 
         //-------------------------------------------------
         // ImGui
@@ -553,14 +553,14 @@ namespace mdcii::world
          *
          * @param t_terrainTiles The Tile objects.
          */
-        void CreateTerrainTiles(std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles);
+        void CreateTerrainTiles(std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles) const;
 
         /**
          * Creates Tile objects for the CoastLayer.
          *
          * @param t_coastTiles The Tile objects.
          */
-        void CreateCoastTiles(std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles);
+        void CreateCoastTiles(std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles) const;
 
         /**
          * Creates a Tile.

@@ -106,7 +106,7 @@ namespace mdcii::world
         /**
          * Shows a menu to save the game.
          */
-        void SaveGameGui();
+        void SaveGameGui() const;
 
     protected:
 

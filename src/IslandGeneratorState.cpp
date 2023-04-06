@@ -31,7 +31,7 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::IslandGeneratorState::IslandGeneratorState(mdcii::state::StateId t_id, std::shared_ptr<state::Context> t_context)
+mdcii::IslandGeneratorState::IslandGeneratorState(const state::StateId t_id, std::shared_ptr<state::Context> t_context)
     : State(t_id, std::move(t_context))
 {
     Log::MDCII_LOG_DEBUG("[IslandGeneratorState::IslandGeneratorState()] Create IslandGeneratorState.");

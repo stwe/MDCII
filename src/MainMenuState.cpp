@@ -36,8 +36,6 @@ mdcii::MainMenuState::MainMenuState(const state::StateId t_id, std::shared_ptr<s
     Log::MDCII_LOG_DEBUG("[MainMenuState::MainMenuState()] Create MainMenuState.");
 
     MDCII_ASSERT(context, "[MainMenuState::MainMenuState()] Null pointer.")
-
-    Init();
 }
 
 mdcii::MainMenuState::~MainMenuState() noexcept
@@ -123,15 +121,4 @@ void mdcii::MainMenuState::RenderImGui()
     ImGui::End();
 
     ogl::Window::ImGuiEnd();
-}
-
-//-------------------------------------------------
-// Init
-//-------------------------------------------------
-
-void mdcii::MainMenuState::Init()
-{
-    Log::MDCII_LOG_DEBUG("[MainMenuState::Init()] Initializing main menu state...");
-
-    Log::MDCII_LOG_DEBUG("[MainMenuState::Init()] The main menu state was successfully initialized.");
 }

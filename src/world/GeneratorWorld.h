@@ -228,7 +228,7 @@ namespace mdcii::world
          *
          * @param t_files A list of island files.
          */
-        void RenderIslandFileChooser(std::vector<std::string>& t_files);
+        void RenderIslandFileChooser(std::vector<std::string>& t_files) const;
 
         //-------------------------------------------------
         // Clean up

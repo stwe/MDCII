@@ -133,7 +133,7 @@ void mdcii::world::IslandGenerator::CalcMapTypes(const int32_t t_seed, const flo
                 d = 1;
             }
 
-            auto e{ fn.GetNoise(static_cast<double>(x), static_cast<double>(y)) / 2.0 + 0.5 };
+            const auto e{ static_cast<double>(fn.GetNoise(static_cast<double>(x), static_cast<double>(y))) / 2.0 + 0.5 };
 
             const auto lerp = [](const auto t_x, const auto t_y, const auto t_t) {
                 return t_x * (1.0 - t_t) + t_y * t_t;
@@ -158,7 +158,7 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues()
 {
     Log::MDCII_LOG_DEBUG("[IslandGenerator::CalcBitmaskValues()] Calc bitmask values.");
 
-    m_bitmaskValues.resize(m_width * m_height);
+    m_bitmaskValues.resize(static_cast<size_t>(m_width) * m_height);
     std::fill(m_bitmaskValues.begin(), m_bitmaskValues.end(), 0);
 
     AddMapType(MapType::EMBANKMENT);
@@ -171,7 +171,7 @@ void mdcii::world::IslandGenerator::CalcBitmaskValues()
 // Bitmasking
 //-------------------------------------------------
 
-int32_t mdcii::world::IslandGenerator::GetNorthValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetNorthValue(const int32_t t_x, const int32_t t_y) const
 {
     if (t_y - 1 < 0)
     {
@@ -186,7 +186,7 @@ int32_t mdcii::world::IslandGenerator::GetNorthValue(const int32_t t_x, const in
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetEastValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetEastValue(const int32_t t_x, const int32_t t_y) const
 {
     if (t_x + 1 >= m_width)
     {
@@ -201,7 +201,7 @@ int32_t mdcii::world::IslandGenerator::GetEastValue(const int32_t t_x, const int
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetSouthValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetSouthValue(const int32_t t_x, const int32_t t_y) const
 {
     if (t_y + 1 >= m_height)
     {
@@ -216,7 +216,7 @@ int32_t mdcii::world::IslandGenerator::GetSouthValue(const int32_t t_x, const in
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetWestValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetWestValue(const int32_t t_x, const int32_t t_y) const
 {
     if (t_x - 1 < 0)
     {
@@ -231,7 +231,7 @@ int32_t mdcii::world::IslandGenerator::GetWestValue(const int32_t t_x, const int
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetNorthWestValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetNorthWestValue(const int32_t t_x, const int32_t t_y) const
 {
     if (t_x - 1 < 0 || t_y - 1 < 0)
     {
@@ -246,7 +246,7 @@ int32_t mdcii::world::IslandGenerator::GetNorthWestValue(const int32_t t_x, cons
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetNorthEastValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetNorthEastValue(const int32_t t_x, const int32_t t_y) const
 {
     if (t_x + 1 >= m_width || t_y - 1 < 0)
     {
@@ -261,7 +261,7 @@ int32_t mdcii::world::IslandGenerator::GetNorthEastValue(const int32_t t_x, cons
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetSouthWestValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetSouthWestValue(const int32_t t_x, const int32_t t_y) const
 {
     if (t_x - 1 < 0 || t_y + 1 >= m_height)
     {
@@ -276,7 +276,7 @@ int32_t mdcii::world::IslandGenerator::GetSouthWestValue(const int32_t t_x, cons
     return 0;
 }
 
-int32_t mdcii::world::IslandGenerator::GetSouthEastValue(const int32_t t_x, const int32_t t_y)
+int32_t mdcii::world::IslandGenerator::GetSouthEastValue(const int32_t t_x, const int32_t t_y) const
 {
     if (t_x + 1 >= m_width || t_y + 1 >= m_height)
     {
@@ -522,7 +522,7 @@ void mdcii::world::IslandGenerator::RenderEditMenuImGui()
 {
     if (ImGui::BeginCombo("Set map type", MAP_TYPES_STRINGS.at(magic_enum::enum_integer(m_selMapType))))
     {
-        for (auto i{ 0 }; i < MAP_TYPES_STRINGS.size(); ++i)
+        for (auto i{ 0u }; i < MAP_TYPES_STRINGS.size(); ++i)
         {
             const auto mapTypeOpt{ magic_enum::enum_cast<MapType>(i) };
             auto mapType{ MapType::WATER };
@@ -861,7 +861,7 @@ void mdcii::world::IslandGenerator::UpdateBySelection(const int32_t t_index)
 // Tiles
 //-------------------------------------------------
 
-void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles)
+void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles) const
 {
     Log::MDCII_LOG_DEBUG("[IslandGenerator::CreateTerrainTiles()] Create terrain tiles.");
 
@@ -966,7 +966,7 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_p
     }
 }
 
-void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles)
+void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles) const
 {
     Log::MDCII_LOG_DEBUG("[IslandGenerator::CreateCoastTiles()] Create coast tiles.");
 
@@ -1099,7 +1099,7 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
 
 std::unique_ptr<mdcii::layer::Tile> mdcii::world::IslandGenerator::CreateTile(const int32_t t_id, const int32_t t_worldX, const int32_t t_worldY, const Rotation t_rotation)
 {
-    std::unique_ptr<mdcii::layer::Tile> tile{ std::make_unique<layer::Tile>() };
+    auto tile{ std::make_unique<layer::Tile>() };
     tile->buildingId = t_id;
     tile->rotation = t_rotation;
     tile->x = 0;

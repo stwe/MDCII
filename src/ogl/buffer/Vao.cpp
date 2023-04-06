@@ -18,7 +18,6 @@
 
 #include "Vao.h"
 #include "Vbo.h"
-#include "Ssbo.h"
 #include "MdciiAssert.h"
 #include "ogl/OpenGL.h"
 

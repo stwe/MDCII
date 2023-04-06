@@ -27,8 +27,8 @@ std::vector<std::string> mdcii::cod::CodHelper::RegexMatch(const std::string& t_
 {
     std::vector<std::string> ret;
     const std::regex expr{ t_regex };
-    std::smatch what;
-    if (std::regex_match(t_str, what, expr))
+
+    if (std::smatch what; std::regex_match(t_str, what, expr))
     {
         for (const auto& i : what)
         {
@@ -43,8 +43,8 @@ std::vector<std::string> mdcii::cod::CodHelper::RegexSearch(const std::string& t
 {
     std::vector<std::string> ret;
     const std::regex expr{ t_regex };
-    std::smatch what;
-    if (std::regex_search(t_str, what, expr))
+
+    if (std::smatch what; std::regex_search(t_str, what, expr))
     {
         for (const auto& i : what)
         {
@@ -68,8 +68,8 @@ std::string mdcii::cod::CodHelper::TabsToSpaces(const std::string& t_str)
 int mdcii::cod::CodHelper::CountFrontSpaces(const std::string& t_str)
 {
     auto numberOfSpaces{ 0 };
-    const auto result{ RegexSearch("(\\s*)(\\w+)", t_str) };
-    if (!result.empty())
+
+    if (const auto result{ RegexSearch("(\\s*)(\\w+)", t_str) }; !result.empty())
     {
         for (auto& iter : result[1])
         {
@@ -120,8 +120,7 @@ bool mdcii::cod::CodHelper::IsEmpty(const std::string& t_str)
 
 bool mdcii::cod::CodHelper::IsSubstring(const std::string& t_str, const std::string& t_substr)
 {
-    const std::size_t found{ t_str.find(t_substr) };
-    if (found != std::string::npos)
+    if (const std::size_t found{ t_str.find(t_substr) }; found != std::string::npos)
     {
         return true;
     }
@@ -134,6 +133,7 @@ std::vector<std::string> mdcii::cod::CodHelper::SplitByDelimiter(const std::stri
     std::vector<std::string> strings;
     size_t start;
     size_t end{ 0 };
+
     while ((start = t_str.find_first_not_of(t_delim, end)) != std::string::npos)
     {
         end = t_str.find(t_delim, start);

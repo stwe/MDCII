@@ -184,7 +184,7 @@ void mdcii::ogl::resource::ShaderProgram::CheckCompileStatus(const uint32_t t_sh
         glGetShaderiv(t_shaderId, GL_INFO_LOG_LENGTH, &maxLength);
 
         std::vector<char> errorLog(maxLength);
-        glGetShaderInfoLog(t_shaderId, maxLength, &maxLength, &errorLog[0]);
+        glGetShaderInfoLog(t_shaderId, maxLength, &maxLength, errorLog.data());
 
         glDeleteShader(t_shaderId);
 
@@ -273,7 +273,7 @@ void mdcii::ogl::resource::ShaderProgram::LinkAndValidateProgram() const
         glGetProgramiv(id, GL_INFO_LOG_LENGTH, &maxLength);
 
         std::vector<char> infoLog(maxLength);
-        glGetProgramInfoLog(id, maxLength, &maxLength, &infoLog[0]);
+        glGetProgramInfoLog(id, maxLength, &maxLength, infoLog.data());
 
         CleanUp();
 
@@ -308,7 +308,7 @@ void mdcii::ogl::resource::ShaderProgram::LinkAndValidateProgram() const
         glGetProgramiv(id, GL_INFO_LOG_LENGTH, &maxLength);
 
         std::vector<char> infoLog(maxLength);
-        glGetProgramInfoLog(id, maxLength, &maxLength, &infoLog[0]);
+        glGetProgramInfoLog(id, maxLength, &maxLength, infoLog.data());
 
         CleanUp();
 

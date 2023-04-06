@@ -299,8 +299,7 @@ void mdcii::cod::CodParser::ParseFile()
                             }
                             else
                             {
-                                auto i{ ConstantExists(v) };
-                                if (i != -1)
+                                if (auto i{ ConstantExists(v) }; i != -1)
                                 {
                                     auto var{ GetVariable(v) };
                                     if (var.Value_case() == cod_pb::Variable::ValueCase::kValueInt)
@@ -662,10 +661,9 @@ cod_pb::Object* mdcii::cod::CodParser::CreateOrReuseObject(const std::string& t_
 {
     if (m_currentObject)
     {
-        auto optionalObj{ GetSubObject(m_currentObject, t_name) };
-        if (optionalObj)
+        if (const auto optionalObj{ GetSubObject(m_currentObject, t_name) })
         {
-            auto o{ optionalObj.value() };
+            auto* o{ optionalObj.value() };
             if (t_addToStack)
             {
                 AddToStack(o, t_numberObject, t_spaces);
@@ -747,7 +745,7 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
         {
             // Searching for some characters followed by a + or - sign and some digits.
             // example: VALUE+20
-            std::vector<std::string> result{ CodHelper::RegexSearch("(\\w+)(\\+|-)(\\d+)", t_value) };
+            auto result{ CodHelper::RegexSearch("(\\w+)(\\+|-)(\\d+)", t_value) };
             if (!result.empty())
             {
                 constant = result[1];
@@ -758,7 +756,7 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
         else
         {
             // Example '+20'
-            std::vector<std::string> result{ CodHelper::RegexSearch("(\\+|-)(\\d+)", t_value) };
+            auto result{ CodHelper::RegexSearch("(\\+|-)(\\d+)", t_value) };
             if (!result.empty())
             {
                 constant = t_key;
@@ -824,7 +822,7 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
     {
         // Check if value has no preceding characters, a possible + or - sign
         // and one or more digits -> it's an int
-        std::vector<std::string> result{ CodHelper::RegexMatch("^\\w*[\\-+]?\\d+", t_value) };
+        auto result{ CodHelper::RegexMatch("^\\w*[\\-+]?\\d+", t_value) };
         if (!result.empty())
         {
             ret.set_value_int(std::stoi(t_value));
@@ -835,7 +833,7 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
     {
         // Check if value has no preceding characters, a possible + or - sign and one or more digits
         // followed by a dot and another one or more digits -> it's a float
-        std::vector<std::string> result{ CodHelper::RegexMatch("^\\w+[\\-+]?\\d+\\.\\d+", t_value) };
+        auto result{ CodHelper::RegexMatch("^\\w+[\\-+]?\\d+\\.\\d+", t_value) };
         if (!result.empty())
         {
             ret.set_value_int(static_cast<int32_t>(std::stof(t_value)));
@@ -846,7 +844,7 @@ cod_pb::Variable mdcii::cod::CodParser::GetValue(const std::string& t_key, const
     {
         // Check if value contains any other characters besides 0-9, + and -
         // -> it is a pure string
-        std::vector<std::string> result{ CodHelper::RegexMatch("([A-Za-z0-9_]+)", t_value) };
+        auto result{ CodHelper::RegexMatch("([A-Za-z0-9_]+)", t_value) };
         if (!result.empty())
         {
             // TODO : When is value not in variables

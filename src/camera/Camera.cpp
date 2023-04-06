@@ -99,12 +99,15 @@ bool mdcii::camera::Camera::IsIslandNotInCamera(const world::Zoom t_zoom, const 
 // Logic
 //-------------------------------------------------
 
-void mdcii::camera::Camera::RenderImGui()
+void mdcii::camera::Camera::RenderImGui() const
 {
-    const auto w{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CameraWorldPosition") + " (%d, %d)" };
-    const auto s{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "cameraScreenPosition") + " (%.2f, %.2f)" };
-    ImGui::Text(w.c_str(), worldPosition.x, worldPosition.y);
-    ImGui::Text(s.c_str(), position.x, position.y);
+    auto w{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CameraWorldPosition") };
+    auto s{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "cameraScreenPosition") };
+    w.append(": (").append(std::to_string(worldPosition.x)).append(", ").append(std::to_string(worldPosition.y)).append(")");
+    s.append(": (").append(std::to_string(static_cast<int>(position.x))).append(", ").append(std::to_string(static_cast<int>(position.y))).append(")");
+
+    ImGui::TextUnformatted(w.c_str());
+    ImGui::TextUnformatted(s.c_str());
 }
 
 //-------------------------------------------------
@@ -113,8 +116,8 @@ void mdcii::camera::Camera::RenderImGui()
 
 void mdcii::camera::Camera::ProcessKeyboard(const Direction t_direction)
 {
-    const auto yTileOff{ glm::ivec2(0, 1) };
-    const auto xTileOff{ glm::ivec2(1, 0) };
+    constexpr auto yTileOff{ glm::ivec2(0, 1) };
+    constexpr auto xTileOff{ glm::ivec2(1, 0) };
 
     const auto yOff{ glm::vec2(0.0f, get_tile_height(zoom)) };
     const auto xOff{ glm::vec2(get_tile_width(zoom), 0.0f) };

@@ -140,7 +140,7 @@ namespace mdcii::camera
         /**
          * Renders ImGui stuff.
          */
-        void RenderImGui();
+        void RenderImGui() const;
 
     protected:
 

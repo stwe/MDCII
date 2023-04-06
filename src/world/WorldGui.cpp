@@ -56,7 +56,7 @@ mdcii::world::WorldGui::~WorldGui() noexcept
 void mdcii::world::WorldGui::RotateGui() const
 {
     std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentMapRotation") };
-    std::string worldRotation{ magic_enum::enum_name(m_world->rotation) };
+    const std::string worldRotation{ magic_enum::enum_name(m_world->rotation) };
     ImGui::TextUnformatted(rotStr.append(": ").append(worldRotation).c_str());
 
     static bool r = false;
@@ -100,7 +100,7 @@ void mdcii::world::WorldGui::RotateGui() const
 void mdcii::world::WorldGui::ZoomGui() const
 {
     std::string zoomStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentMapZoom") };
-    std::string worldZoom{ magic_enum::enum_name(m_world->zoom) };
+    const std::string worldZoom{ magic_enum::enum_name(m_world->zoom) };
     ImGui::TextUnformatted(zoomStr.append(": ").append(worldZoom).c_str());
 
     static bool i = false;
@@ -220,7 +220,7 @@ void mdcii::world::WorldGui::ShowBuildingsGui()
     BuildingsSectionGui(data::Section::MILITARY);
 }
 
-void mdcii::world::WorldGui::SaveGameGui()
+void mdcii::world::WorldGui::SaveGameGui() const
 {
     if (auto const* gameWorld{ dynamic_cast<GameWorld*>(m_world) }; gameWorld != nullptr)
     {
@@ -301,7 +301,7 @@ void mdcii::world::WorldGui::NonRotatableBuildingGui() const
 void mdcii::world::WorldGui::RotatableBuildingGui()
 {
     std::string rotStr{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentBuildingRotation") };
-    std::string workshopRotation{ rotation_to_string(selectedBuildingTile.rotation) };
+    const std::string workshopRotation{ rotation_to_string(selectedBuildingTile.rotation) };
     ImGui::TextUnformatted(rotStr.append(": ").append(workshopRotation).c_str());
 
     ImGui::Separator();
@@ -370,7 +370,7 @@ void mdcii::world::WorldGui::RotatableBuildingGui()
 void mdcii::world::WorldGui::BuildingsSectionGui(const data::Section t_section)
 {
     // Section toString
-    std::string name{ magic_enum::enum_name(t_section) };
+    const std::string name{ magic_enum::enum_name(t_section) };
     std::string lc{ to_lower_case(name) };
     lc[0] = static_cast<char>(toupper(lc[0]));
 
@@ -423,8 +423,7 @@ void mdcii::world::WorldGui::InitBauhausZoom()
     }
 
     // Nina has 3 Bauhaus.bsh files
-    const auto zoomOptional{ magic_enum::enum_cast<Zoom>(Game::INI.Get<std::string>("main_menu", "thumbnails_zoom")) };
-    if (zoomOptional.has_value())
+    if (const auto zoomOptional{ magic_enum::enum_cast<Zoom>(Game::INI.Get<std::string>("main_menu", "thumbnails_zoom")) }; zoomOptional.has_value())
     {
         const auto z{ zoomOptional.value() };
         m_bauhausZoom = z;

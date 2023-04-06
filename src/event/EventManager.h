@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <imgui.h>
 #include "Event.h"
 #include "ogl/OpenGL.h"
 #include "vendor/eventpp/eventdispatcher.h"
@@ -55,6 +56,12 @@ namespace mdcii::event
 
         static void SetKeyboardGlfwCallbacks(GLFWwindow* t_windowHandle);
         static void SetMouseGlfwCallbacks(GLFWwindow* t_windowHandle);
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        static ImGuiKey KeyToImGuiKey(int t_key);
 
     protected:
 

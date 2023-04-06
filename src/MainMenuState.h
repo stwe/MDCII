@@ -65,13 +65,6 @@ namespace mdcii
     protected:
 
     private:
-        //-------------------------------------------------
-        // Init
-        //-------------------------------------------------
 
-        /**
-         * Initializes the state.
-         */
-        void Init();
     };
 }

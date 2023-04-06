@@ -87,7 +87,7 @@ void mdcii::renderer::TerrainRenderer::Update()
     if (m_updates > 4096)
     {
         m_updates = 0;
-        memset(&m_timeCounter[0], 0, m_timeCounter.size() * sizeof m_timeCounter[0]);
+        memset(m_timeCounter.data(), 0, m_timeCounter.size() * sizeof m_timeCounter[0]);
     }
 }
 
@@ -96,9 +96,9 @@ void mdcii::renderer::TerrainRenderer::Render(
     const ogl::buffer::Ssbo& t_gfxNumbersSsbo,
     const ogl::buffer::Ssbo& t_buildingIdsSsbo,
     const int32_t t_instancesToRender,
-    mdcii::world::Zoom t_zoom,
-    mdcii::world::Rotation t_rotation
-    ) const
+    const world::Zoom t_zoom,
+    const world::Rotation t_rotation
+) const
 {
     const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
     const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
@@ -172,7 +172,7 @@ void mdcii::renderer::TerrainRenderer::Render(const layer::TerrainLayer& t_terra
 // Remove / add building - Gpu
 //-------------------------------------------------
 
-void mdcii::renderer::TerrainRenderer::DeleteBuildingFromGpu(world::Island& t_island, const layer::Tile& t_tile)
+void mdcii::renderer::TerrainRenderer::DeleteBuildingFromGpu(world::Island& t_island, const layer::Tile& t_tile) const
 {
     MDCII_ASSERT(t_tile.HasBuilding(), "[TerrainRenderer::DeleteBuildingFromGpu()] No building to delete.")
 
@@ -211,7 +211,7 @@ void mdcii::renderer::TerrainRenderer::DeleteBuildingFromGpu(world::Island& t_is
     });
 }
 
-void mdcii::renderer::TerrainRenderer::DeleteBuildingFromGpu(world::Terrain& t_terrain)
+void mdcii::renderer::TerrainRenderer::DeleteBuildingFromGpu(world::Terrain& t_terrain) const
 {
     MDCII_ASSERT(!t_terrain.tilesToAdd.tiles.empty(), "[TerrainRenderer::DeleteBuildingFromGpu()] No Tile objects available.")
     for (const auto& tile : t_terrain.tilesToAdd.tiles)
@@ -223,7 +223,7 @@ void mdcii::renderer::TerrainRenderer::DeleteBuildingFromGpu(world::Terrain& t_t
     std::vector<std::unique_ptr<layer::Tile>>().swap(t_terrain.tilesToAdd.tiles);
 }
 
-void mdcii::renderer::TerrainRenderer::DeleteBuildingFromGpu(world::Island& t_island, const std::vector<int32_t>& t_tileIndices)
+void mdcii::renderer::TerrainRenderer::DeleteBuildingFromGpu(world::Island& t_island, const std::vector<int32_t>& t_tileIndices) const
 {
     MDCII_ASSERT(!t_tileIndices.empty(), "[TerrainRenderer::DeleteBuildingFromGpu()] No Tile indices available.")
     for (const auto tileIndex : t_tileIndices)
@@ -236,7 +236,7 @@ void mdcii::renderer::TerrainRenderer::AddBuildingToGpu(
     const layer::Tile& t_selectedBuildingTile,
     const glm::ivec2& t_startWorldPosition,
     world::Terrain& t_terrain
-)
+) const
 {
     const auto& building{ m_context->originalResourcesManager->GetBuildingById(t_selectedBuildingTile.buildingId) };
     if (!t_terrain.IsBuildableOnIslandUnderMouse(t_startWorldPosition, building, t_selectedBuildingTile.rotation))
@@ -251,10 +251,10 @@ void mdcii::renderer::TerrainRenderer::AddBuildingToGpu(
         for (auto x{ 0 }; x < building.size.w; ++x)
         {
             // rotate building position
-            auto rp{ world::rotate_position(x, y, building.size.h, building.size.w, t_selectedBuildingTile.rotation) };
+            auto rp{ rotate_position(x, y, building.size.h, building.size.w, t_selectedBuildingTile.rotation) };
             if (t_selectedBuildingTile.rotation == world::Rotation::DEG0 || t_selectedBuildingTile.rotation == world::Rotation::DEG180)
             {
-                rp = world::rotate_position(x, y, building.size.w, building.size.h, t_selectedBuildingTile.rotation);
+                rp = rotate_position(x, y, building.size.w, building.size.h, t_selectedBuildingTile.rotation);
             }
 
             // calc final world position
@@ -321,9 +321,10 @@ void mdcii::renderer::TerrainRenderer::AddBuildingToGpu(
         }
     }
 
-    MDCII_ASSERT(t_terrain.tilesToAdd.tiles.size() == building.size.w * building.size.h, "[TerrainRenderer::AddBuildingToGpu()] Invalid number of created tiles.")
+    MDCII_ASSERT(t_terrain.tilesToAdd.tiles.size() == static_cast<size_t>(building.size.w * building.size.h), "[TerrainRenderer::AddBuildingToGpu()] Invalid number of created tiles.")
 
     std::vector<int32_t> connected;
+    connected.reserve(t_terrain.tilesToAdd.tiles.size());
     for (const auto& tile : t_terrain.tilesToAdd.tiles)
     {
         connected.push_back(tile->indices[0]);
@@ -339,13 +340,13 @@ void mdcii::renderer::TerrainRenderer::AddBuildingToGpu(
 
 void mdcii::renderer::TerrainRenderer::UpdateGpuData(
     const int32_t t_instance,
-    layer::TerrainLayer& t_terrainLayer,
+    const layer::TerrainLayer& t_terrainLayer,
     const world::Zoom t_zoom,
     const world::Rotation t_rotation,
     const glm::mat4& t_modelMatrix,
     const int32_t t_gfxNumber,
     const int32_t t_buildingId
-)
+) const
 {
     // enum to int
     const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
@@ -392,7 +393,7 @@ void mdcii::renderer::TerrainRenderer::DeleteBuildingFromCpu(layer::Tile& t_tile
     t_tile.ResetBuildingInfo();
 }
 
-void mdcii::renderer::TerrainRenderer::DeleteBuildingFromCpu(world::Island& t_island, const std::vector<int32_t>& t_tileIndices)
+void mdcii::renderer::TerrainRenderer::DeleteBuildingFromCpu(const world::Island& t_island, const std::vector<int32_t>& t_tileIndices)
 {
     MDCII_ASSERT(!t_tileIndices.empty(), "[TerrainRenderer::DeleteBuildingFromCpu()] No Tile indices available.")
     for (const auto tileIndex : t_tileIndices)
@@ -483,7 +484,7 @@ void mdcii::renderer::TerrainRenderer::CreateAnimationInfoSsbo()
     Log::MDCII_LOG_DEBUG("[TerrainRenderer::CreateAnimationInfoSsbo()] Creates a Ssbo which holding animation info for each building.");
 
     const auto& buildings{ m_context->originalResourcesManager->buildings->buildingsMap };
-    std::vector<glm::ivec4> animationInfo(buildings.rbegin()->first + 1, glm::ivec4(-1));
+    std::vector animationInfo(buildings.rbegin()->first + 1, glm::ivec4(-1));
 
     for (const auto& [k, v] : buildings)
     {

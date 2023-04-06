@@ -416,7 +416,7 @@ void mdcii::layer::TerrainLayer::CreateGfxNumbersContainer()
     MDCII_ASSERT(instancesToRender > 0, "[TerrainLayer::CreateGfxNumbersContainer()] Invalid number of instances.")
     MDCII_ASSERT(!sortedTiles.empty(), "[TerrainLayer::CreateGfxNumbersContainer()] Missing Tile objects.")
 
-    std::vector<glm::ivec4> gfxs(instancesToRender, glm::ivec4(-1));
+    std::vector gfxs(instancesToRender, glm::ivec4(-1));
 
     magic_enum::enum_for_each<world::Rotation>([this, &gfxs](const world::Rotation t_rotation) {
         const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
@@ -444,7 +444,7 @@ void mdcii::layer::TerrainLayer::CreateBuildingIdsContainer()
     MDCII_ASSERT(instancesToRender > 0, "[TerrainLayer::CreateBuildingIdsContainer()] Invalid number of instances.")
     MDCII_ASSERT(!sortedTiles.empty(), "[TerrainLayer::CreateBuildingIdsContainer()] Missing Tile objects.")
 
-    std::vector<glm::ivec4> ids(instancesToRender, glm::ivec4(-1));
+    std::vector ids(instancesToRender, glm::ivec4(-1));
 
     magic_enum::enum_for_each<world::Rotation>([this, &ids](const world::Rotation t_rotation) {
         const auto rotationInt{ magic_enum::enum_integer(t_rotation) };

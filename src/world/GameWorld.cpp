@@ -181,7 +181,7 @@ void mdcii::world::GameWorld::RenderImGui()
 
         ImGui::Checkbox(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "IslandGrids").c_str(), &m_renderIslandGridLayers);
 
-        if (auto layer{ magic_enum::enum_cast<layer::LayerType>(e) }; layer.has_value())
+        if (const auto layer{ magic_enum::enum_cast<layer::LayerType>(e) }; layer.has_value())
         {
             const auto l{ layer.value() };
             m_layerTypeToRender = l;
@@ -216,13 +216,24 @@ void mdcii::world::GameWorld::RenderImGui()
     {
         for (const auto& island : terrain->islands)
         {
-            const auto i{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Island") + ": (%d, %d)" };
-            const auto c{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Culling") + ": %s" };
-            ImGui::Text(i.c_str(), island->startWorldX, island->startWorldY);
+            auto i{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Island") };
+            auto c{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Culling") };
+
+            i.append(": (").append(std::to_string(island->startWorldX)).append(", ").append(std::to_string(island->startWorldY)).append(")");
+
+            c.append(": ");
+            if (context->camera->IsIslandNotInCamera(zoom, rotation, *island))
+            {
+                c.append(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "No"));
+            }
+            else
+            {
+                c.append(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Yes"));
+            }
+
+            ImGui::TextUnformatted(i.c_str());
             ImGui::SameLine();
-            ImGui::Text(c.c_str(), context->camera->IsIslandNotInCamera(zoom, rotation, *island)
-                            ? data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "No").c_str()
-                            : data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Yes").c_str());
+            ImGui::TextUnformatted(c.c_str());
         }
     }
 

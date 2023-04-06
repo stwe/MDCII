@@ -88,15 +88,26 @@ void mdcii::world::MousePicker::RenderImGui() const
 
     ImGui::SetWindowSize({ 321.0f, 65.0f });
 
-    const auto terrainMode{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "TerrainMode") + ": %s" };
-    const auto mousePos{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentMousePosition") + ": (%d, %d)" };
-    const auto oldMousePos{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "OldMousePosition") + ": (%d, %d)" };
+    auto terrainMode{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "TerrainMode") };
+    auto mousePos{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CurrentMousePosition") };
+    auto oldMousePos{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "OldMousePosition") };
 
-    ImGui::Text(terrainMode.c_str(), calcForIslandTerrain
-                    ? data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Yes").c_str()
-                    : data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "No").c_str());
-    ImGui::Text(mousePos.c_str(), currentPosition.x, currentPosition.y);
-    ImGui::Text(oldMousePos.c_str(), lastPosition.x, lastPosition.y);
+    terrainMode.append(": ");
+    if (calcForIslandTerrain)
+    {
+        terrainMode.append(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Yes"));
+    }
+    else
+    {
+        terrainMode.append(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "No"));
+    }
+
+    mousePos.append(": (").append(std::to_string(currentPosition.x)).append(", ").append(std::to_string(currentPosition.y)).append(")");
+    oldMousePos.append(": (").append(std::to_string(lastPosition.x)).append(", ").append(std::to_string(lastPosition.y)).append(")");
+
+    ImGui::TextUnformatted(terrainMode.c_str());
+    ImGui::TextUnformatted(mousePos.c_str());
+    ImGui::TextUnformatted(oldMousePos.c_str());
 
     ImGui::End();
 }
@@ -107,8 +118,7 @@ void mdcii::world::MousePicker::RenderImGui() const
 
 void mdcii::world::MousePicker::OnMouseMoved(const ogl::Window& t_window, const camera::Camera& t_camera)
 {
-    const auto newPosition{ GetWorldPosition(t_window, t_camera) };
-    if (newPosition != currentPosition)
+    if (const auto newPosition{ GetWorldPosition(t_window, t_camera) }; newPosition != currentPosition)
     {
         lastPosition = currentPosition;
         currentPosition = newPosition;

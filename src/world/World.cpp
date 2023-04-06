@@ -25,7 +25,7 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::World::World(std::shared_ptr<state::Context> t_context, state::StateId t_stateId)
+mdcii::world::World::World(std::shared_ptr<state::Context> t_context, const state::StateId t_stateId)
     : context{ std::move(t_context) }
     , stateId{ t_stateId }
 {

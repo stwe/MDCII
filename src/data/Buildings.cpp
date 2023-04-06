@@ -41,8 +41,7 @@ void mdcii::data::Buildings::GenerateBuildings(const std::string& t_codFilePath)
     const auto cod{ cod::CodParser(t_codFilePath) };
     for (auto i{ 0 }; i < cod.objects.object_size(); ++i)
     {
-        const auto& obj{ cod.objects.object(i) };
-        if (obj.name() == "HAUS")
+        if (const auto& obj{ cod.objects.object(i) }; obj.name() == "HAUS")
         {
             for (auto j{ 0 }; j < obj.objects_size(); ++j)
             {
