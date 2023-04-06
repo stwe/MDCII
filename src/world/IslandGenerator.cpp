@@ -19,13 +19,13 @@
 #include <imgui.h>
 #include <random>
 #include "IslandGenerator.h"
-#include "FastNoiseLite.h"
 #include "MdciiAssert.h"
 #include "Game.h"
 #include "data/Text.h"
 #include "data/BuildingIds.h"
 #include "layer/TerrainLayer.h"
 #include "file/IslandFile.h"
+#include "vendor/fastnoise/FastNoiseLite.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
