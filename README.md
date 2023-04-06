@@ -11,16 +11,15 @@ You must have a copy of the original game installed on your computer.
 
 * [Compiling MDCII](#compiling-mdcii)
 * [Running MDCII](#running-mdcii)
-* [Devlog](#devlog)
 * [Roadmap](#roadmap-mdcii-v02)
 * [Reporting bugs](#reporting-bugs)
 * [License](#license)
 
 ## Compiling MDCII
 
-I switched the package manager from Conan to Vcpkg, which makes the package management nice and clean.
-Clion supports Vcpkg since the latest version.
-However, MDCII must first be adapted to the latest ImGui, so it is currently not usable.
+I prefer vcpkg. You can install it as described [here:](https://vcpkg.io/en/getting-started.html)
+
+Now the [Requirements](#requirements) have to be installed.
 
 ### Requirements
 
@@ -35,21 +34,7 @@ However, MDCII must first be adapted to the latest ImGui, so it is currently not
 
 ### Platforms
 
-* [Win with Visual Studio and Premake](#win-with-visual-studio-2022-and-premake)
-* [Win with MinGW64 and Cmake](#win-with-mingw64-and-cmake)
-* [Linux and Cmake](#linux-with-cmake)
-
-#### Win with Visual Studio 2022 and Premake
-
-
-
-#### Win with MinGW64 and Cmake
-
-
-
-#### Linux with Cmake
-
-
+The project runs on Windows and Linux.
 
 ## Running MDCII
 
