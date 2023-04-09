@@ -149,6 +149,7 @@ void mdcii::world::Island::CreateLayersFromJson(const nlohmann::json& t_json)
     mixedLayer = std::make_unique<layer::TerrainLayer>(m_context, m_terrain->world, this, layer::LayerType::MIXED);
     mixedLayer->instancesToRender = terrainLayer->instancesToRender;
     mixedLayer->modelMatrices = terrainLayer->modelMatrices;
+    mixedLayer->selectedInstances = terrainLayer->selectedInstances;
     mixedLayer->gfxNumbers = terrainLayer->gfxNumbers;
     mixedLayer->buildingIds = terrainLayer->buildingIds;
 

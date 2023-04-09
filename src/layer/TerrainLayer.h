@@ -19,7 +19,6 @@
 #pragma once
 
 #include "GameLayer.h"
-#include "Tile.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -59,17 +58,6 @@ namespace mdcii::layer
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
-
-        /**
-         * Contains all Tile pointers in the order DEG0.
-         */
-        std::vector<std::shared_ptr<Tile>> tiles;
-
-        /**
-         * A vector of Tile pointers for each rotation.
-         * The Tile pointers are in the correct order for rendering.
-         */
-        std::array<std::vector<std::shared_ptr<Tile>>, world::NR_OF_ROTATIONS> sortedTiles;
 
         /**
          * This allows the Instance Id to be determined for each (rotated) position in the world.

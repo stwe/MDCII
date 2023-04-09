@@ -196,6 +196,41 @@ namespace mdcii::world
          */
         decltype(event::EventManager::event_dispatcher)::Handle m_mouseMoved;
 
+        /**
+         * The index of the currently selected island file.
+         */
+        inline static int32_t m_island_file_index{ 0 };
+
+        /**
+         * The width of the loaded island.
+         */
+        int32_t m_island_width{ -1 };
+
+        /**
+         * The height of the loaded island.
+         */
+        int32_t m_island_height{ -1 };
+
+        /**
+         * The x position where the island will be added.
+         */
+        int32_t m_putX{ -1 };
+
+        /**
+         * The y position where the island will be added.
+         */
+        int32_t m_putY{ -1 };
+
+        /**
+         * Helper flag for adding an island.
+         */
+        bool m_addIsland{ false };
+
+        /**
+         * The Json value of the loaded island.
+         */
+        nlohmann::json m_json;
+
         //-------------------------------------------------
         // Event handler
         //-------------------------------------------------

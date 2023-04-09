@@ -19,7 +19,6 @@
 #pragma once
 
 #include "GameLayer.h"
-#include "Tile.h"
 
 //-------------------------------------------------
 // WorldLayer
@@ -36,17 +35,6 @@ namespace mdcii::layer
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
-
-        /**
-         * Contains all Tile pointers in the order DEG0.
-         */
-        std::vector<std::shared_ptr<Tile>> tiles;
-
-        /**
-         * A vector of Tile pointers for each rotation.
-         * The Tile pointers are in the correct order for rendering.
-         */
-        std::array<std::vector<std::shared_ptr<Tile>>, world::NR_OF_ROTATIONS> sortedTiles;
 
         /**
          * This allows the Instance Id to be determined for each (rotated) position in the world.
@@ -127,6 +115,12 @@ namespace mdcii::layer
         // Helper
         //-------------------------------------------------
 
+        /**
+         * Creates a Tile object as part of the deep water area.
+         *
+         * @param t_x The world x position.
+         * @param t_y The world y position.
+         */
         void AddDeepWaterTile(int32_t t_x, int32_t t_y);
 
         /**

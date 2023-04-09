@@ -133,6 +133,11 @@ namespace mdcii::layer
          */
         LayerType layerType;
 
+        /**
+         * Indicates whether the tile has been selected.
+         */
+        bool selected{ false };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -159,6 +164,13 @@ namespace mdcii::layer
          * @return True if a valid building Id is present.
          */
         [[nodiscard]] bool HasBuilding() const { return buildingId >= 0; }
+
+        /**
+         * For better readability/convenience.
+         *
+         * @return True if selected.
+         */
+        [[nodiscard]] bool IsSelected() const { return selected; }
 
         //-------------------------------------------------
         // Render

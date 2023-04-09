@@ -19,8 +19,7 @@
 #pragma once
 
 #include <glm/mat4x4.hpp>
-#include "world/Rotation.h"
-#include "world/Zoom.h"
+#include "Tile.h"
 #include "event/EventManager.h"
 
 //-------------------------------------------------
@@ -129,6 +128,17 @@ namespace mdcii::layer
         int32_t height{ -1 };
 
         /**
+         * Contains all Tile pointers in the order DEG0.
+         */
+        std::vector<std::shared_ptr<Tile>> tiles;
+
+        /**
+         * A vector of Tile pointers for each rotation.
+         * The Tile pointers are in the correct order for rendering.
+         */
+        std::array<std::vector<std::shared_ptr<Tile>>, world::NR_OF_ROTATIONS> sortedTiles;
+
+        /**
          * The four containers with the model matrices for each zoom.
          * Access: modelMatrices[0/SGFX ... 2/GFX][0/DEG0 ... 3/DEG270][0 ... instances]
          */
@@ -139,6 +149,16 @@ namespace mdcii::layer
          * Access: modelMatricesSsbos[0/SGFX ... 2/GFX][0/DEG0 ... 3/DEG270]
          */
         Model_Matrices_Ssbos_For_Each_zoom modelMatricesSsbos;
+
+        /**
+         * Stores a value 1 or 0 for each instance, depending on whether the instance is selected or not.
+         */
+        std::vector<glm::ivec4> selectedInstances;
+
+        /**
+         * A Ssbo containing the selected state for each instance.
+         */
+        std::unique_ptr<ogl::buffer::Ssbo> selectedInstancesSsbo;
 
         /**
          * The number of instances to render.
@@ -252,10 +272,12 @@ namespace mdcii::layer
         virtual void SortTiles() {}
 
         virtual void CreateModelMatricesContainer() {}
+        virtual void CreateSelectedContainer();
         virtual void CreateGfxNumbersContainer() {}
         virtual void CreateBuildingIdsContainer() {}
 
         virtual void StoreModelMatricesInGpu();
+        virtual void StoreSelectedContainerInGpu();
         virtual void StoreGfxNumbersInGpu() {}
         virtual void StoreBuildingIdsInGpu() {}
 

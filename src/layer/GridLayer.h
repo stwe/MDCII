@@ -19,7 +19,6 @@
 #pragma once
 
 #include "GameLayer.h"
-#include "Tile.h"
 
 //-------------------------------------------------
 // GridLayer
@@ -33,16 +32,6 @@ namespace mdcii::layer
     class GridLayer: public GameLayer
     {
     public:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * A vector of Tile pointers for each rotation.
-         * The Tile pointers are in the correct order for rendering.
-         */
-        std::array<std::vector<std::shared_ptr<Tile>>, world::NR_OF_ROTATIONS> sortedTiles;
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------

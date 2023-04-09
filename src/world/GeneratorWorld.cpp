@@ -19,7 +19,7 @@
 #include <imgui.h>
 #include "GeneratorWorld.h"
 #include "Game.h"
-#include "Log.h"
+#include "MdciiAssert.h"
 #include "TileAtlas.h"
 #include "WorldGui.h"
 #include "MousePicker.h"
@@ -84,6 +84,7 @@ void mdcii::world::GeneratorWorld::Render()
     {
         terrainRenderer->Render(
             worldLayer->modelMatricesSsbos,
+            *worldLayer->selectedInstancesSsbo,
             *worldLayer->gfxNumbersSsbo,
             *worldLayer->buildingIdsSsbo,
             worldLayer->instancesToRender,
@@ -132,6 +133,31 @@ void mdcii::world::GeneratorWorld::RenderImGui()
 
     RenderIslandFileChooser(context->mdciiResourcesManager->islandFiles);
 
+    if (ImGui::Button("Add island"))
+    {
+        m_addIsland = true;
+    }
+
+    if (m_addIsland && m_island_width == -1 && m_island_height == -1 && m_putX == -1 && m_putY == -1)
+    {
+        MDCII_ASSERT(m_json.empty(), "[GeneratorWorld::RenderImGui()] Invalid Json value.")
+
+        if (file::IslandFile islandFile{ context->mdciiResourcesManager->islandFiles.at(m_island_file_index) }; islandFile.LoadJsonFromFile())
+        {
+            m_json = islandFile.json;
+
+            MDCII_ASSERT(!m_json.empty(), "[GeneratorWorld::RenderImGui()] Invalid Json value.")
+
+            m_island_width = m_json.at("width");
+            m_island_height = m_json.at("height");
+
+            MDCII_ASSERT(m_island_width > 0, "[GeneratorWorld::RenderImGui()] Invalid island width.")
+            MDCII_ASSERT(m_island_height > 0, "[GeneratorWorld::RenderImGui()] Invalid island height.")
+
+            Log::MDCII_LOG_DEBUG("[GeneratorWorld::RenderImGui()] Selected island size ({}, {}).", m_island_width, m_island_height);
+        }
+    }
+
     ImGui::Separator();
 
     ImGui::Checkbox("Render deep water", &m_renderDeepWater);
@@ -164,14 +190,20 @@ void mdcii::world::GeneratorWorld::OnLeftMouseButtonPressed()
         return;
     }
 
-    // todo: highlight the tile so that you can see where the island will be inserted
-    if (IsPositionInWorld(mousePicker->currentPosition))
+    if (m_addIsland)
     {
-        const auto index{ worldLayer->GetMapIndex(mousePicker->currentPosition, Rotation::DEG0) };
-        if (const auto& tile{ worldLayer->tiles.at(index) }; tile->HasBuilding())
-        {
-            m_currentSelectedTile = tile.get();
-        }
+        // todo: If there are multiple islands, the Aabbs must be observed.
+        // todo: Change the color of the selection in the shader (e.g. pass 2 instead of 1). If overlapping, maybe show more red.
+
+        Log::MDCII_LOG_DEBUG("[GeneratorWorld::OnLeftMouseButtonPressed()] Write island at ({}, {}).", m_putX, m_putY);
+        terrain->AddIslandFromJson(m_json, m_putX, m_putY);
+
+        m_addIsland = false;
+        m_island_width = -1;
+        m_island_height = -1;
+        m_putX = -1;
+        m_putY = -1;
+        m_json.clear();
     }
 }
 
@@ -181,6 +213,45 @@ void mdcii::world::GeneratorWorld::OnMouseMoved()
     if (ImGui::GetIO().WantCaptureMouse)
     {
         return;
+    }
+
+    // todo: Selection currently only works in DEG0
+
+    if (m_addIsland &&
+        IsPositionInWorld(mousePicker->currentPosition) &&
+        IsPositionInWorld(mousePicker->currentPosition.x + m_island_width - 1, mousePicker->currentPosition.y + m_island_height - 1))
+    {
+        // delete selection only if the mouse position has changed
+        if (m_putX != -1 && m_putY != -1 && glm::ivec2(m_putX, m_putY) != mousePicker->currentPosition)
+        {
+            for (auto y{ 0 }; y < m_island_height; ++y)
+            {
+                for (auto x{ 0 }; x < m_island_width; ++x)
+                {
+                    Log::MDCII_LOG_DEBUG("[GeneratorWorld::OnMouseMoved()] Delete rendered selection at ({}, {}).", m_putX, m_putY);
+                    renderer::TerrainRenderer::UnselectPosition({ m_putX + x, m_putY + y }, *worldLayer);
+                }
+            }
+
+            m_putX = -1;
+            m_putY = -1;
+        }
+
+        // render selection
+        if (m_putX == -1 && m_putY == -1)
+        {
+            m_putX = mousePicker->currentPosition.x;
+            m_putY = mousePicker->currentPosition.y;
+
+            for (auto y{ 0 }; y < m_island_height; ++y)
+            {
+                for (auto x{ 0 }; x < m_island_width; ++x)
+                {
+                    Log::MDCII_LOG_DEBUG("[GeneratorWorld::OnMouseMoved()] Render new selection at ({}, {}).", m_putX, m_putY);
+                    renderer::TerrainRenderer::SelectPosition({ m_putX + x, m_putY + y }, *worldLayer);
+                }
+            }
+        }
     }
 }
 
@@ -222,30 +293,13 @@ void mdcii::world::GeneratorWorld::AddListeners()
 
 void mdcii::world::GeneratorWorld::RenderIslandFileChooser(std::vector<std::string>& t_files) const
 {
-    static int32_t fileIndex{ 0 };
-    static int32_t x{ 0 };
-    static int32_t y{ 0 };
-
     if (t_files.empty())
     {
         ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "MissingFiles").c_str());
     }
     else
     {
-        file_chooser(t_files, &fileIndex);
-
-        ImGui::SliderInt("Island x", &x, 0, World::WORLD_MAX_WIDTH - 1); // - island width / height
-        ImGui::SliderInt("Island y", &y, 0, World::WORLD_MAX_HEIGHT - 1);
-
-        if (ImGui::Button("Add island"))
-        {
-            Log::MDCII_LOG_DEBUG("[GeneratorWorld::RenderIslandFileChooser()] Add island at ({}, {})", x, y);
-
-            if (file::IslandFile islandFile{ context->mdciiResourcesManager->islandFiles.at(fileIndex) }; islandFile.LoadJsonFromFile())
-            {
-                terrain->AddIslandFromJson(islandFile.json, x, y);
-            }
-        }
+        file_chooser(t_files, &m_island_file_index);
     }
 }
 

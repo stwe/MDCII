@@ -100,6 +100,7 @@ namespace mdcii::renderer
          * Renders a Layer content with the specified zoom and rotation.
          *
          * @param t_modelMatricesSsbos The model matrices Ssbos.
+         * @param t_selectedInstancesSsbo The selected instances Ssbo.
          * @param t_gfxNumbersSsbo The gfx numbers Ssbo.
          * @param t_buildingIdsSsbo The Building Ids Ssbo.
          * @param t_instancesToRender The number of instances to render.
@@ -108,6 +109,7 @@ namespace mdcii::renderer
          */
         void Render(
             const layer::GameLayer::Model_Matrices_Ssbos_For_Each_zoom& t_modelMatricesSsbos,
+            const ogl::buffer::Ssbo& t_selectedInstancesSsbo,
             const ogl::buffer::Ssbo& t_gfxNumbersSsbo,
             const ogl::buffer::Ssbo& t_buildingIdsSsbo,
             int32_t t_instancesToRender,
@@ -211,6 +213,26 @@ namespace mdcii::renderer
          */
         static void AddBuildingToCpu(world::Terrain& t_terrain);
 
+        //-------------------------------------------------
+        // Select tile - Gpu/Cpu
+        //-------------------------------------------------
+
+        /**
+         * Set the tile at the given position as selected.
+         *
+         * @param t_position The position to select.
+         * @param t_gameLayer The Layer of the Tile.
+         */
+        static void SelectPosition(const glm::ivec2& t_position, const layer::GameLayer& t_gameLayer);
+
+        /**
+         * Set the tile at the given position as unselected.
+         *
+         * @param t_position The position to unselect.
+         * @param t_gameLayer The Layer of the Tile.
+         */
+        static void UnselectPosition(const glm::ivec2& t_position, const layer::GameLayer& t_gameLayer);
+
     protected:
 
     private:
@@ -219,29 +241,44 @@ namespace mdcii::renderer
         //-------------------------------------------------
 
         /**
+         * The value marks a selected tile.
+         */
+        static constexpr auto SELECT{ 1 };
+
+        /**
+         * The value marks a unselected tile.
+         */
+        static constexpr auto UNSELECT{ 0 };
+
+        /**
          * The number of the modelMatrices shader binding.
          */
         static constexpr auto MODEL_MATRICES_BINDING{ 0 };
 
         /**
+         * The number of the selectedInstances shader binding.
+         */
+        static constexpr auto SELECTED_INSTANCES_BINDING{ 1 };
+
+        /**
          * The number of the gfxNumbers shader binding.
          */
-        static constexpr auto GFX_NUMBERS_BINDING{ 1 };
+        static constexpr auto GFX_NUMBERS_BINDING{ 2 };
 
         /**
          * The number of the buildingInfo shader binding.
          */
-        static constexpr auto BUILDING_IDS_BINDING{ 2 };
+        static constexpr auto BUILDING_IDS_BINDING{ 3 };
 
         /**
          * The number of the heights shader binding.
          */
-        static constexpr auto HEIGHTS_BINDING{ 3 };
+        static constexpr auto HEIGHTS_BINDING{ 4 };
 
         /**
          * The number of the animationInfo shader binding.
          */
-        static constexpr auto ANIMATIONS_BINDING{ 4 };
+        static constexpr auto ANIMATIONS_BINDING{ 5 };
 
         //-------------------------------------------------
         // Member

@@ -120,6 +120,7 @@ void mdcii::world::GameWorld::Render()
     {
         terrainRenderer->Render(
             worldLayer->modelMatricesSsbos,
+            *worldLayer->selectedInstancesSsbo,
             *worldLayer->gfxNumbersSsbo,
             *worldLayer->buildingIdsSsbo,
             worldLayer->instancesToRender,

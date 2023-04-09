@@ -88,6 +88,7 @@ void mdcii::layer::GameLayer::PrepareCpuDataForRendering()
     SortTiles();
 
     CreateModelMatricesContainer();
+    CreateSelectedContainer();
     CreateGfxNumbersContainer();
     CreateBuildingIdsContainer();
 }
@@ -95,6 +96,7 @@ void mdcii::layer::GameLayer::PrepareCpuDataForRendering()
 void mdcii::layer::GameLayer::PrepareGpuDataForRendering()
 {
     StoreModelMatricesInGpu();
+    StoreSelectedContainerInGpu();
     StoreGfxNumbersInGpu();
     StoreBuildingIdsInGpu();
 }
@@ -103,11 +105,21 @@ void mdcii::layer::GameLayer::PrepareGpuDataForRendering()
 // Interface
 //-------------------------------------------------
 
+void mdcii::layer::GameLayer::CreateSelectedContainer()
+{
+    Log::MDCII_LOG_DEBUG("[GameLayer::CreateSelectedContainer()] Create selected instances container.");
+
+    MDCII_ASSERT(selectedInstances.empty(), "[GameLayer::CreateSelectedContainer()] Invalid selected instances container size.")
+    MDCII_ASSERT(instancesToRender > 0, "[GameLayer::CreateSelectedContainer()] Invalid number of instances.")
+
+    selectedInstances.resize(instancesToRender, glm::ivec4(0));
+}
+
 void mdcii::layer::GameLayer::StoreModelMatricesInGpu()
 {
-    Log::MDCII_LOG_DEBUG("[GameLayer::StoreModelMatricesInGpu()] Store model matrices container in Ssbos.");
+    Log::MDCII_LOG_DEBUG("[GameLayer::StoreModelMatricesInGpu()] Store model matrices container in Gpu memory.");
 
-    MDCII_ASSERT(!modelMatrices.at(0).at(0).empty(), "[GameLayer::StoreModelMatricesInGpu()] Invalid model matrices container.")
+    MDCII_ASSERT(!modelMatrices.at(0).at(0).empty(), "[GameLayer::StoreModelMatricesInGpu()] Invalid model matrices container size.")
     MDCII_ASSERT(!modelMatricesSsbos.at(0).at(0), "[GameLayer::StoreModelMatricesInGpu()] Invalid model matrices Ssbo.")
 
     magic_enum::enum_for_each<world::Zoom>([this](const world::Zoom t_zoom) {
@@ -129,6 +141,19 @@ void mdcii::layer::GameLayer::StoreModelMatricesInGpu()
             modelMatricesSsbos.at(zoomInt).at(rotationInt) = std::move(ssbo);
         });
     });
+}
+
+void mdcii::layer::GameLayer::StoreSelectedContainerInGpu()
+{
+    Log::MDCII_LOG_DEBUG("[GameLayer::StoreSelectedContainerInGpu()] Store selected instances container in Gpu memory.");
+
+    MDCII_ASSERT(!selectedInstances.empty(), "[GameLayer::StoreSelectedContainerInGpu()] Invalid selected instances container size.")
+    MDCII_ASSERT(!selectedInstancesSsbo, "[GameLayer::StoreSelectedContainerInGpu()] Invalid selected instances Ssbo pointer.")
+
+    selectedInstancesSsbo = std::make_unique<ogl::buffer::Ssbo>("SelectedInstances_Ssbo");
+    selectedInstancesSsbo->Bind();
+    ogl::buffer::Ssbo::StoreData(static_cast<uint32_t>(selectedInstances.size()) * sizeof(glm::ivec4), selectedInstances.data());
+    ogl::buffer::Ssbo::Unbind();
 }
 
 //-------------------------------------------------

@@ -11,22 +11,27 @@ layout(std140, binding = 0) buffer modelMatrices
     mat4 modelMatrix[];
 };
 
-layout(std430, binding = 1) buffer gfxNumbers
+layout(std430, binding = 1) buffer selectedInstances
+{
+    ivec4 selectedInstance[];
+};
+
+layout(std430, binding = 2) buffer gfxNumbers
 {
     ivec4 gfxNumber[];
 };
 
-layout(std430, binding = 2) buffer buildingIds
+layout(std430, binding = 3) buffer buildingIds
 {
     ivec4 buildingId[];
 };
 
-layout(std430, binding = 3) buffer heights
+layout(std430, binding = 4) buffer heights
 {
     float textureHeight[];
 };
 
-layout(std430, binding = 4) buffer buildingAnimations
+layout(std430, binding = 5) buffer buildingAnimations
 {
     ivec4 buildingAnimation[];
 };
@@ -37,6 +42,7 @@ layout(std430, binding = 4) buffer buildingAnimations
 
 out vec2 vUv;
 flat out int vTextureAtlasIndex;
+flat out int vSelected;
 
 //-------------------------------------------------
 // Uniforms
@@ -181,4 +187,6 @@ void main()
     {
         vUv.y = ((1.0 / nrOfRows) * height / maxY) + uvOffset.y;
     }
+
+    vSelected = int(selectedInstance[gl_InstanceID][worldRotation]);
 }

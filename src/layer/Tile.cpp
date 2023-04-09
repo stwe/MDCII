@@ -46,6 +46,7 @@ void mdcii::layer::Tile::Reset()
     screenPositions = {};
     indices = {};
     instanceIds = {};
+    selected = false;
 }
 
 void mdcii::layer::Tile::ResetBuildingInfo()
@@ -85,6 +86,7 @@ void mdcii::layer::Tile::RenderImGui() const
     ImGui::Text("Island y: %d", islandYDeg0);
     ImGui::Text("World x: %d", worldXDeg0);
     ImGui::Text("World y: %d", worldYDeg0);
+    ImGui::Text("selected: %s", selected ? "yes" : "no");
 
     if (ImGui::TreeNode("Indices"))
     {

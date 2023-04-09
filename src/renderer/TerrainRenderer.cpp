@@ -93,6 +93,7 @@ void mdcii::renderer::TerrainRenderer::Update()
 
 void mdcii::renderer::TerrainRenderer::Render(
     const layer::GameLayer::Model_Matrices_Ssbos_For_Each_zoom& t_modelMatricesSsbos,
+    const ogl::buffer::Ssbo& t_selectedInstancesSsbo,
     const ogl::buffer::Ssbo& t_gfxNumbersSsbo,
     const ogl::buffer::Ssbo& t_buildingIdsSsbo,
     const int32_t t_instancesToRender,
@@ -108,7 +109,6 @@ void mdcii::renderer::TerrainRenderer::Render(
 
     shaderProgram.SetUniform("projectionView", m_context->window->GetOrthographicProjectionMatrix() * m_context->camera->GetViewMatrix());
     shaderProgram.SetUniform("diffuseMap", 0);
-    shaderProgram.SetUniform("selected", false);
     shaderProgram.SetUniform("worldRotation", rotationInt);
     shaderProgram.SetUniform("updates", m_timeCounter);
 
@@ -124,6 +124,12 @@ void mdcii::renderer::TerrainRenderer::Render(
         GL_SHADER_STORAGE_BUFFER,
         MODEL_MATRICES_BINDING,
         t_modelMatricesSsbos.at(zoomInt).at(rotationInt)->id
+    );
+
+    glBindBufferBase(
+        GL_SHADER_STORAGE_BUFFER,
+        SELECTED_INSTANCES_BINDING,
+        t_selectedInstancesSsbo.id
     );
 
     glBindBufferBase(
@@ -156,10 +162,15 @@ void mdcii::renderer::TerrainRenderer::Render(
     ogl::buffer::Vao::Unbind();
 }
 
-void mdcii::renderer::TerrainRenderer::Render(const layer::TerrainLayer& t_terrainLayer, const world::Zoom t_zoom, const world::Rotation t_rotation) const
+void mdcii::renderer::TerrainRenderer::Render(
+    const layer::TerrainLayer& t_terrainLayer,
+    const world::Zoom t_zoom,
+    const world::Rotation t_rotation
+) const
 {
     Render(
         t_terrainLayer.modelMatricesSsbos,
+        *t_terrainLayer.selectedInstancesSsbo,
         *t_terrainLayer.gfxNumbersSsbo,
         *t_terrainLayer.buildingIdsSsbo,
         t_terrainLayer.instancesToRender,
@@ -348,11 +359,14 @@ void mdcii::renderer::TerrainRenderer::UpdateGpuData(
     const int32_t t_buildingId
 ) const
 {
+    MDCII_ASSERT(t_instance >= 0, "[TerrainRenderer::UpdateGpuData()] Invalid instance.")
+
     // enum to int
     const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
     const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
     // bind Vao of the given zoom
+    // todo: Expensive binding of the Vao may not be necessary.
     const auto& vao{ m_vaos.at(zoomInt) };
     vao->Bind();
 
@@ -418,6 +432,54 @@ void mdcii::renderer::TerrainRenderer::AddBuildingToCpu(world::Terrain& t_terrai
 
     // clear vector
     std::vector<std::unique_ptr<layer::Tile>>().swap(t_terrain.tilesToAdd.tiles);
+}
+
+//-------------------------------------------------
+// Select tile - Gpu/Cpu
+//-------------------------------------------------
+
+void mdcii::renderer::TerrainRenderer::SelectPosition(const glm::ivec2& t_position, const layer::GameLayer& t_gameLayer)
+{
+    const auto index{ t_gameLayer.GetMapIndex(t_position, world::Rotation::DEG0) };
+    if (const auto& tile{ t_gameLayer.tiles.at(index) }; tile->HasBuilding() && !tile->IsSelected())
+    {
+        // Gpu
+        magic_enum::enum_for_each<world::Rotation>([&tile, &t_gameLayer](const world::Rotation t_rotation) {
+            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+            const auto rotOffset{ rotationInt * static_cast<int32_t>(sizeof(int32_t)) };
+            const auto instance{ tile->instanceIds.at(rotationInt) };
+
+            const auto& selectedInstancesSsbo{ t_gameLayer.selectedInstancesSsbo };
+            selectedInstancesSsbo->Bind();
+            ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::ivec4)) * instance) + rotOffset, sizeof(int32_t), &SELECT);
+            ogl::buffer::Ssbo::Unbind();
+        });
+
+        // Cpu
+        tile->selected = true;
+    }
+}
+
+void mdcii::renderer::TerrainRenderer::UnselectPosition(const glm::ivec2& t_position, const layer::GameLayer& t_gameLayer)
+{
+    const auto index{ t_gameLayer.GetMapIndex(t_position, world::Rotation::DEG0) };
+    if (const auto& tile{ t_gameLayer.tiles.at(index) }; tile->HasBuilding() && tile->IsSelected())
+    {
+        // Gpu
+        magic_enum::enum_for_each<world::Rotation>([&tile, &t_gameLayer](const world::Rotation t_rotation) {
+            const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+            const auto rotOffset{ rotationInt * static_cast<int32_t>(sizeof(int32_t)) };
+            const auto instance{ tile->instanceIds.at(rotationInt) };
+
+            const auto& selectedInstancesSsbo{ t_gameLayer.selectedInstancesSsbo };
+            selectedInstancesSsbo->Bind();
+            ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::ivec4)) * instance) + rotOffset, sizeof(int32_t), &UNSELECT);
+            ogl::buffer::Ssbo::Unbind();
+        });
+
+        // Cpu
+        tile->selected = false;
+    }
 }
 
 //-------------------------------------------------
