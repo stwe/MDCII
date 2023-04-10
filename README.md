@@ -17,7 +17,7 @@ You must have a copy of the original game installed on your computer.
 
 ## Compiling MDCII
 
-I prefer vcpkg. You can install it as described [here:](https://vcpkg.io/en/getting-started.html)
+I prefer vcpkg. You can install it as described [here.](https://vcpkg.io/en/getting-started.html)
 
 Now the [Requirements](#requirements) have to be installed.
 
@@ -49,8 +49,11 @@ In the MDCII `config.ini` the paths must be adapted.
 
 ## Roadmap MDCII v0.2
 
+The project now contains a simple Perlin Noise based Island Generator. The island files created with this
+can be loaded with the World Editor and placed anywhere in the world. A new game can be started with the
+map files created with the World Editor.
+
 * refactoring menus and add missing translations
-* a new editor combines the islands created with the IslandGenerator into a map/world
 * it should be possible to build roads; another Layer may be created for this
 * animations should be possible showing how residents brings goods from A to B; for this the A* algorithm can be implemented
 * further down my priority list: the terrain is to be expanded to include rivers and mountains
