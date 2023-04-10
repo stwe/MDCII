@@ -31,6 +31,7 @@
 #include "data/Text.h"
 #include "file/MdciiResourcesManager.h"
 #include "file/IslandFile.h"
+#include "physics/Aabb.h"
 #include "vendor/eventpp/utilities/argumentadapter.h"
 
 //-------------------------------------------------
@@ -80,28 +81,22 @@ void mdcii::world::GeneratorWorld::Update()
 
 void mdcii::world::GeneratorWorld::Render()
 {
-    if (m_renderDeepWater)
-    {
-        terrainRenderer->Render(
-            worldLayer->modelMatricesSsbos,
-            *worldLayer->selectedInstancesSsbo,
-            *worldLayer->gfxNumbersSsbo,
-            *worldLayer->buildingIdsSsbo,
-            worldLayer->instancesToRender,
-            zoom,
-            rotation
-        );
-    }
+    terrainRenderer->Render(
+        worldLayer->modelMatricesSsbos,
+        *worldLayer->selectedInstancesSsbo,
+        *worldLayer->gfxNumbersSsbo,
+        *worldLayer->buildingIdsSsbo,
+        worldLayer->instancesToRender,
+        zoom,
+        rotation
+    );
 
     ogl::OpenGL::EnableAlphaBlending();
 
-    if (m_renderIslands)
+    for (const auto& island : terrain->islands)
     {
-        for (const auto& island : terrain->islands)
-        {
-            terrainRenderer->Render(*island->coastLayer, zoom, rotation);
-            terrainRenderer->Render(*island->mixedLayer, zoom, rotation);
-        }
+        terrainRenderer->Render(*island->coastLayer, zoom, rotation);
+        terrainRenderer->Render(*island->mixedLayer, zoom, rotation);
     }
 
     ogl::OpenGL::DisableBlending();
@@ -160,10 +155,6 @@ void mdcii::world::GeneratorWorld::RenderImGui()
 
     ImGui::Separator();
 
-    ImGui::Checkbox("Render deep water", &m_renderDeepWater);
-    ImGui::Checkbox("Render islands", &m_renderIslands);
-
-    m_worldGui->RotateGui();
     m_worldGui->ZoomGui();
 
     ImGui::Separator();
@@ -192,12 +183,19 @@ void mdcii::world::GeneratorWorld::OnLeftMouseButtonPressed()
 
     if (m_addIsland)
     {
-        // todo: If there are multiple islands, the Aabbs must be observed.
-        // todo: Change the color of the selection in the shader (e.g. pass 2 instead of 1). If overlapping, maybe show more red.
+        // add island if no collision
+        if (!m_collision)
+        {
+            Log::MDCII_LOG_DEBUG("[GeneratorWorld::OnLeftMouseButtonPressed()] Add island at position ({}, {}).", m_putX, m_putY);
+            terrain->AddIslandFromJson(m_json, m_putX, m_putY);
+            Log::MDCII_LOG_DEBUG("[GeneratorWorld::OnLeftMouseButtonPressed()] The world now contains {} islands.", terrain->islands.size());
+        }
+        else
+        {
+            Log::MDCII_LOG_DEBUG("[GeneratorWorld::OnLeftMouseButtonPressed()] Island could not be added at position ({}, {}).", m_putX, m_putY);
+        }
 
-        Log::MDCII_LOG_DEBUG("[GeneratorWorld::OnLeftMouseButtonPressed()] Write island at ({}, {}).", m_putX, m_putY);
-        terrain->AddIslandFromJson(m_json, m_putX, m_putY);
-
+        // reset
         m_addIsland = false;
         m_island_width = -1;
         m_island_height = -1;
@@ -228,7 +226,6 @@ void mdcii::world::GeneratorWorld::OnMouseMoved()
             {
                 for (auto x{ 0 }; x < m_island_width; ++x)
                 {
-                    Log::MDCII_LOG_DEBUG("[GeneratorWorld::OnMouseMoved()] Delete rendered selection at ({}, {}).", m_putX, m_putY);
                     renderer::TerrainRenderer::UnselectPosition({ m_putX + x, m_putY + y }, *worldLayer);
                 }
             }
@@ -240,15 +237,40 @@ void mdcii::world::GeneratorWorld::OnMouseMoved()
         // render selection
         if (m_putX == -1 && m_putY == -1)
         {
+            // store old position
+            const auto oldValidX{ m_putX };
+            const auto oldValidY{ m_putY };
+
+            // get new position
             m_putX = mousePicker->currentPosition.x;
             m_putY = mousePicker->currentPosition.y;
 
-            for (auto y{ 0 }; y < m_island_height; ++y)
+            m_collision = false;
+            if (!terrain->islands.empty())
             {
-                for (auto x{ 0 }; x < m_island_width; ++x)
+                const auto aabb{ std::make_unique<physics::Aabb>(glm::ivec2(m_putX, m_putY), glm::ivec2(m_island_width, m_island_height)) };
+                for (const auto& island : terrain->islands)
                 {
-                    Log::MDCII_LOG_DEBUG("[GeneratorWorld::OnMouseMoved()] Render new selection at ({}, {}).", m_putX, m_putY);
-                    renderer::TerrainRenderer::SelectPosition({ m_putX + x, m_putY + y }, *worldLayer);
+                    if (physics::Aabb::AabbVsAabb(*aabb, *island->aabb))
+                    {
+                        // restore old position
+                        m_putX = oldValidX;
+                        m_putY = oldValidY;
+
+                        // collision detected
+                        m_collision = true;
+                    }
+                }
+            }
+
+            if (!m_collision)
+            {
+                for (auto y{ 0 }; y < m_island_height; ++y)
+                {
+                    for (auto x{ 0 }; x < m_island_width; ++x)
+                    {
+                        renderer::TerrainRenderer::SelectPosition({ m_putX + x, m_putY + y }, *worldLayer);
+                    }
                 }
             }
         }
@@ -291,7 +313,7 @@ void mdcii::world::GeneratorWorld::AddListeners()
 // ImGui
 //-------------------------------------------------
 
-void mdcii::world::GeneratorWorld::RenderIslandFileChooser(std::vector<std::string>& t_files) const
+void mdcii::world::GeneratorWorld::RenderIslandFileChooser(std::vector<std::string>& t_files)
 {
     if (t_files.empty())
     {
@@ -334,7 +356,6 @@ void mdcii::world::to_json(nlohmann::json& t_json, const GeneratorWorld& t_gener
     /*
     for (const auto& island : t_generatorWorld.terrain->islands)
     {
-        // island
         auto islandJson = nlohmann::json::object();
         islandJson = *island;
         islandsJson.push_back(islandJson);

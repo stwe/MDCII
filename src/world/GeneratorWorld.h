@@ -172,16 +172,6 @@ namespace mdcii::world
         std::unique_ptr<WorldGui> m_worldGui;
 
         /**
-         * Toggles deep water rendering on and off.
-         */
-        bool m_renderDeepWater{ true };
-
-        /**
-         * Toggles islands rendering on and off.
-         */
-        bool m_renderIslands{ true };
-
-        /**
          * Pointer to the currently selected Tile object.
          */
         layer::Tile* m_currentSelectedTile{ nullptr };
@@ -220,6 +210,11 @@ namespace mdcii::world
          * The y position where the island will be added.
          */
         int32_t m_putY{ -1 };
+
+        /**
+         * Is true if no island can be added at a position.
+         */
+        bool m_collision{ false };
 
         /**
          * Helper flag for adding an island.
@@ -263,7 +258,7 @@ namespace mdcii::world
          *
          * @param t_files A list of island files.
          */
-        void RenderIslandFileChooser(std::vector<std::string>& t_files) const;
+        static void RenderIslandFileChooser(std::vector<std::string>& t_files) ;
 
         //-------------------------------------------------
         // Clean up
