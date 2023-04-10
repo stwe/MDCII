@@ -479,7 +479,7 @@ namespace mdcii::world
         /**
          * Save island to file.
          */
-        void SaveIslandImGui();
+        void SaveIslandImGui() const;
 
         //-------------------------------------------------
         // Helper

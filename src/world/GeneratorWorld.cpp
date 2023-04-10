@@ -31,6 +31,7 @@
 #include "data/Text.h"
 #include "file/MdciiResourcesManager.h"
 #include "file/IslandFile.h"
+#include "file/MapFile.h"
 #include "physics/Aabb.h"
 #include "vendor/eventpp/utilities/argumentadapter.h"
 
@@ -128,7 +129,7 @@ void mdcii::world::GeneratorWorld::RenderImGui()
 
     RenderIslandFileChooser(context->mdciiResourcesManager->islandFiles);
 
-    if (ImGui::Button("Add island"))
+    if (!m_addIsland && ImGui::Button("Add island"))
     {
         m_addIsland = true;
     }
@@ -159,10 +160,7 @@ void mdcii::world::GeneratorWorld::RenderImGui()
 
     ImGui::Separator();
 
-    if (m_currentSelectedTile)
-    {
-        m_currentSelectedTile->RenderImGui();
-    }
+    SaveWorldImGui();
 
     ImGui::End();
 
@@ -325,6 +323,53 @@ void mdcii::world::GeneratorWorld::RenderIslandFileChooser(std::vector<std::stri
     }
 }
 
+void mdcii::world::GeneratorWorld::SaveWorldImGui() const
+{
+    if (terrain->islands.empty())
+    {
+        return;
+    }
+
+    static bool error{ false };
+    static bool saved{ false };
+    static std::string fileName;
+    save_file_button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveGame").c_str(), &fileName);
+
+    if (!fileName.empty())
+    {
+        if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Save").c_str()))
+        {
+            file::MapFile mapFile{ fileName };
+            mapFile.AddGeneratorWorld(this);
+            if (mapFile.SaveJsonToFile())
+            {
+                saved = true;
+                fileName.clear();
+            }
+            else
+            {
+                error = true;
+                saved = false;
+                fileName.clear();
+            }
+        }
+    }
+
+    if (error)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveError").c_str());
+        ImGui::PopStyleColor();
+    }
+
+    if (saved)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "SaveSuccess").c_str());
+        ImGui::PopStyleColor();
+    }
+}
+
 //-------------------------------------------------
 // Clean up
 //-------------------------------------------------
@@ -351,16 +396,12 @@ void mdcii::world::to_json(nlohmann::json& t_json, const GeneratorWorld& t_gener
 
     // islands
     auto islandsJson = nlohmann::json::array();
-
-    // todo: islands Json
-    /*
     for (const auto& island : t_generatorWorld.terrain->islands)
     {
         auto islandJson = nlohmann::json::object();
         islandJson = *island;
         islandsJson.push_back(islandJson);
     }
-    */
 
     t_json["islands"] = islandsJson;
 }

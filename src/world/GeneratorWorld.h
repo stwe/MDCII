@@ -30,11 +30,6 @@
 namespace mdcii::layer
 {
     /**
-     * Forward declaration struct Tile.
-     */
-    struct Tile;
-
-    /**
      * Forward declaration class WorldLayer.
      */
     class WorldLayer;
@@ -172,11 +167,6 @@ namespace mdcii::world
         std::unique_ptr<WorldGui> m_worldGui;
 
         /**
-         * Pointer to the currently selected Tile object.
-         */
-        layer::Tile* m_currentSelectedTile{ nullptr };
-
-        /**
          * The mouse button pressed listener handle.
          */
         decltype(event::EventManager::event_dispatcher)::Handle m_mouseButtonPressed;
@@ -258,7 +248,12 @@ namespace mdcii::world
          *
          * @param t_files A list of island files.
          */
-        static void RenderIslandFileChooser(std::vector<std::string>& t_files) ;
+        static void RenderIslandFileChooser(std::vector<std::string>& t_files);
+
+        /**
+         * Save the generated world to file.
+         */
+        void SaveWorldImGui() const;
 
         //-------------------------------------------------
         // Clean up

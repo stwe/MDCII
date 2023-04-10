@@ -75,17 +75,6 @@ namespace mdcii::file
          */
         void AddGeneratorWorld(world::GeneratorWorld const* t_generatorWorld);
 
-        /**
-         * Adds Json values of an island from a file.
-         *
-         * @param t_startMapX The start x position in the world.
-         * @param t_startMapY The start y position in the world.
-         * @param t_islandFileName The filename of the island.
-         *
-         * @return True if success, otherwise false.
-         */
-        [[nodiscard]] bool AddIslandFromFile(int32_t t_startMapX, int32_t t_startMapY, const std::string& t_islandFileName);
-
     protected:
 
     private:

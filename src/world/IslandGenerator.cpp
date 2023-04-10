@@ -600,7 +600,7 @@ void mdcii::world::IslandGenerator::RenderEditMenuImGui()
     ImGui::PopFont();
 }
 
-void mdcii::world::IslandGenerator::SaveIslandImGui()
+void mdcii::world::IslandGenerator::SaveIslandImGui() const
 {
     if (m_map.empty() || m_bitmaskValues.empty())
     {

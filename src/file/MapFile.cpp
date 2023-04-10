@@ -17,7 +17,6 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "MapFile.h"
-#include "IslandFile.h"
 #include "Log.h"
 #include "world/GeneratorWorld.h"
 
@@ -43,22 +42,6 @@ mdcii::file::MapFile::~MapFile() noexcept
 void mdcii::file::MapFile::AddGeneratorWorld(const world::GeneratorWorld* t_generatorWorld)
 {
     json = *t_generatorWorld;
-}
-
-bool mdcii::file::MapFile::AddIslandFromFile(const int32_t t_startMapX, const int32_t t_startMapY, const std::string& t_islandFileName)
-{
-    if (IslandFile islandFile{ t_islandFileName }; islandFile.LoadJsonFromFile())
-    {
-        auto islandJson = islandFile.json;
-        islandJson["x"] = t_startMapX;
-        islandJson["y"] = t_startMapY;
-
-        json["islands"].push_back(islandJson);
-
-        return true;
-    }
-
-    return false;
 }
 
 //-------------------------------------------------
