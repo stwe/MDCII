@@ -102,7 +102,7 @@ bool mdcii::camera::Camera::IsIslandNotInCamera(const world::Zoom t_zoom, const 
 void mdcii::camera::Camera::RenderImGui() const
 {
     auto w{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CameraWorldPosition") };
-    auto s{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "cameraScreenPosition") };
+    auto s{ data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "CameraScreenPosition") };
     w.append(": (").append(std::to_string(worldPosition.x)).append(", ").append(std::to_string(worldPosition.y)).append(")");
     s.append(": (").append(std::to_string(static_cast<int>(position.x))).append(", ").append(std::to_string(static_cast<int>(position.y))).append(")");
 

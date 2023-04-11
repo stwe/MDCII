@@ -50,17 +50,17 @@ void mdcii::world::IslandGenerator::RenderImGui()
     static auto seed{ 5990 };
     static auto frequency{ 0.116f };
 
-    if (ImGui::Checkbox("South", &m_south))
+    if (ImGui::Checkbox(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "South").c_str(), &m_south))
     {
         Reset();
     }
 
-    if (ImGui::SliderInt("Island width", &m_width, 20, 60))
+    if (ImGui::SliderInt(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "IslandWidth").c_str(), &m_width, 20, 60))
     {
         Reset();
     }
 
-    if (ImGui::SliderInt("Island height", &m_height, 20, 60))
+    if (ImGui::SliderInt(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "IslandHeight").c_str(), &m_height, 20, 60))
     {
         Reset();
     }
@@ -70,12 +70,12 @@ void mdcii::world::IslandGenerator::RenderImGui()
         Reset();
     }
 
-    if (ImGui::SliderFloat("Frequency", &frequency, 0.01f, 0.3f))
+    if (ImGui::SliderFloat(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Frequency").c_str(), &frequency, 0.01f, 0.3f))
     {
         Reset();
     }
 
-    if (ImGui::SliderFloat("Water level", &m_water_level, 0.5f, 0.8f))
+    if (ImGui::SliderFloat(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "WaterLevel").c_str(), &m_water_level, 0.5f, 0.8f))
     {
         Reset();
     }
@@ -297,10 +297,10 @@ int32_t mdcii::world::IslandGenerator::GetSouthEastValue(const int32_t t_x, cons
 
 void mdcii::world::IslandGenerator::RenderMapTypesImGui() const
 {
-    ImGui::Begin("Map types");
+    ImGui::Begin(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "MapTypes").c_str());
     if (m_map.empty())
     {
-        ImGui::Text("No values available.");
+        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "NoValuesAvailable").c_str());
     }
     else
     {
@@ -347,10 +347,10 @@ void mdcii::world::IslandGenerator::RenderMapTypesImGui() const
 
 void mdcii::world::IslandGenerator::RenderBitmaskValuesImGui() const
 {
-    ImGui::Begin("Bitmask values");
+    ImGui::Begin(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "BitmaskValues").c_str());
     if (m_bitmaskValues.empty())
     {
-        ImGui::Text("No values available.");
+        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "NoValuesAvailable").c_str());
     }
     else
     {
@@ -379,10 +379,10 @@ void mdcii::world::IslandGenerator::RenderBitmaskValuesAsCharsImGui()
     ImFontAtlas* atlas = ImGui::GetIO().Fonts;
     ImGui::PushFont(atlas->Fonts[1]);
 
-    ImGui::Begin("Resolved bitmask values");
+    ImGui::Begin(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "ResolvedBitmaskValues").c_str());
     if (m_bitmaskValues.empty())
     {
-        ImGui::Text("No values available.");
+        ImGui::TextUnformatted(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "NoValuesAvailable").c_str());
     }
     else
     {
@@ -520,11 +520,11 @@ void mdcii::world::IslandGenerator::RenderCharButtonImGui(const MapType t_mapTyp
 
 void mdcii::world::IslandGenerator::RenderEditMenuImGui()
 {
-    if (ImGui::BeginCombo("Set map type", MAP_TYPES_STRINGS.at(magic_enum::enum_integer(m_selMapType))))
+    if (ImGui::BeginCombo(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "MapType").c_str(), MAP_TYPES_STRINGS.at(magic_enum::enum_integer(m_selMapType))))
     {
         for (auto i{ 0u }; i < MAP_TYPES_STRINGS.size(); ++i)
         {
-            const auto mapTypeOpt{ magic_enum::enum_cast<MapType>(i) };
+            const auto mapTypeOpt{ magic_enum::enum_cast<MapType>(static_cast<int32_t>(i)) };
             auto mapType{ MapType::WATER };
             if (mapTypeOpt.has_value())
             {
