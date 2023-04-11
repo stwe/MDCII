@@ -85,10 +85,10 @@ void mdcii::WorldGeneratorState::RenderImGui()
     {
         begin_centered("WorldGeneratorState");
 
-        ImGui::SliderInt("World width", &w, world::World::WORLD_MIN_WIDTH, world::World::WORLD_MAX_WIDTH);
-        ImGui::SliderInt("World height", &h, world::World::WORLD_MIN_HEIGHT, world::World::WORLD_MAX_HEIGHT);
+        ImGui::SliderInt(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "WorldWidth").c_str(), &w, world::World::WORLD_MIN_WIDTH, world::World::WORLD_MAX_WIDTH);
+        ImGui::SliderInt(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "WorldHeight").c_str(), &h, world::World::WORLD_MIN_HEIGHT, world::World::WORLD_MAX_HEIGHT);
 
-        if (ImGui::Button("Generate World"))
+        if (ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "GenerateWorld").c_str()))
         {
             m_generatorWorld = std::make_shared<world::GeneratorWorld>(context, id, w, h);
         }

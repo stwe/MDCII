@@ -1,5 +1,6 @@
 ﻿{
   "de": {
+    "AddIsland": "Füge Insel aus Datei hinzu",
     "All": "Alles",
     "Animations": "Animationen",
     "BackTo": "Zurück zum",
@@ -22,6 +23,7 @@
     "Exit": "Beenden",
     "Farms": "Farmen",
     "Frequency": "Frequenz",
+    "GenerateWorld": "Erstelle Welt",
     "Houses": "Häuser",
     "Island": "Insel",
     "IslandEditor": "Inseleditor",
@@ -67,12 +69,15 @@
     "WorldDeepWater": "Ozean",
     "WorldEditor": "Welteditor",
     "WorldGrid": "Grid für die Welt",
+    "WorldHeight": "Höhe der Welt",
+    "WorldWidth": "Breite der Welt",
     "Yes": "Ja",
     "Zoom": "Zoom",
     "ZoomMapIn": "Ansicht vergrößern",
     "ZoomMapOut": "Ansicht verkleinern"
   },
   "en": {
+    "AddIsland": "Add island from file",
     "All": "All",
     "Animations": "Animations",
     "BackTo": "Back to",
@@ -95,6 +100,7 @@
     "Exit": "Exit",
     "Farms": "Farms",
     "Frequency": "Frequency",
+    "GenerateWorld": "Generate world",
     "Houses": "Houses",
     "Island": "Island",
     "IslandEditor": "Island Editor",
@@ -140,6 +146,8 @@
     "WorldDeepWater": "Ocean",
     "WorldEditor": "World Editor",
     "WorldGrid": "World grid",
+    "WorldHeight": "World height",
+    "WorldWidth": "World width",
     "Yes": "Yes",
     "Zoom": "Zoom",
     "ZoomMapIn": "Zoom map in",

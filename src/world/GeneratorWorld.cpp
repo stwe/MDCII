@@ -122,14 +122,9 @@ void mdcii::world::GeneratorWorld::RenderImGui()
 
     ImGui::Separator();
 
-    ImGui::Text("World width %d", width);
-    ImGui::Text("World height %d", height);
-
-    ImGui::Separator();
-
     RenderIslandFileChooser(context->mdciiResourcesManager->islandFiles);
 
-    if (!m_addIsland && ImGui::Button("Add island"))
+    if (!m_addIsland && ImGui::Button(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "AddIsland").c_str()))
     {
         m_addIsland = true;
     }
