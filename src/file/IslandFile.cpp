@@ -19,6 +19,7 @@
 #include "IslandFile.h"
 #include "Log.h"
 #include "layer/TerrainLayer.h"
+#include "world/Island.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -40,16 +41,18 @@ mdcii::file::IslandFile::~IslandFile() noexcept
 //-------------------------------------------------
 
 void mdcii::file::IslandFile::SetData(
-    const int32_t t_width, const int32_t t_height,
+    const int32_t t_width, const int32_t t_height, const world::ClimateZone t_climateZone,
     const std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles,
     const std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles
 )
 {
-    json["x"] = -1;
-    json["y"] = -1;
+    Log::MDCII_LOG_DEBUG("[IslandFile::SetData()] Set new values for the Json keys.");
 
     json["width"] = t_width;
     json["height"] = t_height;
+    json["x"] = -1;
+    json["y"] = -1;
+    json["climate"] = std::string(magic_enum::enum_name(t_climateZone));
 
     json["layers"] = nlohmann::json::array();
     nlohmann::json t = nlohmann::json::object();
@@ -68,6 +71,27 @@ void mdcii::file::IslandFile::SetData(
     json["layers"].push_back(b);
 }
 
+bool mdcii::file::IslandFile::CheckJson(const nlohmann::json& t_json, const std::string& t_fileName)
+{
+    if (!t_json.empty() &&
+        t_json.contains("width") &&
+        t_json.contains("height") &&
+        t_json.contains("x") &&
+        t_json.contains("y") &&
+        t_json.contains("climate") &&
+        t_json.contains("layers")
+    )
+    {
+        Log::MDCII_LOG_DEBUG("[IslandFile::ValidateJson()] The island Json value is valid in file {}.", t_fileName);
+
+        return true;
+    }
+
+    Log::MDCII_LOG_WARN("[IslandFile::ValidateJson()] An invalid island Json value was found in file {}.", t_fileName);
+
+    return false;
+}
+
 //-------------------------------------------------
 // Override
 //-------------------------------------------------
@@ -76,21 +100,7 @@ bool mdcii::file::IslandFile::ValidateJson() const
 {
     Log::MDCII_LOG_DEBUG("[IslandFile::ValidateJson()] Check Json value in island file {}.", fileName);
 
-    if (!json.empty() &&
-        json.contains("width") &&
-        json.contains("height") &&
-        json.contains("x") &&
-        json.contains("y") &&
-        json.contains("layers")
-    )
-    {
-        Log::MDCII_LOG_DEBUG("[IslandFile::ValidateJson()]  The Json value in island file {} is valid.", fileName);
-        return true;
-    }
-
-    Log::MDCII_LOG_WARN("[IslandFile::ValidateJson()] Found invalid Json value in map file {}.", fileName);
-
-    return false;
+    return CheckJson(json, fileName);
 }
 
 bool mdcii::file::IslandFile::ValidateObject() const
@@ -102,6 +112,7 @@ bool mdcii::file::IslandFile::ValidateObject() const
         json.at("width").get<int32_t>() <= 0 || json.at("height").get<int32_t>() <= 0)
     {
         Log::MDCII_LOG_WARN("[IslandFile::ValidateObject()] Found invalid object values in island file {}.", fileName);
+
         return false;
     }
 

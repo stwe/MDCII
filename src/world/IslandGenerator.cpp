@@ -21,6 +21,7 @@
 #include "IslandGenerator.h"
 #include "MdciiAssert.h"
 #include "Game.h"
+#include "Island.h"
 #include "data/Text.h"
 #include "data/BuildingIds.h"
 #include "layer/TerrainLayer.h"
@@ -622,7 +623,7 @@ void mdcii::world::IslandGenerator::SaveIslandImGui() const
             CreateCoastTiles(coastTiles);
 
             file::IslandFile islandFile{ fileName };
-            islandFile.SetData(m_width, m_height, terrainTiles, coastTiles);
+            islandFile.SetData(m_width, m_height, m_south ? ClimateZone::SOUTH : ClimateZone::NORTH, terrainTiles, coastTiles);
             if (islandFile.SaveJsonToFile())
             {
                 saved = true;

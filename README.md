@@ -7,7 +7,9 @@ You must have a copy of the original game installed on your computer.
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ffb066523c4064ab513bef2f8d4628)](https://www.codacy.com/gh/stwe/MDCII/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stwe/MDCII&amp;utm_campaign=Badge_Grade)
 
-<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/01-01-2023.png" width="500" height="400" alt="" />
+<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/First_MapEditor_15-04-2023.png" width="500" height="400" alt="" />
+
+<img src="https://github.com/stwe/MDCII/blob/main/resources/devlog/15-04-2023.png" width="500" height="400" alt="" />
 
 * [Compiling MDCII](#compiling-mdcii)
 * [Running MDCII](#running-mdcii)

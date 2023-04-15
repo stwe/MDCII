@@ -17,6 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "MapFile.h"
+#include "IslandFile.h"
 #include "Log.h"
 #include "world/GeneratorWorld.h"
 
@@ -52,6 +53,7 @@ bool mdcii::file::MapFile::ValidateJson() const
 {
     Log::MDCII_LOG_DEBUG("[MapFile::ValidateJson()] Check Json value in map file {}.", fileName);
 
+    auto check{ false };
     if (!json.empty() &&
         json.contains("version") &&
         json.contains("world") &&
@@ -59,7 +61,20 @@ bool mdcii::file::MapFile::ValidateJson() const
         json["world"].contains("height") &&
         json.contains("islands"))
     {
+        check = true;
+        for (const auto& item : json.at("islands"))
+        {
+            if (!IslandFile::CheckJson(item, fileName))
+            {
+                check = false;
+            }
+        }
+    }
+
+    if (check)
+    {
         Log::MDCII_LOG_DEBUG("[MapFile::ValidateJson()] The Json value in map file {} is valid.", fileName);
+
         return true;
     }
 
@@ -79,6 +94,7 @@ bool mdcii::file::MapFile::ValidateObject() const
         h < world::World::WORLD_MIN_HEIGHT || h > world::World::WORLD_MAX_HEIGHT)
     {
         Log::MDCII_LOG_WARN("[MapFile::ValidateObject()] Found invalid object values in map file {}.", fileName);
+
         return false;
     }
 

@@ -70,6 +70,11 @@ void mdcii::world::Island::InitValuesFromJson(const nlohmann::json& t_json)
 
     aabb = std::make_unique<physics::Aabb>(glm::ivec2(startWorldX, startWorldY), glm::ivec2(width, height));
 
+    if (auto climateZoneOpt = magic_enum::enum_cast<ClimateZone>(t_json.at("climate").get<std::string>()); climateZoneOpt.has_value())
+    {
+        climateZone = climateZoneOpt.value();
+    }
+
     CreateLayersFromJson(t_json.at("layers"));
 
     Log::MDCII_LOG_DEBUG("[Island::InitValuesFromJson()] The island have been initialized successfully.");
@@ -103,6 +108,7 @@ void mdcii::world::Island::RenderImGui() const
     ImGui::Text("Start World y: %d", startWorldY);
     ImGui::Text("Width: %d", width);
     ImGui::Text("Height: %d", height);
+    ImGui::Text("Climate: %s", std::string(magic_enum::enum_name(climateZone)).c_str());
 }
 
 //-------------------------------------------------
@@ -196,11 +202,12 @@ void mdcii::world::Island::CreateLayersFromJson(const nlohmann::json& t_json)
 
 void mdcii::world::to_json(nlohmann::json& t_json, const Island& t_island)
 {
-    // size && position
+    // size, position, climate zone
     t_json["width"] = t_island.width;
     t_json["height"] = t_island.height;
     t_json["x"] = t_island.startWorldX;
     t_json["y"] = t_island.startWorldY;
+    t_json["climate"] = std::string(magic_enum::enum_name(t_island.climateZone));
 
     // layers
     t_json["layers"] = nlohmann::json::array();

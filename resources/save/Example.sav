@@ -10,6 +10,7 @@
     "height": 12,
     "x": 3,
     "y": 3,
+    "climate": "NORTH",
     "layers": [
       {
         "coast": [
@@ -66,6 +67,7 @@
       "height": 12,
       "x": 11,
       "y": 15,
+      "climate": "SOUTH",
       "layers": [
         {
           "coast": [

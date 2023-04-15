@@ -24,6 +24,14 @@
 // Forward declarations
 //-------------------------------------------------
 
+namespace mdcii::world
+{
+    /**
+     * Forward declaration enum class ClimateZone.
+     */
+    enum class ClimateZone;
+}
+
 namespace mdcii::layer
 {
     /**
@@ -73,14 +81,25 @@ namespace mdcii::file
          *
          * @param t_width The island width
          * @param t_height The island height.
+         * @param t_climateZone The climate zone of the island.
          * @param t_terrainTiles The terrain tiles of the island.
          * @param t_coastTiles The coast tiles of the island.
          */
         void SetData(
-            int32_t t_width, int32_t t_height,
+            int32_t t_width, int32_t t_height, world::ClimateZone t_climateZone,
             const std::vector<std::shared_ptr<layer::Tile>>& t_terrainTiles,
             const std::vector<std::shared_ptr<layer::Tile>>& t_coastTiles
         );
+
+        /**
+         * Method to check Json values for an island.
+         *
+         * @param t_json The Json value to validate.
+         * @param t_fileName The name of the file.
+         *
+         * @return True if valid, false otherwise.
+         */
+        static bool CheckJson(const nlohmann::json& t_json, const std::string& t_fileName);
 
     protected:
 

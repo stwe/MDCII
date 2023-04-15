@@ -19,6 +19,7 @@
 #pragma once
 
 #include "layer/Tile.h"
+#include "vendor/nlohmann/json.hpp"
 
 //-------------------------------------------------
 // Forward declarations
@@ -67,6 +68,18 @@ namespace mdcii::world
      * Forward declaration class Terrain.
      */
     class Terrain;
+
+    //-------------------------------------------------
+    // ClimateZone
+    //-------------------------------------------------
+
+    /**
+     * Available climate zones.
+     */
+    enum class ClimateZone
+    {
+        NORTH, SOUTH
+    };
 
     //-------------------------------------------------
     // Island
@@ -151,6 +164,11 @@ namespace mdcii::world
          * Pointer to the currently Tile object under the mouse.
          */
         layer::Tile* currentTileUnderMouse{ nullptr };
+
+        /**
+         * The climate zone of the island.
+         */
+        ClimateZone climateZone{ ClimateZone::NORTH };
 
         //-------------------------------------------------
         // Ctors. / Dtor.

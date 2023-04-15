@@ -17,6 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "SavegameFile.h"
+#include "IslandFile.h"
 #include "Log.h"
 #include "world/GameWorld.h"
 
@@ -52,6 +53,7 @@ bool mdcii::file::SavegameFile::ValidateJson() const
 {
     Log::MDCII_LOG_DEBUG("[SavegameFile::ValidateJson()] Check Json value in save-game file {}.", fileName);
 
+    auto check{ false };
     if (!json.empty() &&
         json.contains("version") &&
         json.contains("world") &&
@@ -59,7 +61,20 @@ bool mdcii::file::SavegameFile::ValidateJson() const
         json["world"].contains("height") &&
         json.contains("islands"))
     {
+        check = true;
+        for (const auto& item : json.at("islands"))
+        {
+            if (!IslandFile::CheckJson(item, fileName))
+            {
+                check = false;
+            }
+        }
+    }
+
+    if (check)
+    {
         Log::MDCII_LOG_DEBUG("[SavegameFile::ValidateJson()] The Json value in save-game file {} is valid.", fileName);
+
         return true;
     }
 
@@ -79,6 +94,7 @@ bool mdcii::file::SavegameFile::ValidateObject() const
         h < world::World::WORLD_MIN_HEIGHT || h > world::World::WORLD_MAX_HEIGHT)
     {
         Log::MDCII_LOG_WARN("[SavegameFile::ValidateObject()] Found invalid object values in save-game file {}.", fileName);
+
         return false;
     }
 

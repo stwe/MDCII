@@ -356,6 +356,16 @@ void mdcii::world::GameWorld::Init()
         }
     }
 
+    if (json.empty())
+    {
+        Log::MDCII_LOG_DEBUG("[GameWorld::Init()] Starts POP State {}.", magic_enum::enum_name(stateId));
+
+        context->stateStack->PopState(stateId);
+        context->stateStack->PushState(state::StateId::MAIN_MENU);
+
+        return;
+    }
+
     MDCII_ASSERT(!json.empty(), "[GameWorld::Init()] Invalid Json value.")
 
     // world
