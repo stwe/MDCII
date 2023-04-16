@@ -35,7 +35,6 @@ mdcii::world::World::World(std::shared_ptr<state::Context> t_context, const stat
 
     rotation = Rotation::DEG0;
     zoom = Zoom::GFX;
-    mousePicker = std::make_unique<MousePicker>(this, *context->window, *context->camera);
 }
 
 mdcii::world::World::~World() noexcept

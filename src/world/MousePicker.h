@@ -132,16 +132,6 @@ namespace mdcii::world
         World* m_world{ nullptr };
 
         /**
-         * The world width.
-         */
-        int32_t m_worldWidth{ -1 };
-
-        /**
-         * The world height.
-         */
-        int32_t m_worldHeight{ -1 };
-
-        /**
          * A renderer to show the mouse cursor in the form of a tile.
          */
         std::unique_ptr<renderer::TileRenderer> m_renderer;

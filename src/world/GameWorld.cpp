@@ -336,10 +336,6 @@ void mdcii::world::GameWorld::Init()
 {
     Log::MDCII_LOG_DEBUG("[GameWorld::Init()] Start initializing the game world...");
 
-    terrain = std::make_unique<Terrain>(context, this);
-    tileAtlas = std::make_unique<TileAtlas>();
-    terrainRenderer = std::make_unique<renderer::TerrainRenderer>(context, tileAtlas);
-
     nlohmann::json json;
     if (stateId == state::StateId::NEW_GAME)
     {
@@ -371,6 +367,11 @@ void mdcii::world::GameWorld::Init()
     // world
     width = json["world"].at("width").get<int32_t>();
     height = json["world"].at("height").get<int32_t>();
+
+    mousePicker = std::make_unique<MousePicker>(this, *context->window, *context->camera);
+    terrain = std::make_unique<Terrain>(context, this);
+    tileAtlas = std::make_unique<TileAtlas>();
+    terrainRenderer = std::make_unique<renderer::TerrainRenderer>(context, tileAtlas);
 
     // islands
     terrain->CreateIslandsFromJson(json["islands"]);

@@ -40,9 +40,8 @@ mdcii::world::MousePicker::MousePicker(world::World* t_world, const ogl::Window&
     Log::MDCII_LOG_DEBUG("[MousePicker::MousePicker()] Create MousePicker.");
 
     MDCII_ASSERT(m_world, "[MousePicker::MousePicker()] Null pointer.")
-
-    m_worldWidth = m_world->width;
-    m_worldHeight = m_world->height;
+    MDCII_ASSERT(m_world->width != -1, "[MousePicker::MousePicker()] Invalid world width.")
+    MDCII_ASSERT(m_world->height != -1, "[MousePicker::MousePicker()] Invalid world height.")
 
     Init();
     AddListeners(t_window, t_camera);
@@ -188,7 +187,7 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     {
         result = glm::ivec2(
             (cell.y + t_camera.worldPosition.y) - (cell.x + t_camera.worldPosition.x),
-            m_worldWidth - 1 - ((cell.x + t_camera.worldPosition.x) + (cell.y + t_camera.worldPosition.y))
+            m_world->width - 1 - ((cell.x + t_camera.worldPosition.x) + (cell.y + t_camera.worldPosition.y))
         );
 
         if (r == 255 && g == 0 && b == 0)
@@ -212,8 +211,8 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     if (m_world->rotation == Rotation::DEG180)
     {
         result = glm::ivec2(
-            m_worldWidth - 1 - ((cell.y + t_camera.worldPosition.y) + (cell.x + t_camera.worldPosition.x)),
-            m_worldHeight - 1 - ((cell.y + t_camera.worldPosition.y) - (cell.x + t_camera.worldPosition.x))
+            m_world->width - 1 - ((cell.y + t_camera.worldPosition.y) + (cell.x + t_camera.worldPosition.x)),
+            m_world->height - 1 - ((cell.y + t_camera.worldPosition.y) - (cell.x + t_camera.worldPosition.x))
         );
 
         if (r == 255 && g == 0 && b == 0)
@@ -237,7 +236,7 @@ glm::ivec2 mdcii::world::MousePicker::GetWorldPosition(const ogl::Window& t_wind
     if (m_world->rotation == Rotation::DEG270)
     {
         result = glm::ivec2(
-            m_worldHeight - 1 - ((cell.y + t_camera.worldPosition.y) - (cell.x + t_camera.worldPosition.x)),
+            m_world->height - 1 - ((cell.y + t_camera.worldPosition.y) - (cell.x + t_camera.worldPosition.x)),
             (cell.y + t_camera.worldPosition.y) + (cell.x + t_camera.worldPosition.x)
         );
 

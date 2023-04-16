@@ -47,6 +47,7 @@ mdcii::world::GeneratorWorld::GeneratorWorld(std::shared_ptr<state::Context> t_c
     width = t_width;
     height = t_height;
 
+    mousePicker = std::make_unique<MousePicker>(this, *context->window, *context->camera);
     terrain = std::make_unique<Terrain>(context, this);
     tileAtlas = std::make_unique<TileAtlas>();
     terrainRenderer = std::make_unique<renderer::TerrainRenderer>(context, tileAtlas);

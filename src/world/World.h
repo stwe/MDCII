@@ -124,12 +124,12 @@ namespace mdcii::world
         /**
          * The world width.
          */
-        int32_t width{ WORLD_MIN_WIDTH };
+        int32_t width{ -1 };
 
         /**
          * The world height.
          */
-        int32_t height{ WORLD_MIN_HEIGHT };
+        int32_t height{ -1 };
 
         /**
          * The world rotation.
