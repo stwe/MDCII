@@ -67,6 +67,16 @@ namespace mdcii::renderer
     {
     public:
         //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * todo
+         * Debug-Flag to show either the buildings or just the area selected by the buildings.
+         */
+        bool renderBuildings{ true };
+
+        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
@@ -232,6 +242,22 @@ namespace mdcii::renderer
          * @param t_gameLayer The Layer of the Tile.
          */
         static void UnselectPosition(const glm::ivec2& t_position, const layer::GameLayer& t_gameLayer);
+
+        /**
+         * Updates the Gpu data of a Layer object.
+         * Here the instance of the layer object is set to selected or not selected.
+         *
+         * @param t_instance The instance to change.
+         * @param t_terrainLayer The TerrainLayer object.
+         * @param t_rotation The rotation.
+         * @param t_selected Selected or not selected.
+         */
+        static void UpdateGpuData(
+            int32_t t_instance,
+            const layer::TerrainLayer& t_terrainLayer,
+            world::Rotation t_rotation,
+            bool t_selected
+        );
 
     protected:
 

@@ -164,6 +164,10 @@ void mdcii::world::GameWorld::RenderImGui()
         ImGui::PopStyleColor();
         ImGui::PopStyleColor();
     }
+
+    // todo: temp code
+    ImGui::Checkbox("Debug: Disable to see selected tiles only", &terrainRenderer->renderBuildings);
+
     ImGui::Separator();
 
     if (ImGui::CollapsingHeader(data::Text::GetMenuText(Game::INI.Get<std::string>("locale", "lang"), "Islands").c_str()))

@@ -199,25 +199,37 @@ void mdcii::renderer::TerrainRenderer::DeleteBuildingFromGpu(world::Island& t_is
             const auto& tg{ t_island.terrainLayer->gfxNumbers };
             const auto& tb{ t_island.terrainLayer->buildingIds };
 
-            // delete: update Gpu data of BUILDINGS Layer
-            UpdateGpuData(
-                t_tile.instanceIds[rotationInt],
-                *t_island.buildingsLayer,
-                t_zoom, t_rotation,
-                glm::mat4(), // model matrix
-                -1,          // gfx
-                -1           // building
-            );
+            if (renderBuildings) // default
+            {
+                // delete: update Gpu data of BUILDINGS Layer
+                UpdateGpuData(
+                    t_tile.instanceIds[rotationInt],
+                    *t_island.buildingsLayer,
+                    t_zoom, t_rotation,
+                    glm::mat4(), // model matrix
+                    -1,          // gfx
+                    -1           // building
+                );
 
-            // delete: update Gpu data from MIXED Layer
-            UpdateGpuData(
-                t_tile.instanceIds[rotationInt],
-                *t_island.mixedLayer,
-                t_zoom, t_rotation,
-                tm[t_tile.instanceIds[rotationInt]],
-                tg[t_tile.instanceIds[rotationInt]][rotationInt],
-                tb[t_tile.instanceIds[rotationInt]][rotationInt]
-            );
+                // delete: update Gpu data from MIXED Layer
+                UpdateGpuData(
+                    t_tile.instanceIds[rotationInt],
+                    *t_island.mixedLayer,
+                    t_zoom, t_rotation,
+                    tm[t_tile.instanceIds[rotationInt]],
+                    tg[t_tile.instanceIds[rotationInt]][rotationInt],
+                    tb[t_tile.instanceIds[rotationInt]][rotationInt]
+                );
+            }
+            else // unselect only
+            {
+                UpdateGpuData(
+                    t_tile.instanceIds[rotationInt],
+                    *t_island.mixedLayer,
+                    t_rotation,
+                    false
+                );
+            }
         });
     });
 }
@@ -305,25 +317,37 @@ void mdcii::renderer::TerrainRenderer::AddBuildingToGpu(
                     const auto modelMatrix{ t_terrain.currentIslandUnderMouse->mixedLayer->CreateModelMatrix(*tile, t_zoom, t_rotation) };
                     const auto gfxNumber{ t_terrain.currentIslandUnderMouse->mixedLayer->CalcGfx(*tile, t_rotation) };
 
-                    // add: update Gpu data BUILDINGS
-                    UpdateGpuData(
-                        tile->instanceIds[rotationInt],
-                        *t_terrain.currentIslandUnderMouse->buildingsLayer,
-                        t_zoom, t_rotation,
-                        modelMatrix,
-                        gfxNumber,
-                        tile->buildingId
-                    );
+                    if (renderBuildings) // default
+                    {
+                        // add: update Gpu data BUILDINGS
+                        UpdateGpuData(
+                            tile->instanceIds[rotationInt],
+                            *t_terrain.currentIslandUnderMouse->buildingsLayer,
+                            t_zoom, t_rotation,
+                            modelMatrix,
+                            gfxNumber,
+                            tile->buildingId
+                        );
 
-                    // add: update Gpu data MIXED
-                    UpdateGpuData(
-                        tile->instanceIds[rotationInt],
-                        *t_terrain.currentIslandUnderMouse->mixedLayer,
-                        t_zoom, t_rotation,
-                        modelMatrix,
-                        gfxNumber,
-                        tile->buildingId
-                    );
+                        // add: update Gpu data MIXED
+                        UpdateGpuData(
+                            tile->instanceIds[rotationInt],
+                            *t_terrain.currentIslandUnderMouse->mixedLayer,
+                            t_zoom, t_rotation,
+                            modelMatrix,
+                            gfxNumber,
+                            tile->buildingId
+                        );
+                    }
+                    else // only show the tiles as selected
+                    {
+                        UpdateGpuData(
+                            tile->instanceIds[rotationInt],
+                            *t_terrain.currentIslandUnderMouse->mixedLayer,
+                            t_rotation,
+                            true
+                        );
+                    }
                 });
             });
 
@@ -365,11 +389,6 @@ void mdcii::renderer::TerrainRenderer::UpdateGpuData(
     const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
     const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
 
-    // bind Vao of the given zoom
-    // todo: Expensive binding of the Vao may not be necessary.
-    const auto& vao{ m_vaos.at(zoomInt) };
-    vao->Bind();
-
     // new model matrix
     const auto& modelMatricesSsbo{ t_terrainLayer.modelMatricesSsbos.at(zoomInt).at(rotationInt) };
     modelMatricesSsbo->Bind();
@@ -390,9 +409,6 @@ void mdcii::renderer::TerrainRenderer::UpdateGpuData(
     buildingsSsbo->Bind();
     ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::ivec4)) * t_instance) + rotOffset, sizeof(int32_t), &t_buildingId);
     ogl::buffer::Ssbo::Unbind();
-
-    // unbind Vao
-    ogl::buffer::Vao::Unbind();
 }
 
 //-------------------------------------------------
@@ -480,6 +496,32 @@ void mdcii::renderer::TerrainRenderer::UnselectPosition(const glm::ivec2& t_posi
         // Cpu
         tile->selected = false;
     }
+}
+
+void mdcii::renderer::TerrainRenderer::UpdateGpuData(
+    const int32_t t_instance,
+    const layer::TerrainLayer& t_terrainLayer,
+    const world::Rotation t_rotation,
+    const bool t_selected
+)
+{
+    MDCII_ASSERT(t_instance >= 0, "[TerrainRenderer::UpdateGpuData()] Invalid instance.")
+
+    const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+    const auto rotOffset{ rotationInt * static_cast<int32_t>(sizeof(int32_t)) };
+
+    const auto& ssbo{ t_terrainLayer.selectedInstancesSsbo };
+    ssbo->Bind();
+    if (t_selected)
+    {
+        ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::ivec4)) * t_instance) + rotOffset, sizeof(int32_t), &SELECT);
+    }
+    else
+    {
+        ogl::buffer::Ssbo::StoreSubData((static_cast<int32_t>(sizeof(glm::ivec4)) * t_instance) + rotOffset, sizeof(int32_t), &UNSELECT);
+    }
+
+    ogl::buffer::Ssbo::Unbind();
 }
 
 //-------------------------------------------------
