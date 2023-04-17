@@ -20,6 +20,7 @@
 #include "MdciiAssert.h"
 #include "MousePicker.h"
 #include "state/State.h"
+#include "physics/Aabb.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -74,6 +75,7 @@ void mdcii::world::World::ZoomWorld(const ChangeZoom t_changeZoom)
     context->camera->zoom = zoom;
     context->camera->position.x = static_cast<float>(context->camera->worldPosition.x) * static_cast<float>(get_tile_width(zoom));
     context->camera->position.y = static_cast<float>(context->camera->worldPosition.y) * static_cast<float>(get_tile_height(zoom));
+    context->camera->aabb->position = context->camera->position;
 }
 
 //-------------------------------------------------
