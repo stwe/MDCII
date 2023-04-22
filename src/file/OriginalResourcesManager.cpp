@@ -16,11 +16,12 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include <filesystem>
 #include "OriginalResourcesManager.h"
 #include "Game.h"
 #include "MdciiAssert.h"
 #include "MdciiException.h"
+#include "BshFile.h"
+#include "SoundFile.h"
 #include "world/Zoom.h"
 
 //-------------------------------------------------
@@ -122,6 +123,12 @@ void mdcii::file::OriginalResourcesManager::GetPathsFromOriginal()
                             m_paletteFilePath = f.path().string();
                         }
                     }
+
+                    // MP3 files from the History Ed. only
+                    if (extension == ".mp3")
+                    {
+                        m_soundFilesPaths.emplace_back(f.path().string());
+                    }
                 }
             }
         }
@@ -199,6 +206,12 @@ void mdcii::file::OriginalResourcesManager::LoadFiles()
     }
 
     buildings = std::make_unique<data::Buildings>(m_buildingsFilePath);
+
+    // soundtracks from the History Ed.
+    for (const auto& soundFilePath : m_soundFilesPaths)
+    {
+        soundFiles.try_emplace(soundFilePath.filename().string(), std::make_unique<SoundFile>(soundFilePath));
+    }
 
     Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::LoadFiles()] All files have been loaded successfully.");
 }

@@ -20,6 +20,7 @@
 #include "WorldLayer.h"
 #include "state/State.h"
 #include "file/OriginalResourcesManager.h"
+#include "file/BshFile.h"
 #include "renderer/RenderUtils.h"
 #include "world/GameWorld.h"
 #include "world/Terrain.h"

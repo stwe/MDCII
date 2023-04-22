@@ -28,6 +28,7 @@
 #include "file/OriginalResourcesManager.h"
 #include "file/MdciiResourcesManager.h"
 #include "data/Text.h"
+#include "sound/SoundDevice.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -153,6 +154,9 @@ void mdcii::Game::GameLoop() const
 void mdcii::Game::CreateSharedObjects()
 {
     Log::MDCII_LOG_DEBUG("[Game::CreateSharedObjects()] Create shared objects.");
+
+    // todo: shared object? Singleton?
+    m_soundDevice = std::make_shared<sound::SoundDevice>();
 
     m_window = std::make_shared<ogl::Window>();
     m_camera = std::make_shared<camera::Camera>(m_window->width, m_window->height);

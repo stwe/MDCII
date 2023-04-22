@@ -18,8 +18,8 @@
 
 #pragma once
 
+#include <filesystem>
 #include <unordered_map>
-#include "BshFile.h"
 #include "data/Buildings.h"
 
 //-------------------------------------------------
@@ -28,6 +28,9 @@
 
 namespace mdcii::world
 {
+    /**
+     * Forward declaration enum class Zoom.
+     */
     enum class Zoom;
 }
 
@@ -37,6 +40,34 @@ namespace mdcii::world
 
 namespace mdcii::file
 {
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
+    /**
+     * Forward declaration struct BshTexture.
+     */
+    struct BshTexture;
+
+    /**
+     * Forward declaration class BshFile.
+     */
+    class BshFile;
+
+    /**
+     * Forward declaration class PaletteFile.
+     */
+    class PaletteFile;
+
+    /**
+     * Forward declaration class SoundFile.
+     */
+    class SoundFile;
+
+    //-------------------------------------------------
+    // OriginalResourcesManager
+    //-------------------------------------------------
+
     /**
      * Reads paths from the original game and loads the required resources.
      */
@@ -64,6 +95,11 @@ namespace mdcii::file
          * The decrypted content of the haeuser.cod.
          */
         std::unique_ptr<data::Buildings> buildings;
+
+        /**
+         * The loaded wav/mp3 files.
+         */
+        std::unordered_map<std::string, std::shared_ptr<SoundFile>> soundFiles;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -140,6 +176,11 @@ namespace mdcii::file
          * The col file to get palette values.
          */
         std::unique_ptr<PaletteFile> m_paletteFile;
+
+        /**
+         * The paths to the sound files.
+         */
+        std::vector<std::filesystem::path> m_soundFilesPaths;
 
         //-------------------------------------------------
         // Init

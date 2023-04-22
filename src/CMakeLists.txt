@@ -16,6 +16,8 @@ find_package(imgui CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(Freetype CONFIG REQUIRED)
 find_package(protobuf CONFIG REQUIRED)
+find_package(OpenAL CONFIG REQUIRED)
+find_package(SndFile CONFIG REQUIRED)
 
 message("Building with CMake version: ${CMAKE_VERSION}")
 
@@ -38,6 +40,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
 target_link_libraries(${PROJECT_NAME} PRIVATE freetype)
 target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenAL::OpenAL)
+target_link_libraries(${PROJECT_NAME} PRIVATE SndFile::sndfile)
 
 # copy config.ini
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

@@ -25,6 +25,8 @@
 #include "ogl/Window.h"
 #include "state/StateStack.h"
 #include "data/Text.h"
+#include "sound/MusicBuffer.h"
+#include "file/OriginalResourcesManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -36,6 +38,15 @@ mdcii::MainMenuState::MainMenuState(const state::StateId t_id, std::shared_ptr<s
     Log::MDCII_LOG_DEBUG("[MainMenuState::MainMenuState()] Create MainMenuState.");
 
     MDCII_ASSERT(context, "[MainMenuState::MainMenuState()] Null pointer.")
+
+    // todo: check sound device exist
+    // todo: convert WAV files from Nina to Mp3
+    // todo: each state should play background music
+    m_bgMusic = std::make_shared<sound::MusicBuffer>(context->originalResourcesManager->soundFiles.at("03 - 1st Beginning.mp3"));
+    if (m_bgMusic)
+    {
+        m_bgMusic->Play();
+    }
 }
 
 mdcii::MainMenuState::~MainMenuState() noexcept
@@ -59,6 +70,10 @@ void mdcii::MainMenuState::Input()
 
 void mdcii::MainMenuState::Update()
 {
+    if (m_bgMusic && m_bgMusic->IsPlaying())
+    {
+        m_bgMusic->UpdateBufferStream();
+    }
 }
 
 void mdcii::MainMenuState::Render()

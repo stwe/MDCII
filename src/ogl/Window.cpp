@@ -212,7 +212,7 @@ void mdcii::ogl::Window::InitWindow()
     Log::MDCII_LOG_DEBUG("[Window::InitWindow()] Initializing GLEW.");
     if (const auto err{ glewInit() }; err != GLEW_OK)
     {
-        throw MDCII_EXCEPTION("[Window::InitWindow()] Unable to initialize GLEW." + std::string(reinterpret_cast<const char*>(glewGetErrorString(err))));
+        throw MDCII_EXCEPTION("[Window::InitWindow()] Unable to initialize GLEW. " + std::string(reinterpret_cast<const char*>(glewGetErrorString(err))));
     }
 
     // Print out some information about the graphics drivers.

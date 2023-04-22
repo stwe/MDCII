@@ -32,6 +32,8 @@ Now the [Requirements](#requirements) have to be installed.
 * [imgui](https://github.com/ocornut/imgui)
 * [FreeType](https://freetype.org/)
 * [Protocol Buffers](https://github.com/protocolbuffers/protobuf)
+* [openal-soft](https://github.com/kcat/openal-soft)
+* [libsndfile](https://github.com/libsndfile/libsndfile)
 * C++ 17 Compiler (Gcc or MSVC)
 
 ### Platforms
@@ -55,6 +57,7 @@ The project now contains a simple Perlin Noise based Island Generator. The islan
 can be loaded with the World Editor and placed anywhere in the world. A new game can be started with the
 map files created with the World Editor.
 
+* sound system: play background music and sound effects
 * refactoring menus and add missing translations
 * it should be possible to build roads; another Layer may be created for this
 * animations should be possible showing how residents brings goods from A to B; for this the A* algorithm can be implemented

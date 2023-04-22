@@ -41,6 +41,14 @@ namespace mdcii::camera
     class Camera;
 }
 
+namespace mdcii::sound
+{
+    /**
+     * Forward declaration class SoundDevice.
+     */
+    class SoundDevice;
+}
+
 namespace mdcii::file
 {
     /**
@@ -139,6 +147,11 @@ namespace mdcii
          * An orthographic camera.
          */
         std::shared_ptr<camera::Camera> m_camera;
+
+        /**
+         * The default sound device and the context.
+         */
+        std::shared_ptr<sound::SoundDevice> m_soundDevice;
 
         /**
          * Resources of the original game needed here.

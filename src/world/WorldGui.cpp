@@ -27,6 +27,7 @@
 #include "data/BuildingIds.h"
 #include "data/Text.h"
 #include "file/OriginalResourcesManager.h"
+#include "file/BshFile.h"
 #include "file/SavegameFile.h"
 #include "layer/TerrainLayer.h"
 

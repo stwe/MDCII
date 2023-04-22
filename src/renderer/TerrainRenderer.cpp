@@ -21,6 +21,7 @@
 #include "RenderUtils.h"
 #include "state/State.h"
 #include "file/OriginalResourcesManager.h"
+#include "file/BshFile.h"
 #include "camera/Camera.h"
 #include "ogl/Window.h"
 #include "ogl/resource/ResourceManager.h"

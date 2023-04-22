@@ -22,6 +22,7 @@
 #include "world/Island.h"
 #include "world/World.h"
 #include "file/OriginalResourcesManager.h"
+#include "file/BshFile.h"
 #include "ogl/buffer/Ssbo.h"
 #include "renderer/RenderUtils.h"
 #include "data/BuildingIds.h"

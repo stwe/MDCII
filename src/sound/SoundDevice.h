@@ -18,61 +18,56 @@
 
 #pragma once
 
-#include "state/State.h"
-
 //-------------------------------------------------
 // Forward declarations
+//-------------------------------------------------
+
+/**
+ * Forward declaration struct ALCdevice.
+ */
+struct ALCdevice;
+
+/**
+ * Forward declaration struct ALCcontext.
+ */
+struct ALCcontext;
+
+//-------------------------------------------------
+// SoundDevice
 //-------------------------------------------------
 
 namespace mdcii::sound
 {
     /**
-     * Forward declaration class MusicBuffer.
+     * Open a handle to the default sound device.
+     * After the device is successfully opened, create and activate a context.
      */
-    class MusicBuffer;
-}
-
-//-------------------------------------------------
-// MainMenuState
-//-------------------------------------------------
-
-namespace mdcii
-{
-    /**
-     * A state to show the main menu.
-     */
-    class MainMenuState: public state::State
+    class SoundDevice
     {
     public:
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        MainMenuState() = delete;
+        SoundDevice();
+
+        SoundDevice(const SoundDevice& t_other) = delete;
+        SoundDevice(SoundDevice&& t_other) noexcept = delete;
+        SoundDevice& operator=(const SoundDevice& t_other) = delete;
+        SoundDevice& operator=(SoundDevice&& t_other) noexcept = delete;
+
+        ~SoundDevice() noexcept;
+
+        //-------------------------------------------------
+        // Getter
+        //-------------------------------------------------
 
         /**
-         * Constructs a new MainMenuState object.
+         * For better readability. Checks if the sound device is available.
          *
-         * @param t_id The unique identifier of the State.
-         * @param t_context The holder of shared objects.
+         * @return True if the default sound device is available.
          */
-        MainMenuState(state::StateId t_id, std::shared_ptr<state::Context> t_context);
-
-        MainMenuState(const MainMenuState& t_other) = delete;
-        MainMenuState(MainMenuState&& t_other) noexcept = delete;
-        MainMenuState& operator=(const MainMenuState& t_other) = delete;
-        MainMenuState& operator=(MainMenuState&& t_other) noexcept = delete;
-
-        ~MainMenuState() noexcept override;
-
-        //-------------------------------------------------
-        // Override
-        //-------------------------------------------------
-
-        void Input() override;
-        void Update() override;
-        void Render() override;
-        void RenderImGui() override;
+        [[nodiscard]] bool IsSoundDeviceAvailable() const { return m_device != nullptr; }
 
     protected:
 
@@ -82,8 +77,31 @@ namespace mdcii
         //-------------------------------------------------
 
         /**
-         * To play background music.
+         * The default sound device handle.
          */
-        std::shared_ptr<sound::MusicBuffer> m_bgMusic;
+        ALCdevice* m_device{ nullptr };
+
+        /**
+         * The current context.
+         */
+        ALCcontext* m_context{ nullptr };
+
+        //-------------------------------------------------
+        // Init
+        //-------------------------------------------------
+
+        /**
+         * Initializes the default sound device and create a context.
+         */
+        void Init();
+
+        //-------------------------------------------------
+        // Clean up
+        //-------------------------------------------------
+
+        /**
+         * Clean up.
+         */
+        void CleanUp() const;
     };
 }

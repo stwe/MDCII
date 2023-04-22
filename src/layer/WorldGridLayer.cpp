@@ -20,6 +20,7 @@
 #include "MdciiAssert.h"
 #include "state/State.h"
 #include "file/OriginalResourcesManager.h"
+#include "file/BshFile.h"
 #include "renderer/RenderUtils.h"
 #include "world/World.h"
 
