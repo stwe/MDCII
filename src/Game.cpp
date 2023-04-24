@@ -64,7 +64,7 @@ void mdcii::Game::Init()
 {
     Log::MDCII_LOG_DEBUG("[Game::Init()] Initializing game...");
 
-    CreateSharedObjects();
+    CreateObjects();
     Start();
 
     Log::MDCII_LOG_DEBUG("[Game::Init()] The game was successfully initialized.");
@@ -151,12 +151,12 @@ void mdcii::Game::GameLoop() const
 // Helper
 //-------------------------------------------------
 
-void mdcii::Game::CreateSharedObjects()
+void mdcii::Game::CreateObjects()
 {
-    Log::MDCII_LOG_DEBUG("[Game::CreateSharedObjects()] Create shared objects.");
+    Log::MDCII_LOG_DEBUG("[Game::CreateSharedObjects()] Create objects.");
 
-    // todo: shared object? Singleton?
     m_soundDevice = std::make_shared<sound::SoundDevice>();
+    is_sound_device_available = m_soundDevice->IsSoundDeviceAvailable();
 
     m_window = std::make_shared<ogl::Window>();
     m_camera = std::make_shared<camera::Camera>(m_window->width, m_window->height);

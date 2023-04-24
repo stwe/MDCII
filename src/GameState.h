@@ -34,6 +34,14 @@ namespace mdcii::world
     class GameWorld;
 }
 
+namespace mdcii::sound
+{
+    /**
+     * Forward declaration class MusicBuffer.
+     */
+    class MusicBuffer;
+}
+
 //-------------------------------------------------
 // GameState
 //-------------------------------------------------
@@ -87,6 +95,11 @@ namespace mdcii
          * The GameWorld object.
          */
         std::shared_ptr<world::GameWorld> m_gameWorld;
+
+        /**
+         * To play background music.
+         */
+        std::unique_ptr<sound::MusicBuffer> m_bgMusicBuffer;
 
         //-------------------------------------------------
         // ImGui

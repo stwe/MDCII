@@ -33,6 +33,7 @@ mdcii::file::OriginalResourcesManager::OriginalResourcesManager()
     Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::OriginalResourcesManager()] Create OriginalResourcesManager.");
 
     GetPathsFromOriginal();
+    SetGameType();
     LoadFiles();
 }
 
@@ -63,13 +64,27 @@ const mdcii::data::Building& mdcii::file::OriginalResourcesManager::GetBuildingB
 }
 
 //-------------------------------------------------
-// Init
+// Path to the original data
 //-------------------------------------------------
 
 void mdcii::file::OriginalResourcesManager::GetPathsFromOriginal()
 {
     Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::GetPathsFromOriginal()] Start get paths from {} ...", Game::ORIGINAL_RESOURCES_FULL_PATH);
 
+    FindStadtfldBshFilePaths();
+    FindBauhausBshFilePaths();
+    FindPaletteFilePath();
+    FindMp3FilePaths();
+    FindBuildingsCodFilePath();
+
+    Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::GetPathsFromOriginal()] All paths were found successfully.");
+}
+
+void mdcii::file::OriginalResourcesManager::IterateFilesystem(
+    const std::string& t_fileName,
+    const std::function<void(const std::filesystem::directory_entry&, const std::string&)>& t_doForFileName
+)
+{
     for (const auto& entry : std::filesystem::recursive_directory_iterator(Game::ORIGINAL_RESOURCES_FULL_PATH, std::filesystem::directory_options::follow_directory_symlink))
     {
         if (is_directory(entry))
@@ -78,139 +93,187 @@ void mdcii::file::OriginalResourcesManager::GetPathsFromOriginal()
             {
                 if (is_regular_file(f.status()))
                 {
-                    auto extension{ to_lower_case(f.path().extension().string()) };
-
-                    // BSH files
-                    if (extension == ".bsh")
-                    {
-                        const auto zoomOptional{ magic_enum::enum_cast<world::Zoom>(to_upper_case(entry.path().filename().string())) };
-                        if (zoomOptional.has_value())
-                        {
-                            if (to_upper_case(f.path().filename().string()) == "STADTFLD.BSH")
-                            {
-                                m_stadtfldBshFilesPaths.emplace(zoomOptional.value(), f.path().string());
-                            }
-                        }
-                        else
-                        {
-                            if (to_upper_case(entry.path().filename().string()) == "TOOLGFX")
-                            {
-                                // Nina & Hist Ed.
-                                if (to_upper_case(f.path().filename().string()) == "BAUHAUS.BSH")
-                                {
-                                    m_bauhausBshFilesPaths.emplace(world::Zoom::GFX, f.path().string());
-                                }
-
-                                // Nina only
-                                if (to_upper_case(f.path().filename().string()) == "BAUHAUS8.BSH")
-                                {
-                                    m_bauhausBshFilesPaths.emplace(world::Zoom::MGFX, f.path().string());
-                                }
-
-                                if (to_upper_case(f.path().filename().string()) == "BAUHAUS6.BSH")
-                                {
-                                    m_bauhausBshFilesPaths.emplace(world::Zoom::SGFX, f.path().string());
-                                }
-                            }
-                        }
-                    }
-
-                    // COL file
-                    if (extension == ".col")
-                    {
-                        if (to_upper_case(f.path().filename().string()) == "STADTFLD.COL")
-                        {
-                            m_paletteFilePath = f.path().string();
-                        }
-                    }
-
-                    // MP3 files from the History Ed. only
-                    if (extension == ".mp3")
-                    {
-                        m_soundFilesPaths.emplace_back(f.path().string());
-                    }
+                    t_doForFileName(f, t_fileName);
                 }
             }
         }
         else if (is_regular_file(entry))
         {
-            auto extension{ to_lower_case(entry.path().extension().string()) };
-            if (extension == ".cod")
-            {
-                if (to_upper_case(entry.path().filename().string()) == "HAEUSER.COD")
-                {
-                    m_buildingsFilePath = entry.path().string();
-                }
-            }
+            t_doForFileName(entry, t_fileName);
         }
     }
-
-    Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::GetPathsFromOriginal()] All paths were found successfully.");
 }
+
+void mdcii::file::OriginalResourcesManager::IterateFilesystem(
+    const std::vector<std::string>& t_fileNames,
+    const std::function<void(const std::filesystem::directory_entry&, const std::string&)>& t_doForEachFileName
+)
+{
+    for (const auto& fileName : t_fileNames)
+    {
+        IterateFilesystem(fileName, t_doForEachFileName);
+    }
+}
+
+void mdcii::file::OriginalResourcesManager::FindStadtfldBshFilePaths()
+{
+    IterateFilesystem("stadtfld.bsh", [this](const std::filesystem::directory_entry& t_entry, const std::string& t_fileName) {
+        if (to_upper_case(t_entry.path().filename().string()) == to_upper_case(t_fileName))
+        {
+            if (const auto zoomOptional{ magic_enum::enum_cast<world::Zoom>(to_upper_case(t_entry.path().parent_path().filename().string())) }; zoomOptional.has_value())
+            {
+                m_stadtfldBshPaths.try_emplace(zoomOptional.value(), t_entry.path());
+            }
+        }
+    });
+
+    if (m_stadtfldBshPaths.size() != magic_enum::enum_count<world::Zoom>())
+    {
+        throw MDCII_EXCEPTION("[OriginalResourcesManager::FindStadtfldBshFilePaths()] Error while reading stadtfld bsh files paths.");
+    }
+
+    Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::FindStadtfldBshFilePaths()] All paths to the stadtfld.bsh files were found successfully.");
+}
+
+void mdcii::file::OriginalResourcesManager::FindBauhausBshFilePaths()
+{
+    IterateFilesystem({ "bauhaus.bsh", "bauhaus8.bsh", "bauhaus6.bsh " }, [this](const std::filesystem::directory_entry& t_entry, const std::string& t_fileName) {
+        // Nina & History Ed.
+        if (to_upper_case(t_entry.path().filename().string()) == "BAUHAUS.BSH")
+        {
+            m_bauhausBshPaths.try_emplace(world::Zoom::GFX, t_entry.path());
+        }
+
+        // Nina only
+        if (to_upper_case(t_entry.path().filename().string()) == "BAUHAUS8.BSH")
+        {
+            m_bauhausBshPaths.try_emplace(world::Zoom::MGFX, t_entry.path());
+        }
+
+        if (to_upper_case(t_entry.path().filename().string()) == "BAUHAUS6.BSH")
+        {
+            m_bauhausBshPaths.try_emplace(world::Zoom::SGFX, t_entry.path());
+        }
+    });
+
+    if (m_bauhausBshPaths.empty())
+    {
+        throw MDCII_EXCEPTION("[OriginalResourcesManager::FindBauhausBshFilePaths()] Error while reading bauhaus bsh files paths.");
+    }
+
+    Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::FindBauhausBshFilePaths()] All paths to the bauhaus.bsh files were found successfully.");
+}
+
+void mdcii::file::OriginalResourcesManager::FindPaletteFilePath()
+{
+    IterateFilesystem("stadtfld.col", [this](const std::filesystem::directory_entry& t_entry, const std::string& t_fileName) {
+        if (to_upper_case(t_entry.path().filename().string()) == to_upper_case(t_fileName))
+        {
+            m_palettePath = t_entry.path();
+        }
+    });
+
+    if (m_palettePath.empty())
+    {
+        throw MDCII_EXCEPTION("[OriginalResourcesManager::FindPaletteFilePath()] Error while reading palette file path.");
+    }
+
+    Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::FindPaletteFilePath()] The path to the stadtfld.col file was found successfully.");
+}
+
+void mdcii::file::OriginalResourcesManager::FindMp3FilePaths()
+{
+    IterateFilesystem(".mp3", [this](const std::filesystem::directory_entry& t_entry, const std::string& t_fileName) {
+        auto extension{ t_entry.path().extension().string() };
+        if (to_upper_case(extension) == to_upper_case(t_fileName))
+        {
+            m_mp3Paths.emplace_back(t_entry.path());
+        }
+    });
+
+    Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::FindMp3FilePaths()] {} mp3 files were found.", m_mp3Paths.size());
+}
+
+void mdcii::file::OriginalResourcesManager::FindBuildingsCodFilePath()
+{
+    IterateFilesystem("haeuser.cod", [this](const std::filesystem::directory_entry& t_entry, const std::string& t_fileName) {
+        if (to_upper_case(t_entry.path().filename().string()) == to_upper_case(t_fileName))
+        {
+            m_buildingsPath = t_entry.path();
+        }
+    });
+
+    if (m_buildingsPath.empty())
+    {
+        throw MDCII_EXCEPTION("[OriginalResourcesManager::FindBuildingsCodFilePath()] Error while reading buildings file path.");
+    }
+
+    Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::FindBuildingsCodFilePath()] The path to the haeuser.cod file was found successfully.");
+}
+
+//-------------------------------------------------
+// Original version
+//-------------------------------------------------
+
+void mdcii::file::OriginalResourcesManager::SetGameType() const
+{
+    m_bauhausBshPaths.size() == 1 ? Game::game_type = Game::GameType::HISTORY : Game::game_type = Game::GameType::NINA;
+
+    Log::MDCII_LOG_INFO("The original data comes from the following game: {}", magic_enum::enum_name(Game::game_type));
+}
+
+//-------------------------------------------------
+// Load original data
+//-------------------------------------------------
 
 void mdcii::file::OriginalResourcesManager::LoadFiles()
 {
     Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::LoadFiles()] Start loading files...");
 
-    // palette
-    if (m_paletteFilePath.empty())
-    {
-        throw MDCII_EXCEPTION("[OriginalResourcesManager::LoadFiles()] Error while reading palette file path.");
-    }
+    MDCII_ASSERT(Game::game_type != Game::GameType::UNKNOWN, "[OriginalResourcesManager::LoadFiles()] Invalid game type.")
 
-    m_paletteFile = std::make_unique<PaletteFile>(m_paletteFilePath);
+    // load palette
+    m_paletteFile = std::make_unique<PaletteFile>(m_palettePath);
     m_paletteFile->ReadDataFromChunks();
 
-    // stadtfld bsh graphics
-    if (m_stadtfldBshFilesPaths.size() != magic_enum::enum_count<world::Zoom>())
-    {
-        throw MDCII_EXCEPTION("[OriginalResourcesManager::LoadFiles()] Error while reading stadtfld bsh files paths.");
-    }
-
-    for (const auto& [zoom, stadtfldBshFilePath] : m_stadtfldBshFilesPaths)
+    // load stadtfld.bsh graphics
+    for (const auto& [zoom, stadtfldBshFilePath] : m_stadtfldBshPaths)
     {
         if (stadtfldBshFilePath.empty())
         {
-            throw MDCII_EXCEPTION("[OriginalResourcesManager::LoadFiles()] Error while reading stadtfld bsh file path.");
+            throw MDCII_EXCEPTION("[OriginalResourcesManager::LoadFiles()] Error while reading stadtfld.bsh file path.");
         }
 
         auto stadtfldBshFile{ std::make_unique<BshFile>(stadtfldBshFilePath, m_paletteFile->palette) };
         stadtfldBshFile->ReadDataFromChunks();
 
-        stadtfldBshFiles.emplace(zoom, std::move(stadtfldBshFile));
+        stadtfldBshFiles.try_emplace(zoom, std::move(stadtfldBshFile));
     }
 
-    // bauhaus bsh graphics
-    if (m_bauhausBshFilesPaths.empty())
-    {
-        throw MDCII_EXCEPTION("[OriginalResourcesManager::LoadFiles()] Error while reading bauhaus bsh files paths.");
-    }
-
-    for (const auto& [zoom, bauhausBshFilePath] : m_bauhausBshFilesPaths)
+    // load bauhaus.bsh graphics
+    for (const auto& [zoom, bauhausBshFilePath] : m_bauhausBshPaths)
     {
         if (bauhausBshFilePath.empty())
         {
-            throw MDCII_EXCEPTION("[OriginalResourcesManager::LoadFiles()] Error while reading bauhaus bsh file path.");
+            throw MDCII_EXCEPTION("[OriginalResourcesManager::LoadFiles()] Error while reading bauhaus.bsh file path.");
         }
 
         auto bauhausBshFile{ std::make_unique<BshFile>(bauhausBshFilePath, m_paletteFile->palette) };
         bauhausBshFile->ReadDataFromChunks();
 
-        bauhausBshFiles.emplace(zoom, std::move(bauhausBshFile));
+        bauhausBshFiles.try_emplace(zoom, std::move(bauhausBshFile));
     }
 
-    // decrypted buildings
-    if (m_buildingsFilePath.empty())
-    {
-        throw MDCII_EXCEPTION("[OriginalResourcesManager::LoadFiles()] Error while reading buildings file path.");
-    }
+    // load buildings
+    buildings = std::make_unique<data::Buildings>(m_buildingsPath);
 
-    buildings = std::make_unique<data::Buildings>(m_buildingsFilePath);
-
-    // soundtracks from the History Ed.
-    for (const auto& soundFilePath : m_soundFilesPaths)
+    // load mp3 files from the History Ed.
+    if (!m_mp3Paths.empty() && Game::game_type == Game::GameType::HISTORY)
     {
-        soundFiles.try_emplace(soundFilePath.filename().string(), std::make_unique<SoundFile>(soundFilePath));
+        for (const auto& soundFilePath : m_mp3Paths)
+        {
+            mp3Files.try_emplace(soundFilePath.filename().string(), std::make_unique<SoundFile>(soundFilePath));
+        }
     }
 
     Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::LoadFiles()] All files have been loaded successfully.");

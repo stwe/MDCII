@@ -83,6 +83,18 @@ namespace mdcii
     {
     public:
         //-------------------------------------------------
+        // Types
+        //-------------------------------------------------
+
+        /**
+         * Indicates which original data this game is based on.
+         */
+        enum class GameType
+        {
+            HISTORY, NINA, UNKNOWN
+        };
+
+        //-------------------------------------------------
         // Constants
         //-------------------------------------------------
 
@@ -111,6 +123,10 @@ namespace mdcii
         inline static const std::string ORIGINAL_RESOURCES_FULL_PATH{ INI.Get<std::string>("linux", "original_resources_full_path") }; // NOLINT(cert-err58-cpp)
         inline static const std::string RESOURCES_REL_PATH{ INI.Get<std::string>("linux", "resources_rel_path") };                     // NOLINT(cert-err58-cpp)
 #endif
+
+        inline static GameType game_type{ GameType::UNKNOWN };
+
+        inline static bool is_sound_device_available{ false };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -187,7 +203,7 @@ namespace mdcii
         // Helper
         //-------------------------------------------------
 
-        void CreateSharedObjects();
+        void CreateObjects();
         void Start() const;
     };
 }

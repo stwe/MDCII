@@ -20,6 +20,7 @@
 
 #include <filesystem>
 #include <unordered_map>
+#include <functional>
 #include "data/Buildings.h"
 
 //-------------------------------------------------
@@ -97,9 +98,9 @@ namespace mdcii::file
         std::unique_ptr<data::Buildings> buildings;
 
         /**
-         * The loaded wav/mp3 files.
+         * The loaded mp3 files.
          */
-        std::unordered_map<std::string, std::shared_ptr<SoundFile>> soundFiles;
+        std::unordered_map<std::string, std::shared_ptr<SoundFile>> mp3Files;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -155,44 +156,104 @@ namespace mdcii::file
         /**
          * The path to the stdfld.col palette file.
          */
-        std::string m_paletteFilePath;
+        std::filesystem::path m_palettePath;
 
         /**
          * The paths to the stadtfld.bsh graphic files.
          */
-        std::unordered_map<world::Zoom, std::string> m_stadtfldBshFilesPaths;
+        std::unordered_map<world::Zoom, std::filesystem::path> m_stadtfldBshPaths;
 
         /**
          * The paths to the bauhaus.bsh graphic files.
          */
-        std::unordered_map<world::Zoom, std::string> m_bauhausBshFilesPaths;
+        std::unordered_map<world::Zoom, std::filesystem::path> m_bauhausBshPaths;
 
         /**
          * The path to the haeuser.cod file.
          */
-        std::string m_buildingsFilePath;
+        std::filesystem::path m_buildingsPath;
 
         /**
-         * The col file to get palette values.
+         * The paths to the mp3 files.
+         */
+        std::vector<std::filesystem::path> m_mp3Paths;
+
+        /**
+         * The loaded palette file.
          */
         std::unique_ptr<PaletteFile> m_paletteFile;
 
-        /**
-         * The paths to the sound files.
-         */
-        std::vector<std::filesystem::path> m_soundFilesPaths;
-
         //-------------------------------------------------
-        // Init
+        // Path to the original data
         //-------------------------------------------------
 
         /**
-         * Get paths from original game.
+         * Get all paths to the original data.
          */
         void GetPathsFromOriginal();
 
         /**
-         * Load files from paths.
+         * Iterates over the file system and calls a function on a condition.
+         *
+         * @param t_fileName The name of a file.
+         * @param t_doForFileName The function to call on the file.
+         */
+        static void IterateFilesystem(
+            const std::string& t_fileName,
+            const std::function<void(const std::filesystem::directory_entry&, const std::string&)>& t_doForFileName
+        );
+
+        /**
+         * Iterates over the file system and calls a function on a condition.
+         *
+         * @param t_fileNames Some filenames.
+         * @param t_doForEachFileName The function to call on each file.
+         */
+        static void IterateFilesystem(
+            const std::vector<std::string>& t_fileNames,
+            const std::function<void(const std::filesystem::directory_entry&, const std::string&)>& t_doForEachFileName
+        );
+
+        /**
+         * Finds the paths to all stadtfld.bsh files.
+         */
+        void FindStadtfldBshFilePaths();
+
+        /**
+         * Finds the paths to all bauhaus.bsh files.
+         */
+        void FindBauhausBshFilePaths();
+
+        /**
+         * Finds the path to the stadtfld.col palette file.
+         */
+        void FindPaletteFilePath();
+
+        /**
+         * Finds the paths to all mp3 files.
+         */
+        void FindMp3FilePaths();
+
+        /**
+         * Finds the path to the haeuser.cod file.
+         */
+        void FindBuildingsCodFilePath();
+
+        //-------------------------------------------------
+        // Original version
+        //-------------------------------------------------
+
+        /**
+         * Sets the type/version of the original game (History Ed. or NINA).
+         */
+        void SetGameType() const;
+
+        //-------------------------------------------------
+        // Load original data
+        //-------------------------------------------------
+
+        /**
+         * Load original data from files.
          */
         void LoadFiles();
     };

@@ -25,7 +25,9 @@
 #include "world/GameWorld.h"
 #include "state/StateStack.h"
 #include "data/Text.h"
+#include "sound/MusicBuffer.h"
 #include "file/MdciiResourcesManager.h"
+#include "file/OriginalResourcesManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -37,6 +39,19 @@ mdcii::GameState::GameState(const state::StateId t_id, std::shared_ptr<state::Co
     Log::MDCII_LOG_DEBUG("[GameState::GameState()] Create GameState.");
 
     MDCII_ASSERT(context, "[GameState::GameState()] Null pointer.")
+
+    if (Game::is_sound_device_available && Game::game_type == Game::GameType::HISTORY)
+    {
+        m_bgMusicBuffer = std::make_unique<sound::MusicBuffer>(context->originalResourcesManager->mp3Files.at("03 - 1st Beginning.mp3"));
+        if (m_bgMusicBuffer)
+        {
+            m_bgMusicBuffer->Play();
+        }
+    }
+    else
+    {
+        Log::MDCII_LOG_WARN("[GameState::GameState()] No sound available.");
+    }
 }
 
 mdcii::GameState::~GameState() noexcept
@@ -60,6 +75,11 @@ void mdcii::GameState::Input()
 
 void mdcii::GameState::Update()
 {
+    if (m_bgMusicBuffer)
+    {
+        m_bgMusicBuffer->IsPlaying() ? m_bgMusicBuffer->UpdateBufferStream() : m_bgMusicBuffer->Play();
+    }
+
     if (m_gameWorld)
     {
         m_gameWorld->Update();

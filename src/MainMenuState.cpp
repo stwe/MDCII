@@ -39,13 +39,17 @@ mdcii::MainMenuState::MainMenuState(const state::StateId t_id, std::shared_ptr<s
 
     MDCII_ASSERT(context, "[MainMenuState::MainMenuState()] Null pointer.")
 
-    // todo: check sound device exist
-    // todo: convert WAV files from Nina to Mp3
-    // todo: each state should play background music
-    m_bgMusic = std::make_shared<sound::MusicBuffer>(context->originalResourcesManager->soundFiles.at("03 - 1st Beginning.mp3"));
-    if (m_bgMusic)
+    if (Game::is_sound_device_available && Game::game_type == Game::GameType::HISTORY)
     {
-        m_bgMusic->Play();
+        m_bgMusicBuffer = std::make_unique<sound::MusicBuffer>(context->originalResourcesManager->mp3Files.at("01 - The History Suite.mp3"));
+        if (m_bgMusicBuffer)
+        {
+            m_bgMusicBuffer->Play();
+        }
+    }
+    else
+    {
+        Log::MDCII_LOG_WARN("[MainMenuState::MainMenuState()] No sound available.");
     }
 }
 
@@ -70,9 +74,9 @@ void mdcii::MainMenuState::Input()
 
 void mdcii::MainMenuState::Update()
 {
-    if (m_bgMusic && m_bgMusic->IsPlaying())
+    if (m_bgMusicBuffer && m_bgMusicBuffer->IsPlaying())
     {
-        m_bgMusic->UpdateBufferStream();
+        m_bgMusicBuffer->UpdateBufferStream();
     }
 }
 

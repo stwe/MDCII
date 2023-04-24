@@ -84,6 +84,6 @@ namespace mdcii
         /**
          * To play background music.
          */
-        std::shared_ptr<sound::MusicBuffer> m_bgMusic;
+        std::unique_ptr<sound::MusicBuffer> m_bgMusicBuffer;
     };
 }
