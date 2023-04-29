@@ -40,6 +40,16 @@ namespace mdcii::sound
      * Forward declaration class MusicBuffer.
      */
     class MusicBuffer;
+
+    /**
+     * Forward declaration class SoundBuffer.
+     */
+    class SoundBuffer;
+
+    /**
+     * Forward declaration class SoundSource.
+     */
+    class SoundSource;
 }
 
 //-------------------------------------------------
@@ -100,6 +110,11 @@ namespace mdcii
          * To play background music.
          */
         std::unique_ptr<sound::MusicBuffer> m_bgMusicBuffer;
+
+        // todo temp code
+        std::unique_ptr<sound::SoundBuffer> m_soundBuffer;
+        std::unique_ptr<sound::SoundSource> m_soundSource;
+        uint32_t m_id;
 
         //-------------------------------------------------
         // ImGui

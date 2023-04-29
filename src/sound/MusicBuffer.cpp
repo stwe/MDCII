@@ -17,8 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <AL/alext.h>
-#include "Log.h"
 #include "MusicBuffer.h"
+#include "MdciiAssert.h"
 #include "MdciiException.h"
 #include "file/SoundFile.h"
 
@@ -48,10 +48,10 @@ mdcii::sound::MusicBuffer::~MusicBuffer() noexcept
 bool mdcii::sound::MusicBuffer::IsPlaying() const
 {
     ALint state;
-    ALenum error;
+
     alGetError();
-    alGetSourcei(m_source, AL_SOURCE_STATE, &state);
-    if ((error = alGetError()) != AL_NO_ERROR)
+    alGetSourcei(m_sourceId, AL_SOURCE_STATE, &state);
+    if (const auto error{ alGetError() }; error != AL_NO_ERROR)
     {
         throw MDCII_EXCEPTION("[MusicBuffer::IsPlaying()] An error has occurred. " + std::string(alGetString(error)));
     }
@@ -65,106 +65,105 @@ bool mdcii::sound::MusicBuffer::IsPlaying() const
 
 void mdcii::sound::MusicBuffer::Play()
 {
-    ALsizei i;
-
     alGetError();
 
-    // Rewind the source position and clear the buffer queue
-    alSourceRewind(m_source);
-    alSourcei(m_source, AL_BUFFER, 0);
+    // Rewind the source position and clear the buffer queue.
+    alSourceRewind(m_sourceId);
+    alSourcei(m_sourceId, AL_BUFFER, 0);
 
-    // Fill the buffer queue
-    for (i = 0; i < NUM_BUFFERS; i++)
+    // Fill the buffer queue.
+    for (auto i{ 0 }; i < NUM_BUFFERS; ++i)
     {
-        // Get some data to give it to the buffer
-        sf_count_t slen = sf_readf_short(m_soundFile->sndFile, m_memBuf, BUFFER_SAMPLES);
-        if (slen < 1) break;
+        // Get some data to give it to the buffer.
+        auto nrFrames{ sf_readf_short(m_soundFile->sndFile, m_chunkBuffer.data(), BUFFER_SAMPLES) };
+        if (nrFrames < 1)
+        {
+            break;
+        }
 
-        slen *= m_soundFile->sfInfo.channels * (sf_count_t)sizeof(short);
-        alBufferData(m_buffers[i], m_soundFile->format, m_memBuf, (ALsizei)slen, m_soundFile->sfInfo.samplerate);
+        nrFrames *= m_soundFile->sfInfo.channels * static_cast<sf_count_t>(sizeof(short));
+        alBufferData(m_buffersIds[i], m_soundFile->format, m_chunkBuffer.data(), static_cast<ALsizei>(nrFrames), m_soundFile->sfInfo.samplerate);
     }
 
-    if (alGetError() != AL_NO_ERROR)
+    if (const auto error{ alGetError() }; error != AL_NO_ERROR)
     {
-        throw("Error buffering for playback");
+        throw MDCII_EXCEPTION("[MusicBuffer::Play()] Error buffering for playback. " + std::string(alGetString(error)));
     }
 
-    // Now queue and start playback!
-    alSourceQueueBuffers(m_source, i, m_buffers);
-    alSourcePlay(m_source);
-    if (alGetError() != AL_NO_ERROR)
+    // Now queue and start playback.
+    alSourceQueueBuffers(m_sourceId, NUM_BUFFERS, m_buffersIds.data());
+    alSourcePlay(m_sourceId);
+    if (const auto error{ alGetError() }; error != AL_NO_ERROR)
     {
-        throw("Error starting playback");
+        throw MDCII_EXCEPTION("[MusicBuffer::Play()] Error starting playback. " + std::string(alGetString(error)));
     }
 }
 
 void mdcii::sound::MusicBuffer::Pause() const
 {
-    alSourcePause(m_source);
+    alSourcePause(m_sourceId);
 }
 
 void mdcii::sound::MusicBuffer::Stop() const
 {
-    alSourceStop(m_source);
+    alSourceStop(m_sourceId);
 }
 
 void mdcii::sound::MusicBuffer::Resume() const
 {
-    alSourcePlay(m_source);
+    alSourcePlay(m_sourceId);
 }
 
 void mdcii::sound::MusicBuffer::UpdateBufferStream()
 {
-    ALint processed, state;
-
     alGetError();
 
     // Get relevant source info
-    alGetSourcei(m_source, AL_SOURCE_STATE, &state);
-    alGetSourcei(m_source, AL_BUFFERS_PROCESSED, &processed);
-    if (alGetError() != AL_NO_ERROR)
+    ALint processed;
+    ALint state;
+    alGetSourcei(m_sourceId, AL_SOURCE_STATE, &state);
+    alGetSourcei(m_sourceId, AL_BUFFERS_PROCESSED, &processed);
+    if (const auto error{ alGetError() }; error != AL_NO_ERROR)
     {
-        throw("error checking music source state");
+        throw MDCII_EXCEPTION("[MusicBuffer::UpdateBufferStream()] Error checking music source state. " + std::string(alGetString(error)));
     }
 
-    // Unqueue and handle each processed buffer
+    // Unqueue and handle each processed buffer.
     while (processed > 0)
     {
-        ALuint bufid;
-        sf_count_t slen;
-
-        alSourceUnqueueBuffers(m_source, 1, &bufid);
+        ALuint bufId;
+        alSourceUnqueueBuffers(m_sourceId, 1, &bufId);
         processed--;
 
-        /* Read the next chunk of data, refill the buffer, and queue it
-         * back on the source */
-        slen = sf_readf_short(m_soundFile->sndFile, m_memBuf, BUFFER_SAMPLES);
-        if (slen > 0)
+        // Read the next chunk of data, refill the buffer, and queue it back on the source.
+        if (auto nrFrames{ sf_readf_short(m_soundFile->sndFile, m_chunkBuffer.data(), BUFFER_SAMPLES) }; nrFrames > 0)
         {
-            slen *= m_soundFile->sfInfo.channels * (sf_count_t)sizeof(short);
-            alBufferData(bufid, m_soundFile->format, m_memBuf, (ALsizei)slen, m_soundFile->sfInfo.samplerate);
-            alSourceQueueBuffers(m_source, 1, &bufid);
+            nrFrames *= m_soundFile->sfInfo.channels * static_cast<sf_count_t>(sizeof(short));
+            alBufferData(bufId, m_soundFile->format, m_chunkBuffer.data(), static_cast<ALsizei>(nrFrames), m_soundFile->sfInfo.samplerate);
+            alSourceQueueBuffers(m_sourceId, 1, &bufId);
         }
-        if (alGetError() != AL_NO_ERROR)
+
+        if (const auto error{ alGetError() }; error != AL_NO_ERROR)
         {
-            throw("error buffering music data");
+            throw MDCII_EXCEPTION("[MusicBuffer::UpdateBufferStream()] Error buffering music data. " + std::string(alGetString(error)));
         }
     }
 
-    // Make sure the source hasn't underrun
+    // Make sure the source hasn't underrun.
     if (state != AL_PLAYING && state != AL_PAUSED)
     {
+        // If no buffers are queued, playback is finished.
         ALint queued;
-
-        // If no buffers are queued, playback is finished
-        alGetSourcei(m_source, AL_BUFFERS_QUEUED, &queued);
+        alGetSourcei(m_sourceId, AL_BUFFERS_QUEUED, &queued);
         if (queued == 0)
-            return;
-
-        alSourcePlay(m_source);
-        if (alGetError() != AL_NO_ERROR)
         {
-            throw("error restarting music playback");
+            return;
+        }
+
+        alSourcePlay(m_sourceId);
+        if (const auto error{ alGetError() }; error != AL_NO_ERROR)
+        {
+            throw MDCII_EXCEPTION("[MusicBuffer::UpdateBufferStream()] Error restarting music playback. " + std::string(alGetString(error)));
         }
     }
 }
@@ -180,8 +179,8 @@ void mdcii::sound::MusicBuffer::Init()
     CreateAudioSource();
     CreateBuffer();
 
-    const auto frameSize{ (static_cast<size_t>(BUFFER_SAMPLES) * static_cast<size_t>(m_soundFile->sfInfo.channels)) * sizeof(short) };
-    m_memBuf = static_cast<short*>(malloc(frameSize));
+    const auto frameSize{ static_cast<size_t>(BUFFER_SAMPLES) * static_cast<size_t>(m_soundFile->sfInfo.channels) };
+    m_chunkBuffer.resize(frameSize, 0);
 }
 
 //-------------------------------------------------
@@ -192,10 +191,11 @@ void mdcii::sound::MusicBuffer::CreateAudioSource()
 {
     Log::MDCII_LOG_DEBUG("[MusicBuffer::CreateAudioSource()] Create audio source.");
 
-    ALenum error;
     alGetError();
-    alGenSources(1, &m_source);
-    if ((error = alGetError()) != AL_NO_ERROR)
+    alGenSources(1, &m_sourceId);
+    MDCII_ASSERT(m_sourceId, "[MusicBuffer::CreateAudioSource()] Error while creating a new sound source handle.")
+
+    if (const auto error{ alGetError() }; error != AL_NO_ERROR)
     {
         throw MDCII_EXCEPTION("[MusicBuffer::CreateAudioSource()] Unable to create audio source. " + std::string(alGetString(error)));
     }
@@ -205,10 +205,14 @@ void mdcii::sound::MusicBuffer::CreateBuffer()
 {
     Log::MDCII_LOG_DEBUG("[MusicBuffer::CreateBuffer()] Create music buffer.");
 
-    ALenum error;
     alGetError();
-    alGenBuffers(NUM_BUFFERS, m_buffers);
-    if ((error = alGetError()) != AL_NO_ERROR)
+    alGenBuffers(NUM_BUFFERS, m_buffersIds.data());
+    for (const auto id : m_buffersIds)
+    {
+        MDCII_ASSERT(id, "[MusicBuffer::CreateBuffer()] Error while creating a new sound buffer handle.")
+    }
+
+    if (const auto error{ alGetError() }; error != AL_NO_ERROR)
     {
         throw MDCII_EXCEPTION("[MusicBuffer::CreateBuffer()] Unable to create buffer. " + std::string(alGetString(error)));
     }
@@ -222,9 +226,6 @@ void mdcii::sound::MusicBuffer::CleanUp() const
 {
     Log::MDCII_LOG_DEBUG("[MusicBuffer::CleanUp()] CleanUp music buffer.");
 
-    alDeleteSources(1, &m_source);
-
-    free(m_memBuf);
-
-    alDeleteBuffers(NUM_BUFFERS, m_buffers);
+    alDeleteSources(1, &m_sourceId);
+    alDeleteBuffers(NUM_BUFFERS, m_buffersIds.data());
 }

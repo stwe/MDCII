@@ -102,6 +102,11 @@ namespace mdcii::file
          */
         std::unordered_map<std::string, std::shared_ptr<SoundFile>> mp3Files;
 
+        /**
+         * The loaded wav files.
+         */
+        std::unordered_map<std::string, std::shared_ptr<SoundFile>> wavFiles;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -179,6 +184,11 @@ namespace mdcii::file
         std::vector<std::filesystem::path> m_mp3Paths;
 
         /**
+         * The paths to the wav files.
+         */
+        std::vector<std::filesystem::path> m_wavPaths;
+
+        /**
          * The loaded palette file.
          */
         std::unique_ptr<PaletteFile> m_paletteFile;
@@ -238,6 +248,11 @@ namespace mdcii::file
          * Finds the path to the haeuser.cod file.
          */
         void FindBuildingsCodFilePath();
+
+        /**
+         * Finds the paths to all wav files.
+         */
+        void FindWavFilePaths();
 
         //-------------------------------------------------
         // Original version

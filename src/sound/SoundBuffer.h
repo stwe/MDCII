@@ -18,82 +18,58 @@
 
 #pragma once
 
-#include <string>
-#include <sndfile.h>
-#include <AL/al.h>
+#include <vector>
+#include "file/SoundFile.h"
 
 //-------------------------------------------------
-// SoundFile
+// SoundBuffer
 //-------------------------------------------------
 
-namespace mdcii::file
+namespace mdcii::sound
 {
     /**
-     * Represents a wav/mp3 file.
+     * Manages sound data in order to be able to play sound effects with it.
      */
-    class SoundFile
+    class SoundBuffer
     {
     public:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * The path to the file to load.
-         */
-        std::string filePath;
-
-        /**
-         * Pointer to the loaded file content.
-         */
-        SNDFILE* sndFile{ nullptr };
-
-        /**
-         * Information about the file.
-         */
-        SF_INFO sfInfo{};
-
-        /**
-         * Format of the audio data.
-         */
-        ALenum format{ AL_NONE };
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        SoundFile() = delete;
+        SoundBuffer();
+
+        SoundBuffer(const SoundBuffer& t_other) = delete;
+        SoundBuffer(SoundBuffer&& t_other) noexcept = delete;
+        SoundBuffer& operator=(const SoundBuffer& t_other) = delete;
+        SoundBuffer& operator=(SoundBuffer&& t_other) noexcept = delete;
+
+        ~SoundBuffer() noexcept;
+
+        //-------------------------------------------------
+        // Add
+        //-------------------------------------------------
 
         /**
-         * Constructs a new SoundFile object from a given path.
+         * Creates and adds a sound buffer.
          *
-         * @param t_filePath The path to the file to load.
+         * @param t_soundFile The sound file to generate the buffer.
+         *
+         * @return The handle of the generated sound buffer.
          */
-        explicit SoundFile(std::string t_filePath);
-
-        SoundFile(const SoundFile& t_other) = delete;
-        SoundFile(SoundFile&& t_other) noexcept = delete;
-        SoundFile& operator=(const SoundFile& t_other) = delete;
-        SoundFile& operator=(SoundFile&& t_other) noexcept = delete;
-
-        ~SoundFile() noexcept;
+        ALuint AddSoundEffect(const file::SoundFile& t_soundFile);
 
     protected:
 
     private:
         //-------------------------------------------------
-        // Init
+        // Member
         //-------------------------------------------------
 
         /**
-         * Open a wav/mp3 file.
+         * Handler of many sound buffers.
          */
-        void OpenFile();
-
-        /**
-         * Get audio data format of the wav/mp3 file.
-         */
-        void ReadAudioDataFormat();
+        std::vector<ALuint> m_soundBuffers;
 
         //-------------------------------------------------
         // Clean up

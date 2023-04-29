@@ -26,6 +26,8 @@
 #include "state/StateStack.h"
 #include "data/Text.h"
 #include "sound/MusicBuffer.h"
+#include "sound/SoundBuffer.h"
+#include "sound/SoundSource.h"
 #include "file/MdciiResourcesManager.h"
 #include "file/OriginalResourcesManager.h"
 
@@ -47,6 +49,11 @@ mdcii::GameState::GameState(const state::StateId t_id, std::shared_ptr<state::Co
         {
             m_bgMusicBuffer->Play();
         }
+
+        // todo temp code - test sound
+        m_soundBuffer = std::make_unique<sound::SoundBuffer>();
+        m_id = m_soundBuffer->AddSoundEffect(*context->originalResourcesManager->wavFiles.at("Burg.wav"));
+        m_soundSource = std::make_unique<sound::SoundSource>(m_id);
     }
     else
     {
@@ -78,6 +85,12 @@ void mdcii::GameState::Update()
     if (m_bgMusicBuffer)
     {
         m_bgMusicBuffer->IsPlaying() ? m_bgMusicBuffer->UpdateBufferStream() : m_bgMusicBuffer->Play();
+    }
+
+    // todo temp code
+    if (context->window->IsKeyPressed(GLFW_KEY_S))
+    {
+        m_soundSource->Play();
     }
 
     if (m_gameWorld)

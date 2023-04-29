@@ -18,82 +18,97 @@
 
 #pragma once
 
-#include <string>
-#include <sndfile.h>
 #include <AL/al.h>
+#include <glm/vec3.hpp>
 
 //-------------------------------------------------
-// SoundFile
+// SoundSource
 //-------------------------------------------------
 
-namespace mdcii::file
+namespace mdcii::sound
 {
     /**
-     * Represents a wav/mp3 file.
+     * Plays a sound buffer as effect with a position and velocity.
      */
-    class SoundFile
+    class SoundSource
     {
     public:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * The path to the file to load.
-         */
-        std::string filePath;
-
-        /**
-         * Pointer to the loaded file content.
-         */
-        SNDFILE* sndFile{ nullptr };
-
-        /**
-         * Information about the file.
-         */
-        SF_INFO sfInfo{};
-
-        /**
-         * Format of the audio data.
-         */
-        ALenum format{ AL_NONE };
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        SoundFile() = delete;
+        SoundSource() = delete;
 
         /**
-         * Constructs a new SoundFile object from a given path.
+         * Constructs a new SoundSource object.
          *
-         * @param t_filePath The path to the file to load.
+         * @param t_bufferId The buffer handle of the sound data.
          */
-        explicit SoundFile(std::string t_filePath);
+        explicit SoundSource(ALint t_bufferId);
 
-        SoundFile(const SoundFile& t_other) = delete;
-        SoundFile(SoundFile&& t_other) noexcept = delete;
-        SoundFile& operator=(const SoundFile& t_other) = delete;
-        SoundFile& operator=(SoundFile&& t_other) noexcept = delete;
+        SoundSource(const SoundSource& t_other) = delete;
+        SoundSource(SoundSource&& t_other) noexcept = delete;
+        SoundSource& operator=(const SoundSource& t_other) = delete;
+        SoundSource& operator=(SoundSource&& t_other) noexcept = delete;
 
-        ~SoundFile() noexcept;
+        ~SoundSource() noexcept;
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
+        /**
+         * Plays the sound effect.
+         */
+        void Play() const;
 
     protected:
 
     private:
         //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * The handle of the sound source.
+         */
+        ALuint m_sourceId{ 0 };
+
+        /**
+         * No pitch.
+         */
+        float m_pitch{ 1.0f };
+
+        /**
+         * No gain.
+         */
+        float m_gain{ 1.0f };
+
+        /**
+         * Position of the sound source.
+         */
+        glm::vec3 m_position{ 0.0f };
+
+        /**
+         * Velocity of the sound source.
+         */
+        glm::vec3 m_velocity{ 0.0f };
+
+        /**
+         * No looping.
+         */
+        bool m_loopSound{ false };
+
+        //-------------------------------------------------
         // Init
         //-------------------------------------------------
 
         /**
-         * Open a wav/mp3 file.
+         * Initializes the sound source.
+         *
+         * @param t_bufferId The buffer handle of the sound data.
          */
-        void OpenFile();
-
-        /**
-         * Get audio data format of the wav/mp3 file.
-         */
-        void ReadAudioDataFormat();
+        void Init(ALint t_bufferId);
 
         //-------------------------------------------------
         // Clean up

@@ -76,6 +76,7 @@ void mdcii::file::OriginalResourcesManager::GetPathsFromOriginal()
     FindPaletteFilePath();
     FindMp3FilePaths();
     FindBuildingsCodFilePath();
+    FindWavFilePaths();
 
     Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::GetPathsFromOriginal()] All paths were found successfully.");
 }
@@ -211,6 +212,22 @@ void mdcii::file::OriginalResourcesManager::FindBuildingsCodFilePath()
     Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::FindBuildingsCodFilePath()] The path to the haeuser.cod file was found successfully.");
 }
 
+void mdcii::file::OriginalResourcesManager::FindWavFilePaths()
+{
+    IterateFilesystem(".wav", [this](const std::filesystem::directory_entry& t_entry, const std::string& t_fileName) {
+        auto extension{ t_entry.path().extension().string() };
+        if (to_upper_case(extension) == to_upper_case(t_fileName))
+        {
+            if (t_entry.path().parent_path().filename().string() == "Samples")
+            {
+                m_wavPaths.emplace_back(t_entry.path());
+            }
+        }
+    });
+
+    Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::FindWavFilePaths()] {} wav files were found.", m_wavPaths.size());
+}
+
 //-------------------------------------------------
 // Original version
 //-------------------------------------------------
@@ -273,6 +290,15 @@ void mdcii::file::OriginalResourcesManager::LoadFiles()
         for (const auto& soundFilePath : m_mp3Paths)
         {
             mp3Files.try_emplace(soundFilePath.filename().string(), std::make_unique<SoundFile>(soundFilePath));
+        }
+    }
+
+    // load wav files from the History Ed.
+    if (!m_wavPaths.empty() && Game::game_type == Game::GameType::HISTORY)
+    {
+        for (const auto& soundFilePath : m_wavPaths)
+        {
+            wavFiles.try_emplace(soundFilePath.filename().string(), std::make_unique<SoundFile>(soundFilePath));
         }
     }
 

@@ -18,7 +18,9 @@
 
 #pragma once
 
-#include <string>
+#include <memory>
+#include <array>
+#include <vector>
 #include <AL/al.h>
 
 //-------------------------------------------------
@@ -104,17 +106,17 @@ namespace mdcii::sound
         /**
          * The audio source object handle.
          */
-        ALuint m_source{ 0 };
+        ALuint m_sourceId{ 0 };
 
         /**
          * Holding the raw audio stream.
          */
-        ALuint m_buffers[NUM_BUFFERS];
+        std::array<ALuint, NUM_BUFFERS> m_buffersIds{ 0, 0, 0, 0 };
 
         /**
          * Chunk of audio data.
          */
-        short* m_memBuf{ nullptr };
+        std::vector<short> m_chunkBuffer;
 
         //-------------------------------------------------
         // Init
