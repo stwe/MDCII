@@ -39,17 +39,20 @@ mdcii::MainMenuState::MainMenuState(const state::StateId t_id, std::shared_ptr<s
 
     MDCII_ASSERT(context, "[MainMenuState::MainMenuState()] Null pointer.")
 
-    if (Game::is_sound_device_available && Game::game_type == Game::GameType::HISTORY)
+    if (!Game::INI.Get<bool>("game", "disable_sound"))
     {
-        m_bgMusicBuffer = std::make_unique<sound::MusicBuffer>(context->originalResourcesManager->mp3Files.at("01 - The History Suite.mp3"));
-        if (m_bgMusicBuffer)
+        if (Game::is_sound_device_available && Game::game_type == Game::GameType::HISTORY)
         {
-            m_bgMusicBuffer->Play();
+            m_bgMusicBuffer = std::make_unique<sound::MusicBuffer>(context->originalResourcesManager->mp3Files.at("01 - The History Suite.mp3"));
+            if (m_bgMusicBuffer)
+            {
+                m_bgMusicBuffer->Play();
+            }
         }
-    }
-    else
-    {
-        Log::MDCII_LOG_WARN("[MainMenuState::MainMenuState()] No sound available.");
+        else
+        {
+            Log::MDCII_LOG_WARN("[MainMenuState::MainMenuState()] No sound available.");
+        }
     }
 }
 

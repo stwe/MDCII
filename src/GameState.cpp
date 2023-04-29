@@ -30,6 +30,7 @@
 #include "sound/SoundSource.h"
 #include "file/MdciiResourcesManager.h"
 #include "file/OriginalResourcesManager.h"
+#include "vendor/ini/ini.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -42,22 +43,25 @@ mdcii::GameState::GameState(const state::StateId t_id, std::shared_ptr<state::Co
 
     MDCII_ASSERT(context, "[GameState::GameState()] Null pointer.")
 
-    if (Game::is_sound_device_available && Game::game_type == Game::GameType::HISTORY)
+    if (!Game::INI.Get<bool>("game", "disable_sound"))
     {
-        m_bgMusicBuffer = std::make_unique<sound::MusicBuffer>(context->originalResourcesManager->mp3Files.at("03 - 1st Beginning.mp3"));
-        if (m_bgMusicBuffer)
+        if (Game::is_sound_device_available && Game::game_type == Game::GameType::HISTORY)
         {
-            m_bgMusicBuffer->Play();
-        }
+            m_bgMusicBuffer = std::make_unique<sound::MusicBuffer>(context->originalResourcesManager->mp3Files.at("03 - 1st Beginning.mp3"));
+            if (m_bgMusicBuffer)
+            {
+                m_bgMusicBuffer->Play();
+            }
 
-        // todo temp code - test sound
-        m_soundBuffer = std::make_unique<sound::SoundBuffer>();
-        m_id = m_soundBuffer->AddSoundEffect(*context->originalResourcesManager->wavFiles.at("Burg.wav"));
-        m_soundSource = std::make_unique<sound::SoundSource>(m_id);
-    }
-    else
-    {
-        Log::MDCII_LOG_WARN("[GameState::GameState()] No sound available.");
+            // todo temp code - test sound
+            m_soundBuffer = std::make_unique<sound::SoundBuffer>();
+            m_id = m_soundBuffer->AddSoundEffect(*context->originalResourcesManager->wavFiles.at("Burg.wav"));
+            m_soundSource = std::make_unique<sound::SoundSource>(m_id);
+        }
+        else
+        {
+            Log::MDCII_LOG_WARN("[GameState::GameState()] No sound available.");
+        }
     }
 }
 
@@ -90,7 +94,10 @@ void mdcii::GameState::Update()
     // todo temp code
     if (context->window->IsKeyPressed(GLFW_KEY_S))
     {
-        m_soundSource->Play();
+        if (m_soundSource)
+        {
+            m_soundSource->Play();
+        }
     }
 
     if (m_gameWorld)
