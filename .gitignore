@@ -47,6 +47,7 @@ conanbuildinfo.cmake
 !/resources/data/Buildings.json
 !/resources/data/Menus.json
 !/resources/devlog/*
+!/resources/doc/*
 !/resources/font/DejaVuSansMono.ttf
 !/resources/textures/gfx/*
 !/resources/textures/mgfx/*
