@@ -280,6 +280,24 @@ public class BshFile extends BinaryFile {
         return bshTextures;
     }
 
+    /**
+     * Get {@link #maxX}.
+     *
+     * @return {@link #maxX}
+     */
+    public int getMaxX() {
+        return maxX;
+    }
+
+    /**
+     * Get {@link #maxY}.
+     *
+     * @return {@link #maxY}
+     */
+    public int getMaxY() {
+        return maxY;
+    }
+
     //-------------------------------------------------
     // BinaryFileInterface
     //-------------------------------------------------

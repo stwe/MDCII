@@ -24,7 +24,7 @@ package mdcii;
 public class TileAtlas {
 
     //-------------------------------------------------
-    // Constants GFX
+    // Constants Stadtfld GFX
     //-------------------------------------------------
 
     /**
@@ -38,20 +38,8 @@ public class TileAtlas {
      */
     public static final int NR_OF_GFX_ROWS = 16;
 
-    /**
-     * Width of the largest GFX picture in the <i>stadtfld.bsh</i>.
-     * Can also be read with the BennoFiles class.
-     */
-    public static final float MAX_GFX_WIDTH = 64.0f;
-
-    /**
-     * Height of the largest GFX picture in the <i>stadtfld.bsh</i>.
-     * Can also be read with the BennoFiles class.
-     */
-    public static final float MAX_GFX_HEIGHT = 286.0f;
-
     //-------------------------------------------------
-    // Constants MGFX
+    // Constants Stadtfld MGFX
     //-------------------------------------------------
 
     /**
@@ -65,20 +53,8 @@ public class TileAtlas {
      */
     public static final int NR_OF_MGFX_ROWS = 32;
 
-    /**
-     * Width of the largest MGFX picture in the <i>stadtfld.bsh</i>.
-     * Can also be read with the BennoFiles class.
-     */
-    public static final float MAX_MGFX_WIDTH = 32.0f;
-
-    /**
-     * Height of the largest MGFX picture in the <i>stadtfld.bsh</i>.
-     * Can also be read with the BennoFiles class.
-     */
-    public static final float MAX_MGFX_HEIGHT = 143.0f;
-
     //-------------------------------------------------
-    // Constants SGFX
+    // Constants Stadtfld SGFX
     //-------------------------------------------------
 
     /**
@@ -92,15 +68,11 @@ public class TileAtlas {
      */
     public static final int NR_OF_SGFX_ROWS = 64;
 
-    /**
-     * Width of the largest SGFX picture in the <i>stadtfld.bsh</i>.
-     * Can also be read with the BennoFiles class.
-     */
-    public static final float MAX_SGFX_WIDTH = 16.0f;
+    //-------------------------------------------------
+    // Constants Tiere GFX
+    //-------------------------------------------------
 
-    /**
-     * Height of the largest SGFX picture in the <i>stadtfld.bsh</i>.
-     * Can also be read with the BennoFiles class.
-     */
-    public static final float MAX_SGFX_HEIGHT = 71.0f;
+    public static final int NR_OF_ANIMALS_ATLAS_IMAGES = 3;
+
+    public static final int NR_OF_ANIMALS_ROWS = 16;
 }

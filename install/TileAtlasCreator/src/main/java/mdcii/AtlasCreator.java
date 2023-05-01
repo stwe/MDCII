@@ -20,7 +20,9 @@ package mdcii;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -72,18 +74,185 @@ public class AtlasCreator {
     //-------------------------------------------------
 
     public void run() throws IOException {
-        LOGGER.info("Read the color palette from file.");
+        // palette
+        LOGGER.info("Read the color palette from file ...");
         paletteFile = new PaletteFile(Paths.get(CreatorConfig.ROOT_PATH + "/ToolGfx/STADTFLD.COL"));
+        LOGGER.info("The palette was read successfully.");
 
-        LOGGER.info("Start Tile Atlas Images creation ...");
+        // animals
+        LOGGER.info("Start Tiere Tile Atlas Images creation ...");
+        CreateAnimalsSgfxAtlas();
+        CreateAnimalsMgfxAtlas();
+        CreateAnimalsGfxAtlas();
+        LOGGER.info("The Tiere Tile Atlas Images have been created successfully.");
+
+        // buildings
+        LOGGER.info("Start Stadtfld Tile Atlas Images creation ...");
         createSgfxAtlas();
         createMgfxAtlas();
         createGfxAtlas();
-        LOGGER.info("The Tile Atlas Images have been created successfully.");
+        LOGGER.info("The Stadtfld Tile Atlas Images have been created successfully.");
     }
 
     //-------------------------------------------------
-    // Create
+    // Animals
+    //-------------------------------------------------
+
+    private void CreateAnimalsSgfxAtlas() throws IOException {
+        LOGGER.info("Tile Atlas Animals SGFX Images creation ...");
+
+        var bshFile = new BshFile(
+                Paths.get(CreatorConfig.ROOT_PATH + "/SGFX/Tiere.bsh"),
+                paletteFile.getPalette(),
+                BshFile.Zoom.SGFX,
+                CreatorConfig.CREATE_PNGS
+        );
+        var bshTextures = bshFile.getBshTextures();
+        var atlasImages = new ArrayList<BufferedImage>();
+
+        var c = 0;
+        for (var i = 0; i < TileAtlas.NR_OF_ANIMALS_ATLAS_IMAGES; i++) {
+            // new atlas
+            var atlas = new BufferedImage(
+                    bshFile.getMaxX() * TileAtlas.NR_OF_ANIMALS_ROWS,
+                    bshFile.getMaxY() * TileAtlas.NR_OF_ANIMALS_ROWS,
+                    BufferedImage.TYPE_INT_ARGB
+            );
+
+            // draw bsh images
+            for (var y = 0; y < TileAtlas.NR_OF_ANIMALS_ROWS; y++) {
+                for (var x = 0; x < TileAtlas.NR_OF_ANIMALS_ROWS; x++) {
+                    var g = atlas.getGraphics();
+
+                    // only if index exists
+                    if (c >= 0 && c < bshTextures.size()) {
+                        // draw in atlas
+                        g.drawImage(
+                                bshTextures.get(c).getBufferedImage(),
+                                x * bshFile.getMaxX(),
+                                y * bshFile.getMaxY(),
+                                null
+                        );
+                    }
+
+                    c++;
+                }
+            }
+
+            // store atlas
+            atlasImages.add(atlas);
+        }
+
+        var zoomStr = BshFile.Zoom.SGFX.toString().toLowerCase() + "/animals/";
+        writeAtlasImages(CreatorConfig.ATLAS_OUT_PATH + zoomStr, atlasImages, bshFile.getMaxX(), bshFile.getMaxY());
+
+        bshFile.cleanUp();
+    }
+
+    private void CreateAnimalsMgfxAtlas() throws IOException {
+        LOGGER.info("Tile Atlas Animals MGFX Images creation ...");
+
+        var bshFile = new BshFile(
+                Paths.get(CreatorConfig.ROOT_PATH + "/MGFX/TIERE.BSH"),
+                paletteFile.getPalette(),
+                BshFile.Zoom.MGFX,
+                CreatorConfig.CREATE_PNGS
+        );
+        var bshTextures = bshFile.getBshTextures();
+        var atlasImages = new ArrayList<BufferedImage>();
+
+        var c = 0;
+        for (var i = 0; i < TileAtlas.NR_OF_ANIMALS_ATLAS_IMAGES; i++) {
+            // new atlas
+            var atlas = new BufferedImage(
+                    bshFile.getMaxX() * TileAtlas.NR_OF_ANIMALS_ROWS,
+                    bshFile.getMaxY() * TileAtlas.NR_OF_ANIMALS_ROWS,
+                    BufferedImage.TYPE_INT_ARGB
+            );
+
+            // draw bsh images
+            for (var y = 0; y < TileAtlas.NR_OF_ANIMALS_ROWS; y++) {
+                for (var x = 0; x < TileAtlas.NR_OF_ANIMALS_ROWS; x++) {
+                    var g = atlas.getGraphics();
+
+                    // only if index exists
+                    if (c >= 0 && c < bshTextures.size()) {
+                        // draw in atlas
+                        g.drawImage(
+                                bshTextures.get(c).getBufferedImage(),
+                                x * bshFile.getMaxX(),
+                                y * bshFile.getMaxY(),
+                                null
+                        );
+                    }
+
+                    c++;
+                }
+            }
+
+            // store atlas
+            atlasImages.add(atlas);
+        }
+
+        var zoomStr = BshFile.Zoom.MGFX.toString().toLowerCase() + "/animals/";
+        writeAtlasImages(CreatorConfig.ATLAS_OUT_PATH + zoomStr, atlasImages, bshFile.getMaxX(), bshFile.getMaxY());
+
+        bshFile.cleanUp();
+    }
+
+    private void CreateAnimalsGfxAtlas() throws IOException {
+        LOGGER.info("Tile Atlas Animals GFX Images creation ...");
+
+        var bshFile = new BshFile(
+                Paths.get(CreatorConfig.ROOT_PATH + "/GFX/TIERE.BSH"),
+                paletteFile.getPalette(),
+                BshFile.Zoom.GFX,
+                CreatorConfig.CREATE_PNGS
+        );
+        var bshTextures = bshFile.getBshTextures();
+        var atlasImages = new ArrayList<BufferedImage>();
+
+        var c = 0;
+        for (var i = 0; i < TileAtlas.NR_OF_ANIMALS_ATLAS_IMAGES; i++) {
+            // new atlas
+            var atlas = new BufferedImage(
+                    bshFile.getMaxX() * TileAtlas.NR_OF_ANIMALS_ROWS,
+                    bshFile.getMaxY() * TileAtlas.NR_OF_ANIMALS_ROWS,
+                    BufferedImage.TYPE_INT_ARGB
+            );
+
+            // draw bsh images
+            for (var y = 0; y < TileAtlas.NR_OF_ANIMALS_ROWS; y++) {
+                for (var x = 0; x < TileAtlas.NR_OF_ANIMALS_ROWS; x++) {
+                    var g = atlas.getGraphics();
+
+                    // only if index exists
+                    if (c >= 0 && c < bshTextures.size()) {
+                        // draw in atlas
+                        g.drawImage(
+                                bshTextures.get(c).getBufferedImage(),
+                                x * bshFile.getMaxX(),
+                                y * bshFile.getMaxY(),
+                                null
+                        );
+                    }
+
+                    c++;
+                }
+            }
+
+            // store atlas
+            atlasImages.add(atlas);
+        }
+
+        var zoomStr = BshFile.Zoom.GFX.toString().toLowerCase() + "/animals/";
+        writeAtlasImages(CreatorConfig.ATLAS_OUT_PATH + zoomStr, atlasImages, bshFile.getMaxX(), bshFile.getMaxY());
+
+        bshFile.cleanUp();
+    }
+
+    //-------------------------------------------------
+    // Stadtfld
     //-------------------------------------------------
 
     /**
@@ -107,8 +276,8 @@ public class AtlasCreator {
         for (var i = 0; i < TileAtlas.NR_OF_SGFX_ATLAS_IMAGES; i++) {
             // new atlas
             var atlas = new BufferedImage(
-                    (int)TileAtlas.MAX_SGFX_WIDTH * TileAtlas.NR_OF_SGFX_ROWS,
-                    (int)TileAtlas.MAX_SGFX_HEIGHT * TileAtlas.NR_OF_SGFX_ROWS,
+                    bshFile.getMaxX() * TileAtlas.NR_OF_SGFX_ROWS,
+                    bshFile.getMaxY() * TileAtlas.NR_OF_SGFX_ROWS,
                     BufferedImage.TYPE_INT_ARGB
             );
 
@@ -122,8 +291,8 @@ public class AtlasCreator {
                         // draw in atlas
                         g.drawImage(
                                 bshTextures.get(c).getBufferedImage(),
-                                x * (int)TileAtlas.MAX_SGFX_WIDTH,
-                                y * (int)TileAtlas.MAX_SGFX_HEIGHT,
+                                x * bshFile.getMaxX(),
+                                y * bshFile.getMaxY(),
                                 null
                         );
                     }
@@ -136,8 +305,8 @@ public class AtlasCreator {
             atlasImages.add(atlas);
         }
 
-        var zoomStr = BshFile.Zoom.SGFX.toString().toLowerCase() + "/";
-        writeAtlasImages(CreatorConfig.ATLAS_OUT_PATH + zoomStr, atlasImages);
+        var zoomStr = BshFile.Zoom.SGFX.toString().toLowerCase() + "/stadtfld/";
+        writeAtlasImages(CreatorConfig.ATLAS_OUT_PATH + zoomStr, atlasImages, bshFile.getMaxX(), bshFile.getMaxY());
 
         bshFile.cleanUp();
     }
@@ -163,8 +332,8 @@ public class AtlasCreator {
         for (var i = 0; i < TileAtlas.NR_OF_MGFX_ATLAS_IMAGES; i++) {
             // new atlas
             var atlas = new BufferedImage(
-                    (int)TileAtlas.MAX_MGFX_WIDTH * TileAtlas.NR_OF_MGFX_ROWS,
-                    (int)TileAtlas.MAX_MGFX_HEIGHT * TileAtlas.NR_OF_MGFX_ROWS,
+                    bshFile.getMaxX() * TileAtlas.NR_OF_MGFX_ROWS,
+                    bshFile.getMaxY() * TileAtlas.NR_OF_MGFX_ROWS,
                     BufferedImage.TYPE_INT_ARGB
             );
 
@@ -178,8 +347,8 @@ public class AtlasCreator {
                         // draw in atlas
                         g.drawImage(
                                 bshTextures.get(c).getBufferedImage(),
-                                x * (int)TileAtlas.MAX_MGFX_WIDTH,
-                                y * (int)TileAtlas.MAX_MGFX_HEIGHT,
+                                x * bshFile.getMaxX(),
+                                y * bshFile.getMaxY(),
                                 null
                         );
                     }
@@ -192,8 +361,8 @@ public class AtlasCreator {
             atlasImages.add(atlas);
         }
 
-        var zoomStr = BshFile.Zoom.MGFX.toString().toLowerCase() + "/";
-        writeAtlasImages(CreatorConfig.ATLAS_OUT_PATH + zoomStr, atlasImages);
+        var zoomStr = BshFile.Zoom.MGFX.toString().toLowerCase() + "/stadtfld/";
+        writeAtlasImages(CreatorConfig.ATLAS_OUT_PATH + zoomStr, atlasImages, bshFile.getMaxX(), bshFile.getMaxY());
 
         bshFile.cleanUp();
     }
@@ -219,8 +388,8 @@ public class AtlasCreator {
         for (var i = 0; i < TileAtlas.NR_OF_GFX_ATLAS_IMAGES; i++) {
             // new atlas
             var atlas = new BufferedImage(
-                    (int)TileAtlas.MAX_GFX_WIDTH * TileAtlas.NR_OF_GFX_ROWS,
-                    (int)TileAtlas.MAX_GFX_HEIGHT * TileAtlas.NR_OF_GFX_ROWS,
+                    bshFile.getMaxX() * TileAtlas.NR_OF_GFX_ROWS,
+                    bshFile.getMaxY() * TileAtlas.NR_OF_GFX_ROWS,
                     BufferedImage.TYPE_INT_ARGB
             );
 
@@ -234,8 +403,8 @@ public class AtlasCreator {
                         // draw in atlas
                         g.drawImage(
                                 bshTextures.get(c).getBufferedImage(),
-                                x * (int)TileAtlas.MAX_GFX_WIDTH,
-                                y * (int)TileAtlas.MAX_GFX_HEIGHT,
+                                x * bshFile.getMaxX(),
+                                y * bshFile.getMaxY(),
                                 null
                         );
                     }
@@ -248,8 +417,8 @@ public class AtlasCreator {
             atlasImages.add(atlas);
         }
 
-        var zoomStr = BshFile.Zoom.GFX.toString().toLowerCase() + "/";
-        writeAtlasImages(CreatorConfig.ATLAS_OUT_PATH + zoomStr, atlasImages);
+        var zoomStr = BshFile.Zoom.GFX.toString().toLowerCase() + "/stadtfld/";
+        writeAtlasImages(CreatorConfig.ATLAS_OUT_PATH + zoomStr, atlasImages, bshFile.getMaxX(), bshFile.getMaxY());
 
         bshFile.cleanUp();
     }
@@ -265,7 +434,7 @@ public class AtlasCreator {
      * @param bufferedImages The {@link BufferedImage} objects to be written.
      * @throws IOException If an I/O error is thrown.
      */
-    private void writeAtlasImages(String path, ArrayList<BufferedImage> bufferedImages) throws IOException {
+    private void writeAtlasImages(String path, ArrayList<BufferedImage> bufferedImages, int maxX, int maxY) throws IOException {
         var c = 0;
 
         Files.createDirectories(Paths.get(path));
@@ -287,5 +456,11 @@ public class AtlasCreator {
 
             c++;
         }
+
+        var infoFile = new File(path + "info.txt");
+        var infoFileWriter = new FileWriter(infoFile);
+        var output = new BufferedWriter(infoFileWriter);
+        output.write("maxX: " + maxX + ", maxY: " + maxY);
+        output.close();
     }
 }
