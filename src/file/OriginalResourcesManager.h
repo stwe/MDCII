@@ -35,6 +35,14 @@ namespace mdcii::world
     enum class Zoom;
 }
 
+namespace mdcii::data
+{
+    /**
+     * Forward declaration class Figures.
+     */
+    class Figures;
+}
+
 //-------------------------------------------------
 // OriginalResourcesManager
 //-------------------------------------------------
@@ -96,6 +104,11 @@ namespace mdcii::file
          * The decrypted content of the haeuser.cod.
          */
         std::unique_ptr<data::Buildings> buildings;
+
+        /**
+         * The decrypted content of the figuren.cod.
+         */
+        std::unique_ptr<data::Figures> figures;
 
         /**
          * The loaded mp3 files.
@@ -179,6 +192,11 @@ namespace mdcii::file
         std::filesystem::path m_buildingsPath;
 
         /**
+         * The path to the figuren.cod file.
+         */
+        std::filesystem::path m_figuresPath;
+
+        /**
          * The paths to the mp3 files.
          */
         std::vector<std::filesystem::path> m_mp3Paths;
@@ -248,6 +266,11 @@ namespace mdcii::file
          * Finds the path to the haeuser.cod file.
          */
         void FindBuildingsCodFilePath();
+
+        /**
+         * Finds the path to the figuren.cod file.
+         */
+        void FindFiguresCodFilePath();
 
         /**
          * Finds the paths to all wav files.

@@ -35,13 +35,8 @@ cmake
 *.bak
 *.BSH
 *.COL
+*.txt
 
-conanbuildinfo.premake.lua
-conanbuildinfo.txt
-conaninfo.txt
-conanbuildinfo.cmake
-
-!/create.bat
 !/config.ini
 
 !/resources/data/Buildings.json

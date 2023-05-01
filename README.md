@@ -55,7 +55,7 @@ Make sure you are in the `Vcpkg` directory and install the [Requirements](#requi
 
 **Step 4: Linking the `Vcpkg` toolchain file**
 
-You will need the full path to your `Vcpkg` repository for linking the Vcpkg toolchain file.
+You will need the full path to your `Vcpkg` repository for linking the `Vcpkg` toolchain file.
 
 Open `settings.json` by selecting `File->Preferences->Settings`.
 In the newly opened window, click the editor button to switch to text editing mode. See mouse cursor on the image below.

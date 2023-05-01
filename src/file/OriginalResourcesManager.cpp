@@ -23,6 +23,7 @@
 #include "BshFile.h"
 #include "SoundFile.h"
 #include "world/Zoom.h"
+#include "data/Figures.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -76,6 +77,7 @@ void mdcii::file::OriginalResourcesManager::GetPathsFromOriginal()
     FindPaletteFilePath();
     FindMp3FilePaths();
     FindBuildingsCodFilePath();
+    FindFiguresCodFilePath();
     FindWavFilePaths();
 
     Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::GetPathsFromOriginal()] All paths were found successfully.");
@@ -212,6 +214,23 @@ void mdcii::file::OriginalResourcesManager::FindBuildingsCodFilePath()
     Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::FindBuildingsCodFilePath()] The path to the haeuser.cod file was found successfully.");
 }
 
+void mdcii::file::OriginalResourcesManager::FindFiguresCodFilePath()
+{
+    IterateFilesystem("figuren.cod", [this](const std::filesystem::directory_entry& t_entry, const std::string& t_fileName) {
+        if (to_upper_case(t_entry.path().filename().string()) == to_upper_case(t_fileName))
+        {
+            m_figuresPath = t_entry.path();
+        }
+    });
+
+    if (m_figuresPath.empty())
+    {
+        throw MDCII_EXCEPTION("[OriginalResourcesManager::FindFiguresCodFilePath()] Error while reading figures file path.");
+    }
+
+    Log::MDCII_LOG_DEBUG("[OriginalResourcesManager::FindFiguresCodFilePath()] The path to the figuren.cod file was found successfully.");
+}
+
 void mdcii::file::OriginalResourcesManager::FindWavFilePaths()
 {
     IterateFilesystem(".wav", [this](const std::filesystem::directory_entry& t_entry, const std::string& t_fileName) {
@@ -283,6 +302,9 @@ void mdcii::file::OriginalResourcesManager::LoadFiles()
 
     // load buildings
     buildings = std::make_unique<data::Buildings>(m_buildingsPath);
+
+    // todo: load figures
+    figures = std::make_unique<data::Figures>(m_figuresPath);
 
     // load mp3 files from the History Ed.
     if (!m_mp3Paths.empty() && Game::game_type == Game::GameType::HISTORY)

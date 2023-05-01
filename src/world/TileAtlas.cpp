@@ -94,7 +94,7 @@ void mdcii::world::TileAtlas::LoadAtlasImages(const Zoom t_zoom, const int t_nrO
         int channels;
         const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name(t_zoom))) };
         const auto path{ Game::RESOURCES_REL_PATH + "atlas/" };
-        const auto fileName{ path + zoomStr + "/" + std::to_string(i) + ".png" };
+        const auto fileName{ path + zoomStr + "/stadtfld/" + std::to_string(i) + ".png" };
 
         auto* image{ stbi_load(fileName.c_str(), &width, &height, &channels, 0) };
         if (!image)
