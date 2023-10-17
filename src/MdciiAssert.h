@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2022. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -36,13 +36,13 @@
 #endif
 
 #ifdef MDCII_ENABLE_ASSERTS
-    #define MDCII_ASSERT(x, ...)                                                   \
-        {                                                                          \
-            if (!(x))                                                              \
-            {                                                                      \
-                mdcii::Log::MDCII_LOG_ERROR("Assertion Failed: {0}", __VA_ARGS__); \
-                MDCII_DEBUG_BREAK;                                                 \
-            }                                                                      \
+    #define MDCII_ASSERT(x, ...)                                       \
+        {                                                              \
+            if (!(x))                                                  \
+            {                                                          \
+                MDCII_LOG_ERROR("Assertion Failed: {0}", __VA_ARGS__); \
+                MDCII_DEBUG_BREAK;                                     \
+            }                                                          \
         }
 #else
     #define MDCII_ASSERT(x, ...)

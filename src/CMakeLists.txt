@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.25)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 file(GLOB_RECURSE SRC_FILES
         "*.h"
@@ -9,39 +9,28 @@ file(GLOB_RECURSE SRC_FILES
         "*.cc"
         )
 
-find_package(glfw3 CONFIG REQUIRED)
-find_package(GLEW CONFIG REQUIRED)
-find_package(glm CONFIG REQUIRED)
-find_package(imgui CONFIG REQUIRED)
-find_package(spdlog CONFIG REQUIRED)
-find_package(Freetype CONFIG REQUIRED)
-find_package(protobuf CONFIG REQUIRED)
-find_package(OpenAL CONFIG REQUIRED)
-find_package(SndFile CONFIG REQUIRED)
+message("Building MDCII with CMake version: ${CMAKE_VERSION}")
 
-message("Building with CMake version: ${CMAKE_VERSION}")
+find_package(spdlog CONFIG REQUIRED)
 
 add_executable(MDCII ${SRC_FILES})
 
 if (CMAKE_BUILD_TYPE MATCHES Debug)
-    message("-- USE DEBUG SETUP --")
-    target_compile_definitions(${PROJECT_NAME} PUBLIC MDCII_DEBUG_BUILD GLFW_INCLUDE_NONE GLM_ENABLE_EXPERIMENTAL SPDLOG_NO_EXCEPTIONS)
+    message("-- USE MDCII DEBUG SETUP --")
+    target_compile_definitions(${PROJECT_NAME} PUBLIC MDCII_DEBUG_BUILD SPDLOG_NO_EXCEPTIONS)
 else()
-    message("-- USE RELEASE SETUP --")
-    target_compile_definitions(${PROJECT_NAME} PUBLIC GLFW_INCLUDE_NONE GLM_ENABLE_EXPERIMENTAL SPDLOG_NO_EXCEPTIONS)
+    message("-- USE MDCII RELEASE SETUP --")
+    target_compile_definitions(${PROJECT_NAME} PUBLIC SPDLOG_NO_EXCEPTIONS)
 endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
-target_link_libraries(${PROJECT_NAME} PRIVATE GLEW::GLEW)
-target_link_libraries(${PROJECT_NAME} PRIVATE glm::glm)
-target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
-target_link_libraries(${PROJECT_NAME} PRIVATE freetype)
-target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
-target_link_libraries(${PROJECT_NAME} PRIVATE OpenAL::OpenAL)
-target_link_libraries(${PROJECT_NAME} PRIVATE SndFile::sndfile)
+
+# linux
+target_link_libraries(${PROJECT_NAME} PRIVATE GL)
+target_link_libraries(${PROJECT_NAME} PRIVATE png)
+target_link_libraries(${PROJECT_NAME} PRIVATE X11)
 
 # copy config.ini
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

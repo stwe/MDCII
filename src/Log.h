@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2022. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -21,12 +21,15 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-//-------------------------------------------------
-// Log
-//-------------------------------------------------
-
 namespace mdcii
 {
+    //-------------------------------------------------
+    // Log
+    //-------------------------------------------------
+
+    /**
+     * @brief Provides logging functionality using the spdlog library.
+     */
     class Log
     {
     public:
@@ -38,7 +41,7 @@ namespace mdcii
         {
             spdlog::set_pattern("%^[%T] %n: %v%$");
 
-            m_logger = spdlog::stdout_color_mt("MDCII"); // NOLINT(clang-diagnostic-undefined-func-template)
+            m_logger = spdlog::stdout_color_mt("MDCII");
 
 #ifdef MDCII_DEBUG_BUILD
             m_logger->set_level(spdlog::level::trace);
@@ -48,43 +51,12 @@ namespace mdcii
         }
 
         //-------------------------------------------------
-        // Log
+        // Getter
         //-------------------------------------------------
 
-        template<typename... T>
-        static void MDCII_LOG_TRACE(T... t_args) // NOLINT(readability-identifier-naming)
+        static std::shared_ptr<spdlog::logger>& GetLogger()
         {
-            m_logger->trace(t_args...);
-        }
-
-        template<typename... T>
-        static void MDCII_LOG_DEBUG(T... t_args) // NOLINT(readability-identifier-naming)
-        {
-            m_logger->debug(t_args...);
-        }
-
-        template<typename... T>
-        static void MDCII_LOG_INFO(T... t_args) // NOLINT(readability-identifier-naming)
-        {
-            m_logger->info(t_args...);
-        }
-
-        template<typename... T>
-        static void MDCII_LOG_WARN(T... t_args) // NOLINT(readability-identifier-naming)
-        {
-            m_logger->warn(t_args...);
-        }
-
-        template<typename... T>
-        static void MDCII_LOG_ERROR(T... t_args) // NOLINT(readability-identifier-naming)
-        {
-            m_logger->error(t_args...);
-        }
-
-        template<typename... T>
-        static void MDCII_LOG_FATAL(T... t_args) // NOLINT(readability-identifier-naming)
-        {
-            m_logger->critical(t_args...);
+            return m_logger;
         }
 
     protected:
@@ -97,3 +69,10 @@ namespace mdcii
         inline static std::shared_ptr<spdlog::logger> m_logger;
     };
 }
+
+#define MDCII_LOG_DEBUG(...)    ::mdcii::Log::GetLogger()->debug(__VA_ARGS__)
+#define MDCII_LOG_TRACE(...)    ::mdcii::Log::GetLogger()->trace(__VA_ARGS__)
+#define MDCII_LOG_INFO(...)     ::mdcii::Log::GetLogger()->info(__VA_ARGS__)
+#define MDCII_LOG_WARN(...)     ::mdcii::Log::GetLogger()->warn(__VA_ARGS__)
+#define MDCII_LOG_ERROR(...)    ::mdcii::Log::GetLogger()->error(__VA_ARGS__)
+#define MDCII_LOG_CRITICAL(...) ::mdcii::Log::GetLogger()->critical(__VA_ARGS__)

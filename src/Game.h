@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2022. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -18,116 +18,26 @@
 
 #pragma once
 
+#include "vendor/olc/olcPixelGameEngine.h"
 #include "vendor/ini/ini.h"
-#include "vendor/entt/entt.hpp"
 
-//-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii::ogl
+namespace mdcii::world
 {
-    /**
-     * Forward declaration class Window.
-     */
-    class Window;
+    class Island;
 }
-
-namespace mdcii::camera
-{
-    /**
-     * Forward declaration class Camera.
-     */
-    class Camera;
-}
-
-namespace mdcii::sound
-{
-    /**
-     * Forward declaration class SoundDevice.
-     */
-    class SoundDevice;
-}
-
-namespace mdcii::file
-{
-    /**
-     * Forward declaration class OriginalResourcesManager.
-     */
-    class OriginalResourcesManager;
-
-    /**
-     * Forward declaration class MdciiResourcesManager.
-     */
-    class MdciiResourcesManager;
-}
-
-namespace mdcii::state
-{
-    /**
-     * Forward declaration class StateStack.
-     */
-    class StateStack;
-}
-
-//-------------------------------------------------
-// Game
-//-------------------------------------------------
 
 namespace mdcii
 {
+    //-------------------------------------------------
+    // Game
+    //-------------------------------------------------
+
     /**
-     * The main game object.
+     * @brief The main game object.
      */
-    class Game
+    class Game: public olc::PixelGameEngine
     {
     public:
-        //-------------------------------------------------
-        // Types
-        //-------------------------------------------------
-
-        /**
-         * Indicates which original data this game is based on.
-         */
-        enum class GameType
-        {
-            HISTORY, NINA, UNKNOWN
-        };
-
-        //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        /**
-         * The current version of this game.
-         */
-        static constexpr std::string_view VERSION{ "0.2-DEV" };
-
-        /**
-         * 60 updates per second.
-         */
-        static constexpr auto FRAME_TIME{ 1.0 / 60.0 };
-
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        inline static entt::registry ecs;
-
-        inline static const inih::INIReader INI{ "./config.ini" }; // NOLINT(cert-err58-cpp)
-
-#if defined(_WIN64)
-        inline static const std::string ORIGINAL_RESOURCES_FULL_PATH{ INI.Get<std::string>("win64", "original_resources_full_path") }; // NOLINT(cert-err58-cpp)
-        inline static const std::string RESOURCES_REL_PATH{ INI.Get<std::string>("win64", "resources_rel_path") };                     // NOLINT(cert-err58-cpp)
-#else
-        inline static const std::string ORIGINAL_RESOURCES_FULL_PATH{ INI.Get<std::string>("linux", "original_resources_full_path") }; // NOLINT(cert-err58-cpp)
-        inline static const std::string RESOURCES_REL_PATH{ INI.Get<std::string>("linux", "resources_rel_path") };                     // NOLINT(cert-err58-cpp)
-#endif
-
-        inline static GameType game_type{ GameType::UNKNOWN };
-
-        inline static bool is_sound_device_available{ false };
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -139,71 +49,38 @@ namespace mdcii
         Game& operator=(const Game& t_other) = delete;
         Game& operator=(Game&& t_other) noexcept = delete;
 
-        ~Game() noexcept;
+        ~Game() override;
 
-        //-------------------------------------------------
-        // Run
-        //-------------------------------------------------
-
-        void Run();
-
-    protected:
-
-    private:
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
-        /**
-         * A window with OpenGL context.
-         */
-        std::shared_ptr<ogl::Window> m_window;
+        inline static const inih::INIReader INI{ "./config.ini" };
 
-        /**
-         * An orthographic camera.
-         */
-        std::shared_ptr<camera::Camera> m_camera;
-
-        /**
-         * The default sound device and the context.
-         */
-        std::shared_ptr<sound::SoundDevice> m_soundDevice;
-
-        /**
-         * Resources of the original game needed here.
-         */
-        std::shared_ptr<file::OriginalResourcesManager> m_originalResourcesManager;
-
-        /**
-         * Own maps and islands.
-         */
-        std::shared_ptr<file::MdciiResourcesManager> m_mdciiResourcesManager;
-
-        /**
-         * This game is organized with states.
-         */
-        std::unique_ptr<state::StateStack> m_stateStack;
+#if defined(_WIN64)
+        inline static const std::string ORIGINAL_RESOURCES_FULL_PATH{ INI.Get<std::string>("win64", "original_resources_full_path") };
+        inline static const std::string RESOURCES_REL_PATH{ INI.Get<std::string>("win64", "resources_rel_path") };
+#else
+        inline static const std::string ORIGINAL_RESOURCES_FULL_PATH{ INI.Get<std::string>("linux", "original_resources_full_path") };
+        inline static const std::string RESOURCES_REL_PATH{ INI.Get<std::string>("linux", "resources_rel_path") };
+#endif
 
         //-------------------------------------------------
-        // Logic
+        // Override
         //-------------------------------------------------
 
-        void Init();
-        void Input() const;
-        void Update() const;
-        void Render() const;
+        bool OnUserCreate() override;
+        bool OnUserUpdate(float t_elapsedTime) override;
 
-        //-------------------------------------------------
-        // Game loop
-        //-------------------------------------------------
+    protected:
 
-        void GameLoop() const;
+    private:
+        std::unique_ptr<olc::Sprite> m_sprGreen;
+        std::unique_ptr<olc::Decal> m_decGreen;
 
-        //-------------------------------------------------
-        // Helper
-        //-------------------------------------------------
+        std::unique_ptr<olc::Sprite> m_sprAtlas0;
+        std::unique_ptr<olc::Decal> m_decAtlas0;
 
-        void CreateObjects();
-        void Start() const;
+        std::vector<std::unique_ptr<world::Island>> m_islands;
     };
 }

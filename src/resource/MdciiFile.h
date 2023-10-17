@@ -18,75 +18,75 @@
 
 #pragma once
 
-#include <exception>
-#include <sstream>
+#include "vendor/nlohmann/json.hpp"
 
-namespace mdcii
+namespace mdcii::world
+{
+    class Island;
+}
+
+namespace mdcii::resource
 {
     //-------------------------------------------------
-    // MdciiException
+    // MdciiFile
     //-------------------------------------------------
 
     /**
-     * @brief An exception class for handling MDCII related errors.
+     * @brief Class for all MDCII Json file formats.
      */
-    class MdciiException: public std::exception
+    class MdciiFile
     {
     public:
-        //-------------------------------------------------
-        // Ctors. / Dtor.
-        //-------------------------------------------------
-
-        MdciiException(const int t_line, const char* t_file, std::string t_message)
-            : m_line{ t_line }
-            , m_file{ t_file }
-            , m_message{ std::move(t_message) }
-        {}
-
-        //-------------------------------------------------
-        // What
-        //-------------------------------------------------
-
-        const char* what() const noexcept override
-        {
-            std::ostringstream oss;
-
-            oss << "occurred: \n";
-            oss << GetOriginString();
-
-            m_whatBuffer = oss.str();
-
-            return m_whatBuffer.c_str();
-        }
-
-    protected:
-
-    private:
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
-        int m_line;
-        std::string m_file;
-        std::string m_message;
+        /**
+         * @brief The name of the file.
+         */
+        std::string fileName;
 
-        mutable std::string m_whatBuffer;
+        /**
+         * @brief The current Json value.
+         */
+        nlohmann::json json;
 
         //-------------------------------------------------
-        // Helper
+        // Ctors. / Dtor.
         //-------------------------------------------------
 
-        std::string GetOriginString() const
-        {
-            std::ostringstream oss;
+        MdciiFile() = delete;
 
-            oss << "[Message]: " << m_message << "\n";
-            oss << "[File]: " << m_file << "\n";
-            oss << "[Line]: " << m_line;
+        /**
+         * @brief Constructs a new MdciiFile object.
+         *
+         * @param t_fileName The name of the file.
+         */
+        explicit MdciiFile(std::string t_fileName);
 
-            return oss.str();
-        }
+        MdciiFile(const MdciiFile& t_other) = delete;
+        MdciiFile(MdciiFile&& t_other) noexcept = delete;
+        MdciiFile& operator=(const MdciiFile& t_other) = delete;
+        MdciiFile& operator=(MdciiFile&& t_other) noexcept = delete;
+
+        ~MdciiFile() noexcept;
+
+        //-------------------------------------------------
+        // Save && load
+        //-------------------------------------------------
+
+        /**
+         * @brief Loads the Json value from a file.
+         *
+         * @return True if success or false if error while loading.
+         */
+        [[nodiscard]] bool LoadJsonFromFile();
+
+        [[nodiscard]] std::vector<std::unique_ptr<world::Island>> CreateIslands() const;
+
+    protected:
+
+    private:
+
     };
 }
-
-#define MDCII_EXCEPTION(message) mdcii::MdciiException(__LINE__, __FILE__, message)

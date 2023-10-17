@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2022. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,6 +16,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#define OLC_PGE_APPLICATION
+
 #include "Log.h"
 #include "Game.h"
 #include "MdciiException.h"
@@ -28,27 +30,33 @@ int main()
 {
     mdcii::Log::Init();
 
-    mdcii::Log::MDCII_LOG_DEBUG("[main()] Starting main.");
-    mdcii::Log::MDCII_LOG_DEBUG("[main()] Logger was initialized.");
+    MDCII_LOG_DEBUG("[main()] Starting main.");
+    MDCII_LOG_DEBUG("[main()] Logger was initialized.");
 
     try
     {
-        mdcii::Game game;
-        game.Run();
+        if (mdcii::Game game; game.Construct(
+                mdcii::Game::INI.Get<int>("window", "width"),
+                mdcii::Game::INI.Get<int>("window", "height"),
+                1, 1
+            ))
+        {
+            game.Start();
+        }
 
         return EXIT_SUCCESS;
     }
     catch (const mdcii::MdciiException& e)
     {
-        mdcii::Log::MDCII_LOG_ERROR("MdciiException {}", e.what());
+        MDCII_LOG_ERROR("MdciiException {}", e.what());
     }
     catch (const std::exception& e)
     {
-        mdcii::Log::MDCII_LOG_ERROR("Standard Exception: {}", e.what());
+        MDCII_LOG_ERROR("Standard Exception: {}", e.what());
     }
     catch (...)
     {
-        mdcii::Log::MDCII_LOG_ERROR("Unknown Exception. No details available.");
+        MDCII_LOG_ERROR("Unknown Exception. No details available.");
     }
 
     return EXIT_FAILURE;
