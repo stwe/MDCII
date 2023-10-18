@@ -64,17 +64,15 @@ std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::C
 {
     std::vector<std::unique_ptr<world::Island>> is;
 
-    for (const auto& [k0, v0] : json["islands"].items())
+    for (const auto& [islandKeys, islandVars] : json["islands"].items())
     {
         auto island{ std::make_unique<world::Island>() };
-        island->width = v0.at("width").get<int32_t>();
-        island->height = v0.at("height").get<int32_t>();
-        island->x = v0.at("x").get<int32_t>();
-        island->y = v0.at("y").get<int32_t>();
+        island->width = islandVars.at("width").get<int32_t>();
+        island->height = islandVars.at("height").get<int32_t>();
+        island->x = islandVars.at("x").get<int32_t>();
+        island->y = islandVars.at("y").get<int32_t>();
 
-        auto layers = v0.at("layers").items();
-
-        for (const auto& [k, v] : layers)
+        for (auto layers = islandVars.at("layers").items(); const auto& [k, v] : layers)
         {
             for (const auto& [layerNameJson, layerTilesJson] : v.items())
             {

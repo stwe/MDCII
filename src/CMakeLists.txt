@@ -12,6 +12,7 @@ file(GLOB_RECURSE SRC_FILES
 message("Building MDCII with CMake version: ${CMAKE_VERSION}")
 
 find_package(spdlog CONFIG REQUIRED)
+find_package(Protobuf CONFIG REQUIRED)
 
 add_executable(MDCII ${SRC_FILES})
 
@@ -26,6 +27,9 @@ endif()
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
+
+# todo: olc with win64
 
 # linux
 target_link_libraries(${PROJECT_NAME} PRIVATE GL)

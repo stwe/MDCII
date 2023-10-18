@@ -20,6 +20,10 @@
 
 #include "vendor/nlohmann/json.hpp"
 
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
 namespace mdcii::world
 {
     class Island;
@@ -32,7 +36,7 @@ namespace mdcii::resource
     //-------------------------------------------------
 
     /**
-     * @brief Class for all MDCII Json file formats.
+     * @brief The class is for all MDCII Json files.
      */
     class MdciiFile
     {

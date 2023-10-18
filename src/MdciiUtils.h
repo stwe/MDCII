@@ -34,4 +34,26 @@ namespace mdcii
      * @return The Json value.
      */
     [[nodiscard]] nlohmann::json read_json_from_file(const std::string& t_filePath);
+
+    //-------------------------------------------------
+    // Strings
+    //-------------------------------------------------
+
+    /**
+     * @brief Convert a string to lower case.
+     *
+     * @param t_string The string to convert.
+     *
+     * @return The converted string.
+     */
+    [[nodiscard]] std::string to_lower_case(const std::string& t_string);
+
+    /**
+     * @brief Convert a string to upper case.
+     *
+     * @param t_string The string to convert.
+     *
+     * @return The converted string.
+     */
+    [[nodiscard]] std::string to_upper_case(const std::string& t_string);
 }

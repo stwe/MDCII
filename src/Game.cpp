@@ -19,6 +19,7 @@
 #include "Game.h"
 #include "Log.h"
 #include "resource/MdciiFile.h"
+#include "resource/OriginalResourcesManager.h"
 #include "world/Island.h"
 
 //-------------------------------------------------
@@ -39,6 +40,8 @@ mdcii::Game::~Game()
 
 bool mdcii::Game::OnUserCreate()
 {
+    m_origResMng = std::make_unique<resource::OriginalResourcesManager>();
+
     m_sprGreen = std::make_unique<olc::Sprite>("resources/textures/gfx/corner_gfx.png");
     m_decGreen = std::make_unique<olc::Decal>(m_sprGreen.get());
 

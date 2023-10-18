@@ -21,9 +21,18 @@
 #include "vendor/olc/olcPixelGameEngine.h"
 #include "vendor/ini/ini.h"
 
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
 namespace mdcii::world
 {
     class Island;
+}
+
+namespace mdcii::resource
+{
+    class OriginalResourcesManager;
 }
 
 namespace mdcii
@@ -52,7 +61,7 @@ namespace mdcii
         ~Game() override;
 
         //-------------------------------------------------
-        // Member
+        // Constants
         //-------------------------------------------------
 
         inline static const inih::INIReader INI{ "./config.ini" };
@@ -75,6 +84,10 @@ namespace mdcii
     protected:
 
     private:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
         std::unique_ptr<olc::Sprite> m_sprGreen;
         std::unique_ptr<olc::Decal> m_decGreen;
 
@@ -82,5 +95,6 @@ namespace mdcii
         std::unique_ptr<olc::Decal> m_decAtlas0;
 
         std::vector<std::unique_ptr<world::Island>> m_islands;
+        std::unique_ptr<resource::OriginalResourcesManager> m_origResMng;
     };
 }

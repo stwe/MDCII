@@ -49,3 +49,29 @@ nlohmann::json mdcii::read_json_from_file(const std::string& t_filePath)
 
     return j;
 }
+
+//-------------------------------------------------
+// Strings
+//-------------------------------------------------
+
+std::string mdcii::to_lower_case(const std::string& t_string)
+{
+    auto newString{ t_string };
+    for (auto& c : newString)
+    {
+        c = static_cast<char>(std::tolower(c));
+    }
+
+    return newString;
+}
+
+std::string mdcii::to_upper_case(const std::string& t_string)
+{
+    auto newString{ t_string };
+    for (auto& c : newString)
+    {
+        c = static_cast<char>(std::toupper(c));
+    }
+
+    return newString;
+}
