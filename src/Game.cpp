@@ -69,14 +69,44 @@ bool mdcii::Game::OnUserCreate()
 
 bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
 {
+    // simple camera
+
+    olc::vf2d vVel = { 0.0f, 0.0f };
+
+    if (GetKey(olc::Key::W).bHeld)
+    {
+        vVel += { 0, -1 };
+    }
+    if (GetKey(olc::Key::S).bHeld)
+    {
+        vVel += { 0, +1 };
+    }
+    if (GetKey(olc::Key::A).bHeld)
+    {
+        vVel += { -1, 0 };
+    }
+    if (GetKey(olc::Key::D).bHeld)
+    {
+        vVel += { +1, 0 };
+    }
+
+    // exit
+
+    if (GetKey(olc::Key::ESCAPE).bHeld)
+    {
+        return false;
+    }
+
+    // render
+
     Clear(olc::BLACK);
 
-    auto toScreen = [&](int t_x, int t_y, int t_startX, int t_startY)
+    auto toScreen = [&](int t_x, int t_y, float t_startX, float t_startY)
     {
         return olc::vi2d
             {
-                (t_startX * 64) + (t_x - t_y) * (64 / 2),
-                (t_startY * 32) + (t_x + t_y) * (32 / 2)
+                ((int)t_startX * 64) + (t_x - t_y) * (64 / 2),
+                ((int)t_startY * 32) + (t_x + t_y) * (32 / 2)
             };
     };
 
@@ -94,6 +124,9 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
 
     for (auto const& island : m_islands)
     {
+        island->x += vVel.x * t_elapsedTime * 8.0f;
+        island->y += vVel.y * t_elapsedTime * 8.0f;
+
         for (auto y{ 0 }; y < island->height; ++y)
         {
             for (auto x{ 0 }; x < island->width; ++x)

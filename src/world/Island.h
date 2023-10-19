@@ -32,8 +32,8 @@ namespace mdcii::world
     public:
         int32_t width{ -1 };
         int32_t height{ -1 };
-        int32_t x{ -1 };
-        int32_t y{ -1 };
+        float x{ -1.0f };
+        float y{ -1.0f };
 
         std::vector<Tile> tiles;
 

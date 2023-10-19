@@ -8,8 +8,8 @@
     {
     "width": 8,
     "height": 12,
-    "x": 3,
-    "y": 3,
+    "x": 0,
+    "y": 0,
     "layers": [
       {
         "coast": [
@@ -64,8 +64,8 @@
     {
       "width": 8,
       "height": 12,
-      "x": 11,
-      "y": 15,
+      "x": 9,
+      "y": 0,
       "layers": [
         {
           "coast": [
