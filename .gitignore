@@ -47,4 +47,4 @@ cmake
 !/resources/textures/gfx/*
 !/resources/textures/mgfx/*
 !/resources/textures/sgfx/*
-
+!/src/vendor/ini/LICENSE.txt

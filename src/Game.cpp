@@ -20,6 +20,7 @@
 #include "Log.h"
 #include "resource/MdciiFile.h"
 #include "resource/OriginalResourcesManager.h"
+#include "resource/TileAtlas.h"
 #include "world/Island.h"
 
 //-------------------------------------------------
@@ -42,15 +43,22 @@ bool mdcii::Game::OnUserCreate()
 {
     m_origResMng = std::make_unique<resource::OriginalResourcesManager>();
 
-    m_sprGreen = std::make_unique<olc::Sprite>("resources/textures/gfx/corner_gfx.png");
-    m_decGreen = std::make_unique<olc::Decal>(m_sprGreen.get());
-
-    m_sprAtlas0 = std::make_unique<olc::Sprite>("resources/atlas/gfx/stadtfld/0.png");
-    m_decAtlas0 = std::make_unique<olc::Decal>(m_sprAtlas0.get());
-
-    if (resource::MdciiFile file{"resources/sav/Example.sav" }; file.LoadJsonFromFile())
+    if (resource::MdciiFile file{ "resources/sav/Example.sav" }; file.LoadJsonFromFile())
     {
         m_islands = file.CreateIslands();
+    }
+
+    m_tileAtlas = std::make_unique<resource::TileAtlas>();
+
+    for (auto& tile : m_islands.at(0)->tiles)
+    {
+        if (tile.HasBuilding())
+        {
+            const auto& building{ m_origResMng->GetBuildingById(tile.buildingId) };
+            tile.gfx = building.gfx;
+            tile.posoffs = building.posoffs;
+            tile.heights[2] = m_tileAtlas->gfxHeights.at(tile.gfx);
+        }
     }
 
     return true;
@@ -60,22 +68,59 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
 {
     Clear(olc::BLACK);
 
-    auto toScreen = [&](int t_x, int t_y)
+    auto toScreen = [&](int t_x, int t_y, int t_startX, int t_startY)
     {
         return olc::vi2d
             {
-                (8 * 64) + (t_x - t_y) * (64 / 2),
-                (5 * 32) + (t_x + t_y) * (32 / 2)
+                (t_startX * 64) + (t_x - t_y) * (64 / 2),
+                (t_startY * 32) + (t_x + t_y) * (32 / 2)
             };
+    };
+
+    auto getAtlasIndex = [](int t_gfx, int t_rows)
+    {
+        return (t_gfx / (t_rows * t_rows));
+    };
+
+    auto getOffset = [](int t_gfx, int t_rows)
+    {
+        auto picInPic{ t_gfx % (t_rows * t_rows) };
+
+        return olc::vi2d(picInPic % t_rows, picInPic / t_rows);
     };
 
     for (auto y{ 0 }; y < m_islands.at(0)->height; ++y)
     {
         for (auto x{ 0 }; x < m_islands.at(0)->width; ++x)
         {
-            //position.y * width + position.x;
-            DrawDecal(toScreen(x, y), m_decGreen.get());
-            DrawPartialDecal(toScreen(x, y), m_decAtlas0.get(), olc::vf2d(0 * 64, 0 * 32), olc::vf2d(64, 32));
+            const auto index{ y * m_islands.at(0)->width + x };
+            const auto& tile{ m_islands.at(0)->tiles.at(index) };
+
+            if (tile.HasBuilding() && tile.gfx != -1)
+            {
+                auto atlas{ getAtlasIndex(tile.gfx, 16) };
+                auto offsetXy{ getOffset(tile.gfx, 16) };
+                auto sc{ toScreen(x, y, m_islands.at(0)->x, m_islands.at(0)->y) };
+                auto offset{ 0.0f };
+
+                if (tile.IsAboveWater() && tile.heights[2] > 31)
+                {
+                    offset = (float)tile.heights[2] - 31.0f;
+                }
+
+                DrawPartialDecal(
+                    olc::vf2d(
+                        (float)sc.x,
+                        (float)sc.y - offset
+                    ),
+                    m_tileAtlas->gfxDecAtlas.at(atlas).get(),
+                    olc::vf2d(
+                        (float)offsetXy.x * 64.0f,
+                        (float)offsetXy.y * 286.0f
+                    ),
+                    olc::vf2d(64.0f, 286.0f)
+                );
+            }
         }
     }
 

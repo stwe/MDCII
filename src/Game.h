@@ -33,6 +33,7 @@ namespace mdcii::world
 namespace mdcii::resource
 {
     class OriginalResourcesManager;
+    class TileAtlas;
 }
 
 namespace mdcii
@@ -88,13 +89,8 @@ namespace mdcii
         // Member
         //-------------------------------------------------
 
-        std::unique_ptr<olc::Sprite> m_sprGreen;
-        std::unique_ptr<olc::Decal> m_decGreen;
-
-        std::unique_ptr<olc::Sprite> m_sprAtlas0;
-        std::unique_ptr<olc::Decal> m_decAtlas0;
-
         std::vector<std::unique_ptr<world::Island>> m_islands;
         std::unique_ptr<resource::OriginalResourcesManager> m_origResMng;
+        std::unique_ptr<resource::TileAtlas> m_tileAtlas;
     };
 }

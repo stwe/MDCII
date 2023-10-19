@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cstdint>
+#include <array>
 
 namespace mdcii::world
 {
@@ -33,5 +34,12 @@ namespace mdcii::world
         int32_t rotation{ 0 };
         int32_t x{ 0 };
         int32_t y{ 0 };
+        int32_t posoffs{ 0 };
+
+        // sgfx, mgfx, gfx
+        std::array<int32_t, 3> heights{ 0, 0, 0 };
+
+        [[nodiscard]] bool HasBuilding() const { return buildingId != -1; }
+        [[nodiscard]] bool IsAboveWater() const { return posoffs > 0; }
     };
 }

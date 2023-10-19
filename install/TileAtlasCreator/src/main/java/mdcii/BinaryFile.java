@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2022. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -56,7 +56,7 @@ public abstract class BinaryFile implements BinaryFileInterface {
     //-------------------------------------------------
 
     /**
-     * Contructs a new {@link BinaryFile} object from {@link Path}.
+     * Constructs a new {@link BinaryFile} object from {@link Path}.
      *
      * @param path The {@link Path} to the file.
      * @throws IOException If an I/O error is thrown.
