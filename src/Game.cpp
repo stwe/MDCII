@@ -50,14 +50,17 @@ bool mdcii::Game::OnUserCreate()
 
     m_tileAtlas = std::make_unique<resource::TileAtlas>();
 
-    for (auto& tile : m_islands.at(0)->tiles)
+    for (auto const& island : m_islands)
     {
-        if (tile.HasBuilding())
+        for (auto& tile : island->tiles)
         {
-            const auto& building{ m_origResMng->GetBuildingById(tile.buildingId) };
-            tile.gfx = building.gfx;
-            tile.posoffs = building.posoffs;
-            tile.heights[2] = m_tileAtlas->gfxHeights.at(tile.gfx);
+            if (tile.HasBuilding())
+            {
+                const auto& building{ m_origResMng->GetBuildingById(tile.buildingId) };
+                tile.gfx = building.gfx;
+                tile.posoffs = building.posoffs;
+                tile.heights[2] = m_tileAtlas->gfxHeights.at(tile.gfx);
+            }
         }
     }
 
@@ -89,37 +92,40 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
         return olc::vi2d(picInPic % t_rows, picInPic / t_rows);
     };
 
-    for (auto y{ 0 }; y < m_islands.at(0)->height; ++y)
+    for (auto const& island : m_islands)
     {
-        for (auto x{ 0 }; x < m_islands.at(0)->width; ++x)
+        for (auto y{ 0 }; y < island->height; ++y)
         {
-            const auto index{ y * m_islands.at(0)->width + x };
-            const auto& tile{ m_islands.at(0)->tiles.at(index) };
-
-            if (tile.HasBuilding() && tile.gfx != -1)
+            for (auto x{ 0 }; x < island->width; ++x)
             {
-                auto atlas{ getAtlasIndex(tile.gfx, 16) };
-                auto offsetXy{ getOffset(tile.gfx, 16) };
-                auto sc{ toScreen(x, y, m_islands.at(0)->x, m_islands.at(0)->y) };
-                auto offset{ 0.0f };
+                const auto index{ y * island->width + x };
+                const auto& tile{ island->tiles.at(index) };
 
-                if (tile.IsAboveWater() && tile.heights[2] > 31)
+                if (tile.HasBuilding() && tile.gfx != -1)
                 {
-                    offset = (float)tile.heights[2] - 31.0f;
-                }
+                    auto atlas{ getAtlasIndex(tile.gfx, 16) };
+                    auto offsetXy{ getOffset(tile.gfx, 16) };
+                    auto sc{ toScreen(x, y, island->x, island->y) };
+                    auto offset{ 0.0f };
 
-                DrawPartialDecal(
-                    olc::vf2d(
-                        (float)sc.x,
-                        (float)sc.y - offset
-                    ),
-                    m_tileAtlas->gfxDecAtlas.at(atlas).get(),
-                    olc::vf2d(
-                        (float)offsetXy.x * 64.0f,
-                        (float)offsetXy.y * 286.0f
-                    ),
-                    olc::vf2d(64.0f, 286.0f)
-                );
+                    if (tile.IsAboveWater() && tile.heights[2] > 31)
+                    {
+                        offset = (float)tile.heights[2] - 31.0f;
+                    }
+
+                    DrawPartialDecal(
+                        olc::vf2d(
+                            (float)sc.x,
+                            (float)sc.y - offset
+                        ),
+                        m_tileAtlas->gfxDecAtlas.at(atlas).get(),
+                        olc::vf2d(
+                            (float)offsetXy.x * 64.0f,
+                            (float)offsetXy.y * 286.0f
+                        ),
+                        olc::vf2d(64.0f, 286.0f)
+                    );
+                }
             }
         }
     }
