@@ -20,6 +20,7 @@
 
 #include "vendor/olc/olcPixelGameEngine.h"
 #include "vendor/ini/ini.h"
+#include "world/Zoom.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -74,6 +75,12 @@ namespace mdcii
         inline static const std::string ORIGINAL_RESOURCES_FULL_PATH{ INI.Get<std::string>("linux", "original_resources_full_path") };
         inline static const std::string RESOURCES_REL_PATH{ INI.Get<std::string>("linux", "resources_rel_path") };
 #endif
+
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        world::Zoom zoom{ world::Zoom::GFX };
 
         //-------------------------------------------------
         // Override

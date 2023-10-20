@@ -29,14 +29,17 @@
 namespace olc
 {
     /**
-     * @brief Forward declaration class Sprite.
+     * @brief Forward declaration class Renderable.
      */
-    class Sprite;
+    class Renderable;
+}
 
+namespace mdcii::world
+{
     /**
-     * @brief Forward declaration class Decal.
+     * @brief Forward declaration enum class Zoom.
      */
-    class Decal;
+    enum class Zoom;
 }
 
 namespace mdcii::resource
@@ -45,9 +48,21 @@ namespace mdcii::resource
     // TileAtlas
     //-------------------------------------------------
 
+    /**
+     * @brief Provides the TileAtlas for each zoom.
+     */
     class TileAtlas
     {
     public:
+        //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * @brief The number of Tile Atlas. One for each zoom.
+         */
+        static constexpr auto NR_OF_TILE_ATLAS{ 3 };
+
         //-------------------------------------------------
         // Constants SGFX
         //-------------------------------------------------
@@ -130,15 +145,11 @@ namespace mdcii::resource
         // Member
         //-------------------------------------------------
 
-        std::array<std::unique_ptr<olc::Sprite>, NR_OF_SGFX_ATLAS_IMAGES> sgfxSprAtlas;
-        std::array<std::unique_ptr<olc::Sprite>, NR_OF_MGFX_ATLAS_IMAGES> mgfxSprAtlas;
-        std::array<std::unique_ptr<olc::Sprite>, NR_OF_GFX_ATLAS_IMAGES> gfxSprAtlas;
+        std::array<std::unique_ptr<olc::Renderable>, NR_OF_SGFX_ATLAS_IMAGES> sgfxAtlas;
+        std::array<std::unique_ptr<olc::Renderable>, NR_OF_MGFX_ATLAS_IMAGES> mgfxAtlas;
+        std::array<std::unique_ptr<olc::Renderable>, NR_OF_GFX_ATLAS_IMAGES> gfxAtlas;
 
-        std::array<std::unique_ptr<olc::Decal>, NR_OF_SGFX_ATLAS_IMAGES> sgfxDecAtlas;
-        std::array<std::unique_ptr<olc::Decal>, NR_OF_MGFX_ATLAS_IMAGES> mgfxDecAtlas;
-        std::array<std::unique_ptr<olc::Decal>, NR_OF_GFX_ATLAS_IMAGES> gfxDecAtlas;
-
-        std::vector<int32_t> gfxHeights;
+        std::array<std::vector<int32_t>, NR_OF_TILE_ATLAS> heights;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -160,6 +171,21 @@ namespace mdcii::resource
         // Init
         //-------------------------------------------------
 
+        /**
+         * @brief Initialize the TileAtlas.
+         */
         void Init();
+
+        /**
+         * @brief Load atlas images.
+         */
+        void LoadAtlasImages();
+
+        /**
+         * @brief Method to load all images heights by given Zoom.
+         *
+         * @param t_zoom The desired zoom.
+         */
+        void LoadHeightsByZoom(world::Zoom t_zoom);
     };
 }

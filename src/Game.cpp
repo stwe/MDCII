@@ -42,13 +42,12 @@ mdcii::Game::~Game()
 bool mdcii::Game::OnUserCreate()
 {
     m_origResMng = std::make_unique<resource::OriginalResourcesManager>();
+    m_tileAtlas = std::make_unique<resource::TileAtlas>();
 
     if (resource::MdciiFile file{ "resources/sav/Example.sav" }; file.LoadJsonFromFile())
     {
         m_islands = file.CreateIslands();
     }
-
-    m_tileAtlas = std::make_unique<resource::TileAtlas>();
 
     for (auto const& island : m_islands)
     {
@@ -59,7 +58,11 @@ bool mdcii::Game::OnUserCreate()
                 const auto& building{ m_origResMng->GetBuildingById(tile.buildingId) };
                 tile.gfx = building.gfx;
                 tile.posoffs = building.posoffs;
-                tile.heights[2] = m_tileAtlas->gfxHeights.at(tile.gfx);
+                for (const auto value : magic_enum::enum_values<world::Zoom>())
+                {
+                    const auto zoomInt{ magic_enum::enum_integer(value) };
+                    tile.heights[zoomInt] = m_tileAtlas->heights.at(zoomInt).at(tile.gfx);
+                }
             }
         }
     }
@@ -69,6 +72,19 @@ bool mdcii::Game::OnUserCreate()
 
 bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
 {
+    // zoom
+
+    if (GetMouseWheel() > 0)
+    {
+        --zoom;
+        MDCII_LOG_DEBUG("Zoom-- {}", magic_enum::enum_name(zoom));
+    }
+    if (GetMouseWheel() < 0)
+    {
+        ++zoom;
+        MDCII_LOG_DEBUG("Zoom++ {}", magic_enum::enum_name(zoom));
+    }
+
     // simple camera
 
     olc::vf2d vVel = { 0.0f, 0.0f };
@@ -124,9 +140,11 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
 
     for (auto const& island : m_islands)
     {
+        // camera update
         island->x += vVel.x * t_elapsedTime * 8.0f;
         island->y += vVel.y * t_elapsedTime * 8.0f;
 
+        // render
         for (auto y{ 0 }; y < island->height; ++y)
         {
             for (auto x{ 0 }; x < island->width; ++x)
@@ -151,7 +169,7 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
                             (float)sc.x,
                             (float)sc.y - offset
                         ),
-                        m_tileAtlas->gfxDecAtlas.at(atlas).get(),
+                        m_tileAtlas->gfxAtlas.at(atlas)->Decal(),
                         olc::vf2d(
                             (float)offsetXy.x * 64.0f,
                             (float)offsetXy.y * 286.0f

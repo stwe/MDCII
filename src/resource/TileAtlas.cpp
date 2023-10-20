@@ -19,6 +19,8 @@
 #include "TileAtlas.h"
 #include "Log.h"
 #include "Game.h"
+#include "MdciiException.h"
+#include "MdciiUtils.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -42,20 +44,60 @@ mdcii::resource::TileAtlas::~TileAtlas() noexcept
 
 void mdcii::resource::TileAtlas::Init()
 {
-    MDCII_LOG_DEBUG("[TileAtlas::Init()] Start creating atlas images ...");
+    MDCII_LOG_DEBUG("[TileAtlas::Init()] Start initialization of the tile atlas ...");
+
+    LoadAtlasImages();
+    for (const auto zoom : magic_enum::enum_values<world::Zoom>())
+    {
+        LoadHeightsByZoom(zoom);
+    }
+
+    MDCII_LOG_DEBUG("[TileAtlas::Init()] Tile atlas were created successfully.");
+}
+
+void mdcii::resource::TileAtlas::LoadAtlasImages()
+{
+    MDCII_LOG_DEBUG("[TileAtlas::LoadAtlasImages()] Start creating atlas images ...");
+
+    for (auto i{ 0 }; i < NR_OF_SGFX_ATLAS_IMAGES; ++i)
+    {
+        auto renderable{ std::make_unique<olc::Renderable>() };
+        renderable->Load(fmt::format("{}atlas/sgfx/stadtfld/{}.png", Game::RESOURCES_REL_PATH, i));
+
+        sgfxAtlas.at(i) = std::move(renderable);
+    }
+
+    for (auto i{ 0 }; i < NR_OF_MGFX_ATLAS_IMAGES; ++i)
+    {
+        auto renderable{ std::make_unique<olc::Renderable>() };
+        renderable->Load(fmt::format("{}atlas/mgfx/stadtfld/{}.png", Game::RESOURCES_REL_PATH, i));
+
+        mgfxAtlas.at(i) = std::move(renderable);
+    }
 
     for (auto i{ 0 }; i < NR_OF_GFX_ATLAS_IMAGES; ++i)
     {
-        const auto path{ Game::RESOURCES_REL_PATH + "atlas/gfx/stadtfld/"  + std::to_string(i) + ".png" };
-        auto spr{ std::make_unique<olc::Sprite>(path) };
-        auto dec{ std::make_unique<olc::Decal>(spr.get()) };
+        auto renderable{ std::make_unique<olc::Renderable>() };
+        renderable->Load(fmt::format("{}atlas/gfx/stadtfld/{}.png", Game::RESOURCES_REL_PATH, i));
 
-        gfxSprAtlas.at(i) = std::move(spr);
-        gfxDecAtlas.at(i) = std::move(dec);
+        gfxAtlas.at(i) = std::move(renderable);
     }
 
-    std::ifstream inputFile(Game::RESOURCES_REL_PATH + "atlas/gfx/stadtfld/heights.txt" );
+    MDCII_LOG_DEBUG("[TileAtlas::LoadAtlasImages()] Atlas images were created successfully.");
+}
+
+void mdcii::resource::TileAtlas::LoadHeightsByZoom(const world::Zoom t_zoom)
+{
+    MDCII_LOG_DEBUG("[TileAtlas::LoadHeightsByZoom()] Start reading image heights for zoom {} ...", magic_enum::enum_name(t_zoom));
+
+    std::ifstream inputFile(
+        fmt::format("{}atlas/{}/stadtfld/heights.txt",
+        Game::RESOURCES_REL_PATH, mdcii::to_lower_case(std::string(magic_enum::enum_name(t_zoom)))
+        )
+    );
     std::string line;
+
+    const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
 
     if (inputFile.is_open())
     {
@@ -63,7 +105,7 @@ void mdcii::resource::TileAtlas::Init()
         {
             if (!line.empty())
             {
-                gfxHeights.push_back(std::stoi(line));
+                heights.at(zoomInt).push_back(std::stoi(line));
             }
         }
 
@@ -71,8 +113,12 @@ void mdcii::resource::TileAtlas::Init()
     }
     else
     {
-        // todo exception
+        throw MDCII_EXCEPTION("[TileAtlas::LoadHeightsByZoom()] Error while reading file path: " +
+           fmt::format("{}atlas/{}/stadtfld/heights.txt",
+               Game::RESOURCES_REL_PATH, magic_enum::enum_name(t_zoom)
+           )
+        );
     }
 
-    MDCII_LOG_DEBUG("[TileAtlas::Init()] Atlas images were created successfully.");
+    MDCII_LOG_DEBUG("[TileAtlas::LoadHeightsByZoom()] Image heights were read successfully.");
 }
