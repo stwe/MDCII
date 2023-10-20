@@ -18,6 +18,18 @@
 
 #pragma once
 
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii
+{
+    /**
+     * @brief Forward declaration class Game.
+     */
+    class Game;
+}
+
 namespace mdcii::renderer
 {
     //-------------------------------------------------
@@ -27,6 +39,7 @@ namespace mdcii::renderer
     class Renderer
     {
     public:
+        void Render(Game* t_game);
 
     protected:
 

@@ -28,13 +28,31 @@
 
 namespace mdcii::world
 {
+    /**
+     * @brief Forward declaration class Island.
+     */
     class Island;
 }
 
 namespace mdcii::resource
 {
+    /**
+     * @brief Forward declaration class OriginalResourcesManager.
+     */
     class OriginalResourcesManager;
+
+    /**
+     * @brief Forward declaration class TileAtlas.
+     */
     class TileAtlas;
+}
+
+namespace mdcii::renderer
+{
+    /**
+     * @brief Forward declaration class Renderer.
+     */
+    class Renderer;
 }
 
 namespace mdcii
@@ -81,6 +99,8 @@ namespace mdcii
         //-------------------------------------------------
 
         world::Zoom zoom{ world::Zoom::GFX };
+        std::unique_ptr<resource::TileAtlas> tileAtlas;
+        std::vector<std::unique_ptr<world::Island>> islands;
 
         //-------------------------------------------------
         // Override
@@ -96,8 +116,7 @@ namespace mdcii
         // Member
         //-------------------------------------------------
 
-        std::vector<std::unique_ptr<world::Island>> m_islands;
         std::unique_ptr<resource::OriginalResourcesManager> m_origResMng;
-        std::unique_ptr<resource::TileAtlas> m_tileAtlas;
+        std::unique_ptr<renderer::Renderer> m_renderer;
     };
 }

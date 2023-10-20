@@ -17,11 +17,11 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "Game.h"
-#include "Log.h"
 #include "resource/MdciiFile.h"
 #include "resource/OriginalResourcesManager.h"
 #include "resource/TileAtlas.h"
 #include "world/Island.h"
+#include "renderer/Renderer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -42,14 +42,16 @@ mdcii::Game::~Game()
 bool mdcii::Game::OnUserCreate()
 {
     m_origResMng = std::make_unique<resource::OriginalResourcesManager>();
-    m_tileAtlas = std::make_unique<resource::TileAtlas>();
+    m_renderer = std::make_unique<renderer::Renderer>();
+
+    tileAtlas = std::make_unique<resource::TileAtlas>();
 
     if (resource::MdciiFile file{ "resources/sav/Example.sav" }; file.LoadJsonFromFile())
     {
-        m_islands = file.CreateIslands();
+        islands = file.CreateIslands();
     }
 
-    for (auto const& island : m_islands)
+    for (auto const& island : islands)
     {
         for (auto& tile : island->tiles)
         {
@@ -61,7 +63,7 @@ bool mdcii::Game::OnUserCreate()
                 for (const auto value : magic_enum::enum_values<world::Zoom>())
                 {
                     const auto zoomInt{ magic_enum::enum_integer(value) };
-                    tile.heights[zoomInt] = m_tileAtlas->heights.at(zoomInt).at(tile.gfx);
+                    tile.heights[zoomInt] = tileAtlas->heights.at(zoomInt).at(tile.gfx);
                     tile.SetOffset(value);
                 }
             }
@@ -74,7 +76,6 @@ bool mdcii::Game::OnUserCreate()
 bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
 {
     // zoom
-
     if (GetMouseWheel() > 0)
     {
         --zoom;
@@ -87,7 +88,6 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
     }
 
     // simple camera
-
     olc::vf2d vVel = { 0.0f, 0.0f };
 
     if (GetKey(olc::Key::W).bHeld)
@@ -108,75 +108,21 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
     }
 
     // exit
-
     if (GetKey(olc::Key::ESCAPE).bHeld)
     {
         return false;
     }
 
-    // render
-
-    Clear(olc::BLACK);
-
-    auto toScreen = [&](int t_x, int t_y, float t_startX, float t_startY)
+    // camera update
+    for (auto const& island : islands)
     {
-        return olc::vi2d
-            {
-                ((int)t_startX * 64) + (t_x - t_y) * (64 / 2),
-                ((int)t_startY * 32) + (t_x + t_y) * (32 / 2)
-            };
-    };
-
-    auto getAtlasIndex = [](int t_gfx, int t_rows)
-    {
-        return (t_gfx / (t_rows * t_rows));
-    };
-
-    auto getOffset = [](int t_gfx, int t_rows)
-    {
-        auto picInPic{ t_gfx % (t_rows * t_rows) };
-
-        return olc::vi2d(picInPic % t_rows, picInPic / t_rows);
-    };
-
-    for (auto const& island : m_islands)
-    {
-        // camera update
         island->x += vVel.x * t_elapsedTime * 32.0f;
         island->y += vVel.y * t_elapsedTime * 32.0f;
-
-        const auto zoomInt{ magic_enum::enum_integer(zoom) };
-
-        // render
-        for (auto y{ 0 }; y < island->height; ++y)
-        {
-            for (auto x{ 0 }; x < island->width; ++x)
-            {
-                const auto index{ y * island->width + x };
-                const auto& tile{ island->tiles.at(index) };
-
-                if (tile.HasBuildingAndGfx())
-                {
-                    auto atlas{ getAtlasIndex(tile.gfx, 16) };
-                    auto offsetXy{ getOffset(tile.gfx, 16) };
-                    auto sc{ toScreen(x, y, island->x, island->y) };
-
-                    DrawPartialDecal(
-                        olc::vf2d(
-                            (float)sc.x,
-                            (float)sc.y - tile.offsets[zoomInt]
-                        ),
-                        m_tileAtlas->gfxAtlas.at(atlas)->Decal(),
-                        olc::vf2d(
-                            (float)offsetXy.x * 64.0f,
-                            (float)offsetXy.y * 286.0f
-                        ),
-                        olc::vf2d(64.0f, 286.0f)
-                    );
-                }
-            }
-        }
     }
+
+    // render islands
+    Clear(olc::BLACK);
+    m_renderer->Render(this);
 
     return true;
 }
