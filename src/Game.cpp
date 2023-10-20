@@ -62,6 +62,7 @@ bool mdcii::Game::OnUserCreate()
                 {
                     const auto zoomInt{ magic_enum::enum_integer(value) };
                     tile.heights[zoomInt] = m_tileAtlas->heights.at(zoomInt).at(tile.gfx);
+                    tile.SetOffset(value);
                 }
             }
         }
@@ -141,8 +142,10 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
     for (auto const& island : m_islands)
     {
         // camera update
-        island->x += vVel.x * t_elapsedTime * 8.0f;
-        island->y += vVel.y * t_elapsedTime * 8.0f;
+        island->x += vVel.x * t_elapsedTime * 32.0f;
+        island->y += vVel.y * t_elapsedTime * 32.0f;
+
+        const auto zoomInt{ magic_enum::enum_integer(zoom) };
 
         // render
         for (auto y{ 0 }; y < island->height; ++y)
@@ -152,22 +155,16 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
                 const auto index{ y * island->width + x };
                 const auto& tile{ island->tiles.at(index) };
 
-                if (tile.HasBuilding() && tile.gfx != -1)
+                if (tile.HasBuildingAndGfx())
                 {
                     auto atlas{ getAtlasIndex(tile.gfx, 16) };
                     auto offsetXy{ getOffset(tile.gfx, 16) };
                     auto sc{ toScreen(x, y, island->x, island->y) };
-                    auto offset{ 0.0f };
-
-                    if (tile.IsAboveWater() && tile.heights[2] > 31)
-                    {
-                        offset = (float)tile.heights[2] - 31.0f;
-                    }
 
                     DrawPartialDecal(
                         olc::vf2d(
                             (float)sc.x,
-                            (float)sc.y - offset
+                            (float)sc.y - tile.offsets[zoomInt]
                         ),
                         m_tileAtlas->gfxAtlas.at(atlas)->Decal(),
                         olc::vf2d(
