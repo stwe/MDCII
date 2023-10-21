@@ -51,21 +51,30 @@ void mdcii::renderer::Renderer::Render(Game* t_game)
     {
         const auto zoomInt{ magic_enum::enum_integer(t_game->zoom) };
 
-        // todo: world rotation
-        //const auto rotationInt{ magic_enum::enum_integer(t_game->rotation) };
-
         for (auto y{ 0 }; y < island->height; ++y)
         {
             for (auto x{ 0 }; x < island->width; ++x)
             {
                 const auto index{ y * island->width + x };
                 const auto& tile{ island->tiles[index] };
+                const auto worldRotation{ t_game->rotation + world::int_to_rotation(tile.rotation) };
 
                 if (tile.HasBuilding())
                 {
-                    const auto atlas{ getAtlasIndex(tile.gfxs[tile.rotation], resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
-                    const auto offsetXy{ getOffset(tile.gfxs[tile.rotation], resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
-                    const auto gfxHeight{ t_game->tileAtlas->heights.at(zoomInt).at(tile.gfxs[tile.rotation]) };
+                    MDCII_ASSERT(!tile.gfxs.empty(), "[Renderer::Render()] Missing gfx values.")
+                    auto gfx{ -1 };
+                    if (tile.gfxs.size() == 1)
+                    {
+                        gfx = tile.gfxs[0];
+                    }
+                    else
+                    {
+                        gfx = tile.gfxs[magic_enum::enum_integer(worldRotation)];
+                    }
+
+                    const auto atlas{ getAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+                    const auto offsetXy{ getOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+                    const auto gfxHeight{ t_game->tileAtlas->heights.at(zoomInt).at(gfx) };
                     const auto sc{ toScreen(x, y, island->x, island->y) };
 
                     float offset{ 0.0f };

@@ -112,6 +112,18 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
         vVel += { +1, 0 };
     }
 
+    // rotation
+    if (GetKey(olc::Key::PGUP).bPressed)
+    {
+        ++rotation;
+        MDCII_LOG_DEBUG("World rotation++ {}", magic_enum::enum_name(rotation));
+    }
+    if (GetKey(olc::Key::PGDN).bPressed)
+    {
+        --rotation;
+        MDCII_LOG_DEBUG("World rotation-- {}", magic_enum::enum_name(rotation));
+    }
+
     // exit
     if (GetKey(olc::Key::ESCAPE).bHeld)
     {
