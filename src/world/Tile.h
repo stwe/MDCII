@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include "Zoom.h"
-#include "MdciiAssert.h"
+#include <vector>
+#include <cstdint>
 
 namespace mdcii::world
 {
@@ -30,34 +30,13 @@ namespace mdcii::world
     struct Tile
     {
         int32_t buildingId{ -1 };
-        int32_t gfx{ -1 };
+        std::vector<int32_t> gfxs{};
         int32_t rotation{ 0 };
         int32_t x{ 0 };
         int32_t y{ 0 };
         int32_t posoffs{ 0 };
 
-        std::array<int32_t, NR_OF_ZOOMS> heights{ 0, 0, 0 };
-        std::array<float, NR_OF_ZOOMS> offsets{ 0.0f, 0.0f, 0.0f };
-
         [[nodiscard]] bool HasBuilding() const { return buildingId != -1; }
-        [[nodiscard]] bool HasBuildingAndGfx() const { return buildingId != -1 && gfx != -1; }
         [[nodiscard]] bool IsAboveWater() const { return posoffs > 0; }
-
-        void SetOffset(const Zoom t_zoom)
-        {
-            const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
-            MDCII_ASSERT(heights.at(zoomInt) > 0, "[Tile::SetOffset()] Invalid height.")
-
-            auto height{ get_tile_height(t_zoom) };
-            if (t_zoom == Zoom::GFX)
-            {
-                height -= 1; // = 31
-            }
-
-            if (IsAboveWater() && heights.at(zoomInt) > height)
-            {
-                offsets.at(zoomInt) = static_cast<float>(heights.at(zoomInt)) - static_cast<float>(height);
-            }
-        }
     };
 }

@@ -17,6 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "Game.h"
+#include "Log.h"
 #include "resource/MdciiFile.h"
 #include "resource/OriginalResourcesManager.h"
 #include "resource/TileAtlas.h"
@@ -43,7 +44,6 @@ bool mdcii::Game::OnUserCreate()
 {
     m_origResMng = std::make_unique<resource::OriginalResourcesManager>();
     m_renderer = std::make_unique<renderer::Renderer>();
-
     tileAtlas = std::make_unique<resource::TileAtlas>();
 
     if (resource::MdciiFile file{ "resources/sav/Example.sav" }; file.LoadJsonFromFile())
@@ -57,15 +57,20 @@ bool mdcii::Game::OnUserCreate()
         {
             if (tile.HasBuilding())
             {
+                // pre-calculate a gfx for each rotation
                 const auto& building{ m_origResMng->GetBuildingById(tile.buildingId) };
-                tile.gfx = building.gfx;
-                tile.posoffs = building.posoffs;
-                for (const auto value : magic_enum::enum_values<world::Zoom>())
+                const auto gfx0{ building.gfx };
+
+                tile.gfxs.push_back(gfx0);
+                if (building.rotate > 0)
                 {
-                    const auto zoomInt{ magic_enum::enum_integer(value) };
-                    tile.heights[zoomInt] = tileAtlas->heights.at(zoomInt).at(tile.gfx);
-                    tile.SetOffset(value);
+                    tile.gfxs.push_back(gfx0 + (1 * building.rotate));
+                    tile.gfxs.push_back(gfx0 + (2 * building.rotate));
+                    tile.gfxs.push_back(gfx0 + (3 * building.rotate));
                 }
+
+                // set posoffs
+                tile.posoffs = building.posoffs;
             }
         }
     }

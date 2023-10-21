@@ -18,9 +18,9 @@
 
 #include "Renderer.h"
 #include "Game.h"
+#include "MdciiAssert.h"
 #include "world/Island.h"
 #include "resource/TileAtlas.h"
-#include "vendor/olc/olcPixelGameEngine.h"
 
 void mdcii::renderer::Renderer::Render(Game* t_game)
 {
@@ -51,6 +51,9 @@ void mdcii::renderer::Renderer::Render(Game* t_game)
     {
         const auto zoomInt{ magic_enum::enum_integer(t_game->zoom) };
 
+        // todo: world rotation
+        //const auto rotationInt{ magic_enum::enum_integer(t_game->rotation) };
+
         for (auto y{ 0 }; y < island->height; ++y)
         {
             for (auto x{ 0 }; x < island->width; ++x)
@@ -58,16 +61,32 @@ void mdcii::renderer::Renderer::Render(Game* t_game)
                 const auto index{ y * island->width + x };
                 const auto& tile{ island->tiles[index] };
 
-                if (tile.HasBuildingAndGfx())
+                if (tile.HasBuilding())
                 {
-                    const auto atlas{ getAtlasIndex(tile.gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
-                    const auto offsetXy{ getOffset(tile.gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+                    const auto atlas{ getAtlasIndex(tile.gfxs[tile.rotation], resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+                    const auto offsetXy{ getOffset(tile.gfxs[tile.rotation], resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+                    const auto gfxHeight{ t_game->tileAtlas->heights.at(zoomInt).at(tile.gfxs[tile.rotation]) };
                     const auto sc{ toScreen(x, y, island->x, island->y) };
+
+                    float offset{ 0.0f };
+                    auto tileHeight{ get_tile_height(t_game->zoom) };
+                    if (t_game->zoom == world::Zoom::GFX)
+                    {
+                        tileHeight = 31;
+                    }
+                    if (gfxHeight > tileHeight)
+                    {
+                        offset = static_cast<float>(gfxHeight) - static_cast<float>(tileHeight);
+                    }
+                    if (tile.IsAboveWater())
+                    {
+                        offset += world::ELEVATIONS.at(zoomInt);
+                    }
 
                     t_game->DrawPartialDecal(
                         olc::vf2d(
                             static_cast<float>(sc.x),
-                            static_cast<float>(sc.y) - tile.offsets[zoomInt]
+                            static_cast<float>(sc.y) - offset
                         ),
                         t_game->tileAtlas->atlas[zoomInt][atlas]->Decal(),
                         olc::vf2d(

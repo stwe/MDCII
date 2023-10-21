@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include "vendor/olc/olcPixelGameEngine.h"
 #include "vendor/ini/ini.h"
 #include "world/Zoom.h"
+#include "world/Rotation.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -98,7 +98,8 @@ namespace mdcii
         // Member
         //-------------------------------------------------
 
-        world::Zoom zoom{ world::Zoom::MGFX };
+        world::Zoom zoom{ world::Zoom::GFX };
+        world::Rotation rotation{ world::Rotation::DEG0 };
         std::unique_ptr<resource::TileAtlas> tileAtlas;
         std::vector<std::unique_ptr<world::Island>> islands;
 

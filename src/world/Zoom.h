@@ -81,7 +81,7 @@ namespace mdcii::world
     // Elevation
     //-------------------------------------------------
 
-    static constexpr std::array<int, NR_OF_ZOOMS> ELEVATIONS{ 20 / 4, 20 / 2, 20 };
+    static constexpr std::array<float, NR_OF_ZOOMS> ELEVATIONS{ 20.0f / 4.0f, 20.0f / 2.0f, 20.0f };
 
     //-------------------------------------------------
     // For convenience
