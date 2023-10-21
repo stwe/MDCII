@@ -24,12 +24,14 @@
 
 void mdcii::renderer::Renderer::Render(Game* t_game)
 {
-    auto toScreen = [](int t_x, int t_y, float t_startX, float t_startY)
+    MDCII_ASSERT(t_game, "[Renderer::Render()] Null pointer.")
+
+    auto toScreen = [&](int t_x, int t_y, float t_startX, float t_startY)
     {
         return olc::vi2d
             {
-                ((int)t_startX * 64) + (t_x - t_y) * (64 / 2),
-                ((int)t_startY * 32) + (t_x + t_y) * (32 / 2)
+                (static_cast<int>(t_startX) * get_tile_width(t_game->zoom)) + (t_x - t_y) * get_tile_width_half(t_game->zoom),
+                (static_cast<int>(t_startY) * get_tile_height(t_game->zoom)) + (t_x + t_y) * get_tile_height_half(t_game->zoom)
             };
     };
 
@@ -49,31 +51,33 @@ void mdcii::renderer::Renderer::Render(Game* t_game)
     {
         const auto zoomInt{ magic_enum::enum_integer(t_game->zoom) };
 
-        // render
         for (auto y{ 0 }; y < island->height; ++y)
         {
             for (auto x{ 0 }; x < island->width; ++x)
             {
                 const auto index{ y * island->width + x };
-                const auto& tile{ island->tiles.at(index) };
+                const auto& tile{ island->tiles[index] };
 
                 if (tile.HasBuildingAndGfx())
                 {
-                    auto atlas{ getAtlasIndex(tile.gfx, 16) };
-                    auto offsetXy{ getOffset(tile.gfx, 16) };
-                    auto sc{ toScreen(x, y, island->x, island->y) };
+                    const auto atlas{ getAtlasIndex(tile.gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+                    const auto offsetXy{ getOffset(tile.gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+                    const auto sc{ toScreen(x, y, island->x, island->y) };
 
                     t_game->DrawPartialDecal(
                         olc::vf2d(
-                            (float)sc.x,
-                            (float)sc.y - tile.offsets[zoomInt]
+                            static_cast<float>(sc.x),
+                            static_cast<float>(sc.y) - tile.offsets[zoomInt]
                         ),
-                        t_game->tileAtlas->gfxAtlas.at(atlas)->Decal(),
+                        t_game->tileAtlas->atlas[zoomInt][atlas]->Decal(),
                         olc::vf2d(
-                            (float)offsetXy.x * 64.0f,
-                            (float)offsetXy.y * 286.0f
+                            static_cast<float>(offsetXy.x) * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
+                            static_cast<float>(offsetXy.y) * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
                         ),
-                        olc::vf2d(64.0f, 286.0f)
+                        olc::vf2d(
+                            resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
+                            resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
+                        )
                     );
                 }
             }

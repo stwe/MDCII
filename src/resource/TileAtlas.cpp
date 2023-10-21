@@ -44,27 +44,28 @@ mdcii::resource::TileAtlas::~TileAtlas() noexcept
 
 void mdcii::resource::TileAtlas::Init()
 {
-    MDCII_LOG_DEBUG("[TileAtlas::Init()] Start initialization of the tile atlas ...");
+    MDCII_LOG_DEBUG("[TileAtlas::Init()] Start initialization of the Tile Atlas ...");
 
     LoadAtlasImages();
+
     for (const auto zoom : magic_enum::enum_values<world::Zoom>())
     {
         LoadHeightsByZoom(zoom);
     }
 
-    MDCII_LOG_DEBUG("[TileAtlas::Init()] Tile atlas were created successfully.");
+    MDCII_LOG_DEBUG("[TileAtlas::Init()] Tile Atlas were created successfully.");
 }
 
 void mdcii::resource::TileAtlas::LoadAtlasImages()
 {
-    MDCII_LOG_DEBUG("[TileAtlas::LoadAtlasImages()] Start creating atlas images ...");
+    MDCII_LOG_DEBUG("[TileAtlas::LoadAtlasImages()] Start creating Tile Atlas images ...");
 
     for (auto i{ 0 }; i < NR_OF_SGFX_ATLAS_IMAGES; ++i)
     {
         auto renderable{ std::make_unique<olc::Renderable>() };
         renderable->Load(fmt::format("{}atlas/sgfx/stadtfld/{}.png", Game::RESOURCES_REL_PATH, i));
 
-        sgfxAtlas.at(i) = std::move(renderable);
+        atlas.at(magic_enum::enum_integer(world::Zoom::SGFX)).push_back(std::move(renderable));
     }
 
     for (auto i{ 0 }; i < NR_OF_MGFX_ATLAS_IMAGES; ++i)
@@ -72,7 +73,7 @@ void mdcii::resource::TileAtlas::LoadAtlasImages()
         auto renderable{ std::make_unique<olc::Renderable>() };
         renderable->Load(fmt::format("{}atlas/mgfx/stadtfld/{}.png", Game::RESOURCES_REL_PATH, i));
 
-        mgfxAtlas.at(i) = std::move(renderable);
+        atlas.at(magic_enum::enum_integer(world::Zoom::MGFX)).push_back(std::move(renderable));
     }
 
     for (auto i{ 0 }; i < NR_OF_GFX_ATLAS_IMAGES; ++i)
@@ -80,10 +81,10 @@ void mdcii::resource::TileAtlas::LoadAtlasImages()
         auto renderable{ std::make_unique<olc::Renderable>() };
         renderable->Load(fmt::format("{}atlas/gfx/stadtfld/{}.png", Game::RESOURCES_REL_PATH, i));
 
-        gfxAtlas.at(i) = std::move(renderable);
+        atlas.at(magic_enum::enum_integer(world::Zoom::GFX)).push_back(std::move(renderable));
     }
 
-    MDCII_LOG_DEBUG("[TileAtlas::LoadAtlasImages()] Atlas images were created successfully.");
+    MDCII_LOG_DEBUG("[TileAtlas::LoadAtlasImages()] Tile Atlas images were created successfully.");
 }
 
 void mdcii::resource::TileAtlas::LoadHeightsByZoom(const world::Zoom t_zoom)

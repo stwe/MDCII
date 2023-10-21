@@ -98,7 +98,7 @@ namespace mdcii
         // Member
         //-------------------------------------------------
 
-        world::Zoom zoom{ world::Zoom::GFX };
+        world::Zoom zoom{ world::Zoom::MGFX };
         std::unique_ptr<resource::TileAtlas> tileAtlas;
         std::vector<std::unique_ptr<world::Island>> islands;
 

@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include <array>
 #include <memory>
 #include <vector>
+#include "world/Zoom.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -34,14 +34,6 @@ namespace olc
     class Renderable;
 }
 
-namespace mdcii::world
-{
-    /**
-     * @brief Forward declaration enum class Zoom.
-     */
-    enum class Zoom;
-}
-
 namespace mdcii::resource
 {
     //-------------------------------------------------
@@ -49,7 +41,7 @@ namespace mdcii::resource
     //-------------------------------------------------
 
     /**
-     * @brief Provides the TileAtlas for each zoom.
+     * @brief Provides a Tile Atlas for each zoom.
      */
     class TileAtlas
     {
@@ -59,97 +51,53 @@ namespace mdcii::resource
         //-------------------------------------------------
 
         /**
-         * @brief The number of Tile Atlas. One for each zoom.
+         * @brief Width and height of the largest image.
          */
-        static constexpr auto NR_OF_TILE_ATLAS{ 3 };
-
-        //-------------------------------------------------
-        // Constants SGFX
-        //-------------------------------------------------
+        static constexpr std::array<std::pair<world::Zoom, std::pair<float, float>>, world::NR_OF_ZOOMS> LARGEST_SIZE{
+            { std::make_pair<world::Zoom, std::pair<float, float>>(world::Zoom::SGFX, std::make_pair<float, float>(16.0f, 71.0f)),
+              std::make_pair<world::Zoom, std::pair<float, float>>(world::Zoom::MGFX, std::make_pair<float, float>(32.0f, 143.0f)),
+              std::make_pair<world::Zoom, std::pair<float, float>>(world::Zoom::GFX, std::make_pair<float, float>(64.0f, 286.0f)) }
+        };
 
         /**
-         * @brief Number of SGFX atlas images.
+         * Number of rows in each Tile Atlas.
+         */
+        static constexpr std::array<int32_t, world::NR_OF_ZOOMS> NR_OF_ROWS{ 64, 32, 16 };
+
+        /**
+         * @brief Number of SGFX Tile Atlas images.
          *
          * 2 images a (64 rows * 64 rows)
          */
         static constexpr auto NR_OF_SGFX_ATLAS_IMAGES{ 2 };
 
         /**
-         * @brief Number of rows in SGFX atlas image.
-         */
-        static constexpr auto NR_OF_SGFX_ROWS{ 64 };
-
-        /**
-         * @brief Width of the largest SGFX picture in the stadtfld.bsh.
-         */
-        static constexpr auto MAX_SGFX_WIDTH{ 16.0f };
-
-        /**
-         * @brief Height of the largest SGFX picture in the stadtfld.bsh.
-         */
-        static constexpr auto MAX_SGFX_HEIGHT{ 71.0f };
-
-        //-------------------------------------------------
-        // Constants MGFX
-        //-------------------------------------------------
-
-        /**
-         * @brief Number of MGFX atlas images.
+         * @brief Number of MGFX Tile Atlas images.
          *
          * 6 images a (32 rows * 32 rows)
          */
         static constexpr auto NR_OF_MGFX_ATLAS_IMAGES{ 6 };
 
         /**
-         * @brief Number of rows in MGFX atlas image.
-         */
-        static constexpr auto NR_OF_MGFX_ROWS{ 32 };
-
-        /**
-         * @brief Width of the largest MGFX picture in the stadtfld.bsh.
-         */
-        static constexpr auto MAX_MGFX_WIDTH{ 32.0f };
-
-        /**
-         * @brief Height of the largest MGFX picture in the stadtfld.bsh.
-         */
-        static constexpr auto MAX_MGFX_HEIGHT{ 143.0f };
-
-        //-------------------------------------------------
-        // Constants GFX
-        //-------------------------------------------------
-
-        /**
-         * @brief Number of GFX atlas images.
+         * @brief Number of GFX Tile Atlas images.
          *
          * 24 images a (16 rows * 16 rows)
          */
         static constexpr auto NR_OF_GFX_ATLAS_IMAGES{ 24 };
 
-        /**
-         * @brief Number of rows in GFX atlas image.
-         */
-        static constexpr auto NR_OF_GFX_ROWS{ 16 };
-
-        /**
-         * @brief Width of the largest GFX picture in the stadtfld.bsh.
-         */
-        static constexpr auto MAX_GFX_WIDTH{ 64.0f };
-
-        /**
-         * @brief Height of the largest GFX picture in the stadtfld.bsh.
-         */
-        static constexpr auto MAX_GFX_HEIGHT{ 286.0f };
-
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
-        std::array<std::unique_ptr<olc::Renderable>, NR_OF_SGFX_ATLAS_IMAGES> sgfxAtlas;
-        std::array<std::unique_ptr<olc::Renderable>, NR_OF_MGFX_ATLAS_IMAGES> mgfxAtlas;
-        std::array<std::unique_ptr<olc::Renderable>, NR_OF_GFX_ATLAS_IMAGES> gfxAtlas;
+        /**
+          * @brief Contains the Tile Atlas images for each zoom as a renderable object.
+          */
+        std::array<std::vector<std::unique_ptr<olc::Renderable>>, 3> atlas;
 
-        std::array<std::vector<int32_t>, NR_OF_TILE_ATLAS> heights;
+        /**
+         * @brief Array of vectors containing the real heights of each image.
+         */
+        std::array<std::vector<int32_t>, world::NR_OF_ZOOMS> heights;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -172,19 +120,19 @@ namespace mdcii::resource
         //-------------------------------------------------
 
         /**
-         * @brief Initialize the TileAtlas.
+         * @brief Initialize the Tile Atlas.
          */
         void Init();
 
         /**
-         * @brief Load atlas images.
+         * @brief Load Tile Atlas images.
          */
         void LoadAtlasImages();
 
         /**
-         * @brief Method to load all images heights by given Zoom.
+         * @brief Method to load all Tile Atlas images heights by given Zoom.
          *
-         * @param t_zoom The desired zoom.
+         * @param t_zoom The zoom.
          */
         void LoadHeightsByZoom(world::Zoom t_zoom);
     };

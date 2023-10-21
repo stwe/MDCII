@@ -36,7 +36,6 @@ namespace mdcii::world
         int32_t y{ 0 };
         int32_t posoffs{ 0 };
 
-        // 0->sgfx, 1->mgfx, 2->gfx
         std::array<int32_t, NR_OF_ZOOMS> heights{ 0, 0, 0 };
         std::array<float, NR_OF_ZOOMS> offsets{ 0.0f, 0.0f, 0.0f };
 
@@ -49,15 +48,15 @@ namespace mdcii::world
             const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
             MDCII_ASSERT(heights.at(zoomInt) > 0, "[Tile::SetOffset()] Invalid height.")
 
-            auto width{ get_tile_width(t_zoom) };
+            auto height{ get_tile_height(t_zoom) };
             if (t_zoom == Zoom::GFX)
             {
-                width = 31;
+                height -= 1; // = 31
             }
 
-            if (IsAboveWater() && heights[zoomInt] > width)
+            if (IsAboveWater() && heights.at(zoomInt) > height)
             {
-                offsets.at(zoomInt) = static_cast<float>(heights[zoomInt]) - static_cast<float>(width);
+                offsets.at(zoomInt) = static_cast<float>(heights.at(zoomInt)) - static_cast<float>(height);
             }
         }
     };
