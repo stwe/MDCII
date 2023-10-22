@@ -51,6 +51,9 @@ namespace mdcii::renderer
     // Renderer
     //-------------------------------------------------
 
+    /**
+     * @brief Represents a Renderer.
+     */
     class Renderer
     {
     public:
@@ -71,18 +74,64 @@ namespace mdcii::renderer
         // Logic
         //-------------------------------------------------
 
+        /**
+         * @brief Render the game.
+         *
+         * @param t_game Pointer to the Game.
+         */
         void Render(Game* t_game);
 
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
 
-        static olc::vi2d ToScreen(int t_x, int t_y, float t_startX, float t_startY, world::Zoom t_zoom);
+        /**
+         * @brief Projects a position into an isometric position on the screen.
+         *
+         * @param t_x The x position.
+         * @param t_y The y position.
+         * @param t_zoom The zoom to get the tile sizes.
+         * @param t_rotation The position is previously rotated by the specified value.
+         *
+         * @return The isometric coordinates on the screen.
+         */
+        static olc::vi2d ToScreen(
+            int t_x, int t_y,
+            float t_startX, float t_startY,
+            world::Zoom t_zoom, world::Rotation t_rotation
+        );
 
+        /**
+         * @brief Returns the number of the Texture Atlas on which the given gfx is located.
+         *
+         * @param t_gfx The sprite index.
+         * @param t_rows The number of rows.
+         *
+         * @return The number of the Texture Atlas.
+         */
         static int GetAtlasIndex(int t_gfx, int t_rows);
 
+        /**
+         * @brief Determines where a sprite is located on an atlas image/texture.
+         *
+         * @param t_gfx The sprite index.
+         * @param t_rows The number of rows.
+         *
+         * @return The offset coordinates.
+         */
         static olc::vi2d GetOffset(int t_gfx, int t_rows);
 
+        /**
+         * @brief 2D/1D - mapping of a position.
+         *
+         * @param t_x The 2D x position.
+         * @param t_y The 2D y position.
+         * @param t_width The width of the 2D array.
+         * @param t_height The height of the 2D array.
+         * @param t_rotation The given position is previously rotated by the specified value.
+         *
+         * @return The 1D index.
+         */
         static int GetMapIndex(int t_x, int t_y, int t_width, int t_height, world::Rotation t_rotation);
 
     protected:

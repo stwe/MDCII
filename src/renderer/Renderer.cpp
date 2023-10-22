@@ -48,63 +48,57 @@ void mdcii::renderer::Renderer::Render(Game* t_game)
     {
         const auto zoomInt{ magic_enum::enum_integer(t_game->zoom) };
 
-        for (auto y{ 0 }; y < island->height; ++y)
+        for (const auto& tile : island->sortedTiles[magic_enum::enum_integer(t_game->rotation)])
         {
-            for (auto x{ 0 }; x < island->width; ++x)
+            if (tile.HasBuilding())
             {
-                const auto index{ y * island->width + x };
-                const auto& tile{ island->tiles[index] };
-                const auto worldRotation{ t_game->rotation + world::int_to_rotation(tile.rotation) };
-
-                if (tile.HasBuilding())
+                MDCII_ASSERT(!tile.gfxs.empty(), "[Renderer::Render()] Missing gfx values.")
+                int gfx;
+                if (tile.gfxs.size() == 1)
                 {
-                    MDCII_ASSERT(!tile.gfxs.empty(), "[Renderer::Render()] Missing gfx values.")
-                    auto gfx{ -1 };
-                    if (tile.gfxs.size() == 1)
-                    {
-                        gfx = tile.gfxs[0];
-                    }
-                    else
-                    {
-                        gfx = tile.gfxs[magic_enum::enum_integer(worldRotation)];
-                    }
-
-                    const auto atlas{ GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
-                    const auto offsetXy{ GetOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
-                    const auto gfxHeight{ t_game->tileAtlas->heights.at(zoomInt).at(gfx) };
-                    const auto sc{ ToScreen(x, y, island->x, island->y, t_game->zoom) };
-
-                    float offset{ 0.0f };
-                    auto tileHeight{ get_tile_height(t_game->zoom) };
-                    if (t_game->zoom == world::Zoom::GFX)
-                    {
-                        tileHeight = 31;
-                    }
-                    if (gfxHeight > tileHeight)
-                    {
-                        offset = static_cast<float>(gfxHeight) - static_cast<float>(tileHeight);
-                    }
-                    if (tile.IsAboveWater())
-                    {
-                        offset += world::ELEVATIONS.at(zoomInt);
-                    }
-
-                    t_game->DrawPartialDecal(
-                        olc::vf2d(
-                            static_cast<float>(sc.x),
-                            static_cast<float>(sc.y) - offset
-                        ),
-                        t_game->tileAtlas->atlas[zoomInt][atlas]->Decal(),
-                        olc::vf2d(
-                            static_cast<float>(offsetXy.x) * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
-                            static_cast<float>(offsetXy.y) * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
-                        ),
-                        olc::vf2d(
-                            resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
-                            resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
-                        )
-                    );
+                    gfx = tile.gfxs[0];
                 }
+                else
+                {
+                    const auto worldRotation{ t_game->rotation + world::int_to_rotation(tile.rotation) };
+                    gfx = tile.gfxs[magic_enum::enum_integer(worldRotation)];
+                }
+
+                const auto atlas{ GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+                const auto offsetXy{ GetOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+                const auto gfxHeight{ t_game->tileAtlas->heights[zoomInt][gfx] };
+                const auto screenPosition{ ToScreen(tile.islandX, tile.islandY, island->x, island->y, t_game->zoom, t_game->rotation) };
+
+                float offset{ 0.0f };
+                auto tileHeight{ get_tile_height(t_game->zoom) };
+                if (t_game->zoom == world::Zoom::GFX)
+                {
+                    tileHeight = 31;
+                }
+                if (gfxHeight > tileHeight)
+                {
+                    offset = static_cast<float>(gfxHeight) - static_cast<float>(tileHeight);
+                }
+                if (tile.IsAboveWater())
+                {
+                    offset += world::ELEVATIONS[zoomInt];
+                }
+
+                t_game->DrawPartialDecal(
+                    olc::vf2d(
+                        static_cast<float>(screenPosition.x),
+                        static_cast<float>(screenPosition.y) - offset
+                    ),
+                    t_game->tileAtlas->atlas[zoomInt][atlas]->Decal(),
+                    olc::vf2d(
+                        static_cast<float>(offsetXy.x) * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
+                        static_cast<float>(offsetXy.y) * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
+                    ),
+                    olc::vf2d(
+                        resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
+                        resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
+                    )
+                );
             }
         }
     }
@@ -117,14 +111,14 @@ void mdcii::renderer::Renderer::Render(Game* t_game)
 olc::vi2d mdcii::renderer::Renderer::ToScreen(
     const int t_x, const int t_y,
     const float t_startX, const float t_startY,
-    const world::Zoom t_zoom
+    const world::Zoom t_zoom, const world::Rotation t_rotation
 )
 {
+    const auto position{ rotate_position(t_x, t_y, 8, 12, t_rotation) };
+
     return olc::vi2d{
-        (static_cast<int>(t_startX) * get_tile_width(t_zoom))
-        + (t_x - t_y) * get_tile_width_half(t_zoom),
-        (static_cast<int>(t_startY) * get_tile_height(t_zoom))
-        + (t_x + t_y) * get_tile_height_half(t_zoom)
+        (static_cast<int>(t_startX) * get_tile_width(t_zoom)) + (position.x - position.y) * get_tile_width_half(t_zoom),
+        (static_cast<int>(t_startY) * get_tile_height(t_zoom)) + (position.x + position.y) * get_tile_height_half(t_zoom)
     };
 }
 

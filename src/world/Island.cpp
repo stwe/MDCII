@@ -22,6 +22,10 @@
 #include "resource/OriginalResourcesManager.h"
 #include "renderer/Renderer.h"
 
+//-------------------------------------------------
+// Init
+//-------------------------------------------------
+
 void mdcii::world::Island::InitTiles(const Game* t_game)
 {
     MDCII_ASSERT(t_game, "[Island::InitTiles()] Null pointer.")
@@ -53,10 +57,32 @@ void mdcii::world::Island::InitTiles(const Game* t_game)
                 tile.posoffs = building.posoffs;
             }
 
-            tile.indices[0] = renderer::Renderer::GetMapIndex(tile.islandX, tile.islandY, width, height, world::Rotation::DEG0);
-            tile.indices[1] = renderer::Renderer::GetMapIndex(tile.islandX, tile.islandY, width, height, world::Rotation::DEG90);
-            tile.indices[2] = renderer::Renderer::GetMapIndex(tile.islandX, tile.islandY, width, height, world::Rotation::DEG180);
-            tile.indices[3] = renderer::Renderer::GetMapIndex(tile.islandX, tile.islandY, width, height, world::Rotation::DEG270);
+            tile.indices[0] = renderer::Renderer::GetMapIndex(tile.islandX, tile
+                .islandY, width, height, world::Rotation::DEG0);
+            tile.indices[1] = renderer::Renderer::GetMapIndex(tile.islandX, tile
+                .islandY, width, height, world::Rotation::DEG90);
+            tile.indices[2] = renderer::Renderer::GetMapIndex(tile.islandX, tile
+                .islandY, width, height, world::Rotation::DEG180);
+            tile.indices[3] = renderer::Renderer::GetMapIndex(tile.islandX, tile
+                .islandY, width, height, world::Rotation::DEG270);
         }
     }
+
+    // sort for rendering
+    for (const auto rotation : magic_enum::enum_values<world::Rotation>())
+    {
+        const auto rotationInt{ magic_enum::enum_integer(rotation) };
+
+        // sort tiles by index
+        std::sort(tiles.begin(), tiles.end(), [&](const world::Tile& t_a, const world::Tile& t_b)
+        {
+            return t_a.indices[rotationInt] < t_b.indices[rotationInt];
+        });
+
+        // copy sorted tiles
+        sortedTiles.at(rotationInt) = tiles;
+    }
+
+    // revert tiles sorting = sortedTiles DEG0
+    tiles = sortedTiles.at(magic_enum::enum_integer(world::Rotation::DEG0));
 }

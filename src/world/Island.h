@@ -19,6 +19,7 @@
 #pragma once
 
 #include <vector>
+#include <array>
 #include "Tile.h"
 
 //-------------------------------------------------
@@ -39,16 +40,55 @@ namespace mdcii::world
     // Island
     //-------------------------------------------------
 
+    /**
+     * @brief Represents an Island.
+     */
     class Island
     {
     public:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * @brief The width of the island.
+         */
         int width{ -1 };
+
+        /**
+         * @brief The height of the island.
+         */
         int height{ -1 };
+
+        /**
+         * @brief The start x world position of the island.
+         */
         float x{ -1.0f };
+
+        /**
+         * @brief The start y world position of the island.
+         */
         float y{ -1.0f };
 
+        /**
+         * @brief The tiles of the island.
+         */
         std::vector<Tile> tiles;
 
+        /**
+         * @brief The tiles of the island, sorted by index for each rotation.
+         */
+        std::array<std::vector<Tile>, 4> sortedTiles;
+
+        //-------------------------------------------------
+        // Init
+        //-------------------------------------------------
+
+        /**
+         * @brief Initializes all tiles of the island.
+         *
+         * @param t_game Pointer to the Game.
+         */
         void InitTiles(const Game* t_game);
 
     protected:
