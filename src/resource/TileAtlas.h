@@ -62,7 +62,7 @@ namespace mdcii::resource
         /**
          * Number of rows in each Tile Atlas.
          */
-        static constexpr std::array<int32_t, world::NR_OF_ZOOMS> NR_OF_ROWS{ 64, 32, 16 };
+        static constexpr std::array<int, world::NR_OF_ZOOMS> NR_OF_ROWS{ 64, 32, 16 };
 
         /**
          * @brief Number of SGFX Tile Atlas images.
@@ -97,7 +97,7 @@ namespace mdcii::resource
         /**
          * @brief Array of vectors containing the real heights of each image.
          */
-        std::array<std::vector<int32_t>, world::NR_OF_ZOOMS> heights;
+        std::array<std::vector<int>, world::NR_OF_ZOOMS> heights;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

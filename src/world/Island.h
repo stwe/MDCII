@@ -21,6 +21,18 @@
 #include <vector>
 #include "Tile.h"
 
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii
+{
+    /**
+     * @brief Forward declaration class Game.
+     */
+    class Game;
+}
+
 namespace mdcii::world
 {
     //-------------------------------------------------
@@ -30,12 +42,14 @@ namespace mdcii::world
     class Island
     {
     public:
-        int32_t width{ -1 };
-        int32_t height{ -1 };
+        int width{ -1 };
+        int height{ -1 };
         float x{ -1.0f };
         float y{ -1.0f };
 
         std::vector<Tile> tiles;
+
+        void InitTiles(const Game* t_game);
 
     protected:
 

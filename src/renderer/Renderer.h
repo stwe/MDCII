@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include "vendor/olc/olcPixelGameEngine.h"
+
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
@@ -30,6 +32,19 @@ namespace mdcii
     class Game;
 }
 
+namespace mdcii::world
+{
+    /**
+     * @brief Forward declaration enum class Zoom.
+     */
+    enum class Zoom;
+
+    /**
+     * @brief Forward declaration enum class Rotation.
+     */
+    enum class Rotation;
+}
+
 namespace mdcii::renderer
 {
     //-------------------------------------------------
@@ -39,7 +54,36 @@ namespace mdcii::renderer
     class Renderer
     {
     public:
+        //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        Renderer();
+
+        Renderer(const Renderer& t_other) = delete;
+        Renderer(Renderer&& t_other) noexcept = delete;
+        Renderer& operator=(const Renderer& t_other) = delete;
+        Renderer& operator=(Renderer&& t_other) noexcept = delete;
+
+        ~Renderer() noexcept;
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
         void Render(Game* t_game);
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        static olc::vi2d ToScreen(int t_x, int t_y, float t_startX, float t_startY, world::Zoom t_zoom);
+
+        static int GetAtlasIndex(int t_gfx, int t_rows);
+
+        static olc::vi2d GetOffset(int t_gfx, int t_rows);
+
+        static int GetMapIndex(int t_x, int t_y, int t_width, int t_height, world::Rotation t_rotation);
 
     protected:
 

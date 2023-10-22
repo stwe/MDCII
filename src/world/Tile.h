@@ -19,7 +19,7 @@
 #pragma once
 
 #include <vector>
-#include <cstdint>
+#include <array>
 
 namespace mdcii::world
 {
@@ -29,12 +29,15 @@ namespace mdcii::world
 
     struct Tile
     {
-        int32_t buildingId{ -1 };
-        std::vector<int32_t> gfxs{};
-        int32_t rotation{ 0 };
-        int32_t x{ 0 };
-        int32_t y{ 0 };
-        int32_t posoffs{ 0 };
+        int buildingId{ -1 };
+        std::vector<int> gfxs{};
+        int rotation{ 0 };
+        int x{ 0 };
+        int y{ 0 };
+        int posoffs{ 0 };
+        int islandX{ -1 };
+        int islandY{ -1 };
+        std::array<int, 4> indices{};
 
         [[nodiscard]] bool HasBuilding() const { return buildingId != -1; }
         [[nodiscard]] bool IsAboveWater() const { return posoffs > 0; }

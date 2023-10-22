@@ -87,13 +87,13 @@ namespace mdcii::world
     // For convenience
     //-------------------------------------------------
 
-    constexpr int get_tile_width(const Zoom t_zoom) { return TILE_SIZES[magic_enum::enum_integer(t_zoom)].second.first; }
-    constexpr int get_tile_height(const Zoom t_zoom) { return TILE_SIZES[magic_enum::enum_integer(t_zoom)].second.second; }
+    constexpr auto get_tile_width(const Zoom t_zoom) { return TILE_SIZES[magic_enum::enum_integer(t_zoom)].second.first; }
+    constexpr auto get_tile_height(const Zoom t_zoom) { return TILE_SIZES[magic_enum::enum_integer(t_zoom)].second.second; }
 
-    constexpr int get_tile_width_half(const Zoom t_zoom) { return TILE_SIZES[magic_enum::enum_integer(t_zoom)].second.first / 2; }
-    constexpr int get_tile_height_half(const Zoom t_zoom) { return TILE_SIZES[magic_enum::enum_integer(t_zoom)].second.second / 2; }
+    constexpr auto get_tile_width_half(const Zoom t_zoom) { return TILE_SIZES[magic_enum::enum_integer(t_zoom)].second.first / 2; }
+    constexpr auto get_tile_height_half(const Zoom t_zoom) { return TILE_SIZES[magic_enum::enum_integer(t_zoom)].second.second / 2; }
 
-    constexpr int get_elevation(const Zoom t_zoom) { return ELEVATIONS[magic_enum::enum_integer(t_zoom)]; }
+    constexpr auto get_elevation(const Zoom t_zoom) { return ELEVATIONS[magic_enum::enum_integer(t_zoom)]; }
 
     //-------------------------------------------------
     // Test
@@ -117,7 +117,7 @@ namespace mdcii::world
     static_assert(32 == get_tile_width_half(Zoom::GFX));
     static_assert(16 == get_tile_height_half(Zoom::GFX));
 
-    static_assert(5 == get_elevation(Zoom::SGFX));
-    static_assert(10 == get_elevation(Zoom::MGFX));
-    static_assert(20 == get_elevation(Zoom::GFX));
+    static_assert(5.0f == get_elevation(Zoom::SGFX));
+    static_assert(10.0f == get_elevation(Zoom::MGFX));
+    static_assert(20.0f == get_elevation(Zoom::GFX));
 }

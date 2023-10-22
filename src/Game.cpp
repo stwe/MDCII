@@ -42,9 +42,9 @@ mdcii::Game::~Game()
 
 bool mdcii::Game::OnUserCreate()
 {
-    m_origResMng = std::make_unique<resource::OriginalResourcesManager>();
-    m_renderer = std::make_unique<renderer::Renderer>();
+    origResMng = std::make_unique<resource::OriginalResourcesManager>();
     tileAtlas = std::make_unique<resource::TileAtlas>();
+    m_renderer = std::make_unique<renderer::Renderer>();
 
     if (resource::MdciiFile file{ "resources/sav/Example.sav" }; file.LoadJsonFromFile())
     {
@@ -53,26 +53,7 @@ bool mdcii::Game::OnUserCreate()
 
     for (auto const& island : islands)
     {
-        for (auto& tile : island->tiles)
-        {
-            if (tile.HasBuilding())
-            {
-                // pre-calculate a gfx for each rotation
-                const auto& building{ m_origResMng->GetBuildingById(tile.buildingId) };
-                const auto gfx0{ building.gfx };
-
-                tile.gfxs.push_back(gfx0);
-                if (building.rotate > 0)
-                {
-                    tile.gfxs.push_back(gfx0 + (1 * building.rotate));
-                    tile.gfxs.push_back(gfx0 + (2 * building.rotate));
-                    tile.gfxs.push_back(gfx0 + (3 * building.rotate));
-                }
-
-                // set posoffs
-                tile.posoffs = building.posoffs;
-            }
-        }
+        island->InitTiles(this);
     }
 
     return true;
@@ -92,9 +73,20 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
         MDCII_LOG_DEBUG("Zoom++ {}", magic_enum::enum_name(zoom));
     }
 
-    // simple camera
-    olc::vf2d vVel = { 0.0f, 0.0f };
+    // rotation
+    if (GetKey(olc::Key::PGUP).bPressed)
+    {
+        ++rotation;
+        MDCII_LOG_DEBUG("World rotation++ {}", magic_enum::enum_name(rotation));
+    }
+    if (GetKey(olc::Key::PGDN).bPressed)
+    {
+        --rotation;
+        MDCII_LOG_DEBUG("World rotation-- {}", magic_enum::enum_name(rotation));
+    }
 
+    // camera
+    olc::vf2d vVel = { 0.0f, 0.0f };
     if (GetKey(olc::Key::W).bHeld)
     {
         vVel += { 0, -1 };
@@ -112,25 +104,13 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
         vVel += { +1, 0 };
     }
 
-    // rotation
-    if (GetKey(olc::Key::PGUP).bPressed)
-    {
-        ++rotation;
-        MDCII_LOG_DEBUG("World rotation++ {}", magic_enum::enum_name(rotation));
-    }
-    if (GetKey(olc::Key::PGDN).bPressed)
-    {
-        --rotation;
-        MDCII_LOG_DEBUG("World rotation-- {}", magic_enum::enum_name(rotation));
-    }
-
     // exit
     if (GetKey(olc::Key::ESCAPE).bHeld)
     {
         return false;
     }
 
-    // camera update
+    // update camera
     for (auto const& island : islands)
     {
         island->x += vVel.x * t_elapsedTime * 32.0f;

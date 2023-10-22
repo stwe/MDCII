@@ -36,8 +36,6 @@ namespace mdcii::world
         DEG270
     };
 
-    static constexpr auto NR_OF_ROTATIONS{ magic_enum::enum_count<Rotation>() };
-
     //-------------------------------------------------
     // Operators
     //-------------------------------------------------

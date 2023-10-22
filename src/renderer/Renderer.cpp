@@ -22,30 +22,27 @@
 #include "world/Island.h"
 #include "resource/TileAtlas.h"
 
+//-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
+mdcii::renderer::Renderer::Renderer()
+{
+    MDCII_LOG_DEBUG("[Renderer::Renderer()] Create Renderer.");
+}
+
+mdcii::renderer::Renderer::~Renderer() noexcept
+{
+    MDCII_LOG_DEBUG("[Renderer::~Renderer()] Destruct Renderer.");
+}
+
+//-------------------------------------------------
+// Logic
+//-------------------------------------------------
+
 void mdcii::renderer::Renderer::Render(Game* t_game)
 {
     MDCII_ASSERT(t_game, "[Renderer::Render()] Null pointer.")
-
-    auto toScreen = [&](int t_x, int t_y, float t_startX, float t_startY)
-    {
-        return olc::vi2d
-            {
-                (static_cast<int>(t_startX) * get_tile_width(t_game->zoom)) + (t_x - t_y) * get_tile_width_half(t_game->zoom),
-                (static_cast<int>(t_startY) * get_tile_height(t_game->zoom)) + (t_x + t_y) * get_tile_height_half(t_game->zoom)
-            };
-    };
-
-    auto getAtlasIndex = [](int t_gfx, int t_rows)
-    {
-        return (t_gfx / (t_rows * t_rows));
-    };
-
-    auto getOffset = [](int t_gfx, int t_rows)
-    {
-        auto picInPic{ t_gfx % (t_rows * t_rows) };
-
-        return olc::vi2d(picInPic % t_rows, picInPic / t_rows);
-    };
 
     for (auto const& island : t_game->islands)
     {
@@ -72,10 +69,10 @@ void mdcii::renderer::Renderer::Render(Game* t_game)
                         gfx = tile.gfxs[magic_enum::enum_integer(worldRotation)];
                     }
 
-                    const auto atlas{ getAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
-                    const auto offsetXy{ getOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+                    const auto atlas{ GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+                    const auto offsetXy{ GetOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
                     const auto gfxHeight{ t_game->tileAtlas->heights.at(zoomInt).at(gfx) };
-                    const auto sc{ toScreen(x, y, island->x, island->y) };
+                    const auto sc{ ToScreen(x, y, island->x, island->y, t_game->zoom) };
 
                     float offset{ 0.0f };
                     auto tileHeight{ get_tile_height(t_game->zoom) };
@@ -111,4 +108,50 @@ void mdcii::renderer::Renderer::Render(Game* t_game)
             }
         }
     }
+}
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+olc::vi2d mdcii::renderer::Renderer::ToScreen(
+    const int t_x, const int t_y,
+    const float t_startX, const float t_startY,
+    const world::Zoom t_zoom
+)
+{
+    return olc::vi2d{
+        (static_cast<int>(t_startX) * get_tile_width(t_zoom))
+        + (t_x - t_y) * get_tile_width_half(t_zoom),
+        (static_cast<int>(t_startY) * get_tile_height(t_zoom))
+        + (t_x + t_y) * get_tile_height_half(t_zoom)
+    };
+}
+
+int mdcii::renderer::Renderer::GetAtlasIndex(const int t_gfx, const int t_rows)
+{
+    return t_gfx / (t_rows * t_rows);
+}
+
+olc::vi2d mdcii::renderer::Renderer::GetOffset(const int t_gfx, const int t_rows)
+{
+    auto picInPic{ t_gfx % (t_rows * t_rows) };
+
+    return { picInPic % t_rows, picInPic / t_rows };
+}
+
+int mdcii::renderer::Renderer::GetMapIndex(
+    const int t_x, const int t_y,
+    const int t_width, const int t_height,
+    const world::Rotation t_rotation
+)
+{
+    const auto position{ rotate_position(t_x, t_y, t_width, t_height, t_rotation) };
+
+    if (t_rotation == world::Rotation::DEG0 || t_rotation == world::Rotation::DEG180)
+    {
+        return position.y * t_width + position.x;
+    }
+
+    return position.y * t_height + position.x;
 }

@@ -102,6 +102,7 @@ namespace mdcii
         world::Rotation rotation{ world::Rotation::DEG0 };
         std::unique_ptr<resource::TileAtlas> tileAtlas;
         std::vector<std::unique_ptr<world::Island>> islands;
+        std::unique_ptr<resource::OriginalResourcesManager> origResMng;
 
         //-------------------------------------------------
         // Override
@@ -117,7 +118,6 @@ namespace mdcii
         // Member
         //-------------------------------------------------
 
-        std::unique_ptr<resource::OriginalResourcesManager> m_origResMng;
         std::unique_ptr<renderer::Renderer> m_renderer;
     };
 }
