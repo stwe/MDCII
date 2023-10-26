@@ -18,9 +18,10 @@
 
 #pragma once
 
-#include "vendor/ini/ini.h"
 #include "world/Zoom.h"
 #include "world/Rotation.h"
+#include "vendor/ini/ini.h"
+#include "vendor/imgui/imgui_impl_pge.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -53,6 +54,14 @@ namespace mdcii::renderer
      * @brief Forward declaration class Renderer.
      */
     class Renderer;
+}
+
+namespace mdcii::state
+{
+    /**
+     * @brief Forward declaration class StateStack.
+     */
+    class StateStack;
 }
 
 namespace mdcii
@@ -100,9 +109,11 @@ namespace mdcii
 
         world::Zoom zoom{ world::Zoom::GFX };
         world::Rotation rotation{ world::Rotation::DEG0 };
+        std::unique_ptr<resource::OriginalResourcesManager> origResMng;
         std::unique_ptr<resource::TileAtlas> tileAtlas;
         std::vector<std::unique_ptr<world::Island>> islands;
-        std::unique_ptr<resource::OriginalResourcesManager> origResMng;
+        uint32_t gameLayer;
+        olc::imgui::PGE_ImGUI pgeImgui{ false };
 
         //-------------------------------------------------
         // Override
@@ -110,6 +121,7 @@ namespace mdcii
 
         bool OnUserCreate() override;
         bool OnUserUpdate(float t_elapsedTime) override;
+        void DrawImGui();
 
     protected:
 
@@ -119,5 +131,6 @@ namespace mdcii
         //-------------------------------------------------
 
         std::unique_ptr<renderer::Renderer> m_renderer;
+        std::unique_ptr<state::StateStack> m_stateStack;
     };
 }

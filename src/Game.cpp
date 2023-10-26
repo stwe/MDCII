@@ -18,11 +18,13 @@
 
 #include "Game.h"
 #include "Log.h"
+#include "GameState.h"
 #include "resource/MdciiFile.h"
 #include "resource/OriginalResourcesManager.h"
 #include "resource/TileAtlas.h"
 #include "world/Island.h"
 #include "renderer/Renderer.h"
+#include "state/StateStack.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -44,7 +46,6 @@ bool mdcii::Game::OnUserCreate()
 {
     origResMng = std::make_unique<resource::OriginalResourcesManager>();
     tileAtlas = std::make_unique<resource::TileAtlas>();
-    m_renderer = std::make_unique<renderer::Renderer>();
 
     if (resource::MdciiFile file{ "resources/sav/Example.sav" }; file.LoadJsonFromFile())
     {
@@ -55,6 +56,22 @@ bool mdcii::Game::OnUserCreate()
     {
         island->InitTiles(this);
     }
+
+    // Create and enable a new Layer which will be used for the game.
+    gameLayer = CreateLayer();
+    EnableLayer(static_cast<uint8_t>(gameLayer), true);
+
+    // Set a custom render function on layer 0.  Since DrawUI is a member of
+    // our class, we need to use std::bind
+    // If the pge_imgui was constructed with _register_handler = true, this line is not needed
+    SetLayerCustomRenderFunction(0, std::bind(&Game::DrawImGui, this));
+
+    m_renderer = std::make_unique<renderer::Renderer>();
+
+    m_stateStack = std::make_unique<state::StateStack>(this);
+    m_stateStack->RegisterState<GameState>(state::StateId::NEW_GAME);
+    m_stateStack->PushState(state::StateId::NEW_GAME);
+    m_stateStack->OnUserCreate();
 
     return true;
 }
@@ -118,8 +135,18 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
     }
 
     // render islands
+    // Change the Draw Target to not be Layer 0.
+    SetDrawTarget(static_cast<uint8_t>(gameLayer));
     Clear(olc::BLACK);
     m_renderer->Render(this);
+    m_stateStack->OnUserUpdate(t_elapsedTime);
+
+    ImGui::ShowDemoWindow();
 
     return true;
+}
+
+void mdcii::Game::DrawImGui()
+{
+    pgeImgui.ImGui_ImplPGE_Render();
 }

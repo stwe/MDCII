@@ -16,49 +16,24 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#define OLC_PGE_APPLICATION
-#define OLC_PGEX_DEAR_IMGUI_IMPLEMENTATION
-
-#include "Log.h"
+#include "State.h"
+#include "MdciiAssert.h"
 #include "Game.h"
-#include "MdciiException.h"
 
 //-------------------------------------------------
-// Main
+// Ctors. / Dtor.
 //-------------------------------------------------
 
-int main()
+mdcii::state::State::State(const StateId t_id, Game* t_game)
+    : id{ t_id }
+    , m_game{ t_game }
 {
-    mdcii::Log::Init();
+    MDCII_LOG_DEBUG("[State::State()] Create State.");
 
-    MDCII_LOG_DEBUG("[main()] Starting main.");
-    MDCII_LOG_DEBUG("[main()] Logger was initialized.");
+    MDCII_ASSERT(m_game, "[State::State()] Null pointer.")
+}
 
-    try
-    {
-        if (mdcii::Game game; game.Construct(
-                mdcii::Game::INI.Get<int>("window", "width"),
-                mdcii::Game::INI.Get<int>("window", "height"),
-                1, 1
-            ))
-        {
-            game.Start();
-        }
-
-        return EXIT_SUCCESS;
-    }
-    catch (const mdcii::MdciiException& e)
-    {
-        MDCII_LOG_ERROR("MdciiException {}", e.what());
-    }
-    catch (const std::exception& e)
-    {
-        MDCII_LOG_ERROR("Standard Exception: {}", e.what());
-    }
-    catch (...)
-    {
-        MDCII_LOG_ERROR("Unknown Exception. No details available.");
-    }
-
-    return EXIT_FAILURE;
+mdcii::state::State::~State() noexcept
+{
+    MDCII_LOG_DEBUG("[State::~State()] Destruct State.");
 }

@@ -16,49 +16,41 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#define OLC_PGE_APPLICATION
-#define OLC_PGEX_DEAR_IMGUI_IMPLEMENTATION
-
-#include "Log.h"
-#include "Game.h"
-#include "MdciiException.h"
+#include "GameState.h"
+#include "MdciiAssert.h"
 
 //-------------------------------------------------
-// Main
+// Ctors. / Dtor.
 //-------------------------------------------------
 
-int main()
+mdcii::GameState::GameState(state::StateId t_id, Game* t_game)
+    : State(t_id, t_game)
 {
-    mdcii::Log::Init();
+    MDCII_LOG_DEBUG("[GameState::GameState()] Create GameState.");
 
-    MDCII_LOG_DEBUG("[main()] Starting main.");
-    MDCII_LOG_DEBUG("[main()] Logger was initialized.");
+    MDCII_ASSERT(m_game, "[GameState::GameState()] Null pointer.")
+}
 
-    try
-    {
-        if (mdcii::Game game; game.Construct(
-                mdcii::Game::INI.Get<int>("window", "width"),
-                mdcii::Game::INI.Get<int>("window", "height"),
-                1, 1
-            ))
-        {
-            game.Start();
-        }
+mdcii::GameState::~GameState() noexcept
+{
+    MDCII_LOG_DEBUG("[GameState::~GameState()] Destruct GameState.");
+}
 
-        return EXIT_SUCCESS;
-    }
-    catch (const mdcii::MdciiException& e)
-    {
-        MDCII_LOG_ERROR("MdciiException {}", e.what());
-    }
-    catch (const std::exception& e)
-    {
-        MDCII_LOG_ERROR("Standard Exception: {}", e.what());
-    }
-    catch (...)
-    {
-        MDCII_LOG_ERROR("Unknown Exception. No details available.");
-    }
+//-------------------------------------------------
+// Override
+//-------------------------------------------------
 
-    return EXIT_FAILURE;
+void mdcii::GameState::OnUserCreate()
+{
+
+}
+
+void mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
+{
+
+}
+
+void mdcii::GameState::RenderImGui()
+{
+
 }
