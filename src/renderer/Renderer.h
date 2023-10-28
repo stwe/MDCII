@@ -27,9 +27,9 @@
 namespace mdcii
 {
     /**
-     * @brief Forward declaration class Game.
+     * @brief Forward declaration class GameState.
      */
-    class Game;
+    class GameState;
 }
 
 namespace mdcii::world
@@ -75,11 +75,11 @@ namespace mdcii::renderer
         //-------------------------------------------------
 
         /**
-         * @brief Render the game.
+         * @brief Render the State.
          *
-         * @param t_game Pointer to the Game.
+         * @param t_game Pointer to the Game State.
          */
-        void Render(Game* t_game);
+        void Render(GameState* t_gameState);
 
         //-------------------------------------------------
         // Helper

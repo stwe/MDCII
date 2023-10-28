@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <vector>
-#include <array>
 #include "Tile.h"
 
 //-------------------------------------------------

@@ -18,13 +18,17 @@
 
 #include "GameState.h"
 #include "Log.h"
-#include "vendor/olc/olcPixelGameEngine.h"
+#include "Game.h"
+#include "resource/MdciiFile.h"
+#include "world/Island.h"
+#include "renderer/Renderer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::GameState::GameState()
+mdcii::GameState::GameState(Game* t_game)
+    : State(t_game)
 {
     MDCII_LOG_DEBUG("[GameState::GameState()] Create GameState.");
 }
@@ -38,20 +42,86 @@ mdcii::GameState::~GameState() noexcept
 // Override
 //-------------------------------------------------
 
-void mdcii::GameState::Init()
+bool mdcii::GameState::OnUserCreate()
 {
-    MDCII_LOG_DEBUG("[GameState::Init()] Init GameState.");
-}
+    MDCII_LOG_DEBUG("[GameState::OnUserCreate()] Init GameState.");
 
-void mdcii::GameState::Input(olc::PixelGameEngine* t_pge)
-{
-    if (t_pge->GetKey(olc::Key::SPACE).bPressed)
+    if (resource::MdciiFile file{ "resources/sav/Example.sav" }; file.LoadJsonFromFile())
     {
-        MDCII_LOG_DEBUG("[GameState::Input()] Space Pressed in GameState.");
+        islands = file.CreateIslands();
     }
+
+    for (auto const& island : islands)
+    {
+        island->InitTiles(game);
+    }
+
+    renderer = std::make_unique<renderer::Renderer>();
+
+    return true;
 }
 
-void mdcii::GameState::Render(olc::PixelGameEngine* t_pge, float t_elapsedTime)
+bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
 {
+    // zoom
+    if (game->GetMouseWheel() > 0)
+    {
+        --zoom;
+        MDCII_LOG_DEBUG("Zoom-- {}", magic_enum::enum_name(zoom));
+    }
+    if (game->GetMouseWheel() < 0)
+    {
+        ++zoom;
+        MDCII_LOG_DEBUG("Zoom++ {}", magic_enum::enum_name(zoom));
+    }
 
+    // rotation
+    if (game->GetKey(olc::Key::PGUP).bPressed)
+    {
+        ++rotation;
+        MDCII_LOG_DEBUG("World rotation++ {}", magic_enum::enum_name(rotation));
+    }
+    if (game->GetKey(olc::Key::PGDN).bPressed)
+    {
+        --rotation;
+        MDCII_LOG_DEBUG("World rotation-- {}", magic_enum::enum_name(rotation));
+    }
+
+    // camera
+    olc::vf2d vVel = { 0.0f, 0.0f };
+    if (game->GetKey(olc::Key::W).bHeld)
+    {
+        vVel += { 0, -1 };
+    }
+    if (game->GetKey(olc::Key::S).bHeld)
+    {
+        vVel += { 0, +1 };
+    }
+    if (game->GetKey(olc::Key::A).bHeld)
+    {
+        vVel += { -1, 0 };
+    }
+    if (game->GetKey(olc::Key::D).bHeld)
+    {
+        vVel += { +1, 0 };
+    }
+
+    // exit
+    if (game->GetKey(olc::Key::ESCAPE).bHeld)
+    {
+        return false;
+    }
+
+    // update camera
+    for (auto const& island : islands)
+    {
+        island->x += vVel.x * t_elapsedTime * 32.0f;
+        island->y += vVel.y * t_elapsedTime * 32.0f;
+    }
+
+    // render islands
+    game->Clear(olc::BLACK);
+    renderer->Render(this);
+
+    return true;
 }

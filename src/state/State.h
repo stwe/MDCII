@@ -22,12 +22,12 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace olc
+namespace mdcii
 {
     /**
-     * @brief Forward declaration class PixelGameEngine.
+     * @brief Forward declaration class Game.
      */
-    class PixelGameEngine;
+    class Game;
 }
 
 namespace mdcii::state
@@ -43,10 +43,26 @@ namespace mdcii::state
     {
     public:
         //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * @brief Pointer to the parent Game.
+         */
+        Game* game{ nullptr };
+
+        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        State();
+        State() = delete;
+
+        /**
+         * @brief Constructs a new State object.
+         *
+         * @param t_game Pointer to the parent Game.
+         */
+        explicit State(Game* t_game);
 
         State(const State& t_other) = delete;
         State(State&& t_other) noexcept = delete;
@@ -59,9 +75,8 @@ namespace mdcii::state
         // Logic
         //-------------------------------------------------
 
-        virtual void Init() {}
-        virtual void Input(olc::PixelGameEngine* t_pge) {}
-        virtual void Render(olc::PixelGameEngine* t_pge, float t_elapsedTime) {}
+        [[nodiscard]] virtual bool OnUserCreate() = 0;
+        [[nodiscard]] virtual bool OnUserUpdate(float t_elapsedTime) = 0;
 
     protected:
 

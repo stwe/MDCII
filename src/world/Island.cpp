@@ -21,6 +21,7 @@
 #include "MdciiAssert.h"
 #include "resource/OriginalResourcesManager.h"
 #include "renderer/Renderer.h"
+#include "world/Rotation.h"
 
 //-------------------------------------------------
 // Init

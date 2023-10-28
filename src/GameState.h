@@ -18,7 +18,37 @@
 
 #pragma once
 
+#include "world/Zoom.h"
+#include "world/Rotation.h"
 #include "state/State.h"
+
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii
+{
+    /**
+     * @brief Forward declaration class Game.
+     */
+    class Game;
+}
+
+namespace mdcii::world
+{
+    /**
+     * @brief Forward declaration class Island.
+     */
+    class Island;
+}
+
+namespace mdcii::renderer
+{
+    /**
+     * @brief Forward declaration class Renderer.
+     */
+    class Renderer;
+}
 
 namespace mdcii
 {
@@ -30,10 +60,26 @@ namespace mdcii
     {
     public:
         //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        world::Zoom zoom{ world::Zoom::GFX };
+        world::Rotation rotation{ world::Rotation::DEG0 };
+        std::vector<std::unique_ptr<world::Island>> islands;
+        std::unique_ptr<renderer::Renderer> renderer;
+
+        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        GameState();
+        GameState() = delete;
+
+        /**
+         * @brief Constructs a new GameState object.
+         *
+         * @param t_game Pointer to the parent Game.
+         */
+        explicit GameState(Game* t_game);
 
         GameState(const GameState& t_other) = delete;
         GameState(GameState&& t_other) noexcept = delete;
@@ -46,9 +92,8 @@ namespace mdcii
         // Override
         //-------------------------------------------------
 
-        void Init() override;
-        void Input(olc::PixelGameEngine* t_pge) override;
-        void Render(olc::PixelGameEngine* t_pge, float t_elapsedTime) override;
+        [[nodiscard]] bool OnUserCreate() override;
+        [[nodiscard]] bool OnUserUpdate(float t_elapsedTime) override;
 
     protected:
 

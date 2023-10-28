@@ -32,7 +32,7 @@ mdcii::state::StateSystem::~StateSystem() noexcept
 }
 
 //-------------------------------------------------
-// Add && Init
+// Add && Change
 //-------------------------------------------------
 
 void mdcii::state::StateSystem::AddState(const StateId t_stateId, state::State* t_state)
@@ -40,12 +40,11 @@ void mdcii::state::StateSystem::AddState(const StateId t_stateId, state::State* 
     states.emplace(t_stateId, t_state);
 }
 
-void mdcii::state::StateSystem::InitState(const StateId t_stateId)
+void mdcii::state::StateSystem::ChangeState(const StateId t_stateId)
 {
     if (states.contains(t_stateId))
     {
         currentState = states.at(t_stateId);
-        currentState->Init();
     }
 }
 
@@ -53,18 +52,22 @@ void mdcii::state::StateSystem::InitState(const StateId t_stateId)
 // Logic
 //-------------------------------------------------
 
-void mdcii::state::StateSystem::Input(olc::PixelGameEngine* t_pge) const
+bool mdcii::state::StateSystem::OnUserCreate()
 {
     if (currentState)
     {
-        currentState->Input(t_pge);
+        return currentState->OnUserCreate();
     }
+
+    return false;
 }
 
-void mdcii::state::StateSystem::Render(olc::PixelGameEngine* t_pge, float t_elapsedTime) const
+bool mdcii::state::StateSystem::OnUserUpdate(float t_elapsedTime)
 {
     if (currentState)
     {
-        currentState->Render(t_pge, t_elapsedTime);
+        return currentState->OnUserUpdate(t_elapsedTime);
     }
+
+    return false;
 }

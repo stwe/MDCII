@@ -18,20 +18,12 @@
 
 #include <map>
 
-//-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace olc
-{
-    /**
-     * @brief Forward declaration class PixelGameEngine.
-     */
-    class PixelGameEngine;
-}
-
 namespace mdcii::state
 {
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
     /**
      * @brief Forward declaration class State.
      */
@@ -52,6 +44,10 @@ namespace mdcii::state
         NEW_GAME,
         LOADED_GAME
     };
+
+    //-------------------------------------------------
+    // StateSystem
+    //-------------------------------------------------
 
     /**
      * @brief Manages the states of the game.
@@ -87,7 +83,7 @@ namespace mdcii::state
         ~StateSystem() noexcept;
 
         //-------------------------------------------------
-        // Add && Init
+        // Add && Change
         //-------------------------------------------------
 
         /**
@@ -99,30 +95,18 @@ namespace mdcii::state
         void AddState(StateId t_stateId, State* t_state);
 
         /**
-         * @brief Initialize a state.
+         * @brief Changes to the given state.
          *
-         * @param t_stateId The unique identifier of the state to be initialized.
+         * @param t_stateId The state to change to.
          */
-        void InitState(StateId t_stateId);
+        void ChangeState(StateId t_stateId);
 
         //-------------------------------------------------
         // Logic
         //-------------------------------------------------
 
-        /**
-         * @brief Process input events in the current state.
-         *
-         * @param t_pge The game engine which handles the input events.
-         */
-        void Input(olc::PixelGameEngine* t_pge) const;
-
-        /**
-         * @brief Render the current state to the given game engine.
-         *
-         * @param t_pge The game engine which renders the game.
-         * @param t_elapsedTime Time elapsed since the last render.
-         */
-        void Render(olc::PixelGameEngine* t_pge, float t_elapsedTime) const;
+        [[nodiscard]] bool OnUserCreate();
+        [[nodiscard]] bool OnUserUpdate(float t_elapsedTime);
 
     protected:
 
