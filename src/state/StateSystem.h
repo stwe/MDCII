@@ -17,6 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include <map>
+#include <memory>
 
 namespace mdcii::state
 {
@@ -42,7 +43,7 @@ namespace mdcii::state
         ISLAND_GENERATOR,
         WORLD_GENERATOR,
         NEW_GAME,
-        LOADED_GAME
+        LOAD_GAME
     };
 
     //-------------------------------------------------
@@ -62,7 +63,7 @@ namespace mdcii::state
         /**
          * @brief A map of game states with their unique identifiers as keys.
          */
-        std::map<StateId, State*> states;
+        std::map<StateId, std::unique_ptr<State>> states;
 
         /**
          * @brief Pointer to the current game state.
@@ -92,7 +93,7 @@ namespace mdcii::state
          * @param t_stateId The unique identifier of the new state.
          * @param t_state The state to be added.
          */
-        void AddState(StateId t_stateId, State* t_state);
+        void AddState(StateId t_stateId, std::unique_ptr<State> t_state);
 
         /**
          * @brief Changes to the given state.

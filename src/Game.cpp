@@ -19,6 +19,7 @@
 #include "Game.h"
 #include "Log.h"
 #include "GameState.h"
+#include "MainMenuState.h"
 #include "resource/OriginalResourcesManager.h"
 #include "resource/TileAtlas.h"
 #include "state/StateSystem.h"
@@ -44,14 +45,37 @@ bool mdcii::Game::OnUserCreate()
     origResMng = std::make_unique<resource::OriginalResourcesManager>();
     tileAtlas = std::make_unique<resource::TileAtlas>();
 
-    m_stateSystem = std::make_unique<state::StateSystem>();
-    m_stateSystem->AddState(state::StateId::NEW_GAME, new GameState(this));
-    m_stateSystem->ChangeState(state::StateId::NEW_GAME);
+    gameLayer = static_cast<int>(CreateLayer());
+    EnableLayer(static_cast<uint8_t>(gameLayer), true);
+    SetLayerCustomRenderFunction(0, std::bind_front(&Game::RenderImGui, this));
 
-    return m_stateSystem->OnUserCreate();
+    stateSystem = std::make_unique<state::StateSystem>();
+    stateSystem->AddState(state::StateId::MAIN_MENU, std::make_unique<MainMenuState>(this));
+    stateSystem->AddState(state::StateId::NEW_GAME, std::make_unique<GameState>(this));
+    stateSystem->ChangeState(state::StateId::MAIN_MENU);
+
+    return stateSystem->OnUserCreate();
 }
 
 bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
 {
-    return m_stateSystem->OnUserUpdate(t_elapsedTime);
+    return stateSystem->OnUserUpdate(t_elapsedTime);
+}
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+void mdcii::Game::SetGameLayer()
+{
+    SetDrawTarget(static_cast<uint8_t>(gameLayer));
+}
+
+//-------------------------------------------------
+// ImGui
+//-------------------------------------------------
+
+void mdcii::Game::RenderImGui()
+{
+    pgeImGui.ImGui_ImplPGE_Render();
 }

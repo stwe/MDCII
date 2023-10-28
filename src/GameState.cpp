@@ -120,8 +120,25 @@ bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
     }
 
     // render islands
+    game->SetGameLayer();
     game->Clear(olc::BLACK);
     renderer->Render(this);
+
+    // ImGui
+    ImGui::SetNextWindowPos(
+        { ImGui::GetMainViewport()->Size.x - 150.0f, 0.0f },
+        ImGuiCond_Appearing
+    );
+    constexpr ImGuiWindowFlags flags{ ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings };
+
+    ImGui::Begin("GameMenu", nullptr, flags);
+    if (ImGui::Button("Exit Game"))
+    {
+        ImGui::End();
+        return false;
+    }
+
+    ImGui::End();
 
     return true;
 }

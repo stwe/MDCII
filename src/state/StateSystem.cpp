@@ -35,16 +35,16 @@ mdcii::state::StateSystem::~StateSystem() noexcept
 // Add && Change
 //-------------------------------------------------
 
-void mdcii::state::StateSystem::AddState(const StateId t_stateId, state::State* t_state)
+void mdcii::state::StateSystem::AddState(const StateId t_stateId, std::unique_ptr<State> t_state)
 {
-    states.emplace(t_stateId, t_state);
+    states.emplace(t_stateId, std::move(t_state));
 }
 
 void mdcii::state::StateSystem::ChangeState(const StateId t_stateId)
 {
     if (states.contains(t_stateId))
     {
-        currentState = states.at(t_stateId);
+        currentState = states.at(t_stateId).get();
     }
 }
 
@@ -62,7 +62,7 @@ bool mdcii::state::StateSystem::OnUserCreate()
     return false;
 }
 
-bool mdcii::state::StateSystem::OnUserUpdate(float t_elapsedTime)
+bool mdcii::state::StateSystem::OnUserUpdate(const float t_elapsedTime)
 {
     if (currentState)
     {

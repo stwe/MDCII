@@ -19,7 +19,7 @@
 #pragma once
 
 #include "vendor/ini/ini.h"
-#include "vendor/olc/olcPixelGameEngine.h"
+#include "vendor/imgui/imgui_impl_pge.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -91,6 +91,9 @@ namespace mdcii
 
         std::unique_ptr<resource::OriginalResourcesManager> origResMng;
         std::unique_ptr<resource::TileAtlas> tileAtlas;
+        std::unique_ptr<state::StateSystem> stateSystem;
+        olc::imgui::PGE_ImGUI pgeImGui;
+        int gameLayer{ -1 };
 
         //-------------------------------------------------
         // Override
@@ -99,13 +102,19 @@ namespace mdcii
         bool OnUserCreate() override;
         bool OnUserUpdate(float t_elapsedTime) override;
 
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        void SetGameLayer();
+
     protected:
 
     private:
         //-------------------------------------------------
-        // Member
+        // ImGui
         //-------------------------------------------------
 
-        std::unique_ptr<state::StateSystem> m_stateSystem;
+        void RenderImGui();
     };
 }
