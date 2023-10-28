@@ -17,20 +17,12 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "State.h"
-#include "MdciiAssert.h"
-#include "Game.h"
+#include "Log.h"
+#include "vendor/olc/olcPixelGameEngine.h"
 
-//-------------------------------------------------
-// Ctors. / Dtor.
-//-------------------------------------------------
-
-mdcii::state::State::State(const StateId t_id, Game* t_game)
-    : id{ t_id }
-    , m_game{ t_game }
+mdcii::state::State::State()
 {
     MDCII_LOG_DEBUG("[State::State()] Create State.");
-
-    MDCII_ASSERT(m_game, "[State::State()] Null pointer.")
 }
 
 mdcii::state::State::~State() noexcept

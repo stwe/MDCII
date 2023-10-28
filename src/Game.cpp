@@ -24,7 +24,7 @@
 #include "resource/TileAtlas.h"
 #include "world/Island.h"
 #include "renderer/Renderer.h"
-#include "state/StateStack.h"
+#include "state/StateSystem.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -44,6 +44,7 @@ mdcii::Game::~Game()
 
 bool mdcii::Game::OnUserCreate()
 {
+    /*
     origResMng = std::make_unique<resource::OriginalResourcesManager>();
     tileAtlas = std::make_unique<resource::TileAtlas>();
 
@@ -67,17 +68,18 @@ bool mdcii::Game::OnUserCreate()
     SetLayerCustomRenderFunction(0, std::bind(&Game::DrawImGui, this));
 
     m_renderer = std::make_unique<renderer::Renderer>();
+    */
 
-    m_stateStack = std::make_unique<state::StateStack>(this);
-    m_stateStack->RegisterState<GameState>(state::StateId::NEW_GAME);
-    m_stateStack->PushState(state::StateId::NEW_GAME);
-    m_stateStack->OnUserCreate();
+    m_stateSystem = std::make_unique<state::StateSystem>();
+    m_stateSystem->AddState(state::StateId::NEW_GAME, new GameState());
+    m_stateSystem->InitState(state::StateId::NEW_GAME);
 
     return true;
 }
 
 bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
 {
+    /*
     // zoom
     if (GetMouseWheel() > 0)
     {
@@ -142,11 +144,15 @@ bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
     m_stateStack->OnUserUpdate(t_elapsedTime);
 
     ImGui::ShowDemoWindow();
+    */
+
+    m_stateSystem->Input(this);
+    m_stateSystem->Render(this, t_elapsedTime);
 
     return true;
 }
 
 void mdcii::Game::DrawImGui()
 {
-    pgeImgui.ImGui_ImplPGE_Render();
+    //pgeImgui.ImGui_ImplPGE_Render();
 }

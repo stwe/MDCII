@@ -22,21 +22,16 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii
+namespace olc
 {
     /**
-     * @brief Forward declaration class Game.
+     * @brief Forward declaration class PixelGameEngine.
      */
-    class Game;
+    class PixelGameEngine;
 }
 
 namespace mdcii::state
 {
-    /**
-     * @brief Forward declaration enum class StateId.
-     */
-    enum class StateId;
-
     //-------------------------------------------------
     // State
     //-------------------------------------------------
@@ -48,27 +43,10 @@ namespace mdcii::state
     {
     public:
         //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * @brief The unique identifier of this State.
-         */
-        StateId id;
-
-        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        State() = delete;
-
-        /**
-         * @brief Constructs a new State object.
-         *
-         * @param t_id The unique identifier.
-         * @param t_game Pointer to the parent Game.
-         */
-        State(StateId t_id, Game* t_game);
+        State();
 
         State(const State& t_other) = delete;
         State(State&& t_other) noexcept = delete;
@@ -81,19 +59,11 @@ namespace mdcii::state
         // Logic
         //-------------------------------------------------
 
-        virtual void OnUserCreate() = 0;
-        virtual void OnUserUpdate(float t_elapsedTime) = 0;
-        virtual void RenderImGui() = 0;
+        virtual void Init() {}
+        virtual void Input(olc::PixelGameEngine* t_pge) {}
+        virtual void Render(olc::PixelGameEngine* t_pge, float t_elapsedTime) {}
 
     protected:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * @brief Pointer to the parent Game.
-         */
-        Game* m_game{ nullptr };
 
     private:
 

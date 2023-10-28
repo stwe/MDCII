@@ -33,15 +33,7 @@ namespace mdcii
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        GameState() = delete;
-
-        /**
-         * Constructs a new GameState object.
-         *
-         * @param t_id The unique identifier of the State.
-         * @param t_game Pointer to the Game.
-         */
-        GameState(state::StateId t_id, Game* t_game);
+        GameState();
 
         GameState(const GameState& t_other) = delete;
         GameState(GameState&& t_other) noexcept = delete;
@@ -54,9 +46,9 @@ namespace mdcii
         // Override
         //-------------------------------------------------
 
-        void OnUserCreate() override;
-        void OnUserUpdate(float t_elapsedTime) override;
-        void RenderImGui() override;
+        void Init() override;
+        void Input(olc::PixelGameEngine* t_pge) override;
+        void Render(olc::PixelGameEngine* t_pge, float t_elapsedTime) override;
 
     protected:
 

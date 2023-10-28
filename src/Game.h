@@ -21,7 +21,7 @@
 #include "world/Zoom.h"
 #include "world/Rotation.h"
 #include "vendor/ini/ini.h"
-#include "vendor/imgui/imgui_impl_pge.h"
+#include "vendor/olc/olcPixelGameEngine.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -59,9 +59,9 @@ namespace mdcii::renderer
 namespace mdcii::state
 {
     /**
-     * @brief Forward declaration class StateStack.
+     * @brief Forward declaration class StateSystem.
      */
-    class StateStack;
+    class StateSystem;
 }
 
 namespace mdcii
@@ -113,7 +113,7 @@ namespace mdcii
         std::unique_ptr<resource::TileAtlas> tileAtlas;
         std::vector<std::unique_ptr<world::Island>> islands;
         uint32_t gameLayer;
-        olc::imgui::PGE_ImGUI pgeImgui{ false };
+        //olc::imgui::PGE_ImGUI pgeImgui{ false };
 
         //-------------------------------------------------
         // Override
@@ -131,6 +131,6 @@ namespace mdcii
         //-------------------------------------------------
 
         std::unique_ptr<renderer::Renderer> m_renderer;
-        std::unique_ptr<state::StateStack> m_stateStack;
+        std::unique_ptr<state::StateSystem> m_stateSystem;
     };
 }

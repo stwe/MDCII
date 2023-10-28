@@ -17,18 +17,16 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "GameState.h"
-#include "MdciiAssert.h"
+#include "Log.h"
+#include "vendor/olc/olcPixelGameEngine.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::GameState::GameState(state::StateId t_id, Game* t_game)
-    : State(t_id, t_game)
+mdcii::GameState::GameState()
 {
     MDCII_LOG_DEBUG("[GameState::GameState()] Create GameState.");
-
-    MDCII_ASSERT(m_game, "[GameState::GameState()] Null pointer.")
 }
 
 mdcii::GameState::~GameState() noexcept
@@ -40,17 +38,20 @@ mdcii::GameState::~GameState() noexcept
 // Override
 //-------------------------------------------------
 
-void mdcii::GameState::OnUserCreate()
+void mdcii::GameState::Init()
 {
-
+    MDCII_LOG_DEBUG("[GameState::Init()] Init GameState.");
 }
 
-void mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
+void mdcii::GameState::Input(olc::PixelGameEngine* t_pge)
 {
-
+    if (t_pge->GetKey(olc::Key::SPACE).bPressed)
+    {
+        MDCII_LOG_DEBUG("[GameState::Input()] Space Pressed in GameState.");
+    }
 }
 
-void mdcii::GameState::RenderImGui()
+void mdcii::GameState::Render(olc::PixelGameEngine* t_pge, float t_elapsedTime)
 {
 
 }
