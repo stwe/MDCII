@@ -21,6 +21,7 @@
 #include "Game.h"
 #include "resource/MdciiFile.h"
 #include "world/Island.h"
+#include "world/MousePicker.h"
 #include "renderer/Renderer.h"
 
 //-------------------------------------------------
@@ -57,6 +58,7 @@ bool mdcii::GameState::OnUserCreate()
     }
 
     renderer = std::make_unique<renderer::Renderer>();
+    mousePicker = std::make_unique<world::MousePicker>();
 
     return true;
 }
@@ -123,6 +125,10 @@ bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
     game->SetGameLayer();
     game->Clear(olc::BLACK);
     renderer->Render(this);
+
+    // mousepicker
+    mousePicker->Update(game);
+    mousePicker->Render(game);
 
     // ImGui
     ImGui::SetNextWindowPos(

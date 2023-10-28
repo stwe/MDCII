@@ -40,6 +40,11 @@ namespace mdcii::world
      * @brief Forward declaration class Island.
      */
     class Island;
+
+    /**
+     * @brief Forward declaration class MousePicker.
+     */
+    class MousePicker;
 }
 
 namespace mdcii::renderer
@@ -67,6 +72,7 @@ namespace mdcii
         world::Rotation rotation{ world::Rotation::DEG0 };
         std::vector<std::unique_ptr<world::Island>> islands;
         std::unique_ptr<renderer::Renderer> renderer;
+        std::unique_ptr<world::MousePicker> mousePicker;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
