@@ -58,7 +58,7 @@ bool mdcii::GameState::OnUserCreate()
     }
 
     renderer = std::make_unique<renderer::Renderer>();
-    mousePicker = std::make_unique<world::MousePicker>();
+    mousePicker = std::make_unique<world::MousePicker>(this);
 
     return true;
 }
@@ -126,9 +126,8 @@ bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
     game->Clear(olc::BLACK);
     renderer->Render(this);
 
-    // mousepicker
-    mousePicker->Update(game);
-    mousePicker->Render(game);
+    // mouse picker
+    mousePicker->Render();
 
     // ImGui
     ImGui::SetNextWindowPos(

@@ -93,7 +93,7 @@ void mdcii::resource::TileAtlas::LoadHeightsByZoom(const world::Zoom t_zoom)
 
     std::ifstream inputFile(
         fmt::format("{}atlas/{}/stadtfld/heights.txt",
-        Game::RESOURCES_REL_PATH, mdcii::to_lower_case(std::string(magic_enum::enum_name(t_zoom)))
+        Game::RESOURCES_REL_PATH, to_lower_case(std::string(magic_enum::enum_name(t_zoom)))
         )
     );
     std::string line;

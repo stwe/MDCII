@@ -16,44 +16,90 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include <fmt/format.h>
 #include "MousePicker.h"
+#include "MdciiAssert.h"
 #include "Game.h"
-#include "Log.h"
+#include "GameState.h"
+#include "MdciiUtils.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::MousePicker::MousePicker()
+mdcii::world::MousePicker::MousePicker(GameState* t_gameState)
+    : m_gameState{ t_gameState }
 {
     MDCII_LOG_DEBUG("[MousePicker::MousePicker()] Create MousePicker.");
 
-    m_rect = std::make_unique<olc::Renderable>();
-    m_rect->Load(fmt::format("{}textures/gfx/frame_gfx.png", Game::RESOURCES_REL_PATH));
+    MDCII_ASSERT(m_gameState, "[MousePicker::MousePicker()] Null pointer.")
+
+    Init();
 }
 
 mdcii::world::MousePicker::~MousePicker() noexcept
 {
-    MDCII_LOG_DEBUG("[MousePicker::~MousePicker()] Create MousePicker.");
+    MDCII_LOG_DEBUG("[MousePicker::~MousePicker()] Destruct MousePicker.");
 }
 
 //-------------------------------------------------
 // Logic
 //-------------------------------------------------
 
-void mdcii::world::MousePicker::Update(const Game* t_game)
+void mdcii::world::MousePicker::Render()
 {
-    m_mousePosition = olc::vi2d(t_game->GetMouseX(), t_game->GetMouseY());
-    m_cell = olc::vi2d(m_mousePosition.x / 64, m_mousePosition.y / 32);
-    m_cellOffset = olc::vi2d( m_mousePosition.x % 64, m_mousePosition.y % 32);
+    Update();
+
+    m_gameState->game->DrawDecal(
+        olc::vf2d(
+            static_cast<float>(m_cell.x) * static_cast<float>(get_tile_width(m_gameState->zoom)),
+            static_cast<float>(m_cell.y) * static_cast<float>(get_tile_height(m_gameState->zoom))
+        ),
+        m_rectSprites[magic_enum::enum_integer(m_gameState->zoom)]->Decal()
+    );
+
+    m_gameState->game->DrawString(4, 4, fmt::format("Mouse: {}, {}", std::to_string(m_mousePosition.x), std::to_string(m_mousePosition.y)), olc::WHITE);
+    m_gameState->game->DrawString(4, 14, fmt::format("Cell: {}, {}", std::to_string(m_cell.x), std::to_string(m_cell.y)), olc::WHITE);
+    m_gameState->game->DrawString(4, 24, fmt::format("Offset: {}, {}", std::to_string(m_cellOffset.x), std::to_string(m_cellOffset.y)), olc::WHITE);
 }
 
-void mdcii::world::MousePicker::Render(Game* t_game) const
+void mdcii::world::MousePicker::Update()
 {
-    t_game->DrawDecal(olc::vf2d(static_cast<float>(m_cell.x) * 64.0f, static_cast<float>(m_cell.y) * 32.0f), m_rect->Decal());
+    m_mousePosition = olc::vi2d(m_gameState->game->GetMouseX(), m_gameState->game->GetMouseY());
+    m_cell = olc::vi2d(m_mousePosition.x / get_tile_width(m_gameState->zoom), m_mousePosition.y / get_tile_height(m_gameState->zoom));
+    m_cellOffset = olc::vi2d( m_mousePosition.x % get_tile_width(m_gameState->zoom), m_mousePosition.y % get_tile_height(m_gameState->zoom));
+}
 
-    t_game->DrawString(4, 4, fmt::format("Mouse: {}, {}", std::to_string(m_mousePosition.x), std::to_string(m_mousePosition.y)), olc::WHITE);
-    t_game->DrawString(4, 14, fmt::format("Cell: {}, {}", std::to_string(m_cell.x), std::to_string(m_cell.y)), olc::WHITE);
-    t_game->DrawString(4, 24, fmt::format("Offset: {}, {}", std::to_string(m_cellOffset.x), std::to_string(m_cellOffset.y)), olc::WHITE);
+//-------------------------------------------------
+// Init
+//-------------------------------------------------
+
+void mdcii::world::MousePicker::Init()
+{
+    MDCII_LOG_DEBUG("[MousePicker::Init()] Generate sprites needed by mouse picker ...");
+
+    for (const auto zoom : magic_enum::enum_values<world::Zoom>())
+    {
+        const auto zoomInt{ magic_enum::enum_integer(zoom) };
+        const auto zoomStr{ to_lower_case(std::string(magic_enum::enum_name(zoom))) };
+
+        // rect sprites
+        auto rectSprite{ std::make_unique<olc::Renderable>() };
+        if (rectSprite->Load(fmt::format("{}textures/{}/frame_{}.png", Game::RESOURCES_REL_PATH, zoomStr, zoomStr)) != olc::OK)
+        {
+            throw MDCII_EXCEPTION("[MousePicker::Init()] Error while loading file.");
+        }
+        MDCII_ASSERT(rectSprite->Decal(), "[MousePicker::Init()] Null pointer.")
+        m_rectSprites.at(zoomInt) = std::move(rectSprite);
+
+        // cheat sprites
+        auto cheatSprite{ std::make_unique<olc::Renderable>() };
+        if (cheatSprite->Load(fmt::format("{}textures/{}/corner_{}.png", Game::RESOURCES_REL_PATH, zoomStr, zoomStr)) != olc::OK)
+        {
+            throw MDCII_EXCEPTION("[MousePicker::Init()] Error while loading file.");
+        }
+        MDCII_ASSERT(cheatSprite->Decal(), "[MousePicker::Init()] Null pointer.")
+        m_cheatSprites.at(zoomInt) = std::move(cheatSprite);
+    }
+
+    MDCII_LOG_DEBUG("[MousePicker::Init()] The sprites have been created successfully.");
 }

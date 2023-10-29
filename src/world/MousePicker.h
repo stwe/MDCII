@@ -19,15 +19,30 @@
 #pragma once
 
 #include <memory>
+#include "Zoom.h"
 #include "vendor/olc/olcPixelGameEngine.h"
+
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
 
 namespace mdcii
 {
-    class Game;
+    /**
+     * @brief Forward declaration class GameState.
+     */
+    class GameState;
 }
 
 namespace mdcii::world
 {
+    //-------------------------------------------------
+    // MousePicker
+    //-------------------------------------------------
+
+    /**
+     * @brief Represents a mouse picker to select tiles.
+     */
     class MousePicker
     {
     public:
@@ -35,7 +50,19 @@ namespace mdcii::world
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        MousePicker();
+        MousePicker() = delete;
+
+        /**
+         * @brief Constructs a new MousePicker object.
+         *
+         * @param t_game Pointer to the parent GameState.
+         */
+        explicit MousePicker(GameState* t_gameState);
+
+        MousePicker(const MousePicker& t_other) = delete;
+        MousePicker(MousePicker&& t_other) noexcept = delete;
+        MousePicker& operator=(const MousePicker& t_other) = delete;
+        MousePicker& operator=(MousePicker&& t_other) noexcept = delete;
 
         ~MousePicker() noexcept;
 
@@ -43,12 +70,20 @@ namespace mdcii::world
         // Logic
         //-------------------------------------------------
 
-        void Update(const Game* t_game);
-        void Render(Game* t_game) const;
+        void Render();
 
     protected:
 
     private:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * @brief Pointer to the parent GameState.
+         */
+        GameState* m_gameState{ nullptr };
+
         /**
          * @brief The mouse in the world.
          */
@@ -65,8 +100,31 @@ namespace mdcii::world
         olc::vi2d m_cellOffset;
 
         /**
-         * @brief
+         * @brief A rectangle for each zoom level (SGFX, MGFX, GFX).
          */
-        std::unique_ptr<olc::Renderable> m_rect;
+        std::array<std::unique_ptr<const olc::Renderable>, NR_OF_ZOOMS> m_rectSprites;
+
+        /**
+         * @brief Cheat images for each zoom level (SGFX, MGFX, GFX).
+         */
+        std::array<std::unique_ptr<const olc::Renderable>, NR_OF_ZOOMS> m_cheatSprites;
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
+        /**
+         * @brief Updates the values based on the current mouse position.
+         */
+        void Update();
+
+        //-------------------------------------------------
+        // Init
+        //-------------------------------------------------
+
+        /**
+         * @brief Initializes the mouse picker.
+         */
+        void Init();
     };
 }
