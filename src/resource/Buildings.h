@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <cstdint>
 #include <string>
@@ -478,7 +478,7 @@ namespace mdcii::resource
          *
          * The building ID is the key for each building.
          */
-        std::map<int32_t, Building> buildingsMap;
+        std::unordered_map<int32_t, const Building> buildingsMap;
 
         Buildings() = delete;
 
@@ -500,18 +500,18 @@ namespace mdcii::resource
 
     private:
         /**
-         * @brief Creates the Building objects.
+         * @brief Creates the building objects.
          *
          * @param t_codFilePath The path to the haeuser.cod.
          */
         void GenerateBuildings(const std::string& t_codFilePath);
 
         /**
-         * @brief Creates a single Building object.
+         * @brief Creates a single building object.
          *
          * @param t_obj A Cod object.
          *
-         * @return a Building object.
+         * @return A building object.
          */
         static Building GenerateBuilding(const cod_pb::Object* t_obj) ;
     };

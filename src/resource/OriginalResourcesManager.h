@@ -29,13 +29,16 @@ namespace mdcii::resource
     // OriginalResourcesManager
     //-------------------------------------------------
 
+    /**
+     * @brief Reads paths from the original game and loads the required resources.
+     */
     class OriginalResourcesManager
     {
     public:
         /**
          * @brief The decrypted content of the haeuser.cod.
          */
-        std::unique_ptr<Buildings> buildings;
+        std::unique_ptr<const Buildings> buildings;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -55,11 +58,11 @@ namespace mdcii::resource
         //-------------------------------------------------
 
         /**
-         * @brief For convenience and better readability. Get a Building object by Id.
+         * @brief For convenience and better readability. Get a building object by Id.
          *
          * @param t_id The given Id.
          *
-         * @return The Building object.
+         * @return The building object.
          */
         [[nodiscard]] const Building& GetBuildingById(int t_id) const;
 

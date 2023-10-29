@@ -41,7 +41,7 @@ namespace mdcii::resource
     //-------------------------------------------------
 
     /**
-     * @brief Provides a Tile Atlas for each zoom.
+     * @brief Provides a TileAtlas for each zoom.
      */
     class TileAtlas
     {
@@ -90,9 +90,9 @@ namespace mdcii::resource
         //-------------------------------------------------
 
         /**
-          * @brief Contains the Tile Atlas images for each zoom as a renderable object.
+          * @brief Contains the TileAtlas images for each zoom as a renderable object.
           */
-        std::array<std::vector<std::unique_ptr<olc::Renderable>>, 3> atlas;
+        std::array<std::vector<std::unique_ptr<const olc::Renderable>>, 3> atlas;
 
         /**
          * @brief Array of vectors containing the real heights of each image.
@@ -120,17 +120,17 @@ namespace mdcii::resource
         //-------------------------------------------------
 
         /**
-         * @brief Initialize the Tile Atlas.
+         * @brief Initialize the TileAtlas.
          */
         void Init();
 
         /**
-         * @brief Load Tile Atlas images.
+         * @brief Load TileAtlas images.
          */
         void LoadAtlasImages();
 
         /**
-         * @brief Method to load all Tile Atlas images heights by given Zoom.
+         * @brief Method to load all TileAtlas images heights by given Zoom.
          *
          * @param t_zoom The zoom.
          */

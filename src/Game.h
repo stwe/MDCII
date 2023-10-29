@@ -92,7 +92,15 @@ namespace mdcii
         std::unique_ptr<resource::OriginalResourcesManager> origResMng;
         std::unique_ptr<resource::TileAtlas> tileAtlas;
         std::unique_ptr<state::StateSystem> stateSystem;
+
+        /**
+         * @brief The ImGui plugin.
+         */
         olc::imgui::PGE_ImGUI pgeImGui;
+
+        /**
+         * @brief The layer for the game.
+         */
         int gameLayer{ -1 };
 
         //-------------------------------------------------
@@ -106,6 +114,9 @@ namespace mdcii
         // Helper
         //-------------------------------------------------
 
+        /**
+         * @brief Sets a new GameLayer for the game. The default layer 0 is used for ImGui.
+         */
         void SetGameLayer();
 
     protected:
@@ -115,6 +126,9 @@ namespace mdcii
         // ImGui
         //-------------------------------------------------
 
+        /**
+         * @brief Renders the ImGui UI to the screen.
+         */
         void RenderImGui();
     };
 }

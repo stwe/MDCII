@@ -21,6 +21,10 @@
 #include "Log.h"
 #include "vendor/olc/olcPixelGameEngine.h"
 
+//-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
 mdcii::state::StateSystem::StateSystem()
 {
     MDCII_LOG_DEBUG("[StateSystem::StateSystem()] Create StateSystem.");

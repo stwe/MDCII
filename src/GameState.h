@@ -61,6 +61,9 @@ namespace mdcii
     // GameState
     //-------------------------------------------------
 
+    /**
+     * @brief Represents the GameState.
+     */
     class GameState : public state::State
     {
     public:

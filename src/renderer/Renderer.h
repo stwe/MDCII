@@ -77,7 +77,7 @@ namespace mdcii::renderer
         /**
          * @brief Render the State.
          *
-         * @param t_game Pointer to the Game State.
+         * @param t_game Pointer to the GameState.
          */
         void Render(GameState* t_gameState);
 
@@ -90,8 +90,10 @@ namespace mdcii::renderer
          *
          * @param t_x The x position.
          * @param t_y The y position.
+         * @param t_startX The x offset.
+         * @param t_startY The y offset.
          * @param t_zoom The zoom to get the tile sizes.
-         * @param t_rotation The position is previously rotated by the specified value.
+         * @param t_rotation The position is previously rotated by the given value.
          *
          * @return The isometric coordinates on the screen.
          */
@@ -128,7 +130,7 @@ namespace mdcii::renderer
          * @param t_y The 2D y position.
          * @param t_width The width of the 2D array.
          * @param t_height The height of the 2D array.
-         * @param t_rotation The given position is previously rotated by the specified value.
+         * @param t_rotation The given position is previously rotated by the given value.
          *
          * @return The 1D index.
          */

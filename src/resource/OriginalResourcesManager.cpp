@@ -43,7 +43,7 @@ mdcii::resource::OriginalResourcesManager::~OriginalResourcesManager() noexcept
 // Getter
 //-------------------------------------------------
 
-const mdcii::resource::Building& mdcii::resource::OriginalResourcesManager::GetBuildingById(int t_id) const
+const mdcii::resource::Building& mdcii::resource::OriginalResourcesManager::GetBuildingById(const int t_id) const
 {
     MDCII_ASSERT(t_id >= 0, "[OriginalResourcesManager::GetBuildingById()] Invalid Id given.")
 
@@ -63,7 +63,10 @@ void mdcii::resource::OriginalResourcesManager::GetPathsFromOriginal()
     MDCII_LOG_DEBUG("[OriginalResourcesManager::GetPathsFromOriginal()] All paths were found successfully.");
 }
 
-void mdcii::resource::OriginalResourcesManager::IterateFilesystem(const std::string& t_fileName, const std::function<void(const std::filesystem::directory_entry&, const std::string&)>& t_doForFileName)
+void mdcii::resource::OriginalResourcesManager::IterateFilesystem(
+    const std::string& t_fileName,
+    const std::function<void(const std::filesystem::directory_entry&, const std::string&)>& t_doForFileName
+)
 {
     for (const auto& entry : std::filesystem::recursive_directory_iterator(Game::ORIGINAL_RESOURCES_FULL_PATH, std::filesystem::directory_options::follow_directory_symlink))
     {
@@ -107,7 +110,7 @@ void mdcii::resource::OriginalResourcesManager::FindBuildingsCodFilePath()
 
 void mdcii::resource::OriginalResourcesManager::LoadFiles()
 {
-    MDCII_LOG_DEBUG("[OriginalResourcesManager::LoadFiles()] Start loading files...");
+    MDCII_LOG_DEBUG("[OriginalResourcesManager::LoadFiles()] Start loading files ...");
 
     buildings = std::make_unique<Buildings>(m_buildingsPath);
 

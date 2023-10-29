@@ -17,10 +17,10 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "TileAtlas.h"
-#include "Log.h"
 #include "Game.h"
 #include "MdciiException.h"
 #include "MdciiUtils.h"
+#include "MdciiAssert.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -63,24 +63,33 @@ void mdcii::resource::TileAtlas::LoadAtlasImages()
     for (auto i{ 0 }; i < NR_OF_SGFX_ATLAS_IMAGES; ++i)
     {
         auto renderable{ std::make_unique<olc::Renderable>() };
-        renderable->Load(fmt::format("{}atlas/sgfx/stadtfld/{}.png", Game::RESOURCES_REL_PATH, i));
-
+        if(renderable->Load(fmt::format("{}atlas/sgfx/stadtfld/{}.png", Game::RESOURCES_REL_PATH, i)) != olc::OK)
+        {
+            throw MDCII_EXCEPTION("[TileAtlas::LoadAtlasImages()] Error while loading file.");
+        }
+        MDCII_ASSERT(renderable->Decal(), "[TileAtlas::LoadAtlasImages()] Null pointer.")
         atlas.at(magic_enum::enum_integer(world::Zoom::SGFX)).push_back(std::move(renderable));
     }
 
     for (auto i{ 0 }; i < NR_OF_MGFX_ATLAS_IMAGES; ++i)
     {
         auto renderable{ std::make_unique<olc::Renderable>() };
-        renderable->Load(fmt::format("{}atlas/mgfx/stadtfld/{}.png", Game::RESOURCES_REL_PATH, i));
-
+        if (renderable->Load(fmt::format("{}atlas/mgfx/stadtfld/{}.png", Game::RESOURCES_REL_PATH, i)) != olc::OK)
+        {
+            throw MDCII_EXCEPTION("[TileAtlas::LoadAtlasImages()] Error while loading file.");
+        }
+        MDCII_ASSERT(renderable->Decal(), "[TileAtlas::LoadAtlasImages()] Null pointer.")
         atlas.at(magic_enum::enum_integer(world::Zoom::MGFX)).push_back(std::move(renderable));
     }
 
     for (auto i{ 0 }; i < NR_OF_GFX_ATLAS_IMAGES; ++i)
     {
         auto renderable{ std::make_unique<olc::Renderable>() };
-        renderable->Load(fmt::format("{}atlas/gfx/stadtfld/{}.png", Game::RESOURCES_REL_PATH, i));
-
+        if (renderable->Load(fmt::format("{}atlas/gfx/stadtfld/{}.png", Game::RESOURCES_REL_PATH, i)) != olc::OK)
+        {
+            throw MDCII_EXCEPTION("[TileAtlas::LoadAtlasImages()] Error while loading file.");
+        }
+        MDCII_ASSERT(renderable->Decal(), "[TileAtlas::LoadAtlasImages()] Null pointer.")
         atlas.at(magic_enum::enum_integer(world::Zoom::GFX)).push_back(std::move(renderable));
     }
 

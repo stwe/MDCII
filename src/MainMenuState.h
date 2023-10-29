@@ -26,6 +26,9 @@ namespace mdcii
     // MainMenuState
     //-------------------------------------------------
 
+    /**
+     * @brief Represents the GameState.
+     */
     class MainMenuState : public state::State
     {
     public:

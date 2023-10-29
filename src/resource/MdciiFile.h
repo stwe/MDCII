@@ -26,6 +26,9 @@
 
 namespace mdcii::world
 {
+    /**
+     * @brief Forward declaration class Island.
+     */
     class Island;
 }
 
@@ -86,6 +89,7 @@ namespace mdcii::resource
          */
         [[nodiscard]] bool LoadJsonFromFile();
 
+        // todo: Temp code.
         [[nodiscard]] std::vector<std::unique_ptr<world::Island>> CreateIslands() const;
 
     protected:
