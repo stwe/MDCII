@@ -92,7 +92,7 @@ namespace mdcii::resource
         /**
           * @brief Contains the TileAtlas images for each zoom as a renderable object.
           */
-        std::array<std::vector<std::unique_ptr<const olc::Renderable>>, 3> atlas;
+        std::array<std::vector<std::unique_ptr<const olc::Renderable>>, world::NR_OF_ZOOMS> atlas;
 
         /**
          * @brief Array of vectors containing the real heights of each image.

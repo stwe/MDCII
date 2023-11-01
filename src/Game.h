@@ -36,6 +36,11 @@ namespace mdcii::resource
      * @brief Forward declaration class TileAtlas.
      */
     class TileAtlas;
+
+    /**
+     * @brief Forward declaration class AssetManager.
+     */
+    class AssetManager;
 }
 
 namespace mdcii::state
@@ -89,8 +94,9 @@ namespace mdcii
         // Member
         //-------------------------------------------------
 
-        std::unique_ptr<resource::OriginalResourcesManager> origResMng;
+        std::unique_ptr<resource::OriginalResourcesManager> originalResourcesManager;
         std::unique_ptr<resource::TileAtlas> tileAtlas;
+        std::unique_ptr<resource::AssetManager> assetManager;
         std::unique_ptr<state::StateSystem> stateSystem;
 
         /**

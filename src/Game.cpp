@@ -22,6 +22,7 @@
 #include "MainMenuState.h"
 #include "resource/OriginalResourcesManager.h"
 #include "resource/TileAtlas.h"
+#include "resource/AssetManager.h"
 #include "state/StateSystem.h"
 
 //-------------------------------------------------
@@ -42,8 +43,9 @@ mdcii::Game::~Game()
 
 bool mdcii::Game::OnUserCreate()
 {
-    origResMng = std::make_unique<resource::OriginalResourcesManager>();
+    originalResourcesManager = std::make_unique<resource::OriginalResourcesManager>();
     tileAtlas = std::make_unique<resource::TileAtlas>();
+    assetManager = std::make_unique<resource::AssetManager>();
 
     gameLayer = static_cast<int>(CreateLayer());
     EnableLayer(static_cast<uint8_t>(gameLayer), true);

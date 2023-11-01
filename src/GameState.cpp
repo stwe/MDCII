@@ -57,7 +57,7 @@ bool mdcii::GameState::OnUserCreate()
         island->InitTiles(game);
     }
 
-    renderer = std::make_unique<renderer::Renderer>();
+    renderer = std::make_unique<renderer::Renderer>(this);
     mousePicker = std::make_unique<world::MousePicker>(this);
 
     return true;
@@ -124,7 +124,7 @@ bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
     // render islands
     game->SetGameLayer();
     game->Clear(olc::BLACK);
-    renderer->Render(this);
+    renderer->RenderIslands();
 
     // mouse picker
     mousePicker->Render();

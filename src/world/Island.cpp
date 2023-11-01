@@ -43,7 +43,7 @@ void mdcii::world::Island::InitTiles(const Game* t_game)
             if (tile.HasBuilding())
             {
                 // pre-calculate a gfx for each rotation
-                const auto& building{ t_game->origResMng->GetBuildingById(tile.buildingId) };
+                const auto& building{ t_game->originalResourcesManager->GetBuildingById(tile.buildingId) };
                 const auto gfx0{ building.gfx };
 
                 tile.gfxs.push_back(gfx0);

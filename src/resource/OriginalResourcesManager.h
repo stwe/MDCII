@@ -30,11 +30,15 @@ namespace mdcii::resource
     //-------------------------------------------------
 
     /**
-     * @brief Reads paths from the original game and loads the required resources.
+     * @brief Managing original assets, including loading them from files.
      */
     class OriginalResourcesManager
     {
     public:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
         /**
          * @brief The decrypted content of the haeuser.cod.
          */
