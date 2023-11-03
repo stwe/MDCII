@@ -19,10 +19,8 @@
 #include "GameState.h"
 #include "Log.h"
 #include "Game.h"
-#include "resource/MdciiFile.h"
-#include "world/Island.h"
 #include "world/MousePicker.h"
-#include "renderer/Renderer.h"
+#include "world/World.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -47,18 +45,8 @@ bool mdcii::GameState::OnUserCreate()
 {
     MDCII_LOG_DEBUG("[GameState::OnUserCreate()] Init GameState.");
 
-    if (resource::MdciiFile file{ "resources/sav/Example.sav" }; file.LoadJsonFromFile())
-    {
-        islands = file.CreateIslands();
-    }
-
-    for (auto const& island : islands)
-    {
-        island->InitTiles(game);
-    }
-
-    renderer = std::make_unique<renderer::Renderer>(this);
     mousePicker = std::make_unique<world::MousePicker>(this);
+    world = std::make_unique<world::World>(this);
 
     return true;
 }
@@ -90,22 +78,22 @@ bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
     }
 
     // camera
-    olc::vf2d vVel = { 0.0f, 0.0f };
+    olc::vf2d vel{ 0.0f, 0.0f };
     if (game->GetKey(olc::Key::W).bHeld)
     {
-        vVel += { 0, -1 };
+        vel += { 0, -1 };
     }
     if (game->GetKey(olc::Key::S).bHeld)
     {
-        vVel += { 0, +1 };
+        vel += { 0, +1 };
     }
     if (game->GetKey(olc::Key::A).bHeld)
     {
-        vVel += { -1, 0 };
+        vel += { -1, 0 };
     }
     if (game->GetKey(olc::Key::D).bHeld)
     {
-        vVel += { +1, 0 };
+        vel += { +1, 0 };
     }
 
     // exit
@@ -114,20 +102,13 @@ bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
         return false;
     }
 
-    // update camera
-    for (auto const& island : islands)
-    {
-        island->x += vVel.x * t_elapsedTime * 32.0f;
-        island->y += vVel.y * t_elapsedTime * 32.0f;
-    }
-
-    // render islands
+    // world
     game->SetGameLayer();
     game->Clear(olc::BLACK);
-    renderer->RenderIslands();
+    world->OnUserUpdate(t_elapsedTime, vel);
 
     // mouse picker
-    mousePicker->Render();
+    mousePicker->OnUserUpdate();
 
     // ImGui
     ImGui::SetNextWindowPos(

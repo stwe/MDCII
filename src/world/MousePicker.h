@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <memory>
-#include "Zoom.h"
 #include "vendor/olc/olcPixelGameEngine.h"
 
 //-------------------------------------------------
@@ -55,7 +53,7 @@ namespace mdcii::world
         /**
          * @brief Constructs a new MousePicker object.
          *
-         * @param t_game Pointer to the parent GameState.
+         * @param t_gameState Pointer to the parent GameState.
          */
         explicit MousePicker(GameState* t_gameState);
 
@@ -70,7 +68,7 @@ namespace mdcii::world
         // Logic
         //-------------------------------------------------
 
-        void Render();
+        void OnUserUpdate();
 
     protected:
 
@@ -98,33 +96,5 @@ namespace mdcii::world
          * @brief The mouse offset into cell.
          */
         olc::vi2d m_cellOffset;
-
-        /**
-         * @brief A rectangle for each zoom level (SGFX, MGFX, GFX).
-         */
-        std::array<std::unique_ptr<const olc::Renderable>, NR_OF_ZOOMS> m_rectSprites;
-
-        /**
-         * @brief Cheat images for each zoom level (SGFX, MGFX, GFX).
-         */
-        std::array<std::unique_ptr<const olc::Renderable>, NR_OF_ZOOMS> m_cheatSprites;
-
-        //-------------------------------------------------
-        // Logic
-        //-------------------------------------------------
-
-        /**
-         * @brief Updates the values based on the current mouse position.
-         */
-        void Update();
-
-        //-------------------------------------------------
-        // Init
-        //-------------------------------------------------
-
-        /**
-         * @brief Initializes the mouse picker.
-         */
-        void Init();
     };
 }

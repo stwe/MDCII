@@ -69,8 +69,8 @@ std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::C
         auto island{ std::make_unique<world::Island>() };
         island->width = islandVars.at("width").get<int32_t>();
         island->height = islandVars.at("height").get<int32_t>();
-        island->x = (float)islandVars.at("x").get<int32_t>();
-        island->y = (float)islandVars.at("y").get<int32_t>();
+        island->startX = static_cast<float>(islandVars.at("x").get<int32_t>());
+        island->startY = static_cast<float>(islandVars.at("y").get<int32_t>());
 
         for (auto layers = islandVars.at("layers").items(); const auto& [k, v] : layers)
         {

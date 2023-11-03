@@ -24,14 +24,6 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii
-{
-    /**
-     * @brief Forward declaration class GameState.
-     */
-    class GameState;
-}
-
 namespace mdcii::world
 {
     /**
@@ -43,6 +35,21 @@ namespace mdcii::world
      * @brief Forward declaration enum class Rotation.
      */
     enum class Rotation;
+
+    /**
+     * @brief Forward declaration class Island.
+     */
+    class Island;
+
+    /**
+     * @brief Forward declaration struct Tile.
+     */
+    struct Tile;
+
+    /**
+     * @brief Forward declaration class World.
+     */
+    class World;
 }
 
 namespace mdcii::renderer
@@ -61,7 +68,14 @@ namespace mdcii::renderer
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        Renderer();
+        Renderer() = delete;
+
+        /**
+         * @brief Constructs a new Renderer object.
+         *
+         * @param t_world Pointer to the parent World.
+         */
+        explicit Renderer(const world::World* t_world);
 
         Renderer(const Renderer& t_other) = delete;
         Renderer(Renderer&& t_other) noexcept = delete;
@@ -74,12 +88,12 @@ namespace mdcii::renderer
         // Logic
         //-------------------------------------------------
 
-        /**
-         * @brief Render the State.
-         *
-         * @param t_game Pointer to the GameState.
-         */
-        void Render(GameState* t_gameState);
+        [[nodiscard]] float CalcOffset(const world::Tile* t_tile, int t_gfx) const;
+        [[nodiscard]] int GetGfxForCurrentRotation(const world::Tile* t_tile) const;
+        void RenderBuilding(const world::Island* t_island, const world::Tile* t_tile) const;
+        void RenderIsland(const world::Island* t_island) const;
+        void RenderIslands() const;
+        void RenderDeepWater() const;
 
         //-------------------------------------------------
         // Helper
@@ -92,6 +106,8 @@ namespace mdcii::renderer
          * @param t_y The y position.
          * @param t_startX The x offset.
          * @param t_startY The y offset.
+         * @param t_width The width of the map.
+         * @param t_height The height of the map.
          * @param t_zoom The zoom to get the tile sizes.
          * @param t_rotation The position is previously rotated by the given value.
          *
@@ -100,6 +116,7 @@ namespace mdcii::renderer
         static olc::vi2d ToScreen(
             int t_x, int t_y,
             float t_startX, float t_startY,
+            int t_width, int t_height,
             world::Zoom t_zoom, world::Rotation t_rotation
         );
 
@@ -121,7 +138,7 @@ namespace mdcii::renderer
          *
          * @return The offset coordinates.
          */
-        static olc::vi2d GetOffset(int t_gfx, int t_rows);
+        static olc::vi2d GetAtlasOffset(int t_gfx, int t_rows);
 
         /**
          * @brief 2D/1D - mapping of a position.
@@ -139,6 +156,13 @@ namespace mdcii::renderer
     protected:
 
     private:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
 
+        /**
+         * @brief Pointer to the parent World.
+         */
+        const world::World* m_world{ nullptr };
     };
 }

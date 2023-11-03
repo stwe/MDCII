@@ -59,14 +59,14 @@ namespace mdcii::world
         int height{ -1 };
 
         /**
-         * @brief The start x world position of the island.
+         * @brief The X-coordinate of the island's initial position in the world.
          */
-        float x{ -1.0f };
+        float startX{ -1.0f };
 
         /**
-         * @brief The start y world position of the island.
+         * @brief The Y-coordinate of the island's initial position in the world.
          */
-        float y{ -1.0f };
+        float startY{ -1.0f };
 
         /**
          * @brief The tiles of the island.
