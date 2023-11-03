@@ -104,21 +104,10 @@ namespace mdcii::renderer
          *
          * @param t_x The x position.
          * @param t_y The y position.
-         * @param t_startX The x offset.
-         * @param t_startY The y offset.
-         * @param t_width The width of the map.
-         * @param t_height The height of the map.
-         * @param t_zoom The zoom to get the tile sizes.
-         * @param t_rotation The position is previously rotated by the given value.
          *
          * @return The isometric coordinates on the screen.
          */
-        static olc::vi2d ToScreen(
-            int t_x, int t_y,
-            float t_startX, float t_startY,
-            int t_width, int t_height,
-            world::Zoom t_zoom, world::Rotation t_rotation
-        );
+        [[nodiscard]] olc::vi2d ToScreen(int t_x, int t_y) const;
 
         /**
          * @brief Returns the number of the Texture Atlas on which the given gfx is located.
@@ -128,7 +117,7 @@ namespace mdcii::renderer
          *
          * @return The number of the Texture Atlas.
          */
-        static int GetAtlasIndex(int t_gfx, int t_rows);
+        [[nodiscard]] static int GetAtlasIndex(int t_gfx, int t_rows);
 
         /**
          * @brief Determines where a sprite is located on an atlas image/texture.
@@ -138,7 +127,7 @@ namespace mdcii::renderer
          *
          * @return The offset coordinates.
          */
-        static olc::vi2d GetAtlasOffset(int t_gfx, int t_rows);
+        [[nodiscard]] static olc::vi2d GetAtlasOffset(int t_gfx, int t_rows);
 
         /**
          * @brief 2D/1D - mapping of a position.
@@ -151,7 +140,7 @@ namespace mdcii::renderer
          *
          * @return The 1D index.
          */
-        static int GetMapIndex(int t_x, int t_y, int t_width, int t_height, world::Rotation t_rotation);
+        [[nodiscard]] static int GetMapIndex(int t_x, int t_y, int t_width, int t_height, world::Rotation t_rotation);
 
     protected:
 

@@ -18,76 +18,41 @@
 
 #pragma once
 
-#include "Tile.h"
+#include "vendor/olc/olcPixelGameEngine.h"
 
-//-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii
-{
-    /**
-     * @brief Forward declaration class Game.
-     */
-    class Game;
-}
-
-namespace mdcii::world
+namespace mdcii::camera
 {
     //-------------------------------------------------
-    // Island
+    // Camera
     //-------------------------------------------------
 
-    /**
-     * @brief Represents an Island.
-     */
-    class Island
+    class Camera
     {
     public:
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
-        /**
-         * @brief The width of the island.
-         */
-        int width{ -1 };
-
-        /**
-         * @brief The height of the island.
-         */
-        int height{ -1 };
-
-        /**
-         * @brief The X-coordinate of the island's initial position in the world.
-         */
-        int startX{ -1 };
-
-        /**
-         * @brief The Y-coordinate of the island's initial position in the world.
-         */
-        int startY{ -1 };
-
-        /**
-         * @brief The tiles of the island.
-         */
-        std::vector<Tile> tiles;
-
-        /**
-         * @brief The tiles of the island, sorted by index for each rotation.
-         */
-        std::array<std::vector<Tile>, 4> sortedTiles;
+        olc::vf2d origin{ 0.0f, 0.0f };
 
         //-------------------------------------------------
-        // Init
+        // Ctors. / Dtor.
         //-------------------------------------------------
 
-        /**
-         * @brief Initializes all tiles of the island.
-         *
-         * @param t_game Pointer to the Game.
-         */
-        void InitTiles(const Game* t_game);
+        Camera();
+
+        Camera(const Camera& t_other) = delete;
+        Camera(Camera&& t_other) noexcept = delete;
+        Camera& operator=(const Camera& t_other) = delete;
+        Camera& operator=(Camera&& t_other) noexcept = delete;
+
+        ~Camera() noexcept;
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
+        void OnUserUpdate(float t_elapsedTime, const olc::vf2d& t_vel);
 
     protected:
 

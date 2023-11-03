@@ -24,6 +24,7 @@
 #include "world/World.h"
 #include "resource/TileAtlas.h"
 #include "resource/AssetManager.h"
+#include "camera/Camera.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -86,12 +87,7 @@ void mdcii::renderer::Renderer::RenderBuilding(const world::Island* t_island, co
     const auto gfx{ GetGfxForCurrentRotation(t_tile) };
     const auto atlas{ GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
     const auto atlasOffset{ GetAtlasOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
-    const auto screenPosition{ ToScreen(
-        t_tile->islandX, t_tile->islandY,
-        t_island->startX, t_island->startY,
-        m_world->worldWidth, m_world->worldHeight,
-        m_world->gameState->zoom, m_world->gameState->rotation
-    ) };
+    const auto screenPosition{ ToScreen(t_tile->islandX +  t_island->startX, t_tile->islandY + t_island->startY) };
 
     m_world->gameState->game->DrawPartialDecal(
         olc::vf2d(
@@ -145,12 +141,7 @@ void mdcii::renderer::Renderer::RenderDeepWater() const
     {
         for (auto x{ 0 }; x < m_world->worldWidth; ++x)
         {
-            const auto screenPosition{ ToScreen(
-                x, y,
-                m_world->startX, m_world->startY,
-                m_world->worldWidth, m_world->worldHeight,
-                m_world->gameState->zoom, m_world->gameState->rotation
-            ) };
+            const auto screenPosition{ ToScreen(x, y) };
 
             // Building 1201
             const auto atlas{ GetAtlasIndex(752, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
@@ -179,18 +170,15 @@ void mdcii::renderer::Renderer::RenderDeepWater() const
 // Helper
 //-------------------------------------------------
 
-olc::vi2d mdcii::renderer::Renderer::ToScreen(
-    const int t_x, const int t_y,
-    const float t_startX, const float t_startY,
-    const int t_width, const int t_height,
-    const world::Zoom t_zoom, const world::Rotation t_rotation
-)
+olc::vi2d mdcii::renderer::Renderer::ToScreen(const int t_x, const int t_y) const
 {
-    const auto position{ rotate_position(static_cast<int>(t_startX) + t_x, static_cast<int>(t_startY) + t_y, t_width, t_height, t_rotation) };
+    const auto position{ rotate_position(t_x, t_y, m_world->worldWidth, m_world->worldHeight, m_world->gameState->rotation) };
 
     return olc::vi2d{
-        (position.x - position.y) * get_tile_width_half(t_zoom),
-        (position.x + position.y) * get_tile_height_half(t_zoom)
+        (static_cast<int>(m_world->gameState->world->camera->origin.x) * get_tile_width(m_world->gameState->zoom))
+        + (position.x - position.y) * get_tile_width_half(m_world->gameState->zoom),
+        (static_cast<int>(m_world->gameState->world->camera->origin.y) * get_tile_height(m_world->gameState->zoom))
+        + (position.x + position.y) * get_tile_height_half(m_world->gameState->zoom)
     };
 }
 

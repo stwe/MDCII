@@ -22,6 +22,7 @@
 #include "GameState.h"
 #include "resource/AssetManager.h"
 #include "world/World.h"
+#include "camera/Camera.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -55,8 +56,8 @@ void mdcii::world::MousePicker::OnUserUpdate()
 
     // todo offset
     olc::vi2d selected{
-        (m_cell.y) + (m_cell.x),
-        (m_cell.y) - (m_cell.x)
+        (m_cell.y - (int)m_gameState->world->camera->origin.y) + (m_cell.x - (int)m_gameState->world->camera->origin.x),
+        (m_cell.y - (int)m_gameState->world->camera->origin.y) - (m_cell.x - (int)m_gameState->world->camera->origin.x)
     };
     if (cheatColor == olc::RED)
     {
@@ -77,17 +78,10 @@ void mdcii::world::MousePicker::OnUserUpdate()
 
     auto toScreen = [&](int t_x, int t_y)
     {
-        const auto position{ rotate_position(
-            /*static_cast<int>(m_gameState->world->startX) + */t_x,
-            /*static_cast<int>(m_gameState->world->startY) + */t_y,
-            m_gameState->world->worldWidth, m_gameState->world->worldHeight,
-            m_gameState->rotation)
-        };
-
         return olc::vi2d
             {
-                (position.x - position.y) * get_tile_width_half(m_gameState->zoom),
-                (position.x + position.y) * get_tile_height_half(m_gameState->zoom)
+                ((int)m_gameState->world->camera->origin.x * get_tile_width(m_gameState->zoom)) + (t_x - t_y) * get_tile_width_half(m_gameState->zoom),
+                ((int)m_gameState->world->camera->origin.y * get_tile_height(m_gameState->zoom)) + (t_x + t_y) * get_tile_height_half(m_gameState->zoom)
             };
     };
 

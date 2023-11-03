@@ -41,6 +41,14 @@ namespace mdcii::renderer
     class Renderer;
 }
 
+namespace mdcii::camera
+{
+    /**
+     * @brief Forward declaration class Camera.
+     */
+    class Camera;
+}
+
 namespace mdcii::world
 {
     /**
@@ -78,24 +86,19 @@ namespace mdcii::world
         int worldHeight{ 48 };
 
         /**
-         * @brief The X-coordinate of the world's initial position.
-         */
-        float startX{ 0.0f };
-
-        /**
-         * @brief The Y-coordinate of the world's initial position.
-         */
-        float startY{ 0.0f };
-
-        /**
          * @brief A collection of unique pointers to Island objects.
          */
         std::vector<std::unique_ptr<Island>> islands;
 
         /**
-         * @brief A unique pointer to the Renderer for rendering this game world.
+         * @brief For rendering this world.
          */
         std::unique_ptr<renderer::Renderer> renderer;
+
+        /**
+         * @brief A camera to move around.
+         */
+        std::unique_ptr<camera::Camera> camera;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

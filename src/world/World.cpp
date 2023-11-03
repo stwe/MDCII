@@ -22,6 +22,7 @@
 #include "GameState.h"
 #include "resource/MdciiFile.h"
 #include "renderer/Renderer.h"
+#include "camera/Camera.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -48,14 +49,15 @@ mdcii::world::World::~World() noexcept
 
 void mdcii::world::World::OnUserUpdate(const float t_elapsedTime, const olc::vf2d& t_vel)
 {
+    /*
     for (auto const& island : islands)
     {
         island->startX += t_vel.x * t_elapsedTime * 32.0f;
         island->startY += t_vel.y * t_elapsedTime * 32.0f;
     }
+    */
 
-    startX += t_vel.x * t_elapsedTime * 32.0f;
-    startY += t_vel.y * t_elapsedTime * 32.0f;
+    camera->OnUserUpdate(t_elapsedTime, t_vel);
 
     renderer->RenderDeepWater();
     renderer->RenderIslands();
@@ -82,4 +84,5 @@ void mdcii::world::World::Init()
     // todo: set world width and height from the savegame
 
     renderer = std::make_unique<renderer::Renderer>(this);
+    camera = std::make_unique<camera::Camera>();
 }
