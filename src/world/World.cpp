@@ -28,14 +28,14 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::World::World(GameState* t_gameState)
+mdcii::world::World::World(GameState* t_gameState, const std::string& t_fileName)
     : gameState{ t_gameState }
 {
     MDCII_LOG_DEBUG("[World::World()] Create World.");
 
     MDCII_ASSERT(gameState, "[World::World()] Null pointer.")
 
-    Init();
+    Init(t_fileName);
 }
 
 mdcii::world::World::~World() noexcept
@@ -75,21 +75,19 @@ olc::vi2d mdcii::world::World::ToScreen(const int t_x, const int t_y) const
 // Init
 //-------------------------------------------------
 
-void mdcii::world::World::Init()
+void mdcii::world::World::Init(const std::string& t_fileName)
 {
     MDCII_LOG_DEBUG("[World::Init()] Init World.");
 
-    if (resource::MdciiFile file{ "resources/sav/Example.sav" }; file.LoadJsonFromFile())
+    if (resource::MdciiFile file{ t_fileName }; file.LoadJsonFromFile())
     {
-        islands = file.CreateIslands();
+        islands = file.CreateWorldContent(worldWidth, worldHeight);
     }
 
     for (auto const& island : islands)
     {
         island->InitTiles(gameState->game);
     }
-
-    // todo: set world width and height from the savegame
 
     renderer = std::make_unique<renderer::Renderer>(this);
     camera = std::make_unique<camera::Camera>();

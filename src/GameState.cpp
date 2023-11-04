@@ -46,7 +46,7 @@ bool mdcii::GameState::OnUserCreate()
     MDCII_LOG_DEBUG("[GameState::OnUserCreate()] Init GameState.");
 
     mousePicker = std::make_unique<world::MousePicker>(this);
-    world = std::make_unique<world::World>(this);
+    world = std::make_unique<world::World>(this, "resources/sav/SaveMap0.sav");
 
     return true;
 }
@@ -79,21 +79,21 @@ bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
 
     // camera
     olc::vf2d vel{ 0.0f, 0.0f };
-    if (game->GetKey(olc::Key::W).bHeld)
+    if (game->GetKey(olc::Key::UP).bHeld)
     {
         vel += { 0, -1 };
     }
-    if (game->GetKey(olc::Key::S).bHeld)
+    if (game->GetKey(olc::Key::DOWN).bHeld)
     {
-        vel += { 0, +1 };
+        vel += { 0, 1 };
     }
-    if (game->GetKey(olc::Key::A).bHeld)
+    if (game->GetKey(olc::Key::LEFT).bHeld)
     {
         vel += { -1, 0 };
     }
-    if (game->GetKey(olc::Key::D).bHeld)
+    if (game->GetKey(olc::Key::RIGHT).bHeld)
     {
-        vel += { +1, 0 };
+        vel += { 1, 0 };
     }
 
     // exit

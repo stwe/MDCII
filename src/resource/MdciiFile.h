@@ -89,8 +89,8 @@ namespace mdcii::resource
          */
         [[nodiscard]] bool LoadJsonFromFile();
 
-        // todo: Temp code.
-        [[nodiscard]] std::vector<std::unique_ptr<world::Island>> CreateIslands() const;
+        // todo tmp code
+        [[nodiscard]] std::vector<std::unique_ptr<world::Island>> CreateWorldContent(int& t_worldWidth, int& t_worldHeight) const;
 
     protected:
 

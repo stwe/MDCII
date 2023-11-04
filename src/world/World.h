@@ -78,12 +78,12 @@ namespace mdcii::world
         /**
          * @brief The width of the world in tiles.
          */
-        int worldWidth{ 64 };
+        int worldWidth{ -1 };
 
         /**
          * @brief The height of the world in tiles.
          */
-        int worldHeight{ 48 };
+        int worldHeight{ -1 };
 
         /**
          * @brief A collection of unique pointers to Island objects.
@@ -110,8 +110,9 @@ namespace mdcii::world
          * @brief Constructs a new World object.
          *
          * @param t_gameState Pointer to the parent GameState.
+         * @param t_fileName The name of the save-game file.
          */
-        explicit World(GameState* t_gameState);
+        World(GameState* t_gameState, const std::string& t_fileName);
 
         World(const World& t_other) = delete;
         World(World&& t_other) noexcept = delete;
@@ -150,8 +151,10 @@ namespace mdcii::world
         /**
          * @brief Initializes the game world.
          *
+         * @param t_fileName The name of the save-game file.
+         *
          * Called upon construction of a World object.
          */
-        void Init();
+        void Init(const std::string& t_fileName);
     };
 }

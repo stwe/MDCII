@@ -60,17 +60,20 @@ bool mdcii::resource::MdciiFile::LoadJsonFromFile()
     return false;
 }
 
-std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::CreateIslands() const
+std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::CreateWorldContent(int& t_worldWidth, int& t_worldHeight) const
 {
     std::vector<std::unique_ptr<world::Island>> is;
+
+    t_worldWidth = json.at("world").at("width").get<int32_t>();
+    t_worldHeight = json.at("world").at("height").get<int32_t>();
 
     for (const auto& [islandKeys, islandVars] : json["islands"].items())
     {
         auto island{ std::make_unique<world::Island>() };
         island->width = islandVars.at("width").get<int32_t>();
         island->height = islandVars.at("height").get<int32_t>();
-        island->startX = static_cast<float>(islandVars.at("x").get<int32_t>());
-        island->startY = static_cast<float>(islandVars.at("y").get<int32_t>());
+        island->startX = islandVars.at("x").get<int32_t>();
+        island->startY = islandVars.at("y").get<int32_t>();
 
         for (auto layers = islandVars.at("layers").items(); const auto& [k, v] : layers)
         {
