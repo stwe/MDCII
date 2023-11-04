@@ -89,6 +89,15 @@ void mdcii::renderer::Renderer::RenderBuilding(const world::Island* t_island, co
     const auto atlasOffset{ GetAtlasOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
     const auto screenPosition{ m_world->ToScreen(t_tile->islandX +  t_island->startX, t_tile->islandY + t_island->startY) };
 
+    // skip render
+    if (screenPosition.x > mdcii::Game::INI.Get<int>("window", "width") + get_tile_width(m_world->gameState->zoom) ||
+        screenPosition.x < -get_tile_width(m_world->gameState->zoom) ||
+        screenPosition.y > mdcii::Game::INI.Get<int>("window", "height") + get_tile_height(m_world->gameState->zoom) ||
+        screenPosition.y < -get_tile_height(m_world->gameState->zoom))
+    {
+        return;
+    }
+
     m_world->gameState->game->DrawPartialDecal(
         olc::vf2d(
             static_cast<float>(screenPosition.x),
@@ -147,6 +156,15 @@ void mdcii::renderer::Renderer::RenderDeepWater() const
             }
 
             const auto screenPosition{ m_world->ToScreen(x, y) };
+
+            // skip render
+            if (screenPosition.x > mdcii::Game::INI.Get<int>("window", "width") + get_tile_width(m_world->gameState->zoom) ||
+                screenPosition.x < -get_tile_width(m_world->gameState->zoom) ||
+                screenPosition.y > mdcii::Game::INI.Get<int>("window", "height") + get_tile_height(m_world->gameState->zoom) ||
+                screenPosition.y < -get_tile_height(m_world->gameState->zoom))
+            {
+                continue;
+            }
 
             m_world->gameState->game->DrawPartialDecal(
                 olc::vf2d(
