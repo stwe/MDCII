@@ -54,34 +54,122 @@ void mdcii::world::MousePicker::OnUserUpdate()
     const auto* cheatSprite{ m_gameState->game->assetManager->GetAsset(resource::Asset::CHEAT, m_gameState->zoom)->Sprite() };
     const auto cheatColor{ cheatSprite->GetPixel(m_cellOffset.x, m_cellOffset.y) };
 
-    // todo offset
-    olc::vi2d selected{
-        (m_cell.y - (int)m_gameState->world->camera->origin.y) + (m_cell.x - (int)m_gameState->world->camera->origin.x),
-        (m_cell.y - (int)m_gameState->world->camera->origin.y) - (m_cell.x - (int)m_gameState->world->camera->origin.x)
-    };
-    if (cheatColor == olc::RED)
+    olc::vi2d selected;
+    if (m_gameState->rotation == Rotation::DEG0)
     {
-        selected += { -1, 0 };
+        selected = {
+            (m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
+            + (m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x)),
+            (m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
+            - (m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x))
+        };
+
+        if (cheatColor == olc::RED)
+        {
+            selected += { -1, 0 };
+        }
+        if (cheatColor == olc::BLUE)
+        {
+            selected += { 0, 1 };
+        }
+        if (cheatColor == olc::GREEN)
+        {
+            selected += { 0, -1 };
+        }
+        if (cheatColor == olc::YELLOW)
+        {
+            selected += { 1, 0 };
+        }
     }
-    if (cheatColor == olc::BLUE)
+    if (m_gameState->rotation == Rotation::DEG90)
     {
-        selected += { 0, 1 };
+        selected = {
+            (m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
+            - (m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x)),
+            m_gameState->world->worldWidth - 1 - ((m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x))
+                                                  + (m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y)))
+        };
+
+        if (cheatColor == olc::RED)
+        {
+            selected += { 0, 1 };
+        }
+        if (cheatColor == olc::BLUE)
+        {
+            selected += { 1, 0 };
+        }
+        if (cheatColor == olc::GREEN)
+        {
+            selected += { -1, 0 };
+        }
+        if (cheatColor == olc::YELLOW)
+        {
+            selected += { 0, -1 };
+        }
     }
-    if (cheatColor == olc::GREEN)
+    if (m_gameState->rotation == Rotation::DEG180)
     {
-        selected += { 0, -1 };
+        selected = {
+            m_gameState->world->worldWidth - 1 - ((m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
+                                                  + (m_cell.x
+                                                     - static_cast<int>(m_gameState->world->camera->origin.x))),
+            m_gameState->world->worldHeight - 1 - ((m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
+                                                   - (m_cell.x
+                                                      - static_cast<int>(m_gameState->world->camera->origin.x)))
+        };
+
+        if (cheatColor == olc::RED)
+        {
+            selected += { 1, 0 };
+        }
+        if (cheatColor == olc::BLUE)
+        {
+            selected += { 0, -1 };
+        }
+        if (cheatColor == olc::GREEN)
+        {
+            selected += { 0, 1 };
+        }
+        if (cheatColor == olc::YELLOW)
+        {
+            selected += { -1, 0 };
+        }
     }
-    if (cheatColor == olc::YELLOW)
+    if (m_gameState->rotation == Rotation::DEG270)
     {
-        selected += { 1, 0 };
+        selected = {
+            m_gameState->world->worldHeight - 1 - ((m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
+                                                   - (m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x))),
+            (m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
+            + (m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x))
+        };
+
+        if (cheatColor == olc::RED)
+        {
+            selected += { 0, -1 };
+        }
+        if (cheatColor == olc::BLUE)
+        {
+            selected += { -1, 0 };
+        }
+        if (cheatColor == olc::GREEN)
+        {
+            selected += { 1, 0 };
+        }
+        if (cheatColor == olc::YELLOW)
+        {
+            selected += { 0, 1 };
+        }
     }
 
-    auto toScreen = [&](int t_x, int t_y)
+    const auto toScreen = [&](int t_x, int t_y)
     {
+        const auto position{ rotate_position(t_x, t_y, m_gameState->world->worldWidth, m_gameState->world->worldHeight, m_gameState->rotation) };
+
         return olc::vi2d
             {
-                ((int)m_gameState->world->camera->origin.x * get_tile_width(m_gameState->zoom)) + (t_x - t_y) * get_tile_width_half(m_gameState->zoom),
-                ((int)m_gameState->world->camera->origin.y * get_tile_height(m_gameState->zoom)) + (t_x + t_y) * get_tile_height_half(m_gameState->zoom)
+                (static_cast<int>(m_gameState->world->camera->origin.x) * get_tile_width(m_gameState->zoom)) + (position.x - position.y) * get_tile_width_half(m_gameState->zoom),
+                (static_cast<int>(m_gameState->world->camera->origin.y) * get_tile_height(m_gameState->zoom)) + (position.x + position.y) * get_tile_height_half(m_gameState->zoom)
             };
     };
 
