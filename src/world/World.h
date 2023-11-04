@@ -100,6 +100,11 @@ namespace mdcii::world
          */
         std::unique_ptr<camera::Camera> camera;
 
+        /**
+         * @brief Contains a 0 for the deep water tile and a 1 for an island tile.
+         */
+        std::vector<int> worldMap;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------

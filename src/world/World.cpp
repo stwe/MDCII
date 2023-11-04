@@ -23,6 +23,7 @@
 #include "resource/MdciiFile.h"
 #include "renderer/Renderer.h"
 #include "camera/Camera.h"
+#include "physics/Aabb.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -84,6 +85,8 @@ void mdcii::world::World::Init(const std::string& t_fileName)
         islands = file.CreateWorldContent(worldWidth, worldHeight);
     }
 
+    worldMap.resize(worldWidth * worldHeight, 0);
+
     for (auto const& island : islands)
     {
         island->InitTiles(gameState->game);
@@ -91,4 +94,18 @@ void mdcii::world::World::Init(const std::string& t_fileName)
 
     renderer = std::make_unique<renderer::Renderer>(this);
     camera = std::make_unique<camera::Camera>();
+
+    for (auto y{ 0 }; y < worldHeight; ++y)
+    {
+        for (auto x{ 0 }; x < worldWidth; ++x)
+        {
+            for (auto const& island : islands)
+            {
+                if (physics::Aabb::PointVsAabb({ x, y }, island->aabb))
+                {
+                    worldMap.at(y * worldWidth + x) = 1;
+                }
+            }
+        }
+    }
 }

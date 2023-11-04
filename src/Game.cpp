@@ -54,7 +54,7 @@ bool mdcii::Game::OnUserCreate()
     stateSystem = std::make_unique<state::StateSystem>();
     stateSystem->AddState(state::StateId::MAIN_MENU, std::make_unique<MainMenuState>(this));
     stateSystem->AddState(state::StateId::NEW_GAME, std::make_unique<GameState>(this));
-    stateSystem->ChangeState(state::StateId::MAIN_MENU);
+    stateSystem->ChangeState(state::StateId::NEW_GAME);
 
     return stateSystem->OnUserCreate();
 }

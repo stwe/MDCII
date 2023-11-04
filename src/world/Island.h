@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Tile.h"
+#include "physics/Aabb.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -77,6 +78,11 @@ namespace mdcii::world
          * @brief The tiles of the island, sorted by index for each rotation.
          */
         std::array<std::vector<Tile>, 4> sortedTiles;
+
+        /**
+         * An Aabb (axis-aligned bounding box) object for collision detection.
+         */
+        physics::Aabb aabb;
 
         //-------------------------------------------------
         // Init

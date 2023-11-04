@@ -86,4 +86,7 @@ void mdcii::world::Island::InitTiles(const Game* t_game)
 
     // revert tiles sorting = sortedTiles DEG0
     tiles = sortedTiles.at(magic_enum::enum_integer(world::Rotation::DEG0));
+
+    // aabb
+    aabb = physics::Aabb(olc::vi2d(startX, startY), olc::vi2d(width, height));
 }

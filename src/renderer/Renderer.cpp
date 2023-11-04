@@ -104,14 +104,6 @@ void mdcii::renderer::Renderer::RenderBuilding(const world::Island* t_island, co
             resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
         )
     );
-
-    m_world->gameState->game->DrawDecal(
-        olc::vf2d(
-            static_cast<float>(screenPosition.x),
-            static_cast<float>(screenPosition.y)
-        ),
-        m_world->gameState->game->assetManager->GetAsset(resource::Asset::GREEN_ISO, m_world->gameState->zoom)->Decal()
-    );
 }
 
 void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island) const
@@ -137,15 +129,24 @@ void mdcii::renderer::Renderer::RenderDeepWater() const
 {
     const auto zoomInt{ magic_enum::enum_integer(m_world->gameState->zoom) };
 
+    // Building 1201
+    const auto atlas{ GetAtlasIndex(752, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+    const auto atlasOffset{ GetAtlasOffset(752, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+
+    const auto ax{ static_cast<float>(atlasOffset.x) };
+    const auto ay{ static_cast<float>(atlasOffset.y) };
+
     for (auto y{ 0 }; y < m_world->worldHeight; ++y)
     {
         for (auto x{ 0 }; x < m_world->worldWidth; ++x)
         {
-            const auto screenPosition{ m_world->ToScreen(x, y) };
+            // skip islands
+            if (m_world->worldMap[y * m_world->worldWidth + x] == 1)
+            {
+                continue;
+            }
 
-            // Building 1201
-            const auto atlas{ GetAtlasIndex(752, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
-            const auto atlasOffset{ GetAtlasOffset(752, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+            const auto screenPosition{ m_world->ToScreen(x, y) };
 
             m_world->gameState->game->DrawPartialDecal(
                 olc::vf2d(
@@ -154,8 +155,8 @@ void mdcii::renderer::Renderer::RenderDeepWater() const
                 ),
                 m_world->gameState->game->tileAtlas->atlas[zoomInt][atlas]->Decal(),
                 olc::vf2d(
-                    static_cast<float>(atlasOffset.x) * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
-                    static_cast<float>(atlasOffset.y) * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
+                    ax * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
+                    ay * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
                 ),
                 olc::vf2d(
                     resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
