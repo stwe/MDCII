@@ -100,16 +100,6 @@ namespace mdcii::renderer
         //-------------------------------------------------
 
         /**
-         * @brief Projects a position into an isometric position on the screen.
-         *
-         * @param t_x The x position.
-         * @param t_y The y position.
-         *
-         * @return The isometric coordinates on the screen.
-         */
-        [[nodiscard]] olc::vi2d ToScreen(int t_x, int t_y) const;
-
-        /**
          * @brief Returns the number of the Texture Atlas on which the given gfx is located.
          *
          * @param t_gfx The sprite index.

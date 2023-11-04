@@ -49,18 +49,26 @@ mdcii::world::World::~World() noexcept
 
 void mdcii::world::World::OnUserUpdate(const float t_elapsedTime, const olc::vf2d& t_vel)
 {
-    /*
-    for (auto const& island : islands)
-    {
-        island->startX += t_vel.x * t_elapsedTime * 32.0f;
-        island->startY += t_vel.y * t_elapsedTime * 32.0f;
-    }
-    */
-
     camera->OnUserUpdate(t_elapsedTime, t_vel);
 
     renderer->RenderDeepWater();
     renderer->RenderIslands();
+}
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+olc::vi2d mdcii::world::World::ToScreen(const int t_x, const int t_y) const
+{
+    const auto position{ rotate_position(t_x, t_y, worldWidth, worldHeight, gameState->rotation) };
+
+    return olc::vi2d{
+        (static_cast<int>(gameState->world->camera->origin.x) * get_tile_width(gameState->zoom))
+        + (position.x - position.y) * get_tile_width_half(gameState->zoom),
+        (static_cast<int>(gameState->world->camera->origin.y) * get_tile_height(gameState->zoom))
+        + (position.x + position.y) * get_tile_height_half(gameState->zoom)
+    };
 }
 
 //-------------------------------------------------

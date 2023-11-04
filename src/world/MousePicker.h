@@ -96,5 +96,33 @@ namespace mdcii::world
          * @brief The mouse offset into cell.
          */
         olc::vi2d m_cellOffset;
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        /**
+         * @brief Updated the mouse position.
+         *
+         * This method calculates the mouse position, the cell the mouse is in,
+         * and the mouse position offset inside the cell, given the game state's zoom level.
+         */
+        void UpdateMousePosition();
+
+        /**
+         * @brief Calculates the selected cell.
+         *
+         * @return The x and y coordinates of the selected cell.
+         */
+        [[nodiscard]] olc::vi2d CalculateSelected() const;
+
+        /**
+         * @brief Calculates the move offset due to cheat color.
+         *
+         * @param t_cheatColor The current cheat color.
+         *
+         * @return The x and y coordinates of movement.
+         */
+        [[nodiscard]] olc::vi2d CalculateSelectedCheatColorOffset(const olc::Pixel& t_cheatColor) const;
     };
 }
