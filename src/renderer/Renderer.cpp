@@ -83,20 +83,21 @@ int mdcii::renderer::Renderer::GetGfxForCurrentRotation(const world::Tile* t_til
 
 void mdcii::renderer::Renderer::RenderBuilding(const world::Island* t_island, const world::Tile* t_tile) const
 {
-    const auto zoomInt{ magic_enum::enum_integer(m_world->gameState->zoom) };
-    const auto gfx{ GetGfxForCurrentRotation(t_tile) };
-    const auto atlas{ GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
-    const auto atlasOffset{ GetAtlasOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
     const auto screenPosition{ m_world->ToScreen(t_tile->islandX +  t_island->startX, t_tile->islandY + t_island->startY) };
 
     // skip render
-    if (screenPosition.x > mdcii::Game::INI.Get<int>("window", "width") + get_tile_width(m_world->gameState->zoom) ||
+    if (screenPosition.x > Game::INI.Get<int>("window", "width") + get_tile_width(m_world->gameState->zoom) ||
         screenPosition.x < -get_tile_width(m_world->gameState->zoom) ||
-        screenPosition.y > mdcii::Game::INI.Get<int>("window", "height") + get_tile_height(m_world->gameState->zoom) ||
+        screenPosition.y > Game::INI.Get<int>("window", "height") + get_tile_height(m_world->gameState->zoom) ||
         screenPosition.y < -get_tile_height(m_world->gameState->zoom))
     {
         return;
     }
+
+    const auto zoomInt{ magic_enum::enum_integer(m_world->gameState->zoom) };
+    const auto gfx{ GetGfxForCurrentRotation(t_tile) };
+    const auto atlas{ GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+    const auto atlasOffset{ GetAtlasOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
 
     m_world->gameState->game->DrawPartialDecal(
         olc::vf2d(
