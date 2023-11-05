@@ -16,7 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include "Island.h"
+#include "DeepWater.h"
 #include "Game.h"
 #include "MdciiAssert.h"
 #include "resource/OriginalResourcesManager.h"
@@ -27,12 +27,14 @@
 // Init
 //-------------------------------------------------
 
-void mdcii::world::Island::InitTiles(const Game* t_game)
+void mdcii::world::DeepWater::InitTiles(const Game* t_game)
 {
-    MDCII_ASSERT(t_game, "[Island::InitTiles()] Null pointer.")
-    MDCII_ASSERT(!tiles.empty(), "[Island::InitTiles()] Invalid number of tiles.")
-    MDCII_ASSERT(width, "[Island::InitTiles()] Invalid width.")
-    MDCII_ASSERT(height, "[Island::InitTiles()] Invalid height.")
+    // todo: same as Island tiles
+
+    MDCII_ASSERT(t_game, "[DeepWater::InitTiles()] Null pointer.")
+    MDCII_ASSERT(!tiles.empty(), "[DeepWater::InitTiles()] Invalid number of tiles.")
+    MDCII_ASSERT(width, "[DeepWater::InitTiles()] Invalid width.")
+    MDCII_ASSERT(height, "[DeepWater::InitTiles()] Invalid height.")
 
     for (auto h{ 0 }; h < height; ++h)
     {
@@ -88,7 +90,4 @@ void mdcii::world::Island::InitTiles(const Game* t_game)
 
     // revert tiles sorting = sortedTiles DEG0
     tiles = sortedTiles.at(magic_enum::enum_integer(world::Rotation::DEG0));
-
-    // aabb
-    aabb = physics::Aabb(olc::vi2d(startX, startY), olc::vi2d(width, height));
 }

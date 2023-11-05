@@ -90,7 +90,7 @@ namespace mdcii::renderer
 
         [[nodiscard]] float CalcOffset(const world::Tile* t_tile, int t_gfx) const;
         [[nodiscard]] int GetGfxForCurrentRotation(const world::Tile* t_tile) const;
-        void RenderBuilding(const world::Island* t_island, const world::Tile* t_tile) const;
+        void RenderBuilding(int t_startX, int t_startY, const world::Tile* t_tile) const;
         void RenderIsland(const world::Island* t_island) const;
         void RenderIslands() const;
         void RenderDeepWater() const;

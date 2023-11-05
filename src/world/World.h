@@ -56,6 +56,11 @@ namespace mdcii::world
      */
     class Island;
 
+    /**
+     * @brief Forward declaration class DeepWater.
+     */
+    class DeepWater;
+
     //-------------------------------------------------
     // World
     //-------------------------------------------------
@@ -91,6 +96,11 @@ namespace mdcii::world
         std::vector<std::unique_ptr<Island>> islands;
 
         /**
+         * @brief Pointer to the DeepWater object.
+         */
+        std::unique_ptr<DeepWater> deepWater;
+
+        /**
          * @brief For rendering this world.
          */
         std::unique_ptr<renderer::Renderer> renderer;
@@ -99,11 +109,6 @@ namespace mdcii::world
          * @brief A camera to move around.
          */
         std::unique_ptr<camera::Camera> camera;
-
-        /**
-         * @brief Contains a 0 for the deep water tile and a 1 for an island tile.
-         */
-        std::vector<int> worldMap;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -145,6 +150,16 @@ namespace mdcii::world
          * @return The isometric coordinates on the screen.
          */
         [[nodiscard]] olc::vi2d ToScreen(int t_x, int t_y) const;
+
+        /**
+         * @brief Checks whether a world position is on any island.
+         *
+         * @param t_x The x position.
+         * @param t_y The y position.
+         *
+         * @return True if the location is on an island. Otherwise false.
+         */
+        [[nodiscard]] bool IsWorldPositionOnAnyIsland(int t_x, int t_y) const;
 
     protected:
 

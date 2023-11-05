@@ -33,6 +33,17 @@ namespace mdcii::world
     struct Tile
     {
         //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * @brief The total number of rotations.
+         *
+         * For better readability.
+         */
+        static constexpr auto NR_OF_ROTATIONS{ 4 };
+
+        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -82,19 +93,29 @@ namespace mdcii::world
         int posoffs{ 0 };
 
         /**
-         * @brief The x position for Deg0 on the parent island.
+         * @brief Represents the x position for DEG0 of a tile relative to its parent island.
+         *
+         * This indicates the local position of the tile on the island, not its global world position.
+         * For example, if the island starts at position 8, 5 in the world, the first tile will be at posX 0.
+         *
+         * However, for deep water areas, posX always represents the world position.
          */
-        int islandX{ -1 };
+        int posX{ -1 };
 
         /**
-         * @brief The y position for Deg0 on the parent island.
+         * @brief Represents the y position for DEG0 of a tile relative to its parent island.
+         *
+         * This indicates the local position of the tile on the island, not its global world position.
+         * For example, if the island starts at position 8, 5 in the world, the first tile will be at posY 0.
+         *
+         * However, for deep water areas, posY always represents the world position.
          */
-        int islandY{ -1 };
+        int posY{ -1 };
 
         /**
          * @brief The index for each rotation is needed for sorting.
          */
-        std::array<int, 4> indices{};
+        std::array<int, NR_OF_ROTATIONS> indices{};
 
         //-------------------------------------------------
         // Getter

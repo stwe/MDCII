@@ -18,12 +18,12 @@
 
 #include "World.h"
 #include "Island.h"
+#include "DeepWater.h"
 #include "MdciiAssert.h"
 #include "GameState.h"
 #include "resource/MdciiFile.h"
 #include "renderer/Renderer.h"
 #include "camera/Camera.h"
-#include "physics/Aabb.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -72,6 +72,19 @@ olc::vi2d mdcii::world::World::ToScreen(const int t_x, const int t_y) const
     };
 }
 
+bool mdcii::world::World::IsWorldPositionOnAnyIsland(const int t_x, const int t_y) const
+{
+    for (auto const& island : islands)
+    {
+        if (physics::Aabb::PointVsAabb({ t_x, t_y }, island->aabb))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 //-------------------------------------------------
 // Init
 //-------------------------------------------------
@@ -80,32 +93,37 @@ void mdcii::world::World::Init(const std::string& t_fileName)
 {
     MDCII_LOG_DEBUG("[World::Init()] Init World.");
 
+    // create islands that encompass all island tiles and set worldWidth and worldHeight
     if (resource::MdciiFile file{ t_fileName }; file.LoadJsonFromFile())
     {
         islands = file.CreateWorldContent(worldWidth, worldHeight);
     }
-
-    worldMap.resize(worldWidth * worldHeight, 0);
 
     for (auto const& island : islands)
     {
         island->InitTiles(gameState->game);
     }
 
-    renderer = std::make_unique<renderer::Renderer>(this);
-    camera = std::make_unique<camera::Camera>();
+    // create deep water area
+    deepWater = std::make_unique<DeepWater>();
+    deepWater->width = worldWidth;
+    deepWater->height = worldHeight;
+    deepWater->tiles.resize(worldWidth * worldHeight);
 
     for (auto y{ 0 }; y < worldHeight; ++y)
     {
         for (auto x{ 0 }; x < worldWidth; ++x)
         {
-            for (auto const& island : islands)
+            if (!IsWorldPositionOnAnyIsland(x, y))
             {
-                if (physics::Aabb::PointVsAabb({ x, y }, island->aabb))
-                {
-                    worldMap.at(y * worldWidth + x) = 1;
-                }
+                deepWater->tiles.at(y * worldWidth + x).buildingId = 1201;
             }
         }
     }
+
+    deepWater->InitTiles(gameState->game);
+
+    // renderer && camera
+    renderer = std::make_unique<renderer::Renderer>(this);
+    camera = std::make_unique<camera::Camera>();
 }

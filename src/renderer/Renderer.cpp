@@ -21,10 +21,9 @@
 #include "GameState.h"
 #include "MdciiAssert.h"
 #include "world/Island.h"
+#include "world/DeepWater.h"
 #include "world/World.h"
 #include "resource/TileAtlas.h"
-#include "resource/AssetManager.h"
-#include "camera/Camera.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -81,9 +80,9 @@ int mdcii::renderer::Renderer::GetGfxForCurrentRotation(const world::Tile* t_til
     return t_tile->gfxs[magic_enum::enum_integer(worldRotation)];
 }
 
-void mdcii::renderer::Renderer::RenderBuilding(const world::Island* t_island, const world::Tile* t_tile) const
+void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_startY, const world::Tile* t_tile) const
 {
-    const auto screenPosition{ m_world->ToScreen(t_tile->islandX +  t_island->startX, t_tile->islandY + t_island->startY) };
+    const auto screenPosition{ m_world->ToScreen(t_tile->posX +  t_startX, t_tile->posY + t_startY) };
 
     // skip render
     if (screenPosition.x > Game::INI.Get<int>("window", "width") + get_tile_width(m_world->gameState->zoom) ||
@@ -122,7 +121,7 @@ void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island) cons
     {
         if (tile.HasBuilding())
         {
-            RenderBuilding(t_island, &tile);
+            RenderBuilding(t_island->startX, t_island->startY, &tile);
         }
     }
 }
@@ -137,51 +136,11 @@ void mdcii::renderer::Renderer::RenderIslands() const
 
 void mdcii::renderer::Renderer::RenderDeepWater() const
 {
-    const auto zoomInt{ magic_enum::enum_integer(m_world->gameState->zoom) };
-
-    // Building 1201
-    const auto atlas{ GetAtlasIndex(752, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
-    const auto atlasOffset{ GetAtlasOffset(752, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
-
-    const auto ax{ static_cast<float>(atlasOffset.x) };
-    const auto ay{ static_cast<float>(atlasOffset.y) };
-
-    for (auto y{ 0 }; y < m_world->worldHeight; ++y)
+    for (const auto& tile : m_world->deepWater->sortedTiles[magic_enum::enum_integer(m_world->gameState->rotation)])
     {
-        for (auto x{ 0 }; x < m_world->worldWidth; ++x)
+        if (tile.HasBuilding())
         {
-            // skip islands
-            if (m_world->worldMap[y * m_world->worldWidth + x] == 1)
-            {
-                continue;
-            }
-
-            const auto screenPosition{ m_world->ToScreen(x, y) };
-
-            // skip render
-            if (screenPosition.x > mdcii::Game::INI.Get<int>("window", "width") + get_tile_width(m_world->gameState->zoom) ||
-                screenPosition.x < -get_tile_width(m_world->gameState->zoom) ||
-                screenPosition.y > mdcii::Game::INI.Get<int>("window", "height") + get_tile_height(m_world->gameState->zoom) ||
-                screenPosition.y < -get_tile_height(m_world->gameState->zoom))
-            {
-                continue;
-            }
-
-            m_world->gameState->game->DrawPartialDecal(
-                olc::vf2d(
-                    static_cast<float>(screenPosition.x),
-                    static_cast<float>(screenPosition.y)
-                ),
-                m_world->gameState->game->tileAtlas->atlas[zoomInt][atlas]->Decal(),
-                olc::vf2d(
-                    ax * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
-                    ay * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
-                ),
-                olc::vf2d(
-                    resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
-                    resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
-                )
-            );
+            RenderBuilding(0, 0, &tile);
         }
     }
 }

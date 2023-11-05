@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Tile.h"
-#include "physics/Aabb.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -36,13 +35,13 @@ namespace mdcii
 namespace mdcii::world
 {
     //-------------------------------------------------
-    // Island
+    // DeepWater
     //-------------------------------------------------
 
     /**
-     * @brief Represents an Island.
+     * @brief Represents the deep water area.
      */
-    class Island
+    class DeepWater
     {
     public:
         //-------------------------------------------------
@@ -50,46 +49,31 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief The width of the island.
+         * @brief The width of the deep water area.
          */
         int width{ -1 };
 
         /**
-         * @brief The height of the island.
+         * @brief The height of the deep water area.
          */
         int height{ -1 };
 
         /**
-         * @brief The X-coordinate of the island's initial position in the world.
-         */
-        int startX{ -1 };
-
-        /**
-         * @brief The Y-coordinate of the island's initial position in the world.
-         */
-        int startY{ -1 };
-
-        /**
-         * @brief The tiles of the island.
+         * @brief The tiles of the deep water area.
          */
         std::vector<Tile> tiles;
 
         /**
-         * @brief The tiles of the island, sorted by index for each rotation.
+         * @brief The tiles of the deep water area, sorted by index for each rotation.
          */
         std::array<std::vector<Tile>, Tile::NR_OF_ROTATIONS> sortedTiles;
-
-        /**
-         * An Aabb (axis-aligned bounding box) object for collision detection.
-         */
-        physics::Aabb aabb;
 
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
 
         /**
-         * @brief Initializes all tiles of the island.
+         * @brief Initializes all tiles.
          *
          * @param t_game Pointer to the Game.
          */
