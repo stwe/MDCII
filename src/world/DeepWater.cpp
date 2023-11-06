@@ -36,6 +36,7 @@ void mdcii::world::DeepWater::InitTiles(const Game* t_game)
     MDCII_ASSERT(width, "[DeepWater::InitTiles()] Invalid width.")
     MDCII_ASSERT(height, "[DeepWater::InitTiles()] Invalid height.")
 
+    // set world positions
     for (auto h{ 0 }; h < height; ++h)
     {
         for (auto w{ 0 }; w < width; ++w)
@@ -43,34 +44,47 @@ void mdcii::world::DeepWater::InitTiles(const Game* t_game)
             auto& tile{ tiles.at(h * width + w) };
             tile.posX = w;
             tile.posY = h;
+        }
+    }
 
-            if (tile.HasBuilding())
+    // remove tiles that don't have the buildingId 1201
+    tiles.erase(
+        std::remove_if(
+            tiles.begin(),
+            tiles.end(),
+            [](const auto& tile) { return tile.buildingId != 1201; }
+        ),
+        tiles.end()
+    );
+
+    for (auto& tile : tiles)
+    {
+        if (tile.HasBuilding())
+        {
+            // pre-calculate a gfx for each rotation
+            const auto& building{ t_game->originalResourcesManager->GetBuildingById(tile.buildingId) };
+            const auto gfx0{ building.gfx };
+
+            tile.gfxs.push_back(gfx0);
+            if (building.rotate > 0)
             {
-                // pre-calculate a gfx for each rotation
-                const auto& building{ t_game->originalResourcesManager->GetBuildingById(tile.buildingId) };
-                const auto gfx0{ building.gfx };
-
-                tile.gfxs.push_back(gfx0);
-                if (building.rotate > 0)
-                {
-                    tile.gfxs.push_back(gfx0 + (1 * building.rotate));
-                    tile.gfxs.push_back(gfx0 + (2 * building.rotate));
-                    tile.gfxs.push_back(gfx0 + (3 * building.rotate));
-                }
-
-                // set posoffs
-                tile.posoffs = building.posoffs;
+                tile.gfxs.push_back(gfx0 + (1 * building.rotate));
+                tile.gfxs.push_back(gfx0 + (2 * building.rotate));
+                tile.gfxs.push_back(gfx0 + (3 * building.rotate));
             }
 
-            tile.indices[0] = renderer::Renderer::GetMapIndex(tile.posX, tile
-                .posY, width, height, world::Rotation::DEG0);
-            tile.indices[1] = renderer::Renderer::GetMapIndex(tile.posX, tile
-                .posY, width, height, world::Rotation::DEG90);
-            tile.indices[2] = renderer::Renderer::GetMapIndex(tile.posX, tile
-                .posY, width, height, world::Rotation::DEG180);
-            tile.indices[3] = renderer::Renderer::GetMapIndex(tile.posX, tile
-                .posY, width, height, world::Rotation::DEG270);
+            // set posoffs
+            tile.posoffs = building.posoffs;
         }
+
+        tile.indices[0] = renderer::Renderer::GetMapIndex(tile.posX, tile
+            .posY, width, height, world::Rotation::DEG0);
+        tile.indices[1] = renderer::Renderer::GetMapIndex(tile.posX, tile
+            .posY, width, height, world::Rotation::DEG90);
+        tile.indices[2] = renderer::Renderer::GetMapIndex(tile.posX, tile
+            .posY, width, height, world::Rotation::DEG180);
+        tile.indices[3] = renderer::Renderer::GetMapIndex(tile.posX, tile
+            .posY, width, height, world::Rotation::DEG270);
     }
 
     // sort for rendering

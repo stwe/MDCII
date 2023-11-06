@@ -80,7 +80,7 @@ int mdcii::renderer::Renderer::GetGfxForCurrentRotation(const world::Tile* t_til
     return t_tile->gfxs[magic_enum::enum_integer(worldRotation)];
 }
 
-void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_startY, const world::Tile* t_tile) const
+void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_startY, const world::Tile* t_tile, int& t_skip) const
 {
     const auto screenPosition{ m_world->ToScreen(t_tile->posX +  t_startX, t_tile->posY + t_startY) };
 
@@ -90,6 +90,7 @@ void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_s
         screenPosition.y > Game::INI.Get<int>("window", "height") + get_tile_height(m_world->gameState->zoom) ||
         screenPosition.y < -get_tile_height(m_world->gameState->zoom))
     {
+        t_skip++;
         return;
     }
 
@@ -117,11 +118,12 @@ void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_s
 
 void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island) const
 {
+    // todo
     for (const auto& tile : t_island->sortedTiles[magic_enum::enum_integer(m_world->gameState->rotation)])
     {
         if (tile.HasBuilding())
         {
-            RenderBuilding(t_island->startX, t_island->startY, &tile);
+            //RenderBuilding(t_island->startX, t_island->startY, &tile);
         }
     }
 }
@@ -136,13 +138,15 @@ void mdcii::renderer::Renderer::RenderIslands() const
 
 void mdcii::renderer::Renderer::RenderDeepWater() const
 {
+    auto c{ 0 };
+
+    // todo
     for (const auto& tile : m_world->deepWater->sortedTiles[magic_enum::enum_integer(m_world->gameState->rotation)])
     {
-        if (tile.HasBuilding())
-        {
-            RenderBuilding(0, 0, &tile);
-        }
+        RenderBuilding(0, 0, &tile, c);
     }
+
+    //MDCII_LOG_DEBUG("Skip Tiles: {}", c);
 }
 
 //-------------------------------------------------

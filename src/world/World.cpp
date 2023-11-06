@@ -53,7 +53,7 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime, const olc::vf2
     camera->OnUserUpdate(t_elapsedTime, t_vel);
 
     renderer->RenderDeepWater();
-    renderer->RenderIslands();
+    //renderer->RenderIslands();
 }
 
 //-------------------------------------------------
