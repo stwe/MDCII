@@ -33,6 +33,8 @@ mdcii::renderer::Renderer::Renderer(const world::World* t_world)
     : m_world{ t_world }
 {
     MDCII_LOG_DEBUG("[Renderer::Renderer()] Create Renderer.");
+
+    MDCII_ASSERT(m_world, "[Renderer::Renderer()] Null pointer.")
 }
 
 mdcii::renderer::Renderer::~Renderer() noexcept

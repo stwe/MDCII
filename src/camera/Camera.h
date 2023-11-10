@@ -20,6 +20,18 @@
 
 #include "vendor/olc/olcPixelGameEngine.h"
 
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::world
+{
+    /**
+     * @brief Forward declaration class World.
+     */
+    class World;
+}
+
 namespace mdcii::camera
 {
     //-------------------------------------------------
@@ -34,12 +46,21 @@ namespace mdcii::camera
         //-------------------------------------------------
 
         olc::vf2d origin{ 0.0f, 0.0f };
+        olc::vi2d worldPosition{ 0, 0 };
+        olc::vi2d screenPosition{ 0, 0 };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        Camera();
+        Camera() = delete;
+
+        /**
+         * @brief Constructs a new Camera object.
+         *
+         * @param t_world Pointer to the parent World.
+         */
+        explicit Camera(const world::World* t_world);
 
         Camera(const Camera& t_other) = delete;
         Camera(Camera&& t_other) noexcept = delete;
@@ -57,6 +78,13 @@ namespace mdcii::camera
     protected:
 
     private:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
 
+        /**
+         * @brief Pointer to the parent World.
+         */
+        const world::World* m_world{ nullptr };
     };
 }

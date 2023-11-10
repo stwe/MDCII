@@ -17,15 +17,22 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "Camera.h"
-#include "Log.h"
+#include "Game.h"
+#include "MdciiAssert.h"
+#include "GameState.h"
+#include "world/World.h"
+#include "world/DeepWater.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::camera::Camera::Camera()
+mdcii::camera::Camera::Camera(const world::World* t_world)
+    : m_world{ t_world }
 {
     MDCII_LOG_DEBUG("[Camera::Camera()] Create Camera.");
+
+    MDCII_ASSERT(m_world, "[Camera::Camera()] Null pointer.")
 }
 
 mdcii::camera::Camera::~Camera() noexcept
@@ -41,4 +48,13 @@ void mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime, const olc::v
 {
     origin.x += t_vel.x * t_elapsedTime * 32.0f;
     origin.y += t_vel.y * t_elapsedTime * 32.0f;
+
+    worldPosition.x = static_cast<int>(origin.x);
+    worldPosition.y = static_cast<int>(origin.y);
+
+    screenPosition.x = worldPosition.x * get_tile_width(m_world->gameState->zoom);
+    screenPosition.y = worldPosition.y * get_tile_height(m_world->gameState->zoom);
+
+    m_world->gameState->game->DrawString(4, 14, fmt::format("Camera world: {}, {}", std::to_string(worldPosition.x), std::to_string(worldPosition.y)), olc::WHITE);
+    m_world->gameState->game->DrawString(4, 24, fmt::format("Camera screen: {}, {}", std::to_string(screenPosition.x), std::to_string(screenPosition.y)), olc::WHITE);
 }

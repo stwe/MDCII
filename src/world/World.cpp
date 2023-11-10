@@ -65,10 +65,8 @@ olc::vi2d mdcii::world::World::ToScreen(const int t_x, const int t_y) const
     const auto position{ rotate_position(t_x, t_y, worldWidth, worldHeight, gameState->rotation) };
 
     return olc::vi2d{
-        (static_cast<int>(gameState->world->camera->origin.x) * get_tile_width(gameState->zoom))
-        + (position.x - position.y) * get_tile_width_half(gameState->zoom),
-        (static_cast<int>(gameState->world->camera->origin.y) * get_tile_height(gameState->zoom))
-        + (position.x + position.y) * get_tile_height_half(gameState->zoom)
+        camera->screenPosition.x + (position.x - position.y) * get_tile_width_half(gameState->zoom),
+        camera->screenPosition.y + (position.x + position.y) * get_tile_height_half(gameState->zoom)
     };
 }
 
@@ -125,5 +123,5 @@ void mdcii::world::World::Init(const std::string& t_fileName)
 
     // renderer && camera
     renderer = std::make_unique<renderer::Renderer>(this);
-    camera = std::make_unique<camera::Camera>();
+    camera = std::make_unique<camera::Camera>(this);
 }
