@@ -54,49 +54,6 @@ bool mdcii::GameState::OnUserCreate()
 
 bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
 {
-    // zoom
-    if (game->GetMouseWheel() > 0)
-    {
-        --zoom;
-        MDCII_LOG_DEBUG("Zoom-- {}", magic_enum::enum_name(zoom));
-    }
-    if (game->GetMouseWheel() < 0)
-    {
-        ++zoom;
-        MDCII_LOG_DEBUG("Zoom++ {}", magic_enum::enum_name(zoom));
-    }
-
-    // rotation
-    if (game->GetKey(olc::Key::PGUP).bPressed)
-    {
-        ++rotation;
-        MDCII_LOG_DEBUG("World rotation++ {}", magic_enum::enum_name(rotation));
-    }
-    if (game->GetKey(olc::Key::PGDN).bPressed)
-    {
-        --rotation;
-        MDCII_LOG_DEBUG("World rotation-- {}", magic_enum::enum_name(rotation));
-    }
-
-    // camera
-    olc::vf2d vel{ 0.0f, 0.0f };
-    if (game->GetKey(olc::Key::UP).bHeld)
-    {
-        vel += { 0, -1 };
-    }
-    if (game->GetKey(olc::Key::DOWN).bHeld)
-    {
-        vel += { 0, 1 };
-    }
-    if (game->GetKey(olc::Key::LEFT).bHeld)
-    {
-        vel += { -1, 0 };
-    }
-    if (game->GetKey(olc::Key::RIGHT).bHeld)
-    {
-        vel += { 1, 0 };
-    }
-
     // exit
     if (game->GetKey(olc::Key::ESCAPE).bHeld)
     {
@@ -106,7 +63,7 @@ bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
     // world
     game->SetGameLayer();
     game->Clear(olc::BLACK);
-    world->OnUserUpdate(t_elapsedTime, vel);
+    world->OnUserUpdate(t_elapsedTime);
 
     // mouse picker
     mousePicker->OnUserUpdate();

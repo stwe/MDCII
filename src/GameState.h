@@ -18,8 +18,7 @@
 
 #pragma once
 
-#include "world/Zoom.h"
-#include "world/Rotation.h"
+#include <memory>
 #include "state/State.h"
 
 //-------------------------------------------------
@@ -63,8 +62,6 @@ namespace mdcii
         // Member
         //-------------------------------------------------
 
-        world::Zoom zoom{ world::Zoom::GFX };
-        world::Rotation rotation{ world::Rotation::DEG0 };
         std::unique_ptr<world::MousePicker> mousePicker;
         std::unique_ptr<world::World> world;
 

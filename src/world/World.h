@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <vector>
 #include "vendor/olc/olcPixelGameEngine.h"
 
 //-------------------------------------------------
@@ -135,7 +134,7 @@ namespace mdcii::world
         // Logic
         //-------------------------------------------------
 
-        void OnUserUpdate(float t_elapsedTime, const olc::vf2d& t_vel);
+        void OnUserUpdate(float t_elapsedTime);
 
         //-------------------------------------------------
         // Helper

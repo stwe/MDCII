@@ -49,13 +49,13 @@ void mdcii::world::MousePicker::OnUserUpdate()
 {
     UpdateMousePosition();
 
-    const auto* cheatSprite{ m_gameState->game->assetManager->GetAsset(resource::Asset::CHEAT, m_gameState->zoom)->Sprite() };
+    const auto* cheatSprite{ m_gameState->game->assetManager->GetAsset(resource::Asset::CHEAT, m_gameState->world->camera->zoom)->Sprite() };
 
     auto selected{ CalculateSelected() };
     selected += CalculateSelectedCheatColorOffset(cheatSprite->GetPixel(m_cellOffset.x, m_cellOffset.y));
 
     const auto ts{ m_gameState->world->ToScreen(selected.x, selected.y) };
-    auto* mouseSprite{ m_gameState->game->assetManager->GetAsset(resource::Asset::PURPLE_ISO, m_gameState->zoom)->Decal() };
+    auto* mouseSprite{ m_gameState->game->assetManager->GetAsset(resource::Asset::PURPLE_ISO, m_gameState->world->camera->zoom)->Decal() };
 
     m_gameState->game->DrawDecal(
         olc::vf2d(
@@ -75,13 +75,13 @@ void mdcii::world::MousePicker::OnUserUpdate()
 void mdcii::world::MousePicker::UpdateMousePosition()
 {
     m_mousePosition = olc::vi2d(m_gameState->game->GetMouseX(), m_gameState->game->GetMouseY());
-    m_cell = olc::vi2d(m_mousePosition.x / get_tile_width(m_gameState->zoom), m_mousePosition.y / get_tile_height(m_gameState->zoom));
-    m_cellOffset = olc::vi2d( m_mousePosition.x % get_tile_width(m_gameState->zoom), m_mousePosition.y % get_tile_height(m_gameState->zoom));
+    m_cell = olc::vi2d(m_mousePosition.x / get_tile_width(m_gameState->world->camera->zoom), m_mousePosition.y / get_tile_height(m_gameState->world->camera->zoom));
+    m_cellOffset = olc::vi2d( m_mousePosition.x % get_tile_width(m_gameState->world->camera->zoom), m_mousePosition.y % get_tile_height(m_gameState->world->camera->zoom));
 }
 
 olc::vi2d mdcii::world::MousePicker::CalculateSelected() const
 {
-    switch(m_gameState->rotation)
+    switch(m_gameState->world->camera->rotation)
     {
     case Rotation::DEG0:
         return {
@@ -120,7 +120,7 @@ olc::vi2d mdcii::world::MousePicker::CalculateSelectedCheatColorOffset(const olc
 {
     olc::vi2d offset;
 
-    switch (m_gameState->rotation)
+    switch (m_gameState->world->camera->rotation)
     {
     case Rotation::DEG0:
         if (t_cheatColor == olc::RED)

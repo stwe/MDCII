@@ -21,7 +21,6 @@
 #include "MdciiAssert.h"
 #include "GameState.h"
 #include "world/World.h"
-#include "world/DeepWater.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -44,16 +43,59 @@ mdcii::camera::Camera::~Camera() noexcept
 // Logic
 //-------------------------------------------------
 
-void mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime, const olc::vf2d& t_vel)
+void mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
 {
-    origin.x += t_vel.x * t_elapsedTime * 32.0f;
-    origin.y += t_vel.y * t_elapsedTime * 32.0f;
+    // zoom
+    if (m_world->gameState->game->GetMouseWheel() > 0)
+    {
+        --zoom;
+        MDCII_LOG_DEBUG("Zoom-- {}", magic_enum::enum_name(zoom));
+    }
+    if (m_world->gameState->game->GetMouseWheel() < 0)
+    {
+        ++zoom;
+        MDCII_LOG_DEBUG("Zoom++ {}", magic_enum::enum_name(zoom));
+    }
+
+    // rotation
+    if (m_world->gameState->game->GetKey(olc::Key::PGUP).bPressed)
+    {
+        ++rotation;
+        MDCII_LOG_DEBUG("World rotation++ {}", magic_enum::enum_name(rotation));
+    }
+    if (m_world->gameState->game->GetKey(olc::Key::PGDN).bPressed)
+    {
+        --rotation;
+        MDCII_LOG_DEBUG("World rotation-- {}", magic_enum::enum_name(rotation));
+    }
+
+    // world
+    olc::vf2d vel{ 0.0f, 0.0f };
+    if (m_world->gameState->game->GetKey(olc::Key::UP).bHeld)
+    {
+        vel += { 0, -1 };
+    }
+    if (m_world->gameState->game->GetKey(olc::Key::DOWN).bHeld)
+    {
+        vel += { 0, 1 };
+    }
+    if (m_world->gameState->game->GetKey(olc::Key::LEFT).bHeld)
+    {
+        vel += { -1, 0 };
+    }
+    if (m_world->gameState->game->GetKey(olc::Key::RIGHT).bHeld)
+    {
+        vel += { 1, 0 };
+    }
+
+    origin.x += vel.x * t_elapsedTime * SPEED;
+    origin.y += vel.y * t_elapsedTime * SPEED;
 
     worldPosition.x = static_cast<int>(origin.x);
     worldPosition.y = static_cast<int>(origin.y);
 
-    screenPosition.x = worldPosition.x * get_tile_width(m_world->gameState->zoom);
-    screenPosition.y = worldPosition.y * get_tile_height(m_world->gameState->zoom);
+    screenPosition.x = worldPosition.x * get_tile_width(zoom);
+    screenPosition.y = worldPosition.y * get_tile_height(zoom);
 
     m_world->gameState->game->DrawString(4, 14, fmt::format("Camera world: {}, {}", std::to_string(worldPosition.x), std::to_string(worldPosition.y)), olc::WHITE);
     m_world->gameState->game->DrawString(4, 24, fmt::format("Camera screen: {}, {}", std::to_string(screenPosition.x), std::to_string(screenPosition.y)), olc::WHITE);

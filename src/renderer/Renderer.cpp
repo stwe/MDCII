@@ -24,6 +24,7 @@
 #include "world/DeepWater.h"
 #include "world/World.h"
 #include "resource/TileAtlas.h"
+#include "camera/Camera.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -49,11 +50,11 @@ mdcii::renderer::Renderer::~Renderer() noexcept
 float mdcii::renderer::Renderer::CalcOffset(const world::Tile* t_tile, const int t_gfx) const
 {
     auto offset{ 0.0f };
-    const auto zoomInt{ magic_enum::enum_integer(m_world->gameState->zoom) };
-    auto tileHeight{ get_tile_height(m_world->gameState->zoom) };
+    const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
+    auto tileHeight{ get_tile_height(m_world->camera->zoom) };
     const auto gfxHeight{ m_world->gameState->game->tileAtlas->heights[zoomInt][t_gfx] };
 
-    if (m_world->gameState->zoom == world::Zoom::GFX)
+    if (m_world->camera->zoom == world::Zoom::GFX)
     {
         tileHeight = 31;
     }
@@ -78,7 +79,7 @@ int mdcii::renderer::Renderer::GetGfxForCurrentRotation(const world::Tile* t_til
         return t_tile->gfxs[0];
     }
 
-    const auto worldRotation{ m_world->gameState->rotation + world::int_to_rotation(t_tile->rotation) };
+    const auto worldRotation{ m_world->camera->rotation + world::int_to_rotation(t_tile->rotation) };
     return t_tile->gfxs[magic_enum::enum_integer(worldRotation)];
 }
 
@@ -87,16 +88,16 @@ void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_s
     const auto screenPosition{ m_world->ToScreen(t_tile->posX +  t_startX, t_tile->posY + t_startY) };
 
     // skip render
-    if (screenPosition.x > Game::INI.Get<int>("window", "width") + get_tile_width(m_world->gameState->zoom) ||
-        screenPosition.x < -get_tile_width(m_world->gameState->zoom) ||
-        screenPosition.y > Game::INI.Get<int>("window", "height") + get_tile_height(m_world->gameState->zoom) ||
-        screenPosition.y < -get_tile_height(m_world->gameState->zoom))
+    if (screenPosition.x > Game::INI.Get<int>("window", "width") + get_tile_width(m_world->camera->zoom) ||
+        screenPosition.x < -get_tile_width(m_world->camera->zoom) ||
+        screenPosition.y > Game::INI.Get<int>("window", "height") + get_tile_height(m_world->camera->zoom) ||
+        screenPosition.y < -get_tile_height(m_world->camera->zoom))
     {
         t_skip++;
         return;
     }
 
-    const auto zoomInt{ magic_enum::enum_integer(m_world->gameState->zoom) };
+    const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
     const auto gfx{ GetGfxForCurrentRotation(t_tile) };
     const auto atlas{ GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
     const auto atlasOffset{ GetAtlasOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
@@ -121,7 +122,7 @@ void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_s
 void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island) const
 {
     // todo
-    for (const auto& tile : t_island->sortedTiles[magic_enum::enum_integer(m_world->gameState->rotation)])
+    for (const auto& tile : t_island->sortedTiles[magic_enum::enum_integer(m_world->camera->rotation)])
     {
         if (tile.HasBuilding())
         {
@@ -143,7 +144,7 @@ void mdcii::renderer::Renderer::RenderDeepWater() const
     auto c{ 0 };
 
     // todo
-    for (const auto& tile : m_world->deepWater->sortedTiles[magic_enum::enum_integer(m_world->gameState->rotation)])
+    for (const auto& tile : m_world->deepWater->sortedTiles[magic_enum::enum_integer(m_world->camera->rotation)])
     {
         RenderBuilding(0, 0, &tile, c);
     }

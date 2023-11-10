@@ -18,7 +18,8 @@
 
 #pragma once
 
-#include "vendor/olc/olcPixelGameEngine.h"
+#include "world/Zoom.h"
+#include "world/Rotation.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -38,6 +39,9 @@ namespace mdcii::camera
     // Camera
     //-------------------------------------------------
 
+    /**
+     * @brief Represents a camera.
+     */
     class Camera
     {
     public:
@@ -45,8 +49,29 @@ namespace mdcii::camera
         // Member
         //-------------------------------------------------
 
+        /**
+         * @brief The current zoom.
+         */
+        world::Zoom zoom{ world::Zoom::GFX };
+
+        /**
+         * @brief The current rotation.
+         */
+        world::Rotation rotation{ world::Rotation::DEG0 };
+
+        /**
+         * @brief Where to place first tile (0, 0) on screen (in tile size steps).
+         */
         olc::vf2d origin{ 0.0f, 0.0f };
+
+        /**
+         * @brief The world position of the camera.
+         */
         olc::vi2d worldPosition{ 0, 0 };
+
+        /**
+         * @brief The screen position of the camera.
+         */
         olc::vi2d screenPosition{ 0, 0 };
 
         //-------------------------------------------------
@@ -73,11 +98,20 @@ namespace mdcii::camera
         // Logic
         //-------------------------------------------------
 
-        void OnUserUpdate(float t_elapsedTime, const olc::vf2d& t_vel);
+        void OnUserUpdate(float t_elapsedTime);
 
     protected:
 
     private:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * @brief The speed of the camera.
+         */
+        static constexpr auto SPEED{ 32.0f };
+
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
