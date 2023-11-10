@@ -87,7 +87,7 @@ void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_s
 {
     const auto screenPosition{ m_world->ToScreen(t_tile->posX +  t_startX, t_tile->posY + t_startY) };
 
-    // skip render
+    /*
     if (screenPosition.x > Game::INI.Get<int>("window", "width") + get_tile_width(m_world->camera->zoom) ||
         screenPosition.x < -get_tile_width(m_world->camera->zoom) ||
         screenPosition.y > Game::INI.Get<int>("window", "height") + get_tile_height(m_world->camera->zoom) ||
@@ -95,6 +95,7 @@ void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_s
     {
         return;
     }
+    */
 
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
     const auto gfx{ GetGfxForCurrentRotation(t_tile) };
@@ -120,12 +121,11 @@ void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_s
 
 void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island) const
 {
-    // todo
     for (const auto& tile : t_island->sortedTiles[magic_enum::enum_integer(m_world->camera->rotation)])
     {
         if (tile.HasBuilding())
         {
-            //RenderBuilding(t_island->startX, t_island->startY, &tile);
+            RenderBuilding(t_island->startX, t_island->startY, &tile);
         }
     }
 }

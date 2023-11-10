@@ -96,7 +96,7 @@ namespace mdcii::world
          * @brief Represents the x position for DEG0 of a tile relative to its parent island.
          *
          * This indicates the local position of the tile on the island, not its global world position.
-         * For example, if the island starts at position 8, 5 in the world, the first tile will be at posX 0.
+         * For example, if the island starts at position (8, 5) in the world, the first tile will be at posX 0.
          *
          * However, for deep water areas, posX always represents the world position.
          */
@@ -106,7 +106,7 @@ namespace mdcii::world
          * @brief Represents the y position for DEG0 of a tile relative to its parent island.
          *
          * This indicates the local position of the tile on the island, not its global world position.
-         * For example, if the island starts at position 8, 5 in the world, the first tile will be at posY 0.
+         * For example, if the island starts at position (8, 5) in the world, the first tile will be at posY 0.
          *
          * However, for deep water areas, posY always represents the world position.
          */

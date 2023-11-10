@@ -51,32 +51,30 @@ mdcii::world::World::~World() noexcept
 
 void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
 {
+    auto shouldBeRemoved = [&](const Tile& t_tile)
+    {
+        const auto screenPosition{ ToScreen(t_tile.posX, t_tile.posY) };
+        return screenPosition.x > Game::INI.Get<int>("window", "width") + get_tile_width(camera->zoom) ||
+               screenPosition.x < -get_tile_width_half(camera->zoom) ||
+               screenPosition.y > Game::INI.Get<int>("window", "height") + get_tile_height(camera->zoom) ||
+               screenPosition.y < -get_tile_height_half(camera->zoom);
+    };
+
     // handle first access
-    auto first{ false };
-    if (deepWater->currentTiles.empty())
+    if (deepWater->currentTiles.empty() && m_flag)
     {
         deepWater->currentTiles = deepWater->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
-        MDCII_LOG_DEBUG("[World::OnUserUpdate()] Initializing deep water current tiles.");
-        first = true;
+        deepWater->currentTiles.erase(std::remove_if(deepWater->currentTiles.begin(), deepWater->currentTiles.end(), shouldBeRemoved), deepWater->currentTiles.end());
+        MDCII_LOG_DEBUG("[World::OnUserUpdate()] Set deep water current tiles.");
+        m_flag = false;
     }
 
-    if (camera->OnUserUpdate(t_elapsedTime) || first)
+    // key pressed
+    if (camera->OnUserUpdate(t_elapsedTime) && !m_flag)
     {
-        // clear
+        // clear, set new && remove
         std::vector<Tile>().swap(deepWater->currentTiles);
-
-        // set new / copy
         deepWater->currentTiles = deepWater->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
-
-        auto shouldBeRemoved = [&](const Tile& t_tile)
-        {
-            const auto screenPosition{ ToScreen(t_tile.posX, t_tile.posY) };
-            return screenPosition.x > Game::INI.Get<int>("window", "width") + get_tile_width(camera->zoom) ||
-                   screenPosition.x < -get_tile_width(camera->zoom) ||
-                   screenPosition.y > Game::INI.Get<int>("window", "height") + get_tile_height(camera->zoom) ||
-                   screenPosition.y < -get_tile_height(camera->zoom);
-        };
-
         deepWater->currentTiles.erase(std::remove_if(deepWater->currentTiles.begin(), deepWater->currentTiles.end(), shouldBeRemoved), deepWater->currentTiles.end());
         MDCII_LOG_DEBUG("[World::OnUserUpdate()] Render {} current deep water tiles.", deepWater->currentTiles.size());
     }
