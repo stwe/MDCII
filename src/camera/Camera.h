@@ -98,7 +98,7 @@ namespace mdcii::camera
         // Logic
         //-------------------------------------------------
 
-        void OnUserUpdate(float t_elapsedTime);
+        [[nodiscard]] bool OnUserUpdate(float t_elapsedTime);
 
     protected:
 

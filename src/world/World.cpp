@@ -17,6 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "World.h"
+#include "Game.h"
 #include "Island.h"
 #include "DeepWater.h"
 #include "MdciiAssert.h"
@@ -50,7 +51,35 @@ mdcii::world::World::~World() noexcept
 
 void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
 {
-    camera->OnUserUpdate(t_elapsedTime);
+    // handle first access
+    auto first{ false };
+    if (deepWater->currentTiles.empty())
+    {
+        deepWater->currentTiles = deepWater->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
+        MDCII_LOG_DEBUG("[World::OnUserUpdate()] Initializing deep water current tiles.");
+        first = true;
+    }
+
+    if (camera->OnUserUpdate(t_elapsedTime) || first)
+    {
+        // clear
+        std::vector<Tile>().swap(deepWater->currentTiles);
+
+        // set new / copy
+        deepWater->currentTiles = deepWater->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
+
+        auto shouldBeRemoved = [&](const Tile& t_tile)
+        {
+            const auto screenPosition{ ToScreen(t_tile.posX, t_tile.posY) };
+            return screenPosition.x > Game::INI.Get<int>("window", "width") + get_tile_width(camera->zoom) ||
+                   screenPosition.x < -get_tile_width(camera->zoom) ||
+                   screenPosition.y > Game::INI.Get<int>("window", "height") + get_tile_height(camera->zoom) ||
+                   screenPosition.y < -get_tile_height(camera->zoom);
+        };
+
+        deepWater->currentTiles.erase(std::remove_if(deepWater->currentTiles.begin(), deepWater->currentTiles.end(), shouldBeRemoved), deepWater->currentTiles.end());
+        MDCII_LOG_DEBUG("[World::OnUserUpdate()] Render {} current deep water tiles.", deepWater->currentTiles.size());
+    }
 
     renderer->RenderDeepWater();
     //renderer->RenderIslands();

@@ -43,17 +43,23 @@ mdcii::camera::Camera::~Camera() noexcept
 // Logic
 //-------------------------------------------------
 
-void mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
+bool mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
 {
+    // the array containing the tiles currently being rendered must be updated
+    // if the flag is set
+    auto dirty{ false };
+
     // zoom
     if (m_world->gameState->game->GetMouseWheel() > 0)
     {
         --zoom;
+        dirty = true;
         MDCII_LOG_DEBUG("Zoom-- {}", magic_enum::enum_name(zoom));
     }
     if (m_world->gameState->game->GetMouseWheel() < 0)
     {
         ++zoom;
+        dirty = true;
         MDCII_LOG_DEBUG("Zoom++ {}", magic_enum::enum_name(zoom));
     }
 
@@ -61,11 +67,13 @@ void mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
     if (m_world->gameState->game->GetKey(olc::Key::PGUP).bPressed)
     {
         ++rotation;
+        dirty = true;
         MDCII_LOG_DEBUG("World rotation++ {}", magic_enum::enum_name(rotation));
     }
     if (m_world->gameState->game->GetKey(olc::Key::PGDN).bPressed)
     {
         --rotation;
+        dirty = true;
         MDCII_LOG_DEBUG("World rotation-- {}", magic_enum::enum_name(rotation));
     }
 
@@ -74,18 +82,22 @@ void mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
     if (m_world->gameState->game->GetKey(olc::Key::UP).bHeld)
     {
         vel += { 0, -1 };
+        dirty = true;
     }
     if (m_world->gameState->game->GetKey(olc::Key::DOWN).bHeld)
     {
         vel += { 0, 1 };
+        dirty = true;
     }
     if (m_world->gameState->game->GetKey(olc::Key::LEFT).bHeld)
     {
         vel += { -1, 0 };
+        dirty = true;
     }
     if (m_world->gameState->game->GetKey(olc::Key::RIGHT).bHeld)
     {
         vel += { 1, 0 };
+        dirty = true;
     }
 
     origin.x += vel.x * t_elapsedTime * SPEED;
@@ -99,4 +111,6 @@ void mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
 
     m_world->gameState->game->DrawString(4, 14, fmt::format("Camera world: {}, {}", std::to_string(worldPosition.x), std::to_string(worldPosition.y)), olc::WHITE);
     m_world->gameState->game->DrawString(4, 24, fmt::format("Camera screen: {}, {}", std::to_string(screenPosition.x), std::to_string(screenPosition.y)), olc::WHITE);
+
+    return dirty;
 }
