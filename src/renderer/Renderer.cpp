@@ -109,8 +109,7 @@ void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_s
 
 void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island) const
 {
-    // todo: current tiles
-    for (const auto& tile : t_island->sortedTiles[magic_enum::enum_integer(m_world->camera->rotation)])
+    for (const auto& tile : t_island->currentTiles)
     {
         if (tile.HasBuilding())
         {
@@ -121,10 +120,9 @@ void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island) cons
 
 void mdcii::renderer::Renderer::RenderIslands() const
 {
-    // todo: aabb island
-    for (auto const& island : m_world->islands)
+    for (auto const& island : m_world->currentIslands)
     {
-        RenderIsland(island.get());
+        RenderIsland(island);
     }
 }
 
