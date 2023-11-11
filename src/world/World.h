@@ -95,6 +95,11 @@ namespace mdcii::world
         std::vector<std::unique_ptr<Island>> islands;
 
         /**
+         * @brief Pointer to the Islands objects that are currently being rendered.
+         */
+        std::vector<Island*> currentIslands;
+
+        /**
          * @brief Pointer to the DeepWater object.
          */
         std::unique_ptr<DeepWater> deepWater;
@@ -137,7 +142,7 @@ namespace mdcii::world
         void OnUserUpdate(float t_elapsedTime);
 
         //-------------------------------------------------
-        // Helper
+        // World / screen positions
         //-------------------------------------------------
 
         /**
@@ -156,9 +161,19 @@ namespace mdcii::world
          * @param t_x The x position.
          * @param t_y The y position.
          *
-         * @return True if the location is on an island. Otherwise false.
+         * @return True if the position is on an island. Otherwise false.
          */
         [[nodiscard]] bool IsWorldPositionOnAnyIsland(int t_x, int t_y) const;
+
+        /**
+         * @brief Checks whether a world position is outside the screen.
+         *
+         * @param t_x The x position.
+         * @param t_y The y position.
+         *
+         * @return True if the position is outside the screen. Otherwise false.
+         */
+        [[nodiscard]] bool IsWorldPositionOutsideScreen(int t_x, int t_y) const;
 
     protected:
 
@@ -184,5 +199,14 @@ namespace mdcii::world
          * Called upon construction of a World object.
          */
         void Init(const std::string& t_fileName);
+
+        [[nodiscard]] std::unique_ptr<DeepWater> CreateDeepWaterArea() const;
+
+        //-------------------------------------------------
+        // Render helper
+        //-------------------------------------------------
+
+        void FindVisibleIslands();
+        void FindVisibleDeepWaterTiles() const;
     };
 }

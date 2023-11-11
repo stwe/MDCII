@@ -86,20 +86,8 @@ int mdcii::renderer::Renderer::GetGfxForCurrentRotation(const world::Tile* t_til
 void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_startY, const world::Tile* t_tile) const
 {
     const auto screenPosition{ m_world->ToScreen(t_tile->posX +  t_startX, t_tile->posY + t_startY) };
-
-    /*
-    if (screenPosition.x > Game::INI.Get<int>("window", "width") + get_tile_width(m_world->camera->zoom) ||
-        screenPosition.x < -get_tile_width(m_world->camera->zoom) ||
-        screenPosition.y > Game::INI.Get<int>("window", "height") + get_tile_height(m_world->camera->zoom) ||
-        screenPosition.y < -get_tile_height(m_world->camera->zoom))
-    {
-        return;
-    }
-    */
-
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
     const auto gfx{ GetGfxForCurrentRotation(t_tile) };
-    const auto atlas{ GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
     const auto atlasOffset{ GetAtlasOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
 
     m_world->gameState->game->DrawPartialDecal(
@@ -107,7 +95,7 @@ void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_s
             static_cast<float>(screenPosition.x),
             static_cast<float>(screenPosition.y) - CalcOffset(t_tile, gfx)
         ),
-        m_world->gameState->game->tileAtlas->atlas[zoomInt][atlas]->Decal(),
+        m_world->gameState->game->tileAtlas->atlas[zoomInt][GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt])]->Decal(),
         olc::vf2d(
             static_cast<float>(atlasOffset.x) * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
             static_cast<float>(atlasOffset.y) * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
@@ -121,6 +109,7 @@ void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_s
 
 void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island) const
 {
+    // todo: current tiles
     for (const auto& tile : t_island->sortedTiles[magic_enum::enum_integer(m_world->camera->rotation)])
     {
         if (tile.HasBuilding())
@@ -132,6 +121,7 @@ void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island) cons
 
 void mdcii::renderer::Renderer::RenderIslands() const
 {
+    // todo: aabb island
     for (auto const& island : m_world->islands)
     {
         RenderIsland(island.get());

@@ -80,6 +80,11 @@ namespace mdcii::world
         std::array<std::vector<Tile>, Tile::NR_OF_ROTATIONS> sortedTiles;
 
         /**
+         * @brief The tiles that are currently being rendered.
+         */
+        std::vector<Tile> currentTiles;
+
+        /**
          * An Aabb (axis-aligned bounding box) object for collision detection.
          */
         physics::Aabb aabb;
