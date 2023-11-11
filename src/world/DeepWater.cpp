@@ -16,6 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <algorithm>
 #include "DeepWater.h"
 #include "Game.h"
 #include "MdciiAssert.h"
@@ -29,8 +30,6 @@
 
 void mdcii::world::DeepWater::InitTiles(const Game* t_game)
 {
-    // todo: same as Island tiles
-
     MDCII_ASSERT(t_game, "[DeepWater::InitTiles()] Null pointer.")
     MDCII_ASSERT(!tiles.empty(), "[DeepWater::InitTiles()] Invalid number of tiles.")
     MDCII_ASSERT(width, "[DeepWater::InitTiles()] Invalid width.")
@@ -48,34 +47,27 @@ void mdcii::world::DeepWater::InitTiles(const Game* t_game)
     }
 
     // remove tiles that don't have the buildingId 1201
-    tiles.erase(
-        std::remove_if(
-            tiles.begin(),
-            tiles.end(),
-            [](const auto& tile) { return tile.buildingId != 1201; }
-        ),
-        tiles.end()
-    );
+    auto [begin, end]{ std::ranges::remove_if(tiles, [](const auto& t_tile) { return t_tile.buildingId != 1201; }) };
+    tiles.erase(begin, end);
 
     for (auto& tile : tiles)
     {
-        if (tile.HasBuilding())
+        MDCII_ASSERT(tile.HasBuilding(), "[DeepWater::InitTiles()] Invalid building Id")
+
+        // pre-calculate a gfx for each rotation
+        const auto& building{ t_game->originalResourcesManager->GetBuildingById(tile.buildingId) };
+        const auto gfx0{ building.gfx };
+
+        tile.gfxs.push_back(gfx0);
+        if (building.rotate > 0)
         {
-            // pre-calculate a gfx for each rotation
-            const auto& building{ t_game->originalResourcesManager->GetBuildingById(tile.buildingId) };
-            const auto gfx0{ building.gfx };
-
-            tile.gfxs.push_back(gfx0);
-            if (building.rotate > 0)
-            {
-                tile.gfxs.push_back(gfx0 + (1 * building.rotate));
-                tile.gfxs.push_back(gfx0 + (2 * building.rotate));
-                tile.gfxs.push_back(gfx0 + (3 * building.rotate));
-            }
-
-            // set posoffs
-            tile.posoffs = building.posoffs;
+            tile.gfxs.push_back(gfx0 + (1 * building.rotate));
+            tile.gfxs.push_back(gfx0 + (2 * building.rotate));
+            tile.gfxs.push_back(gfx0 + (3 * building.rotate));
         }
+
+        // set posoffs
+        tile.posoffs = building.posoffs;
 
         tile.indices[0] = renderer::Renderer::GetMapIndex(tile.posX, tile
             .posY, width, height, world::Rotation::DEG0);
@@ -93,7 +85,7 @@ void mdcii::world::DeepWater::InitTiles(const Game* t_game)
         const auto rotationInt{ magic_enum::enum_integer(rotation) };
 
         // sort tiles by index
-        std::sort(tiles.begin(), tiles.end(), [&](const world::Tile& t_a, const world::Tile& t_b)
+        std::ranges::sort(tiles, [&](const world::Tile& t_a, const world::Tile& t_b)
         {
             return t_a.indices[rotationInt] < t_b.indices[rotationInt];
         });

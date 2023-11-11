@@ -16,6 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <algorithm>
 #include "Island.h"
 #include "Game.h"
 #include "MdciiAssert.h"
@@ -77,7 +78,7 @@ void mdcii::world::Island::InitTiles(const Game* t_game)
         const auto rotationInt{ magic_enum::enum_integer(rotation) };
 
         // sort tiles by index
-        std::sort(tiles.begin(), tiles.end(), [&](const world::Tile& t_a, const world::Tile& t_b)
+        std::ranges::sort(tiles, [&](const world::Tile& t_a, const world::Tile& t_b)
         {
             return t_a.indices[rotationInt] < t_b.indices[rotationInt];
         });
