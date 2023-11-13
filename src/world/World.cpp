@@ -19,6 +19,7 @@
 #include "World.h"
 #include "Game.h"
 #include "Island.h"
+#include "Layer.h"
 #include "DeepWater.h"
 #include "MdciiAssert.h"
 #include "GameState.h"
@@ -52,8 +53,12 @@ mdcii::world::World::~World() noexcept
 void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
 {
     // first access
-    if (deepWater->currentTiles.empty() && m_flag)
+    if (m_flag)
     {
+        MDCII_LOG_DEBUG("[World::OnUserUpdate()] First world update.");
+
+        MDCII_ASSERT(deepWater->layer->currentTiles.empty(), "[World::OnUserUpdate()] Invalid number of tiles.")
+
         FindVisibleIslands();
         FindVisibleDeepWaterTiles();
 
@@ -108,7 +113,7 @@ bool mdcii::world::World::IsWorldPositionOutsideScreen(const int t_x, const int 
 
 void mdcii::world::World::Init(const std::string& t_fileName)
 {
-    MDCII_LOG_DEBUG("[World::Init()] Init World.");
+    MDCII_LOG_DEBUG("[World::Init()] Start initializing the world ...");
 
     if (resource::MdciiFile file{ t_fileName }; file.LoadJsonFromFile())
     {
@@ -117,12 +122,14 @@ void mdcii::world::World::Init(const std::string& t_fileName)
 
     for (auto const& island : islands)
     {
-        island->InitTiles(gameState->game);
+        island->Init(gameState->game);
     }
 
     deepWater = CreateDeepWaterArea();
     renderer = std::make_unique<renderer::Renderer>(this);
     camera = std::make_unique<camera::Camera>(this);
+
+    MDCII_LOG_DEBUG("[World::Init()] The world were initialized successfully.");
 }
 
 std::unique_ptr<mdcii::world::DeepWater> mdcii::world::World::CreateDeepWaterArea() const
@@ -130,7 +137,8 @@ std::unique_ptr<mdcii::world::DeepWater> mdcii::world::World::CreateDeepWaterAre
     auto deepWaterArea{ std::make_unique<DeepWater>() };
     deepWaterArea->width = worldWidth;
     deepWaterArea->height = worldHeight;
-    deepWaterArea->tiles.resize(worldWidth * worldHeight);
+    deepWaterArea->layer = std::make_unique<Layer>(LayerType::DEEP_WATER);
+    deepWaterArea->layer->tiles.resize(worldWidth * worldHeight);
 
     for (auto y{ 0 }; y < worldHeight; ++y)
     {
@@ -138,11 +146,12 @@ std::unique_ptr<mdcii::world::DeepWater> mdcii::world::World::CreateDeepWaterAre
         {
             if (!IsWorldPositionOnAnyIsland(x, y))
             {
-                deepWaterArea->tiles.at(y * worldWidth + x).buildingId = 1201;
+                deepWaterArea->layer->tiles.at(y * worldWidth + x).buildingId = 1201;
             }
         }
     }
-    deepWaterArea->InitTiles(gameState->game);
+
+    deepWaterArea->Init(gameState->game);
 
     return deepWaterArea;
 }
@@ -151,32 +160,33 @@ std::unique_ptr<mdcii::world::DeepWater> mdcii::world::World::CreateDeepWaterAre
 // Render helper
 //-------------------------------------------------
 
+// todo: it makes sense to sort out the islands beforehand that are completely invisible
 void mdcii::world::World::FindVisibleIslands()
 {
     std::vector<Island*>().swap(currentIslands);
-    size_t c{ 0 };
 
-    // todo: it makes sense to sort out the islands beforehand that are completely invisible
     for (const auto& island : islands)
     {
-        std::vector<Tile>().swap(island->currentTiles);
-        island->currentTiles = island->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
-
-        auto [begin, end]{ std::ranges::remove_if(island->currentTiles, [&](const Tile& t_tile)
+        for (auto i{ 0 }; i < 3; ++i)
         {
-            return IsWorldPositionOutsideScreen(t_tile.posX + island->startX, t_tile.posY + island->startY);
-        }) };
-        island->currentTiles.erase(begin, end);
-        c += island->currentTiles.size();
+            std::vector<Tile>().swap(island->layers[i]->currentTiles);
+            island->layers[i]->currentTiles = island->layers[i]->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
 
-        if (!island->currentTiles.empty())
+            auto [begin, end]{ std::ranges::remove_if(island->layers[i]->currentTiles, [&](const Tile& t_tile)
+            {
+                return IsWorldPositionOutsideScreen(t_tile.posX + island->startX, t_tile.posY + island->startY);
+            }) };
+
+            island->layers[i]->currentTiles.erase(begin, end);
+        }
+
+        if (!island->layers[magic_enum::enum_integer(world::LayerType::COAST)]->currentTiles.empty())
         {
             currentIslands.push_back(island.get());
         }
     }
 
     MDCII_LOG_DEBUG("[World::FindVisibleIslands()] Render {} islands.", currentIslands.size());
-    MDCII_LOG_DEBUG("[World::FindVisibleIslands()] Render {} island tiles.", c);
 }
 
 void mdcii::world::World::FindVisibleDeepWaterTiles() const
@@ -186,11 +196,11 @@ void mdcii::world::World::FindVisibleDeepWaterTiles() const
         return IsWorldPositionOutsideScreen(t_tile.posX, t_tile.posY);
     };
 
-    std::vector<Tile>().swap(deepWater->currentTiles);
-    deepWater->currentTiles = deepWater->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
+    std::vector<Tile>().swap(deepWater->layer->currentTiles);
+    deepWater->layer->currentTiles = deepWater->layer->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
 
-    auto [begin, end]{ std::ranges::remove_if(deepWater->currentTiles, shouldBeRemoved) };
-    deepWater->currentTiles.erase(begin, end);
+    auto [begin, end]{ std::ranges::remove_if(deepWater->layer->currentTiles, shouldBeRemoved) };
+    deepWater->layer->currentTiles.erase(begin, end);
 
-    MDCII_LOG_DEBUG("[World::FindVisibleDeepWaterTiles()] Render {} deep water tiles.", deepWater->currentTiles.size());
+    MDCII_LOG_DEBUG("[World::FindVisibleDeepWaterTiles()] Render {} deep water tiles.", deepWater->layer->currentTiles.size());
 }

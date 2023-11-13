@@ -30,6 +30,16 @@ namespace mdcii::world
      * @brief Forward declaration class Island.
      */
     class Island;
+
+    /**
+     * @brief Forward declaration class Layer.
+     */
+    class Layer;
+
+    /**
+     * @brief Forward declaration struct Tile.
+     */
+    struct Tile;
 }
 
 namespace mdcii::resource
@@ -85,16 +95,37 @@ namespace mdcii::resource
         /**
          * @brief Loads the Json value from a file.
          *
-         * @return True if success or false if error while loading.
+         * @return True if successful, false if an error occurs while loading.
          */
         [[nodiscard]] bool LoadJsonFromFile();
 
-        // todo tmp code
+        /**
+         * @brief Create world content and return a vector of unique pointers to the islands.
+         *
+         * @param t_worldWidth The width of the world is passed by reference and modified.
+         * @param t_worldHeight The height of the world is passed by reference and modified.
+         *
+         * @return A vector of unique pointers to the islands.
+         */
         [[nodiscard]] std::vector<std::unique_ptr<world::Island>> CreateWorldContent(int& t_worldWidth, int& t_worldHeight) const;
 
     protected:
 
     private:
+        /**
+         * @brief Extract tile data from JSON and save it to the Tile object.
+         *
+         * @param t_source Source JSON data.
+         * @param t_tileTarget Pointer to the target Tile object.
+         */
+        static void ExtractTileData(nlohmann::json const& t_source, world::Tile* t_tileTarget);
 
+        /**
+         * @brief Create layer tiles according to the provided JSON data.
+         *
+         * @param t_layer Pointer to the target Layer object.
+         * @param t_layerTilesJson Source JSON data.
+         */
+        static void CreateLayerTiles(world::Layer* t_layer, const nlohmann::json& t_layerTilesJson);
     };
 }

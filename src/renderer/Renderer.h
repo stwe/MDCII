@@ -37,6 +37,11 @@ namespace mdcii::world
     enum class Rotation;
 
     /**
+     * @brief Forward declaration enum class LayerType.
+     */
+    enum class LayerType;
+
+    /**
      * @brief Forward declaration class Island.
      */
     class Island;
@@ -91,7 +96,7 @@ namespace mdcii::renderer
         [[nodiscard]] float CalcOffset(const world::Tile* t_tile, int t_gfx) const;
         [[nodiscard]] int GetGfxForCurrentRotation(const world::Tile* t_tile) const;
         void RenderBuilding(int t_startX, int t_startY, const world::Tile* t_tile) const;
-        void RenderIsland(const world::Island* t_island) const;
+        void RenderIsland(const world::Island* t_island, world::LayerType t_layerType) const;
         void RenderIslands() const;
         void RenderDeepWater() const;
 

@@ -19,27 +19,55 @@
 #include <algorithm>
 #include "Island.h"
 #include "Game.h"
+#include "Layer.h"
 #include "MdciiAssert.h"
 #include "resource/OriginalResourcesManager.h"
 #include "renderer/Renderer.h"
 #include "world/Rotation.h"
 
 //-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
+mdcii::world::Island::Island()
+{
+    MDCII_LOG_DEBUG("[Island::Island()] Create Island.");
+}
+
+mdcii::world::Island::~Island() noexcept
+{
+    MDCII_LOG_DEBUG("[Island::~Island()] Destruct Island.");
+}
+
+//-------------------------------------------------
 // Init
 //-------------------------------------------------
 
-void mdcii::world::Island::InitTiles(const Game* t_game)
+void mdcii::world::Island::Init(const Game* t_game)
 {
-    MDCII_ASSERT(t_game, "[Island::InitTiles()] Null pointer.")
-    MDCII_ASSERT(!tiles.empty(), "[Island::InitTiles()] Invalid number of tiles.")
-    MDCII_ASSERT(width, "[Island::InitTiles()] Invalid width.")
-    MDCII_ASSERT(height, "[Island::InitTiles()] Invalid height.")
+    MDCII_LOG_DEBUG("[Island::Init()] Initialize the island.");
+
+    MDCII_ASSERT(t_game, "[Island::Init()] Null pointer.")
+    MDCII_ASSERT(width, "[Island::Init()] Invalid width.")
+    MDCII_ASSERT(height, "[Island::Init()] Invalid height.")
+
+    for (auto i{ 0 }; i < 3; ++i)
+    {
+        InitLayerTiles(t_game, layers.at(i).get());
+    }
+
+    aabb = physics::Aabb(olc::vi2d(startX, startY), olc::vi2d(width, height));
+}
+
+void mdcii::world::Island::InitLayerTiles(const Game* t_game, Layer* t_layer) const
+{
+    MDCII_ASSERT(!t_layer->tiles.empty(), "[Island::InitLayerTiles()] Invalid number of tiles.")
 
     for (auto h{ 0 }; h < height; ++h)
     {
         for (auto w{ 0 }; w < width; ++w)
         {
-            auto& tile{ tiles.at(h * width + w) };
+            auto& tile{ t_layer->tiles.at(h * width + w) };
             tile.posX = w;
             tile.posY = h;
 
@@ -78,18 +106,15 @@ void mdcii::world::Island::InitTiles(const Game* t_game)
         const auto rotationInt{ magic_enum::enum_integer(rotation) };
 
         // sort tiles by index
-        std::ranges::sort(tiles, [&](const world::Tile& t_a, const world::Tile& t_b)
+        std::ranges::sort(t_layer->tiles, [&](const world::Tile& t_a, const world::Tile& t_b)
         {
             return t_a.indices[rotationInt] < t_b.indices[rotationInt];
         });
 
         // copy sorted tiles
-        sortedTiles.at(rotationInt) = tiles;
+        t_layer->sortedTiles.at(rotationInt) = t_layer->tiles;
     }
 
     // revert tiles sorting = sortedTiles DEG0
-    tiles = sortedTiles.at(magic_enum::enum_integer(world::Rotation::DEG0));
-
-    // aabb
-    aabb = physics::Aabb(olc::vi2d(startX, startY), olc::vi2d(width, height));
+    t_layer->tiles = t_layer->sortedTiles.at(magic_enum::enum_integer(world::Rotation::DEG0));
 }

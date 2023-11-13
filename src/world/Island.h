@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "Tile.h"
 #include "physics/Aabb.h"
 
 //-------------------------------------------------
@@ -38,6 +37,11 @@ namespace mdcii::world
     //-------------------------------------------------
     // Island
     //-------------------------------------------------
+
+    /**
+     * @brief Forward declaration class Layer.
+     */
+    class Layer;
 
     /**
      * @brief Represents an Island.
@@ -70,19 +74,9 @@ namespace mdcii::world
         int startY{ -1 };
 
         /**
-         * @brief The tiles of the island.
+         * @brief The tile layers (coast, terrain, buildings) of the island.
          */
-        std::vector<Tile> tiles;
-
-        /**
-         * @brief The tiles of the island, sorted by index for each rotation.
-         */
-        std::array<std::vector<Tile>, Tile::NR_OF_ROTATIONS> sortedTiles;
-
-        /**
-         * @brief The tiles that are currently being rendered.
-         */
-        std::vector<Tile> currentTiles;
+        std::array<std::unique_ptr<Layer>, 3> layers;
 
         /**
          * An Aabb (axis-aligned bounding box) object for collision detection.
@@ -90,19 +84,38 @@ namespace mdcii::world
         physics::Aabb aabb;
 
         //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        Island();
+
+        Island(const Island& t_other) = delete;
+        Island(Island&& t_other) noexcept = delete;
+        Island& operator=(const Island& t_other) = delete;
+        Island& operator=(Island&& t_other) noexcept = delete;
+
+        ~Island() noexcept;
+
+        //-------------------------------------------------
         // Init
         //-------------------------------------------------
 
         /**
-         * @brief Initializes all tiles of the island.
+         * @brief Initializes all layers.
          *
          * @param t_game Pointer to the Game.
          */
-        void InitTiles(const Game* t_game);
+        void Init(const Game* t_game);
 
     protected:
 
     private:
-
+        /**
+         * @brief Initializes all layer tiles.
+         *
+         * @param t_game Pointer to the Game.
+         * @param t_layer Pointer to the Layer.
+         */
+        void InitLayerTiles(const Game* t_game, Layer* t_layer) const;
     };
 }

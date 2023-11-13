@@ -18,35 +18,31 @@
 
 #pragma once
 
-#include <memory>
-
-//-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii
-{
-    /**
-     * @brief Forward declaration class Game.
-     */
-    class Game;
-}
+#include "Tile.h"
+#include "vendor/enum/magic_enum.hpp"
 
 namespace mdcii::world
 {
-    /**
-     * @brief Forward declaration class Layer.
-     */
-    class Layer;
-
     //-------------------------------------------------
-    // DeepWater
+    // Layer type
     //-------------------------------------------------
 
     /**
-     * @brief Represents the deep water area.
+     * @brief Enum class representing different types of layers.
      */
-    class DeepWater
+    enum class LayerType
+    {
+        COAST, TERRAIN, BUILDINGS, DEEP_WATER, NONE
+    };
+
+    //-------------------------------------------------
+    // Layer
+    //-------------------------------------------------
+
+    /**
+     * @brief Class representing a layer.
+     */
+    class Layer
     {
     public:
         //-------------------------------------------------
@@ -54,43 +50,46 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief The width of the deep water area.
+         * @brief The type the layer.
          */
-        int width{ -1 };
+        LayerType layerType{ LayerType::NONE };
 
         /**
-         * @brief The height of the deep water area.
+         * @brief A vector holding all tiles belonging to this layer.
          */
-        int height{ -1 };
+        std::vector<Tile> tiles;
 
         /**
-         * @brief The deep water tile layer.
+         * @brief An array of std::vectors, each representing a rotation of the tiles.
+         *
+         * Tiles are sorted by index for each rotation.
          */
-        std::unique_ptr<Layer> layer;
+        std::array<std::vector<Tile>, Tile::NR_OF_ROTATIONS> sortedTiles;
+
+        /**
+         * @brief The tiles that are currently being rendered.
+         */
+        std::vector<Tile> currentTiles;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        DeepWater();
-
-        DeepWater(const DeepWater& t_other) = delete;
-        DeepWater(DeepWater&& t_other) noexcept = delete;
-        DeepWater& operator=(const DeepWater& t_other) = delete;
-        DeepWater& operator=(DeepWater&& t_other) noexcept = delete;
-
-        ~DeepWater() noexcept;
-
-        //-------------------------------------------------
-        // Init
-        //-------------------------------------------------
+        Layer() = delete;
 
         /**
-         * @brief Initializes the layer.
+         * @brief Constructs a new Layer object.
          *
-         * @param t_game Pointer to the Game.
+         * @param t_layerType The type of the layer.
          */
-        void Init(const Game* t_game);
+        explicit Layer(LayerType t_layerType);
+
+        Layer(const Layer& t_other) = delete;
+        Layer(Layer&& t_other) noexcept = delete;
+        Layer& operator=(const Layer& t_other) = delete;
+        Layer& operator=(Layer&& t_other) noexcept = delete;
+
+        ~Layer() noexcept;
 
     protected:
 

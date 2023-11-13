@@ -23,6 +23,8 @@
 #include "world/Island.h"
 #include "world/DeepWater.h"
 #include "world/World.h"
+#include "world/Tile.h"
+#include "world/Layer.h"
 #include "resource/TileAtlas.h"
 #include "camera/Camera.h"
 
@@ -107,9 +109,9 @@ void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_s
     );
 }
 
-void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island) const
+void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island, const world::LayerType t_layerType) const
 {
-    for (const auto& tile : t_island->currentTiles)
+    for (const auto& tile : t_island->layers[magic_enum::enum_integer(t_layerType)]->currentTiles)
     {
         if (tile.HasBuilding())
         {
@@ -120,15 +122,18 @@ void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island) cons
 
 void mdcii::renderer::Renderer::RenderIslands() const
 {
+    // todo
     for (auto const& island : m_world->currentIslands)
     {
-        RenderIsland(island);
+        RenderIsland(island, world::LayerType::COAST);
+        RenderIsland(island, world::LayerType::TERRAIN);
+        RenderIsland(island, world::LayerType::BUILDINGS);
     }
 }
 
 void mdcii::renderer::Renderer::RenderDeepWater() const
 {
-    for (const auto& tile : m_world->deepWater->currentTiles)
+    for (const auto& tile : m_world->deepWater->layer->currentTiles)
     {
         RenderBuilding(0, 0, &tile);
     }
