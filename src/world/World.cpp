@@ -134,6 +134,8 @@ void mdcii::world::World::Init(const std::string& t_fileName)
 
 std::unique_ptr<mdcii::world::DeepWater> mdcii::world::World::CreateDeepWaterArea() const
 {
+    MDCII_LOG_DEBUG("[World::CreateDeepWaterArea()] Initialize the deep water area.");
+
     auto deepWaterArea{ std::make_unique<DeepWater>() };
     deepWaterArea->width = worldWidth;
     deepWaterArea->height = worldHeight;
@@ -146,7 +148,7 @@ std::unique_ptr<mdcii::world::DeepWater> mdcii::world::World::CreateDeepWaterAre
         {
             if (!IsWorldPositionOnAnyIsland(x, y))
             {
-                deepWaterArea->layer->tiles.at(y * worldWidth + x).buildingId = 1201;
+                deepWaterArea->layer->tiles.at(y * worldWidth + x).buildingId = DEEP_WATER_BUILDING_ID;
             }
         }
     }

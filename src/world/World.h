@@ -71,6 +71,15 @@ namespace mdcii::world
     {
     public:
         //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * @brief The building Id used for the deep water area.
+         */
+        static constexpr auto DEEP_WATER_BUILDING_ID{ 1201 };
+
+        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -156,22 +165,22 @@ namespace mdcii::world
         [[nodiscard]] olc::vi2d ToScreen(int t_x, int t_y) const;
 
         /**
-         * @brief Checks whether a world position is on any island.
+         * @brief Checks if the given world position falls on any island.
          *
          * @param t_x The x position.
          * @param t_y The y position.
          *
-         * @return True if the position is on an island. Otherwise false.
+         * @return True if the position falls on an island. Otherwise, it returns false.
          */
         [[nodiscard]] bool IsWorldPositionOnAnyIsland(int t_x, int t_y) const;
 
         /**
-         * @brief Checks whether a world position is outside the screen.
+         * @brief Checks if the given world position is outside the screen.
          *
          * @param t_x The x position.
          * @param t_y The y position.
          *
-         * @return True if the position is outside the screen. Otherwise false.
+         * @return True if the position is outside the screen. Otherwise, it returns false.
          */
         [[nodiscard]] bool IsWorldPositionOutsideScreen(int t_x, int t_y) const;
 
@@ -183,7 +192,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief First access flag.
+         * @brief Initial access flag.
          */
         bool m_flag{ true };
 
@@ -195,18 +204,28 @@ namespace mdcii::world
          * @brief Initializes the game world.
          *
          * @param t_fileName The name of the save-game file.
-         *
-         * Called upon construction of a World object.
          */
         void Init(const std::string& t_fileName);
 
+        /**
+         * @brief Creates the deep water area.
+         *
+         * @return A unique pointer to the created DeepWater object.
+         */
         [[nodiscard]] std::unique_ptr<DeepWater> CreateDeepWaterArea() const;
 
         //-------------------------------------------------
         // Render helper
         //-------------------------------------------------
 
+        /**
+         * @brief Identifies the visible islands and tiles for rendering.
+         */
         void FindVisibleIslands();
+
+        /**
+         * @brief Identifies the visible deep water tiles for rendering.
+         */
         void FindVisibleDeepWaterTiles() const;
     };
 }

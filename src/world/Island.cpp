@@ -61,6 +61,8 @@ void mdcii::world::Island::Init(const Game* t_game)
 
 void mdcii::world::Island::InitLayerTiles(const Game* t_game, Layer* t_layer) const
 {
+    MDCII_LOG_DEBUG("[Island::InitLayerTiles()] Start initializing layer tiles for {} ...", magic_enum::enum_name(t_layer->layerType));
+
     MDCII_ASSERT(!t_layer->tiles.empty(), "[Island::InitLayerTiles()] Invalid number of tiles.")
 
     for (auto h{ 0 }; h < height; ++h)
@@ -83,6 +85,45 @@ void mdcii::world::Island::InitLayerTiles(const Game* t_game, Layer* t_layer) co
                     tile.gfxs.push_back(gfx0 + (1 * building.rotate));
                     tile.gfxs.push_back(gfx0 + (2 * building.rotate));
                     tile.gfxs.push_back(gfx0 + (3 * building.rotate));
+                }
+
+                for (auto& gfx : tile.gfxs)
+                {
+                    if (building.size.w > 1 || building.size.h > 1)
+                    {
+                        // default: orientation 0
+                        auto rp{ olc::vi2d(tile.x, tile.y) };
+
+                        if (tile.rotation == magic_enum::enum_integer(Rotation::DEG270))
+                        {
+                            rp = rotate_position(
+                                tile.x, tile.y,
+                                building.size.w, building.size.h,
+                                world::Rotation::DEG90
+                            );
+                        }
+
+                        if (tile.rotation == magic_enum::enum_integer(Rotation::DEG180))
+                        {
+                            rp = rotate_position(
+                                tile.x, tile.y,
+                                building.size.w, building.size.h,
+                                world::Rotation::DEG180
+                            );
+                        }
+
+                        if (tile.rotation == magic_enum::enum_integer(Rotation::DEG90))
+                        {
+                            rp = rotate_position(
+                                tile.x, tile.y,
+                                building.size.w, building.size.h,
+                                world::Rotation::DEG270
+                            );
+                        }
+
+                        const auto offset{ rp.y * building.size.w + rp.x };
+                        gfx += offset;
+                    }
                 }
 
                 // set posoffs
@@ -117,4 +158,6 @@ void mdcii::world::Island::InitLayerTiles(const Game* t_game, Layer* t_layer) co
 
     // revert tiles sorting = sortedTiles DEG0
     t_layer->tiles = t_layer->sortedTiles.at(magic_enum::enum_integer(world::Rotation::DEG0));
+
+    MDCII_LOG_DEBUG("[Island::InitLayerTiles()] The layer tiles were initialized successfully.");
 }
