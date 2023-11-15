@@ -32,8 +32,21 @@ namespace mdcii
     class Game;
 }
 
+namespace mdcii::resource
+{
+    /**
+     * @brief Forward declaration struct Building.
+     */
+    struct Building;
+}
+
 namespace mdcii::world
 {
+    /**
+     * @brief Forward declaration struct Tile.
+     */
+    struct Tile;
+
     //-------------------------------------------------
     // Island
     //-------------------------------------------------
@@ -117,5 +130,10 @@ namespace mdcii::world
          * @param t_layer Pointer to the Layer.
          */
         void InitLayerTiles(const Game* t_game, Layer* t_layer) const;
+
+        void InitTileDetails(const Game* t_game, Layer* t_layer, int t_w, int t_h) const;
+        static void InitBuildingTileDetails(const Game* t_game, Tile* t_tile);
+        static void AdjustGfxForBigBuildings(const resource::Building* t_building, const Tile* t_tile, int& t_gfx);
+        static void SortTiles(Layer* t_layer);
     };
 }
