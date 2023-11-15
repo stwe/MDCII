@@ -123,6 +123,10 @@ namespace mdcii::world
     protected:
 
     private:
+        //-------------------------------------------------
+        // Init layer tiles
+        //-------------------------------------------------
+
         /**
          * @brief Initializes all layer tiles.
          *
@@ -131,9 +135,38 @@ namespace mdcii::world
          */
         void InitLayerTiles(const Game* t_game, Layer* t_layer) const;
 
+        /**
+         * @brief Initializes the details of a single tile.
+         *
+         * @param t_game Pointer to a Game object.
+         * @param t_layer Current layer being initialized.
+         * @param t_w Width (x) coordinate of the tile.
+         * @param t_h Height (y) coordinate of the tile.
+         */
         void InitTileDetails(const Game* t_game, Layer* t_layer, int t_w, int t_h) const;
+
+        /**
+         * @brief Initializes the details of a tile with a building.
+         *
+         * @param t_game Pointer to a Game object.
+         * @param t_tile The tile to be initialized.
+         */
         static void InitBuildingTileDetails(const Game* t_game, Tile* t_tile);
+
+        /**
+         * @brief Adjusts the graphical representation of a tile for large buildings.
+         *
+         * @param t_building The building on this tile.
+         * @param t_tile The tile to be adjusted.
+         * @param t_gfx The graphical representation of the tile.
+         */
         static void AdjustGfxForBigBuildings(const resource::Building* t_building, const Tile* t_tile, int& t_gfx);
+
+        /**
+         * @brief Sorts the tiles in a layer for correct rendering order.
+         *
+         * @param t_layer Pointer to the layer whose tiles are to be sorted.
+         */
         static void SortTiles(Layer* t_layer);
     };
 }

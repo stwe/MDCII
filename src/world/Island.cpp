@@ -81,7 +81,11 @@ void mdcii::world::Island::InitLayerTiles(const Game* t_game, Layer* t_layer) co
     MDCII_LOG_DEBUG("[Island::InitLayerTiles()] The layer tiles were initialized successfully.");
 }
 
-void mdcii::world::Island::InitTileDetails(const Game* t_game, Layer* t_layer, int t_w, int t_h) const
+//-------------------------------------------------
+// Init layer tiles
+//-------------------------------------------------
+
+void mdcii::world::Island::InitTileDetails(const Game* t_game, Layer* t_layer, const int t_w, const int t_h) const
 {
     auto& tile{ t_layer->tiles.at(t_h * width + t_w) };
     tile.posX = t_w;
