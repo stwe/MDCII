@@ -133,7 +133,46 @@ namespace mdcii::world
 
     private:
         //-------------------------------------------------
-        // Init layer tiles
+        // Layer
+        //-------------------------------------------------
+
+        /**
+         * @brief Initialises the COAST, TERRAIN and BUILDINGS layer of the island.
+         *
+         * @param t_game Pointer to the Game object.
+         */
+        void InitLayers(const Game* t_game);
+
+        /**
+         * @brief Initialises the mixed layer of the island, which is created from all other layers.
+         */
+        void InitMixedLayer();
+
+        /**
+         * @brief Populates the mixed layer with data from other layers.
+         *
+         * @param coastLayer Coast layer of the island.
+         * @param terrainLayer Terrain layer of the island.
+         * @param buildingsLayer Buildings layer of the island.
+         * @param mixedLayer The mixed layer to be populated.
+         * @param h The height index.
+         * @param w The width index.
+         */
+        void PopulateMixedLayer(const Layer* t_coastLayer, const Layer* t_terrainLayer, const Layer* t_buildingsLayer, Layer* t_mixedLayer, int t_w, int t_h) const;
+
+        /**
+         * @brief Checks if a tile should be replaced in the mixed layer.
+         *
+         * @param layer Layer to check the tile from.
+         * @param buildingsLayer Buildings layer of the island.
+         * @param index Index of the tile to check.
+         *
+         * @return True if the tile should be replaced; false otherwise.
+         */
+        static bool ShouldReplaceTile(const Layer* t_layer, const Layer* t_buildingsLayer, int t_index);
+
+        //-------------------------------------------------
+        // Layer tiles
         //-------------------------------------------------
 
         /**
