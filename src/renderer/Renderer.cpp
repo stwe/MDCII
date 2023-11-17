@@ -125,9 +125,10 @@ void mdcii::renderer::Renderer::RenderIslands() const
     // todo
     for (auto const& island : m_world->currentIslands)
     {
-        RenderIsland(island, world::LayerType::COAST);
-        RenderIsland(island, world::LayerType::TERRAIN);
-        RenderIsland(island, world::LayerType::BUILDINGS);
+        //RenderIsland(island, world::LayerType::COAST);
+        //RenderIsland(island, world::LayerType::TERRAIN);
+        //RenderIsland(island, world::LayerType::BUILDINGS);
+        RenderIsland(island, world::LayerType::TERRAIN_BUILDINGS);
     }
 }
 
