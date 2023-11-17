@@ -37,6 +37,11 @@ namespace mdcii::world
     class Layer;
 
     /**
+     * @brief Forward declaration enum class LayerType.
+     */
+    enum class LayerType;
+
+    /**
      * @brief Forward declaration struct Tile.
      */
     struct Tile;
@@ -112,6 +117,19 @@ namespace mdcii::resource
     protected:
 
     private:
+        //-------------------------------------------------
+        // Layer && Tiles
+        //-------------------------------------------------
+
+        /**
+         * @brief Init Layer by type.
+         *
+         * @param t_island Pointer to the Island object.
+         * @param t_vars JSON variables related to the layer details.
+         * @param t_layerType The type of layer.
+         */
+        static void InitLayerByType(world::Island* t_island, const nlohmann::json& t_vars, world::LayerType t_layerType);
+
         /**
          * @brief Extract tile data from JSON and save it to the Tile object.
          *

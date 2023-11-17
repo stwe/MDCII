@@ -63,6 +63,15 @@ namespace mdcii::world
     {
     public:
         //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * @brief Number of layers used here.
+         */
+        static constexpr auto NR_OF_LAYERS{ 4 };
+
+        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -87,9 +96,9 @@ namespace mdcii::world
         int startY{ -1 };
 
         /**
-         * @brief The tile layers (coast, terrain, buildings) of the island.
+         * @brief The tile layers (coast, terrain, buildings, terrain_buildings) of the island.
          */
-        std::array<std::unique_ptr<Layer>, 3> layers;
+        std::array<std::unique_ptr<Layer>, NR_OF_LAYERS> layers;
 
         /**
          * An Aabb (axis-aligned bounding box) object for collision detection.

@@ -83,71 +83,13 @@ std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::C
         MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The size of the island is ({}, {}).", island->width, island->height);
         MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The island starts at position ({}, {}).", island->startX, island->startY);
 
-        island->layers.at(0) = std::make_unique<world::Layer>(world::LayerType::COAST);
-        island->layers.at(1) = std::make_unique<world::Layer>(world::LayerType::TERRAIN);
-        island->layers.at(2) = std::make_unique<world::Layer>(world::LayerType::BUILDINGS);
+        // the data for these three layers is read from a file
+        InitLayerByType(island.get(), islandVars, world::LayerType::COAST);
+        InitLayerByType(island.get(), islandVars, world::LayerType::TERRAIN);
+        InitLayerByType(island.get(), islandVars, world::LayerType::BUILDINGS);
 
-        // we set each layer separately
-
-        for (auto layers = islandVars.at("layers").items(); const auto& [k, v] : layers)
-        {
-            for (const auto& [layerNameJson, layerTilesJson] : v.items())
-            {
-                if (layerNameJson == "coast")
-                {
-                    CreateLayerTiles(
-                        island->layers.at(magic_enum::enum_integer(world::LayerType::COAST)).get(),
-                        layerTilesJson
-                    );
-
-                    MDCII_ASSERT(
-                        island->layers.at(magic_enum::enum_integer(world::LayerType::COAST))->tiles.size()
-                        == island->width * island->height,
-                        "[MdciiFile::CreateWorldContent()] Invalid number of tiles."
-                    )
-                }
-            }
-        }
-
-        for (auto layers = islandVars.at("layers").items(); const auto& [k, v] : layers)
-        {
-            for (const auto& [layerNameJson, layerTilesJson] : v.items())
-            {
-                if (layerNameJson == "terrain")
-                {
-                    CreateLayerTiles(
-                        island->layers.at(magic_enum::enum_integer(world::LayerType::TERRAIN)).get(),
-                        layerTilesJson
-                    );
-
-                    MDCII_ASSERT(
-                        island->layers.at(magic_enum::enum_integer(world::LayerType::TERRAIN))->tiles.size()
-                        == island->width * island->height,
-                        "[MdciiFile::CreateWorldContent()] Invalid number of tiles."
-                    )
-                }
-            }
-        }
-
-        for (auto layers = islandVars.at("layers").items(); const auto& [k, v] : layers)
-        {
-            for (const auto& [layerNameJson, layerTilesJson] : v.items())
-            {
-                if (layerNameJson == "buildings")
-                {
-                    CreateLayerTiles(
-                        island->layers.at(magic_enum::enum_integer(world::LayerType::BUILDINGS)).get(),
-                        layerTilesJson
-                    );
-
-                    MDCII_ASSERT(
-                        island->layers.at(magic_enum::enum_integer(world::LayerType::BUILDINGS))->tiles.size()
-                        == island->width * island->height,
-                        "[MdciiFile::CreateWorldContent()] Invalid number of tiles."
-                    )
-                }
-            }
-        }
+        // this layer will later be filled with the data from the other layers
+        island->layers.at(magic_enum::enum_integer(world::LayerType::TERRAIN_BUILDINGS)) = std::make_unique<world::Layer>(world::LayerType::TERRAIN_BUILDINGS);
 
         is.push_back(std::move(island));
     }
@@ -155,6 +97,37 @@ std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::C
     MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The world was successfully created.");
 
     return is;
+}
+
+//-------------------------------------------------
+// Layer && Tiles
+//-------------------------------------------------
+
+void mdcii::resource::MdciiFile::InitLayerByType(world::Island* t_island, const nlohmann::json& t_vars, const world::LayerType t_layerType)
+{
+    MDCII_LOG_DEBUG("[MdciiFile::InitLayerByType()] Create and init island layer {}.", magic_enum::enum_name(t_layerType));
+
+    t_island->layers.at(magic_enum::enum_integer(t_layerType)) = std::make_unique<world::Layer>(t_layerType);
+
+    for (auto layers = t_vars.at("layers").items(); const auto& [k, v] : layers)
+    {
+        for (const auto& [layerNameJson, layerTilesJson] : v.items())
+        {
+            if (layerNameJson == to_lower_case(std::string(magic_enum::enum_name(t_layerType))))
+            {
+                CreateLayerTiles(
+                    t_island->layers.at(magic_enum::enum_integer(t_layerType)).get(),
+                    layerTilesJson
+                );
+
+                MDCII_ASSERT(
+                    t_island->layers.at(magic_enum::enum_integer(t_layerType))->tiles.size()
+                    == t_island->width * t_island->height,
+                    "[MdciiFile::CreateWorldContent()] Invalid number of tiles."
+                )
+            }
+        }
+    }
 }
 
 void mdcii::resource::MdciiFile::ExtractTileData(const nlohmann::json& t_source, world::Tile* t_tileTarget)

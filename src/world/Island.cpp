@@ -51,10 +51,34 @@ void mdcii::world::Island::Init(const Game* t_game)
     MDCII_ASSERT(width, "[Island::Init()] Invalid width.")
     MDCII_ASSERT(height, "[Island::Init()] Invalid height.")
 
-    for (auto i{ 0 }; i < 3; ++i)
+    // init Coast, Terrain and Buildings layers
+    for (auto i{ 0 }; i < NR_OF_LAYERS - 1; ++i)
     {
         InitLayerTiles(t_game, layers.at(i).get());
     }
+
+    // init Terrain_Buildings layer
+    const auto* buildingsLayer{ layers.at(magic_enum::enum_integer(LayerType::BUILDINGS)).get() };
+    const auto* terrainLayer{ layers.at(magic_enum::enum_integer(LayerType::TERRAIN)).get() };
+    auto* mixedLayer{ layers.at(magic_enum::enum_integer(LayerType::TERRAIN_BUILDINGS)).get() };
+    mixedLayer->tiles = buildingsLayer->tiles;
+
+    for (auto h{ 0 }; h < height; ++h)
+    {
+        for (auto w{ 0 }; w < width; ++w)
+        {
+            const auto& terrainTile{ terrainLayer->tiles.at(h * width + w) };
+            if (terrainTile.HasBuilding() && !buildingsLayer->tiles.at(h * width + w).HasBuilding())
+            {
+                mixedLayer->tiles.at(h * width + w) = terrainTile;
+            }
+        }
+    }
+
+    SortTiles(mixedLayer);
+
+    // revert tiles sorting = sortedTiles DEG0
+    //mixedLayer->tiles = mixedLayer->sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0));
 
     aabb = physics::Aabb(olc::vi2d(startX, startY), olc::vi2d(width, height));
 }
@@ -76,7 +100,7 @@ void mdcii::world::Island::InitLayerTiles(const Game* t_game, Layer* t_layer) co
     SortTiles(t_layer);
 
     // revert tiles sorting = sortedTiles DEG0
-    t_layer->tiles = t_layer->sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0));
+    //t_layer->tiles = t_layer->sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0));
 
     MDCII_LOG_DEBUG("[Island::InitLayerTiles()] The layer tiles were initialized successfully.");
 }
