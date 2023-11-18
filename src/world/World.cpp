@@ -284,6 +284,12 @@ void mdcii::world::World::FindVisibleIslands()
             {
                 currentIslands.push_back(island.get());
             }
+
+            // fallback
+            if (currentIslands.empty() && !island->layers[magic_enum::enum_integer(LayerType::BUILDINGS)]->currentTiles.empty())
+            {
+                currentIslands.push_back(island.get());
+            }
         }
     }
 
