@@ -82,12 +82,14 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
 
 void mdcii::world::World::RenderImGui()
 {
-    auto dirty{ false };
+    auto dirtyIslands{ false };
+    auto dirtyDeepWater{ false };
 
-    static bool cl{ false };
-    static bool tl{ false };
-    static bool bl{ false };
-    static bool ml{ true };
+    static auto cl{ false };
+    static auto tl{ false };
+    static auto bl{ false };
+    static auto ml{ true };
+    static auto dl{ true };
 
     if (ImGui::Checkbox("Render Coast Layer", &cl))
     {
@@ -98,7 +100,7 @@ void mdcii::world::World::RenderImGui()
             ml = false;
         }
 
-        dirty = true;
+        dirtyIslands = true;
     }
     if (ImGui::Checkbox("Render Terrain Layer", &tl))
     {
@@ -109,7 +111,7 @@ void mdcii::world::World::RenderImGui()
             ml = false;
         }
 
-        dirty = true;
+        dirtyIslands = true;
     }
     if (ImGui::Checkbox("Render Buildings Layer", &bl))
     {
@@ -120,7 +122,7 @@ void mdcii::world::World::RenderImGui()
             ml = false;
         }
 
-        dirty = true;
+        dirtyIslands = true;
     }
     if (ImGui::Checkbox("Render Mixed Layer", &ml))
     {
@@ -141,12 +143,23 @@ void mdcii::world::World::RenderImGui()
             bl = false;
         }
 
-        dirty = true;
+        dirtyIslands = true;
+    }
+    if (ImGui::Checkbox("Render Deep-Water Layer", &dl))
+    {
+        renderLayer ^= RENDER_DEEP_WATER_LAYER;
+
+        dirtyDeepWater = true;
     }
 
-    if (dirty)
+    if (dirtyIslands)
     {
         FindVisibleIslands();
+    }
+
+    if (dirtyDeepWater)
+    {
+        FindVisibleDeepWaterTiles();
     }
 }
 
@@ -294,6 +307,14 @@ void mdcii::world::World::CheckLayer(const Island* t_island, const LayerType t_l
 
 void mdcii::world::World::FindVisibleDeepWaterTiles() const
 {
+    if (!HasRenderLayerOption(RenderLayer::RENDER_DEEP_WATER_LAYER))
+    {
+        std::vector<Tile>().swap(deepWater->layer->currentTiles);
+        MDCII_LOG_DEBUG("[World::FindVisibleDeepWaterTiles()] Render {} deep water tiles.", deepWater->layer->currentTiles.size());
+
+        return;
+    }
+
     const auto shouldBeRemoved = [&](const Tile& t_tile)
     {
         return IsWorldPositionOutsideScreen(t_tile.posX, t_tile.posY);

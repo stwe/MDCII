@@ -148,9 +148,12 @@ void mdcii::renderer::Renderer::RenderIslands() const
 
 void mdcii::renderer::Renderer::RenderDeepWater() const
 {
-    for (const auto& tile : m_world->deepWater->layer->currentTiles)
+    if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_DEEP_WATER_LAYER))
     {
-        RenderBuilding(0, 0, &tile);
+        for (const auto& tile : m_world->deepWater->layer->currentTiles)
+        {
+            RenderBuilding(0, 0, &tile);
+        }
     }
 }
 

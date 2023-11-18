@@ -77,7 +77,8 @@ namespace mdcii::world
         RENDER_COAST_LAYER = 1,
         RENDER_TERRAIN_LAYER = 2,
         RENDER_BUILDINGS_LAYER = 4,
-        RENDER_MIXED_LAYER = 8
+        RENDER_MIXED_LAYER = 8,
+        RENDER_DEEP_WATER_LAYER = 16
     };
 
     //-------------------------------------------------
@@ -146,7 +147,7 @@ namespace mdcii::world
         /**
          * @brief Representing the currently selected layers for rendering in the game world.
          */
-        int renderLayer{ RENDER_MIXED_LAYER };
+        int renderLayer{ RENDER_MIXED_LAYER | RENDER_DEEP_WATER_LAYER };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
