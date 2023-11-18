@@ -96,7 +96,7 @@ namespace mdcii::world
         int startY{ -1 };
 
         /**
-         * @brief The tile layers (coast, terrain, buildings, terrain_buildings) of the island.
+         * @brief The tile layers (coast, terrain, buildings, mixed) of the island.
          */
         std::array<std::unique_ptr<Layer>, NR_OF_LAYERS> layers;
 

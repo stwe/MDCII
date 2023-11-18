@@ -89,7 +89,7 @@ std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::C
         InitLayerByType(island.get(), islandVars, world::LayerType::BUILDINGS);
 
         // this layer will later be filled with the data from the other layers
-        island->layers.at(magic_enum::enum_integer(world::LayerType::TERRAIN_BUILDINGS)) = std::make_unique<world::Layer>(world::LayerType::TERRAIN_BUILDINGS);
+        island->layers.at(magic_enum::enum_integer(world::LayerType::MIXED)) = std::make_unique<world::Layer>(world::LayerType::MIXED);
 
         is.push_back(std::move(island));
     }

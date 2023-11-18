@@ -52,6 +52,10 @@ bool mdcii::GameState::OnUserCreate()
     return true;
 }
 
+//-------------------------------------------------
+// ImGui
+//-------------------------------------------------
+
 bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
 {
     // exit
@@ -68,9 +72,13 @@ bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
     // mouse picker
     mousePicker->OnUserUpdate();
 
-    // ImGui
+    return RenderImGui();
+}
+
+bool mdcii::GameState::RenderImGui() const
+{
     ImGui::SetNextWindowPos(
-        { ImGui::GetMainViewport()->Size.x - 150.0f, 0.0f },
+        { ImGui::GetMainViewport()->Size.x - 250.0f, 0.0f },
         ImGuiCond_Appearing
     );
     constexpr ImGuiWindowFlags flags{ ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings };
@@ -81,6 +89,8 @@ bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
         ImGui::End();
         return false;
     }
+
+    world->RenderImGui();
 
     ImGui::End();
 

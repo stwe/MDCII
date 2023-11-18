@@ -122,13 +122,27 @@ void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island, cons
 
 void mdcii::renderer::Renderer::RenderIslands() const
 {
-    // todo
     for (auto const& island : m_world->currentIslands)
     {
-        //RenderIsland(island, world::LayerType::COAST);
-        //RenderIsland(island, world::LayerType::TERRAIN);
-        //RenderIsland(island, world::LayerType::BUILDINGS);
-        RenderIsland(island, world::LayerType::TERRAIN_BUILDINGS);
+        if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_MIXED_LAYER))
+        {
+            RenderIsland(island, world::LayerType::MIXED);
+        }
+        else
+        {
+            if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_COAST_LAYER))
+            {
+                RenderIsland(island, world::LayerType::COAST);
+            }
+            if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_TERRAIN_LAYER))
+            {
+                RenderIsland(island, world::LayerType::TERRAIN);
+            }
+            if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_BUILDINGS_LAYER))
+            {
+                RenderIsland(island, world::LayerType::BUILDINGS);
+            }
+        }
     }
 }
 

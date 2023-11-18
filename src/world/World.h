@@ -60,6 +60,26 @@ namespace mdcii::world
      */
     class DeepWater;
 
+    /**
+     * @brief Forward declaration enum class LayerType.
+     */
+    enum class LayerType;
+
+    //-------------------------------------------------
+    // Render layer options
+    //-------------------------------------------------
+
+    /**
+     * @brief Options for which layers are rendered.
+     */
+    enum RenderLayer
+    {
+        RENDER_COAST_LAYER = 1,
+        RENDER_TERRAIN_LAYER = 2,
+        RENDER_BUILDINGS_LAYER = 4,
+        RENDER_MIXED_LAYER = 8
+    };
+
     //-------------------------------------------------
     // World
     //-------------------------------------------------
@@ -123,6 +143,11 @@ namespace mdcii::world
          */
         std::unique_ptr<camera::Camera> camera;
 
+        /**
+         * @brief Representing the currently selected layers for rendering in the game world.
+         */
+        int renderLayer{ RENDER_MIXED_LAYER };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -149,6 +174,12 @@ namespace mdcii::world
         //-------------------------------------------------
 
         void OnUserUpdate(float t_elapsedTime);
+
+        //-------------------------------------------------
+        // ImGui
+        //-------------------------------------------------
+
+        void RenderImGui();
 
         //-------------------------------------------------
         // World / screen positions
@@ -183,6 +214,19 @@ namespace mdcii::world
          * @return True if the position is outside the screen. Otherwise, it returns false.
          */
         [[nodiscard]] bool IsWorldPositionOutsideScreen(int t_x, int t_y) const;
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        /**
+         * @brief A helper function to check if a given render layer option is active.
+         *
+         * @param t_option The render layer option to check.
+         *
+         * @return True if the option is active, false otherwise.
+         */
+        [[nodiscard]] bool HasRenderLayerOption(RenderLayer t_option) const { return (renderLayer & t_option) != 0; }
 
     protected:
 
@@ -219,12 +263,20 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief Identifies the visible islands and tiles for rendering.
+         * @brief Identifies the islands visible on the screen for rendering.
          */
         void FindVisibleIslands();
 
         /**
-         * @brief Identifies the visible deep water tiles for rendering.
+         * @brief Checks if a given layer of an island is visible on the screen.
+         *
+         * @param t_island The island to check.
+         * @param t_layerType The layer type to check.
+         */
+        void CheckLayer(const Island* t_island, LayerType t_layerType) const;
+
+        /**
+         * @brief Identifies the deep water tiles visible on the screen for rendering.
          */
         void FindVisibleDeepWaterTiles() const;
     };

@@ -95,6 +95,10 @@ namespace mdcii
     protected:
 
     private:
+        //-------------------------------------------------
+        // ImGui
+        //-------------------------------------------------
 
+        [[nodiscard]] bool RenderImGui() const;
     };
 }

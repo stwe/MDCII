@@ -77,6 +77,80 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
 }
 
 //-------------------------------------------------
+// ImGui
+//-------------------------------------------------
+
+void mdcii::world::World::RenderImGui()
+{
+    auto dirty{ false };
+
+    static bool cl{ false };
+    static bool tl{ false };
+    static bool bl{ false };
+    static bool ml{ true };
+
+    if (ImGui::Checkbox("Render Coast Layer", &cl))
+    {
+        renderLayer ^= RENDER_COAST_LAYER;
+        if (ml)
+        {
+            renderLayer ^= RENDER_MIXED_LAYER;
+            ml = false;
+        }
+
+        dirty = true;
+    }
+    if (ImGui::Checkbox("Render Terrain Layer", &tl))
+    {
+        renderLayer ^= RENDER_TERRAIN_LAYER;
+        if (ml)
+        {
+            renderLayer ^= RENDER_MIXED_LAYER;
+            ml = false;
+        }
+
+        dirty = true;
+    }
+    if (ImGui::Checkbox("Render Buildings Layer", &bl))
+    {
+        renderLayer ^= RENDER_BUILDINGS_LAYER;
+        if (ml)
+        {
+            renderLayer ^= RENDER_MIXED_LAYER;
+            ml = false;
+        }
+
+        dirty = true;
+    }
+    if (ImGui::Checkbox("Render Mixed Layer", &ml))
+    {
+        renderLayer ^= RENDER_MIXED_LAYER;
+        if (cl)
+        {
+            renderLayer ^= RENDER_COAST_LAYER;
+            cl = false;
+        }
+        if (tl)
+        {
+            renderLayer ^= RENDER_TERRAIN_LAYER;
+            tl = false;
+        }
+        if (bl)
+        {
+            renderLayer ^= RENDER_BUILDINGS_LAYER;
+            bl = false;
+        }
+
+        dirty = true;
+    }
+
+    if (dirty)
+    {
+        FindVisibleIslands();
+    }
+}
+
+//-------------------------------------------------
 // World / screen positions
 //-------------------------------------------------
 
@@ -167,43 +241,55 @@ void mdcii::world::World::FindVisibleIslands()
 {
     std::vector<Island*>().swap(currentIslands);
 
-    // todo
     for (const auto& island : islands)
     {
-        /*
-        for (auto i{ 0 }; i < Island::NR_OF_LAYERS - 1; ++i)
+        if (HasRenderLayerOption(RenderLayer::RENDER_MIXED_LAYER))
         {
-            std::vector<Tile>().swap(island->layers[i]->currentTiles);
-            island->layers[i]->currentTiles = island->layers[i]->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
+            CheckLayer(island.get(), LayerType::MIXED);
 
-            auto [begin, end]{ std::ranges::remove_if(island->layers[i]->currentTiles, [&](const Tile& t_tile)
+            if (!island->layers[magic_enum::enum_integer(LayerType::MIXED)]->currentTiles.empty())
             {
-                return IsWorldPositionOutsideScreen(t_tile.posX + island->startX, t_tile.posY + island->startY);
-            }) };
-
-            island->layers[i]->currentTiles.erase(begin, end);
+                currentIslands.push_back(island.get());
+            }
         }
-        */
-
-        const auto mixedLayerInt{ magic_enum::enum_integer(LayerType::TERRAIN_BUILDINGS) };
-
-        std::vector<Tile>().swap(island->layers[mixedLayerInt]->currentTiles);
-        island->layers[mixedLayerInt]->currentTiles = island->layers[mixedLayerInt]->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
-
-        auto [begin, end]{ std::ranges::remove_if(island->layers[mixedLayerInt]->currentTiles, [&](const Tile& t_tile)
+        else
         {
-            return IsWorldPositionOutsideScreen(t_tile.posX + island->startX, t_tile.posY + island->startY);
-        }) };
+            if (HasRenderLayerOption(RenderLayer::RENDER_COAST_LAYER))
+            {
+                CheckLayer(island.get(), LayerType::COAST);
+            }
+            if (HasRenderLayerOption(RenderLayer::RENDER_TERRAIN_LAYER))
+            {
+                CheckLayer(island.get(), LayerType::TERRAIN);
+            }
+            if (HasRenderLayerOption(RenderLayer::RENDER_BUILDINGS_LAYER))
+            {
+                CheckLayer(island.get(), LayerType::BUILDINGS);
+            }
 
-        island->layers[mixedLayerInt]->currentTiles.erase(begin, end);
-
-        if (!island->layers[mixedLayerInt]->currentTiles.empty())
-        {
-            currentIslands.push_back(island.get());
+            if (!island->layers[magic_enum::enum_integer(LayerType::COAST)]->currentTiles.empty())
+            {
+                currentIslands.push_back(island.get());
+            }
         }
     }
 
     MDCII_LOG_DEBUG("[World::FindVisibleIslands()] Render {} islands.", currentIslands.size());
+}
+
+void mdcii::world::World::CheckLayer(const Island* t_island, const LayerType t_layerType) const
+{
+    const auto layerTypeInt{ magic_enum::enum_integer(t_layerType) };
+
+    std::vector<Tile>().swap(t_island->layers[layerTypeInt]->currentTiles);
+    t_island->layers[layerTypeInt]->currentTiles = t_island->layers[layerTypeInt]->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
+
+    auto [begin, end]{ std::ranges::remove_if(t_island->layers[layerTypeInt]->currentTiles, [&](const Tile& t_tile)
+    {
+        return IsWorldPositionOutsideScreen(t_tile.posX + t_island->startX, t_tile.posY + t_island->startY);
+    }) };
+
+    t_island->layers[layerTypeInt]->currentTiles.erase(begin, end);
 }
 
 void mdcii::world::World::FindVisibleDeepWaterTiles() const

@@ -73,12 +73,12 @@ void mdcii::world::Island::InitLayers(const Game* t_game)
 
 void mdcii::world::Island::InitMixedLayer()
 {
-    MDCII_LOG_DEBUG("[Island::InitMixedLayer()] Initializing the TERRAIN_BUILDINGS layer of the island.");
+    MDCII_LOG_DEBUG("[Island::InitMixedLayer()] Initializing the MIXED layer of the island.");
 
     const auto* buildingsLayer{ layers.at(magic_enum::enum_integer(LayerType::BUILDINGS)).get() };
     const auto* terrainLayer{ layers.at(magic_enum::enum_integer(LayerType::TERRAIN)).get() };
     const auto* coastLayer{ layers.at(magic_enum::enum_integer(LayerType::COAST)).get() };
-    auto* mixedLayer{ layers.at(magic_enum::enum_integer(LayerType::TERRAIN_BUILDINGS)).get() };
+    auto* mixedLayer{ layers.at(magic_enum::enum_integer(LayerType::MIXED)).get() };
     mixedLayer->tiles = buildingsLayer->tiles;
 
     for (auto h{ 0 }; h < height; ++h)
