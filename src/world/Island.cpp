@@ -153,14 +153,10 @@ void mdcii::world::Island::InitTileDetails(const Game* t_game, Layer* t_layer, c
         InitBuildingTileDetails(t_game, &tile);
     }
 
-    tile.indices[0] = renderer::Renderer::GetMapIndex(tile.posX, tile
-        .posY, width, height, Rotation::DEG0);
-    tile.indices[1] = renderer::Renderer::GetMapIndex(tile.posX, tile
-        .posY, width, height, Rotation::DEG90);
-    tile.indices[2] = renderer::Renderer::GetMapIndex(tile.posX, tile
-        .posY, width, height, Rotation::DEG180);
-    tile.indices[3] = renderer::Renderer::GetMapIndex(tile.posX, tile
-        .posY, width, height, Rotation::DEG270);
+    tile.indices[0] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG0);
+    tile.indices[1] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG90);
+    tile.indices[2] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG180);
+    tile.indices[3] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG270);
 }
 
 void mdcii::world::Island::InitBuildingTileDetails(const Game* t_game, Tile* t_tile)

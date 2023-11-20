@@ -84,23 +84,19 @@ void mdcii::world::DeepWater::Init(const Game* t_game)
         // set posoffs
         tile.posoffs = building.posoffs;
 
-        tile.indices[0] = renderer::Renderer::GetMapIndex(tile.posX, tile
-            .posY, width, height, world::Rotation::DEG0);
-        tile.indices[1] = renderer::Renderer::GetMapIndex(tile.posX, tile
-            .posY, width, height, world::Rotation::DEG90);
-        tile.indices[2] = renderer::Renderer::GetMapIndex(tile.posX, tile
-            .posY, width, height, world::Rotation::DEG180);
-        tile.indices[3] = renderer::Renderer::GetMapIndex(tile.posX, tile
-            .posY, width, height, world::Rotation::DEG270);
+        tile.indices[0] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG0);
+        tile.indices[1] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG90);
+        tile.indices[2] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG180);
+        tile.indices[3] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG270);
     }
 
     // sort for rendering
-    for (const auto rotation : magic_enum::enum_values<world::Rotation>())
+    for (const auto rotation : magic_enum::enum_values<Rotation>())
     {
         const auto rotationInt{ magic_enum::enum_integer(rotation) };
 
         // sort tiles by index
-        std::ranges::sort(layer->tiles, [&](const world::Tile& t_a, const world::Tile& t_b)
+        std::ranges::sort(layer->tiles, [&](const Tile& t_a, const Tile& t_b)
         {
             return t_a.indices[rotationInt] < t_b.indices[rotationInt];
         });
@@ -110,5 +106,5 @@ void mdcii::world::DeepWater::Init(const Game* t_game)
     }
 
     // revert tiles sorting = sortedTiles DEG0
-    layer->tiles = layer->sortedTiles.at(magic_enum::enum_integer(world::Rotation::DEG0));
+    layer->tiles = layer->sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0));
 }
