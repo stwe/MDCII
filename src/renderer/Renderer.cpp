@@ -79,11 +79,11 @@ int mdcii::renderer::Renderer::GetGfxForCurrentRotation(const world::Tile* t_til
 
     if (t_tile->gfxs.size() == 1)
     {
-        return t_tile->gfxs[0];
+        return t_tile->gfxs[0] + t_tile->frame * t_tile->building->animAdd;
     }
 
     const auto worldRotation{ m_world->camera->rotation + world::int_to_rotation(t_tile->rotation) };
-    return t_tile->gfxs[magic_enum::enum_integer(worldRotation)];
+    return t_tile->gfxs[magic_enum::enum_integer(worldRotation)] + t_tile->frame * t_tile->building->animAdd;
 }
 
 void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_startY, const world::Tile* t_tile) const
@@ -110,12 +110,56 @@ void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_s
     );
 }
 
+void mdcii::renderer::Renderer::CalcAnimationFrame(const float t_elapsedTime)
+{
+    for (auto& timer : m_timer_values)
+    {
+        timer += t_elapsedTime;
+    }
+
+    if (m_timer_values[0] >= 0.09f)
+    {
+        m_frame_values[0] = ++m_frame_values[0];
+        m_timer_values[0] = 0.0f;
+        m_frame_values[0] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[1] >= 0.13f)
+    {
+        m_frame_values[1] = ++m_frame_values[1];
+        m_timer_values[1] = 0.0f;
+        m_frame_values[1] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[2] >= 0.15f)
+    {
+        m_frame_values[2] = ++m_frame_values[2];
+        m_timer_values[2] = 0.0f;
+        m_frame_values[2] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[3] >= 0.18f)
+    {
+        m_frame_values[3] = ++m_frame_values[3];
+        m_timer_values[3] = 0.0f;
+        m_frame_values[3] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[4] >= 0.22f)
+    {
+        m_frame_values[4] = ++m_frame_values[4];
+        m_timer_values[4] = 0.0f;
+        m_frame_values[4] %= MAX_FRAME_VALUE + 1;
+    }
+}
+
 void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island, const world::LayerType t_layerType) const
 {
-    for (const auto& tile : t_island->layers[magic_enum::enum_integer(t_layerType)]->currentTiles)
+    for (auto& tile : t_island->layers[magic_enum::enum_integer(t_layerType)]->currentTiles)
     {
         if (tile.HasBuilding())
         {
+            tile.UpdateFrame(m_frame_values);
             RenderBuilding(t_island->startX, t_island->startY, &tile);
         }
     }
@@ -151,8 +195,9 @@ void mdcii::renderer::Renderer::RenderDeepWater() const
 {
     if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_DEEP_WATER_LAYER))
     {
-        for (const auto& tile : m_world->deepWater->layer->currentTiles)
+        for (auto& tile : m_world->deepWater->layer->currentTiles)
         {
+            tile.UpdateFrame(m_frame_values);
             RenderBuilding(0, 0, &tile);
         }
     }

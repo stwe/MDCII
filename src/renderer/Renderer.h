@@ -97,6 +97,7 @@ namespace mdcii::renderer
         [[nodiscard]] int GetGfxForCurrentRotation(const world::Tile* t_tile) const;
         void RenderBuilding(int t_startX, int t_startY, const world::Tile* t_tile) const;
         void RenderIsland(const world::Island* t_island, world::LayerType t_layerType) const;
+        static void CalcAnimationFrame(float t_elapsedTime);
         void RenderIslands() const;
         void RenderDeepWater() const;
 
@@ -141,6 +142,15 @@ namespace mdcii::renderer
 
     private:
         //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * @brief To avoid m_frame_values[] will exceed that value.
+         */
+        static constexpr int MAX_FRAME_VALUE{ 1000 };
+
+        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -148,5 +158,18 @@ namespace mdcii::renderer
          * @brief Pointer to the parent World.
          */
         const world::World* m_world{ nullptr };
+
+        /**
+         * @brief Five timers to measure the times for the next frame.
+         *
+         * The animation speeds of the buildings are finally defined.
+         * So after 90, 130, 150, 180, 220 milliseconds the next frame from the animation is used.
+         */
+        inline static std::array m_timer_values{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+
+        /**
+         * @brief When one of the five timers expires, the respective frame is counted up.
+         */
+        inline static std::array m_frame_values{ 0, 0, 0, 0, 0 };
     };
 }

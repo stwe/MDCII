@@ -55,6 +55,11 @@ namespace mdcii::world
          */
         static constexpr auto NR_OF_ROTATIONS{ 4 };
 
+        /**
+         * @brief The number of different animation times.
+         */
+        static constexpr auto NR_OF_ANIM_TIMES{ 5 };
+
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
@@ -124,6 +129,11 @@ namespace mdcii::world
          */
         std::array<int, NR_OF_ROTATIONS> indices{};
 
+        /**
+         * @brief Used to get the current gfx for animation.
+         */
+        int frame{ 0 };
+
         //-------------------------------------------------
         // Getter
         //-------------------------------------------------
@@ -134,5 +144,16 @@ namespace mdcii::world
          * @return True if a Building object is present.
          */
         [[nodiscard]] bool HasBuilding() const { return building != nullptr; }
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
+        /**
+         * @brief Set the current animation frame.
+         *
+         * @param t_frameValues The current frame values for all animation times.
+         */
+        void UpdateFrame(const std::array<int, NR_OF_ANIM_TIMES>& t_frameValues);
     };
 }

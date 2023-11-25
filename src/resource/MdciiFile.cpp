@@ -144,7 +144,7 @@ void mdcii::resource::MdciiFile::InitLayerByType(world::Island* t_island, const 
 
 void mdcii::resource::MdciiFile::ExtractTileData(const nlohmann::json& t_source, world::Tile* t_tileTarget) const
 {
-    if (t_source.count("id"))
+    if (t_source.count("id") && t_source.at("id") >= 0)
     {
         const auto& building{ m_world->gameState->game->originalResourcesManager->GetBuildingById(t_source.at("id")) };
         t_tileTarget->building = &building;

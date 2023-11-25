@@ -71,6 +71,7 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
         FindVisibleDeepWaterTiles();
     }
 
+    renderer->CalcAnimationFrame(t_elapsedTime);
     renderer->RenderDeepWater();
     renderer->RenderIslands();
 }
