@@ -21,6 +21,18 @@
 #include <vector>
 #include <array>
 
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::resource
+{
+    /**
+     * @brief Forward declaration struct Building.
+     */
+    struct Building;
+}
+
 namespace mdcii::world
 {
     //-------------------------------------------------
@@ -48,9 +60,9 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief The Building Id from the haeuser.cod file.
+         * @brief Pointer to the Building object generated from the haeuser.cod file.
          */
-        int buildingId{ -1 };
+        const resource::Building* building{ nullptr };
 
         /**
          * @brief The Bsh graphic for each rotation.
@@ -88,11 +100,6 @@ namespace mdcii::world
         int y{ 0 };
 
         /**
-         * @brief The value is greater than zero if the building is above water.
-         */
-        int posoffs{ 0 };
-
-        /**
          * @brief Represents the x position for DEG0 of a tile relative to its parent island.
          *
          * This indicates the local position of the tile on the island, not its global world position.
@@ -124,15 +131,8 @@ namespace mdcii::world
         /**
          * @brief For better readability/convenience.
          *
-         * @return True if a valid building Id is present.
+         * @return True if a Building object is present.
          */
-        [[nodiscard]] bool HasBuilding() const { return buildingId != -1; }
-
-        /**
-         * @brief For better readability/convenience.
-         *
-         * @return True if building is above water.
-         */
-        [[nodiscard]] bool IsAboveWater() const { return posoffs > 0; }
+        [[nodiscard]] bool HasBuilding() const { return building != nullptr; }
     };
 }

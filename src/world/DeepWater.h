@@ -20,24 +20,21 @@
 
 #include <memory>
 
-//-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii
-{
-    /**
-     * @brief Forward declaration class Game.
-     */
-    class Game;
-}
-
 namespace mdcii::world
 {
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
     /**
      * @brief Forward declaration class Layer.
      */
     class Layer;
+
+    /**
+     * @brief Forward declaration class World.
+     */
+    class World;
 
     //-------------------------------------------------
     // DeepWater
@@ -54,17 +51,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief The width of the deep water area.
-         */
-        int width{ -1 };
-
-        /**
-         * @brief The height of the deep water area.
-         */
-        int height{ -1 };
-
-        /**
-         * @brief The deep water tile layer.
+         * @brief The deep water area tile layer.
          */
         std::unique_ptr<Layer> layer;
 
@@ -72,7 +59,14 @@ namespace mdcii::world
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        DeepWater();
+        DeepWater() = delete;
+
+        /**
+         * @brief Constructs a new DeepWater object.
+         *
+         * @param t_world Pointer to the parent World object.
+         */
+        explicit DeepWater(World* t_world);
 
         DeepWater(const DeepWater& t_other) = delete;
         DeepWater(DeepWater&& t_other) noexcept = delete;
@@ -81,20 +75,59 @@ namespace mdcii::world
 
         ~DeepWater() noexcept;
 
+    protected:
+
+    private:
+        //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * @brief The building Id used for all deep water tiles.
+         */
+        static constexpr auto DEEP_WATER_BUILDING_ID{ 1201 };
+
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * @brief Pointer to the parent World object.
+         */
+        World* m_world{ nullptr };
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------
 
         /**
-         * @brief Initializes the layer.
-         *
-         * @param t_game Pointer to the Game.
+         * @brief Initializes the deep water area.
          */
-        void Init(const Game* t_game);
+        void Init();
 
-    protected:
+        /**
+         * @brief Initialize the deep water layer and its tiles.
+         */
+        void InitLayer();
 
-    private:
+        /**
+         * @brief Set the world positions for each tile.
+         */
+        void SetWorldPositions();
 
+        /**
+         * @brief Remove tiles that do not belong to the deep water.
+         */
+        void RemoveIrrelevantTiles();
+
+        /**
+         * @brief Update the properties of each tile based on the buildingId it contains.
+         */
+        void UpdateTileProperties();
+
+        /**
+         * @brief Sort tiles for rendering based on their indices and rotations.
+         */
+        void SortTilesForRendering();
     };
 }

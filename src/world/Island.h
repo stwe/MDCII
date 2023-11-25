@@ -24,22 +24,6 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii
-{
-    /**
-     * @brief Forward declaration class Game.
-     */
-    class Game;
-}
-
-namespace mdcii::resource
-{
-    /**
-     * @brief Forward declaration struct Building.
-     */
-    struct Building;
-}
-
 namespace mdcii::world
 {
     /**
@@ -47,14 +31,14 @@ namespace mdcii::world
      */
     struct Tile;
 
-    //-------------------------------------------------
-    // Island
-    //-------------------------------------------------
-
     /**
      * @brief Forward declaration class Layer.
      */
     class Layer;
+
+    //-------------------------------------------------
+    // Island
+    //-------------------------------------------------
 
     /**
      * @brief Represents an Island.
@@ -123,11 +107,9 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief Initializes all layers.
-         *
-         * @param t_game Pointer to the Game.
+         * @brief Initializes the island.
          */
-        void Init(const Game* t_game);
+        void Init();
 
     protected:
 
@@ -138,10 +120,8 @@ namespace mdcii::world
 
         /**
          * @brief Initialises the COAST, TERRAIN and BUILDINGS layer of the island.
-         *
-         * @param t_game Pointer to the Game object.
          */
-        void InitLayers(const Game* t_game);
+        void InitLayers();
 
         /**
          * @brief Initialises the mixed layer of the island, which is created from all other layers.
@@ -151,21 +131,21 @@ namespace mdcii::world
         /**
          * @brief Populates the mixed layer with data from other layers.
          *
-         * @param coastLayer Coast layer of the island.
-         * @param terrainLayer Terrain layer of the island.
-         * @param buildingsLayer Buildings layer of the island.
-         * @param mixedLayer The mixed layer to be populated.
-         * @param h The height index.
-         * @param w The width index.
+         * @param t_coastLayer Coast layer of the island.
+         * @param t_terrainLayer Terrain layer of the island.
+         * @param t_buildingsLayer Buildings layer of the island.
+         * @param t_mixedLayer The mixed layer to be populated.
+         * @param t_h The height index.
+         * @param t_w The width index.
          */
         void PopulateMixedLayer(const Layer* t_coastLayer, const Layer* t_terrainLayer, const Layer* t_buildingsLayer, Layer* t_mixedLayer, int t_w, int t_h) const;
 
         /**
          * @brief Checks if a tile should be replaced in the mixed layer.
          *
-         * @param layer Layer to check the tile from.
-         * @param buildingsLayer Buildings layer of the island.
-         * @param index Index of the tile to check.
+         * @param t_layer Layer to check the tile from.
+         * @param t_buildingsLayer Buildings layer of the island.
+         * @param t_index Index of the tile to check.
          *
          * @return True if the tile should be replaced; false otherwise.
          */
@@ -178,43 +158,39 @@ namespace mdcii::world
         /**
          * @brief Initializes all layer tiles.
          *
-         * @param t_game Pointer to the Game.
          * @param t_layer Pointer to the Layer.
          */
-        void InitLayerTiles(const Game* t_game, Layer* t_layer) const;
+        void InitLayerTiles(Layer* t_layer) const;
 
         /**
          * @brief Initializes the details of a single tile.
          *
-         * @param t_game Pointer to a Game object.
          * @param t_layer Current layer being initialized.
          * @param t_w Width (x) coordinate of the tile.
          * @param t_h Height (y) coordinate of the tile.
          */
-        void InitTileDetails(const Game* t_game, Layer* t_layer, int t_w, int t_h) const;
+        void InitTileDetails(Layer* t_layer, int t_w, int t_h) const;
 
         /**
          * @brief Initializes the details of a tile with a building.
          *
-         * @param t_game Pointer to a Game object.
          * @param t_tile The tile to be initialized.
          */
-        static void InitBuildingTileDetails(const Game* t_game, Tile* t_tile);
+        void InitBuildingTileDetails(Tile* t_tile) const;
 
         /**
          * @brief Adjusts the graphical representation of a tile for large buildings.
          *
-         * @param t_building The building on this tile.
          * @param t_tile The tile to be adjusted.
          * @param t_gfx The graphical representation of the tile.
          */
-        static void AdjustGfxForBigBuildings(const resource::Building* t_building, const Tile* t_tile, int& t_gfx);
+        void AdjustGfxForBigBuildings(const Tile* t_tile, int& t_gfx) const;
 
         /**
          * @brief Sorts the tiles in a layer for correct rendering order.
          *
          * @param t_layer Pointer to the layer whose tiles are to be sorted.
          */
-        static void SortTiles(Layer* t_layer);
+        void SortTiles(Layer* t_layer) const;
     };
 }

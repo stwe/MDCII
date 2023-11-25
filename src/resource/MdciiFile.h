@@ -27,6 +27,11 @@
 namespace mdcii::world
 {
     /**
+     * @brief Forward declaration class World.
+     */
+    class World;
+
+    /**
      * @brief Forward declaration class Island.
      */
     class Island;
@@ -60,20 +65,6 @@ namespace mdcii::resource
     {
     public:
         //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * @brief The name of the file.
-         */
-        std::string fileName;
-
-        /**
-         * @brief The current Json value.
-         */
-        nlohmann::json json;
-
-        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
@@ -82,9 +73,10 @@ namespace mdcii::resource
         /**
          * @brief Constructs a new MdciiFile object.
          *
+         * @param t_world Pointer to the parent World object.
          * @param t_fileName The name of the file.
          */
-        explicit MdciiFile(std::string t_fileName);
+        MdciiFile(world::World* t_world, std::string t_fileName);
 
         MdciiFile(const MdciiFile& t_other) = delete;
         MdciiFile(MdciiFile&& t_other) noexcept = delete;
@@ -105,18 +97,34 @@ namespace mdcii::resource
         [[nodiscard]] bool LoadJsonFromFile();
 
         /**
-         * @brief Create world content and return a vector of unique pointers to the islands.
-         *
-         * @param t_worldWidth The width of the world is passed by reference and modified.
-         * @param t_worldHeight The height of the world is passed by reference and modified.
+         * @brief Create world content.
          *
          * @return A vector of unique pointers to the islands.
          */
-        [[nodiscard]] std::vector<std::unique_ptr<world::Island>> CreateWorldContent(int& t_worldWidth, int& t_worldHeight) const;
+        [[nodiscard]] std::vector<std::unique_ptr<world::Island>> CreateWorldContent() const;
 
     protected:
 
     private:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * @brief Pointer to the parent World object.
+         */
+        world::World* m_world{ nullptr };
+
+        /**
+         * @brief The name of the file.
+         */
+        std::string m_fileName;
+
+        /**
+         * @brief The current Json value.
+         */
+        nlohmann::json m_json;
+
         //-------------------------------------------------
         // Layer && Tiles
         //-------------------------------------------------
@@ -128,7 +136,7 @@ namespace mdcii::resource
          * @param t_vars JSON variables related to the layer details.
          * @param t_layerType The type of layer.
          */
-        static void InitLayerByType(world::Island* t_island, const nlohmann::json& t_vars, world::LayerType t_layerType);
+        void InitLayerByType(world::Island* t_island, const nlohmann::json& t_vars, world::LayerType t_layerType) const;
 
         /**
          * @brief Extract tile data from JSON and save it to the Tile object.
@@ -136,7 +144,7 @@ namespace mdcii::resource
          * @param t_source Source JSON data.
          * @param t_tileTarget Pointer to the target Tile object.
          */
-        static void ExtractTileData(nlohmann::json const& t_source, world::Tile* t_tileTarget);
+        void ExtractTileData(nlohmann::json const& t_source, world::Tile* t_tileTarget) const;
 
         /**
          * @brief Create layer tiles according to the provided JSON data.
@@ -144,6 +152,6 @@ namespace mdcii::resource
          * @param t_layer Pointer to the target Layer object.
          * @param t_layerTilesJson Source JSON data.
          */
-        static void CreateLayerTiles(world::Layer* t_layer, const nlohmann::json& t_layerTilesJson);
+        void CreateLayerTiles(world::Layer* t_layer, const nlohmann::json& t_layerTilesJson) const;
     };
 }

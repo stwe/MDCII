@@ -92,15 +92,6 @@ namespace mdcii::world
     {
     public:
         //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        /**
-         * @brief The building Id used for the deep water area.
-         */
-        static constexpr auto DEEP_WATER_BUILDING_ID{ 1201 };
-
-        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -251,13 +242,6 @@ namespace mdcii::world
          * @param t_fileName The name of the save-game file.
          */
         void Init(const std::string& t_fileName);
-
-        /**
-         * @brief Creates the deep water area.
-         *
-         * @return A unique pointer to the created DeepWater object.
-         */
-        [[nodiscard]] std::unique_ptr<DeepWater> CreateDeepWaterArea() const;
 
         //-------------------------------------------------
         // Render helper

@@ -19,9 +19,11 @@
 #include <algorithm>
 #include "DeepWater.h"
 #include "Game.h"
+#include "World.h"
 #include "Rotation.h"
 #include "Layer.h"
 #include "MdciiAssert.h"
+#include "GameState.h"
 #include "resource/OriginalResourcesManager.h"
 #include "renderer/Renderer.h"
 
@@ -29,9 +31,14 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::DeepWater::DeepWater()
+mdcii::world::DeepWater::DeepWater(World* t_world)
+    : m_world{ t_world }
 {
     MDCII_LOG_DEBUG("[DeepWater::DeepWater()] Create DeepWater.");
+
+    MDCII_ASSERT(m_world, "[DeepWater::DeepWater()] Null pointer.")
+
+    Init();
 }
 
 mdcii::world::DeepWater::~DeepWater() noexcept
@@ -43,52 +50,95 @@ mdcii::world::DeepWater::~DeepWater() noexcept
 // Init
 //-------------------------------------------------
 
-void mdcii::world::DeepWater::Init(const Game* t_game)
+void mdcii::world::DeepWater::Init()
 {
-    MDCII_ASSERT(t_game, "[DeepWater::InitLayer()] Null pointer.")
-    MDCII_ASSERT(width, "[DeepWater::InitLayer()] Invalid width.")
-    MDCII_ASSERT(height, "[DeepWater::InitLayer()] Invalid height.")
-    MDCII_ASSERT(!layer->tiles.empty(), "[DeepWater::InitLayer()] Invalid number of tiles.")
+    MDCII_LOG_DEBUG("[DeepWater::Init()] Start creating the deep water area ...");
 
-    // set world positions
-    for (auto h{ 0 }; h < height; ++h)
+    InitLayer();
+    SetWorldPositions();
+    RemoveIrrelevantTiles();
+    UpdateTileProperties();
+    SortTilesForRendering();
+
+    MDCII_LOG_DEBUG("[DeepWater::Init()] The deep water area was successfully created.");
+}
+
+void mdcii::world::DeepWater::InitLayer()
+{
+    MDCII_LOG_DEBUG("[DeepWater::InitLayer()] Init deep water layer.");
+
+    layer = std::make_unique<Layer>(LayerType::DEEP_WATER);
+    layer->tiles.resize(m_world->worldWidth * m_world->worldHeight);
+
+    for (auto y{ 0 }; y < m_world->worldHeight; ++y)
     {
-        for (auto w{ 0 }; w < width; ++w)
+        for (auto x{ 0 }; x < m_world->worldWidth; ++x)
         {
-            auto& tile{ layer->tiles.at(h * width + w) };
+            if (!m_world->IsWorldPositionOnAnyIsland(x, y))
+            {
+                const auto& building1201{ m_world->gameState->game->originalResourcesManager->GetBuildingById(DEEP_WATER_BUILDING_ID) };
+                layer->tiles.at(y * m_world->worldWidth + x).building = &building1201;
+            }
+        }
+    }
+}
+
+void mdcii::world::DeepWater::SetWorldPositions()
+{
+    MDCII_LOG_DEBUG("[DeepWater::SetWorldPositions()] Set a world position for each tile.");
+
+    for (auto h{ 0 }; h < m_world->worldHeight; ++h)
+    {
+        for (auto w{ 0 }; w < m_world->worldWidth; ++w)
+        {
+            auto& tile{ layer->tiles.at(h * m_world->worldWidth + w) };
             tile.posX = w;
             tile.posY = h;
         }
     }
+}
 
-    // remove tiles that don't have the buildingId 1201
-    auto [begin, end]{ std::ranges::remove_if(layer->tiles, [](const auto& t_tile) { return t_tile.buildingId != 1201; }) };
+void mdcii::world::DeepWater::RemoveIrrelevantTiles()
+{
+    MDCII_LOG_DEBUG("[DeepWater::RemoveIrrelevantTiles()] Remove tiles without building info.");
+
+    auto [begin, end]{ std::ranges::remove_if(layer->tiles, [](const auto& t_tile)
+    {
+        return t_tile.building == nullptr; })
+    };
+
     layer->tiles.erase(begin, end);
+}
+
+void mdcii::world::DeepWater::UpdateTileProperties()
+{
+    MDCII_LOG_DEBUG("[DeepWater::UpdateTileProperties()] Pre-calculate other properties.");
 
     for (auto& tile : layer->tiles)
     {
-        MDCII_ASSERT(tile.HasBuilding(), "[DeepWater::InitLayer()] Invalid building Id")
+        MDCII_ASSERT(tile.HasBuilding(), "[DeepWater::UpdateTileProperties()] Building information is missing.")
 
         // pre-calculate a gfx for each rotation
-        const auto& building{ t_game->originalResourcesManager->GetBuildingById(tile.buildingId) };
-        const auto gfx0{ building.gfx };
+        const auto gfx0{ tile.building->gfx };
 
         tile.gfxs.push_back(gfx0);
-        if (building.rotate > 0)
+        if (tile.building->rotate > 0)
         {
-            tile.gfxs.push_back(gfx0 + (1 * building.rotate));
-            tile.gfxs.push_back(gfx0 + (2 * building.rotate));
-            tile.gfxs.push_back(gfx0 + (3 * building.rotate));
+            tile.gfxs.push_back(gfx0 + (1 * tile.building->rotate));
+            tile.gfxs.push_back(gfx0 + (2 * tile.building->rotate));
+            tile.gfxs.push_back(gfx0 + (3 * tile.building->rotate));
         }
 
-        // set posoffs
-        tile.posoffs = building.posoffs;
-
-        tile.indices[0] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG0);
-        tile.indices[1] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG90);
-        tile.indices[2] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG180);
-        tile.indices[3] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG270);
+        tile.indices[0] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, m_world->worldWidth, m_world->worldHeight, Rotation::DEG0);
+        tile.indices[1] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, m_world->worldWidth, m_world->worldHeight, Rotation::DEG90);
+        tile.indices[2] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, m_world->worldWidth, m_world->worldHeight, Rotation::DEG180);
+        tile.indices[3] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, m_world->worldWidth, m_world->worldHeight, Rotation::DEG270);
     }
+}
+
+void mdcii::world::DeepWater::SortTilesForRendering()
+{
+    MDCII_LOG_DEBUG("[DeepWater::SortTilesForRendering()] Sort tile for rendering.");
 
     // sort for rendering
     for (const auto rotation : magic_enum::enum_values<Rotation>())

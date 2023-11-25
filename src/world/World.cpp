@@ -22,7 +22,6 @@
 #include "Layer.h"
 #include "DeepWater.h"
 #include "MdciiAssert.h"
-#include "GameState.h"
 #include "resource/MdciiFile.h"
 #include "renderer/Renderer.h"
 #include "camera/Camera.h"
@@ -202,54 +201,27 @@ void mdcii::world::World::Init(const std::string& t_fileName)
 {
     MDCII_LOG_DEBUG("[World::Init()] Start initializing the world ...");
 
-    if (resource::MdciiFile file{ t_fileName }; file.LoadJsonFromFile())
+    if (resource::MdciiFile mdciiFile{ this, t_fileName }; mdciiFile.LoadJsonFromFile())
     {
-        islands = file.CreateWorldContent(worldWidth, worldHeight);
+        islands = mdciiFile.CreateWorldContent();
     }
 
     for (auto const& island : islands)
     {
-        island->Init(gameState->game);
+        island->Init();
     }
 
-    deepWater = CreateDeepWaterArea();
+    deepWater = std::make_unique<DeepWater>(this);
     renderer = std::make_unique<renderer::Renderer>(this);
     camera = std::make_unique<camera::Camera>(this);
 
     MDCII_LOG_DEBUG("[World::Init()] The world were initialized successfully.");
 }
 
-std::unique_ptr<mdcii::world::DeepWater> mdcii::world::World::CreateDeepWaterArea() const
-{
-    MDCII_LOG_DEBUG("[World::CreateDeepWaterArea()] Initialize the deep water area.");
-
-    auto deepWaterArea{ std::make_unique<DeepWater>() };
-    deepWaterArea->width = worldWidth;
-    deepWaterArea->height = worldHeight;
-    deepWaterArea->layer = std::make_unique<Layer>(LayerType::DEEP_WATER);
-    deepWaterArea->layer->tiles.resize(worldWidth * worldHeight);
-
-    for (auto y{ 0 }; y < worldHeight; ++y)
-    {
-        for (auto x{ 0 }; x < worldWidth; ++x)
-        {
-            if (!IsWorldPositionOnAnyIsland(x, y))
-            {
-                deepWaterArea->layer->tiles.at(y * worldWidth + x).buildingId = DEEP_WATER_BUILDING_ID;
-            }
-        }
-    }
-
-    deepWaterArea->Init(gameState->game);
-
-    return deepWaterArea;
-}
-
 //-------------------------------------------------
 // Render helper
 //-------------------------------------------------
 
-// todo: it makes sense to sort out the islands beforehand that are completely invisible
 void mdcii::world::World::FindVisibleIslands()
 {
     std::vector<Island*>().swap(currentIslands);
@@ -265,7 +237,9 @@ void mdcii::world::World::FindVisibleIslands()
                 currentIslands.push_back(island.get());
             }
         }
-        else
+        else if (HasRenderLayerOption(RenderLayer::RENDER_COAST_LAYER) ||
+                 HasRenderLayerOption(RenderLayer::RENDER_TERRAIN_LAYER) ||
+                 HasRenderLayerOption(RenderLayer::RENDER_BUILDINGS_LAYER))
         {
             if (HasRenderLayerOption(RenderLayer::RENDER_COAST_LAYER))
             {

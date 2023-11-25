@@ -18,12 +18,11 @@
 
 #include <algorithm>
 #include "Island.h"
-#include "Game.h"
 #include "Layer.h"
 #include "MdciiAssert.h"
-#include "resource/OriginalResourcesManager.h"
 #include "renderer/Renderer.h"
 #include "world/Rotation.h"
+#include "resource/Buildings.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -43,15 +42,14 @@ mdcii::world::Island::~Island() noexcept
 // Init
 //-------------------------------------------------
 
-void mdcii::world::Island::Init(const Game* t_game)
+void mdcii::world::Island::Init()
 {
-    MDCII_LOG_DEBUG("[Island::Init()] Initialize the island.");
+    MDCII_LOG_DEBUG("[Island::Init()] Initializes the island.");
 
-    MDCII_ASSERT(t_game, "[Island::Init()] Null pointer.")
     MDCII_ASSERT(width, "[Island::Init()] Invalid width.")
     MDCII_ASSERT(height, "[Island::Init()] Invalid height.")
 
-    InitLayers(t_game);
+    InitLayers();
     InitMixedLayer();
 
     aabb = physics::Aabb(olc::vi2d(startX, startY), olc::vi2d(width, height));
@@ -61,13 +59,13 @@ void mdcii::world::Island::Init(const Game* t_game)
 // Layer
 //-------------------------------------------------
 
-void mdcii::world::Island::InitLayers(const Game* t_game)
+void mdcii::world::Island::InitLayers()
 {
     MDCII_LOG_DEBUG("[Island::InitLayers()] Initializing the COAST, TERRAIN and BUILDINGS layer of the island.");
 
     for (auto i{ 0 }; i < NR_OF_LAYERS - 1; ++i)
     {
-        InitLayerTiles(t_game, layers.at(i).get());
+        InitLayerTiles(layers.at(i).get());
     }
 }
 
@@ -123,7 +121,7 @@ bool mdcii::world::Island::ShouldReplaceTile(const Layer* t_layer, const Layer* 
 // Layer tiles
 //-------------------------------------------------
 
-void mdcii::world::Island::InitLayerTiles(const Game* t_game, Layer* t_layer) const
+void mdcii::world::Island::InitLayerTiles(Layer* t_layer) const
 {
     MDCII_LOG_DEBUG("[Island::InitLayerTiles()] Start initializing layer tiles for {} ...", magic_enum::enum_name(t_layer->layerType));
 
@@ -133,7 +131,7 @@ void mdcii::world::Island::InitLayerTiles(const Game* t_game, Layer* t_layer) co
     {
         for (auto w{ 0 }; w < width; ++w)
         {
-            InitTileDetails(t_game, t_layer, w, h);
+            InitTileDetails(t_layer, w, h);
         }
     }
 
@@ -142,7 +140,7 @@ void mdcii::world::Island::InitLayerTiles(const Game* t_game, Layer* t_layer) co
     MDCII_LOG_DEBUG("[Island::InitLayerTiles()] The layer tiles were initialized successfully.");
 }
 
-void mdcii::world::Island::InitTileDetails(const Game* t_game, Layer* t_layer, const int t_w, const int t_h) const
+void mdcii::world::Island::InitTileDetails(Layer* t_layer, const int t_w, const int t_h) const
 {
     auto& tile{ t_layer->tiles.at(t_h * width + t_w) };
     tile.posX = t_w;
@@ -150,7 +148,7 @@ void mdcii::world::Island::InitTileDetails(const Game* t_game, Layer* t_layer, c
 
     if (tile.HasBuilding())
     {
-        InitBuildingTileDetails(t_game, &tile);
+        InitBuildingTileDetails(&tile);
     }
 
     tile.indices[0] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG0);
@@ -159,34 +157,34 @@ void mdcii::world::Island::InitTileDetails(const Game* t_game, Layer* t_layer, c
     tile.indices[3] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG270);
 }
 
-void mdcii::world::Island::InitBuildingTileDetails(const Game* t_game, Tile* t_tile)
+void mdcii::world::Island::InitBuildingTileDetails(Tile* t_tile) const
 {
+    MDCII_ASSERT(t_tile->HasBuilding(), "[Island::InitBuildingTileDetails()] Null pointer.")
+
     // pre-calculate a gfx for each rotation
-    const auto& building{ t_game->originalResourcesManager->GetBuildingById(t_tile->buildingId) };
-    const auto gfx0{ building.gfx };
+    const auto gfx0{ t_tile->building->gfx };
 
     t_tile->gfxs.push_back(gfx0);
-    if (building.rotate > 0)
+    if (t_tile->building->rotate > 0)
     {
-        t_tile->gfxs.push_back(gfx0 + (1 * building.rotate));
-        t_tile->gfxs.push_back(gfx0 + (2 * building.rotate));
-        t_tile->gfxs.push_back(gfx0 + (3 * building.rotate));
+        t_tile->gfxs.push_back(gfx0 + (1 * t_tile->building->rotate));
+        t_tile->gfxs.push_back(gfx0 + (2 * t_tile->building->rotate));
+        t_tile->gfxs.push_back(gfx0 + (3 * t_tile->building->rotate));
     }
 
     for (auto& gfx : t_tile->gfxs)
     {
-        if (building.size.w > 1 || building.size.h > 1)
+        if (t_tile->building->size.w > 1 || t_tile->building->size.h > 1)
         {
-            AdjustGfxForBigBuildings(&building, t_tile, gfx);
+            AdjustGfxForBigBuildings(t_tile, gfx);
         }
     }
-
-    // set posoffs
-    t_tile->posoffs = building.posoffs;
 }
 
-void mdcii::world::Island::AdjustGfxForBigBuildings(const resource::Building* t_building, const Tile* t_tile, int& t_gfx)
+void mdcii::world::Island::AdjustGfxForBigBuildings(const Tile* t_tile, int& t_gfx) const
 {
+    MDCII_ASSERT(t_tile->HasBuilding(), "[Island::AdjustGfxForBigBuildings()] Null pointer.")
+
     // default: orientation 0
     auto rp{ olc::vi2d(t_tile->x, t_tile->y) };
 
@@ -194,7 +192,7 @@ void mdcii::world::Island::AdjustGfxForBigBuildings(const resource::Building* t_
     {
         rp = rotate_position(
             t_tile->x, t_tile->y,
-            t_building->size.w, t_building->size.h,
+            t_tile->building->size.w, t_tile->building->size.h,
             Rotation::DEG90
         );
     }
@@ -203,7 +201,7 @@ void mdcii::world::Island::AdjustGfxForBigBuildings(const resource::Building* t_
     {
         rp = rotate_position(
             t_tile->x, t_tile->y,
-            t_building->size.w, t_building->size.h,
+            t_tile->building->size.w, t_tile->building->size.h,
             Rotation::DEG180
         );
     }
@@ -212,16 +210,16 @@ void mdcii::world::Island::AdjustGfxForBigBuildings(const resource::Building* t_
     {
         rp = rotate_position(
             t_tile->x, t_tile->y,
-            t_building->size.w, t_building->size.h,
+            t_tile->building->size.w, t_tile->building->size.h,
             Rotation::DEG270
         );
     }
 
-    const auto offset{ rp.y * t_building->size.w + rp.x };
+    const auto offset{ rp.y * t_tile->building->size.w + rp.x };
     t_gfx += offset;
 }
 
-void mdcii::world::Island::SortTiles(Layer* t_layer)
+void mdcii::world::Island::SortTiles(Layer* t_layer) const
 {
     for (const auto rotation : magic_enum::enum_values<Rotation>())
     {

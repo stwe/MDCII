@@ -27,6 +27,7 @@
 #include "world/Layer.h"
 #include "resource/TileAtlas.h"
 #include "camera/Camera.h"
+#include "resource/Buildings.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -64,7 +65,7 @@ float mdcii::renderer::Renderer::CalcOffset(const world::Tile* t_tile, const int
     {
         offset = static_cast<float>(gfxHeight) - static_cast<float>(tileHeight);
     }
-    if (t_tile->IsAboveWater())
+    if (t_tile->building->posoffs > 0) // above water
     {
         offset += world::ELEVATIONS[zoomInt];
     }

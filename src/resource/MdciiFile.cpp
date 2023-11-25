@@ -19,20 +19,27 @@
 
 #include "MdciiFile.h"
 #include "MdciiAssert.h"
+#include "MdciiException.h"
 #include "MdciiUtils.h"
+#include "GameState.h"
+#include "Game.h"
+#include "world/World.h"
 #include "world/Island.h"
 #include "world/Layer.h"
+#include "resource/OriginalResourcesManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::resource::MdciiFile::MdciiFile(std::string t_fileName)
-    : fileName{ std::move(t_fileName) }
+mdcii::resource::MdciiFile::MdciiFile(world::World* t_world, std::string t_fileName)
+    : m_world{ t_world }
+    , m_fileName{ std::move(t_fileName) }
 {
     MDCII_LOG_DEBUG("[MdciiFile::MdciiFile()] Create MdciiFile.");
 
-    MDCII_ASSERT(!fileName.empty(), "[MdciiFile::MdciiFile()] Invalid file name.")
+    MDCII_ASSERT(m_world, "[MdciiFile::MdciiFile()] Null pointer.")
+    MDCII_ASSERT(!m_fileName.empty(), "[MdciiFile::MdciiFile()] Invalid file name.")
 }
 
 mdcii::resource::MdciiFile::~MdciiFile() noexcept
@@ -46,33 +53,38 @@ mdcii::resource::MdciiFile::~MdciiFile() noexcept
 
 bool mdcii::resource::MdciiFile::LoadJsonFromFile()
 {
-    MDCII_LOG_DEBUG("[MdciiFile::LoadJsonFromFile()] Start loading Json value from file {}.", fileName);
+    MDCII_LOG_DEBUG("[MdciiFile::LoadJsonFromFile()] Start loading Json value from file {}.", m_fileName);
 
-    if (std::filesystem::exists(fileName))
+    if (std::filesystem::exists(m_fileName))
     {
-        json = read_json_from_file(fileName);
-        MDCII_LOG_DEBUG("[MdciiFile::LoadJsonFromFile()] The Json value was successfully read from file {}.", fileName);
+        m_json = read_json_from_file(m_fileName);
+        MDCII_LOG_DEBUG("[MdciiFile::LoadJsonFromFile()] The Json value was successfully read from file {}.", m_fileName);
 
         return true;
     }
 
-    MDCII_LOG_WARN("[MdciiFile::LoadJsonFromFile()] File {} does not exist.", fileName);
+    MDCII_LOG_WARN("[MdciiFile::LoadJsonFromFile()] File {} does not exist.", m_fileName);
 
     return false;
 }
 
-std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::CreateWorldContent(int& t_worldWidth, int& t_worldHeight) const
+std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::CreateWorldContent() const
 {
-    MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] Start creating the world from file {} ...", fileName);
+    MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] Start creating the world from file {} ...", m_fileName);
 
     std::vector<std::unique_ptr<world::Island>> is;
 
-    t_worldWidth = json.at("world").at("width").get<int32_t>();
-    t_worldHeight = json.at("world").at("height").get<int32_t>();
+    m_world->worldWidth = m_json.at("world").at("width").get<int32_t>();
+    m_world->worldHeight = m_json.at("world").at("height").get<int32_t>();
 
-    MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The size of the world is ({}, {}).", t_worldWidth, t_worldHeight);
+    if (m_world->worldWidth <= 0 || m_world->worldHeight <= 0)
+    {
+        throw MDCII_EXCEPTION("[MdciiFile::CreateWorldContent()] Invalid world size.");
+    }
 
-    for (const auto& [islandKeys, islandVars] : json["islands"].items())
+    MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The size of the world is ({}, {}).", m_world->worldWidth, m_world->worldHeight);
+
+    for (const auto& [islandKeys, islandVars] : m_json["islands"].items())
     {
         auto island{ std::make_unique<world::Island>() };
         island->width = islandVars.at("width").get<int32_t>();
@@ -103,7 +115,7 @@ std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::C
 // Layer && Tiles
 //-------------------------------------------------
 
-void mdcii::resource::MdciiFile::InitLayerByType(world::Island* t_island, const nlohmann::json& t_vars, const world::LayerType t_layerType)
+void mdcii::resource::MdciiFile::InitLayerByType(world::Island* t_island, const nlohmann::json& t_vars, const world::LayerType t_layerType) const
 {
     MDCII_LOG_DEBUG("[MdciiFile::InitLayerByType()] Create and init island layer {}.", magic_enum::enum_name(t_layerType));
 
@@ -130,11 +142,12 @@ void mdcii::resource::MdciiFile::InitLayerByType(world::Island* t_island, const 
     }
 }
 
-void mdcii::resource::MdciiFile::ExtractTileData(const nlohmann::json& t_source, world::Tile* t_tileTarget)
+void mdcii::resource::MdciiFile::ExtractTileData(const nlohmann::json& t_source, world::Tile* t_tileTarget) const
 {
     if (t_source.count("id"))
     {
-        t_tileTarget->buildingId = t_source.at("id");
+        const auto& building{ m_world->gameState->game->originalResourcesManager->GetBuildingById(t_source.at("id")) };
+        t_tileTarget->building = &building;
     }
 
     if (t_source.count("rotation"))
@@ -153,7 +166,7 @@ void mdcii::resource::MdciiFile::ExtractTileData(const nlohmann::json& t_source,
     }
 }
 
-void mdcii::resource::MdciiFile::CreateLayerTiles(world::Layer* t_layer, const nlohmann::json& t_layerTilesJson)
+void mdcii::resource::MdciiFile::CreateLayerTiles(world::Layer* t_layer, const nlohmann::json& t_layerTilesJson) const
 {
     MDCII_LOG_DEBUG("[MdciiFile::CreateLayerTiles()] Create layer tiles for layer of type {}.", magic_enum::enum_name(t_layer->layerType));
 
