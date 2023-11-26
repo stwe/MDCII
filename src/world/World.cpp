@@ -71,7 +71,7 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
         FindVisibleDeepWaterTiles();
     }
 
-    renderer->CalcAnimationFrame(t_elapsedTime);
+    renderer::Renderer::CalcAnimationFrame(t_elapsedTime);
     renderer->RenderDeepWater();
     renderer->RenderIslands();
 }
@@ -245,26 +245,33 @@ void mdcii::world::World::FindVisibleIslands()
                  HasRenderLayerOption(RenderLayer::RENDER_TERRAIN_LAYER) ||
                  HasRenderLayerOption(RenderLayer::RENDER_BUILDINGS_LAYER))
         {
+            auto dirty{ false };
             if (HasRenderLayerOption(RenderLayer::RENDER_COAST_LAYER))
             {
                 CheckLayer(island.get(), LayerType::COAST);
+                if (!island->layers[magic_enum::enum_integer(LayerType::COAST)]->currentTiles.empty())
+                {
+                    dirty = true;
+                }
             }
             if (HasRenderLayerOption(RenderLayer::RENDER_TERRAIN_LAYER))
             {
                 CheckLayer(island.get(), LayerType::TERRAIN);
+                if (!island->layers[magic_enum::enum_integer(LayerType::TERRAIN)]->currentTiles.empty())
+                {
+                    dirty = true;
+                }
             }
             if (HasRenderLayerOption(RenderLayer::RENDER_BUILDINGS_LAYER))
             {
                 CheckLayer(island.get(), LayerType::BUILDINGS);
+                if (!island->layers[magic_enum::enum_integer(LayerType::BUILDINGS)]->currentTiles.empty())
+                {
+                    dirty = true;
+                }
             }
 
-            if (!island->layers[magic_enum::enum_integer(LayerType::COAST)]->currentTiles.empty())
-            {
-                currentIslands.push_back(island.get());
-            }
-
-            // fallback
-            if (currentIslands.empty() && !island->layers[magic_enum::enum_integer(LayerType::BUILDINGS)]->currentTiles.empty())
+            if (dirty)
             {
                 currentIslands.push_back(island.get());
             }
