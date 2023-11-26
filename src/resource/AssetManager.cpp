@@ -62,7 +62,7 @@ void mdcii::resource::AssetManager::Init()
 
         const auto& fileName{ ASSET_FILE_NAMES.at(magic_enum::enum_integer(asset)) };
 
-        std::array<std::unique_ptr<const olc::Renderable>, 3> sprites;
+        std::array<std::unique_ptr<const olc::Renderable>, NR_OF_ZOOMS> sprites;
         for (const auto zoom : magic_enum::enum_values<world::Zoom>())
         {
             const auto zoomInt{ magic_enum::enum_integer(zoom) };

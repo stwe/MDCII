@@ -55,7 +55,7 @@ void mdcii::world::MousePicker::OnUserUpdate()
     selected += CalculateSelectedCheatColorOffset(cheatSprite->GetPixel(m_cellOffset.x, m_cellOffset.y));
 
     olc::vf2d screenPosition{ m_gameState->world->ToScreen(selected.x, selected.y) };
-    if (calcForTerrain)
+    if (m_calcForTerrain)
     {
         screenPosition.y -= get_elevation(m_gameState->world->camera->zoom);
     }
@@ -67,13 +67,24 @@ void mdcii::world::MousePicker::OnUserUpdate()
 }
 
 //-------------------------------------------------
+// ImGui
+//-------------------------------------------------
+
+void mdcii::world::MousePicker::RenderImGui()
+{
+    ImGui::Separator();
+    ImGui::Checkbox("Mouse For Terrain", &m_calcForTerrain);
+    ImGui::Separator();
+}
+
+//-------------------------------------------------
 // Helper
 //-------------------------------------------------
 
 void mdcii::world::MousePicker::UpdateMousePosition()
 {
     m_mousePosition = olc::vi2d(m_gameState->game->GetMouseX(), m_gameState->game->GetMouseY());
-    if (calcForTerrain)
+    if (m_calcForTerrain)
     {
         m_cell = olc::vi2d(
             m_mousePosition.x / get_tile_width(m_gameState->world->camera->zoom),

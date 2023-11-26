@@ -28,6 +28,7 @@
 #include "resource/TileAtlas.h"
 #include "camera/Camera.h"
 #include "resource/Buildings.h"
+#include "resource/AssetManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -88,26 +89,33 @@ int mdcii::renderer::Renderer::GetGfxForCurrentRotation(const world::Tile* t_til
 
 void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_startY, const world::Tile* t_tile) const
 {
-    const auto screenPosition{ m_world->ToScreen(t_tile->posX +  t_startX, t_tile->posY + t_startY) };
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
     const auto gfx{ GetGfxForCurrentRotation(t_tile) };
-    const auto atlasOffset{ GetAtlasOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+    const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+
+    olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX +  t_startX, t_tile->posY + t_startY) };
+    screenPosition.y -= CalcOffset(t_tile, gfx);
 
     m_world->gameState->game->DrawPartialDecal(
-        olc::vf2d(
-            static_cast<float>(screenPosition.x),
-            static_cast<float>(screenPosition.y) - CalcOffset(t_tile, gfx)
-        ),
+        screenPosition,
         m_world->gameState->game->tileAtlas->atlas[zoomInt][GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt])]->Decal(),
-        olc::vf2d(
-            static_cast<float>(atlasOffset.x) * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
-            static_cast<float>(atlasOffset.y) * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
-        ),
-        olc::vf2d(
+        {
+            atlasOffset.x * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
+            atlasOffset.y * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
+        },
+        {
             resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
             resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
-        )
+        }
     );
+
+    if (m_world->showGrid && t_tile->building->kind == resource::KindType::BODEN)
+    {
+        m_world->gameState->game->DrawDecal(
+            screenPosition,
+            m_world->gameState->game->assetManager->GetAsset(resource::Asset::GREEN_ISO, m_world->gameState->world->camera->zoom)->Decal()
+        );
+    }
 }
 
 void mdcii::renderer::Renderer::CalcAnimationFrame(const float t_elapsedTime)

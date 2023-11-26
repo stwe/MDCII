@@ -96,6 +96,11 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
+         * @brief Specifies whether a grid is showing.
+         */
+        bool showGrid{ false };
+
+        /**
          * @brief Pointer to the parent GameState.
          */
         GameState* gameState{ nullptr };

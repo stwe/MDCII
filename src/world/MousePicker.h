@@ -45,15 +45,6 @@ namespace mdcii::world
     {
     public:
         //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * @brief Specifies whether the mouse is calculated for terrain.
-         */
-        bool calcForTerrain{ true };
-
-        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
@@ -79,12 +70,23 @@ namespace mdcii::world
 
         void OnUserUpdate();
 
+        //-------------------------------------------------
+        // ImGui
+        //-------------------------------------------------
+
+        void RenderImGui();
+
     protected:
 
     private:
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
+
+        /**
+         * @brief Specifies whether the mouse is calculated for terrain.
+         */
+        bool m_calcForTerrain{ true };
 
         /**
          * @brief Pointer to the parent GameState.

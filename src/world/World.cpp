@@ -91,6 +91,9 @@ void mdcii::world::World::RenderImGui()
     static auto ml{ true };
     static auto dl{ true };
 
+    ImGui::Checkbox("Show Terrain Grid", &showGrid);
+    ImGui::Separator();
+
     if (ImGui::Checkbox("Render Coast Layer", &cl))
     {
         renderLayer ^= RENDER_COAST_LAYER;
