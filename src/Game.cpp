@@ -43,6 +43,11 @@ mdcii::Game::~Game()
 
 bool mdcii::Game::OnUserCreate()
 {
+    /*
+    wave.LoadAudioWaveform(fmt::format("{}SampleC.wav", Game::RESOURCES_REL_PATH));
+    engine.InitialiseAudio(44100, 2);
+    */
+
     originalResourcesManager = std::make_unique<resource::OriginalResourcesManager>();
     tileAtlas = std::make_unique<resource::TileAtlas>();
     assetManager = std::make_unique<resource::AssetManager>();
@@ -61,6 +66,13 @@ bool mdcii::Game::OnUserCreate()
 
 bool mdcii::Game::OnUserUpdate(float t_elapsedTime)
 {
+    /*
+    if (GetKey(olc::Key::K1).bPressed)
+    {
+        engine.PlayWaveform(&wave);
+    }
+    */
+
     return stateSystem->OnUserUpdate(t_elapsedTime);
 }
 

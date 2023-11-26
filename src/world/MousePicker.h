@@ -45,6 +45,15 @@ namespace mdcii::world
     {
     public:
         //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * @brief Specifies whether the mouse is calculated for terrain.
+         */
+        bool calcForTerrain{ true };
+
+        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 

@@ -54,16 +54,14 @@ void mdcii::world::MousePicker::OnUserUpdate()
     auto selected{ CalculateSelected() };
     selected += CalculateSelectedCheatColorOffset(cheatSprite->GetPixel(m_cellOffset.x, m_cellOffset.y));
 
-    const auto ts{ m_gameState->world->ToScreen(selected.x, selected.y) };
+    olc::vf2d screenPosition{ m_gameState->world->ToScreen(selected.x, selected.y) };
+    if (calcForTerrain)
+    {
+        screenPosition.y -= get_elevation(m_gameState->world->camera->zoom);
+    }
     auto* mouseSprite{ m_gameState->game->assetManager->GetAsset(resource::Asset::PURPLE_ISO, m_gameState->world->camera->zoom)->Decal() };
 
-    m_gameState->game->DrawDecal(
-        olc::vf2d(
-            static_cast<float>(ts.x),
-            static_cast<float>(ts.y)
-        ),
-        mouseSprite
-    );
+    m_gameState->game->DrawDecal(screenPosition, mouseSprite);
 
     m_gameState->game->DrawString(4, 4, fmt::format("Selected: {}, {}", std::to_string(selected.x), std::to_string(selected.y)), olc::WHITE);
 }
@@ -75,8 +73,28 @@ void mdcii::world::MousePicker::OnUserUpdate()
 void mdcii::world::MousePicker::UpdateMousePosition()
 {
     m_mousePosition = olc::vi2d(m_gameState->game->GetMouseX(), m_gameState->game->GetMouseY());
-    m_cell = olc::vi2d(m_mousePosition.x / get_tile_width(m_gameState->world->camera->zoom), m_mousePosition.y / get_tile_height(m_gameState->world->camera->zoom));
-    m_cellOffset = olc::vi2d( m_mousePosition.x % get_tile_width(m_gameState->world->camera->zoom), m_mousePosition.y % get_tile_height(m_gameState->world->camera->zoom));
+    if (calcForTerrain)
+    {
+        m_cell = olc::vi2d(
+            m_mousePosition.x / get_tile_width(m_gameState->world->camera->zoom),
+            (m_mousePosition.y + static_cast<int>(get_elevation(m_gameState->world->camera->zoom))) / get_tile_height(m_gameState->world->camera->zoom)
+        );
+        m_cellOffset = olc::vi2d(
+            m_mousePosition.x % get_tile_width(m_gameState->world->camera->zoom),
+            (m_mousePosition.y + static_cast<int>(get_elevation(m_gameState->world->camera->zoom))) % get_tile_height(m_gameState->world->camera->zoom)
+        );
+    }
+    else
+    {
+        m_cell = olc::vi2d(
+            m_mousePosition.x / get_tile_width(m_gameState->world->camera->zoom),
+            m_mousePosition.y / get_tile_height(m_gameState->world->camera->zoom)
+        );
+        m_cellOffset = olc::vi2d(
+            m_mousePosition.x % get_tile_width(m_gameState->world->camera->zoom),
+            m_mousePosition.y % get_tile_height(m_gameState->world->camera->zoom)
+        );
+    }
 }
 
 olc::vi2d mdcii::world::MousePicker::CalculateSelected() const

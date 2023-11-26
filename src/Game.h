@@ -20,6 +20,7 @@
 
 #include "vendor/ini/ini.h"
 #include "vendor/imgui/imgui_impl_pge.h"
+#include "vendor/olc/olcSoundWaveEngine.h"
 #include "vendor/entt/entt.hpp"
 
 //-------------------------------------------------
@@ -111,6 +112,12 @@ namespace mdcii
          * @brief The layer for the game.
          */
         int gameLayer{ -1 };
+
+        // todo
+        /*
+        olc::sound::WaveEngine engine;
+        olc::sound::Wave wave;
+        */
 
         //-------------------------------------------------
         // Override

@@ -90,6 +90,10 @@ bool mdcii::GameState::RenderImGui() const
         return false;
     }
 
+    ImGui::Separator();
+    ImGui::Checkbox("Mouse For Terrain", &mousePicker->calcForTerrain);
+    ImGui::Separator();
+
     world->RenderImGui();
 
     ImGui::End();

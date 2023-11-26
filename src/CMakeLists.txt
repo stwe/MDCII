@@ -37,6 +37,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE GL)
 target_link_libraries(${PROJECT_NAME} PRIVATE png)
 target_link_libraries(${PROJECT_NAME} PRIVATE X11)
 target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
+target_link_libraries(${PROJECT_NAME} PRIVATE pulse-simple)
+target_link_libraries(${PROJECT_NAME} PRIVATE pulse)
 
 # copy config.ini
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

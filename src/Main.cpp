@@ -18,6 +18,7 @@
 
 #define OLC_PGE_APPLICATION
 #define OLC_PGEX_DEAR_IMGUI_IMPLEMENTATION
+#define OLC_SOUNDWAVE
 
 #include "Log.h"
 #include "Game.h"
