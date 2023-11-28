@@ -17,7 +17,13 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "Tile.h"
+#include "Rotation.h"
+#include "MdciiAssert.h"
 #include "resource/Buildings.h"
+
+//-------------------------------------------------
+// Logic
+//-------------------------------------------------
 
 void mdcii::world::Tile::UpdateFrame(const std::array<int, NR_OF_ANIM_TIMES>& t_frameValues)
 {
@@ -41,4 +47,69 @@ void mdcii::world::Tile::UpdateFrame(const std::array<int, NR_OF_ANIM_TIMES>& t_
     default:
         frame = 0;
     }
+}
+
+//-------------------------------------------------
+// Gfx
+//-------------------------------------------------
+
+void mdcii::world::Tile::CalculateGfx()
+{
+    MDCII_ASSERT(HasBuilding(), "[Tile::CalculateGfx()] Null pointer.")
+
+    const auto gfx0{ building->gfx };
+
+    gfxs.push_back(gfx0);
+    if (building->rotate > 0)
+    {
+        gfxs.push_back(gfx0 + (1 * building->rotate));
+        gfxs.push_back(gfx0 + (2 * building->rotate));
+        gfxs.push_back(gfx0 + (3 * building->rotate));
+    }
+
+    if (building->size.w > 1 || building->size.h > 1)
+    {
+        for (auto& gfx : gfxs)
+        {
+            AdjustGfxForBigBuildings(gfx);
+        }
+    }
+}
+
+void mdcii::world::Tile::AdjustGfxForBigBuildings(int& t_gfx) const
+{
+    MDCII_ASSERT(HasBuilding(), "[Tile::AdjustGfxForBigBuildings()] Null pointer.")
+
+    // default: orientation 0
+    auto rp{ olc::vi2d(x, y) };
+
+    if (rotation == magic_enum::enum_integer(Rotation::DEG270))
+    {
+        rp = rotate_position(
+            x, y,
+            building->size.w, building->size.h,
+            Rotation::DEG90
+        );
+    }
+
+    if (rotation == magic_enum::enum_integer(Rotation::DEG180))
+    {
+        rp = rotate_position(
+            x, y,
+            building->size.w, building->size.h,
+            Rotation::DEG180
+        );
+    }
+
+    if (rotation == magic_enum::enum_integer(Rotation::DEG90))
+    {
+        rp = rotate_position(
+            x, y,
+            building->size.w, building->size.h,
+            Rotation::DEG270
+        );
+    }
+
+    const auto offset{ rp.y * building->size.w + rp.x };
+    t_gfx += offset;
 }

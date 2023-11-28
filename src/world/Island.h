@@ -170,27 +170,5 @@ namespace mdcii::world
          * @param t_h Height (y) coordinate of the tile.
          */
         void InitTileDetails(Layer* t_layer, int t_w, int t_h) const;
-
-        /**
-         * @brief Initializes the details of a tile with a building.
-         *
-         * @param t_tile The tile to be initialized.
-         */
-        void InitBuildingTileDetails(Tile* t_tile) const;
-
-        /**
-         * @brief Adjusts the graphical representation of a tile for large buildings.
-         *
-         * @param t_tile The tile to be adjusted.
-         * @param t_gfx The graphical representation of the tile.
-         */
-        void AdjustGfxForBigBuildings(const Tile* t_tile, int& t_gfx) const;
-
-        /**
-         * @brief Sorts the tiles in a layer for correct rendering order.
-         *
-         * @param t_layer Pointer to the layer whose tiles are to be sorted.
-         */
-        void SortTiles(Layer* t_layer) const;
     };
 }

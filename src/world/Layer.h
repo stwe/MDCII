@@ -91,6 +91,17 @@ namespace mdcii::world
 
         ~Layer() noexcept;
 
+        //-------------------------------------------------
+        // Sort
+        //-------------------------------------------------
+
+        /**
+         * @brief Sorts the tiles for correct rendering order.
+         *
+         * The sorted tiles are stored in `sortedTiles`.
+         */
+        void SortTiles();
+
     protected:
 
     private:

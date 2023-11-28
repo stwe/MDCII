@@ -16,8 +16,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
+#include <algorithm>
 #include "Layer.h"
 #include "Log.h"
+#include "Rotation.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -32,4 +34,25 @@ mdcii::world::Layer::Layer(LayerType t_layerType)
 mdcii::world::Layer::~Layer() noexcept
 {
     MDCII_LOG_DEBUG("[Layer::~Layer()] Destruct Layer.");
+}
+
+//-------------------------------------------------
+// Sort
+//-------------------------------------------------
+
+void mdcii::world::Layer::SortTiles()
+{
+    for (const auto rotation : magic_enum::enum_values<Rotation>())
+    {
+        const auto rotationInt{ magic_enum::enum_integer(rotation) };
+
+        // sort tiles by index
+        std::ranges::sort(tiles, [&](const Tile& t_a, const Tile& t_b)
+        {
+            return t_a.indices[rotationInt] < t_b.indices[rotationInt];
+        });
+
+        // copy sorted tiles
+        sortedTiles.at(rotationInt) = tiles;
+    }
 }

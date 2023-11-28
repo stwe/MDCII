@@ -155,5 +155,21 @@ namespace mdcii::world
          * @param t_frameValues The current frame values for all animation times.
          */
         void UpdateFrame(const std::array<int, NR_OF_ANIM_TIMES>& t_frameValues);
+
+        //-------------------------------------------------
+        // Gfx
+        //-------------------------------------------------
+
+        /**
+         * @brief Calculates a gfx for each rotation.
+         */
+        void CalculateGfx();
+
+        /**
+         * @brief Adjusts gfx values of the tile for large buildings.
+         *
+         * @param t_gfx The gfx of the tile.
+         */
+        void AdjustGfxForBigBuildings(int& t_gfx) const;
     };
 }
