@@ -51,7 +51,7 @@ void mdcii::world::MousePicker::OnUserUpdate()
 
     const auto* cheatSprite{ m_gameState->game->assetManager->GetAsset(resource::Asset::CHEAT, m_gameState->world->camera->zoom)->Sprite() };
 
-    auto selected{ CalculateSelected() };
+    selected = CalculateSelected();
     selected += CalculateSelectedCheatColorOffset(cheatSprite->GetPixel(m_cellOffset.x, m_cellOffset.y));
 
     olc::vf2d screenPosition{ m_gameState->world->ToScreen(selected.x, selected.y) };
@@ -63,7 +63,7 @@ void mdcii::world::MousePicker::OnUserUpdate()
 
     m_gameState->game->DrawDecal(screenPosition, mouseSprite);
 
-    m_gameState->game->DrawString(4, 4, fmt::format("Selected: {}, {}", std::to_string(selected.x), std::to_string(selected.y)), olc::WHITE);
+    m_gameState->game->DrawString(4, 4, fmt::format("Tile: {}, {}", std::to_string(selected.x), std::to_string(selected.y)), olc::WHITE);
 }
 
 //-------------------------------------------------
