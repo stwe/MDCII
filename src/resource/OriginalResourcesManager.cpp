@@ -21,6 +21,8 @@
 #include "MdciiException.h"
 #include "MdciiUtils.h"
 #include "MdciiAssert.h"
+#include "PaletteFile.h"
+#include "BshFile.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -58,6 +60,8 @@ void mdcii::resource::OriginalResourcesManager::GetPathsFromOriginal()
 {
     MDCII_LOG_DEBUG("[OriginalResourcesManager::GetPathsFromOriginal()] Start get paths from {} ...", Game::ORIGINAL_RESOURCES_FULL_PATH);
 
+    FindBauhausBshFilePaths();
+    FindPaletteFilePath();
     FindBuildingsCodFilePath();
 
     MDCII_LOG_DEBUG("[OriginalResourcesManager::GetPathsFromOriginal()] All paths were found successfully.");
@@ -87,6 +91,17 @@ void mdcii::resource::OriginalResourcesManager::IterateFilesystem(
     }
 }
 
+void mdcii::resource::OriginalResourcesManager::IterateFilesystem(
+    const std::vector<std::string>& t_fileNames,
+    const std::function<void(const std::filesystem::directory_entry&, const std::string&)>& t_doForEachFileName
+)
+{
+    for (const auto& fileName : t_fileNames)
+    {
+        IterateFilesystem(fileName, t_doForEachFileName);
+    }
+}
+
 void mdcii::resource::OriginalResourcesManager::FindBuildingsCodFilePath()
 {
     IterateFilesystem("haeuser.cod", [this](const std::filesystem::directory_entry& t_entry, const std::string& t_fileName) {
@@ -104,6 +119,52 @@ void mdcii::resource::OriginalResourcesManager::FindBuildingsCodFilePath()
     MDCII_LOG_DEBUG("[OriginalResourcesManager::FindBuildingsCodFilePath()] The path to the haeuser.cod file was found successfully.");
 }
 
+void mdcii::resource::OriginalResourcesManager::FindBauhausBshFilePaths()
+{
+    IterateFilesystem({ "bauhaus.bsh", "bauhaus8.bsh", "bauhaus6.bsh " }, [this](const std::filesystem::directory_entry& t_entry, const std::string& t_fileName) {
+        // Nina & History Ed.
+        if (to_upper_case(t_entry.path().filename().string()) == "BAUHAUS.BSH")
+        {
+            m_bauhausBshPaths.try_emplace(world::Zoom::GFX, t_entry.path());
+        }
+
+        // Nina only
+        if (to_upper_case(t_entry.path().filename().string()) == "BAUHAUS8.BSH")
+        {
+            m_bauhausBshPaths.try_emplace(world::Zoom::MGFX, t_entry.path());
+        }
+
+        if (to_upper_case(t_entry.path().filename().string()) == "BAUHAUS6.BSH")
+        {
+            m_bauhausBshPaths.try_emplace(world::Zoom::SGFX, t_entry.path());
+        }
+    });
+
+    if (m_bauhausBshPaths.empty())
+    {
+        throw MDCII_EXCEPTION("[OriginalResourcesManager::FindBauhausBshFilePaths()] Error while reading bauhaus bsh files paths.");
+    }
+
+    MDCII_LOG_DEBUG("[OriginalResourcesManager::FindBauhausBshFilePaths()] All paths to the bauhaus.bsh files were found successfully.");
+}
+
+void mdcii::resource::OriginalResourcesManager::FindPaletteFilePath()
+{
+    IterateFilesystem("stadtfld.col", [this](const std::filesystem::directory_entry& t_entry, const std::string& t_fileName) {
+        if (to_upper_case(t_entry.path().filename().string()) == to_upper_case(t_fileName))
+        {
+            m_palettePath = t_entry.path();
+        }
+    });
+
+    if (m_palettePath.empty())
+    {
+        throw MDCII_EXCEPTION("[OriginalResourcesManager::FindPaletteFilePath()] Error while reading palette file path.");
+    }
+
+    MDCII_LOG_DEBUG("[OriginalResourcesManager::FindPaletteFilePath()] The path to the stadtfld.col file was found successfully.");
+}
+
 //-------------------------------------------------
 // Load original data
 //-------------------------------------------------
@@ -111,6 +172,23 @@ void mdcii::resource::OriginalResourcesManager::FindBuildingsCodFilePath()
 void mdcii::resource::OriginalResourcesManager::LoadFiles()
 {
     MDCII_LOG_DEBUG("[OriginalResourcesManager::LoadFiles()] Start loading files ...");
+
+    m_paletteFile = std::make_unique<PaletteFile>(m_palettePath);
+    m_paletteFile->ReadDataFromChunks();
+
+    // load bauhaus.bsh graphics
+    for (const auto& [zoom, bauhausBshFilePath] : m_bauhausBshPaths)
+    {
+        if (bauhausBshFilePath.empty())
+        {
+            throw MDCII_EXCEPTION("[OriginalResourcesManager::LoadFiles()] Error while reading bauhaus.bsh file path.");
+        }
+
+        auto bauhausBshFile{ std::make_unique<BshFile>(bauhausBshFilePath, m_paletteFile->palette) };
+        bauhausBshFile->ReadDataFromChunks();
+
+        bauhausBshFiles.try_emplace(zoom, std::move(bauhausBshFile));
+    }
 
     buildings = std::make_unique<Buildings>(m_buildingsPath);
 

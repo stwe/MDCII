@@ -20,11 +20,25 @@
 
 #include <memory>
 #include <filesystem>
-#include <functional>
 #include "Buildings.h"
+#include "world/Zoom.h"
 
 namespace mdcii::resource
 {
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
+    /**
+     * @brief Forward declaration class PaletteFile.
+     */
+    class PaletteFile;
+
+    /**
+     * @brief Forward declaration class BshFile.
+     */
+    class BshFile;
+
     //-------------------------------------------------
     // OriginalResourcesManager
     //-------------------------------------------------
@@ -38,6 +52,15 @@ namespace mdcii::resource
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
+
+        /**
+         * @brief A bauhaus bsh file for each zoom to get the Gpu texture Ids.
+         *
+         * In the History Edition there is only one Bauhaus.bsh.
+         * The Nina has two other versions, suffixed by 6 and 8, which
+         * correspond to images for small and medium resolutions, respectively.
+         */
+        std::unordered_map<world::Zoom, std::unique_ptr<BshFile>> bauhausBshFiles;
 
         /**
          * @brief The decrypted content of the haeuser.cod.
@@ -82,6 +105,21 @@ namespace mdcii::resource
          */
         std::filesystem::path m_buildingsPath;
 
+        /**
+         * @brief The path to the palette file.
+         */
+        std::filesystem::path m_palettePath;
+
+        /**
+         * @brief The loaded palette file.
+         */
+        std::unique_ptr<PaletteFile> m_paletteFile;
+
+        /**
+         * @brief The paths to the bauhaus.bsh graphic files.
+         */
+        std::unordered_map<world::Zoom, std::filesystem::path> m_bauhausBshPaths;
+
         //-------------------------------------------------
         // Path to the original data
         //-------------------------------------------------
@@ -103,9 +141,30 @@ namespace mdcii::resource
         );
 
         /**
+         * @brief Iterates over the file system and calls a function on a condition.
+         *
+         * @param t_fileNames Some filenames.
+         * @param t_doForEachFileName The function to call on each file.
+         */
+        static void IterateFilesystem(
+            const std::vector<std::string>& t_fileNames,
+            const std::function<void(const std::filesystem::directory_entry&, const std::string&)>& t_doForEachFileName
+        );
+
+        /**
          * @brief Finds the path to the haeuser.cod file.
          */
         void FindBuildingsCodFilePath();
+
+        /**
+         * @brief Finds the paths to all bauhaus.bsh files.
+         */
+        void FindBauhausBshFilePaths();
+
+        /**
+         * @brief Finds the path to the stadtfld.col palette file.
+         */
+        void FindPaletteFilePath();
 
         //-------------------------------------------------
         // Load original data
