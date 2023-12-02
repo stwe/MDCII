@@ -28,7 +28,7 @@ namespace mdcii::resource
     //-------------------------------------------------
 
     /**
-     * @brief A bsh graphic of the original game.
+     * @brief A Bsh graphic of the original game.
      */
     struct BshTexture
     {
@@ -48,9 +48,14 @@ namespace mdcii::resource
         uint32_t height{ 0 };
 
         /**
-         * @brief A renderable object.
+         * @brief Gfx stored as an Olc Sprite.
          */
-        std::unique_ptr<olc::Renderable> renderable;
+        std::unique_ptr<olc::Sprite> sprite;
+
+        /**
+         * @brief Gfx stored as an Olc Decal.
+         */
+        std::unique_ptr<olc::Decal> decal;
     };
 
     //-------------------------------------------------

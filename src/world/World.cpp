@@ -18,11 +18,15 @@
 
 #include "World.h"
 #include "Game.h"
+#include "GameState.h"
 #include "Island.h"
+#include "MousePicker.h"
 #include "Layer.h"
 #include "DeepWater.h"
 #include "MdciiAssert.h"
+#include "Gui.h"
 #include "resource/MdciiFile.h"
+#include "resource/OriginalResourcesManager.h"
 #include "renderer/Renderer.h"
 #include "camera/Camera.h"
 
@@ -71,9 +75,38 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
         FindVisibleDeepWaterTiles();
     }
 
+    // render
     renderer::Renderer::CalcAnimationFrame(t_elapsedTime);
     renderer->RenderDeepWater();
     renderer->RenderIslands();
+
+    // render the selected building to add it
+    if (m_addBuildingFlag.addNew)
+    {
+        const auto& building{ gameState->game->originalResourcesManager->GetBuildingById(m_addBuildingFlag.addBuildingId) };
+        for (auto y{ 0 }; y < building.size.h; ++y)
+        {
+            for (auto x{ 0 }; x < building.size.w; ++x)
+            {
+                world::Tile tile;
+                tile.building = &building;
+                tile.x = x;
+                tile.y = y;
+
+                tile.CalculateGfx();
+
+                tile.posX = gameState->mousePicker->selected.x + x;
+                tile.posY = gameState->mousePicker->selected.y + y;
+                renderer->RenderNewBuilding(&tile, olc::DARK_GREY);
+            }
+        }
+
+        if (gameState->game->GetMouse(1).bHeld)
+        {
+            m_addBuildingFlag.addNew = false;
+            m_addBuildingFlag.addBuildingId = -1;
+        }
+    }
 }
 
 //-------------------------------------------------
@@ -164,6 +197,15 @@ void mdcii::world::World::RenderImGui()
     {
         FindVisibleDeepWaterTiles();
     }
+
+    ImGui::Separator();
+
+    const auto addBuildingOpt{ Gui::RenderAddBuildingsGui(gameState->game) };
+    if (addBuildingOpt.has_value())
+    {
+        m_addBuildingFlag.addNew = true;
+        m_addBuildingFlag.addBuildingId = addBuildingOpt.value();
+    }
 }
 
 //-------------------------------------------------
@@ -208,11 +250,10 @@ void mdcii::world::World::Init(const std::string& t_fileName)
     if (resource::MdciiFile mdciiFile{ this, t_fileName }; mdciiFile.LoadJsonFromFile())
     {
         islands = mdciiFile.CreateWorldContent();
-    }
-
-    for (auto const& island : islands)
-    {
-        island->Init();
+        for (auto const& island : islands)
+        {
+            island->Init();
+        }
     }
 
     deepWater = std::make_unique<DeepWater>(this);

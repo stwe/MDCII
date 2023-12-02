@@ -87,13 +87,18 @@ int mdcii::renderer::Renderer::GetGfxForCurrentRotation(const world::Tile* t_til
     return t_tile->gfxs[magic_enum::enum_integer(worldRotation)] + t_tile->frame * t_tile->building->animAdd;
 }
 
-void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_startY, const world::Tile* t_tile) const
+void mdcii::renderer::Renderer::RenderBuilding(
+    const int t_startX,
+    const int t_startY,
+    const world::Tile* t_tile,
+    const olc::Pixel& t_tint
+) const
 {
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
     const auto gfx{ GetGfxForCurrentRotation(t_tile) };
     const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
 
-    olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX +  t_startX, t_tile->posY + t_startY) };
+    olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
     screenPosition.y -= CalcOffset(t_tile, gfx);
 
     m_world->gameState->game->DrawPartialDecal(
@@ -106,7 +111,9 @@ void mdcii::renderer::Renderer::RenderBuilding(const int t_startX, const int t_s
         {
             resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
             resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
-        }
+        },
+        { 1.0f, 1.0f },
+        t_tint
     );
 
     if (m_world->showGrid && t_tile->building->kind == resource::KindType::BODEN)
@@ -209,6 +216,19 @@ void mdcii::renderer::Renderer::RenderDeepWater() const
             RenderBuilding(0, 0, &tile);
         }
     }
+}
+
+void mdcii::renderer::Renderer::RenderNewBuilding(const world::Tile* t_tile, const olc::Pixel& t_tint)
+{
+    olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX, t_tile->posY) };
+    screenPosition.y -= 20;
+
+    RenderBuilding(0, 0, t_tile, t_tint);
+
+    m_world->gameState->game->DrawDecal(
+        screenPosition,
+        m_world->gameState->game->assetManager->GetAsset(resource::Asset::GREEN_ISO, m_world->gameState->world->camera->zoom)->Decal()
+    );
 }
 
 //-------------------------------------------------

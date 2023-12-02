@@ -36,6 +36,7 @@ cmake
 *.BSH
 *.COL
 *.txt
+*.sh
 
 !/config.ini
 

@@ -95,11 +95,12 @@ namespace mdcii::renderer
 
         [[nodiscard]] float CalcOffset(const world::Tile* t_tile, int t_gfx) const;
         [[nodiscard]] int GetGfxForCurrentRotation(const world::Tile* t_tile) const;
-        void RenderBuilding(int t_startX, int t_startY, const world::Tile* t_tile) const;
+        void RenderBuilding(int t_startX, int t_startY, const world::Tile* t_tile, const olc::Pixel& t_tint = olc::WHITE) const;
         void RenderIsland(const world::Island* t_island, world::LayerType t_layerType) const;
         static void CalcAnimationFrame(float t_elapsedTime);
         void RenderIslands() const;
         void RenderDeepWater() const;
+        void RenderNewBuilding(const world::Tile* t_tile, const olc::Pixel& t_tint = olc::WHITE);
 
         //-------------------------------------------------
         // Helper

@@ -101,7 +101,7 @@ void mdcii::resource::BshFile::DecodePixelData(const uint32_t t_offset)
     auto bshTexture{ std::make_unique<BshTexture>() };
     bshTexture->width = width;
     bshTexture->height = height;
-    bshTexture->pixels.resize(static_cast<size_t>(width) * height);
+    bshTexture->pixels.resize(static_cast<size_t>(width) * height, { 0, 0, 0, 0 });
 
     auto x{ 0 };
     auto y{ 0 };
@@ -126,7 +126,6 @@ void mdcii::resource::BshFile::DecodePixelData(const uint32_t t_offset)
 
         for (auto i{ 0 }; i < numAlpha; ++i)
         {
-            bshTexture->pixels[static_cast<size_t>(y) * width + x] = 0;
             x++;
         }
 
@@ -146,15 +145,16 @@ void mdcii::resource::BshFile::CreateRenderables() const
 {
     for (const auto& texture : bshTextures)
     {
-        texture->renderable = std::make_unique<olc::Renderable>();
-        texture->renderable->Create(texture->width, texture->height);
+        texture->sprite = std::make_unique<olc::Sprite>(texture->width, texture->height);
 
         for (int y{ 0 }; y < texture->height; ++y)
         {
             for (int x{ 0 }; x < texture->width; ++x)
             {
-                texture->renderable->Sprite()->SetPixel(x, y, texture->pixels[y * texture->width + x]);
+                texture->sprite->SetPixel(x, y, texture->pixels[static_cast<size_t>(y) * texture->width + x]);
             }
         }
+
+        texture->decal = std::make_unique<olc::Decal>(texture->sprite.get());
     }
 }
