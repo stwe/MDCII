@@ -14,6 +14,7 @@ message("Building MDCII with CMake version: ${CMAKE_VERSION}")
 find_package(spdlog CONFIG REQUIRED)
 find_package(Protobuf CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
+find_package(Intl REQUIRED)
 
 add_executable(MDCII ${SRC_FILES})
 
@@ -39,6 +40,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE X11)
 target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
 target_link_libraries(${PROJECT_NAME} PRIVATE pulse-simple)
 target_link_libraries(${PROJECT_NAME} PRIVATE pulse)
+target_link_libraries(${PROJECT_NAME} PRIVATE Intl::Intl)
 
 # copy config.ini
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD

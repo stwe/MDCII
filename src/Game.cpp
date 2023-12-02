@@ -20,6 +20,7 @@
 #include "Log.h"
 #include "GameState.h"
 #include "MainMenuState.h"
+#include "Intl.h"
 #include "resource/OriginalResourcesManager.h"
 #include "resource/TileAtlas.h"
 #include "resource/AssetManager.h"
@@ -32,6 +33,8 @@
 mdcii::Game::Game()
 {
     MDCII_LOG_DEBUG("[Game::Game()] Create Game.");
+
+    setup_i18n(INI.Get<std::string>("locale", "lang"), RESOURCES_REL_PATH);
 
     sAppName = "MDCII";
 }
