@@ -18,8 +18,6 @@
 
 #pragma once
 
-#include <optional>
-
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
@@ -32,15 +30,53 @@ namespace mdcii
     class Game;
 }
 
+namespace mdcii::resource
+{
+    /**
+     * @brief Forward declaration struct Building.
+     */
+    struct Building;
+}
+
 namespace mdcii::world
 {
+    /**
+     * @brief Forward declaration enum class Rotation.
+     */
+    enum class Rotation;
+
+    //-------------------------------------------------
+    // SelectBuilding
+    //-------------------------------------------------
+
+    /**
+     * @brief A building selected in the Gui in a specific rotation.
+     */
+    struct SelectBuilding
+    {
+        const resource::Building* building;
+        Rotation rotation;
+    };
+
     //-------------------------------------------------
     // Gui
     //-------------------------------------------------
 
+    /**
+     * @brief Renders ImGui menus.
+     */
     class Gui
     {
     public:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * @brief Currently selected building in the Gui.
+         */
+        static SelectBuilding select_building;
+
         //-------------------------------------------------
         // ImGui
         //-------------------------------------------------
@@ -49,10 +85,15 @@ namespace mdcii::world
          * @brief Renders an ImGui menu to select buildings.
          *
          * @param t_game Pointer to the parent Game object.
-         *
-         * @return The building Id or null.
          */
-        static std::optional<int> RenderAddBuildingsGui(const Game* t_game);
+        static void RenderAddBuildingsGui(const Game* t_game);
+
+        /**
+         * @brief Shows ImGui elements to rotate a selected building.
+         *
+         * @param t_building The building to be rotated.
+         */
+        static void RotatableBuildingGui(const resource::Building* t_building);
 
     protected:
 

@@ -35,6 +35,12 @@ msgstr "Musketenbauer"
 msgid "Ore refinery"
 msgstr "Erzschmelze"
 
+msgid "Rotate building left"
+msgstr "Bauwerk linksherum drehen"
+
+msgid "Rotate building right"
+msgstr "Bauwerk rechtsherum drehen"
+
 msgid "Rum distillery"
 msgstr "Rumbrennerei"
 

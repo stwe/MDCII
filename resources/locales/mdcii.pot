@@ -35,6 +35,12 @@ msgstr ""
 msgid "Ore refinery"
 msgstr ""
 
+msgid "Rotate building left"
+msgstr ""
+
+msgid "Rotate building right"
+msgstr ""
+
 msgid "Rum distillery"
 msgstr ""
 

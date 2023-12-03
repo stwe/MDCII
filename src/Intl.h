@@ -19,6 +19,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 /**
  * @brief This macro is very commonly used in projects that use GNU gettext.

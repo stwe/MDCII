@@ -221,7 +221,7 @@ void mdcii::renderer::Renderer::RenderDeepWater() const
 void mdcii::renderer::Renderer::RenderNewBuilding(const world::Tile* t_tile, const olc::Pixel& t_tint)
 {
     olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX, t_tile->posY) };
-    screenPosition.y -= 20;
+    screenPosition.y -= world::ELEVATIONS[magic_enum::enum_integer(m_world->camera->zoom)];
 
     RenderBuilding(0, 0, t_tile, t_tint);
 

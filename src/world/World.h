@@ -237,15 +237,6 @@ namespace mdcii::world
          */
         bool m_flag{ true };
 
-        /**
-         * @brief Controls the addition of buildings.
-         */
-        struct
-        {
-            bool addNew{ false };
-            int addBuildingId{ -1 };
-        } m_addBuildingFlag;
-
         //-------------------------------------------------
         // Init
         //-------------------------------------------------

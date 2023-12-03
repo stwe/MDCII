@@ -81,15 +81,14 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
     renderer->RenderIslands();
 
     // render the selected building to add it
-    if (m_addBuildingFlag.addNew)
+    if (Gui::select_building.building)
     {
-        const auto& building{ gameState->game->originalResourcesManager->GetBuildingById(m_addBuildingFlag.addBuildingId) };
-        for (auto y{ 0 }; y < building.size.h; ++y)
+        for (auto y{ 0 }; y < Gui::select_building.building->size.h; ++y)
         {
-            for (auto x{ 0 }; x < building.size.w; ++x)
+            for (auto x{ 0 }; x < Gui::select_building.building->size.w; ++x)
             {
                 world::Tile tile;
-                tile.building = &building;
+                tile.building = Gui::select_building.building;
                 tile.x = x;
                 tile.y = y;
 
@@ -97,14 +96,22 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
 
                 tile.posX = gameState->mousePicker->selected.x + x;
                 tile.posY = gameState->mousePicker->selected.y + y;
+
                 renderer->RenderNewBuilding(&tile, olc::DARK_GREY);
             }
         }
 
         if (gameState->game->GetMouse(1).bHeld)
         {
-            m_addBuildingFlag.addNew = false;
-            m_addBuildingFlag.addBuildingId = -1;
+            Gui::select_building.building = nullptr;
+            Gui::select_building.rotation = Rotation::DEG0;
+        }
+
+        if (gameState->game->GetMouse(0).bPressed)
+        {
+            MDCII_LOG_DEBUG("[World::OnUserUpdate()] Add {}", Gui::select_building.building->id);
+
+            // todo
         }
     }
 }
@@ -200,12 +207,7 @@ void mdcii::world::World::RenderImGui()
 
     ImGui::Separator();
 
-    const auto addBuildingOpt{ Gui::RenderAddBuildingsGui(gameState->game) };
-    if (addBuildingOpt.has_value())
-    {
-        m_addBuildingFlag.addNew = true;
-        m_addBuildingFlag.addBuildingId = addBuildingOpt.value();
-    }
+    Gui::RenderAddBuildingsGui(gameState->game);
 }
 
 //-------------------------------------------------
