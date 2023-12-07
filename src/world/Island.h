@@ -24,8 +24,21 @@
 // Forward declarations
 //-------------------------------------------------
 
+namespace mdcii::resource
+{
+    /**
+     * @brief Forward declaration class MdciiFile.
+     */
+    class MdciiFile;
+}
+
 namespace mdcii::world
 {
+    /**
+     * @brief Forward declaration class World.
+     */
+    class World;
+
     /**
      * @brief Forward declaration struct Tile.
      */
@@ -45,13 +58,21 @@ namespace mdcii::world
      */
     class Island
     {
+        //-------------------------------------------------
+        // Friends
+        //-------------------------------------------------
+
+        /**
+         * @brief So MdciiFile has access to the private Init method.
+         */
+        friend class resource::MdciiFile;
     public:
         //-------------------------------------------------
         // Constants
         //-------------------------------------------------
 
         /**
-         * @brief Number of layers used here.
+         * @brief Number of layers (coast, terrain, buildings, mixed).
          */
         static constexpr auto NR_OF_LAYERS{ 4 };
 
@@ -62,38 +83,44 @@ namespace mdcii::world
         /**
          * @brief The width of the island.
          */
-        int width{ -1 };
+        const int width;
 
         /**
          * @brief The height of the island.
          */
-        int height{ -1 };
+        const int height;
 
         /**
          * @brief The X-coordinate of the island's initial position in the world.
          */
-        int startX{ -1 };
+        const int startX;
 
         /**
          * @brief The Y-coordinate of the island's initial position in the world.
          */
-        int startY{ -1 };
+        const int startY;
 
         /**
          * @brief The tile layers (coast, terrain, buildings, mixed) of the island.
          */
         std::array<std::unique_ptr<Layer>, NR_OF_LAYERS> layers;
 
-        /**
-         * An Aabb (axis-aligned bounding box) object for collision detection.
-         */
-        physics::Aabb aabb;
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        Island();
+        Island() = delete;
+
+        /**
+         * @brief Constructs a new Island object.
+         *
+         * @param t_world Pointer to the parent World object.
+         * @param t_width The width of the island.
+         * @param t_height The height of the island.
+         * @param t_x The X-coordinate of the island's initial position in the world.
+         * @param t_y The Y-coordinate of the island's initial position in the world.
+         */
+        Island(World* t_world, int t_width, int t_height, int t_x, int t_y);
 
         Island(const Island& t_other) = delete;
         Island(Island&& t_other) noexcept = delete;
@@ -101,6 +128,46 @@ namespace mdcii::world
         Island& operator=(Island&& t_other) noexcept = delete;
 
         ~Island() noexcept;
+
+        //-------------------------------------------------
+        // Position
+        //-------------------------------------------------
+
+        /**
+         * @brief Checks whether the given world position is over the island.
+         *
+         * @param t_position The position in the world.
+         *
+         * @return True if the position is over the island. Otherwise, it returns false.
+         */
+        [[nodiscard]] bool IsWorldPositionOverIsland(const olc::vi2d& t_position) const;
+
+        /**
+         * @brief Checks whether the mouse is over the island.
+         *
+         * @return True if the mouse is over the island. Otherwise, it returns false.
+         */
+        [[nodiscard]] bool IsMouseOverIsland() const;
+
+    protected:
+
+    private:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * @brief Pointer to the parent World object.
+         */
+        World* m_world{ nullptr };
+
+        /**
+         * @brief An Aabb (axis-aligned bounding box) object for collision detection.
+         *
+         * The Aabb is constructed from startX and startY variables, along with width and height.
+         * These define the location of the island in the world, indicating where it starts and ends.
+         */
+        const physics::Aabb m_aabb;
 
         //-------------------------------------------------
         // Init
@@ -111,9 +178,19 @@ namespace mdcii::world
          */
         void Init();
 
-    protected:
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
 
-    private:
+        /**
+         * @brief Checks whether the given world position is inside the Aabb.
+         *
+         * @param t_position The position in the world.
+         *
+         * @return True if the position is inside the Aabb. Otherwise, it returns false.
+         */
+        [[nodiscard]] bool IsWorldPositionInAabb(const olc::vi2d& t_position) const;
+
         //-------------------------------------------------
         // Layer
         //-------------------------------------------------
@@ -135,10 +212,14 @@ namespace mdcii::world
          * @param t_terrainLayer Terrain layer of the island.
          * @param t_buildingsLayer Buildings layer of the island.
          * @param t_mixedLayer The mixed layer to be populated.
-         * @param t_h The height index.
-         * @param t_w The width index.
+         * @param t_x The x position
+         * @param t_y The y position.
          */
-        void PopulateMixedLayer(const Layer* t_coastLayer, const Layer* t_terrainLayer, const Layer* t_buildingsLayer, Layer* t_mixedLayer, int t_w, int t_h) const;
+        void PopulateMixedLayer(const Layer* t_coastLayer, const Layer* t_terrainLayer, const Layer* t_buildingsLayer, Layer* t_mixedLayer, int t_x, int t_y) const;
+
+        //-------------------------------------------------
+        // Layer tiles
+        //-------------------------------------------------
 
         /**
          * @brief Checks if a tile should be replaced in the mixed layer.
@@ -151,10 +232,6 @@ namespace mdcii::world
          */
         static bool ShouldReplaceTile(const Layer* t_layer, const Layer* t_buildingsLayer, int t_index);
 
-        //-------------------------------------------------
-        // Layer tiles
-        //-------------------------------------------------
-
         /**
          * @brief Initializes all layer tiles.
          *
@@ -166,9 +243,9 @@ namespace mdcii::world
          * @brief Initializes the details of a single tile.
          *
          * @param t_layer Current layer being initialized.
-         * @param t_w Width (x) coordinate of the tile.
-         * @param t_h Height (y) coordinate of the tile.
+         * @param t_x The x coordinate of the tile.
+         * @param t_y The y coordinate of the tile.
          */
-        void InitTileDetails(Layer* t_layer, int t_w, int t_h) const;
+        void InitTileDetails(Layer* t_layer, int t_x, int t_y) const;
     };
 }

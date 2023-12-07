@@ -18,6 +18,9 @@
 
 #include "Island.h"
 #include "Layer.h"
+#include "World.h"
+#include "GameState.h"
+#include "MousePicker.h"
 #include "MdciiAssert.h"
 #include "renderer/Renderer.h"
 #include "world/Rotation.h"
@@ -26,14 +29,38 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::Island::Island()
+mdcii::world::Island::Island(World* t_world, const int t_width, const int t_height, const int t_x, const int t_y)
+    : width{ t_width }
+    , height{ t_height }
+    , startX{ t_x }
+    , startY{ t_y }
+    , m_world{ t_world }
+    , m_aabb{ physics::Aabb(olc::vi2d(startX, startY), olc::vi2d(width, height)) }
 {
     MDCII_LOG_DEBUG("[Island::Island()] Create Island.");
+
+    MDCII_ASSERT(width, "[Island::Island()] Invalid width.")
+    MDCII_ASSERT(height, "[Island::Island()] Invalid height.")
+    MDCII_ASSERT(m_world, "[Island::Island()] Null pointer.")
 }
 
 mdcii::world::Island::~Island() noexcept
 {
     MDCII_LOG_DEBUG("[Island::~Island()] Destruct Island.");
+}
+
+//-------------------------------------------------
+// Position
+//-------------------------------------------------
+
+bool mdcii::world::Island::IsWorldPositionOverIsland(const olc::vi2d& t_position) const
+{
+    return IsWorldPositionInAabb(t_position);
+}
+
+bool mdcii::world::Island::IsMouseOverIsland() const
+{
+    return IsWorldPositionInAabb(m_world->gameState->mousePicker->selected);
 }
 
 //-------------------------------------------------
@@ -44,13 +71,17 @@ void mdcii::world::Island::Init()
 {
     MDCII_LOG_DEBUG("[Island::Init()] Initializes the island.");
 
-    MDCII_ASSERT(width, "[Island::Init()] Invalid width.")
-    MDCII_ASSERT(height, "[Island::Init()] Invalid height.")
-
     InitLayers();
     InitMixedLayer();
+}
 
-    aabb = physics::Aabb(olc::vi2d(startX, startY), olc::vi2d(width, height));
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+bool mdcii::world::Island::IsWorldPositionInAabb(const olc::vi2d& t_position) const
+{
+    return physics::Aabb::PointVsAabb(t_position, m_aabb);
 }
 
 //-------------------------------------------------
@@ -93,11 +124,11 @@ void mdcii::world::Island::PopulateMixedLayer(
     const Layer* t_terrainLayer,
     const Layer* t_buildingsLayer,
     Layer* t_mixedLayer,
-    const int t_w,
-    const int t_h
+    const int t_x,
+    const int t_y
 ) const
 {
-    const auto index{ t_h * width + t_w };
+    const auto index{ t_y * width + t_x };
 
     if (ShouldReplaceTile(t_coastLayer, t_buildingsLayer, index))
     {
@@ -110,14 +141,14 @@ void mdcii::world::Island::PopulateMixedLayer(
     }
 }
 
+//-------------------------------------------------
+// Layer tiles
+//-------------------------------------------------
+
 bool mdcii::world::Island::ShouldReplaceTile(const Layer* t_layer, const Layer* t_buildingsLayer, int t_index)
 {
     return t_layer->tiles.at(t_index).HasBuilding() && !t_buildingsLayer->tiles.at(t_index).HasBuilding();
 }
-
-//-------------------------------------------------
-// Layer tiles
-//-------------------------------------------------
 
 void mdcii::world::Island::InitLayerTiles(Layer* t_layer) const
 {
@@ -138,11 +169,11 @@ void mdcii::world::Island::InitLayerTiles(Layer* t_layer) const
     MDCII_LOG_DEBUG("[Island::InitLayerTiles()] The layer tiles were initialized successfully.");
 }
 
-void mdcii::world::Island::InitTileDetails(Layer* t_layer, const int t_w, const int t_h) const
+void mdcii::world::Island::InitTileDetails(Layer* t_layer, const int t_x, const int t_y) const
 {
-    auto& tile{ t_layer->tiles.at(t_h * width + t_w) };
-    tile.posX = t_w;
-    tile.posY = t_h;
+    auto& tile{ t_layer->tiles.at(t_y * width + t_x) };
+    tile.posX = t_x;
+    tile.posY = t_y;
 
     if (tile.HasBuilding())
     {

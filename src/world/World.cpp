@@ -80,6 +80,16 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
     renderer->RenderDeepWater();
     renderer->RenderIslands();
 
+    // ---------------------------------
+    // todo: Rendering depends on ImGui
+    // ---------------------------------
+
+    // do nothing (return) when the mouse is over the ImGui window
+    if (ImGui::GetIO().WantCaptureMouse)
+    {
+        return;
+    }
+
     // render the selected building to add it
     if (Gui::select_building.building)
     {
@@ -228,7 +238,7 @@ bool mdcii::world::World::IsWorldPositionOnAnyIsland(const int t_x, const int t_
 {
     return std::ranges::any_of(islands, [t_x, t_y](auto const& t_island)
     {
-        return physics::Aabb::PointVsAabb({ t_x, t_y }, t_island->aabb);
+        return t_island->IsWorldPositionOverIsland({ t_x, t_y });
     });
 }
 
@@ -252,10 +262,6 @@ void mdcii::world::World::Init(const std::string& t_fileName)
     if (resource::MdciiFile mdciiFile{ this, t_fileName }; mdciiFile.LoadJsonFromFile())
     {
         islands = mdciiFile.CreateWorldContent();
-        for (auto const& island : islands)
-        {
-            island->Init();
-        }
     }
 
     deepWater = std::make_unique<DeepWater>(this);

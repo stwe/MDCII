@@ -193,7 +193,7 @@ namespace mdcii::world
         [[nodiscard]] olc::vi2d ToScreen(int t_x, int t_y) const;
 
         /**
-         * @brief Checks if the given world position falls on any island.
+         * @brief Checks whether the given world position falls on any island.
          *
          * @param t_x The x position.
          * @param t_y The y position.
@@ -203,7 +203,7 @@ namespace mdcii::world
         [[nodiscard]] bool IsWorldPositionOnAnyIsland(int t_x, int t_y) const;
 
         /**
-         * @brief Checks if the given world position is outside the screen.
+         * @brief Checks whether the given world position is outside the screen.
          *
          * @param t_x The x position.
          * @param t_y The y position.
@@ -217,7 +217,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief A helper function to check if a given render layer option is active.
+         * @brief A helper function to check whether a given render layer option is active.
          *
          * @param t_option The render layer option to check.
          *

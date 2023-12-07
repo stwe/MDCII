@@ -86,11 +86,13 @@ std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::C
 
     for (const auto& [islandKeys, islandVars] : m_json["islands"].items())
     {
-        auto island{ std::make_unique<world::Island>() };
-        island->width = islandVars.at("width").get<int32_t>();
-        island->height = islandVars.at("height").get<int32_t>();
-        island->startX = islandVars.at("x").get<int32_t>();
-        island->startY = islandVars.at("y").get<int32_t>();
+        auto island{ std::make_unique<world::Island>(
+            m_world,
+            islandVars.at("width").get<int32_t>(),
+            islandVars.at("height").get<int32_t>(),
+            islandVars.at("x").get<int32_t>(),
+            islandVars.at("y").get<int32_t>()
+        ) };
 
         MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The size of the island is ({}, {}).", island->width, island->height);
         MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The island starts at position ({}, {}).", island->startX, island->startY);
@@ -102,6 +104,8 @@ std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::C
 
         // this layer will later be filled with the data from the other layers
         island->layers.at(magic_enum::enum_integer(world::LayerType::MIXED)) = std::make_unique<world::Layer>(world::LayerType::MIXED);
+
+        island->Init();
 
         is.push_back(std::move(island));
     }
