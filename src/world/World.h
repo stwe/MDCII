@@ -269,5 +269,24 @@ namespace mdcii::world
          * @brief Identifies the deep water tiles visible on the screen for rendering.
          */
         void FindVisibleDeepWaterTiles() const;
+
+        //-------------------------------------------------
+        //  Render layer bits
+        //-------------------------------------------------
+
+        /**
+         * @brief Toggles the given render layer option.
+         *
+         * @param t_renderLayer The render layer option to be toggled.
+         */
+        void ToggleRenderLayer(RenderLayer t_renderLayer);
+
+        /**
+         * @brief Disables the given render layer option.
+         *
+         * @param t_renderLayer The render layer option to be disabled.
+         * @param t_toFalse A reference boolean that will be set to false.
+         */
+        void DisableRenderLayer(RenderLayer t_renderLayer, bool& t_toFalse);
     };
 }

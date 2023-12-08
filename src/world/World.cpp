@@ -132,86 +132,49 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
 
 void mdcii::world::World::RenderImGui()
 {
-    auto dirtyIslands{ false };
-    auto dirtyDeepWater{ false };
-
-    static auto cl{ false };
-    static auto tl{ false };
-    static auto bl{ false };
-    static auto ml{ true };
-    static auto dl{ true };
+    static auto renderCoastLayer{ false };
+    static auto renderTerrainLayer{ false };
+    static auto renderBuildingsLayer{ false };
+    static auto renderMixedLayer{ true };
+    static auto renderDeepWaterLayer{ true };
 
     ImGui::Checkbox("Show Terrain Grid", &showGrid);
     ImGui::Separator();
 
-    if (ImGui::Checkbox("Render Coast Layer", &cl))
+    if (ImGui::Checkbox("Render Coast Layer", &renderCoastLayer))
     {
-        renderLayer ^= RENDER_COAST_LAYER;
-        if (ml)
-        {
-            renderLayer ^= RENDER_MIXED_LAYER;
-            ml = false;
-        }
+        ToggleRenderLayer(RENDER_COAST_LAYER);
+        DisableRenderLayer(RENDER_MIXED_LAYER, renderMixedLayer);
 
-        dirtyIslands = true;
-    }
-    if (ImGui::Checkbox("Render Terrain Layer", &tl))
-    {
-        renderLayer ^= RENDER_TERRAIN_LAYER;
-        if (ml)
-        {
-            renderLayer ^= RENDER_MIXED_LAYER;
-            ml = false;
-        }
-
-        dirtyIslands = true;
-    }
-    if (ImGui::Checkbox("Render Buildings Layer", &bl))
-    {
-        renderLayer ^= RENDER_BUILDINGS_LAYER;
-        if (ml)
-        {
-            renderLayer ^= RENDER_MIXED_LAYER;
-            ml = false;
-        }
-
-        dirtyIslands = true;
-    }
-    if (ImGui::Checkbox("Render Mixed Layer", &ml))
-    {
-        renderLayer ^= RENDER_MIXED_LAYER;
-        if (cl)
-        {
-            renderLayer ^= RENDER_COAST_LAYER;
-            cl = false;
-        }
-        if (tl)
-        {
-            renderLayer ^= RENDER_TERRAIN_LAYER;
-            tl = false;
-        }
-        if (bl)
-        {
-            renderLayer ^= RENDER_BUILDINGS_LAYER;
-            bl = false;
-        }
-
-        dirtyIslands = true;
-    }
-    if (ImGui::Checkbox("Render Deep-Water Layer", &dl))
-    {
-        renderLayer ^= RENDER_DEEP_WATER_LAYER;
-
-        dirtyDeepWater = true;
-    }
-
-    if (dirtyIslands)
-    {
         FindVisibleIslands();
     }
-
-    if (dirtyDeepWater)
+    if (ImGui::Checkbox("Render Terrain Layer", &renderTerrainLayer))
     {
+        ToggleRenderLayer(RENDER_TERRAIN_LAYER);
+        DisableRenderLayer(RENDER_MIXED_LAYER, renderMixedLayer);
+
+        FindVisibleIslands();
+    }
+    if (ImGui::Checkbox("Render Buildings Layer", &renderBuildingsLayer))
+    {
+        ToggleRenderLayer(RENDER_BUILDINGS_LAYER);
+        DisableRenderLayer(RENDER_MIXED_LAYER, renderMixedLayer);
+
+        FindVisibleIslands();
+    }
+    if (ImGui::Checkbox("Render Mixed Layer", &renderMixedLayer))
+    {
+        ToggleRenderLayer(RENDER_MIXED_LAYER);
+
+        DisableRenderLayer(RENDER_COAST_LAYER, renderCoastLayer);
+        DisableRenderLayer(RENDER_TERRAIN_LAYER, renderTerrainLayer);
+        DisableRenderLayer(RENDER_BUILDINGS_LAYER, renderBuildingsLayer);
+
+        FindVisibleIslands();
+    }
+    if (ImGui::Checkbox("Render Deep-Water Layer", &renderDeepWaterLayer))
+    {
+        ToggleRenderLayer(RENDER_DEEP_WATER_LAYER);
         FindVisibleDeepWaterTiles();
     }
 
@@ -367,4 +330,19 @@ void mdcii::world::World::FindVisibleDeepWaterTiles() const
     deepWater->layer->currentTiles.erase(begin, end);
 
     MDCII_LOG_DEBUG("[World::FindVisibleDeepWaterTiles()] Render {} deep water tiles.", deepWater->layer->currentTiles.size());
+}
+
+//-------------------------------------------------
+//  Render layer bits
+//-------------------------------------------------
+
+void mdcii::world::World::ToggleRenderLayer(const RenderLayer t_renderLayer)
+{
+    renderLayer ^= t_renderLayer;
+}
+
+void mdcii::world::World::DisableRenderLayer(const RenderLayer t_renderLayer, bool& t_toFalse)
+{
+    renderLayer &= ~t_renderLayer;
+    t_toFalse = false;
 }
