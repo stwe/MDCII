@@ -65,7 +65,7 @@ void mdcii::world::Gui::RenderAddBuildingsGui(const Game* t_game)
             {
                 const auto& building{ t_game->originalResourcesManager->GetBuildingById(buildingId) };
 
-                if (const auto& renderableBauhaus{ bshTextures.at(building.baugfx)->decal };
+                if (const auto& renderableBauhaus{ bshTextures.at(building.baugfx + magic_enum::enum_integer(select_building.rotation))->decal };
                     ImGui::ImageButton(
                         reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(renderableBauhaus->id)),  // texture-Id
                         ImVec2(static_cast<float>(renderableBauhaus->sprite->width),
@@ -78,6 +78,7 @@ void mdcii::world::Gui::RenderAddBuildingsGui(const Game* t_game)
                 {
                     MDCII_LOG_DEBUG("[Gui::RenderAddBuildingsGui()] Select Building {}", workshopNames.at(i).data());
                     select_building.building = &building;
+                    select_building.rotation = Rotation::DEG0;
                 }
 
                 ImGui::TreePop();
