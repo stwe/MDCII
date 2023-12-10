@@ -58,7 +58,6 @@ void mdcii::world::DeepWater::Init()
     SetWorldPositions();
     RemoveIrrelevantTiles();
     UpdateTileProperties();
-    SortTilesForRendering();
 
     MDCII_LOG_DEBUG("[DeepWater::Init()] The deep water area was successfully created.");
 }
@@ -98,7 +97,7 @@ void mdcii::world::DeepWater::SetWorldPositions()
     }
 }
 
-void mdcii::world::DeepWater::RemoveIrrelevantTiles()
+void mdcii::world::DeepWater::RemoveIrrelevantTiles() const
 {
     MDCII_LOG_DEBUG("[DeepWater::RemoveIrrelevantTiles()] Remove tiles without building info.");
 
@@ -134,27 +133,6 @@ void mdcii::world::DeepWater::UpdateTileProperties()
         tile.indices[2] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, m_world->worldWidth, m_world->worldHeight, Rotation::DEG180);
         tile.indices[3] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, m_world->worldWidth, m_world->worldHeight, Rotation::DEG270);
     }
-}
 
-void mdcii::world::DeepWater::SortTilesForRendering()
-{
-    MDCII_LOG_DEBUG("[DeepWater::SortTilesForRendering()] Sort tile for rendering.");
-
-    // sort for rendering
-    for (const auto rotation : magic_enum::enum_values<Rotation>())
-    {
-        const auto rotationInt{ magic_enum::enum_integer(rotation) };
-
-        // sort tiles by index
-        std::ranges::sort(layer->tiles, [&](const Tile& t_a, const Tile& t_b)
-        {
-            return t_a.indices[rotationInt] < t_b.indices[rotationInt];
-        });
-
-        // copy sorted tiles
-        layer->sortedTiles.at(rotationInt) = layer->tiles;
-    }
-
-    // revert tiles sorting = sortedTiles DEG0
-    layer->tiles = layer->sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0));
+    layer->SortTilesForRendering();
 }

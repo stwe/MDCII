@@ -100,7 +100,7 @@ namespace mdcii::world
          *
          * The sorted tiles are stored in `sortedTiles`.
          */
-        void SortTiles();
+        void SortTilesForRendering();
 
     protected:
 

@@ -118,16 +118,11 @@ namespace mdcii::world
         /**
          * @brief Remove tiles that do not belong to the deep water.
          */
-        void RemoveIrrelevantTiles();
+        void RemoveIrrelevantTiles() const;
 
         /**
          * @brief Update the properties of each tile based on the buildingId it contains.
          */
         void UpdateTileProperties();
-
-        /**
-         * @brief Sort tiles for rendering based on their indices and rotations.
-         */
-        void SortTilesForRendering();
     };
 }

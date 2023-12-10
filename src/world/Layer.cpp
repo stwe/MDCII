@@ -40,8 +40,10 @@ mdcii::world::Layer::~Layer() noexcept
 // Sort
 //-------------------------------------------------
 
-void mdcii::world::Layer::SortTiles()
+void mdcii::world::Layer::SortTilesForRendering()
 {
+    MDCII_LOG_DEBUG("[Layer::SortTilesForRendering()] Sort tiles for rendering.");
+
     for (const auto rotation : magic_enum::enum_values<Rotation>())
     {
         const auto rotationInt{ magic_enum::enum_integer(rotation) };
@@ -55,4 +57,7 @@ void mdcii::world::Layer::SortTiles()
         // copy sorted tiles
         sortedTiles.at(rotationInt) = tiles;
     }
+
+    // revert tiles sorting = sortedTiles DEG0
+    tiles = sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0));
 }
