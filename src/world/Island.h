@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <optional>
 #include "physics/Aabb.h"
 
 //-------------------------------------------------
@@ -145,9 +146,9 @@ namespace mdcii::world
         /**
          * @brief Checks whether the mouse is over the island.
          *
-         * @return True if the mouse is over the island. Otherwise, it returns false.
+         * @return std::optional containing the mouse position relative to the island, std::nullopt otherwise.
          */
-        [[nodiscard]] bool IsMouseOverIsland() const;
+        [[nodiscard]] std::optional<olc::vi2d> IsMouseOverIsland() const;
 
     protected:
 

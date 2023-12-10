@@ -58,9 +58,17 @@ bool mdcii::world::Island::IsWorldPositionOverIsland(const olc::vi2d& t_position
     return IsWorldPositionInAabb(t_position);
 }
 
-bool mdcii::world::Island::IsMouseOverIsland() const
+std::optional<olc::vi2d> mdcii::world::Island::IsMouseOverIsland() const
 {
-    return IsWorldPositionInAabb(m_world->gameState->mousePicker->selected);
+    if (IsWorldPositionInAabb(m_world->gameState->mousePicker->selected))
+    {
+        return olc::vi2d(
+            m_world->gameState->mousePicker->selected.x - startX,
+            m_world->gameState->mousePicker->selected.y - startY
+        );
+    }
+
+    return std::nullopt;
 }
 
 //-------------------------------------------------
@@ -116,7 +124,7 @@ void mdcii::world::Island::InitMixedLayer()
         }
     }
 
-    mixedLayer->SortTiles();
+    mixedLayer->SortTilesForRendering();
 }
 
 void mdcii::world::Island::PopulateMixedLayer(
@@ -164,7 +172,7 @@ void mdcii::world::Island::InitLayerTiles(Layer* t_layer) const
         }
     }
 
-    t_layer->SortTiles();
+    t_layer->SortTilesForRendering();
 
     MDCII_LOG_DEBUG("[Island::InitLayerTiles()] The layer tiles were initialized successfully.");
 }
