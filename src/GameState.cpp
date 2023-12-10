@@ -46,8 +46,8 @@ bool mdcii::GameState::OnUserCreate()
     MDCII_LOG_DEBUG("[GameState::OnUserCreate()] Init GameState.");
 
     mousePicker = std::make_unique<world::MousePicker>(this);
-    //world = std::make_unique<world::World>(this, "resources/sav/SaveMap0.sav");
-    world = std::make_unique<world::World>(this, "resources/sav/Example.sav");
+    world = std::make_unique<world::World>(this, "resources/sav/SaveMap0.sav");
+    //world = std::make_unique<world::World>(this, "resources/sav/Example.sav");
 
     return true;
 }
