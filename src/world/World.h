@@ -96,11 +96,6 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief Specifies whether a grid is showing.
-         */
-        bool showGrid{ false };
-
-        /**
          * @brief Pointer to the parent GameState.
          */
         GameState* gameState{ nullptr };
@@ -288,5 +283,7 @@ namespace mdcii::world
          * @param t_toFalse A reference boolean that will be set to false.
          */
         void DisableRenderLayer(RenderLayer t_renderLayer, bool& t_toFalse);
+
+        //bool CheckForBuildingAvailability(const Island* island, int x, int y, int indexY, int indexX);
     };
 }

@@ -115,14 +115,25 @@ void mdcii::renderer::Renderer::RenderBuilding(
         { 1.0f, 1.0f },
         t_tint
     );
+}
 
-    if (m_world->showGrid && t_tile->building->kind == resource::KindType::BODEN)
-    {
-        m_world->gameState->game->DrawDecal(
-            screenPosition,
-            m_world->gameState->game->assetManager->GetAsset(resource::Asset::GREEN_ISO, m_world->gameState->world->camera->zoom)->Decal()
-        );
-    }
+void mdcii::renderer::Renderer::RenderAsset(
+    const resource::Asset t_asset,
+    const int t_startX,
+    const int t_startY,
+    const world::Tile* t_tile,
+    const olc::Pixel& t_tint
+) const
+{
+    olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
+    screenPosition.y -= world::ELEVATIONS[magic_enum::enum_integer(m_world->camera->zoom)];
+
+    m_world->gameState->game->DrawDecal(
+        screenPosition,
+        m_world->gameState->game->assetManager->GetAsset(t_asset, m_world->gameState->world->camera->zoom)->Decal(),
+        { 1.0f, 1.0f },
+        t_tint
+    );
 }
 
 void mdcii::renderer::Renderer::CalcAnimationFrame(const float t_elapsedTime)
@@ -216,19 +227,6 @@ void mdcii::renderer::Renderer::RenderDeepWater() const
             RenderBuilding(0, 0, &tile);
         }
     }
-}
-
-void mdcii::renderer::Renderer::RenderNewBuilding(const world::Tile* t_tile, const olc::Pixel& t_tint)
-{
-    olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX, t_tile->posY) };
-    screenPosition.y -= world::ELEVATIONS[magic_enum::enum_integer(m_world->camera->zoom)];
-
-    RenderBuilding(0, 0, t_tile, t_tint);
-
-    m_world->gameState->game->DrawDecal(
-        screenPosition,
-        m_world->gameState->game->assetManager->GetAsset(resource::Asset::GREEN_ISO, m_world->gameState->world->camera->zoom)->Decal()
-    );
 }
 
 //-------------------------------------------------
