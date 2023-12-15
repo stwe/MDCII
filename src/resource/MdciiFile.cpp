@@ -97,14 +97,13 @@ std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::C
         MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The size of the island is ({}, {}).", island->width, island->height);
         MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The island starts at position ({}, {}).", island->startX, island->startY);
 
-        // the data for these three layers is read from a file
+        // the data for these three island layers is read from a file
         InitLayerByType(island.get(), islandVars, world::LayerType::COAST);
         InitLayerByType(island.get(), islandVars, world::LayerType::TERRAIN);
         InitLayerByType(island.get(), islandVars, world::LayerType::BUILDINGS);
 
-        // this layer will later be filled with the data from the other layers
-        island->layers.at(magic_enum::enum_integer(world::LayerType::MIXED)) = std::make_unique<world::Layer>(world::LayerType::MIXED);
-
+        // this island layer will later be filled with the data from the other layers
+        island->layers.at(magic_enum::enum_integer(world::LayerType::MIXED)) = std::make_unique<world::Layer>(world::LayerType::MIXED, island->width, island->height);
         island->Init();
 
         is.push_back(std::move(island));
@@ -123,7 +122,7 @@ void mdcii::resource::MdciiFile::InitLayerByType(world::Island* t_island, const 
 {
     MDCII_LOG_DEBUG("[MdciiFile::InitLayerByType()] Create and init island layer {}.", magic_enum::enum_name(t_layerType));
 
-    t_island->layers.at(magic_enum::enum_integer(t_layerType)) = std::make_unique<world::Layer>(t_layerType);
+    t_island->layers.at(magic_enum::enum_integer(t_layerType)) = std::make_unique<world::Layer>(t_layerType, t_island->width, t_island->height);
 
     for (auto layers = t_vars.at("layers").items(); const auto& [k, v] : layers)
     {
