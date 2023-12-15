@@ -50,6 +50,20 @@ mdcii::world::Island::~Island() noexcept
 }
 
 //-------------------------------------------------
+// Getter
+//-------------------------------------------------
+
+mdcii::world::Layer* mdcii::world::Island::GetLayer(const LayerType t_layerType)
+{
+    return layers[magic_enum::enum_integer(t_layerType)].get();
+}
+
+const mdcii::world::Layer* mdcii::world::Island::GetLayer(const LayerType t_layerType) const
+{
+    return layers[magic_enum::enum_integer(t_layerType)].get();
+}
+
+//-------------------------------------------------
 // Position
 //-------------------------------------------------
 
@@ -188,8 +202,8 @@ void mdcii::world::Island::InitTileDetails(Layer* t_layer, const int t_x, const 
         tile.CalculateGfx();
     }
 
-    tile.indices[0] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG0);
-    tile.indices[1] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG90);
-    tile.indices[2] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG180);
-    tile.indices[3] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, width, height, Rotation::DEG270);
+    tile.indices[0] = t_layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG0);
+    tile.indices[1] = t_layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG90);
+    tile.indices[2] = t_layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG180);
+    tile.indices[3] = t_layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG270);
 }

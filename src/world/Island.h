@@ -50,6 +50,11 @@ namespace mdcii::world
      */
     class Layer;
 
+    /**
+     * @brief Forward declaration enum class LayerType.
+     */
+    enum class LayerType;
+
     //-------------------------------------------------
     // Island
     //-------------------------------------------------
@@ -129,6 +134,28 @@ namespace mdcii::world
         Island& operator=(Island&& t_other) noexcept = delete;
 
         ~Island() noexcept;
+
+        //-------------------------------------------------
+        // Getter
+        //-------------------------------------------------
+
+        /**
+         * @brief Getter function to retrieve a pointer to the specified layer.
+         *
+         * @param t_layerType The type of layer to retrieve.
+         *
+         * @return A pointer to the requested layer.
+         */
+        [[nodiscard]] Layer* GetLayer(LayerType t_layerType);
+
+        /**
+         * @brief Const getter function to retrieve a constant pointer to the specified layer.
+         *
+         * @param t_layerType The type of layer to retrieve.
+         *
+         * @return A constant pointer to the requested layer.
+         */
+        [[nodiscard]] const Layer* GetLayer(LayerType t_layerType) const;
 
         //-------------------------------------------------
         // Position
