@@ -18,15 +18,17 @@
 
 #include <algorithm>
 #include "Layer.h"
-#include "Log.h"
 #include "Rotation.h"
+#include "MdciiAssert.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::Layer::Layer(LayerType t_layerType)
+mdcii::world::Layer::Layer(LayerType t_layerType, const int t_width, const int t_height)
     : layerType{ t_layerType }
+    , m_width{ t_width }
+    , m_height{ t_height }
 {
     MDCII_LOG_DEBUG("[Layer::Layer()] Create Layer of type {}.", magic_enum::enum_name(layerType));
 }
@@ -34,6 +36,20 @@ mdcii::world::Layer::Layer(LayerType t_layerType)
 mdcii::world::Layer::~Layer() noexcept
 {
     MDCII_LOG_DEBUG("[Layer::~Layer()] Destruct Layer.");
+}
+
+//-------------------------------------------------
+// Getter
+//-------------------------------------------------
+
+mdcii::world::Tile& mdcii::world::Layer::GetTile(const int t_x, const int t_y, const Rotation t_rotation)
+{
+    return sortedTiles.at(magic_enum::enum_integer(t_rotation)).at(GetMapIndex(t_x, t_y, t_rotation));
+}
+
+const mdcii::world::Tile& mdcii::world::Layer::GetTile(const int t_x, const int t_y, const Rotation t_rotation) const
+{
+    return sortedTiles.at(magic_enum::enum_integer(t_rotation)).at(GetMapIndex(t_x, t_y, t_rotation));
 }
 
 //-------------------------------------------------
@@ -60,4 +76,29 @@ void mdcii::world::Layer::SortTilesForRendering()
 
     // revert tiles sorting = sortedTiles DEG0
     tiles = sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0));
+}
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+int mdcii::world::Layer::GetMapIndex(
+    const int t_x, const int t_y,
+    const int t_width, const int t_height,
+    const Rotation t_rotation
+)
+{
+    const auto position{ rotate_position(t_x, t_y, t_width, t_height, t_rotation) };
+
+    if (t_rotation == world::Rotation::DEG0 || t_rotation == world::Rotation::DEG180)
+    {
+        return position.y * t_width + position.x;
+    }
+
+    return position.y * t_height + position.x;
+}
+
+int mdcii::world::Layer::GetMapIndex(const int t_x, const int t_y, const Rotation t_rotation) const
+{
+    return GetMapIndex(t_x, t_y, m_width, m_height, t_rotation);
 }

@@ -24,6 +24,15 @@
 namespace mdcii::world
 {
     //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
+    /**
+     * @brief Forward declaration enum class Rotation.
+     */
+    enum class Rotation;
+
+    //-------------------------------------------------
     // Layer type
     //-------------------------------------------------
 
@@ -81,8 +90,10 @@ namespace mdcii::world
          * @brief Constructs a new Layer object.
          *
          * @param t_layerType The type of the layer.
+         * @param t_width The width of the layer.
+         * @param t_height The height of the layer.
          */
-        explicit Layer(LayerType t_layerType);
+        Layer(LayerType t_layerType, int t_width, int t_height);
 
         Layer(const Layer& t_other) = delete;
         Layer(Layer&& t_other) noexcept = delete;
@@ -90,6 +101,32 @@ namespace mdcii::world
         Layer& operator=(Layer&& t_other) noexcept = delete;
 
         ~Layer() noexcept;
+
+        //-------------------------------------------------
+        // Getter
+        //-------------------------------------------------
+
+        /**
+         * @brief Retrieves a reference to the Tile at the specified position and rotation.
+         *
+         * @param t_x The x position on the layer.
+         * @param t_y The x position on the layer.
+         * @param t_rotation The current camera rotation.
+         *
+         * @return A reference to the Tile at the specified position and rotation.
+         */
+        [[nodiscard]] Tile& GetTile(int t_x, int t_y, Rotation t_rotation);
+
+        /**
+         * @brief Retrieves a const reference to the Tile at the specified position and rotation.
+         *
+         * @param t_x The x position on the layer.
+         * @param t_y The x position on the layer.
+         * @param t_rotation The current camera rotation.
+         *
+         * @return A const reference to the Tile at the specified position and rotation.
+         */
+        [[nodiscard]] const Tile& GetTile(int t_x, int t_y, Rotation t_rotation) const;
 
         //-------------------------------------------------
         // Sort
@@ -102,9 +139,53 @@ namespace mdcii::world
          */
         void SortTilesForRendering();
 
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        /**
+         * @brief 2D/1D - mapping of a position.
+         *
+         * The index can be used, for example, to get a tile with the 2D position from the sortedTiles array.
+         *
+         * @param t_x The 2D x position.
+         * @param t_y The 2D y position.
+         * @param t_width The width of the 2D array.
+         * @param t_height The height of the 2D array.
+         * @param t_rotation The given position is previously rotated by the specified rotation.
+         *
+         * @return The 1D index.
+         */
+        [[nodiscard]] static int GetMapIndex(int t_x, int t_y, int t_width, int t_height, Rotation t_rotation);
+
+        /**
+         * @brief 2D/1D - mapping of a layer position.
+         *
+         * The index is used to get a tile from the layer.
+         *
+         * @param t_x The x position on the layer.
+         * @param t_y The x position on the layer.
+         * @param t_rotation The given position is previously rotated by the specified rotation.
+         *
+         * @return The 1D index.
+         */
+        [[nodiscard]] int GetMapIndex(int t_x, int t_y, Rotation t_rotation) const;
+
     protected:
 
     private:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
 
+        /**
+         * @brief The width of the layer.
+         */
+        const int m_width;
+
+        /**
+         * @brief The height of the layer.
+         */
+        const int m_height;
     };
 }
