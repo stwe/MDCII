@@ -22,6 +22,15 @@
 #include "resource/Buildings.h"
 
 //-------------------------------------------------
+// Getter
+//-------------------------------------------------
+
+bool mdcii::world::Tile::HasBuildingAboveWaterAndCoast() const
+{
+    return building != nullptr && building->posoffs > 0;
+}
+
+//-------------------------------------------------
 // Logic
 //-------------------------------------------------
 

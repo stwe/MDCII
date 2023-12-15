@@ -145,6 +145,13 @@ namespace mdcii::world
          */
         [[nodiscard]] bool HasBuilding() const { return building != nullptr; }
 
+        /**
+         * @brief For better readability/convenience.
+         *
+         * @return True if a Building object is present and is above water and coast.
+         */
+        [[nodiscard]] bool HasBuildingAboveWaterAndCoast() const;
+
         //-------------------------------------------------
         // Logic
         //-------------------------------------------------
