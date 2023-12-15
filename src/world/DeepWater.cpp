@@ -66,7 +66,7 @@ void mdcii::world::DeepWater::InitLayer()
 {
     MDCII_LOG_DEBUG("[DeepWater::InitLayer()] Init deep water layer.");
 
-    layer = std::make_unique<Layer>(LayerType::DEEP_WATER);
+    layer = std::make_unique<Layer>(LayerType::DEEP_WATER, m_world->worldWidth, m_world->worldHeight);
     layer->tiles.resize(m_world->worldWidth * m_world->worldHeight);
 
     for (auto y{ 0 }; y < m_world->worldHeight; ++y)
@@ -109,7 +109,7 @@ void mdcii::world::DeepWater::RemoveIrrelevantTiles() const
     layer->tiles.erase(begin, end);
 }
 
-void mdcii::world::DeepWater::UpdateTileProperties()
+void mdcii::world::DeepWater::UpdateTileProperties() const
 {
     MDCII_LOG_DEBUG("[DeepWater::UpdateTileProperties()] Pre-calculate other properties.");
 
@@ -128,10 +128,10 @@ void mdcii::world::DeepWater::UpdateTileProperties()
             tile.gfxs.push_back(gfx0 + (3 * tile.building->rotate));
         }
 
-        tile.indices[0] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, m_world->worldWidth, m_world->worldHeight, Rotation::DEG0);
-        tile.indices[1] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, m_world->worldWidth, m_world->worldHeight, Rotation::DEG90);
-        tile.indices[2] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, m_world->worldWidth, m_world->worldHeight, Rotation::DEG180);
-        tile.indices[3] = renderer::Renderer::GetMapIndex(tile.posX, tile.posY, m_world->worldWidth, m_world->worldHeight, Rotation::DEG270);
+        tile.indices[0] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG0);
+        tile.indices[1] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG90);
+        tile.indices[2] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG180);
+        tile.indices[3] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG270);
     }
 
     layer->SortTilesForRendering();

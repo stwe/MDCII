@@ -123,6 +123,6 @@ namespace mdcii::world
         /**
          * @brief Update the properties of each tile based on the buildingId it contains.
          */
-        void UpdateTileProperties();
+        void UpdateTileProperties() const;
     };
 }
