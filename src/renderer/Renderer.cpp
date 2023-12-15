@@ -23,12 +23,11 @@
 #include "world/Island.h"
 #include "world/DeepWater.h"
 #include "world/World.h"
-#include "world/Tile.h"
 #include "world/Layer.h"
 #include "resource/TileAtlas.h"
-#include "camera/Camera.h"
 #include "resource/Buildings.h"
 #include "resource/AssetManager.h"
+#include "camera/Camera.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -66,7 +65,7 @@ float mdcii::renderer::Renderer::CalcOffset(const world::Tile* t_tile, const int
     {
         offset = static_cast<float>(gfxHeight) - static_cast<float>(tileHeight);
     }
-    if (t_tile->building->posoffs > 0) // above water
+    if (t_tile->HasBuildingAboveWaterAndCoast())
     {
         offset += world::ELEVATIONS[zoomInt];
     }
@@ -243,20 +242,4 @@ olc::vi2d mdcii::renderer::Renderer::GetAtlasOffset(const int t_gfx, const int t
     auto picInPic{ t_gfx % (t_rows * t_rows) };
 
     return { picInPic % t_rows, picInPic / t_rows };
-}
-
-int mdcii::renderer::Renderer::GetMapIndex(
-    const int t_x, const int t_y,
-    const int t_width, const int t_height,
-    const world::Rotation t_rotation
-)
-{
-    const auto position{ rotate_position(t_x, t_y, t_width, t_height, t_rotation) };
-
-    if (t_rotation == world::Rotation::DEG0 || t_rotation == world::Rotation::DEG180)
-    {
-        return position.y * t_width + position.x;
-    }
-
-    return position.y * t_height + position.x;
 }

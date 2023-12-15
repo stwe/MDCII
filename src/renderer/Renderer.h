@@ -27,16 +27,6 @@
 namespace mdcii::world
 {
     /**
-     * @brief Forward declaration enum class Zoom.
-     */
-    enum class Zoom;
-
-    /**
-     * @brief Forward declaration enum class Rotation.
-     */
-    enum class Rotation;
-
-    /**
      * @brief Forward declaration enum class LayerType.
      */
     enum class LayerType;
@@ -133,19 +123,6 @@ namespace mdcii::renderer
          * @return The offset coordinates.
          */
         [[nodiscard]] static olc::vi2d GetAtlasOffset(int t_gfx, int t_rows);
-
-        /**
-         * @brief 2D/1D - mapping of a position.
-         *
-         * @param t_x The 2D x position.
-         * @param t_y The 2D y position.
-         * @param t_width The width of the 2D array.
-         * @param t_height The height of the 2D array.
-         * @param t_rotation The given position is previously rotated by the given value.
-         *
-         * @return The 1D index.
-         */
-        [[nodiscard]] static int GetMapIndex(int t_x, int t_y, int t_width, int t_height, world::Rotation t_rotation);
 
     protected:
 
