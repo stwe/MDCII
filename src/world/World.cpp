@@ -149,13 +149,15 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
 
                                 buildingsLayer->AddBuilding(newTiles);
                                 island->GetLayer(LayerType::MIXED)->AddBuilding(newTiles);
+
+                                FindVisibleIslands();
                             }
 
-                            // render the building to be added
+                            // render the building (dark grey) to be added and a green grid
                             for (const auto& tile : newTiles)
                             {
                                 renderer->RenderBuilding(island->startX, island->startY, &tile, olc::DARK_GREY);
-                                //renderer->RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, &tile);
+                                renderer->RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, &tile);
                             }
 
                             break;
