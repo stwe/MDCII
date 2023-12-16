@@ -22,6 +22,7 @@
 #include "MainMenuState.h"
 #include "Intl.h"
 #include "resource/OriginalResourcesManager.h"
+#include "resource/MdciiResourcesManager.h"
 #include "resource/TileAtlas.h"
 #include "resource/AssetManager.h"
 #include "state/StateSystem.h"
@@ -52,6 +53,7 @@ bool mdcii::Game::OnUserCreate()
     */
 
     originalResourcesManager = std::make_unique<resource::OriginalResourcesManager>();
+    mdciiResourcesManager = std::make_unique<resource::MdciiResourcesManager>();
     tileAtlas = std::make_unique<resource::TileAtlas>();
     assetManager = std::make_unique<resource::AssetManager>();
 
@@ -62,7 +64,9 @@ bool mdcii::Game::OnUserCreate()
     stateSystem = std::make_unique<state::StateSystem>();
     stateSystem->AddState(state::StateId::MAIN_MENU, std::make_unique<MainMenuState>(this));
     stateSystem->AddState(state::StateId::NEW_GAME, std::make_unique<GameState>(this));
-    stateSystem->ChangeState(state::StateId::NEW_GAME);
+    stateSystem->AddState(state::StateId::LOAD_GAME, std::make_unique<GameState>(this));
+
+    stateSystem->ChangeState(state::StateId::MAIN_MENU);
 
     return stateSystem->OnUserCreate();
 }

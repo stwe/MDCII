@@ -35,6 +35,11 @@ namespace mdcii::resource
     class OriginalResourcesManager;
 
     /**
+     * @brief Forward declaration class MdciiResourcesManager.
+     */
+    class MdciiResourcesManager;
+
+    /**
      * @brief Forward declaration class TileAtlas.
      */
     class TileAtlas;
@@ -99,6 +104,7 @@ namespace mdcii
         inline static entt::registry ecs;
 
         std::unique_ptr<resource::OriginalResourcesManager> originalResourcesManager;
+        std::unique_ptr<resource::MdciiResourcesManager> mdciiResourcesManager;
         std::unique_ptr<resource::TileAtlas> tileAtlas;
         std::unique_ptr<resource::AssetManager> assetManager;
         std::unique_ptr<state::StateSystem> stateSystem;
