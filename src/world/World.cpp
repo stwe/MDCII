@@ -94,6 +94,13 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
     // render the selected building to add it
     if (Gui::select_building.building)
     {
+        const std::array offsets{
+            olc::vi2d(+1, +1), // + x, + y
+            olc::vi2d(-1, -1), // - x, - y
+            olc::vi2d(+1, -1), // + x, - y
+            olc::vi2d(-1, +1), // - x, + y
+        };
+
         for (const auto* island : currentIslands)
         {
             if (auto mouseOverIsland{ island->IsMouseOverIsland() }; mouseOverIsland.has_value())
@@ -105,85 +112,47 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                 {
                     std::vector<Tile> newTiles;
 
-                    for (auto y{ 0 }; y < Gui::select_building.building->size.h; ++y)
+                    for (const auto& offset : offsets)
                     {
-                        for (auto x{ 0 }; x < Gui::select_building.building->size.w; ++x)
-                        {
-                            const auto& terrainTileToCheck{ terrainLayer->GetTile(mouseOverIsland.value().x + x, mouseOverIsland.value().y + y, camera->rotation) };
-                            const auto& buildingTileToCheck{ buildingsLayer->GetTile(mouseOverIsland.value().x + x, mouseOverIsland.value().y + y, camera->rotation) };
-
-                            if (terrainTileToCheck.HasBuildingAboveWaterAndCoast() && !buildingTileToCheck.HasBuilding())
-                            {
-                                newTiles.emplace_back(
-                                    Gui::select_building.building,
-                                    magic_enum::enum_integer(Gui::select_building.rotation),
-                                    x,
-                                    y,
-                                    mouseOverIsland.value().x + x,
-                                    mouseOverIsland.value().y + y
-                                );
-                            }
-                        }
-                    }
-
-                    if (newTiles.size() != Gui::select_building.building->size.h * Gui::select_building.building->size.w)
-                    {
-                        std::vector<Tile>().swap(newTiles);
-
                         for (auto y{ 0 }; y < Gui::select_building.building->size.h; ++y)
                         {
                             for (auto x{ 0 }; x < Gui::select_building.building->size.w; ++x)
                             {
-                                const auto& terrainTileToCheck{ terrainLayer->GetTile(mouseOverIsland.value().x + x, mouseOverIsland.value().y - y, camera->rotation) };
-                                const auto& buildingTileToCheck{ buildingsLayer->GetTile(mouseOverIsland.value().x + x, mouseOverIsland.value().y - y, camera->rotation) };
+                                const auto offsetX{ x * offset.x };
+                                const auto offsetY{ y * offset.y };
+
+                                const auto posX{ mouseOverIsland.value().x + offsetX };
+                                const auto posY{ mouseOverIsland.value().y + offsetY };
+
+                                const auto& terrainTileToCheck{ terrainLayer->GetTile(posX, posY, camera->rotation) };
+                                const auto& buildingTileToCheck{ buildingsLayer->GetTile(posX, posY, camera->rotation) };
 
                                 if (terrainTileToCheck.HasBuildingAboveWaterAndCoast() && !buildingTileToCheck.HasBuilding())
                                 {
                                     newTiles.emplace_back(
                                         Gui::select_building.building,
                                         magic_enum::enum_integer(Gui::select_building.rotation),
-                                        x,
-                                        Gui::select_building.building->size.h - 1 - y,
-                                        mouseOverIsland.value().x + x,
-                                        mouseOverIsland.value().y - y
+                                        offset.x < 0 ? Gui::select_building.building->size.w - 1 - x : x,
+                                        offset.y < 0 ? Gui::select_building.building->size.h - 1 - y : y,
+                                        posX, posY
                                     );
                                 }
                             }
                         }
-                    }
 
-                    if (newTiles.size() != Gui::select_building.building->size.h * Gui::select_building.building->size.w)
-                    {
-                        std::vector<Tile>().swap(newTiles);
-
-                        for (auto y{ 0 }; y < Gui::select_building.building->size.h; ++y)
+                        if (newTiles.size() == Gui::select_building.building->size.h * Gui::select_building.building->size.w)
                         {
-                            for (auto x{ 0 }; x < Gui::select_building.building->size.w; ++x)
+                            for (const auto& tile : newTiles)
                             {
-                                const auto& terrainTileToCheck{ terrainLayer->GetTile(mouseOverIsland.value().x - x, mouseOverIsland.value().y - y, camera->rotation) };
-                                const auto& buildingTileToCheck{ buildingsLayer->GetTile(mouseOverIsland.value().x - x, mouseOverIsland.value().y - y, camera->rotation) };
-
-                                if (terrainTileToCheck.HasBuildingAboveWaterAndCoast() && !buildingTileToCheck.HasBuilding())
-                                {
-                                    newTiles.emplace_back(
-                                        Gui::select_building.building,
-                                        magic_enum::enum_integer(Gui::select_building.rotation),
-                                        Gui::select_building.building->size.w - 1 - x,
-                                        Gui::select_building.building->size.h - 1 - y,
-                                        mouseOverIsland.value().x - x,
-                                        mouseOverIsland.value().y - y
-                                    );
-                                }
+                                renderer->RenderBuilding(island->startX, island->startY, &tile, olc::DARK_GREY);
+                                //renderer->RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, &tile);
                             }
-                        }
-                    }
 
-                    if (newTiles.size() == Gui::select_building.building->size.h * Gui::select_building.building->size.w)
-                    {
-                        for (const auto& tile : newTiles)
+                            break;
+                        }
+                        else
                         {
-                            renderer->RenderBuilding(island->startX, island->startY, &tile, olc::DARK_GREY);
-                            //renderer->RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, &tile);
+                            std::vector<Tile>().swap(newTiles);
                         }
                     }
                 }
