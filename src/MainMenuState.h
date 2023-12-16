@@ -18,6 +18,8 @@
 
 #pragma once
 
+#include <vector>
+#include <string>
 #include "state/State.h"
 
 namespace mdcii
@@ -62,6 +64,15 @@ namespace mdcii
     protected:
 
     private:
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
 
+        /**
+         * @brief Provides a simple mechanism to choose a file.
+         *
+         * @param t_files A list of files.
+         */
+        static int RenderFileChooser(std::vector<std::string>& t_files);
     };
 }

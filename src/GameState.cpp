@@ -17,7 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "GameState.h"
-#include "Log.h"
+#include "MdciiAssert.h"
+#include "MdciiException.h"
 #include "Game.h"
 #include "world/MousePicker.h"
 #include "world/World.h"
@@ -38,6 +39,17 @@ mdcii::GameState::~GameState() noexcept
 }
 
 //-------------------------------------------------
+// Load world
+//-------------------------------------------------
+
+void mdcii::GameState::LoadWorldFrom(const std::string& t_file)
+{
+    MDCII_ASSERT(!world, "[GameState::LoadWorldFrom()] Invalid world pointer.")
+
+    world = std::make_unique<world::World>(this, t_file);
+}
+
+//-------------------------------------------------
 // Override
 //-------------------------------------------------
 
@@ -46,8 +58,11 @@ bool mdcii::GameState::OnUserCreate()
     MDCII_LOG_DEBUG("[GameState::OnUserCreate()] Init GameState.");
 
     mousePicker = std::make_unique<world::MousePicker>(this);
-    world = std::make_unique<world::World>(this, "resources/sav/SaveMap0.sav");
-    //world = std::make_unique<world::World>(this, "resources/sav/Example.sav");
+
+    if (!world)
+    {
+        throw MDCII_EXCEPTION("[GameState::OnUserCreate()] Missing world, use the LoadWorldFrom() method to load.");
+    }
 
     return true;
 }

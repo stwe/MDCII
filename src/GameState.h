@@ -86,6 +86,17 @@ namespace mdcii
         ~GameState() noexcept override;
 
         //-------------------------------------------------
+        // Load world
+        //-------------------------------------------------
+
+        /**
+         * @brief Loads a world from the given file.
+         *
+         * @param t_file The world data file.
+         */
+        void LoadWorldFrom(const std::string& t_file);
+
+        //-------------------------------------------------
         // Override
         //-------------------------------------------------
 

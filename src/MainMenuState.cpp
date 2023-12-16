@@ -19,7 +19,10 @@
 #include "MainMenuState.h"
 #include "Log.h"
 #include "Game.h"
+#include "MdciiUtils.h"
+#include "GameState.h"
 #include "state/StateSystem.h"
+#include "resource/MdciiResourcesManager.h"
 
 mdcii::MainMenuState::MainMenuState(Game* t_game)
     : State(t_game)
@@ -52,12 +55,79 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
     constexpr ImGuiWindowFlags flags{ ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings };
 
     ImGui::Begin("MainMenu", nullptr, flags);
+
+    static auto c{ -1 };
+
+    // Start a new game
+
     if (ImGui::Button("New Game"))
     {
-        game->stateSystem->ChangeState(state::StateId::NEW_GAME);
+        ImGui::OpenPopup("Select Map");
+
         ImGui::End();
-        return game->stateSystem->OnUserCreate();
+
+        return true;
     }
+
+    if (ImGui::BeginPopupModal("Select Map"))
+    {
+        c = RenderFileChooser(game->mdciiResourcesManager->mapFiles);
+        if (c >= 0)
+        {
+            game->stateSystem->ChangeState(state::StateId::NEW_GAME);
+
+            auto* g{ dynamic_cast<GameState*>(game->stateSystem->states.at(state::StateId::NEW_GAME).get()) };
+            g->LoadWorldFrom(game->mdciiResourcesManager->mapFiles.at(c));
+
+            ImGui::EndPopup();
+            ImGui::End();
+
+            return game->stateSystem->OnUserCreate();
+        }
+
+        if (ImGui::Button("Close"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+
+    // Load saved game
+
+    if (ImGui::Button("Load Game"))
+    {
+        ImGui::OpenPopup("Select Saved Game");
+
+        ImGui::End();
+
+        return true;
+    }
+
+    if (ImGui::BeginPopupModal("Select Saved Game"))
+    {
+        c = RenderFileChooser(game->mdciiResourcesManager->saveGameFiles);
+        if (c >= 0)
+        {
+            game->stateSystem->ChangeState(state::StateId::LOAD_GAME);
+
+            auto* g{ dynamic_cast<GameState*>(game->stateSystem->states.at(state::StateId::LOAD_GAME).get()) };
+            g->LoadWorldFrom(game->mdciiResourcesManager->saveGameFiles.at(c));
+
+            ImGui::EndPopup();
+            ImGui::End();
+
+            return game->stateSystem->OnUserCreate();
+        }
+
+        if (ImGui::Button("Close"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+
     if (ImGui::Button("Exit"))
     {
         ImGui::End();
@@ -67,4 +137,29 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
     ImGui::End();
 
     return true;
+}
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+int mdcii::MainMenuState::RenderFileChooser(std::vector<std::string>& t_files)
+{
+    static int32_t fileIndex{ 0 };
+
+    if (t_files.empty())
+    {
+        ImGui::Text("MissingFiles");
+    }
+    else
+    {
+        file_chooser(t_files, &fileIndex);
+        if (ImGui::Button("LoadFile"))
+        {
+            ImGui::CloseCurrentPopup();
+            return fileIndex;
+        }
+    }
+
+    return -1;
 }
