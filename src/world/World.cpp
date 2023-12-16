@@ -101,12 +101,12 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
             olc::vi2d(-1, +1), // - x, + y
         };
 
-        for (const auto* island : currentIslands)
+        for (auto* island : currentIslands)
         {
             if (auto mouseOverIsland{ island->IsMouseOverIsland() }; mouseOverIsland.has_value())
             {
                 const auto* terrainLayer{ island->GetLayer(LayerType::TERRAIN) };
-                const auto* buildingsLayer{ island->GetLayer(LayerType::BUILDINGS) };
+                auto* buildingsLayer{ island->GetLayer(LayerType::BUILDINGS) };
 
                 if (terrainLayer->GetTile(mouseOverIsland.value().x, mouseOverIsland.value().y, camera->rotation).HasBuildingAboveWaterAndCoast())
                 {
@@ -140,8 +140,18 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                             }
                         }
 
-                        if (newTiles.size() == Gui::select_building.building->size.h * Gui::select_building.building->size.w)
+                        if (newTiles.size() == Gui::select_building.building->size.h * static_cast<std::size_t>(Gui::select_building.building->size.w))
                         {
+                            // add on left mouse button click
+                            if (gameState->game->GetMouse(0).bPressed)
+                            {
+                                MDCII_LOG_DEBUG("[World::OnUserUpdate()] Add {}", Gui::select_building.building->id);
+
+                                buildingsLayer->AddBuilding(newTiles);
+                                island->GetLayer(LayerType::MIXED)->AddBuilding(newTiles);
+                            }
+
+                            // render the building to be added
                             for (const auto& tile : newTiles)
                             {
                                 renderer->RenderBuilding(island->startX, island->startY, &tile, olc::DARK_GREY);
@@ -163,13 +173,6 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
         {
             Gui::select_building.building = nullptr;
             Gui::select_building.rotation = Rotation::DEG0;
-        }
-
-        if (gameState->game->GetMouse(0).bPressed)
-        {
-            MDCII_LOG_DEBUG("[World::OnUserUpdate()] Add {}", Gui::select_building.building->id);
-
-            // todo
         }
     }
 }

@@ -129,6 +129,17 @@ namespace mdcii::world
         [[nodiscard]] const Tile& GetTile(int t_x, int t_y, Rotation t_rotation) const;
 
         //-------------------------------------------------
+        // Add
+        //-------------------------------------------------
+
+        /**
+         * @brief Adds a building to the layer.
+         *
+         * @param t_buildingTiles The tiles of the building to be added.
+         */
+        void AddBuilding(std::vector<Tile>& t_buildingTiles);
+
+        //-------------------------------------------------
         // Sort
         //-------------------------------------------------
 

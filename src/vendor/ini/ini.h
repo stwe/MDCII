@@ -266,7 +266,7 @@ class INIReader {
     template <typename T>
     T Converter(const std::string& s) const;
 
-    const bool BoolConverter(std::string s) const;
+    bool BoolConverter(std::string s) const;
 
     template <typename T>
     std::string V2String(const T& v) const;
@@ -521,7 +521,7 @@ inline T INIReader::Converter(const std::string& s) const {
     }
 }
 
-inline const bool INIReader::BoolConverter(std::string s) const {
+inline bool INIReader::BoolConverter(std::string s) const {
     std::transform(s.begin(), s.end(), s.begin(), ::tolower);
     static const std::unordered_map<std::string, bool> s2b{
         {"1", true},  {"true", true},   {"yes", true}, {"on", true},

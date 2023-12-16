@@ -53,6 +53,34 @@ const mdcii::world::Tile& mdcii::world::Layer::GetTile(const int t_x, const int 
 }
 
 //-------------------------------------------------
+// Add
+//-------------------------------------------------
+
+void mdcii::world::Layer::AddBuilding(std::vector<Tile>& t_buildingTiles)
+{
+    MDCII_ASSERT(!t_buildingTiles.empty(), "[Layer::AddBuilding()] Invalid number of tiles.")
+
+    MDCII_LOG_DEBUG("[Layer::AddBuilding()] Add {} tiles for a building to the {} layer.", t_buildingTiles.size(), magic_enum::enum_name(layerType));
+
+    for (auto& tile : t_buildingTiles)
+    {
+        MDCII_ASSERT(tile.HasBuildingAboveWaterAndCoast(), "[Layer::AddBuilding()] Null pointer or invalid building.")
+
+        tile.indices[0] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG0);
+        tile.indices[1] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG90);
+        tile.indices[2] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG180);
+        tile.indices[3] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG270);
+
+        tiles.at(tile.indices[0]) = tile;
+
+        sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0)).at(tile.indices[0]) = tile;
+        sortedTiles.at(magic_enum::enum_integer(Rotation::DEG90)).at(tile.indices[1]) = tile;
+        sortedTiles.at(magic_enum::enum_integer(Rotation::DEG180)).at(tile.indices[2]) = tile;
+        sortedTiles.at(magic_enum::enum_integer(Rotation::DEG270)).at(tile.indices[3]) = tile;
+    }
+}
+
+//-------------------------------------------------
 // Sort
 //-------------------------------------------------
 
