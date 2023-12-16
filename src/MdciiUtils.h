@@ -35,6 +35,16 @@ namespace mdcii
      */
     [[nodiscard]] nlohmann::json read_json_from_file(const std::string& t_filePath);
 
+    /**
+     * @brief Searches for files in the specified path with a given extension.
+     *
+     * @param t_relPath The relative path to the RESOURCES_REL_PATH.
+     * @param t_extension Search for files with this extension.
+     *
+     * @return A list of found files.
+     */
+    [[nodiscard]] std::vector<std::string> get_files_list(const std::string& t_relPath, const std::string& t_extension);
+
     //-------------------------------------------------
     // Strings
     //-------------------------------------------------
@@ -56,4 +66,31 @@ namespace mdcii
      * @return The converted string.
      */
     [[nodiscard]] std::string to_upper_case(const std::string& t_string);
+
+    //-------------------------------------------------
+    // ImGui widgets
+    //-------------------------------------------------
+
+    /**
+     * @brief A ListBox showing files.
+     *
+     * @param t_files The files to display.
+     * @param t_currentItem The index of the currently selected file.
+     */
+    void file_chooser(std::vector<std::string>& t_files, int* t_currentItem);
+
+    //-------------------------------------------------
+    // ImGui helper
+    //-------------------------------------------------
+
+    /**
+     * @brief Helper to use std::vector with ImGui Listbox.
+     *
+     * @param t_vec A std::vector of strings.
+     * @param t_index The index of an element in the std::vector.
+     * @param t_outText The text showing in the ListBox.
+     *
+     * @return True or false.
+     */
+    [[nodiscard]] bool vector_getter(void* t_vec, int32_t t_index, const char** t_outText);
 }

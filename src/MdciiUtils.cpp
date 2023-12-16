@@ -20,6 +20,7 @@
 #include "MdciiUtils.h"
 #include "MdciiException.h"
 #include "Log.h"
+#include "Game.h"
 
 //-------------------------------------------------
 // Files
@@ -50,6 +51,20 @@ nlohmann::json mdcii::read_json_from_file(const std::string& t_filePath)
     return j;
 }
 
+std::vector<std::string> mdcii::get_files_list(const std::string& t_relPath, const std::string& t_extension)
+{
+    std::vector<std::string> results;
+    for (const auto& entry : std::filesystem::recursive_directory_iterator(fmt::format("{}{}", Game::RESOURCES_REL_PATH, t_relPath), std::filesystem::directory_options::follow_directory_symlink))
+    {
+        if (is_regular_file(entry.status()) && entry.path().extension().string() == t_extension)
+        {
+            results.push_back(entry.path().string());
+        }
+    }
+
+    return results;
+}
+
 //-------------------------------------------------
 // Strings
 //-------------------------------------------------
@@ -74,4 +89,36 @@ std::string mdcii::to_upper_case(const std::string& t_string)
     }
 
     return newString;
+}
+
+//-------------------------------------------------
+// ImGui widgets
+//-------------------------------------------------
+
+void mdcii::file_chooser(std::vector<std::string>& t_files, int* t_currentItem)
+{
+    ImGui::ListBox(
+        "ChooseFile",
+        t_currentItem,
+        vector_getter,
+        &t_files,
+        static_cast<int32_t>(t_files.size())
+    );
+}
+
+//-------------------------------------------------
+// ImGui helper
+//-------------------------------------------------
+
+bool mdcii::vector_getter(void* t_vec, const int32_t t_index, const char** t_outText)
+{
+    const auto &vector{ *static_cast<std::vector<std::string>*>(t_vec) };
+    if (t_index < 0 || t_index >= static_cast<int>(vector.size()))
+    {
+        return false;
+    }
+
+    *t_outText = vector.at(t_index).c_str();
+
+    return true;
 }
