@@ -98,21 +98,10 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
         {
             if (auto mouseOverIsland{ island->IsMouseOverIsland() }; mouseOverIsland.has_value())
             {
-                const auto rotationInt{ magic_enum::enum_integer(camera->rotation) };
+                const auto* terrainLayer{ island->GetLayer(LayerType::TERRAIN) };
+                const auto* buildingsLayer{ island->GetLayer(LayerType::BUILDINGS) };
 
-                const auto& terrainLayer{ *island->layers[1] };
-                const auto& buildingsLayer{ *island->layers[2] };
-
-                const auto startIndex{ renderer::Renderer::GetMapIndex(
-                    mouseOverIsland.value().x,
-                    mouseOverIsland.value().y,
-                    island->width, island->height,
-                    camera->rotation
-                    )
-                };
-                const auto& terrainTile{ terrainLayer.sortedTiles.at(rotationInt).at(startIndex) };
-
-                if (terrainTile.HasBuilding() && terrainTile.building->posoffs > 0)
+                if (terrainLayer->GetTile(mouseOverIsland.value().x, mouseOverIsland.value().y, camera->rotation).HasBuildingAboveWaterAndCoast())
                 {
                     std::vector<Tile> newTiles;
 
@@ -120,25 +109,19 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                     {
                         for (auto x{ 0 }; x < Gui::select_building.building->size.w; ++x)
                         {
-                            const auto newIndex{ renderer::Renderer::GetMapIndex(mouseOverIsland.value().x + x, mouseOverIsland.value().y + y, island->width, island->height, camera->rotation) };
-                            const auto& terrainTileToCheck{ terrainLayer.sortedTiles.at(rotationInt).at(newIndex) };
-                            const auto& buildingTileToCheck{ buildingsLayer.sortedTiles.at(rotationInt).at(newIndex) };
+                            const auto& terrainTileToCheck{ terrainLayer->GetTile(mouseOverIsland.value().x + x, mouseOverIsland.value().y + y, camera->rotation) };
+                            const auto& buildingTileToCheck{ buildingsLayer->GetTile(mouseOverIsland.value().x + x, mouseOverIsland.value().y + y, camera->rotation) };
 
-                            if (terrainTileToCheck.HasBuilding() && terrainTileToCheck.building->posoffs > 0 && !buildingTileToCheck.HasBuilding())
+                            if (terrainTileToCheck.HasBuildingAboveWaterAndCoast() && !buildingTileToCheck.HasBuilding())
                             {
-                                world::Tile tile;
-                                tile.building = Gui::select_building.building;
-                                tile.rotation = magic_enum::enum_integer(Gui::select_building.rotation);
-
-                                tile.x = x;
-                                tile.y = y;
-
-                                tile.CalculateGfx();
-
-                                tile.posX = mouseOverIsland.value().x + x;
-                                tile.posY = mouseOverIsland.value().y + y;
-
-                                newTiles.push_back(tile);
+                                newTiles.emplace_back(
+                                    Gui::select_building.building,
+                                    magic_enum::enum_integer(Gui::select_building.rotation),
+                                    x,
+                                    y,
+                                    mouseOverIsland.value().x + x,
+                                    mouseOverIsland.value().y + y
+                                );
                             }
                         }
                     }
@@ -151,26 +134,19 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                         {
                             for (auto x{ 0 }; x < Gui::select_building.building->size.w; ++x)
                             {
-                                const auto newIndex{ renderer::Renderer::GetMapIndex(mouseOverIsland.value().x + x, mouseOverIsland.value().y - y, island->width, island->height, camera->rotation) };
-                                const auto& terrainTileToCheck{ terrainLayer.sortedTiles.at(rotationInt).at(newIndex) };
-                                const auto& buildingTileToCheck{ buildingsLayer.sortedTiles.at(rotationInt).at(newIndex) };
+                                const auto& terrainTileToCheck{ terrainLayer->GetTile(mouseOverIsland.value().x + x, mouseOverIsland.value().y - y, camera->rotation) };
+                                const auto& buildingTileToCheck{ buildingsLayer->GetTile(mouseOverIsland.value().x + x, mouseOverIsland.value().y - y, camera->rotation) };
 
-                                if (terrainTileToCheck.HasBuilding() && terrainTileToCheck.building->posoffs > 0
-                                    && !buildingTileToCheck.HasBuilding())
+                                if (terrainTileToCheck.HasBuildingAboveWaterAndCoast() && !buildingTileToCheck.HasBuilding())
                                 {
-                                    world::Tile tile;
-                                    tile.building = Gui::select_building.building;
-                                    tile.rotation = magic_enum::enum_integer(Gui::select_building.rotation);
-
-                                    tile.x = x;
-                                    tile.y = Gui::select_building.building->size.h - 1 - y;
-
-                                    tile.CalculateGfx();
-
-                                    tile.posX = mouseOverIsland.value().x + x;
-                                    tile.posY = mouseOverIsland.value().y - y;
-
-                                    newTiles.push_back(tile);
+                                    newTiles.emplace_back(
+                                        Gui::select_building.building,
+                                        magic_enum::enum_integer(Gui::select_building.rotation),
+                                        x,
+                                        Gui::select_building.building->size.h - 1 - y,
+                                        mouseOverIsland.value().x + x,
+                                        mouseOverIsland.value().y - y
+                                    );
                                 }
                             }
                         }
@@ -184,26 +160,19 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                         {
                             for (auto x{ 0 }; x < Gui::select_building.building->size.w; ++x)
                             {
-                                const auto newIndex{ renderer::Renderer::GetMapIndex(mouseOverIsland.value().x - x, mouseOverIsland.value().y - y, island->width, island->height, camera->rotation) };
-                                const auto& terrainTileToCheck{ terrainLayer.sortedTiles.at(rotationInt).at(newIndex) };
-                                const auto& buildingTileToCheck{ buildingsLayer.sortedTiles.at(rotationInt).at(newIndex) };
+                                const auto& terrainTileToCheck{ terrainLayer->GetTile(mouseOverIsland.value().x - x, mouseOverIsland.value().y - y, camera->rotation) };
+                                const auto& buildingTileToCheck{ buildingsLayer->GetTile(mouseOverIsland.value().x - x, mouseOverIsland.value().y - y, camera->rotation) };
 
-                                if (terrainTileToCheck.HasBuilding() && terrainTileToCheck.building->posoffs > 0
-                                    && !buildingTileToCheck.HasBuilding())
+                                if (terrainTileToCheck.HasBuildingAboveWaterAndCoast() && !buildingTileToCheck.HasBuilding())
                                 {
-                                    world::Tile tile;
-                                    tile.building = Gui::select_building.building;
-                                    tile.rotation = magic_enum::enum_integer(Gui::select_building.rotation);
-
-                                    tile.x = Gui::select_building.building->size.w - 1 - x;
-                                    tile.y = Gui::select_building.building->size.h - 1 - y;
-
-                                    tile.CalculateGfx();
-
-                                    tile.posX = mouseOverIsland.value().x - x;
-                                    tile.posY = mouseOverIsland.value().y - y;
-
-                                    newTiles.push_back(tile);
+                                    newTiles.emplace_back(
+                                        Gui::select_building.building,
+                                        magic_enum::enum_integer(Gui::select_building.rotation),
+                                        Gui::select_building.building->size.w - 1 - x,
+                                        Gui::select_building.building->size.h - 1 - y,
+                                        mouseOverIsland.value().x - x,
+                                        mouseOverIsland.value().y - y
+                                    );
                                 }
                             }
                         }
@@ -453,44 +422,3 @@ void mdcii::world::World::DisableRenderLayer(const RenderLayer t_renderLayer, bo
     renderLayer &= ~t_renderLayer;
     t_toFalse = false;
 }
-
-// todo: return optional?
-/*
-bool mdcii::world::World::CheckForBuildingAvailability(
-    const Island* island,
-    int x,
-    int y,
-    int indexY,
-    int indexX
-)
-{
-    const auto rotationInt{ magic_enum::enum_integer(camera->rotation) };
-
-    const auto& terrainLayer{ *island->layers[1] };
-    const auto& buildingsLayer{ *island->layers[2] };
-
-    const auto newIndex{ renderer::Renderer::GetMapIndex(x, y, island->width, island->height, camera->rotation) };
-    const auto& terrainTileToCheck{ terrainLayer.sortedTiles.at(rotationInt).at(newIndex) };
-    const auto& buildingTileToCheck{ buildingsLayer.sortedTiles.at(rotationInt).at(newIndex) };
-
-    if (terrainTileToCheck.HasBuilding() && terrainTileToCheck.building->posoffs > 0 && !buildingTileToCheck.HasBuilding())
-    {
-        world::Tile tile;
-        tile.building = Gui::select_building.building;
-        tile.rotation = magic_enum::enum_integer(Gui::select_building.rotation);
-
-        tile.x = x;
-        tile.y = y;
-
-        tile.CalculateGfx();
-
-        tile.posX = mouseOverIsland.value().x + x;
-        tile.posY = mouseOverIsland.value().y + y;
-
-        newTiles.push_back(tile);
-    }
-
-
-    return false;
-}
-*/

@@ -22,6 +22,28 @@
 #include "resource/Buildings.h"
 
 //-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
+mdcii::world::Tile::Tile(
+    const resource::Building* t_building,
+    const int t_rotation,
+    const int t_x,
+    const int t_y,
+    const int t_posX,
+    const int t_posY
+)
+    : building{ t_building }
+    , rotation{ t_rotation }
+    , x{ t_x }
+    , y{ t_y }
+    , posX{ t_posX }
+    , posY{ t_posY }
+{
+    CalculateGfx();
+}
+
+//-------------------------------------------------
 // Getter
 //-------------------------------------------------
 
