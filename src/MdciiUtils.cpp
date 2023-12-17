@@ -21,6 +21,7 @@
 #include "MdciiException.h"
 #include "Log.h"
 #include "Game.h"
+#include "vendor/imgui/imgui_stdlib.h"
 
 //-------------------------------------------------
 // Files
@@ -94,6 +95,18 @@ std::string mdcii::to_upper_case(const std::string& t_string)
 //-------------------------------------------------
 // ImGui widgets
 //-------------------------------------------------
+
+void mdcii::save_file_button(const char* t_label, std::string* t_str)
+{
+    ImGui::InputText(t_label, t_str, ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CallbackCharFilter, [](ImGuiInputTextCallbackData* t_data) {
+        if (const auto c{ t_data->EventChar }; (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+        {
+            return 0;
+        }
+
+        return 1;
+    });
+}
 
 void mdcii::file_chooser(std::vector<std::string>& t_files, int* t_currentItem)
 {

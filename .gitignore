@@ -49,3 +49,4 @@ cmake
 !/resources/textures/mgfx/*
 !/resources/textures/sgfx/*
 !/src/vendor/ini/LICENSE.txt
+!/src/vendor/imgui/LICENSE.txt

@@ -72,6 +72,14 @@ namespace mdcii
     //-------------------------------------------------
 
     /**
+     * @brief A text field used to enter a file name.
+     *
+     * @param t_label The label of the text field.
+     * @param t_str The entered text.
+     */
+    void save_file_button(const char* t_label, std::string* t_str);
+
+    /**
      * @brief A ListBox showing files.
      *
      * @param t_files The files to display.

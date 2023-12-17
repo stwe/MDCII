@@ -21,7 +21,6 @@
 #include "vendor/ini/ini.h"
 #include "vendor/imgui/imgui_impl_pge.h"
 #include "vendor/olc/olcSoundWaveEngine.h"
-#include "vendor/entt/entt.hpp"
 
 //-------------------------------------------------
 // Forward declarations
@@ -100,8 +99,6 @@ namespace mdcii
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
-
-        inline static entt::registry ecs;
 
         std::unique_ptr<resource::OriginalResourcesManager> originalResourcesManager;
         std::unique_ptr<resource::MdciiResourcesManager> mdciiResourcesManager;

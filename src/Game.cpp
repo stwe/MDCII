@@ -20,6 +20,8 @@
 #include "Log.h"
 #include "GameState.h"
 #include "MainMenuState.h"
+#include "IslandGeneratorState.h"
+#include "WorldGeneratorState.h"
 #include "Intl.h"
 #include "resource/OriginalResourcesManager.h"
 #include "resource/MdciiResourcesManager.h"
@@ -65,7 +67,8 @@ bool mdcii::Game::OnUserCreate()
     stateSystem->AddState(state::StateId::MAIN_MENU, std::make_unique<MainMenuState>(this));
     stateSystem->AddState(state::StateId::NEW_GAME, std::make_unique<GameState>(this));
     stateSystem->AddState(state::StateId::LOAD_GAME, std::make_unique<GameState>(this));
-
+    stateSystem->AddState(state::StateId::ISLAND_GENERATOR, std::make_unique<IslandGeneratorState>(this));
+    stateSystem->AddState(state::StateId::WORLD_GENERATOR, std::make_unique<WorldGeneratorState>(this));
     stateSystem->ChangeState(state::StateId::MAIN_MENU);
 
     return stateSystem->OnUserCreate();
