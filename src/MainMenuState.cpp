@@ -69,7 +69,7 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
 
     if (ImGui::BeginPopupModal("Select Map"))
     {
-        c = RenderFileChooser(game->mdciiResourcesManager->mapFiles);
+        c = render_file_chooser(game->mdciiResourcesManager->mapFiles);
         if (c >= 0)
         {
             game->stateSystem->ChangeState(state::StateId::NEW_GAME);
@@ -104,7 +104,7 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
 
     if (ImGui::BeginPopupModal("Select Saved Game"))
     {
-        c = RenderFileChooser(game->mdciiResourcesManager->saveGameFiles);
+        c = render_file_chooser(game->mdciiResourcesManager->saveGameFiles);
         if (c >= 0)
         {
             game->stateSystem->ChangeState(state::StateId::LOAD_GAME);
@@ -160,30 +160,4 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
     ImGui::End();
 
     return true;
-}
-
-//-------------------------------------------------
-// Helper
-//-------------------------------------------------
-
-// todo: -> MdciiUtils
-int mdcii::MainMenuState::RenderFileChooser(std::vector<std::string>& t_files)
-{
-    static int32_t fileIndex{ 0 };
-
-    if (t_files.empty())
-    {
-        ImGui::Text("MissingFiles");
-    }
-    else
-    {
-        file_chooser(t_files, &fileIndex);
-        if (ImGui::Button("LoadFile"))
-        {
-            ImGui::CloseCurrentPopup();
-            return fileIndex;
-        }
-    }
-
-    return -1;
 }

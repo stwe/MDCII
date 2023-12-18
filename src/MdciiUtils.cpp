@@ -96,6 +96,27 @@ std::string mdcii::to_upper_case(const std::string& t_string)
 // ImGui widgets
 //-------------------------------------------------
 
+int mdcii::render_file_chooser(std::vector<std::string>& t_files)
+{
+    static int32_t fileIndex{ 0 };
+
+    if (t_files.empty())
+    {
+        ImGui::Text("MissingFiles");
+    }
+    else
+    {
+        mdcii::file_chooser(t_files, &fileIndex);
+        if (ImGui::Button("LoadFile"))
+        {
+            ImGui::CloseCurrentPopup();
+            return fileIndex;
+        }
+    }
+
+    return -1;
+}
+
 void mdcii::save_file_button(const char* t_label, std::string* t_str)
 {
     ImGui::InputText(t_label, t_str, ImGuiInputTextFlags_CharsNoBlank | ImGuiInputTextFlags_CallbackCharFilter, [](ImGuiInputTextCallbackData* t_data) {

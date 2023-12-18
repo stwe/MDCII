@@ -72,6 +72,13 @@ namespace mdcii
     //-------------------------------------------------
 
     /**
+     * @brief Provides a simple mechanism to choose a file.
+     *
+     * @param t_files A list of files.
+     */
+    [[nodiscard]] int render_file_chooser(std::vector<std::string>& t_files);
+
+    /**
      * @brief A text field used to enter a file name.
      *
      * @param t_label The label of the text field.
