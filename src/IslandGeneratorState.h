@@ -18,41 +18,52 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
+#include <memory>
 #include "state/State.h"
+
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::world
+{
+    /**
+     * @brief Forward declaration class IslandGenerator.
+     */
+    class IslandGenerator;
+}
 
 namespace mdcii
 {
     //-------------------------------------------------
-    // MainMenuState
+    // IslandGeneratorState
     //-------------------------------------------------
 
     /**
-     * @brief Represents the main menu.
+     * @brief Represents the island generator.
      */
-    class MainMenuState : public state::State
+    class IslandGeneratorState : public state::State
     {
     public:
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        MainMenuState() = delete;
+        IslandGeneratorState() = delete;
 
         /**
-         * @brief Constructs a new MainMenuState object.
+         * @brief Constructs a new IslandGeneratorState object.
          *
          * @param t_game Pointer to the parent Game.
          */
-        explicit MainMenuState(Game* t_game);
+        explicit IslandGeneratorState(Game* t_game);
 
-        MainMenuState(const MainMenuState& t_other) = delete;
-        MainMenuState(MainMenuState&& t_other) noexcept = delete;
-        MainMenuState& operator=(const MainMenuState& t_other) = delete;
-        MainMenuState& operator=(MainMenuState&& t_other) noexcept = delete;
+        IslandGeneratorState(const IslandGeneratorState& t_other) = delete;
+        IslandGeneratorState(IslandGeneratorState&& t_other) noexcept = delete;
+        IslandGeneratorState& operator=(const IslandGeneratorState& t_other) = delete;
+        IslandGeneratorState& operator=(IslandGeneratorState&& t_other) noexcept = delete;
 
-        ~MainMenuState() noexcept override;
+        ~IslandGeneratorState() noexcept override;
 
         //-------------------------------------------------
         // Override
@@ -65,14 +76,12 @@ namespace mdcii
 
     private:
         //-------------------------------------------------
-        // Helper
+        // Member
         //-------------------------------------------------
 
         /**
-         * @brief Provides a simple mechanism to choose a file.
-         *
-         * @param t_files A list of files.
+         * @brief The IslandGenerator object.
          */
-        static int RenderFileChooser(std::vector<std::string>& t_files);
+        std::unique_ptr<world::IslandGenerator> m_islandGenerator;
     };
 }

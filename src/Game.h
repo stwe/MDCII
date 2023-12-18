@@ -109,7 +109,7 @@ namespace mdcii
         /**
          * @brief The ImGui plugin.
          */
-        olc::imgui::PGE_ImGUI pgeImGui;
+        olc::imgui::PGE_ImGUI pgeImGui{ Game::RESOURCES_REL_PATH + "font/DejaVuSansMono.ttf", false };
 
         /**
          * @brief The layer for the game.

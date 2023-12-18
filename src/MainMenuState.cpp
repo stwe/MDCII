@@ -48,8 +48,6 @@ bool mdcii::MainMenuState::OnUserCreate()
 
 bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
 {
-    game->SetGameLayer();
-
     const auto center{ ImGui::GetMainViewport()->GetCenter() };
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     constexpr ImGuiWindowFlags flags{ ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings };
@@ -128,9 +126,34 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
         ImGui::EndPopup();
     }
 
+    // Start the island generator
+
+    if (ImGui::Button("Island Generator"))
+    {
+        game->stateSystem->ChangeState(state::StateId::ISLAND_GENERATOR);
+
+        ImGui::End();
+
+        return game->stateSystem->OnUserCreate();
+    }
+
+    // Start the world generator
+
+    if (ImGui::Button("World Generator"))
+    {
+        game->stateSystem->ChangeState(state::StateId::WORLD_GENERATOR);
+
+        ImGui::End();
+
+        return game->stateSystem->OnUserCreate();
+    }
+
+    // Exit game
+
     if (ImGui::Button("Exit"))
     {
         ImGui::End();
+
         return false;
     }
 
@@ -143,6 +166,7 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
 // Helper
 //-------------------------------------------------
 
+// todo: -> MdciiUtils
 int mdcii::MainMenuState::RenderFileChooser(std::vector<std::string>& t_files)
 {
     static int32_t fileIndex{ 0 };

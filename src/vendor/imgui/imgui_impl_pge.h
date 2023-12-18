@@ -62,176 +62,14 @@ Versions:
 3.0 - OnBeforeUserUpdate now returns false to work with PGE 2.17
 */
 
-
-/*
-
-KNOWN LIMITATIONS
-PGE does not bind every key on the keyboard.
-	- ALT is not bound
-	- No distinction between L-CTRL and R-CTRL
-	- Maybe no distinction between ENTER and NP_ENTER
-		There is no NP_ENTER, but there is both an ENTER and a RETURN
-	- The Super / Windows key is not bound
-
-There is no IME support for non-English languages.
-
-There is no support for non-US or non-QWERTY keyboards although they may work.
-
-PGE returns mouse scrolling using an integer, and the relation of this integer
-to actual scroll distance is not well understood by me.  On a Logitech G700s a
-single "click" of the wheel is a wheel delta of +/-120.  The scroll sensitivity
-defaults to 120.0f and can be changed with ImGui_ImplPGE_SetScrollSensitivity.
-Higher values result in less scrolling per movement of the wheel.
-
-Dear ImGui will always render 1:1 with the display's pixels.  You cannot have
-Dear ImGui render its UI using pixels with size matching the application.
-
-
-Dear ImGui Integration Implementation
-
-Include this file in your application and define the implementation macro
-in at least one location.  The macro will create the implementation of the
-extension's functions.  It must be defined before the include in the file
-where the implementation is needed.  A separate .cpp file is recommended
-for this purpose.  A PGE version of at least 2.06 is required for some of
-the functions used.  This can be identified in the PGE header file.  A PGE
-version of at least 2.10 is required to use the OpenGL 3.3 renderer.  The
-OpenGL 3.3 renderer may be specified by defining PGE_GFX_OPENGL33  in the
-same location as OLC_PGEX_DEAR_IMGUI_IMPLEMENTATION.
-
-```
-//OpenGL 2 renderer
-#define OLC_PGEX_DEAR_IMGUI_IMPLEMENTATION
-#include imgui_impl_pge.h
-```
-
-```
-//OpenGL 3.3 renderer
-#define PGE_GFX_OPENGL33
-#define OLC_PGEX_DEAR_IMGUI_IMPLEMENTATION
-#include imgui_impl_pge.h
-```
-
-To use the OpenGL 3.3 renderer, GLEW will also need to be available to
-load the required OpenGL functions.  The static library will be linked
-and needs to appear in the library path, and GL\glew.h will be included
-and must appear on the include path.  GLEW can be found on their ssourceforge
-page here: http://glew.sourceforge.net/
-
-
-Dear ImGui Integration Usage
-
-Unlike many PGE Extensions, this extension requires files from an external
-library.  To integrate the Dear Imgui functionality you will need to pull
-the Dear ImGui software and include a number of files in your project.
-
-Dear ImGui Github:
-https://github.com/ocornut/imgui
-
-Files Required:
-imgui.h
-imgui_internal.h
-imstb_rectpack.h
-imstb_textedit.h
-imstb_truetype.h
-
-imgui.cpp
-imgui_demo.cpp
-imgui_draw.cpp
-imgui_widgets.cpp
-
-Additionally required are either the opengl2 or opengl3 files, depending
-on the choice of renderer
-
-imgui_impl_opengl2.cpp
-imgui_impl_opengl2.h
-
-imgui_impl_opengl3.cpp
-imgui_impl_opengl3.h
-
-
-
-Once all these files are included in your project you will be able to use
-Dear ImGui.  Documentation on using the Dear ImGui library can be found
-on their Github.
-
-To integrate Dear ImGui with a PGE application, there are some special
-things to consider.  First, Dear ImGui will render to the screen directly
-using OpenGL and the GPU.  PGE has one facility to support this rendering
-method, and that is the Layer's funchook which is intended to allow a game
-to render a layer using its own renderer code.  This is how we will render
-the Dear ImGui interface.  Second, we want the UI to appear on top of the
-rest of the game.  Layer 0 is the top-most layer, so we will need to use
-the Layer 0 render hook, and do all other PGE drawing to Layer 1 (or more).
-
-Instead of writing paragraph upon paragraph on how to do this, I will just
-add a basic example below:
-
-class Example : public olc::PixelGameEngine
-{
-	olc::imgui::PGE_ImGUI pge_imgui;
-	int m_GameLayer;
-
-public:
-	//PGE_ImGui can automatically call the SetLayerCustomRenderFunction by passing
-	//true into the constructor.  false is the default value.
-	Example() : pge_imgui(false)
-	{
-		sAppName = "Test Application";
-	}
-
-public:
-	bool OnUserCreate() override
-	{
-		//Create a new Layer which will be used for the game
-		m_GameLayer = CreateLayer();
-		//The layer is not enabled by default,  so we need to enable it
-		EnableLayer(m_GameLayer, true);
-
-		//Set a custom render function on layer 0.  Since DrawUI is a member of
-		//our class, we need to use std::bind
-		//If the pge_imgui was constructed with _register_handler = true, this line is not needed
-		SetLayerCustomRenderFunction(0, std::bind(&Example::DrawUI, this));
-
-		return true;
-	}
-
-	bool OnUserUpdate(float fElapsedTime) override
-	{
-		//Change the Draw Target to not be Layer 0
-		SetDrawTarget((uint8_t)m_GameLayer);
-		//Game Drawing code here
-
-		//Create and react to your UI here, it will be drawn during the layer draw function
-		ImGui::ShowDemoWindow();
-
-		return true;
-	}
-
-	void DrawUI(void) {
-		//This finishes the Dear ImGui and renders it to the screen
-		pge_imgui.ImGui_ImplPGE_Render();
-	}
-};
-
-int main() {
-	Example demo;
-	if (demo.Construct(640, 360, 2, 2))
-		demo.Start();
-
-	return 0;
-}
-
-*/
-
 #pragma once
+
 #ifndef OLC_PGEX_IMGUI_IMPL_PGE_H
 #define OLC_PGEX_IMGUI_IMPL_PGE_H
 
 #include <vector>
-#include "imgui.h"
+#include "vendor/imgui/imgui.h"
 #include "vendor/olc/olcPixelGameEngine.h"
-
 
 namespace olc
 {
@@ -247,9 +85,8 @@ namespace olc
 		class PGE_ImGUI : public PGEX
 		{
 		public:
-
 			//_register_handler set to true will automatically register this plugin to draw on layer 0
-			PGE_ImGUI(bool _register_handler = false);
+			PGE_ImGUI(std::string t_fontPath = "", bool _register_handler = false);
 
 			//Initialize the Dear ImGui PGE Platform implementation.
 			olc::rcode ImGui_ImplPGE_Init();
@@ -275,6 +112,9 @@ namespace olc
 
 
 		private:
+            //To load an extra font
+            std::string m_fontPath;
+
 			//A list of keyboard buttons which directly input a character
 			std::vector<keyCharMap> vValueInputKeys;
 
@@ -295,7 +135,6 @@ namespace olc
 			void ImGui_ImplPGE_UpdateKeys(void);
 		};
 	}
-
 }
 
 #ifdef OLC_PGEX_DEAR_IMGUI_IMPLEMENTATION
@@ -314,7 +153,11 @@ namespace olc
 {
 	namespace imgui
 	{
-		PGE_ImGUI::PGE_ImGUI(bool _register_handler) : PGEX(true), register_handler(_register_handler) {
+		PGE_ImGUI::PGE_ImGUI(std::string t_fontPath, bool _register_handler)
+            : PGEX(true)
+            , m_fontPath{ std::move(t_fontPath) }
+            , register_handler{ _register_handler }
+        {
 
 		}
 
@@ -328,6 +171,13 @@ namespace olc
 			ImGui_ImplOpenGL2_Init();
 #endif
 			ImGuiIO& io = ImGui::GetIO();
+
+            if (!m_fontPath.empty())
+            {
+                static ImWchar ranges[] = { 0x20, 0xFFFF, 0 };
+                io.Fonts->AddFontDefault();
+                io.Fonts->AddFontFromFileTTF(m_fontPath.c_str(), 12, nullptr, ranges);
+            }
 
 			io.BackendPlatformName = "imgui_impl_pge";
 
@@ -532,7 +382,8 @@ namespace olc
 		}
 
 		//Before the OnUserUpdate runs, do the pre-frame ImGui intialization
-		bool PGE_ImGUI::OnBeforeUserUpdate(float& fElapsedTime) {
+		bool PGE_ImGUI::OnBeforeUserUpdate(float& fElapsedTime)
+        {
 			ImGui_ImplPGE_NewFrame();
 			ImGui::NewFrame();
 			return false;

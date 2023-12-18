@@ -18,41 +18,36 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
 #include "state/State.h"
 
 namespace mdcii
 {
     //-------------------------------------------------
-    // MainMenuState
+    // WorldGeneratorState
     //-------------------------------------------------
 
-    /**
-     * @brief Represents the main menu.
-     */
-    class MainMenuState : public state::State
+    class WorldGeneratorState : public state::State
     {
     public:
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        MainMenuState() = delete;
+        WorldGeneratorState() = delete;
 
         /**
-         * @brief Constructs a new MainMenuState object.
+         * @brief Constructs a new WorldGeneratorState object.
          *
          * @param t_game Pointer to the parent Game.
          */
-        explicit MainMenuState(Game* t_game);
+        explicit WorldGeneratorState(Game* t_game);
 
-        MainMenuState(const MainMenuState& t_other) = delete;
-        MainMenuState(MainMenuState&& t_other) noexcept = delete;
-        MainMenuState& operator=(const MainMenuState& t_other) = delete;
-        MainMenuState& operator=(MainMenuState&& t_other) noexcept = delete;
+        WorldGeneratorState(const WorldGeneratorState& t_other) = delete;
+        WorldGeneratorState(WorldGeneratorState&& t_other) noexcept = delete;
+        WorldGeneratorState& operator=(const WorldGeneratorState& t_other) = delete;
+        WorldGeneratorState& operator=(WorldGeneratorState&& t_other) noexcept = delete;
 
-        ~MainMenuState() noexcept override;
+        ~WorldGeneratorState() noexcept override;
 
         //-------------------------------------------------
         // Override
@@ -64,15 +59,6 @@ namespace mdcii
     protected:
 
     private:
-        //-------------------------------------------------
-        // Helper
-        //-------------------------------------------------
 
-        /**
-         * @brief Provides a simple mechanism to choose a file.
-         *
-         * @param t_files A list of files.
-         */
-        static int RenderFileChooser(std::vector<std::string>& t_files);
     };
 }
