@@ -56,6 +56,18 @@ namespace mdcii::world
     enum class LayerType;
 
     //-------------------------------------------------
+    // ClimateZone
+    //-------------------------------------------------
+
+    /**
+     * @brief Available climate zones.
+     */
+    enum class ClimateZone
+    {
+        NORTH, SOUTH
+    };
+
+    //-------------------------------------------------
     // Island
     //-------------------------------------------------
 
@@ -110,6 +122,11 @@ namespace mdcii::world
          * @brief The tile layers (coast, terrain, buildings, mixed) of the island.
          */
         std::array<std::unique_ptr<Layer>, NR_OF_LAYERS> layers;
+
+        /**
+         * @brief The climate zone of the island.
+         */
+        ClimateZone climateZone{ ClimateZone::NORTH };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
