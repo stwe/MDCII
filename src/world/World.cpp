@@ -272,9 +272,9 @@ void mdcii::world::World::Init(const std::string& t_fileName)
 {
     MDCII_LOG_DEBUG("[World::Init()] Start initializing the world ...");
 
-    if (resource::MdciiFile mdciiFile{ this, t_fileName }; mdciiFile.LoadJsonFromFile())
+    if (resource::MdciiFile mdciiFile{ t_fileName }; mdciiFile.LoadJsonFromFile())
     {
-        islands = mdciiFile.CreateWorldContent();
+        mdciiFile.CreateWorldContentFromJson(this);
     }
 
     deepWater = std::make_unique<DeepWater>(this);

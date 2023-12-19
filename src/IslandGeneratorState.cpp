@@ -44,7 +44,7 @@ bool mdcii::IslandGeneratorState::OnUserCreate()
 {
     MDCII_LOG_DEBUG("[IslandGeneratorState::OnUserCreate()] Init IslandGeneratorState.");
 
-    m_islandGenerator = std::make_unique<world::IslandGenerator>();
+    m_islandGenerator = std::make_unique<world::IslandGenerator>(game);
 
     return true;
 }

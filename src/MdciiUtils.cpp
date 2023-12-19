@@ -40,6 +40,17 @@ nlohmann::json mdcii::read_json_from_file(const std::string& t_filePath)
     {
         jsonFile.open(t_filePath);
         j = nlohmann::json::parse(jsonFile);
+
+        if (!j.is_object())
+        {
+            throw MDCII_EXCEPTION("[read_json_from_file()] Invalid Json object.");
+        }
+
+        if (j.empty())
+        {
+            throw MDCII_EXCEPTION("[read_json_from_file()] Invalid Json value.");
+        }
+
         jsonFile.close();
     }
     catch (const std::ifstream::failure&)

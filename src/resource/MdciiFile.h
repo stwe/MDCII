@@ -73,10 +73,9 @@ namespace mdcii::resource
         /**
          * @brief Constructs a new MdciiFile object.
          *
-         * @param t_world Pointer to the parent World object.
          * @param t_fileName The name of the file.
          */
-        MdciiFile(world::World* t_world, std::string t_fileName);
+        explicit MdciiFile(std::string t_fileName);
 
         MdciiFile(const MdciiFile& t_other) = delete;
         MdciiFile(MdciiFile&& t_other) noexcept = delete;
@@ -86,7 +85,7 @@ namespace mdcii::resource
         ~MdciiFile() noexcept;
 
         //-------------------------------------------------
-        // Save && load
+        // Load Json
         //-------------------------------------------------
 
         /**
@@ -96,12 +95,28 @@ namespace mdcii::resource
          */
         [[nodiscard]] bool LoadJsonFromFile();
 
+        //-------------------------------------------------
+        // Set Maps && Save games content
+        //-------------------------------------------------
+
         /**
-         * @brief Create world content.
+         * @brief Create world content (world width/height and islands) from Json value.
          *
-         * @return A vector of unique pointers to the islands.
+         * @param t_world Pointer to the World object to set the content.
          */
-        [[nodiscard]] std::vector<std::unique_ptr<world::Island>> CreateWorldContent() const;
+        void CreateWorldContentFromJson(world::World* t_world) const;
+
+
+
+        //-------------------------------------------------
+        // Save Maps && Save games Json
+        //-------------------------------------------------
+
+
+        //-------------------------------------------------
+        // Save Island Json
+        //-------------------------------------------------
+
 
     protected:
 
@@ -109,11 +124,6 @@ namespace mdcii::resource
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
-
-        /**
-         * @brief Pointer to the parent World object.
-         */
-        world::World* m_world{ nullptr };
 
         /**
          * @brief The name of the file.
@@ -136,22 +146,24 @@ namespace mdcii::resource
          * @param t_vars JSON variables related to the layer details.
          * @param t_layerType The type of layer.
          */
-        void InitLayerByType(world::Island* t_island, const nlohmann::json& t_vars, world::LayerType t_layerType) const;
+        static void InitLayerByType(world::Island* t_island, const nlohmann::json& t_vars, world::LayerType t_layerType);
 
         /**
          * @brief Extract tile data from JSON and save it to the Tile object.
          *
+         * @param t_world Pointer to the World object.
          * @param t_source Source JSON data.
          * @param t_tileTarget Pointer to the target Tile object.
          */
-        void ExtractTileData(nlohmann::json const& t_source, world::Tile* t_tileTarget) const;
+        static void ExtractTileData(const world::World* t_world, nlohmann::json const& t_source, world::Tile* t_tileTarget);
 
         /**
          * @brief Create layer tiles according to the provided JSON data.
          *
+         * @param t_world Pointer to the World object.
          * @param t_layer Pointer to the target Layer object.
          * @param t_layerTilesJson Source JSON data.
          */
-        void CreateLayerTiles(world::Layer* t_layer, const nlohmann::json& t_layerTilesJson) const;
+        static void CreateLayerTiles(const world::World* t_world, world::Layer* t_layer, const nlohmann::json& t_layerTilesJson);
     };
 }

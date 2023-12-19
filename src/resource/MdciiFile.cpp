@@ -32,13 +32,11 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::resource::MdciiFile::MdciiFile(world::World* t_world, std::string t_fileName)
-    : m_world{ t_world }
-    , m_fileName{ std::move(t_fileName) }
+mdcii::resource::MdciiFile::MdciiFile(std::string t_fileName)
+    : m_fileName{ std::move(t_fileName) }
 {
     MDCII_LOG_DEBUG("[MdciiFile::MdciiFile()] Create MdciiFile.");
 
-    MDCII_ASSERT(m_world, "[MdciiFile::MdciiFile()] Null pointer.")
     MDCII_ASSERT(!m_fileName.empty(), "[MdciiFile::MdciiFile()] Invalid file name.")
 }
 
@@ -48,7 +46,7 @@ mdcii::resource::MdciiFile::~MdciiFile() noexcept
 }
 
 //-------------------------------------------------
-// Save && load
+// Load Json
 //-------------------------------------------------
 
 bool mdcii::resource::MdciiFile::LoadJsonFromFile()
@@ -68,26 +66,30 @@ bool mdcii::resource::MdciiFile::LoadJsonFromFile()
     return false;
 }
 
-std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::CreateWorldContent() const
+//-------------------------------------------------
+// Set Maps && Save games content
+//-------------------------------------------------
+
+void mdcii::resource::MdciiFile::CreateWorldContentFromJson(world::World* t_world) const
 {
-    MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] Start creating the world from file {} ...", m_fileName);
+    MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] Start creating the world from Json value ...");
 
     std::vector<std::unique_ptr<world::Island>> is;
 
-    m_world->worldWidth = m_json.at("world").at("width").get<int32_t>();
-    m_world->worldHeight = m_json.at("world").at("height").get<int32_t>();
+    t_world->worldWidth = m_json.at("world").at("width").get<int32_t>();
+    t_world->worldHeight = m_json.at("world").at("height").get<int32_t>();
 
-    if (m_world->worldWidth <= 0 || m_world->worldHeight <= 0)
+    if (t_world->worldWidth <= 0 || t_world->worldHeight <= 0)
     {
         throw MDCII_EXCEPTION("[MdciiFile::CreateWorldContent()] Invalid world size.");
     }
 
-    MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The size of the world is ({}, {}).", m_world->worldWidth, m_world->worldHeight);
+    MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The size of the world is ({}, {}).", t_world->worldWidth, t_world->worldHeight);
 
     for (const auto& [islandKeys, islandVars] : m_json["islands"].items())
     {
         auto island{ std::make_unique<world::Island>(
-            m_world,
+            t_world,
             islandVars.at("width").get<int32_t>(),
             islandVars.at("height").get<int32_t>(),
             islandVars.at("x").get<int32_t>(),
@@ -109,16 +111,16 @@ std::vector<std::unique_ptr<mdcii::world::Island>> mdcii::resource::MdciiFile::C
         is.push_back(std::move(island));
     }
 
-    MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The world was successfully created.");
+    MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The world was successfully created from Json.");
 
-    return is;
+    t_world->islands = std::move(is);
 }
 
 //-------------------------------------------------
 // Layer && Tiles
 //-------------------------------------------------
 
-void mdcii::resource::MdciiFile::InitLayerByType(world::Island* t_island, const nlohmann::json& t_vars, const world::LayerType t_layerType) const
+void mdcii::resource::MdciiFile::InitLayerByType(world::Island* t_island, const nlohmann::json& t_vars, const world::LayerType t_layerType)
 {
     MDCII_LOG_DEBUG("[MdciiFile::InitLayerByType()] Create and init island layer {}.", magic_enum::enum_name(t_layerType));
 
@@ -130,27 +132,29 @@ void mdcii::resource::MdciiFile::InitLayerByType(world::Island* t_island, const 
         {
             if (layerNameJson == to_lower_case(std::string(magic_enum::enum_name(t_layerType))))
             {
-                CreateLayerTiles(
-                    t_island->layers.at(magic_enum::enum_integer(t_layerType)).get(),
-                    layerTilesJson
-                );
+                CreateLayerTiles(t_island->m_world, t_island->layers.at(magic_enum::enum_integer(t_layerType)).get(), layerTilesJson);
 
-                MDCII_ASSERT(
-                    t_island->layers.at(magic_enum::enum_integer(t_layerType))->tiles.size()
-                    == t_island->width * t_island->height,
-                    "[MdciiFile::CreateWorldContent()] Invalid number of tiles."
-                )
+                MDCII_ASSERT(t_island->layers.at(magic_enum::enum_integer(t_layerType))->tiles.size()
+                             == t_island->width * static_cast<size_t>(t_island->height),
+                             "[MdciiFile::CreateWorldContent()] Invalid number of tiles.")
             }
         }
     }
 }
 
-void mdcii::resource::MdciiFile::ExtractTileData(const nlohmann::json& t_source, world::Tile* t_tileTarget) const
+void mdcii::resource::MdciiFile::ExtractTileData(const world::World* t_world, const nlohmann::json& t_source, world::Tile* t_tileTarget)
 {
     if (t_source.count("id") && t_source.at("id") >= 0)
     {
-        const auto& building{ m_world->gameState->game->originalResourcesManager->GetBuildingById(t_source.at("id")) };
-        t_tileTarget->building = &building;
+        if (t_world)
+        {
+            const auto& building{ t_world->gameState->game->originalResourcesManager->GetBuildingById(t_source.at("id")) };
+            t_tileTarget->building = &building;
+        }
+        else
+        {
+            throw MDCII_EXCEPTION("[MdciiFile::ExtractTileData()] Null pointer.");
+        }
     }
 
     if (t_source.count("rotation"))
@@ -169,14 +173,14 @@ void mdcii::resource::MdciiFile::ExtractTileData(const nlohmann::json& t_source,
     }
 }
 
-void mdcii::resource::MdciiFile::CreateLayerTiles(world::Layer* t_layer, const nlohmann::json& t_layerTilesJson) const
+void mdcii::resource::MdciiFile::CreateLayerTiles(const world::World* t_world, world::Layer* t_layer, const nlohmann::json& t_layerTilesJson)
 {
     MDCII_LOG_DEBUG("[MdciiFile::CreateLayerTiles()] Create layer tiles for layer of type {}.", magic_enum::enum_name(t_layer->layerType));
 
     for (const auto& [k, tileJson] : t_layerTilesJson.items())
     {
         world::Tile tile;
-        ExtractTileData(tileJson, &tile);
-        t_layer->tiles.push_back(std::move(tile));
+        ExtractTileData(t_world, tileJson, &tile);
+        t_layer->tiles.push_back(tile);
     }
 }

@@ -24,12 +24,20 @@
 #include <functional>
 #include "vendor/imgui/imgui.h"
 
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii
+{
+    /**
+     * @brief Forward declaration class Game.
+     */
+    class Game;
+}
+
 namespace mdcii::world
 {
-    //-------------------------------------------------
-    // Forward declarations
-    //-------------------------------------------------
-
     /**
      * @brief Forward declaration struct Tile.
      */
@@ -54,7 +62,14 @@ namespace mdcii::world
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        IslandGenerator();
+        IslandGenerator() = delete;
+
+        /**
+         * @brief Constructs a new IslandGenerator object.
+         *
+         * @param t_game Pointer to the parent Game object.
+         */
+        explicit IslandGenerator(Game* t_game);
 
         IslandGenerator(const IslandGenerator& t_other) = delete;
         IslandGenerator(IslandGenerator&& t_other) noexcept = delete;
@@ -369,6 +384,11 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
+         * @brief Pointer to the parent Game object.
+         */
+        Game* m_game{ nullptr };
+
+        /**
          * @brief Elevation values above this value are used as terrain, all others as water.
          */
         inline static float m_water_level{ 0.5f };
@@ -564,6 +584,6 @@ namespace mdcii::world
          *
          * @return The created Tile object pointer.
          */
-        static std::unique_ptr<Tile> CreateTile(int32_t t_id, int32_t t_worldX, int32_t t_worldY, Rotation t_rotation);
+        [[nodiscard]] std::unique_ptr<Tile> CreateTile(int32_t t_id, int32_t t_worldX, int32_t t_worldY, Rotation t_rotation) const;
     };
 }

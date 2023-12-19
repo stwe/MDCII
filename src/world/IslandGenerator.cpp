@@ -21,17 +21,22 @@
 #include "MdciiAssert.h"
 #include "Tile.h"
 #include "Rotation.h"
+#include "Game.h"
 #include "MdciiUtils.h"
 #include "resource/BuildingIds.h"
+#include "resource/OriginalResourcesManager.h"
 #include "vendor/fastnoise/FastNoiseLite.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::IslandGenerator::IslandGenerator()
+mdcii::world::IslandGenerator::IslandGenerator(Game* t_game)
+    : m_game{ t_game }
 {
     MDCII_LOG_DEBUG("[IslandGenerator::IslandGenerator()] Create IslandGenerator.");
+
+    MDCII_ASSERT(m_game, "[IslandGenerator::IslandGenerator()] Null pointer.")
 }
 
 mdcii::world::IslandGenerator::~IslandGenerator() noexcept
@@ -1097,18 +1102,19 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
     }
 }
 
-std::unique_ptr<mdcii::world::Tile> mdcii::world::IslandGenerator::CreateTile(const int32_t t_id, const int32_t t_worldX, const int32_t t_worldY, const Rotation t_rotation)
+std::unique_ptr<mdcii::world::Tile> mdcii::world::IslandGenerator::CreateTile(
+    const int32_t t_id,
+    const int32_t t_worldX,
+    const int32_t t_worldY,
+    const Rotation t_rotation
+) const
 {
-    auto tile{ std::make_unique<Tile>() };
-
-    /*
-    tile->buildingId = t_id;
-    tile->rotation = t_rotation;
-    tile->x = 0;
-    tile->y = 0;
-    tile->worldXDeg0 = t_worldX;
-    tile->worldYDeg0 = t_worldY;
-    */
+    auto tile{ std::make_unique<Tile>(
+        &m_game->originalResourcesManager->GetBuildingById(t_id),
+        magic_enum::enum_integer(t_rotation),
+        0, 0,
+        t_worldX, t_worldY
+    ) };
 
     return tile;
 }
