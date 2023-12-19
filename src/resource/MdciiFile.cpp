@@ -46,7 +46,7 @@ mdcii::resource::MdciiFile::~MdciiFile() noexcept
 }
 
 //-------------------------------------------------
-// Load Json
+// Content to Json value
 //-------------------------------------------------
 
 bool mdcii::resource::MdciiFile::LoadJsonFromFile()
@@ -66,8 +66,42 @@ bool mdcii::resource::MdciiFile::LoadJsonFromFile()
     return false;
 }
 
+void mdcii::resource::MdciiFile::SetIslandJson(
+    const int t_width, const int t_height,
+    const world::ClimateZone t_climateZone,
+    const std::vector<world::Tile>& t_terrainTiles,
+    const std::vector<world::Tile>& t_coastTiles
+)
+{
+    MDCII_LOG_DEBUG("[MdciiFile::SetIslandJson()] Set new values for the Json keys.");
+
+    /*
+    m_json["width"] = t_width;
+    m_json["height"] = t_height;
+    m_json["x"] = -1;
+    m_json["y"] = -1;
+    m_json["climate"] = std::string(magic_enum::enum_name(t_climateZone));
+
+    m_json["layers"] = nlohmann::json::array();
+    nlohmann::json t = nlohmann::json::object();
+    nlohmann::json c = nlohmann::json::object();
+    nlohmann::json b = nlohmann::json::object();
+    t["terrain"] = t_terrainTiles;
+    c["coast"] = t_coastTiles;
+
+    std::vector<std::shared_ptr<world::Tile>> buildingsTiles;
+    buildingsTiles.resize(t_width * t_height);
+    std::generate(buildingsTiles.begin(), buildingsTiles.end(), []() { return std::make_unique<world::Tile>(); } );
+    b["buildings"] = buildingsTiles;
+
+    m_json["layers"].push_back(t);
+    m_json["layers"].push_back(c);
+    m_json["layers"].push_back(b);
+    */
+}
+
 //-------------------------------------------------
-// Set Maps && Save games content
+// Content from Json value
 //-------------------------------------------------
 
 void mdcii::resource::MdciiFile::CreateWorldContentFromJson(world::World* t_world) const

@@ -47,6 +47,11 @@ namespace mdcii::world
     enum class LayerType;
 
     /**
+     * @brief Forward declaration enum class ClimateZone.
+     */
+    enum class ClimateZone;
+
+    /**
      * @brief Forward declaration struct Tile.
      */
     struct Tile;
@@ -85,7 +90,7 @@ namespace mdcii::resource
         ~MdciiFile() noexcept;
 
         //-------------------------------------------------
-        // Load Json
+        // Content to Json value
         //-------------------------------------------------
 
         /**
@@ -95,8 +100,15 @@ namespace mdcii::resource
          */
         [[nodiscard]] bool LoadJsonFromFile();
 
+        void SetIslandJson(
+            int t_width, int t_height,
+            world::ClimateZone t_climateZone,
+            const std::vector<world::Tile>& t_terrainTiles,
+            const std::vector<world::Tile>& t_coastTiles
+        );
+
         //-------------------------------------------------
-        // Set Maps && Save games content
+        // Content from Json value
         //-------------------------------------------------
 
         /**
@@ -105,18 +117,6 @@ namespace mdcii::resource
          * @param t_world Pointer to the World object to set the content.
          */
         void CreateWorldContentFromJson(world::World* t_world) const;
-
-
-
-        //-------------------------------------------------
-        // Save Maps && Save games Json
-        //-------------------------------------------------
-
-
-        //-------------------------------------------------
-        // Save Island Json
-        //-------------------------------------------------
-
 
     protected:
 

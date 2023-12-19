@@ -19,12 +19,14 @@
 #include <random>
 #include "IslandGenerator.h"
 #include "MdciiAssert.h"
+#include "Island.h"
 #include "Tile.h"
 #include "Rotation.h"
 #include "Game.h"
 #include "MdciiUtils.h"
 #include "resource/BuildingIds.h"
 #include "resource/OriginalResourcesManager.h"
+#include "resource/MdciiFile.h"
 #include "vendor/fastnoise/FastNoiseLite.h"
 
 //-------------------------------------------------
@@ -619,14 +621,21 @@ void mdcii::world::IslandGenerator::SaveIslandImGui() const
     {
         if (ImGui::Button("Save"))
         {
-            std::vector<std::shared_ptr<Tile>> coastTiles;
-            std::vector<std::shared_ptr<Tile>> terrainTiles;
+            /*
+            std::vector<Tile> coastTiles;
+            std::vector<Tile> terrainTiles;
             CreateTerrainTiles(terrainTiles);
             CreateCoastTiles(coastTiles);
 
+            resource::MdciiFile mdciiFile{ fileName };
+            mdciiFile.SetIslandJson(
+                m_width, m_height,
+                m_south ? ClimateZone::SOUTH : ClimateZone::NORTH,
+                terrainTiles, coastTiles
+            );
+            */
+
             /*
-            file::IslandFile islandFile{ fileName };
-            islandFile.SetData(m_width, m_height, m_south ? ClimateZone::SOUTH : ClimateZone::NORTH, terrainTiles, coastTiles);
             if (islandFile.SaveJsonToFile())
             {
                 saved = true;
