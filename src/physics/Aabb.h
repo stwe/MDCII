@@ -23,7 +23,7 @@
 namespace mdcii::physics
 {
     /**
-     * Represents an Aabb (axis-aligned bounding box) for collision detection.
+     * @brief Represents an Aabb (axis-aligned bounding box) for collision detection.
      */
     struct Aabb
     {

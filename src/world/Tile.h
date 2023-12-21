@@ -18,8 +18,7 @@
 
 #pragma once
 
-#include <vector>
-#include <array>
+#include "vendor/nlohmann/json.hpp"
 
 //-------------------------------------------------
 // Forward declarations
@@ -199,4 +198,10 @@ namespace mdcii::world
          */
         void AdjustGfxForBigBuildings(int& t_gfx) const;
     };
+
+    //-------------------------------------------------
+    // Serializing Tile into Json
+    //-------------------------------------------------
+
+    void to_json(nlohmann::json& t_json, const Tile& t_tile);
 }

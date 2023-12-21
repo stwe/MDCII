@@ -561,18 +561,18 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief Creates Tile objects for the TerrainLayer.
+         * @brief Creates Tile objects for a terrain layer.
          *
          * @param t_terrainTiles The Tile objects.
          */
-        void CreateTerrainTiles(std::vector<std::shared_ptr<Tile>>& t_terrainTiles) const;
+        void CreateTerrainTiles(std::vector<Tile>& t_terrainTiles) const;
 
         /**
-         * @brief Creates Tile objects for the CoastLayer.
+         * @brief Creates Tile objects for a coast layer.
          *
          * @param t_coastTiles The Tile objects.
          */
-        void CreateCoastTiles(std::vector<std::shared_ptr<Tile>>& t_coastTiles) const;
+        void CreateCoastTiles(std::vector<Tile>& t_coastTiles) const;
 
         /**
          * @brief Creates a Tile.
@@ -582,8 +582,8 @@ namespace mdcii::world
          * @param t_worldY The world y position.
          * @param t_rotation The rotation of the building.
          *
-         * @return The created Tile object pointer.
+         * @return The created Tile.
          */
-        [[nodiscard]] std::unique_ptr<Tile> CreateTile(int32_t t_id, int32_t t_worldX, int32_t t_worldY, Rotation t_rotation) const;
+        [[nodiscard]] Tile CreateTile(int32_t t_id, int32_t t_worldX, int32_t t_worldY, Rotation t_rotation) const;
     };
 }

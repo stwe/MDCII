@@ -144,3 +144,24 @@ void mdcii::world::Tile::AdjustGfxForBigBuildings(int& t_gfx) const
     const auto offset{ rp.y * building->size.w + rp.x };
     t_gfx += offset;
 }
+
+//-------------------------------------------------
+// Serializing Tile into Json
+//-------------------------------------------------
+
+void mdcii::world::to_json(nlohmann::json& t_json, const mdcii::world::Tile& t_tile)
+{
+    if (t_tile.HasBuilding())
+    {
+        t_json = nlohmann::json{
+            { "id", t_tile.building->id },
+            { "rotation", t_tile.rotation },
+            { "x", t_tile.x },
+            { "y", t_tile.y },
+        };
+    }
+    else
+    {
+        t_json = nlohmann::json::object();
+    }
+}

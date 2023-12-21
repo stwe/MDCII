@@ -90,17 +90,26 @@ namespace mdcii::resource
         ~MdciiFile() noexcept;
 
         //-------------------------------------------------
-        // Content to Json value
+        // Content to Json
         //-------------------------------------------------
 
         /**
-         * @brief Loads the Json value from a file.
+         * @brief Sets the Json value from a file.
          *
-         * @return True if successful, false if an error occurs while loading.
+         * @return True if successful, false if an error occurs while loading file.
          */
-        [[nodiscard]] bool LoadJsonFromFile();
+        [[nodiscard]] bool SetJsonFromFile();
 
-        void SetIslandJson(
+        /**
+         * @brief Sets the Json value representing an Island.
+         *
+         * @param t_width The width of the island.
+         * @param t_height The height of the island.
+         * @param t_climateZone The climate zone of the island.
+         * @param t_terrainTiles The terrain tile of the island.
+         * @param t_coastTiles The coast tiles of the island.
+         */
+        void SetJsonFromIsland(
             int t_width, int t_height,
             world::ClimateZone t_climateZone,
             const std::vector<world::Tile>& t_terrainTiles,
@@ -108,8 +117,17 @@ namespace mdcii::resource
         );
 
         //-------------------------------------------------
-        // Content from Json value
+        // Content from Json
         //-------------------------------------------------
+
+        /**
+         * @brief Saves the Json value representing an island in a file.
+         *
+         * If the file already exists, the method returns false.
+         *
+         * @return True if success or false if error while saving.
+         */
+        [[nodiscard]] bool CreateFileFromJson();
 
         /**
          * @brief Create world content (world width/height and islands) from Json value.
@@ -121,6 +139,20 @@ namespace mdcii::resource
     protected:
 
     private:
+        //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * @brief The file extension of the island files.
+         */
+        static constexpr std::string_view ISLAND_FILE_EXTENSION{ ".isl" };
+
+        /**
+         * @brief The relative path to the island files.
+         */
+        static constexpr std::string_view ISLAND_RELATIVE_PATH{ "island/" };
+
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
@@ -165,5 +197,21 @@ namespace mdcii::resource
          * @param t_layerTilesJson Source JSON data.
          */
         static void CreateLayerTiles(const world::World* t_world, world::Layer* t_layer, const nlohmann::json& t_layerTilesJson);
+
+        //-------------------------------------------------
+        // Init
+        //-------------------------------------------------
+
+        /**
+         * @brief Initializes the full file path by appending the relative path and file extension.
+         *
+         * This method checks if the current file name (m_fileName) already contains the complete path,
+         * including the relative path and file extension. If not, it appends the relative path (t_relPath),
+         * user-specified path, and the file extension (t_fileExtension) to the file name.
+         *
+         * @param t_relPath The relative path to be appended to the file name.
+         * @param t_fileExtension The file extension to be appended to the file name.
+         */
+        void InitFileName(const std::string& t_relPath, const std::string& t_fileExtension);
     };
 }

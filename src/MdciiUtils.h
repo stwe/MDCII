@@ -45,6 +45,16 @@ namespace mdcii
      */
     [[nodiscard]] std::vector<std::string> get_files_list(const std::string& t_relPath, const std::string& t_extension);
 
+    /**
+     * @brief Creates and opens a new file.
+     *
+     * @param t_fileName The name of the file.
+     * @param t_file The opened file.
+     *
+     * @return True if success or false if error while creating (e.g. if the file already exists).
+     */
+    [[nodiscard]] bool create_file(const std::string& t_fileName, std::ofstream& t_file);
+
     //-------------------------------------------------
     // Strings
     //-------------------------------------------------

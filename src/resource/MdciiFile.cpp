@@ -46,63 +46,81 @@ mdcii::resource::MdciiFile::~MdciiFile() noexcept
 }
 
 //-------------------------------------------------
-// Content to Json value
+// Content to Json
 //-------------------------------------------------
 
-bool mdcii::resource::MdciiFile::LoadJsonFromFile()
+bool mdcii::resource::MdciiFile::SetJsonFromFile()
 {
-    MDCII_LOG_DEBUG("[MdciiFile::LoadJsonFromFile()] Start loading Json value from file {}.", m_fileName);
+    MDCII_LOG_DEBUG("[MdciiFile::SetJsonFromFile()] Start loading Json value from file {}.", m_fileName);
+
+    MDCII_ASSERT(m_json.empty(), "[MdciiFile::SetJsonFromFile()] Invalid Json value.")
 
     if (std::filesystem::exists(m_fileName))
     {
         m_json = read_json_from_file(m_fileName);
-        MDCII_LOG_DEBUG("[MdciiFile::LoadJsonFromFile()] The Json value was successfully read from file {}.", m_fileName);
+        MDCII_LOG_DEBUG("[MdciiFile::SetJsonFromFile()] The Json value was successfully read from file {}.", m_fileName);
 
         return true;
     }
 
-    MDCII_LOG_WARN("[MdciiFile::LoadJsonFromFile()] File {} does not exist.", m_fileName);
+    MDCII_LOG_WARN("[MdciiFile::SetJsonFromFile()] File {} does not exist.", m_fileName);
 
     return false;
 }
 
-void mdcii::resource::MdciiFile::SetIslandJson(
+void mdcii::resource::MdciiFile::SetJsonFromIsland(
     const int t_width, const int t_height,
     const world::ClimateZone t_climateZone,
     const std::vector<world::Tile>& t_terrainTiles,
     const std::vector<world::Tile>& t_coastTiles
 )
 {
-    MDCII_LOG_DEBUG("[MdciiFile::SetIslandJson()] Set new values for the Json keys.");
+    MDCII_LOG_DEBUG("[MdciiFile::SetJsonFromIsland()] Set new values for the Json keys.");
 
-    /*
+    MDCII_ASSERT(m_json.empty(), "[MdciiFile::SetJsonFromIsland()] Invalid Json value.")
+
+    // island
     m_json["width"] = t_width;
     m_json["height"] = t_height;
     m_json["x"] = -1;
     m_json["y"] = -1;
     m_json["climate"] = std::string(magic_enum::enum_name(t_climateZone));
 
+    // layers
     m_json["layers"] = nlohmann::json::array();
-    nlohmann::json t = nlohmann::json::object();
-    nlohmann::json c = nlohmann::json::object();
-    nlohmann::json b = nlohmann::json::object();
-    t["terrain"] = t_terrainTiles;
-    c["coast"] = t_coastTiles;
 
-    std::vector<std::shared_ptr<world::Tile>> buildingsTiles;
-    buildingsTiles.resize(t_width * t_height);
-    std::generate(buildingsTiles.begin(), buildingsTiles.end(), []() { return std::make_unique<world::Tile>(); } );
-    b["buildings"] = buildingsTiles;
+    auto c = nlohmann::json::object();
+    c["coast"] = t_terrainTiles;
 
-    m_json["layers"].push_back(t);
+    auto t = nlohmann::json::object();
+    t["terrain"] = t_coastTiles;
+
     m_json["layers"].push_back(c);
-    m_json["layers"].push_back(b);
-    */
+    m_json["layers"].push_back(t);
 }
 
 //-------------------------------------------------
-// Content from Json value
+// Content from Json
 //-------------------------------------------------
+
+bool mdcii::resource::MdciiFile::CreateFileFromJson()
+{
+    InitFileName(std::string(ISLAND_RELATIVE_PATH), std::string(ISLAND_FILE_EXTENSION));
+
+    MDCII_LOG_DEBUG("[MdciiFile::CreateFileFromJson()] Start saving Json value to file {}.", m_fileName);
+
+    if (std::ofstream file; create_file(m_fileName, file))
+    {
+        file << m_json;
+        MDCII_LOG_DEBUG("[MdciiFile::CreateFileFromJson()] The Json value has been successfully saved in file {}.", m_fileName);
+
+        return true;
+    }
+
+    MDCII_LOG_WARN("[MdciiFile::CreateFileFromJson()] An error occurred while saving Json value to file {}.", m_fileName);
+
+    return false;
+}
 
 void mdcii::resource::MdciiFile::CreateWorldContentFromJson(world::World* t_world) const
 {
@@ -216,5 +234,19 @@ void mdcii::resource::MdciiFile::CreateLayerTiles(const world::World* t_world, w
         world::Tile tile;
         ExtractTileData(t_world, tileJson, &tile);
         t_layer->tiles.push_back(tile);
+    }
+}
+
+//-------------------------------------------------
+// Init
+//-------------------------------------------------
+
+void mdcii::resource::MdciiFile::InitFileName(const std::string& t_relPath, const std::string& t_fileExtension)
+{
+    if (m_fileName.find(fmt::format("{}{}", Game::RESOURCES_REL_PATH, t_relPath)) == std::string::npos)
+    {
+        m_fileName = fmt::format("{}{}{}", Game::RESOURCES_REL_PATH, t_relPath, m_fileName.append(t_fileExtension));
+
+        MDCII_LOG_DEBUG("[MdciiFile::InitFileName()] The full path to the file was initialized to {}.", m_fileName);
     }
 }

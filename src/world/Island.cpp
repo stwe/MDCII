@@ -207,3 +207,34 @@ void mdcii::world::Island::InitTileDetails(Layer* t_layer, const int t_x, const 
     tile.indices[2] = t_layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG180);
     tile.indices[3] = t_layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG270);
 }
+
+//-------------------------------------------------
+// Serializing Island into Json
+//-------------------------------------------------
+
+/*
+void mdcii::world::to_json(nlohmann::json& t_json, const mdcii::world::Island& t_island)
+{
+    t_json["width"] = t_island.width;
+    t_json["height"] = t_island.height;
+    t_json["x"] = t_island.startX;
+    t_json["y"] = t_island.startY;
+    t_json["climate"] = std::string(magic_enum::enum_name(t_island.climateZone));
+
+    // layers
+    t_json["layers"] = nlohmann::json::array();
+
+    auto c = nlohmann::json::object();
+    c["coast"] = t_island.layers.at(0)->tiles;
+
+    auto t = nlohmann::json::object();
+    t["terrain"] = t_island.layers.at(1)->tiles;
+
+    auto b = nlohmann::json::object();
+    b["buildings"] = t_island.layers.at(2)->tiles;
+
+    t_json["layers"].push_back(c);
+    t_json["layers"].push_back(t);
+    t_json["layers"].push_back(b);
+}
+*/

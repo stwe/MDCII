@@ -621,22 +621,19 @@ void mdcii::world::IslandGenerator::SaveIslandImGui() const
     {
         if (ImGui::Button("Save"))
         {
-            /*
             std::vector<Tile> coastTiles;
             std::vector<Tile> terrainTiles;
             CreateTerrainTiles(terrainTiles);
             CreateCoastTiles(coastTiles);
 
             resource::MdciiFile mdciiFile{ fileName };
-            mdciiFile.SetIslandJson(
+            mdciiFile.SetJsonFromIsland(
                 m_width, m_height,
                 m_south ? ClimateZone::SOUTH : ClimateZone::NORTH,
                 terrainTiles, coastTiles
             );
-            */
 
-            /*
-            if (islandFile.SaveJsonToFile())
+            if (mdciiFile.CreateFileFromJson())
             {
                 saved = true;
                 fileName.clear();
@@ -647,7 +644,6 @@ void mdcii::world::IslandGenerator::SaveIslandImGui() const
                 saved = false;
                 fileName.clear();
             }
-            */
         }
     }
 
@@ -875,7 +871,7 @@ void mdcii::world::IslandGenerator::UpdateBySelection(const int32_t t_index)
 // Tiles
 //-------------------------------------------------
 
-void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_ptr<Tile>>& t_terrainTiles) const
+void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<Tile>& t_terrainTiles) const
 {
     MDCII_LOG_DEBUG("[IslandGenerator::CreateTerrainTiles()] Create terrain tiles.");
 
@@ -883,7 +879,7 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_p
     {
         for (auto x{ 0 }; x < m_width; ++x)
         {
-            t_terrainTiles.emplace_back(std::make_unique<Tile>());
+            t_terrainTiles.emplace_back();
         }
     }
 
@@ -980,7 +976,7 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<std::shared_p
     }
 }
 
-void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr<Tile>>& t_coastTiles) const
+void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<Tile>& t_coastTiles) const
 {
     MDCII_LOG_DEBUG("[IslandGenerator::CreateCoastTiles()] Create coast tiles.");
 
@@ -988,7 +984,7 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
     {
         for (auto x{ 0 }; x < m_width; ++x)
         {
-            t_coastTiles.emplace_back(std::make_unique<Tile>());
+            t_coastTiles.emplace_back();
         }
     }
 
@@ -1111,19 +1107,17 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<std::shared_ptr
     }
 }
 
-std::unique_ptr<mdcii::world::Tile> mdcii::world::IslandGenerator::CreateTile(
+mdcii::world::Tile mdcii::world::IslandGenerator::CreateTile(
     const int32_t t_id,
     const int32_t t_worldX,
     const int32_t t_worldY,
     const Rotation t_rotation
 ) const
 {
-    auto tile{ std::make_unique<Tile>(
+    return {
         &m_game->originalResourcesManager->GetBuildingById(t_id),
         magic_enum::enum_integer(t_rotation),
         0, 0,
         t_worldX, t_worldY
-    ) };
-
-    return tile;
+    };
 }

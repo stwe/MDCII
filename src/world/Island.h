@@ -20,6 +20,7 @@
 
 #include <optional>
 #include "physics/Aabb.h"
+#include "vendor/nlohmann/json.hpp"
 
 //-------------------------------------------------
 // Forward declarations
@@ -293,4 +294,10 @@ namespace mdcii::world
          */
         void InitTileDetails(Layer* t_layer, int t_x, int t_y) const;
     };
+
+    //-------------------------------------------------
+    // Serializing Island into Json
+    //-------------------------------------------------
+
+    //void to_json(nlohmann::json& t_json, const Island& t_island);
 }

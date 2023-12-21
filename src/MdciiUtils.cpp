@@ -77,6 +77,26 @@ std::vector<std::string> mdcii::get_files_list(const std::string& t_relPath, con
     return results;
 }
 
+bool mdcii::create_file(const std::string& t_fileName, std::ofstream& t_file)
+{
+    if (std::filesystem::exists(t_fileName))
+    {
+        MDCII_LOG_WARN("[create_file()] The {} file already exists.", t_fileName);
+
+        return false;
+    }
+
+    MDCII_LOG_DEBUG("[create_file()] Create new file {}.", t_fileName);
+
+    t_file.open(t_fileName);
+    if (!t_file.is_open())
+    {
+        throw MDCII_EXCEPTION("[create_file()] Error while opening file " + t_fileName + ".");
+    }
+
+    return true;
+}
+
 //-------------------------------------------------
 // Strings
 //-------------------------------------------------
