@@ -40,7 +40,7 @@ namespace mdcii
     //-------------------------------------------------
 
     /**
-     * @brief Represents the world generator.
+     * @brief Represents the world generator state.
      */
     class WorldGeneratorState : public state::State
     {
@@ -54,7 +54,7 @@ namespace mdcii
         /**
          * @brief Constructs a new WorldGeneratorState object.
          *
-         * @param t_game Pointer to the parent Game.
+         * @param t_game Pointer to the parent Game object.
          */
         explicit WorldGeneratorState(Game* t_game);
 

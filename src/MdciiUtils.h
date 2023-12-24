@@ -85,6 +85,8 @@ namespace mdcii
      * @brief Provides a simple mechanism to choose a file.
      *
      * @param t_files A list of files.
+     *
+     * @return The index of the selected file, or -1 if nothing is selected.
      */
     [[nodiscard]] int render_file_chooser(std::vector<std::string>& t_files);
 

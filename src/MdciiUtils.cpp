@@ -138,7 +138,7 @@ int mdcii::render_file_chooser(std::vector<std::string>& t_files)
     else
     {
         mdcii::file_chooser(t_files, &fileIndex);
-        if (ImGui::Button("LoadFile"))
+        if (ImGui::Button("Load File"))
         {
             ImGui::CloseCurrentPopup();
             return fileIndex;

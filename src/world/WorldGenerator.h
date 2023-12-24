@@ -24,16 +24,21 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii
+namespace mdcii::state
 {
     /**
-     * @brief Forward declaration class Game.
+     * @brief Forward declaration class State.
      */
-    class Game;
+    class State;
 }
 
 namespace mdcii::world
 {
+    /**
+     * @brief Forward declaration class World.
+     */
+    class World;
+
     //-------------------------------------------------
     // WorldGenerator
     //-------------------------------------------------
@@ -45,6 +50,12 @@ namespace mdcii::world
     {
     public:
         //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        std::unique_ptr<world::World> world;
+
+        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
@@ -53,9 +64,9 @@ namespace mdcii::world
         /**
          * @brief Constructs a new WorldGenerator object.
          *
-         * @param t_game Pointer to the parent Game object.
+         * @param t_state Pointer to the parent State object.
          */
-        explicit WorldGenerator(Game* t_game);
+        explicit WorldGenerator(state::State* t_state);
 
         WorldGenerator(const WorldGenerator& t_other) = delete;
         WorldGenerator(WorldGenerator&& t_other) noexcept = delete;
@@ -68,6 +79,7 @@ namespace mdcii::world
         // Logic
         //-------------------------------------------------
 
+        void OnUserUpdate(float t_elapsedTime);
 
     protected:
 
@@ -76,10 +88,12 @@ namespace mdcii::world
         // Member
         //-------------------------------------------------
 
+        inline static int m_island_file_index{ 0 };
+
         /**
-         * @brief Pointer to the parent Game object.
+         * @brief Pointer to the parent State object.
          */
-        Game* m_game{ nullptr };
+        state::State* m_state{ nullptr };
     };
 
     //-------------------------------------------------
