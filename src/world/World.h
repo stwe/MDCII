@@ -24,12 +24,12 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii
+namespace mdcii::state
 {
     /**
-     * @brief Forward declaration class GameState.
+     * @brief Forward declaration class State.
      */
-    class GameState;
+    class State;
 }
 
 namespace mdcii::renderer
@@ -65,6 +65,11 @@ namespace mdcii::world
      */
     enum class LayerType;
 
+    /**
+     * @brief Forward declaration class MousePicker.
+     */
+    class MousePicker;
+
     //-------------------------------------------------
     // Render layer options
     //-------------------------------------------------
@@ -96,9 +101,9 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief Pointer to the parent GameState.
+         * @brief Pointer to the parent State.
          */
-        GameState* gameState{ nullptr };
+        state::State* state{ nullptr };
 
         /**
          * @brief The width of the world in tiles.
@@ -136,6 +141,11 @@ namespace mdcii::world
         std::unique_ptr<camera::Camera> camera;
 
         /**
+         * @brief Pointer to the MousePicker object.
+         */
+        std::unique_ptr<world::MousePicker> mousePicker;
+
+        /**
          * @brief Representing the currently selected layers for rendering in the game world.
          */
         int renderLayer{ RENDER_MIXED_LAYER | RENDER_DEEP_WATER_LAYER };
@@ -149,10 +159,10 @@ namespace mdcii::world
         /**
          * @brief Constructs a new World object.
          *
-         * @param t_gameState Pointer to the parent GameState.
+         * @param t_state Pointer to the parent GameState.
          * @param t_fileName The name of the save-game file.
          */
-        World(GameState* t_gameState, const std::string& t_fileName);
+        World(state::State* t_state, const std::string& t_fileName);
 
         World(const World& t_other) = delete;
         World(World&& t_other) noexcept = delete;

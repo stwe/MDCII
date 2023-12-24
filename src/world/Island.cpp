@@ -74,11 +74,11 @@ bool mdcii::world::Island::IsWorldPositionOverIsland(const olc::vi2d& t_position
 
 std::optional<olc::vi2d> mdcii::world::Island::IsMouseOverIsland() const
 {
-    if (IsWorldPositionInAabb(m_world->gameState->mousePicker->selected))
+    if (IsWorldPositionInAabb(m_world->mousePicker->selected))
     {
         return olc::vi2d(
-            m_world->gameState->mousePicker->selected.x - startX,
-            m_world->gameState->mousePicker->selected.y - startY
+            m_world->mousePicker->selected.x - startX,
+            m_world->mousePicker->selected.y - startY
         );
     }
 

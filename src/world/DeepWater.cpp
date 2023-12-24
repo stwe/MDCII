@@ -23,9 +23,9 @@
 #include "Rotation.h"
 #include "Layer.h"
 #include "MdciiAssert.h"
-#include "GameState.h"
 #include "resource/OriginalResourcesManager.h"
 #include "renderer/Renderer.h"
+#include "state/State.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -75,7 +75,7 @@ void mdcii::world::DeepWater::InitLayer()
         {
             if (!m_world->IsWorldPositionOnAnyIsland(x, y))
             {
-                const auto& building1201{ m_world->gameState->game->originalResourcesManager->GetBuildingById(DEEP_WATER_BUILDING_ID) };
+                const auto& building1201{ m_world->state->game->originalResourcesManager->GetBuildingById(DEEP_WATER_BUILDING_ID) };
                 layer->tiles.at(y * m_world->worldWidth + x).building = &building1201;
             }
         }

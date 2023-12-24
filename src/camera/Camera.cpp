@@ -19,8 +19,8 @@
 #include "Camera.h"
 #include "Game.h"
 #include "MdciiAssert.h"
-#include "GameState.h"
 #include "world/World.h"
+#include "state/State.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -50,13 +50,13 @@ bool mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
     auto dirty{ false };
 
     // zoom
-    if (m_world->gameState->game->GetMouseWheel() > 0)
+    if (m_world->state->game->GetMouseWheel() > 0)
     {
         --zoom;
         dirty = true;
         MDCII_LOG_DEBUG("Zoom-- {}", magic_enum::enum_name(zoom));
     }
-    if (m_world->gameState->game->GetMouseWheel() < 0)
+    if (m_world->state->game->GetMouseWheel() < 0)
     {
         ++zoom;
         dirty = true;
@@ -64,13 +64,13 @@ bool mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
     }
 
     // rotation
-    if (m_world->gameState->game->GetKey(olc::Key::PGUP).bPressed)
+    if (m_world->state->game->GetKey(olc::Key::PGUP).bPressed)
     {
         ++rotation;
         dirty = true;
         MDCII_LOG_DEBUG("World rotation++ {}", magic_enum::enum_name(rotation));
     }
-    if (m_world->gameState->game->GetKey(olc::Key::PGDN).bPressed)
+    if (m_world->state->game->GetKey(olc::Key::PGDN).bPressed)
     {
         --rotation;
         dirty = true;
@@ -79,22 +79,22 @@ bool mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
 
     // world
     olc::vf2d vel{ 0.0f, 0.0f };
-    if (m_world->gameState->game->GetKey(olc::Key::UP).bHeld)
+    if (m_world->state->game->GetKey(olc::Key::UP).bHeld)
     {
         vel += { 0, -1 };
         dirty = true;
     }
-    if (m_world->gameState->game->GetKey(olc::Key::DOWN).bHeld)
+    if (m_world->state->game->GetKey(olc::Key::DOWN).bHeld)
     {
         vel += { 0, 1 };
         dirty = true;
     }
-    if (m_world->gameState->game->GetKey(olc::Key::LEFT).bHeld)
+    if (m_world->state->game->GetKey(olc::Key::LEFT).bHeld)
     {
         vel += { -1, 0 };
         dirty = true;
     }
-    if (m_world->gameState->game->GetKey(olc::Key::RIGHT).bHeld)
+    if (m_world->state->game->GetKey(olc::Key::RIGHT).bHeld)
     {
         vel += { 1, 0 };
         dirty = true;
@@ -109,8 +109,8 @@ bool mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
     screenPosition.x = worldPosition.x * get_tile_width(zoom);
     screenPosition.y = worldPosition.y * get_tile_height(zoom);
 
-    m_world->gameState->game->DrawString(4, 14, fmt::format("Camera world: {}, {}", std::to_string(worldPosition.x), std::to_string(worldPosition.y)), olc::WHITE);
-    m_world->gameState->game->DrawString(4, 24, fmt::format("Camera screen: {}, {}", std::to_string(screenPosition.x), std::to_string(screenPosition.y)), olc::WHITE);
+    m_world->state->game->DrawString(4, 14, fmt::format("Camera world: {}, {}", std::to_string(worldPosition.x), std::to_string(worldPosition.y)), olc::WHITE);
+    m_world->state->game->DrawString(4, 24, fmt::format("Camera screen: {}, {}", std::to_string(screenPosition.x), std::to_string(screenPosition.y)), olc::WHITE);
 
     return dirty;
 }

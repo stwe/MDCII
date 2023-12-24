@@ -20,20 +20,17 @@
 
 #include "vendor/olc/olcPixelGameEngine.h"
 
-//-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii
-{
-    /**
-     * @brief Forward declaration class GameState.
-     */
-    class GameState;
-}
-
 namespace mdcii::world
 {
+    //-------------------------------------------------
+    // Forward declarations
+    //-------------------------------------------------
+
+    /**
+     * Forward declaration class World.
+     */
+    class World;
+
     //-------------------------------------------------
     // MousePicker
     //-------------------------------------------------
@@ -62,9 +59,9 @@ namespace mdcii::world
         /**
          * @brief Constructs a new MousePicker object.
          *
-         * @param t_gameState Pointer to the parent GameState.
+         * @param t_world Pointer to the parent World object.
          */
-        explicit MousePicker(GameState* t_gameState);
+        explicit MousePicker(World* t_world);
 
         MousePicker(const MousePicker& t_other) = delete;
         MousePicker(MousePicker&& t_other) noexcept = delete;
@@ -98,9 +95,9 @@ namespace mdcii::world
         bool m_calcForTerrain{ true };
 
         /**
-         * @brief Pointer to the parent GameState.
+         * @brief Pointer to the parent World object.
          */
-        GameState* m_gameState{ nullptr };
+        World* m_world{ nullptr };
 
         /**
          * @brief The mouse in the world.

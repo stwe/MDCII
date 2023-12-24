@@ -20,7 +20,6 @@
 #include "MdciiAssert.h"
 #include "MdciiException.h"
 #include "Game.h"
-#include "world/MousePicker.h"
 #include "world/World.h"
 
 //-------------------------------------------------
@@ -57,8 +56,6 @@ bool mdcii::GameState::OnUserCreate()
 {
     MDCII_LOG_DEBUG("[GameState::OnUserCreate()] Init GameState.");
 
-    mousePicker = std::make_unique<world::MousePicker>(this);
-
     if (!world)
     {
         throw MDCII_EXCEPTION("[GameState::OnUserCreate()] Missing world, use the LoadWorldFrom() method to load.");
@@ -84,9 +81,6 @@ bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
     game->Clear(olc::BLACK);
     world->OnUserUpdate(t_elapsedTime);
 
-    // mouse picker
-    mousePicker->OnUserUpdate();
-
     return RenderImGui();
 }
 
@@ -105,7 +99,6 @@ bool mdcii::GameState::RenderImGui() const
         return false;
     }
 
-    mousePicker->RenderImGui();
     world->RenderImGui();
 
     ImGui::End();

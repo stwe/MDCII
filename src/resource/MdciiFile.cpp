@@ -21,12 +21,12 @@
 #include "MdciiAssert.h"
 #include "MdciiException.h"
 #include "MdciiUtils.h"
-#include "GameState.h"
 #include "Game.h"
 #include "world/World.h"
 #include "world/Island.h"
 #include "world/Layer.h"
 #include "resource/OriginalResourcesManager.h"
+#include "state/State.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -200,7 +200,7 @@ void mdcii::resource::MdciiFile::ExtractTileData(const world::World* t_world, co
     {
         if (t_world)
         {
-            const auto& building{ t_world->gameState->game->originalResourcesManager->GetBuildingById(t_source.at("id")) };
+            const auto& building{ t_world->state->game->originalResourcesManager->GetBuildingById(t_source.at("id")) };
             t_tileTarget->building = &building;
         }
         else

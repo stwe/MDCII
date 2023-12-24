@@ -18,13 +18,13 @@
 
 #include "World.h"
 #include "Game.h"
-#include "GameState.h"
 #include "Island.h"
 #include "MousePicker.h"
 #include "Layer.h"
 #include "DeepWater.h"
 #include "MdciiAssert.h"
 #include "Gui.h"
+#include "state/State.h"
 #include "resource/MdciiFile.h"
 #include "resource/OriginalResourcesManager.h"
 #include "resource/AssetManager.h"
@@ -35,12 +35,12 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::World::World(GameState* t_gameState, const std::string& t_fileName)
-    : gameState{ t_gameState }
+mdcii::world::World::World(state::State* t_state, const std::string& t_fileName)
+    : state{ t_state }
 {
     MDCII_LOG_DEBUG("[World::World()] Create World.");
 
-    MDCII_ASSERT(gameState, "[World::World()] Null pointer.")
+    MDCII_ASSERT(state, "[World::World()] Null pointer.")
 
     Init(t_fileName);
 }
@@ -143,7 +143,7 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                         if (newTiles.size() == Gui::select_building.building->size.h * static_cast<std::size_t>(Gui::select_building.building->size.w))
                         {
                             // add on left mouse button click
-                            if (gameState->game->GetMouse(0).bPressed)
+                            if (state->game->GetMouse(0).bPressed)
                             {
                                 MDCII_LOG_DEBUG("[World::OnUserUpdate()] Add {}", Gui::select_building.building->id);
 
@@ -171,12 +171,14 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
             }
         }
 
-        if (gameState->game->GetMouse(1).bHeld)
+        if (state->game->GetMouse(1).bHeld)
         {
             Gui::select_building.building = nullptr;
             Gui::select_building.rotation = Rotation::DEG0;
         }
     }
+
+    mousePicker->OnUserUpdate();
 }
 
 //-------------------------------------------------
@@ -185,6 +187,8 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
 
 void mdcii::world::World::RenderImGui()
 {
+    mousePicker->RenderImGui();
+
     static auto renderCoastLayer{ false };
     static auto renderTerrainLayer{ false };
     static auto renderBuildingsLayer{ false };
@@ -230,7 +234,7 @@ void mdcii::world::World::RenderImGui()
 
     ImGui::Separator();
 
-    Gui::RenderAddBuildingsGui(gameState->game);
+    Gui::RenderAddBuildingsGui(state->game);
 }
 
 //-------------------------------------------------
@@ -280,6 +284,7 @@ void mdcii::world::World::Init(const std::string& t_fileName)
     deepWater = std::make_unique<DeepWater>(this);
     renderer = std::make_unique<renderer::Renderer>(this);
     camera = std::make_unique<camera::Camera>(this);
+    mousePicker = std::make_unique<MousePicker>(this);
 
     MDCII_LOG_DEBUG("[World::Init()] The world were initialized successfully.");
 }

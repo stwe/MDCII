@@ -36,11 +36,6 @@ namespace mdcii
 namespace mdcii::world
 {
     /**
-     * @brief Forward declaration class MousePicker.
-     */
-    class MousePicker;
-
-    /**
      * @brief Forward declaration class World.
      */
     class World;
@@ -62,7 +57,6 @@ namespace mdcii
         // Member
         //-------------------------------------------------
 
-        std::unique_ptr<world::MousePicker> mousePicker;
         std::unique_ptr<world::World> world;
 
         //-------------------------------------------------

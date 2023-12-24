@@ -55,7 +55,7 @@ float mdcii::renderer::Renderer::CalcOffset(const world::Tile* t_tile, const int
     auto offset{ 0.0f };
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
     auto tileHeight{ get_tile_height(m_world->camera->zoom) };
-    const auto gfxHeight{ m_world->gameState->game->tileAtlas->heights[zoomInt][t_gfx] };
+    const auto gfxHeight{ m_world->state->game->tileAtlas->heights[zoomInt][t_gfx] };
 
     if (m_world->camera->zoom == world::Zoom::GFX)
     {
@@ -100,9 +100,9 @@ void mdcii::renderer::Renderer::RenderBuilding(
     olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
     screenPosition.y -= CalcOffset(t_tile, gfx);
 
-    m_world->gameState->game->DrawPartialDecal(
+    m_world->state->game->DrawPartialDecal(
         screenPosition,
-        m_world->gameState->game->tileAtlas->atlas[zoomInt][GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt])]->Decal(),
+        m_world->state->game->tileAtlas->atlas[zoomInt][GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt])]->Decal(),
         {
             atlasOffset.x * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
             atlasOffset.y * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
@@ -127,9 +127,9 @@ void mdcii::renderer::Renderer::RenderAsset(
     olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
     screenPosition.y -= world::ELEVATIONS[magic_enum::enum_integer(m_world->camera->zoom)];
 
-    m_world->gameState->game->DrawDecal(
+    m_world->state->game->DrawDecal(
         screenPosition,
-        m_world->gameState->game->assetManager->GetAsset(t_asset, m_world->gameState->world->camera->zoom)->Decal(),
+        m_world->state->game->assetManager->GetAsset(t_asset, m_world->camera->zoom)->Decal(),
         { 1.0f, 1.0f },
         t_tint
     );

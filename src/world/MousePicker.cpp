@@ -19,21 +19,21 @@
 #include "MousePicker.h"
 #include "MdciiAssert.h"
 #include "Game.h"
-#include "GameState.h"
 #include "resource/AssetManager.h"
 #include "world/World.h"
 #include "camera/Camera.h"
+#include "state/State.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::MousePicker::MousePicker(GameState* t_gameState)
-    : m_gameState{ t_gameState }
+mdcii::world::MousePicker::MousePicker(World* t_world)
+    : m_world{ t_world }
 {
     MDCII_LOG_DEBUG("[MousePicker::MousePicker()] Create MousePicker.");
 
-    MDCII_ASSERT(m_gameState, "[MousePicker::MousePicker()] Null pointer.")
+    MDCII_ASSERT(m_world, "[MousePicker::MousePicker()] Null pointer.")
 }
 
 mdcii::world::MousePicker::~MousePicker() noexcept
@@ -49,21 +49,21 @@ void mdcii::world::MousePicker::OnUserUpdate()
 {
     UpdateMousePosition();
 
-    const auto* cheatSprite{ m_gameState->game->assetManager->GetAsset(resource::Asset::CHEAT, m_gameState->world->camera->zoom)->Sprite() };
+    const auto* cheatSprite{ m_world->state->game->assetManager->GetAsset(resource::Asset::CHEAT, m_world->camera->zoom)->Sprite() };
 
     selected = CalculateSelected();
     selected += CalculateSelectedCheatColorOffset(cheatSprite->GetPixel(m_cellOffset.x, m_cellOffset.y));
 
-    olc::vf2d screenPosition{ m_gameState->world->ToScreen(selected.x, selected.y) };
+    olc::vf2d screenPosition{ m_world->ToScreen(selected.x, selected.y) };
     if (m_calcForTerrain)
     {
-        screenPosition.y -= get_elevation(m_gameState->world->camera->zoom);
+        screenPosition.y -= get_elevation(m_world->camera->zoom);
     }
-    auto* mouseSprite{ m_gameState->game->assetManager->GetAsset(resource::Asset::PURPLE_ISO, m_gameState->world->camera->zoom)->Decal() };
+    auto* mouseSprite{ m_world->state->game->assetManager->GetAsset(resource::Asset::PURPLE_ISO, m_world->camera->zoom)->Decal() };
 
-    m_gameState->game->DrawDecal(screenPosition, mouseSprite);
+    m_world->state->game->DrawDecal(screenPosition, mouseSprite);
 
-    m_gameState->game->DrawString(4, 4, fmt::format("Tile: {}, {}", std::to_string(selected.x), std::to_string(selected.y)), olc::WHITE);
+    m_world->state->game->DrawString(4, 4, fmt::format("Tile: {}, {}", std::to_string(selected.x), std::to_string(selected.y)), olc::WHITE);
 }
 
 //-------------------------------------------------
@@ -83,62 +83,62 @@ void mdcii::world::MousePicker::RenderImGui()
 
 void mdcii::world::MousePicker::UpdateMousePosition()
 {
-    m_mousePosition = olc::vi2d(m_gameState->game->GetMouseX(), m_gameState->game->GetMouseY());
+    m_mousePosition = olc::vi2d(m_world->state->game->GetMouseX(), m_world->state->game->GetMouseY());
     if (m_calcForTerrain)
     {
         m_cell = olc::vi2d(
-            m_mousePosition.x / get_tile_width(m_gameState->world->camera->zoom),
-            (m_mousePosition.y + static_cast<int>(get_elevation(m_gameState->world->camera->zoom))) / get_tile_height(m_gameState->world->camera->zoom)
+            m_mousePosition.x / get_tile_width(m_world->camera->zoom),
+            (m_mousePosition.y + static_cast<int>(get_elevation(m_world->camera->zoom))) / get_tile_height(m_world->camera->zoom)
         );
         m_cellOffset = olc::vi2d(
-            m_mousePosition.x % get_tile_width(m_gameState->world->camera->zoom),
-            (m_mousePosition.y + static_cast<int>(get_elevation(m_gameState->world->camera->zoom))) % get_tile_height(m_gameState->world->camera->zoom)
+            m_mousePosition.x % get_tile_width(m_world->camera->zoom),
+            (m_mousePosition.y + static_cast<int>(get_elevation(m_world->camera->zoom))) % get_tile_height(m_world->camera->zoom)
         );
     }
     else
     {
         m_cell = olc::vi2d(
-            m_mousePosition.x / get_tile_width(m_gameState->world->camera->zoom),
-            m_mousePosition.y / get_tile_height(m_gameState->world->camera->zoom)
+            m_mousePosition.x / get_tile_width(m_world->camera->zoom),
+            m_mousePosition.y / get_tile_height(m_world->camera->zoom)
         );
         m_cellOffset = olc::vi2d(
-            m_mousePosition.x % get_tile_width(m_gameState->world->camera->zoom),
-            m_mousePosition.y % get_tile_height(m_gameState->world->camera->zoom)
+            m_mousePosition.x % get_tile_width(m_world->camera->zoom),
+            m_mousePosition.y % get_tile_height(m_world->camera->zoom)
         );
     }
 }
 
 olc::vi2d mdcii::world::MousePicker::CalculateSelected() const
 {
-    switch(m_gameState->world->camera->rotation)
+    switch(m_world->camera->rotation)
     {
     case Rotation::DEG0:
         return {
-            (m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
-            + (m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x)),
-            (m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
-            - (m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x))
+            (m_cell.y - static_cast<int>(m_world->camera->origin.y))
+            + (m_cell.x - static_cast<int>(m_world->camera->origin.x)),
+            (m_cell.y - static_cast<int>(m_world->camera->origin.y))
+            - (m_cell.x - static_cast<int>(m_world->camera->origin.x))
         };
     case Rotation::DEG90:
         return {
-            (m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
-            - (m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x)),
-            m_gameState->world->worldWidth - 1 - ((m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x))
-                                                 + (m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y)))
+            (m_cell.y - static_cast<int>(m_world->camera->origin.y))
+            - (m_cell.x - static_cast<int>(m_world->camera->origin.x)),
+            m_world->worldWidth - 1 - ((m_cell.x - static_cast<int>(m_world->camera->origin.x))
+                                                 + (m_cell.y - static_cast<int>(m_world->camera->origin.y)))
         };
     case Rotation::DEG180:
         return {
-            m_gameState->world->worldWidth - 1 - ((m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
-                                                 + (m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x))),
-            m_gameState->world->worldHeight - 1 - ((m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
-                                                 - (m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x)))
+            m_world->worldWidth - 1 - ((m_cell.y - static_cast<int>(m_world->camera->origin.y))
+                                                 + (m_cell.x - static_cast<int>(m_world->camera->origin.x))),
+            m_world->worldHeight - 1 - ((m_cell.y - static_cast<int>(m_world->camera->origin.y))
+                                                 - (m_cell.x - static_cast<int>(m_world->camera->origin.x)))
         };
     case Rotation::DEG270:
         return {
-            m_gameState->world->worldHeight - 1 - ((m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
-                                                  - (m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x))),
-            (m_cell.y - static_cast<int>(m_gameState->world->camera->origin.y))
-            + (m_cell.x - static_cast<int>(m_gameState->world->camera->origin.x))
+            m_world->worldHeight - 1 - ((m_cell.y - static_cast<int>(m_world->camera->origin.y))
+                                                  - (m_cell.x - static_cast<int>(m_world->camera->origin.x))),
+            (m_cell.y - static_cast<int>(m_world->camera->origin.y))
+            + (m_cell.x - static_cast<int>(m_world->camera->origin.x))
         };
     }
 
@@ -149,7 +149,7 @@ olc::vi2d mdcii::world::MousePicker::CalculateSelectedCheatColorOffset(const olc
 {
     olc::vi2d offset;
 
-    switch (m_gameState->world->camera->rotation)
+    switch (m_world->camera->rotation)
     {
     case Rotation::DEG0:
         if (t_cheatColor == olc::RED)
