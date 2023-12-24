@@ -101,7 +101,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief Pointer to the parent State.
+         * @brief Pointer to the parent State object.
          */
         state::State* state{ nullptr };
 
@@ -159,7 +159,14 @@ namespace mdcii::world
         /**
          * @brief Constructs a new World object.
          *
-         * @param t_state Pointer to the parent GameState.
+         * @param t_state Pointer to the parent State object.
+         */
+        explicit World(state::State* t_state);
+
+        /**
+         * @brief Constructs a new World object.
+         *
+         * @param t_state Pointer to the parent State object.
          * @param t_fileName The name of the save-game file.
          */
         World(state::State* t_state, const std::string& t_fileName);
@@ -170,6 +177,15 @@ namespace mdcii::world
         World& operator=(World&& t_other) noexcept = delete;
 
         ~World() noexcept;
+
+        //-------------------------------------------------
+        // Create core objects
+        //-------------------------------------------------
+
+        /**
+         * @brief Creates all objects that depend on setting the size of the world.
+         */
+        void CreateCoreObjects();
 
         //-------------------------------------------------
         // Logic

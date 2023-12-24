@@ -35,6 +35,14 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
+mdcii::world::World::World(state::State* t_state)
+    : state{ t_state }
+{
+    MDCII_LOG_DEBUG("[World::World()] Create World.");
+
+    MDCII_ASSERT(state, "[World::World()] Null pointer.")
+}
+
 mdcii::world::World::World(state::State* t_state, const std::string& t_fileName)
     : state{ t_state }
 {
@@ -48,6 +56,25 @@ mdcii::world::World::World(state::State* t_state, const std::string& t_fileName)
 mdcii::world::World::~World() noexcept
 {
     MDCII_LOG_DEBUG("[World::~World()] Destruct World.");
+}
+
+//-------------------------------------------------
+// Create core objects
+//-------------------------------------------------
+
+void mdcii::world::World::CreateCoreObjects()
+{
+    MDCII_LOG_DEBUG("[World::CreateCoreObjects()] Create core objects.");
+
+    if (worldWidth <= 0 || worldHeight <= 0)
+    {
+        throw MDCII_EXCEPTION("[World::CreateCoreObjects()] Invalid world size.");
+    }
+
+    deepWater = std::make_unique<DeepWater>(this);
+    renderer = std::make_unique<renderer::Renderer>(this);
+    camera = std::make_unique<camera::Camera>(this);
+    mousePicker = std::make_unique<MousePicker>(this);
 }
 
 //-------------------------------------------------
@@ -274,17 +301,14 @@ bool mdcii::world::World::IsWorldPositionOutsideScreen(const int t_x, const int 
 
 void mdcii::world::World::Init(const std::string& t_fileName)
 {
-    MDCII_LOG_DEBUG("[World::Init()] Start initializing the world ...");
+    MDCII_LOG_DEBUG("[World::Init()] Start initializing the world from file {} ...", t_fileName);
 
     if (resource::MdciiFile mdciiFile{ t_fileName }; mdciiFile.SetJsonFromFile())
     {
         mdciiFile.CreateWorldContentFromJson(this);
     }
 
-    deepWater = std::make_unique<DeepWater>(this);
-    renderer = std::make_unique<renderer::Renderer>(this);
-    camera = std::make_unique<camera::Camera>(this);
-    mousePicker = std::make_unique<MousePicker>(this);
+    CreateCoreObjects();
 
     MDCII_LOG_DEBUG("[World::Init()] The world were initialized successfully.");
 }
