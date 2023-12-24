@@ -32,21 +32,6 @@ namespace mdcii::world
     class World;
 
     /**
-     * @brief Forward declaration class Island.
-     */
-    class Island;
-
-    /**
-     * @brief Forward declaration class Layer.
-     */
-    class Layer;
-
-    /**
-     * @brief Forward declaration enum class LayerType.
-     */
-    enum class LayerType;
-
-    /**
      * @brief Forward declaration enum class ClimateZone.
      */
     enum class ClimateZone;
@@ -166,37 +151,6 @@ namespace mdcii::resource
          * @brief The current Json value.
          */
         nlohmann::json m_json;
-
-        //-------------------------------------------------
-        // Layer && Tiles
-        //-------------------------------------------------
-
-        /**
-         * @brief Init Layer by type.
-         *
-         * @param t_island Pointer to the Island object.
-         * @param t_vars JSON variables related to the layer details.
-         * @param t_layerType The type of layer.
-         */
-        static void InitLayerByType(world::Island* t_island, const nlohmann::json& t_vars, world::LayerType t_layerType);
-
-        /**
-         * @brief Extract tile data from JSON and save it to the Tile object.
-         *
-         * @param t_world Pointer to the World object.
-         * @param t_source Source JSON data.
-         * @param t_tileTarget Pointer to the target Tile object.
-         */
-        static void ExtractTileData(const world::World* t_world, nlohmann::json const& t_source, world::Tile* t_tileTarget);
-
-        /**
-         * @brief Create layer tiles according to the provided JSON data.
-         *
-         * @param t_world Pointer to the World object.
-         * @param t_layer Pointer to the target Layer object.
-         * @param t_layerTilesJson Source JSON data.
-         */
-        static void CreateLayerTiles(const world::World* t_world, world::Layer* t_layer, const nlohmann::json& t_layerTilesJson);
 
         //-------------------------------------------------
         // Init

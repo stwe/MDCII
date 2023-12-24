@@ -26,14 +26,6 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::resource
-{
-    /**
-     * @brief Forward declaration class MdciiFile.
-     */
-    class MdciiFile;
-}
-
 namespace mdcii::world
 {
     /**
@@ -77,14 +69,6 @@ namespace mdcii::world
      */
     class Island
     {
-        //-------------------------------------------------
-        // Friends
-        //-------------------------------------------------
-
-        /**
-         * @brief So MdciiFile has access to the private Init method.
-         */
-        friend class resource::MdciiFile;
     public:
         //-------------------------------------------------
         // Constants
@@ -102,22 +86,22 @@ namespace mdcii::world
         /**
          * @brief The width of the island.
          */
-        const int width;
+        int width{ -1 };
 
         /**
          * @brief The height of the island.
          */
-        const int height;
+        int height{ -1 };
 
         /**
          * @brief The X-coordinate of the island's initial position in the world.
          */
-        const int startX;
+        int startX{ -1 };
 
         /**
          * @brief The Y-coordinate of the island's initial position in the world.
          */
-        const int startY;
+        int startY{ -1 };
 
         /**
          * @brief The tile layers (coast, terrain, buildings, mixed) of the island.
@@ -139,12 +123,9 @@ namespace mdcii::world
          * @brief Constructs a new Island object.
          *
          * @param t_world Pointer to the parent World object.
-         * @param t_width The width of the island.
-         * @param t_height The height of the island.
-         * @param t_x The X-coordinate of the island's initial position in the world.
-         * @param t_y The Y-coordinate of the island's initial position in the world.
+         * @param t_json A Json value representing an Island.
          */
-        Island(World* t_world, int t_width, int t_height, int t_x, int t_y);
+        Island(const World* t_world, const nlohmann::json& t_json);
 
         Island(const Island& t_other) = delete;
         Island(Island&& t_other) noexcept = delete;
@@ -205,7 +186,7 @@ namespace mdcii::world
         /**
          * @brief Pointer to the parent World object.
          */
-        World* m_world{ nullptr };
+        const World* m_world{ nullptr };
 
         /**
          * @brief An Aabb (axis-aligned bounding box) object for collision detection.
@@ -213,16 +194,49 @@ namespace mdcii::world
          * The Aabb is constructed from startX and startY variables, along with width and height.
          * These define the location of the island in the world, indicating where it starts and ends.
          */
-        const physics::Aabb m_aabb;
+        physics::Aabb m_aabb;
 
         //-------------------------------------------------
-        // Init
+        // Set from Json
         //-------------------------------------------------
 
         /**
-         * @brief Initializes the island.
+         * Sets the size and position of the island from a Json value.
+         *
+         * @param t_json The Json value containing the size and position of the island.
          */
-        void Init();
+        void SetSizeAndPosition(const nlohmann::json& t_json);
+
+        /**
+         * Sets the island's layer data using a Json value.
+         *
+         * @param t_json The Json value containing the island's tile data.
+         */
+        void SetLayerData(const nlohmann::json& t_json);
+
+        /**
+         * @brief Init Layer by type.
+         *
+         * @param t_json Json variables related to the layer details.
+         * @param t_layerType The type of layer.
+         */
+        void InitLayerByType(const nlohmann::json& t_json, LayerType t_layerType);
+
+        /**
+         * @brief Create layer tiles according to the provided JSON data.
+         *
+         * @param t_layer Pointer to the target Layer object.
+         * @param t_json Source Json data.
+         */
+        void CreateLayerTiles(Layer* t_layer, const nlohmann::json& t_json) const;
+
+        /**
+         * @brief Extract tile data from Json and save it to the Tile object.
+         *
+         * @param t_json Source Json data.
+         * @param t_tileTarget Pointer to the target Tile object.
+         */
+        void ExtractTileData(const nlohmann::json& t_json, Tile* t_tileTarget) const;
 
         //-------------------------------------------------
         // Helper
@@ -238,18 +252,18 @@ namespace mdcii::world
         [[nodiscard]] bool IsWorldPositionInAabb(const olc::vi2d& t_position) const;
 
         //-------------------------------------------------
-        // Layer
+        // Layer data
         //-------------------------------------------------
 
         /**
-         * @brief Initialises the COAST, TERRAIN and BUILDINGS layer of the island.
+         * @brief Initialises the data of the COAST, TERRAIN and BUILDINGS layer.
          */
-        void InitLayers();
+        void InitLayerData();
 
         /**
          * @brief Initialises the mixed layer of the island, which is created from all other layers.
          */
-        void InitMixedLayer();
+        void InitMixedLayerData();
 
         /**
          * @brief Populates the mixed layer with data from other layers.
