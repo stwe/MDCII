@@ -39,7 +39,7 @@ mdcii::Game::Game()
 
     setup_i18n(INI.Get<std::string>("locale", "lang"), RESOURCES_REL_PATH);
 
-    sAppName = "MDCII";
+    sAppName = GAME_NAME;
 }
 
 mdcii::Game::~Game()

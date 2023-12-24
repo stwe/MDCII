@@ -18,59 +18,56 @@
 
 #pragma once
 
-#include <memory>
-#include "state/State.h"
+#include "vendor/nlohmann/json.hpp"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::world
-{
-    /**
-     * @brief Forward declaration class WorldGenerator.
-     */
-    class WorldGenerator;
-}
-
 namespace mdcii
 {
+    /**
+     * @brief Forward declaration class Game.
+     */
+    class Game;
+}
+
+namespace mdcii::world
+{
     //-------------------------------------------------
-    // WorldGeneratorState
+    // WorldGenerator
     //-------------------------------------------------
 
     /**
-     * @brief Represents the world generator.
+     * @brief Represents a world generator.
      */
-    class WorldGeneratorState : public state::State
+    class WorldGenerator
     {
     public:
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        WorldGeneratorState() = delete;
+        WorldGenerator() = delete;
 
         /**
-         * @brief Constructs a new WorldGeneratorState object.
+         * @brief Constructs a new WorldGenerator object.
          *
-         * @param t_game Pointer to the parent Game.
+         * @param t_game Pointer to the parent Game object.
          */
-        explicit WorldGeneratorState(Game* t_game);
+        explicit WorldGenerator(Game* t_game);
 
-        WorldGeneratorState(const WorldGeneratorState& t_other) = delete;
-        WorldGeneratorState(WorldGeneratorState&& t_other) noexcept = delete;
-        WorldGeneratorState& operator=(const WorldGeneratorState& t_other) = delete;
-        WorldGeneratorState& operator=(WorldGeneratorState&& t_other) noexcept = delete;
+        WorldGenerator(const WorldGenerator& t_other) = delete;
+        WorldGenerator(WorldGenerator&& t_other) noexcept = delete;
+        WorldGenerator& operator=(const WorldGenerator& t_other) = delete;
+        WorldGenerator& operator=(WorldGenerator&& t_other) noexcept = delete;
 
-        ~WorldGeneratorState() noexcept override;
+        ~WorldGenerator() noexcept;
 
         //-------------------------------------------------
-        // Override
+        // Logic
         //-------------------------------------------------
 
-        [[nodiscard]] bool OnUserCreate() override;
-        [[nodiscard]] bool OnUserUpdate(float t_elapsedTime) override;
 
     protected:
 
@@ -80,8 +77,14 @@ namespace mdcii
         //-------------------------------------------------
 
         /**
-         * @brief The WorldGenerator object.
+         * @brief Pointer to the parent Game object.
          */
-        std::unique_ptr<world::WorldGenerator> m_worldGenerator;
+        Game* m_game{ nullptr };
     };
+
+    //-------------------------------------------------
+    // Json
+    //-------------------------------------------------
+
+    void to_json(nlohmann::json& t_json, const WorldGenerator& t_worldGenerator);
 }

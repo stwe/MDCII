@@ -16,40 +16,49 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include "WorldGeneratorState.h"
-#include "Log.h"
+#include "WorldGenerator.h"
 #include "Game.h"
-#include "world/WorldGenerator.h"
+#include "MdciiAssert.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::WorldGeneratorState::WorldGeneratorState(Game* t_game)
-    : State(t_game)
+mdcii::world::WorldGenerator::WorldGenerator(Game* t_game)
+    : m_game{ t_game }
 {
-    MDCII_LOG_DEBUG("[WorldGeneratorState::WorldGeneratorState()] Create WorldGeneratorState.");
+    MDCII_LOG_DEBUG("[WorldGenerator::WorldGenerator()] Create WorldGenerator.");
+
+    MDCII_ASSERT(m_game, "[WorldGenerator::WorldGenerator()] Null pointer.")
 }
 
-mdcii::WorldGeneratorState::~WorldGeneratorState() noexcept
+mdcii::world::WorldGenerator::~WorldGenerator() noexcept
 {
-    MDCII_LOG_DEBUG("[WorldGeneratorState::~WorldGeneratorState()] Destruct WorldGeneratorState.");
+    MDCII_LOG_DEBUG("[WorldGenerator::~WorldGenerator()] Destruct WorldGenerator.");
 }
 
 //-------------------------------------------------
-// Override
+// Json
 //-------------------------------------------------
 
-bool mdcii::WorldGeneratorState::OnUserCreate()
+void mdcii::world::to_json(nlohmann::json& t_json, const WorldGenerator& t_worldGenerator)
 {
-    MDCII_LOG_DEBUG("[WorldGeneratorState::OnUserCreate()] Init WorldGeneratorState.");
+    // version
+    t_json["version"] = Game::VERSION;
 
-    m_worldGenerator = std::make_unique<world::WorldGenerator>(game);
+    // world
+    //t_json["world"] = { { "width", t_generatorWorld.width }, { "height", t_generatorWorld.height } };
 
-    return true;
-}
+    // islands
+    auto islandsJson = nlohmann::json::array();
+    /*
+    for (const auto& island : t_generatorWorld.terrain->islands)
+    {
+        auto islandJson = nlohmann::json::object();
+        islandJson = *island;
+        islandsJson.push_back(islandJson);
+    }
+    */
 
-bool mdcii::WorldGeneratorState::OnUserUpdate(const float t_elapsedTime)
-{
-    return true;
+    t_json["islands"] = islandsJson;
 }

@@ -86,6 +86,19 @@ namespace mdcii
         // Constants
         //-------------------------------------------------
 
+        /**
+         * @brief The name of this game.
+         */
+        static constexpr std::string_view GAME_NAME{ "MDCII" };
+
+        /**
+         * @brief The current version of this game.
+         */
+        static constexpr std::string_view VERSION{ "0.2-DEV" };
+
+        /**
+         * @brief The name of the Ini-File to read.
+         */
         inline static const inih::INIReader INI{ "./config.ini" };
 
 #if defined(_WIN64)
