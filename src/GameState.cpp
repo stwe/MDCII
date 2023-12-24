@@ -43,9 +43,9 @@ mdcii::GameState::~GameState() noexcept
 
 void mdcii::GameState::LoadWorldFrom(const std::string& t_file)
 {
-    MDCII_ASSERT(!world, "[GameState::LoadWorldFrom()] Invalid world pointer.")
+    MDCII_ASSERT(!m_world, "[GameState::LoadWorldFrom()] Invalid world pointer.")
 
-    world = std::make_unique<world::World>(this, t_file);
+    m_world = std::make_unique<world::World>(this, t_file);
 }
 
 //-------------------------------------------------
@@ -56,17 +56,13 @@ bool mdcii::GameState::OnUserCreate()
 {
     MDCII_LOG_DEBUG("[GameState::OnUserCreate()] Init GameState.");
 
-    if (!world)
+    if (!m_world)
     {
         throw MDCII_EXCEPTION("[GameState::OnUserCreate()] Missing world, use the LoadWorldFrom() method to load.");
     }
 
     return true;
 }
-
-//-------------------------------------------------
-// ImGui
-//-------------------------------------------------
 
 bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
 {
@@ -79,10 +75,14 @@ bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
     // world
     game->SetGameLayer();
     game->Clear(olc::BLACK);
-    world->OnUserUpdate(t_elapsedTime);
+    m_world->OnUserUpdate(t_elapsedTime);
 
     return RenderImGui();
 }
+
+//-------------------------------------------------
+// ImGui
+//-------------------------------------------------
 
 bool mdcii::GameState::RenderImGui() const
 {
@@ -99,7 +99,7 @@ bool mdcii::GameState::RenderImGui() const
         return false;
     }
 
-    world->RenderImGui();
+    m_world->RenderImGui();
 
     ImGui::End();
 

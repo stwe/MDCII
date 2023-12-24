@@ -25,14 +25,6 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii
-{
-    /**
-     * @brief Forward declaration class Game.
-     */
-    class Game;
-}
-
 namespace mdcii::world
 {
     /**
@@ -54,12 +46,6 @@ namespace mdcii
     {
     public:
         //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        std::unique_ptr<world::World> world;
-
-        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
@@ -68,7 +54,7 @@ namespace mdcii
         /**
          * @brief Constructs a new GameState object.
          *
-         * @param t_game Pointer to the parent Game.
+         * @param t_game Pointer to the parent Game object.
          */
         explicit GameState(Game* t_game);
 
@@ -100,6 +86,12 @@ namespace mdcii
     protected:
 
     private:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        std::unique_ptr<world::World> m_world;
+
         //-------------------------------------------------
         // ImGui
         //-------------------------------------------------
