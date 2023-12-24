@@ -56,7 +56,7 @@ void mdcii::state::StateSystem::ChangeState(const StateId t_stateId)
 // Logic
 //-------------------------------------------------
 
-bool mdcii::state::StateSystem::OnUserCreate()
+bool mdcii::state::StateSystem::OnUserCreate() const
 {
     if (currentState)
     {
@@ -66,7 +66,7 @@ bool mdcii::state::StateSystem::OnUserCreate()
     return false;
 }
 
-bool mdcii::state::StateSystem::OnUserUpdate(const float t_elapsedTime)
+bool mdcii::state::StateSystem::OnUserUpdate(const float t_elapsedTime) const
 {
     if (currentState)
     {

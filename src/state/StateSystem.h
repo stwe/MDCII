@@ -106,8 +106,8 @@ namespace mdcii::state
         // Logic
         //-------------------------------------------------
 
-        [[nodiscard]] bool OnUserCreate();
-        [[nodiscard]] bool OnUserUpdate(float t_elapsedTime);
+        [[nodiscard]] bool OnUserCreate() const;
+        [[nodiscard]] bool OnUserUpdate(float t_elapsedTime) const;
 
     protected:
 

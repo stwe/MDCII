@@ -28,7 +28,7 @@ mdcii::resource::MdciiResourcesManager::MdciiResourcesManager()
 {
     MDCII_LOG_DEBUG("[MdciiResourcesManager::MdciiResourcesManager()] Create MdciiResourcesManager.");
 
-    LoadFiles();
+    ReadPaths();
 }
 
 mdcii::resource::MdciiResourcesManager::~MdciiResourcesManager() noexcept
@@ -40,13 +40,13 @@ mdcii::resource::MdciiResourcesManager::~MdciiResourcesManager() noexcept
 // Init
 //-------------------------------------------------
 
-void mdcii::resource::MdciiResourcesManager::LoadFiles()
+void mdcii::resource::MdciiResourcesManager::ReadPaths()
 {
-    MDCII_LOG_DEBUG("[MdciiResourcesManager::LoadFiles()] Start loading files...");
+    MDCII_LOG_DEBUG("[MdciiResourcesManager::ReadPaths()] Start reading file paths ...");
 
     mapFiles = get_files_list(MAP_FILE_REL_PATH, MAP_FILE_EXTENSION);
     saveGameFiles = get_files_list(SAVE_GAME_FILE_REL_PATH, SAVE_GAME_FILE_EXTENSION);
     islandFiles = get_files_list(ISLAND_FILE_REL_PATH, ISLAND_FILE_EXTENSION);
 
-    MDCII_LOG_DEBUG("[MdciiResourcesManager::LoadFiles()] All files have been loaded successfully.");
+    MDCII_LOG_DEBUG("[MdciiResourcesManager::ReadPaths()] All file paths have been read successfully.");
 }

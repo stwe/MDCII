@@ -27,6 +27,9 @@ namespace mdcii::resource
     // MdciiResourcesManager
     //-------------------------------------------------
 
+    /**
+     * @brief Manages MDCII save game, maps and island files.
+     */
     class MdciiResourcesManager
     {
     public:
@@ -104,8 +107,8 @@ namespace mdcii::resource
         //-------------------------------------------------
 
         /**
-         * @brief Load files.
+         * @brief Reads the paths to all MDCII files.
          */
-        void LoadFiles();
+        void ReadPaths();
     };
 }
