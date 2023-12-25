@@ -39,6 +39,11 @@ namespace mdcii::world
      */
     class World;
 
+    /**
+     * @brief Forward declaration class Island.
+     */
+    class Island;
+
     //-------------------------------------------------
     // WorldGenerator
     //-------------------------------------------------
@@ -91,5 +96,9 @@ namespace mdcii::world
         inline static int m_island_file_index{ 0 };
 
         state::State* m_state{ nullptr };
+
+        Island* m_currentIsland{ nullptr };
+
+        void SaveWorldImGui() const;
     };
 }

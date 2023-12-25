@@ -168,11 +168,11 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
     // todo:
     if (ImGui::BeginPopupModal("World Size"))
     {
-        static int x{ 24 };
-        ImGui::SliderInt("World width", &x, 24, 128);
+        static int x{ 96 };
+        ImGui::SliderInt("World width", &x, 96, 128);
 
-        static int y{ 24 };
-        ImGui::SliderInt("World height", &y, 24, 128);
+        static int y{ 96 };
+        ImGui::SliderInt("World height", &y, 96, 128);
 
         if (ImGui::Button("Generate World"))
         {

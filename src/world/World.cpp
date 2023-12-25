@@ -444,3 +444,27 @@ void mdcii::world::World::DisableRenderLayer(const RenderLayer t_renderLayer, bo
     renderLayer &= ~t_renderLayer;
     t_toFalse = false;
 }
+
+//-------------------------------------------------
+// Serializing World into Json
+//-------------------------------------------------
+
+void mdcii::world::to_json(nlohmann::json& t_json, const World& t_world)
+{
+    // version
+    t_json["version"] = Game::VERSION;
+
+    // world size
+    t_json["world"] = { { "width", t_world.worldWidth }, { "height", t_world.worldHeight } };
+
+    // islands
+    auto islandsJson = nlohmann::json::array();
+    for (const auto& island : t_world.islands)
+    {
+        auto islandJson = nlohmann::json::object();
+        islandJson = *island;
+        islandsJson.push_back(islandJson);
+    }
+
+    t_json["islands"] = islandsJson;
+}

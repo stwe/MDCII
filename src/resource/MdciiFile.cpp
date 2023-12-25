@@ -99,9 +99,16 @@ void mdcii::resource::MdciiFile::SetJsonFromIsland(
 // From Json
 //-------------------------------------------------
 
-bool mdcii::resource::MdciiFile::CreateFileFromJson()
+bool mdcii::resource::MdciiFile::CreateFileFromJson(const MdciiFileType t_mdciiFileType)
 {
-    InitFileName(std::string(ISLAND_RELATIVE_PATH), std::string(ISLAND_FILE_EXTENSION));
+    if (t_mdciiFileType == MdciiFileType::ISLAND)
+    {
+        InitFileName(std::string(ISLAND_RELATIVE_PATH), std::string(ISLAND_FILE_EXTENSION));
+    }
+    else
+    {
+        InitFileName(std::string(MAP_RELATIVE_PATH), std::string(MAP_FILE_EXTENSION));
+    }
 
     MDCII_LOG_DEBUG("[MdciiFile::CreateFileFromJson()] Start saving Json value to file {}.", m_fileName);
 

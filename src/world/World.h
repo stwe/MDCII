@@ -313,4 +313,10 @@ namespace mdcii::world
          */
         void DisableRenderLayer(RenderLayer t_renderLayer, bool& t_toFalse);
     };
+
+    //-------------------------------------------------
+    // Serializing World into Json
+    //-------------------------------------------------
+
+    void to_json(nlohmann::json& t_json, const World& t_world);
 }

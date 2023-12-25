@@ -23,7 +23,7 @@
 #include "MdciiAssert.h"
 #include "MdciiUtils.h"
 #include "Game.h"
-#include "world/Rotation.h"
+#include "Rotation.h"
 #include "resource/OriginalResourcesManager.h"
 #include "state/State.h"
 
@@ -99,6 +99,27 @@ void mdcii::world::Island::SetSizeAndPosition(const nlohmann::json& t_json)
     height = t_json.at("height").get<int>();
     startX = t_json.at("x").get<int>();
     startY = t_json.at("y").get<int>();
+
+    // todo: magic enum issue?
+
+    /*
+    auto z = t_json.at("climate").get<std::string>();
+    if (auto zone = magic_enum::enum_cast<ClimateZone>(z); zone.has_value())
+    {
+        climateZone = zone.value();
+
+        MDCII_LOG_DEBUG("[Island::SetSizeAndPosition()] The zone of the island is {}.", t_json.at("climate").get<std::string>());
+    }
+    */
+
+    if (const auto z = t_json.at("climate").get<std::string>(); z == "NORTH")
+    {
+        climateZone = ClimateZone::NORTH;
+    }
+    else
+    {
+        climateZone = ClimateZone::SOUTH;
+    }
 
     m_aabb = physics::Aabb(olc::vi2d(startX, startY), olc::vi2d(width, height));
 
@@ -298,14 +319,13 @@ void mdcii::world::Island::InitTileDetails(Layer* t_layer, const int t_x, const 
 // Serializing Island into Json
 //-------------------------------------------------
 
-/*
-void mdcii::world::to_json(nlohmann::json& t_json, const mdcii::world::Island& t_island)
+void mdcii::world::to_json(nlohmann::json& t_json, const Island& t_island)
 {
     t_json["width"] = t_island.width;
     t_json["height"] = t_island.height;
     t_json["x"] = t_island.startX;
     t_json["y"] = t_island.startY;
-    t_json["climate"] = std::string(magic_enum::enum_name(t_island.climateZone));
+    t_json["climate"] = t_island.climateZone == ClimateZone::NORTH ? "NORTH" : "SOUTH"; // todo: magic enum issue?
 
     t_json["layers"] = nlohmann::json::array();
 
@@ -322,4 +342,3 @@ void mdcii::world::to_json(nlohmann::json& t_json, const mdcii::world::Island& t
     t_json["layers"].push_back(t);
     t_json["layers"].push_back(b);
 }
-*/

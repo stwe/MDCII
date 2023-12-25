@@ -40,6 +40,15 @@ namespace mdcii::world
 namespace mdcii::resource
 {
     //-------------------------------------------------
+    // Mdcii file type
+    //-------------------------------------------------
+
+    enum class MdciiFileType
+    {
+        MAP, ISLAND
+    };
+
+    //-------------------------------------------------
     // MdciiFile
     //-------------------------------------------------
 
@@ -110,13 +119,15 @@ namespace mdcii::resource
         //-------------------------------------------------
 
         /**
-         * @brief Saves the Json value representing an island in a file.
+         * @brief Saves the Json value in a file.
          *
          * If the file already exists, the method returns false.
          *
+         * @param t_mdciiFileType The file type to save.
+         *
          * @return True if success or false if error while saving.
          */
-        [[nodiscard]] bool CreateFileFromJson();
+        [[nodiscard]] bool CreateFileFromJson(MdciiFileType t_mdciiFileType);
 
     protected:
 
@@ -134,6 +145,16 @@ namespace mdcii::resource
          * @brief The relative path to the island files.
          */
         static constexpr std::string_view ISLAND_RELATIVE_PATH{ "island/" };
+
+        /**
+         * @brief The file extension of the map files.
+         */
+        static constexpr std::string_view MAP_FILE_EXTENSION{ ".map" };
+
+        /**
+         * @brief The relative path to the map files.
+         */
+        static constexpr std::string_view MAP_RELATIVE_PATH{ "map/" };
 
         //-------------------------------------------------
         // Member

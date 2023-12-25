@@ -20,7 +20,9 @@
 #include "Game.h"
 #include "MdciiAssert.h"
 #include "World.h"
+#include "Island.h"
 #include "MdciiUtils.h"
+#include "MousePicker.h"
 #include "state/State.h"
 #include "resource/MdciiResourcesManager.h"
 
@@ -49,9 +51,21 @@ void mdcii::world::WorldGenerator::OnUserUpdate(const float t_elapsedTime)
 {
     world->OnUserUpdate(t_elapsedTime);
 
+    // FindVisibleIslands();
+    if (m_currentIsland)
+    {
+        m_currentIsland->startX = world->mousePicker->selected.x;
+        m_currentIsland->startY = world->mousePicker->selected.y;
+    }
+
+    if (world->state->game->GetMouse(0).bPressed && m_currentIsland)
+    {
+        m_currentIsland = nullptr;
+    }
+
     if (m_state->game->mdciiResourcesManager->islandFiles.empty())
     {
-        ImGui::Text("MissingFiles");
+        ImGui::Text("Missing Files");
     }
     else
     {
@@ -60,8 +74,62 @@ void mdcii::world::WorldGenerator::OnUserUpdate(const float t_elapsedTime)
 
     if (m_island_file_index >= 0)
     {
-        const auto& fileName{ m_state->game->mdciiResourcesManager->islandFiles.at(m_island_file_index) };
+        auto& fileName{ m_state->game->mdciiResourcesManager->islandFiles.at(m_island_file_index) };
+        if (fileName.SetJsonFromFile())
+        {
+            auto island{ std::make_unique<Island>(world.get(), fileName.GetJson()) };
+            island->startX = 0;
+            island->startY = 0;
 
-        MDCII_LOG_DEBUG("[WorldGenerator::OnUserUpdate()] Add island {}.", m_state->game->mdciiResourcesManager->islandFiles.at(m_island_file_index).GetFileName());
+            world->islands.push_back(std::move(island));
+            m_currentIsland = world->islands.back().get();
+
+            MDCII_LOG_DEBUG("[WorldGenerator::OnUserUpdate()] Add island {}.", m_state->game->mdciiResourcesManager->islandFiles.at(m_island_file_index).GetFileName());
+        }
+    }
+
+    SaveWorldImGui();
+}
+
+void mdcii::world::WorldGenerator::SaveWorldImGui() const
+{
+    static bool error{ false };
+    static bool saved{ false };
+    static std::string fileName;
+    save_file_button("Save World", &fileName);
+
+    if (!fileName.empty())
+    {
+        if (ImGui::Button("Save"))
+        {
+            resource::MdciiFile mdciiFile{ fileName };
+            mdciiFile.GetJson() = *world;
+
+            if (mdciiFile.CreateFileFromJson(resource::MdciiFileType::MAP))
+            {
+                saved = true;
+                fileName.clear();
+            }
+            else
+            {
+                error = true;
+                saved = false;
+                fileName.clear();
+            }
+        }
+    }
+
+    if (error)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+        ImGui::Text("Save Error");
+        ImGui::PopStyleColor();
+    }
+
+    if (saved)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+        ImGui::Text("Save Success");
+        ImGui::PopStyleColor();
     }
 }

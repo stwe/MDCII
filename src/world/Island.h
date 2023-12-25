@@ -313,5 +313,5 @@ namespace mdcii::world
     // Serializing Island into Json
     //-------------------------------------------------
 
-    //void to_json(nlohmann::json& t_json, const Island& t_island);
+    void to_json(nlohmann::json& t_json, const Island& t_island);
 }

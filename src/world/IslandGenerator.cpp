@@ -615,7 +615,7 @@ void mdcii::world::IslandGenerator::SaveIslandImGui() const
     static bool error{ false };
     static bool saved{ false };
     static std::string fileName;
-    save_file_button("SaveGame", &fileName);
+    save_file_button("Save Game", &fileName);
 
     if (!fileName.empty())
     {
@@ -633,7 +633,7 @@ void mdcii::world::IslandGenerator::SaveIslandImGui() const
                 terrainTiles, coastTiles
             );
 
-            if (mdciiFile.CreateFileFromJson())
+            if (mdciiFile.CreateFileFromJson(resource::MdciiFileType::ISLAND))
             {
                 saved = true;
                 fileName.clear();
@@ -650,14 +650,14 @@ void mdcii::world::IslandGenerator::SaveIslandImGui() const
     if (error)
     {
         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-        ImGui::Text("SaveError");
+        ImGui::Text("Save Error");
         ImGui::PopStyleColor();
     }
 
     if (saved)
     {
         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
-        ImGui::Text("SaveSuccess");
+        ImGui::Text("Save Success");
         ImGui::PopStyleColor();
     }
 }
