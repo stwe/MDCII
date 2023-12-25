@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "vendor/nlohmann/json.hpp"
+#include "resource/MdciiFile.h"
 
 namespace mdcii
 {
@@ -36,14 +36,14 @@ namespace mdcii
     [[nodiscard]] nlohmann::json read_json_from_file(const std::string& t_filePath);
 
     /**
-     * @brief Searches for files in the specified path with a given extension.
+     * @brief Searches for MDCII Json files in the specified path with a given extension.
      *
      * @param t_relPath The relative path to the RESOURCES_REL_PATH.
      * @param t_extension Search for files with this extension.
      *
      * @return A list of found files.
      */
-    [[nodiscard]] std::vector<std::string> get_files_list(const std::string& t_relPath, const std::string& t_extension);
+    [[nodiscard]] std::vector<resource::MdciiFile> get_mdcii_files_list(const std::string& t_relPath, const std::string& t_extension);
 
     /**
      * @brief Creates and opens a new file.
@@ -82,13 +82,13 @@ namespace mdcii
     //-------------------------------------------------
 
     /**
-     * @brief Provides a simple mechanism to choose a file.
+     * @brief Provides a simple mechanism to choose a MDCII Json file.
      *
      * @param t_files A list of files.
      *
      * @return The index of the selected file, or -1 if nothing is selected.
      */
-    [[nodiscard]] int render_file_chooser(std::vector<std::string>& t_files);
+    [[nodiscard]] int render_mdcii_file_chooser(std::vector<resource::MdciiFile>& t_files);
 
     /**
      * @brief A text field used to enter a file name.
@@ -99,12 +99,12 @@ namespace mdcii
     void save_file_button(const char* t_label, std::string* t_str);
 
     /**
-     * @brief A ListBox showing files.
+     * @brief A ListBox showing MDCII Json files.
      *
      * @param t_files The files to display.
      * @param t_currentItem The index of the currently selected file.
      */
-    void file_chooser(std::vector<std::string>& t_files, int* t_currentItem);
+    void file_chooser(std::vector<resource::MdciiFile>& t_files, int* t_currentItem);
 
     //-------------------------------------------------
     // ImGui helper

@@ -44,9 +44,9 @@ void mdcii::resource::MdciiResourcesManager::ReadPaths()
 {
     MDCII_LOG_DEBUG("[MdciiResourcesManager::ReadPaths()] Start reading file paths ...");
 
-    mapFiles = get_files_list(MAP_FILE_REL_PATH, MAP_FILE_EXTENSION);
-    saveGameFiles = get_files_list(SAVE_GAME_FILE_REL_PATH, SAVE_GAME_FILE_EXTENSION);
-    islandFiles = get_files_list(ISLAND_FILE_REL_PATH, ISLAND_FILE_EXTENSION);
+    mapFiles = get_mdcii_files_list(MAP_FILE_REL_PATH, MAP_FILE_EXTENSION);
+    saveGameFiles = get_mdcii_files_list(SAVE_GAME_FILE_REL_PATH, SAVE_GAME_FILE_EXTENSION);
+    islandFiles = get_mdcii_files_list(ISLAND_FILE_REL_PATH, ISLAND_FILE_EXTENSION);
 
     MDCII_LOG_DEBUG("[MdciiResourcesManager::ReadPaths()] All file paths have been read successfully.");
 }

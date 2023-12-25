@@ -27,11 +27,6 @@
 namespace mdcii::world
 {
     /**
-     * @brief Forward declaration class World.
-     */
-    class World;
-
-    /**
      * @brief Forward declaration enum class ClimateZone.
      */
     enum class ClimateZone;
@@ -49,7 +44,7 @@ namespace mdcii::resource
     //-------------------------------------------------
 
     /**
-     * @brief The class is for all MDCII Json files.
+     * @brief A class to load MDCII Json files.
      */
     class MdciiFile
     {
@@ -68,14 +63,23 @@ namespace mdcii::resource
         explicit MdciiFile(std::string t_fileName);
 
         MdciiFile(const MdciiFile& t_other) = delete;
-        MdciiFile(MdciiFile&& t_other) noexcept = delete;
+        MdciiFile(MdciiFile&& t_other) noexcept = default;
         MdciiFile& operator=(const MdciiFile& t_other) = delete;
         MdciiFile& operator=(MdciiFile&& t_other) noexcept = delete;
 
         ~MdciiFile() noexcept;
 
         //-------------------------------------------------
-        // Content to Json
+        // Getter
+        //-------------------------------------------------
+
+        [[nodiscard]] const std::string& GetFileName() const { return m_fileName; }
+
+        [[nodiscard]] const nlohmann::json& GetJson() const { return m_json; }
+        [[nodiscard]] nlohmann::json& GetJson() { return m_json; }
+
+        //-------------------------------------------------
+        // To Json
         //-------------------------------------------------
 
         /**
@@ -102,7 +106,7 @@ namespace mdcii::resource
         );
 
         //-------------------------------------------------
-        // Content from Json
+        // From Json
         //-------------------------------------------------
 
         /**
@@ -113,13 +117,6 @@ namespace mdcii::resource
          * @return True if success or false if error while saving.
          */
         [[nodiscard]] bool CreateFileFromJson();
-
-        /**
-         * @brief Create world content (world width/height and islands) from Json value.
-         *
-         * @param t_world Pointer to the World object to set the content.
-         */
-        void CreateWorldContentFromJson(world::World* t_world) const;
 
     protected:
 
@@ -148,7 +145,7 @@ namespace mdcii::resource
         std::string m_fileName;
 
         /**
-         * @brief The current Json value.
+         * @brief The Json value.
          */
         nlohmann::json m_json;
 

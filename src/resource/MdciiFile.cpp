@@ -19,11 +19,8 @@
 
 #include "MdciiFile.h"
 #include "MdciiAssert.h"
-#include "MdciiException.h"
 #include "MdciiUtils.h"
 #include "Game.h"
-#include "world/World.h"
-#include "world/Island.h"
 #include "world/Tile.h"
 #include "vendor/enum/magic_enum.hpp"
 
@@ -45,7 +42,7 @@ mdcii::resource::MdciiFile::~MdciiFile() noexcept
 }
 
 //-------------------------------------------------
-// Content to Json
+// To Json
 //-------------------------------------------------
 
 bool mdcii::resource::MdciiFile::SetJsonFromFile()
@@ -99,7 +96,7 @@ void mdcii::resource::MdciiFile::SetJsonFromIsland(
 }
 
 //-------------------------------------------------
-// Content from Json
+// From Json
 //-------------------------------------------------
 
 bool mdcii::resource::MdciiFile::CreateFileFromJson()
@@ -119,31 +116,6 @@ bool mdcii::resource::MdciiFile::CreateFileFromJson()
     MDCII_LOG_WARN("[MdciiFile::CreateFileFromJson()] An error occurred while saving Json value to file {}.", m_fileName);
 
     return false;
-}
-
-void mdcii::resource::MdciiFile::CreateWorldContentFromJson(world::World* t_world) const
-{
-    MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] Start creating the world from Json value ...");
-
-    t_world->worldWidth = m_json.at("world").at("width").get<int>();
-    t_world->worldHeight = m_json.at("world").at("height").get<int>();
-
-    if (t_world->worldWidth <= 0 || t_world->worldHeight <= 0)
-    {
-        throw MDCII_EXCEPTION("[MdciiFile::CreateWorldContent()] Invalid world size.");
-    }
-
-    MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The size of the world is ({}, {}).", t_world->worldWidth, t_world->worldHeight);
-
-    std::vector<std::unique_ptr<world::Island>> islands;
-    for (const auto& [islandKeys, islandVars] : m_json["islands"].items())
-    {
-        islands.emplace_back(std::make_unique<world::Island>(t_world, islandVars));
-    }
-
-    MDCII_LOG_DEBUG("[MdciiFile::CreateWorldContent()] The world was successfully created from Json.");
-
-    t_world->islands = std::move(islands);
 }
 
 //-------------------------------------------------

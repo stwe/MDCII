@@ -18,8 +18,7 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
+#include "MdciiFile.h"
 
 namespace mdcii::resource
 {
@@ -28,7 +27,7 @@ namespace mdcii::resource
     //-------------------------------------------------
 
     /**
-     * @brief Manages MDCII save game, maps and island files.
+     * @brief Manages MDCII Json files.
      */
     class MdciiResourcesManager
     {
@@ -74,17 +73,17 @@ namespace mdcii::resource
         /**
          * @brief A list of map files.
          */
-        std::vector<std::string> mapFiles;
+        std::vector<MdciiFile> mapFiles;
 
         /**
          * @brief A list of save-game files.
          */
-        std::vector<std::string> saveGameFiles;
+        std::vector<MdciiFile> saveGameFiles;
 
         /**
          * @brief A list of island files.
          */
-        std::vector<std::string> islandFiles;
+        std::vector<MdciiFile> islandFiles;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
