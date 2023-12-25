@@ -19,8 +19,17 @@ You must have a copy of the original game installed on your computer.
 
 ### Using Vcpkg with CMake and Visual Studio Code
 
-### Requirements
+### Included dependencies
 
+* [olcPixelGameEngine](https://github.com/OneLoneCoder/olcPixelGameEngine)
+* [Magic Enum C++](https://github.com/Neargye/magic_enum)
+* [FastNoise Lite](https://github.com/Auburn/FastNoiseLite)
+* [C++ INI Parser](https://github.com/SSARCandy/ini-cpp)
+* [nlohmann::json library](https://github.com/nlohmann/json)
+
+### Additional requirements
+
+* gettext-libintl
 * [spdlog](https://github.com/gabime/spdlog)
 * [imgui](https://github.com/ocornut/imgui)
 * [Protocol Buffers](https://github.com/protocolbuffers/protobuf)
