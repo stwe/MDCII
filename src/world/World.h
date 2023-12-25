@@ -19,6 +19,7 @@
 #pragma once
 
 #include "vendor/olc/olcPixelGameEngine.h"
+#include "vendor/nlohmann/json.hpp"
 
 //-------------------------------------------------
 // Forward declarations
@@ -160,16 +161,18 @@ namespace mdcii::world
          * @brief Constructs a new World object.
          *
          * @param t_state Pointer to the parent State object.
+         * @param t_width The width of the world in tiles.
+         * @param t_height The height of the world in tiles.
          */
-        explicit World(state::State* t_state);
+        World(state::State* t_state, int t_width, int t_height);
 
         /**
          * @brief Constructs a new World object.
          *
          * @param t_state Pointer to the parent State object.
-         * @param t_fileName The name of the save-game file.
+         * @param t_json A Json value representing a World.
          */
-        World(state::State* t_state, const std::string& t_fileName);
+        World(state::State* t_state, const nlohmann::json& t_json);
 
         World(const World& t_other) = delete;
         World(World&& t_other) noexcept = delete;
@@ -265,9 +268,9 @@ namespace mdcii::world
         /**
          * @brief Initializes the game world.
          *
-         * @param t_fileName The name of the save-game file.
+         * @param t_json A Json value representing a World.
          */
-        void Init(const std::string& t_fileName);
+        void Init(const nlohmann::json& t_json);
 
         //-------------------------------------------------
         // Render helper

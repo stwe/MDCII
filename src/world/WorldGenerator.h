@@ -90,15 +90,6 @@ namespace mdcii::world
 
         inline static int m_island_file_index{ 0 };
 
-        /**
-         * @brief Pointer to the parent State object.
-         */
         state::State* m_state{ nullptr };
     };
-
-    //-------------------------------------------------
-    // Json
-    //-------------------------------------------------
-
-    void to_json(nlohmann::json& t_json, const WorldGenerator& t_worldGenerator);
 }

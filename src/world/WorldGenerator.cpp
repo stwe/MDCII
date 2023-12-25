@@ -23,7 +23,6 @@
 #include "MdciiUtils.h"
 #include "state/State.h"
 #include "resource/MdciiResourcesManager.h"
-#include "resource/MdciiFile.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -35,11 +34,6 @@ mdcii::world::WorldGenerator::WorldGenerator(state::State* t_state)
     MDCII_LOG_DEBUG("[WorldGenerator::WorldGenerator()] Create WorldGenerator.");
 
     MDCII_ASSERT(m_state, "[WorldGenerator::WorldGenerator()] Null pointer.")
-
-    world = std::make_unique<world::World>(m_state);
-    world->worldWidth = 24;
-    world->worldHeight = 24;
-    world->CreateCoreObjects();
 }
 
 mdcii::world::WorldGenerator::~WorldGenerator() noexcept
@@ -53,50 +47,21 @@ mdcii::world::WorldGenerator::~WorldGenerator() noexcept
 
 void mdcii::world::WorldGenerator::OnUserUpdate(const float t_elapsedTime)
 {
+    world->OnUserUpdate(t_elapsedTime);
+
     if (m_state->game->mdciiResourcesManager->islandFiles.empty())
     {
         ImGui::Text("MissingFiles");
     }
     else
     {
-        m_island_file_index = render_file_chooser(m_state->game->mdciiResourcesManager->islandFiles);
+        m_island_file_index = render_mdcii_file_chooser(m_state->game->mdciiResourcesManager->islandFiles);
     }
 
     if (m_island_file_index >= 0)
     {
         const auto& fileName{ m_state->game->mdciiResourcesManager->islandFiles.at(m_island_file_index) };
 
-        MDCII_LOG_DEBUG("[WorldGenerator::OnUserUpdate()] Add island {}.", m_state->game->mdciiResourcesManager->islandFiles.at(m_island_file_index));
-
-        if (resource::MdciiFile mdciiFile{ fileName }; mdciiFile.SetJsonFromFile())
-        {
-            // todo
-        }
+        MDCII_LOG_DEBUG("[WorldGenerator::OnUserUpdate()] Add island {}.", m_state->game->mdciiResourcesManager->islandFiles.at(m_island_file_index).GetFileName());
     }
-}
-
-//-------------------------------------------------
-// Json
-//-------------------------------------------------
-
-void mdcii::world::to_json(nlohmann::json& t_json, const WorldGenerator& t_worldGenerator)
-{
-    // version
-    t_json["version"] = Game::VERSION;
-
-    // world
-    t_json["world"] = { { "width", t_worldGenerator.world->worldWidth }, { "height", t_worldGenerator.world->worldHeight } };
-
-    // islands
-    auto islandsJson = nlohmann::json::array();
-    /*
-    for (const auto& island : t_generatorWorld.terrain->islands)
-    {
-        auto islandJson = nlohmann::json::object();
-        islandJson = *island;
-        islandsJson.push_back(islandJson);
-    }
-    */
-
-    t_json["islands"] = islandsJson;
 }

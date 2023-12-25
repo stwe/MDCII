@@ -46,6 +46,15 @@ namespace mdcii
     {
     public:
         //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * @brief The WorldGenerator object.
+         */
+        std::unique_ptr<world::WorldGenerator> worldGenerator;
+
+        //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
@@ -75,13 +84,6 @@ namespace mdcii
     protected:
 
     private:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
 
-        /**
-         * @brief The WorldGenerator object.
-         */
-        std::unique_ptr<world::WorldGenerator> m_worldGenerator;
     };
 }

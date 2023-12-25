@@ -19,7 +19,6 @@
 #include "WorldGeneratorState.h"
 #include "Log.h"
 #include "Game.h"
-#include "world/World.h"
 #include "world/WorldGenerator.h"
 
 //-------------------------------------------------
@@ -30,6 +29,8 @@ mdcii::WorldGeneratorState::WorldGeneratorState(Game* t_game)
     : State(t_game)
 {
     MDCII_LOG_DEBUG("[WorldGeneratorState::WorldGeneratorState()] Create WorldGeneratorState.");
+
+    worldGenerator = std::make_unique<world::WorldGenerator>(this);
 }
 
 mdcii::WorldGeneratorState::~WorldGeneratorState() noexcept
@@ -45,8 +46,6 @@ bool mdcii::WorldGeneratorState::OnUserCreate()
 {
     MDCII_LOG_DEBUG("[WorldGeneratorState::OnUserCreate()] Init WorldGeneratorState.");
 
-    m_worldGenerator = std::make_unique<world::WorldGenerator>(this);
-
     return true;
 }
 
@@ -61,8 +60,7 @@ bool mdcii::WorldGeneratorState::OnUserUpdate(const float t_elapsedTime)
     // world
     game->SetGameLayer();
     game->Clear(olc::BLACK);
-    m_worldGenerator->world->OnUserUpdate(t_elapsedTime);
-    m_worldGenerator->OnUserUpdate(t_elapsedTime);
+    worldGenerator->OnUserUpdate(t_elapsedTime);
 
     return true;
 }

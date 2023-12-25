@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <memory>
 #include "state/State.h"
+#include "resource/MdciiFile.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -66,15 +66,17 @@ namespace mdcii
         ~GameState() noexcept override;
 
         //-------------------------------------------------
-        // Load world
+        // Create world
         //-------------------------------------------------
 
         /**
-         * @brief Loads a world from the given file.
+         * @brief Creates the world from a given MDCII Json file.
          *
-         * @param t_file The world data file.
+         * @param t_file The MDCII Json file.
+         *
+         * @return Returns True if no error occurred, false otherwise.
          */
-        void LoadWorldFrom(const std::string& t_file);
+        [[nodiscard]] bool CreateWorldFromFile(resource::MdciiFile& t_mdciiFile);
 
         //-------------------------------------------------
         // Override

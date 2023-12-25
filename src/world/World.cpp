@@ -35,22 +35,28 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::World::World(state::State* t_state)
+mdcii::world::World::World(state::State* t_state, const int t_width, const int t_height)
     : state{ t_state }
+    , worldWidth{ t_width }
+    , worldHeight{ t_height }
 {
     MDCII_LOG_DEBUG("[World::World()] Create World.");
 
     MDCII_ASSERT(state, "[World::World()] Null pointer.")
+
+    MDCII_LOG_DEBUG("[World::World()] The size of the world is set to ({}, {}).", worldWidth, worldHeight);
+
+    CreateCoreObjects();
 }
 
-mdcii::world::World::World(state::State* t_state, const std::string& t_fileName)
+mdcii::world::World::World(state::State* t_state, const nlohmann::json& t_json)
     : state{ t_state }
 {
     MDCII_LOG_DEBUG("[World::World()] Create World.");
 
     MDCII_ASSERT(state, "[World::World()] Null pointer.")
 
-    Init(t_fileName);
+    Init(t_json);
 }
 
 mdcii::world::World::~World() noexcept
@@ -299,14 +305,27 @@ bool mdcii::world::World::IsWorldPositionOutsideScreen(const int t_x, const int 
 // Init
 //-------------------------------------------------
 
-void mdcii::world::World::Init(const std::string& t_fileName)
+void mdcii::world::World::Init(const nlohmann::json& t_json)
 {
-    MDCII_LOG_DEBUG("[World::Init()] Start initializing the world from file {} ...", t_fileName);
+    MDCII_LOG_DEBUG("[World::Init()] Start initializing the world ...");
 
-    if (resource::MdciiFile mdciiFile{ t_fileName }; mdciiFile.SetJsonFromFile())
+    worldWidth = t_json.at("world").at("width").get<int>();
+    worldHeight = t_json.at("world").at("height").get<int>();
+
+    if (worldWidth <= 0 || worldHeight <= 0)
     {
-        mdciiFile.CreateWorldContentFromJson(this);
+        throw MDCII_EXCEPTION("[World::Init()] Invalid world size.");
     }
+
+    MDCII_LOG_DEBUG("[World::Init()] The size of the world is set to ({}, {}).", worldWidth, worldHeight);
+
+    std::vector<std::unique_ptr<Island>> newIslands;
+    for (const auto& [islandKeys, islandVars] : t_json["islands"].items())
+    {
+        newIslands.emplace_back(std::make_unique<Island>(this, islandVars));
+    }
+
+    islands = std::move(newIslands);
 
     CreateCoreObjects();
 
