@@ -17,6 +17,14 @@ You must have a copy of the original game installed on your computer.
 
 ### Using Vcpkg with CMake
 
+You can use any package manager. Currently, I'm using [Vcpkg](https://vcpkg.io/en/).
+
+I can't explain every IDE here, but the short `Vcpkg` story is as follows:
+- Clone/install and bootstrap [Vcpkg](https://github.com/Microsoft/vcpkg#getting-started) - Those who use the `CLion`
+  IDE can now use their Vcpkg plugin.
+- Install the [additional packages](#additional-requirements) mentioned below.
+- Link the Vcpkg toolchain file.
+
 ### Using Vcpkg with CMake and Visual Studio Code
 
 ### Included dependencies
