@@ -42,7 +42,7 @@ Make sure you are in the `Vcpkg` directory.
 
 **Step 3: Install libraries**
 
-Make sure you are in the `Vcpkg` directory and install the [Requirements](#requirements):
+Make sure you are in the `Vcpkg` directory and install the [Requirements](#additional-requirements):
 ```bash
 ./vcpkg install gettext-libintl spdlog imgui protobuf
 ```
