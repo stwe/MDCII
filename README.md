@@ -58,7 +58,7 @@ In the newly opened window, click the editor button to switch to text editing mo
 
 Now add the following line somewhere within the `settings.json` file
 
-```json
+``` json
 "cmake.configureSettings": {
     "CMAKE_TOOLCHAIN_FILE": "/home/your_name/vcpkg/scripts/buildsystems/vcpkg.cmake"
 }
