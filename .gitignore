@@ -48,5 +48,6 @@ cmake
 !/resources/textures/gfx/*
 !/resources/textures/mgfx/*
 !/resources/textures/sgfx/*
+!/resources/doc/VsSettings.png
 !/src/vendor/ini/LICENSE.txt
 !/src/vendor/imgui/LICENSE.txt
