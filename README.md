@@ -5,8 +5,6 @@ isometric game world.
 
 You must have a copy of the original game installed on your computer.
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/50ffb066523c4064ab513bef2f8d4628)](https://www.codacy.com/gh/stwe/MDCII/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=stwe/MDCII&amp;utm_campaign=Badge_Grade)
-
 * [Compiling MDCII](#compiling-mdcii)
 * [Running MDCII](#running-mdcii)
 * [Roadmap](#roadmap-mdcii-v02)
@@ -26,6 +24,47 @@ I can't explain every IDE here, but the short `Vcpkg` story is as follows:
 - Link the Vcpkg toolchain file.
 
 ### Using Vcpkg with CMake and Visual Studio Code
+
+To install `Vcpkg`, you can follow the official instructions on [GitHub](https://github.com/Microsoft/vcpkg#getting-started).
+
+**Step 1: Clone `Vcpkg`**
+
+```bash
+git clone https://github.com/Microsoft/vcpkg.git
+```
+
+**Step 2: Run the bootstrap script to build `Vcpkg`**
+
+Make sure you are in the `Vcpkg` directory.
+```bash
+./bootstrap-vcpkg.sh
+```
+
+**Step 3: Install libraries**
+
+Make sure you are in the `Vcpkg` directory and install the [Requirements](#requirements):
+```bash
+./vcpkg install gettext-libintl spdlog imgui protobuf
+```
+
+**Step 4: Linking the `Vcpkg` toolchain file**
+
+You will need the full path to your `Vcpkg` repository for linking the `Vcpkg` toolchain file.
+
+Open `settings.json` by selecting `File->Preferences->Settings`.
+In the newly opened window, click the editor button to switch to text editing mode. See mouse cursor on the image below.
+
+<img src="https://github.com/stwe/MDCII/blob/main/resources/doc/VsSettings.png" width="555" height="78" alt="" />
+
+Now add the following line somewhere within the `settings.json` file
+
+```json
+"cmake.configureSettings": {
+    "CMAKE_TOOLCHAIN_FILE": "/home/your_name/vcpkg/scripts/buildsystems/vcpkg.cmake"
+}
+```
+
+It is quite possible that some CMake caches have to be deleted or reloaded at this point.
 
 ### Included dependencies
 

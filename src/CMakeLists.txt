@@ -28,9 +28,6 @@ endif()
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/src)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
-target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
-
 # todo: olc with win64
 
 # linux
@@ -41,6 +38,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE imgui::imgui)
 target_link_libraries(${PROJECT_NAME} PRIVATE pulse-simple)
 target_link_libraries(${PROJECT_NAME} PRIVATE pulse)
 target_link_libraries(${PROJECT_NAME} PRIVATE Intl::Intl)
+target_link_libraries(${PROJECT_NAME} PRIVATE spdlog::spdlog spdlog::spdlog_header_only)
+target_link_libraries(${PROJECT_NAME} PRIVATE protobuf::libprotoc protobuf::libprotobuf protobuf::libprotobuf-lite)
 
 # copy config.ini
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
