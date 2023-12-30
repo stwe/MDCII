@@ -80,7 +80,7 @@ void mdcii::world::World::CreateCoreObjects()
     deepWater = std::make_unique<DeepWater>(this);
     renderer = std::make_unique<renderer::Renderer>(this);
     camera = std::make_unique<camera::Camera>(this);
-    mousePicker = std::make_unique<MousePicker>(this);
+    mousePicker = std::make_unique<MousePicker>(this, false);
 }
 
 //-------------------------------------------------
@@ -138,6 +138,28 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
         {
             if (auto mouseOverIsland{ island->IsMouseOverIsland() }; mouseOverIsland.has_value())
             {
+                state->game->DrawString(200, 4, fmt::format("Over island: {}, {}",
+                                        std::to_string(mouseOverIsland.value().x),
+                                        std::to_string(mouseOverIsland.value().y)),
+                                        olc::RED
+                                        );
+
+                // todo: render grid on position
+                Tile tile;
+                tile.posX = mouseOverIsland.value().x;
+                tile.posY = mouseOverIsland.value().y;
+
+                const auto& terrainTile{ island->GetLayer(LayerType::TERRAIN)->GetTile(tile.posX, tile.posY, camera->rotation) };
+
+                state->game->DrawString(200, 14, fmt::format("Terrain tile: {}, {}",
+                                        std::to_string(terrainTile.posX),
+                                        std::to_string(terrainTile.posY)),
+                                        olc::RED
+                );
+
+                renderer->RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, &tile);
+
+                /*
                 const auto* terrainLayer{ island->GetLayer(LayerType::TERRAIN) };
                 auto* buildingsLayer{ island->GetLayer(LayerType::BUILDINGS) };
 
@@ -201,6 +223,7 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                         }
                     }
                 }
+                */
             }
         }
 

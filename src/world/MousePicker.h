@@ -60,8 +60,9 @@ namespace mdcii::world
          * @brief Constructs a new MousePicker object.
          *
          * @param t_world Pointer to the parent World object.
+         * @param t_renderCursor The tile under the mouse is highlighted.
          */
-        explicit MousePicker(World* t_world);
+        explicit MousePicker(World* t_world, bool t_renderCursor = true);
 
         MousePicker(const MousePicker& t_other) = delete;
         MousePicker(MousePicker&& t_other) noexcept = delete;
@@ -113,6 +114,11 @@ namespace mdcii::world
          * @brief The mouse offset into cell.
          */
         olc::vi2d m_cellOffset;
+
+        /**
+         * @brief The tile under the mouse is highlighted.
+         */
+        bool m_renderCursor{ true };
 
         //-------------------------------------------------
         // Helper

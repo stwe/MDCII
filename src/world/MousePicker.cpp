@@ -28,8 +28,9 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::MousePicker::MousePicker(World* t_world)
+mdcii::world::MousePicker::MousePicker(World* t_world, bool t_renderCursor)
     : m_world{ t_world }
+    , m_renderCursor{ t_renderCursor }
 {
     MDCII_LOG_DEBUG("[MousePicker::MousePicker()] Create MousePicker.");
 
@@ -59,11 +60,20 @@ void mdcii::world::MousePicker::OnUserUpdate()
     {
         screenPosition.y -= get_elevation(m_world->camera->zoom);
     }
-    auto* mouseSprite{ m_world->state->game->assetManager->GetAsset(resource::Asset::PURPLE_ISO, m_world->camera->zoom)->Decal() };
 
-    m_world->state->game->DrawDecal(screenPosition, mouseSprite);
+    if (m_renderCursor)
+    {
+        auto* mouseSprite{ m_world->state->game->assetManager->GetAsset(resource::Asset::PURPLE_ISO, m_world->camera->zoom)->Decal() };
+        m_world->state->game->DrawDecal(screenPosition, mouseSprite);
+    }
 
-    m_world->state->game->DrawString(4, 4, fmt::format("Tile: {}, {}", std::to_string(selected.x), std::to_string(selected.y)), olc::WHITE);
+    auto col{ olc::WHITE };
+    if (selected.x < 0 || selected.y < 0)
+    {
+        col = olc::RED;
+    }
+
+    m_world->state->game->DrawString(4, 4, fmt::format("Tile: {}, {}", std::to_string(selected.x),std::to_string(selected.y)), col);
 }
 
 //-------------------------------------------------
