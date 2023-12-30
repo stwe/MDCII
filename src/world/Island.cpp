@@ -22,10 +22,7 @@
 #include "MousePicker.h"
 #include "MdciiAssert.h"
 #include "MdciiUtils.h"
-#include "Game.h"
-#include "Rotation.h"
-#include "resource/OriginalResourcesManager.h"
-#include "state/State.h"
+#include "vendor/enum/magic_enum.hpp"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -175,9 +172,9 @@ void mdcii::world::Island::InitLayerData()
 {
     MDCII_LOG_DEBUG("[Island::InitLayerData()] Initialises the tile data of the COAST, TERRAIN and BUILDINGS layer.");
 
-    InitLayerTiles(GetLayer(LayerType::COAST));
-    InitLayerTiles(GetLayer(LayerType::TERRAIN));
-    InitLayerTiles(GetLayer(LayerType::BUILDINGS));
+    GetLayer(LayerType::COAST)->InitLayerTiles();
+    GetLayer(LayerType::TERRAIN)->InitLayerTiles();
+    GetLayer(LayerType::BUILDINGS)->InitLayerTiles();
 }
 
 void mdcii::world::Island::InitMixedLayerData()
@@ -214,49 +211,9 @@ void mdcii::world::Island::PopulateMixedLayer(const int t_x, const int t_y)
     }
 }
 
-//-------------------------------------------------
-// Layer tiles
-//-------------------------------------------------
-
 bool mdcii::world::Island::ShouldReplaceTile(const Layer* t_layer, const int t_index)
 {
     return t_layer->tiles.at(t_index).HasBuilding() && !GetLayer(LayerType::BUILDINGS)->tiles.at(t_index).HasBuilding();
-}
-
-void mdcii::world::Island::InitLayerTiles(Layer* t_layer) const
-{
-    MDCII_LOG_DEBUG("[Island::InitLayerTiles()] Start initializing layer tiles for {} ...", magic_enum::enum_name(t_layer->layerType));
-
-    MDCII_ASSERT(!t_layer->tiles.empty(), "[Island::InitLayerTiles()] Invalid number of tiles.")
-
-    for (auto h{ 0 }; h < height; ++h)
-    {
-        for (auto w{ 0 }; w < width; ++w)
-        {
-            InitTileDetails(t_layer, w, h);
-        }
-    }
-
-    t_layer->SortTilesForRendering();
-
-    MDCII_LOG_DEBUG("[Island::InitLayerTiles()] The layer tiles were initialized successfully.");
-}
-
-void mdcii::world::Island::InitTileDetails(Layer* t_layer, const int t_x, const int t_y) const
-{
-    auto& tile{ t_layer->tiles.at(t_y * width + t_x) };
-    tile.posX = t_x;
-    tile.posY = t_y;
-
-    if (tile.HasBuilding())
-    {
-        tile.CalculateGfx();
-    }
-
-    tile.indices[0] = t_layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG0);
-    tile.indices[1] = t_layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG90);
-    tile.indices[2] = t_layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG180);
-    tile.indices[3] = t_layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG270);
 }
 
 //-------------------------------------------------

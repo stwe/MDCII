@@ -257,10 +257,6 @@ namespace mdcii::world
          */
         void PopulateMixedLayer(int t_x, int t_y);
 
-        //-------------------------------------------------
-        // Layer tiles
-        //-------------------------------------------------
-
         /**
          * @brief Checks if a tile should be replaced in the mixed layer.
          *
@@ -271,21 +267,6 @@ namespace mdcii::world
          */
         bool ShouldReplaceTile(const Layer* t_layer, int t_index);
 
-        /**
-         * @brief Initializes all layer tiles.
-         *
-         * @param t_layer Pointer to the Layer.
-         */
-        void InitLayerTiles(Layer* t_layer) const;
-
-        /**
-         * @brief Initializes the details of a single tile.
-         *
-         * @param t_layer Current layer being initialized.
-         * @param t_x The x coordinate of the tile.
-         * @param t_y The y coordinate of the tile.
-         */
-        void InitTileDetails(Layer* t_layer, int t_x, int t_y) const;
     };
 
     //-------------------------------------------------

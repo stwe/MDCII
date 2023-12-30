@@ -109,6 +109,42 @@ mdcii::world::Tile mdcii::world::Layer::CreateTile(const nlohmann::json& t_json)
     return tile;
 }
 
+void mdcii::world::Layer::InitLayerTiles()
+{
+    MDCII_LOG_DEBUG("[Layer::InitLayerTiles()] Start initializing layer tiles for {} ...", magic_enum::enum_name(layerType));
+
+    MDCII_ASSERT(!tiles.empty(), "[Layer::InitLayerTiles()] Invalid number of tiles.")
+
+    for (auto h{ 0 }; h < m_height; ++h)
+    {
+        for (auto w{ 0 }; w < m_width; ++w)
+        {
+            InitTileDetails(w, h);
+        }
+    }
+
+    SortTilesForRendering();
+
+    MDCII_LOG_DEBUG("[Layer::InitLayerTiles()] The layer tiles were initialized successfully.");
+}
+
+void mdcii::world::Layer::InitTileDetails(const int t_x, const int t_y)
+{
+    auto& tile{ tiles.at(t_y * m_width + t_x) };
+    tile.posX = t_x;
+    tile.posY = t_y;
+
+    if (tile.HasBuilding())
+    {
+        tile.CalculateGfx();
+    }
+
+    tile.indices[0] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG0);
+    tile.indices[1] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG90);
+    tile.indices[2] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG180);
+    tile.indices[3] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG270);
+}
+
 //-------------------------------------------------
 // Add
 //-------------------------------------------------

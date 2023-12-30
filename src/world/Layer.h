@@ -139,6 +139,8 @@ namespace mdcii::world
 
         void CreateLayerTiles(const nlohmann::json& t_json);
         Tile CreateTile(const nlohmann::json& t_json);
+        void InitLayerTiles();
+        void InitTileDetails(int t_x, int t_y);
 
         //-------------------------------------------------
         // Add
