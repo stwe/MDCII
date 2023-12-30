@@ -16,7 +16,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include <algorithm>
 #include "Layer.h"
 #include "Rotation.h"
 #include "MdciiAssert.h"
@@ -116,14 +115,18 @@ int mdcii::world::Layer::GetMapIndex(
     const Rotation t_rotation
 )
 {
-    const auto position{ rotate_position(t_x, t_y, t_width, t_height, t_rotation) };
+    const auto count{ t_width * t_height };
+    const auto position{ rotate_position(t_x - 1, t_y - 1, t_width, t_height, t_rotation) };
 
     if (t_rotation == world::Rotation::DEG0 || t_rotation == world::Rotation::DEG180)
     {
-        return position.y * t_width + position.x;
+        const auto result{ position.y * t_width + position.x };
+        MDCII_ASSERT(result <= count, "[Layer::GetMapIndex()] " + std::to_string(result) + " <= " + std::to_string(count))
+        return result;
     }
 
-    return position.y * t_height + position.x;
+    const auto result{ position.y * t_height + position.x };
+    return result;
 }
 
 int mdcii::world::Layer::GetMapIndex(const int t_x, const int t_y, const Rotation t_rotation) const

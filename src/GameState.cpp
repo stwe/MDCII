@@ -18,9 +18,9 @@
 
 #include "GameState.h"
 #include "MdciiAssert.h"
-#include "MdciiException.h"
 #include "Game.h"
 #include "world/World.h"
+#include "resource/MdciiResourcesManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -38,39 +38,18 @@ mdcii::GameState::~GameState() noexcept
 }
 
 //-------------------------------------------------
-// Create world
-//-------------------------------------------------
-
-bool mdcii::GameState::CreateWorldFromFile(resource::MdciiFile& t_mdciiFile)
-{
-    MDCII_LOG_DEBUG("[GameState::CreateWorldFromFile()] Create a world from MDCII Json file {}.", t_mdciiFile.GetFileName());
-
-    MDCII_ASSERT(!m_world, "[GameState::CreateWorldFromFile()] Invalid world pointer.")
-
-    if (t_mdciiFile.SetJsonFromFile())
-    {
-        m_world = std::make_unique<world::World>(this, t_mdciiFile.GetJson());
-
-        return true;
-    }
-
-    return false;
-}
-
-//-------------------------------------------------
 // Override
 //-------------------------------------------------
 
-bool mdcii::GameState::OnUserCreate()
+bool mdcii::GameState::OnUserCreate(void* t_data)
 {
     MDCII_LOG_DEBUG("[GameState::OnUserCreate()] Init GameState.");
 
-    if (!m_world)
-    {
-        throw MDCII_EXCEPTION("[GameState::OnUserCreate()] Missing world, use the LoadWorldFrom() method to load.");
-    }
+    auto* intData{ reinterpret_cast<int*>(t_data) };
+    MDCII_ASSERT(intData, "[GameState::OnUserCreate()] Null pointer.")
+    MDCII_ASSERT(*intData >= 0, "[GameState::OnUserCreate()] Invalid index given.")
 
-    return true;
+    return CreateWorldFromFile(game->mdciiResourcesManager->mapFiles.at(*intData));
 }
 
 bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
@@ -87,6 +66,25 @@ bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)
     m_world->OnUserUpdate(t_elapsedTime);
 
     return RenderImGui();
+}
+
+//-------------------------------------------------
+// Create world
+//-------------------------------------------------
+
+bool mdcii::GameState::CreateWorldFromFile(resource::MdciiFile& t_mdciiFile)
+{
+    MDCII_LOG_DEBUG("[GameState::CreateWorldFromFile()] Create a world from MDCII Json file {}.", t_mdciiFile.GetFileName());
+    MDCII_ASSERT(!m_world, "[GameState::CreateWorldFromFile()] Invalid world pointer.")
+
+    if (t_mdciiFile.SetJsonFromFile())
+    {
+        m_world = std::make_unique<world::World>(this, t_mdciiFile.GetJson());
+
+        return true;
+    }
+
+    return false;
 }
 
 //-------------------------------------------------

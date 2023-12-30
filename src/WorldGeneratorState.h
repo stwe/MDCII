@@ -78,7 +78,7 @@ namespace mdcii
         // Override
         //-------------------------------------------------
 
-        [[nodiscard]] bool OnUserCreate() override;
+        [[nodiscard]] bool OnUserCreate(void* t_data) override;
         [[nodiscard]] bool OnUserUpdate(float t_elapsedTime) override;
 
     protected:

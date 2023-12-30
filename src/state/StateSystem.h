@@ -61,12 +61,12 @@ namespace mdcii::state
         //-------------------------------------------------
 
         /**
-         * @brief A map of game states with their unique identifiers as keys.
+         * @brief A map of states with their unique identifiers as keys.
          */
         std::map<StateId, std::unique_ptr<State>> states;
 
         /**
-         * @brief Pointer to the current game state.
+         * @brief Raw pointer to the current State object.
          */
         State* currentState{ nullptr };
 
@@ -96,17 +96,20 @@ namespace mdcii::state
         void AddState(StateId t_stateId, std::unique_ptr<State> t_state);
 
         /**
-         * @brief Changes to the given state.
+         * @brief Changes to the specified state and calls the OnUserCreate() method of the State object.
          *
          * @param t_stateId The state to change to.
+         * @param t_data A pointer to custom data associated with the state.
+         *
+         * @return The result of the OnUserCreate() method (true or false).
          */
-        void ChangeState(StateId t_stateId);
+        [[nodiscard]] bool ChangeState(StateId t_stateId, void* t_data);
 
         //-------------------------------------------------
         // Logic
         //-------------------------------------------------
 
-        [[nodiscard]] bool OnUserCreate() const;
+        [[nodiscard]] bool OnUserCreate(void* t_data) const;
         [[nodiscard]] bool OnUserUpdate(float t_elapsedTime) const;
 
     protected:

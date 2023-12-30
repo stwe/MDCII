@@ -20,11 +20,7 @@
 #include "Log.h"
 #include "Game.h"
 #include "MdciiUtils.h"
-#include "GameState.h"
-#include "WorldGeneratorState.h"
 #include "state/StateSystem.h"
-#include "world/World.h"
-#include "world/WorldGenerator.h"
 #include "resource/MdciiResourcesManager.h"
 
 mdcii::MainMenuState::MainMenuState(Game* t_game)
@@ -42,7 +38,7 @@ mdcii::MainMenuState::~MainMenuState() noexcept
 // Override
 //-------------------------------------------------
 
-bool mdcii::MainMenuState::OnUserCreate()
+bool mdcii::MainMenuState::OnUserCreate(void* t_data)
 {
     MDCII_LOG_DEBUG("[MainMenuState::OnUserCreate()] Init MainMenuState.");
 
@@ -64,7 +60,6 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
     if (ImGui::Button("New Game"))
     {
         ImGui::OpenPopup("Select Map");
-
         ImGui::End();
 
         return true;
@@ -73,26 +68,12 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
     if (ImGui::BeginPopupModal("Select Map"))
     {
         c = render_mdcii_file_chooser(game->mdciiResourcesManager->mapFiles);
-
-        // a file is selected
         if (c >= 0)
         {
-            // change to state NEW_GAME
-            game->stateSystem->ChangeState(state::StateId::NEW_GAME);
-
-            // get the state NEW_GAME to load the world
-            auto* gameState{ dynamic_cast<GameState*>(game->stateSystem->states.at(state::StateId::NEW_GAME).get()) };
-            const auto result{ gameState->CreateWorldFromFile(game->mdciiResourcesManager->mapFiles.at(c)) };
-
             ImGui::EndPopup();
             ImGui::End();
 
-            if (!result)
-            {
-                return false;
-            }
-
-            return game->stateSystem->OnUserCreate();
+            return game->stateSystem->ChangeState(state::StateId::NEW_GAME, &c);
         }
 
         if (ImGui::Button("Close"))
@@ -108,7 +89,6 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
     if (ImGui::Button("Load Game"))
     {
         ImGui::OpenPopup("Select Saved Game");
-
         ImGui::End();
 
         return true;
@@ -119,20 +99,10 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
         c = render_mdcii_file_chooser(game->mdciiResourcesManager->saveGameFiles);
         if (c >= 0)
         {
-            game->stateSystem->ChangeState(state::StateId::LOAD_GAME);
-
-            auto* gameState{ dynamic_cast<GameState*>(game->stateSystem->states.at(state::StateId::LOAD_GAME).get()) };
-            const auto result{ gameState->CreateWorldFromFile(game->mdciiResourcesManager->saveGameFiles.at(c)) };
-
             ImGui::EndPopup();
             ImGui::End();
 
-            if (!result)
-            {
-                return false;
-            }
-
-            return game->stateSystem->OnUserCreate();
+            return game->stateSystem->ChangeState(state::StateId::LOAD_GAME, &c);
         }
 
         if (ImGui::Button("Close"))
@@ -147,11 +117,9 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
 
     if (ImGui::Button("Island Generator"))
     {
-        game->stateSystem->ChangeState(state::StateId::ISLAND_GENERATOR);
-
         ImGui::End();
 
-        return game->stateSystem->OnUserCreate();
+        return game->stateSystem->ChangeState(state::StateId::ISLAND_GENERATOR, nullptr);
     }
 
     // Start the world generator
@@ -159,20 +127,16 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
     if (ImGui::Button("World Generator"))
     {
         ImGui::OpenPopup("World Size");
-
         ImGui::End();
 
         return true;
     }
 
-    // todo:
     if (ImGui::BeginPopupModal("World Size"))
     {
-        static int x{ 96 };
-        ImGui::SliderInt("World width", &x, 96, 128);
-
-        static int y{ 96 };
-        ImGui::SliderInt("World height", &y, 96, 128);
+        static olc::vi2d size{ 96,96 };
+        ImGui::SliderInt("World width", &size.x, 96, 128);
+        ImGui::SliderInt("World height", &size.y, 96, 128);
 
         if (ImGui::Button("Generate World"))
         {
@@ -181,12 +145,7 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
             ImGui::EndPopup();
             ImGui::End();
 
-            game->stateSystem->ChangeState(state::StateId::WORLD_GENERATOR);
-
-            auto* genState{ dynamic_cast<WorldGeneratorState*>(game->stateSystem->states.at(state::StateId::WORLD_GENERATOR).get()) };
-            genState->worldGenerator->world = std::make_unique<world::World>(genState, x, y);
-
-            return game->stateSystem->OnUserCreate();
+            return game->stateSystem->ChangeState(state::StateId::WORLD_GENERATOR, &size);
         }
 
         if (ImGui::Button("Close"))

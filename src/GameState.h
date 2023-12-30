@@ -66,23 +66,10 @@ namespace mdcii
         ~GameState() noexcept override;
 
         //-------------------------------------------------
-        // Create world
-        //-------------------------------------------------
-
-        /**
-         * @brief Creates the world from a given MDCII Json file.
-         *
-         * @param t_file The MDCII Json file.
-         *
-         * @return Returns True if no error occurred, false otherwise.
-         */
-        [[nodiscard]] bool CreateWorldFromFile(resource::MdciiFile& t_mdciiFile);
-
-        //-------------------------------------------------
         // Override
         //-------------------------------------------------
 
-        [[nodiscard]] bool OnUserCreate() override;
+        [[nodiscard]] bool OnUserCreate(void* t_data) override;
         [[nodiscard]] bool OnUserUpdate(float t_elapsedTime) override;
 
     protected:
@@ -93,6 +80,19 @@ namespace mdcii
         //-------------------------------------------------
 
         std::unique_ptr<world::World> m_world;
+
+        //-------------------------------------------------
+        // Create world
+        //-------------------------------------------------
+
+        /**
+         * @brief Creates the world from a given MDCII Json file.
+         *
+         * @param t_mdciiFile The MDCII Json file.
+         *
+         * @return Returns true if no error occurred, false otherwise.
+         */
+        [[nodiscard]] bool CreateWorldFromFile(resource::MdciiFile& t_mdciiFile);
 
         //-------------------------------------------------
         // ImGui

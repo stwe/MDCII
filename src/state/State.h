@@ -75,7 +75,7 @@ namespace mdcii::state
         // Logic
         //-------------------------------------------------
 
-        [[nodiscard]] virtual bool OnUserCreate() = 0;
+        [[nodiscard]] virtual bool OnUserCreate(void* t_data) = 0;
         [[nodiscard]] virtual bool OnUserUpdate(float t_elapsedTime) = 0;
 
     protected:

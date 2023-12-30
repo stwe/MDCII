@@ -17,8 +17,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "WorldGeneratorState.h"
-#include "Log.h"
+#include "MdciiAssert.h"
 #include "Game.h"
+#include "world/World.h"
 #include "world/WorldGenerator.h"
 
 //-------------------------------------------------
@@ -29,8 +30,6 @@ mdcii::WorldGeneratorState::WorldGeneratorState(Game* t_game)
     : State(t_game)
 {
     MDCII_LOG_DEBUG("[WorldGeneratorState::WorldGeneratorState()] Create WorldGeneratorState.");
-
-    worldGenerator = std::make_unique<world::WorldGenerator>(this);
 }
 
 mdcii::WorldGeneratorState::~WorldGeneratorState() noexcept
@@ -42,9 +41,15 @@ mdcii::WorldGeneratorState::~WorldGeneratorState() noexcept
 // Override
 //-------------------------------------------------
 
-bool mdcii::WorldGeneratorState::OnUserCreate()
+bool mdcii::WorldGeneratorState::OnUserCreate(void* t_data)
 {
     MDCII_LOG_DEBUG("[WorldGeneratorState::OnUserCreate()] Init WorldGeneratorState.");
+
+    auto* vi2dData{ reinterpret_cast<olc::vi2d*>(t_data) };
+    MDCII_ASSERT(vi2dData, "[WorldGeneratorState::OnUserCreate()] Null pointer.")
+
+    worldGenerator = std::make_unique<world::WorldGenerator>(this);
+    worldGenerator->world = std::make_unique<world::World>(this, vi2dData->x, vi2dData->y);
 
     return true;
 }

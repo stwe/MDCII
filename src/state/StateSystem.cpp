@@ -44,23 +44,27 @@ void mdcii::state::StateSystem::AddState(const StateId t_stateId, std::unique_pt
     states.emplace(t_stateId, std::move(t_state));
 }
 
-void mdcii::state::StateSystem::ChangeState(const StateId t_stateId)
+bool mdcii::state::StateSystem::ChangeState(const StateId t_stateId, void* t_data)
 {
     if (states.contains(t_stateId))
     {
         currentState = states.at(t_stateId).get();
+
+        return currentState->OnUserCreate(t_data);
     }
+
+    return false;
 }
 
 //-------------------------------------------------
 // Logic
 //-------------------------------------------------
 
-bool mdcii::state::StateSystem::OnUserCreate() const
+bool mdcii::state::StateSystem::OnUserCreate(void* t_data) const
 {
     if (currentState)
     {
-        return currentState->OnUserCreate();
+        return currentState->OnUserCreate(t_data);
     }
 
     return false;

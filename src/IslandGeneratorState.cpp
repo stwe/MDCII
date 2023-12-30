@@ -40,7 +40,7 @@ mdcii::IslandGeneratorState::~IslandGeneratorState() noexcept
 // Override
 //-------------------------------------------------
 
-bool mdcii::IslandGeneratorState::OnUserCreate()
+bool mdcii::IslandGeneratorState::OnUserCreate(void* t_data)
 {
     MDCII_LOG_DEBUG("[IslandGeneratorState::OnUserCreate()] Init IslandGeneratorState.");
 
