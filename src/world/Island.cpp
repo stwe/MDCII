@@ -32,14 +32,14 @@
 //-------------------------------------------------
 
 mdcii::world::Island::Island(const World* t_world, const nlohmann::json& t_json)
-    : m_world{ t_world }
+    : world{ t_world }
 {
     MDCII_LOG_DEBUG("[Island::Island()] Create Island.");
 
-    MDCII_ASSERT(m_world, "[Island::Island()] Null pointer.")
+    MDCII_ASSERT(world, "[Island::Island()] Null pointer.")
     MDCII_ASSERT(!t_json.empty(), "[Island::Island()] Invalid Json value.")
 
-    SetSizeAndPosition(t_json);
+    SetIslandData(t_json);
     SetLayerData(t_json);
 
     InitLayerData();
@@ -76,11 +76,11 @@ bool mdcii::world::Island::IsWorldPositionOverIsland(const olc::vi2d& t_position
 
 std::optional<olc::vi2d> mdcii::world::Island::IsMouseOverIsland() const
 {
-    if (IsWorldPositionInAabb(m_world->mousePicker->selected))
+    if (IsWorldPositionInAabb(world->mousePicker->selected))
     {
         return olc::vi2d(
-            m_world->mousePicker->selected.x - startX,
-            m_world->mousePicker->selected.y - startY
+            world->mousePicker->selected.x - startX,
+            world->mousePicker->selected.y - startY
         );
     }
 
@@ -88,12 +88,12 @@ std::optional<olc::vi2d> mdcii::world::Island::IsMouseOverIsland() const
 }
 
 //-------------------------------------------------
-// Set from Json
+// Set layer data from Json
 //-------------------------------------------------
 
-void mdcii::world::Island::SetSizeAndPosition(const nlohmann::json& t_json)
+void mdcii::world::Island::SetIslandData(const nlohmann::json& t_json)
 {
-    MDCII_LOG_DEBUG("[Island::SetSizeAndPosition()] Sets the island's size and position.");
+    MDCII_LOG_DEBUG("[Island::SetIslandData()] Sets the island's size, position and climate zone.");
 
     width = t_json.at("width").get<int>();
     height = t_json.at("height").get<int>();
@@ -123,8 +123,8 @@ void mdcii::world::Island::SetSizeAndPosition(const nlohmann::json& t_json)
 
     m_aabb = physics::Aabb(olc::vi2d(startX, startY), olc::vi2d(width, height));
 
-    MDCII_LOG_DEBUG("[Island::SetSizeAndPosition()] The size of the island is ({}, {}).", width, height);
-    MDCII_LOG_DEBUG("[Island::SetSizeAndPosition()] The island starts at position ({}, {}).", startX, startY);
+    MDCII_LOG_DEBUG("[Island::SetIslandData()] The size of the island is ({}, {}).", width, height);
+    MDCII_LOG_DEBUG("[Island::SetIslandData()] The island starts at position ({}, {}).", startX, startY);
 }
 
 void mdcii::world::Island::SetLayerData(const nlohmann::json& t_json)
@@ -132,19 +132,19 @@ void mdcii::world::Island::SetLayerData(const nlohmann::json& t_json)
     MDCII_LOG_DEBUG("[Island::SetLayerData()] Sets the island's layer data.");
 
     // the data for these three island layers is read from a file
-    InitLayerByType(t_json, LayerType::COAST);
-    InitLayerByType(t_json, LayerType::TERRAIN);
-    InitLayerByType(t_json, LayerType::BUILDINGS);
+    SetLayerDataByType(t_json, LayerType::COAST);
+    SetLayerDataByType(t_json, LayerType::TERRAIN);
+    SetLayerDataByType(t_json, LayerType::BUILDINGS);
 
-    // this island layer will later be filled with the data from the other layers
-    layers.at(magic_enum::enum_integer(LayerType::MIXED)) = std::make_unique<Layer>(LayerType::MIXED, width, height);
+    // this mixed layer will later be filled with the data from the other layers
+    layers.at(magic_enum::enum_integer(LayerType::MIXED)) = std::make_unique<Layer>(world, LayerType::MIXED, width, height);
 }
 
-void mdcii::world::Island::InitLayerByType(const nlohmann::json& t_json, LayerType t_layerType)
+void mdcii::world::Island::SetLayerDataByType(const nlohmann::json& t_json, LayerType t_layerType)
 {
-    MDCII_LOG_DEBUG("[Island::InitLayerByType()] Create and init island layer {}.", magic_enum::enum_name(t_layerType));
+    MDCII_LOG_DEBUG("[Island::SetLayerDataByType()] Sets the island's layer data of type {}.", magic_enum::enum_name(t_layerType));
 
-    layers.at(magic_enum::enum_integer(t_layerType)) = std::make_unique<Layer>(t_layerType, width, height);
+    layers.at(magic_enum::enum_integer(t_layerType)) = std::make_unique<Layer>(world, t_layerType, width, height);
 
     for (auto layerJson = t_json.at("layers").items(); const auto& [k, v] : layerJson)
     {
@@ -152,55 +152,9 @@ void mdcii::world::Island::InitLayerByType(const nlohmann::json& t_json, LayerTy
         {
             if (layerNameJson == to_lower_case(std::string(magic_enum::enum_name(t_layerType))))
             {
-                CreateLayerTiles(layers.at(magic_enum::enum_integer(t_layerType)).get(), layerTilesJson);
-
-                MDCII_ASSERT(layers.at(magic_enum::enum_integer(t_layerType))->tiles.size() == width * static_cast<size_t>(height),
-                    "[Island::InitLayerByType()] Invalid number of tiles.")
+                GetLayer(t_layerType)->CreateLayerTiles(layerTilesJson);
             }
         }
-    }
-}
-
-void mdcii::world::Island::CreateLayerTiles(Layer* t_layer, const nlohmann::json& t_json) const
-{
-    MDCII_LOG_DEBUG("[Island::CreateLayerTiles()] Create layer tiles for layer of type {}.", magic_enum::enum_name(t_layer->layerType));
-
-    for (const auto& [k, tileJson] : t_json.items())
-    {
-        world::Tile tile;
-        ExtractTileData(tileJson, &tile);
-        t_layer->tiles.push_back(tile);
-    }
-}
-
-void mdcii::world::Island::ExtractTileData(const nlohmann::json& t_json, Tile* t_tileTarget) const
-{
-    if (t_json.count("id") && t_json.at("id") >= 0)
-    {
-        if (m_world)
-        {
-            const auto& building{ m_world->state->game->originalResourcesManager->GetBuildingById(t_json.at("id")) };
-            t_tileTarget->building = &building;
-        }
-        else
-        {
-            throw MDCII_EXCEPTION("[Island::ExtractTileData()] Null pointer.");
-        }
-    }
-
-    if (t_json.count("rotation"))
-    {
-        t_tileTarget->rotation = t_json.at("rotation");
-    }
-
-    if (t_json.count("x"))
-    {
-        t_tileTarget->x = t_json.at("x");
-    }
-
-    if (t_json.count("y"))
-    {
-        t_tileTarget->y = t_json.at("y");
     }
 }
 
@@ -214,59 +168,49 @@ bool mdcii::world::Island::IsWorldPositionInAabb(const olc::vi2d& t_position) co
 }
 
 //-------------------------------------------------
-// Layer data
+// Init layer data
 //-------------------------------------------------
 
 void mdcii::world::Island::InitLayerData()
 {
-    MDCII_LOG_DEBUG("[Island::InitLayerData()] Initialises the data of the COAST, TERRAIN and BUILDINGS layer.");
+    MDCII_LOG_DEBUG("[Island::InitLayerData()] Initialises the tile data of the COAST, TERRAIN and BUILDINGS layer.");
 
-    for (auto i{ 0 }; i < NR_OF_LAYERS - 1; ++i)
-    {
-        InitLayerTiles(layers.at(i).get());
-    }
+    InitLayerTiles(GetLayer(LayerType::COAST));
+    InitLayerTiles(GetLayer(LayerType::TERRAIN));
+    InitLayerTiles(GetLayer(LayerType::BUILDINGS));
 }
 
 void mdcii::world::Island::InitMixedLayerData()
 {
-    MDCII_LOG_DEBUG("[Island::InitMixedLayerData()] Initializing the MIXED layer data of the island.");
+    MDCII_LOG_DEBUG("[Island::InitMixedLayerData()] Initializing the MIXED layer tile data.");
 
-    const auto* buildingsLayer{ layers.at(magic_enum::enum_integer(LayerType::BUILDINGS)).get() };
-    const auto* terrainLayer{ layers.at(magic_enum::enum_integer(LayerType::TERRAIN)).get() };
-    const auto* coastLayer{ layers.at(magic_enum::enum_integer(LayerType::COAST)).get() };
-    auto* mixedLayer{ layers.at(magic_enum::enum_integer(LayerType::MIXED)).get() };
-    mixedLayer->tiles = buildingsLayer->tiles;
+    GetLayer(LayerType::MIXED)->tiles = GetLayer(LayerType::BUILDINGS)->tiles;
 
     for (auto h{ 0 }; h < height; ++h)
     {
         for (auto w{ 0 }; w < width; ++w)
         {
-            PopulateMixedLayer(coastLayer, terrainLayer, buildingsLayer, mixedLayer, w, h);
+            PopulateMixedLayer(w, h);
         }
     }
 
-    mixedLayer->SortTilesForRendering();
+    GetLayer(LayerType::MIXED)->SortTilesForRendering();
 }
 
-void mdcii::world::Island::PopulateMixedLayer(
-    const Layer* t_coastLayer,
-    const Layer* t_terrainLayer,
-    const Layer* t_buildingsLayer,
-    Layer* t_mixedLayer,
-    const int t_x,
-    const int t_y
-) const
+void mdcii::world::Island::PopulateMixedLayer(const int t_x, const int t_y)
 {
     const auto index{ t_y * width + t_x };
 
-    if (ShouldReplaceTile(t_coastLayer, t_buildingsLayer, index))
+    MDCII_ASSERT(index >= 0 && index < width * height, "[Island::PopulateMixedLayer()] Invalid index.")
+
+    if (ShouldReplaceTile(GetLayer(LayerType::COAST), index))
     {
-        t_mixedLayer->tiles.at(index) = t_coastLayer->tiles.at(index);
+        GetLayer(LayerType::MIXED)->tiles.at(index) = GetLayer(LayerType::COAST)->tiles.at(index);
     }
 
-    if (ShouldReplaceTile(t_terrainLayer, t_buildingsLayer, index))
+    if (ShouldReplaceTile(GetLayer(LayerType::TERRAIN), index))
     {
-        t_mixedLayer->tiles.at(index) = t_terrainLayer->tiles.at(index);
+        GetLayer(LayerType::MIXED)->tiles.at(index) = GetLayer(LayerType::TERRAIN)->tiles.at(index);
     }
 }
 
@@ -274,9 +218,9 @@ void mdcii::world::Island::PopulateMixedLayer(
 // Layer tiles
 //-------------------------------------------------
 
-bool mdcii::world::Island::ShouldReplaceTile(const Layer* t_layer, const Layer* t_buildingsLayer, int t_index)
+bool mdcii::world::Island::ShouldReplaceTile(const Layer* t_layer, const int t_index)
 {
-    return t_layer->tiles.at(t_index).HasBuilding() && !t_buildingsLayer->tiles.at(t_index).HasBuilding();
+    return t_layer->tiles.at(t_index).HasBuilding() && !GetLayer(LayerType::BUILDINGS)->tiles.at(t_index).HasBuilding();
 }
 
 void mdcii::world::Island::InitLayerTiles(Layer* t_layer) const

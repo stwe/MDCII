@@ -45,11 +45,10 @@ bool mdcii::GameState::OnUserCreate(void* t_data)
 {
     MDCII_LOG_DEBUG("[GameState::OnUserCreate()] Init GameState.");
 
-    auto* intData{ reinterpret_cast<int*>(t_data) };
-    MDCII_ASSERT(intData, "[GameState::OnUserCreate()] Null pointer.")
-    MDCII_ASSERT(*intData >= 0, "[GameState::OnUserCreate()] Invalid index given.")
+    auto* data{ reinterpret_cast<resource::MdciiFile*>(t_data) };
+    MDCII_ASSERT(data, "[GameState::OnUserCreate()] Null pointer.")
 
-    return CreateWorldFromFile(game->mdciiResourcesManager->mapFiles.at(*intData));
+    return CreateWorldFromFile(*data);
 }
 
 bool mdcii::GameState::OnUserUpdate(const float t_elapsedTime)

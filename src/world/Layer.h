@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Tile.h"
-#include "vendor/enum/magic_enum.hpp"
 
 namespace mdcii::world
 {
@@ -31,6 +30,11 @@ namespace mdcii::world
      * @brief Forward declaration enum class Rotation.
      */
     enum class Rotation;
+
+    /**
+     * @brief Forward declaration class World.
+     */
+    class World;
 
     //-------------------------------------------------
     // LayerType
@@ -89,11 +93,12 @@ namespace mdcii::world
         /**
          * @brief Constructs a new Layer object.
          *
+         * @param t_world Pointer to the parent World object.
          * @param t_layerType The type of the layer.
          * @param t_width The width of the layer.
          * @param t_height The height of the layer.
          */
-        Layer(LayerType t_layerType, int t_width, int t_height);
+        Layer(const World* t_world, LayerType t_layerType, int t_width, int t_height);
 
         Layer(const Layer& t_other) = delete;
         Layer(Layer&& t_other) noexcept = delete;
@@ -127,6 +132,13 @@ namespace mdcii::world
          * @return A const reference to the Tile at the specified position and rotation.
          */
         [[nodiscard]] const Tile& GetTile(int t_x, int t_y, Rotation t_rotation) const;
+
+        //-------------------------------------------------
+        // Create Tiles
+        //-------------------------------------------------
+
+        void CreateLayerTiles(const nlohmann::json& t_json);
+        Tile CreateTile(const nlohmann::json& t_json);
 
         //-------------------------------------------------
         // Add
@@ -188,6 +200,11 @@ namespace mdcii::world
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
+
+        /**
+         * @brief Pointer to the parent World object.
+         */
+        const World* m_world{ nullptr };
 
         /**
          * @brief The width of the layer.

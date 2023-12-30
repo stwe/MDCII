@@ -84,6 +84,11 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
+         * @brief Pointer to the parent World object.
+         */
+        const World* world{ nullptr };
+
+        /**
          * @brief The width of the island.
          */
         int width{ -1 };
@@ -184,11 +189,6 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief Pointer to the parent World object.
-         */
-        const World* m_world{ nullptr };
-
-        /**
          * @brief An Aabb (axis-aligned bounding box) object for collision detection.
          *
          * The Aabb is constructed from startX and startY variables, along with width and height.
@@ -197,46 +197,30 @@ namespace mdcii::world
         physics::Aabb m_aabb;
 
         //-------------------------------------------------
-        // Set from Json
+        // Set layer data from Json
         //-------------------------------------------------
 
         /**
-         * Sets the size and position of the island from a Json value.
+         * @brief Sets the size, position and climate zone of the island from a Json value.
          *
-         * @param t_json The Json value containing the size and position of the island.
+         * @param t_json The Json value containing the data to set.
          */
-        void SetSizeAndPosition(const nlohmann::json& t_json);
+        void SetIslandData(const nlohmann::json& t_json);
 
         /**
-         * Sets the island's layer data using a Json value.
+         * @brief Sets the island's tile data of all layers using a Json value.
          *
-         * @param t_json The Json value containing the island's tile data.
+         * @param t_json The Json value containing the tile data to set.
          */
         void SetLayerData(const nlohmann::json& t_json);
 
         /**
-         * @brief Init Layer by type.
+         * @brief Sets the tile data of the given layer type using a Json value.
          *
-         * @param t_json Json variables related to the layer details.
+         * @param t_json The Json value containing the tile data to set.
          * @param t_layerType The type of layer.
          */
-        void InitLayerByType(const nlohmann::json& t_json, LayerType t_layerType);
-
-        /**
-         * @brief Create layer tiles according to the provided JSON data.
-         *
-         * @param t_layer Pointer to the target Layer object.
-         * @param t_json Source Json data.
-         */
-        void CreateLayerTiles(Layer* t_layer, const nlohmann::json& t_json) const;
-
-        /**
-         * @brief Extract tile data from Json and save it to the Tile object.
-         *
-         * @param t_json Source Json data.
-         * @param t_tileTarget Pointer to the target Tile object.
-         */
-        void ExtractTileData(const nlohmann::json& t_json, Tile* t_tileTarget) const;
+        void SetLayerDataByType(const nlohmann::json& t_json, LayerType t_layerType);
 
         //-------------------------------------------------
         // Helper
@@ -252,11 +236,11 @@ namespace mdcii::world
         [[nodiscard]] bool IsWorldPositionInAabb(const olc::vi2d& t_position) const;
 
         //-------------------------------------------------
-        // Layer data
+        // Init layer data
         //-------------------------------------------------
 
         /**
-         * @brief Initialises the data of the COAST, TERRAIN and BUILDINGS layer.
+         * @brief Initialises the tile data of the COAST, TERRAIN and BUILDINGS layer.
          */
         void InitLayerData();
 
@@ -268,14 +252,10 @@ namespace mdcii::world
         /**
          * @brief Populates the mixed layer with data from other layers.
          *
-         * @param t_coastLayer Coast layer of the island.
-         * @param t_terrainLayer Terrain layer of the island.
-         * @param t_buildingsLayer Buildings layer of the island.
-         * @param t_mixedLayer The mixed layer to be populated.
-         * @param t_x The x position
-         * @param t_y The y position.
+         * @param t_x The tile x position.
+         * @param t_y The tile y position.
          */
-        void PopulateMixedLayer(const Layer* t_coastLayer, const Layer* t_terrainLayer, const Layer* t_buildingsLayer, Layer* t_mixedLayer, int t_x, int t_y) const;
+        void PopulateMixedLayer(int t_x, int t_y);
 
         //-------------------------------------------------
         // Layer tiles
@@ -285,12 +265,11 @@ namespace mdcii::world
          * @brief Checks if a tile should be replaced in the mixed layer.
          *
          * @param t_layer Layer to check the tile from.
-         * @param t_buildingsLayer Buildings layer of the island.
          * @param t_index Index of the tile to check.
          *
          * @return True if the tile should be replaced; false otherwise.
          */
-        static bool ShouldReplaceTile(const Layer* t_layer, const Layer* t_buildingsLayer, int t_index);
+        bool ShouldReplaceTile(const Layer* t_layer, int t_index);
 
         /**
          * @brief Initializes all layer tiles.

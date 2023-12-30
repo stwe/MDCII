@@ -66,7 +66,7 @@ void mdcii::world::DeepWater::InitLayer()
 {
     MDCII_LOG_DEBUG("[DeepWater::InitLayer()] Init deep water layer.");
 
-    layer = std::make_unique<Layer>(LayerType::DEEP_WATER, m_world->worldWidth, m_world->worldHeight);
+    layer = std::make_unique<Layer>(m_world, LayerType::DEEP_WATER, m_world->worldWidth, m_world->worldHeight);
     layer->tiles.resize(m_world->worldWidth * m_world->worldHeight);
 
     for (auto y{ 0 }; y < m_world->worldHeight; ++y)

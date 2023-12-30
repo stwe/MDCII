@@ -73,7 +73,8 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
             ImGui::EndPopup();
             ImGui::End();
 
-            return game->stateSystem->ChangeState(state::StateId::NEW_GAME, &c);
+            auto& mdciiFile{ game->mdciiResourcesManager->mapFiles.at(c) };
+            return game->stateSystem->ChangeState(state::StateId::NEW_GAME, &mdciiFile);
         }
 
         if (ImGui::Button("Close"))
@@ -102,7 +103,8 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
             ImGui::EndPopup();
             ImGui::End();
 
-            return game->stateSystem->ChangeState(state::StateId::LOAD_GAME, &c);
+            auto& mdciiFile{ game->mdciiResourcesManager->saveGameFiles.at(c) };
+            return game->stateSystem->ChangeState(state::StateId::LOAD_GAME, &mdciiFile);
         }
 
         if (ImGui::Button("Close"))
