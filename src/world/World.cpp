@@ -80,7 +80,7 @@ void mdcii::world::World::CreateCoreObjects()
     deepWater = std::make_unique<DeepWater>(this);
     renderer = std::make_unique<renderer::Renderer>(this);
     camera = std::make_unique<camera::Camera>(this);
-    mousePicker = std::make_unique<MousePicker>(this, false);
+    mousePicker = std::make_unique<MousePicker>(this, true);
 }
 
 //-------------------------------------------------
@@ -111,8 +111,8 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
 
     // render
     renderer::Renderer::CalcAnimationFrame(t_elapsedTime);
-    renderer->RenderDeepWater();
-    renderer->RenderIslands();
+    renderer->RenderDeepWater(m_renderDeepWaterGrid);
+    renderer->RenderIslands(m_renderIslandsGrid);
 
     // ---------------------------------
     // todo: Rendering depends on ImGui
@@ -138,6 +138,8 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
         {
             if (auto mouseOverIsland{ island->IsMouseOverIsland() }; mouseOverIsland.has_value())
             {
+                // todo:
+
                 state->game->DrawString(200, 4, fmt::format("Over island: {}, {}",
                                         std::to_string(mouseOverIsland.value().x),
                                         std::to_string(mouseOverIsland.value().y)),
@@ -157,7 +159,8 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                                         olc::RED
                 );
 
-                renderer->RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, &tile);
+                // the mouse is already calculated for terrain or deep water
+                renderer->RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, &tile, false);
 
                 /*
                 const auto* terrainLayer{ island->GetLayer(LayerType::TERRAIN) };
@@ -250,6 +253,11 @@ void mdcii::world::World::RenderImGui()
     static auto renderBuildingsLayer{ false };
     static auto renderMixedLayer{ true };
     static auto renderDeepWaterLayer{ true };
+
+    ImGui::Checkbox("Render islands terrain grid", &m_renderIslandsGrid);
+    ImGui::Checkbox("Render deep water grid", &m_renderDeepWaterGrid);
+
+    ImGui::Separator();
 
     if (ImGui::Checkbox("Render Coast Layer", &renderCoastLayer))
     {

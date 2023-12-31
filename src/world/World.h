@@ -261,6 +261,16 @@ namespace mdcii::world
          */
         bool m_flag{ true };
 
+        /**
+         * @brief Renders a grid on the deep water.
+         */
+        bool m_renderDeepWaterGrid{ false };
+
+        /**
+         * @brief Renders a grid on all the islands terrain.
+         */
+        bool m_renderIslandsGrid{ false };
+
         //-------------------------------------------------
         // Init
         //-------------------------------------------------

@@ -121,11 +121,15 @@ void mdcii::renderer::Renderer::RenderAsset(
     const int t_startX,
     const int t_startY,
     const world::Tile* t_tile,
+    const bool t_minusElevation,
     const olc::Pixel& t_tint
 ) const
 {
     olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
-    screenPosition.y -= world::ELEVATIONS[magic_enum::enum_integer(m_world->camera->zoom)];
+    if (t_minusElevation)
+    {
+        screenPosition.y -= world::ELEVATIONS[magic_enum::enum_integer(m_world->camera->zoom)];
+    }
 
     m_world->state->game->DrawDecal(
         screenPosition,
@@ -178,7 +182,7 @@ void mdcii::renderer::Renderer::CalcAnimationFrame(const float t_elapsedTime)
     }
 }
 
-void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island, const world::LayerType t_layerType) const
+void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island, const world::LayerType t_layerType, const bool t_renderGrid) const
 {
     for (auto& tile : t_island->layers[magic_enum::enum_integer(t_layerType)]->currentTiles)
     {
@@ -186,37 +190,41 @@ void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island, cons
         {
             tile.UpdateFrame(m_frame_values);
             RenderBuilding(t_island->startX, t_island->startY, &tile);
+            if (t_renderGrid)
+            {
+                RenderAsset(resource::Asset::GREEN_ISO, t_island->startX, t_island->startY, &tile, true);
+            }
         }
     }
 }
 
-void mdcii::renderer::Renderer::RenderIslands() const
+void mdcii::renderer::Renderer::RenderIslands(const bool t_renderGrid) const
 {
     for (auto const& island : m_world->currentIslands)
     {
         if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_MIXED_LAYER))
         {
-            RenderIsland(island, world::LayerType::MIXED);
+            RenderIsland(island, world::LayerType::MIXED, t_renderGrid);
         }
         else
         {
             if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_COAST_LAYER))
             {
-                RenderIsland(island, world::LayerType::COAST);
+                RenderIsland(island, world::LayerType::COAST, false);
             }
             if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_TERRAIN_LAYER))
             {
-                RenderIsland(island, world::LayerType::TERRAIN);
+                RenderIsland(island, world::LayerType::TERRAIN, t_renderGrid);
             }
             if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_BUILDINGS_LAYER))
             {
-                RenderIsland(island, world::LayerType::BUILDINGS);
+                RenderIsland(island, world::LayerType::BUILDINGS, t_renderGrid);
             }
         }
     }
 }
 
-void mdcii::renderer::Renderer::RenderDeepWater() const
+void mdcii::renderer::Renderer::RenderDeepWater(const bool t_renderGrid) const
 {
     if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_DEEP_WATER_LAYER))
     {
@@ -224,6 +232,10 @@ void mdcii::renderer::Renderer::RenderDeepWater() const
         {
             tile.UpdateFrame(m_frame_values);
             RenderBuilding(0, 0, &tile);
+            if (t_renderGrid)
+            {
+                RenderAsset(resource::Asset::BLUE_ISO, 0, 0, &tile, false);
+            }
         }
     }
 }
