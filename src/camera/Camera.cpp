@@ -109,8 +109,8 @@ bool mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
     screenPosition.x = worldPosition.x * get_tile_width(zoom);
     screenPosition.y = worldPosition.y * get_tile_height(zoom);
 
-    m_world->state->game->DrawString(4, 14, fmt::format("Camera world: {}, {}", std::to_string(worldPosition.x), std::to_string(worldPosition.y)), olc::WHITE);
-    m_world->state->game->DrawString(4, 24, fmt::format("Camera screen: {}, {}", std::to_string(screenPosition.x), std::to_string(screenPosition.y)), olc::WHITE);
+    m_world->state->game->DrawString(4, 4, fmt::format("Camera world: {}, {}", std::to_string(worldPosition.x), std::to_string(worldPosition.y)), olc::WHITE);
+    m_world->state->game->DrawString(4, 14, fmt::format("Camera screen: {}, {}", std::to_string(screenPosition.x), std::to_string(screenPosition.y)), olc::WHITE);
 
     return dirty;
 }
