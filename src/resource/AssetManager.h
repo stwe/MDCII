@@ -54,7 +54,7 @@ namespace mdcii::resource
      */
     enum class Asset
     {
-        CHEAT, RECT, GREEN_ISO, PURPLE_ISO
+        CHEAT, RECT, GREEN_ISO, PURPLE_ISO, BLUE_ISO
     };
 
     /**
@@ -67,7 +67,7 @@ namespace mdcii::resource
      */
     static constexpr std::array<const char*, NR_OF_ASSETS> ASSET_FILE_NAMES
     {
-        "corner", "frame", "green", "mouse"
+        "corner", "frame", "green", "mouse", "blue"
     };
 
     //-------------------------------------------------
