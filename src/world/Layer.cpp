@@ -209,7 +209,10 @@ int mdcii::world::Layer::GetMapIndex(
     const Rotation t_rotation
 )
 {
-    const auto position{ rotate_position(t_x - 1, t_y - 1, t_width, t_height, t_rotation) };
+    MDCII_ASSERT(t_x >= 0 && t_x < t_width, "[Layer::GetMapIndex()] Invalid x position given.")
+    MDCII_ASSERT(t_y >= 0 && t_y < t_height, "[Layer::GetMapIndex()] Invalid y position given.")
+
+    const auto position{ rotate_position(t_x, t_y, t_width, t_height, t_rotation) };
 
     if (t_rotation == world::Rotation::DEG0 || t_rotation == world::Rotation::DEG180)
     {

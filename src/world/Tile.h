@@ -133,6 +133,11 @@ namespace mdcii::world
          */
         int frame{ 0 };
 
+        /**
+         * @brief Can be used as a flag to highlight the tile.
+         */
+        int tintFlag{ -1 };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
