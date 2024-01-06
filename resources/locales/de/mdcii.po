@@ -121,3 +121,9 @@ msgstr "Datei auswählen"
 
 msgid "Missing Files"
 msgstr "Keine Datei vorhanden"
+
+msgid "Game Menu"
+msgstr "Spielmenü"
+
+msgid "Exit Game"
+msgstr "Spiel beenden"

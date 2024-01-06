@@ -121,3 +121,9 @@ msgstr ""
 
 msgid "Missing Files"
 msgstr ""
+
+msgid "Game Menu"
+msgstr ""
+
+msgid "Exit Game"
+msgstr ""

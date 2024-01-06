@@ -19,6 +19,7 @@
 #include "GameState.h"
 #include "MdciiAssert.h"
 #include "Game.h"
+#include "Intl.h"
 #include "world/World.h"
 #include "resource/MdciiResourcesManager.h"
 
@@ -98,8 +99,8 @@ bool mdcii::GameState::RenderImGui() const
     );
     constexpr ImGuiWindowFlags flags{ ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings };
 
-    ImGui::Begin("GameMenu", nullptr, flags);
-    if (ImGui::Button("Exit Game"))
+    ImGui::Begin(_("Game Menu"), nullptr, flags);
+    if (ImGui::Button(_("Exit Game")))
     {
         ImGui::End();
         return false;
