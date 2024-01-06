@@ -120,17 +120,6 @@ void mdcii::world::Gui::RotatableBuildingGui(const resource::Building* t_buildin
 
         ImGui::SameLine();
 
-        /*
-        ImGui::Image(
-            textureId,
-            ImVec2(static_cast<float>(textureWidth), static_cast<float>(textureHeight)),
-            ImVec2(0.0f, 0.0f),
-            ImVec2(1.0f, 1.0f),
-            ImVec4(1.0f, 1.0f, 1.0f, 1.0f),
-            ImVec4(0.6f, 0.6f, 0.6f, 1.0f)
-        );
-        */
-
         ImGui::SameLine();
 
         ImGui::BeginDisabled(l);

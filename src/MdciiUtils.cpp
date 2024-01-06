@@ -21,6 +21,7 @@
 #include "MdciiException.h"
 #include "Log.h"
 #include "Game.h"
+#include "Intl.h"
 #include "vendor/imgui/imgui_stdlib.h"
 
 //-------------------------------------------------
@@ -133,12 +134,12 @@ int mdcii::render_mdcii_file_chooser(std::vector<resource::MdciiFile>& t_files)
 
     if (t_files.empty())
     {
-        ImGui::Text("MissingFiles");
+        ImGui::Text(_("Missing Files"));
     }
     else
     {
         mdcii::file_chooser(t_files, &fileIndex);
-        if (ImGui::Button("Load File"))
+        if (ImGui::Button(_("Load File")))
         {
             ImGui::CloseCurrentPopup();
             return fileIndex;
@@ -163,7 +164,7 @@ void mdcii::save_file_button(const char* t_label, std::string* t_str)
 void mdcii::file_chooser(std::vector<resource::MdciiFile>& t_files, int* t_currentItem)
 {
     ImGui::ListBox(
-        "Choose File",
+            _("Choose File"),
         t_currentItem,
         vector_getter,
         &t_files,

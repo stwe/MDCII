@@ -20,6 +20,7 @@
 #include "Log.h"
 #include "Game.h"
 #include "MdciiUtils.h"
+#include "Intl.h"
 #include "state/StateSystem.h"
 #include "resource/MdciiResourcesManager.h"
 
@@ -51,21 +52,21 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
     constexpr ImGuiWindowFlags flags{ ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings };
 
-    ImGui::Begin("MainMenu", nullptr, flags);
+    ImGui::Begin(_("Main Menu"), nullptr, flags);
 
     static auto c{ -1 };
 
     // Start a new game
 
-    if (ImGui::Button("New Game"))
+    if (ImGui::Button(_("New Game")))
     {
-        ImGui::OpenPopup("Select Map");
+        ImGui::OpenPopup(_("Select Map"));
         ImGui::End();
 
         return true;
     }
 
-    if (ImGui::BeginPopupModal("Select Map"))
+    if (ImGui::BeginPopupModal(_("Select Map")))
     {
         c = render_mdcii_file_chooser(game->mdciiResourcesManager->mapFiles);
         if (c >= 0)
@@ -77,7 +78,7 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
             return game->stateSystem->ChangeState(state::StateId::NEW_GAME, &mdciiFile);
         }
 
-        if (ImGui::Button("Close"))
+        if (ImGui::Button(_("Close")))
         {
             ImGui::CloseCurrentPopup();
         }
@@ -87,15 +88,15 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
 
     // Load saved game
 
-    if (ImGui::Button("Load Game"))
+    if (ImGui::Button(_("Load Game")))
     {
-        ImGui::OpenPopup("Select Saved Game");
+        ImGui::OpenPopup(_("Select Saved Game"));
         ImGui::End();
 
         return true;
     }
 
-    if (ImGui::BeginPopupModal("Select Saved Game"))
+    if (ImGui::BeginPopupModal(_("Select Saved Game")))
     {
         c = render_mdcii_file_chooser(game->mdciiResourcesManager->saveGameFiles);
         if (c >= 0)
@@ -107,7 +108,7 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
             return game->stateSystem->ChangeState(state::StateId::LOAD_GAME, &mdciiFile);
         }
 
-        if (ImGui::Button("Close"))
+        if (ImGui::Button(_("Close")))
         {
             ImGui::CloseCurrentPopup();
         }
@@ -117,7 +118,7 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
 
     // Start the island generator
 
-    if (ImGui::Button("Island Generator"))
+    if (ImGui::Button(_("Island Generator")))
     {
         ImGui::End();
 
@@ -126,21 +127,21 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
 
     // Start the world generator
 
-    if (ImGui::Button("World Generator"))
+    if (ImGui::Button(_("World Generator")))
     {
-        ImGui::OpenPopup("World Size");
+        ImGui::OpenPopup(_("World Size"));
         ImGui::End();
 
         return true;
     }
 
-    if (ImGui::BeginPopupModal("World Size"))
+    if (ImGui::BeginPopupModal(_("World Size")))
     {
         static olc::vi2d size{ 96,96 };
-        ImGui::SliderInt("World width", &size.x, 96, 128);
-        ImGui::SliderInt("World height", &size.y, 96, 128);
+        ImGui::SliderInt(_("World width"), &size.x, 96, 128);
+        ImGui::SliderInt(_("World height"), &size.y, 96, 128);
 
-        if (ImGui::Button("Generate World"))
+        if (ImGui::Button(_("Generate World")))
         {
 
             ImGui::CloseCurrentPopup();
@@ -150,7 +151,7 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
             return game->stateSystem->ChangeState(state::StateId::WORLD_GENERATOR, &size);
         }
 
-        if (ImGui::Button("Close"))
+        if (ImGui::Button(_("Close")))
         {
             ImGui::CloseCurrentPopup();
         }
@@ -163,7 +164,7 @@ bool mdcii::MainMenuState::OnUserUpdate(const float t_elapsedTime)
 
     // Exit game
 
-    if (ImGui::Button("Exit"))
+    if (ImGui::Button(_("Exit")))
     {
         ImGui::End();
 

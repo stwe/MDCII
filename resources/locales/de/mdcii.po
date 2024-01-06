@@ -73,3 +73,51 @@ msgstr "Getreidemühle"
 
 msgid "Workshops"
 msgstr "Handwerksbetriebe"
+
+msgid "Close"
+msgstr "Schließen"
+
+msgid "Exit"
+msgstr "Beenden"
+
+msgid "Generate World"
+msgstr "Welt erstellen"
+
+msgid "Island Generator"
+msgstr "Inseleditor"
+
+msgid "Load Game"
+msgstr "Spiel laden"
+
+msgid "Main Menu"
+msgstr "Hauptmenü"
+
+msgid "New Game"
+msgstr "Neues Spiel"
+
+msgid "Select Map"
+msgstr "Karte wählen"
+
+msgid "Select Saved Game"
+msgstr "Spiel laden"
+
+msgid "World Generator"
+msgstr "Karteneditor"
+
+msgid "World Size"
+msgstr "Größe der Welt"
+
+msgid "World height"
+msgstr "Höhe der Welt"
+
+msgid "World width"
+msgstr "Breite der Welt"
+
+msgid "Load File"
+msgstr "Datei laden"
+
+msgid "Choose File"
+msgstr "Datei auswählen"
+
+msgid "Missing Files"
+msgstr "Keine Datei vorhanden"

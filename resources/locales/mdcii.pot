@@ -73,3 +73,51 @@ msgstr ""
 
 msgid "Workshops"
 msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Exit"
+msgstr ""
+
+msgid "Generate World"
+msgstr ""
+
+msgid "Island Generator"
+msgstr ""
+
+msgid "Load Game"
+msgstr ""
+
+msgid "Main Menu"
+msgstr ""
+
+msgid "New Game"
+msgstr ""
+
+msgid "Select Map"
+msgstr ""
+
+msgid "Select Saved Game"
+msgstr ""
+
+msgid "World Generator"
+msgstr ""
+
+msgid "World Size"
+msgstr ""
+
+msgid "World height"
+msgstr ""
+
+msgid "World width"
+msgstr ""
+
+msgid "Load File"
+msgstr ""
+
+msgid "Choose File"
+msgstr ""
+
+msgid "Missing Files"
+msgstr ""
