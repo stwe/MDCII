@@ -128,10 +128,10 @@ void mdcii::world::DeepWater::UpdateTileProperties() const
             tile.gfxs.push_back(gfx0 + (3 * tile.building->rotate));
         }
 
-        tile.indices[0] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG0);
-        tile.indices[1] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG90);
-        tile.indices[2] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG180);
-        tile.indices[3] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG270);
+        tile.renderIndices[0] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG0);
+        tile.renderIndices[1] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG90);
+        tile.renderIndices[2] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG180);
+        tile.renderIndices[3] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG270);
     }
 
     layer->SortTilesForRendering();

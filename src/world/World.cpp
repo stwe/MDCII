@@ -138,95 +138,67 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
         {
             if (auto mouseOverIsland{ island->IsMouseOverIsland() }; mouseOverIsland.has_value())
             {
-                // todo:
+                std::vector<Tile> newTiles;
 
-                state->game->DrawString(200, 4, fmt::format("Over island: {}, {}",
-                                        std::to_string(mouseOverIsland.value().x),
-                                        std::to_string(mouseOverIsland.value().y)),
-                                        olc::RED
-                                        );
-
-                // todo: render grid on position
-                Tile tile;
-                tile.posX = mouseOverIsland.value().x;
-                tile.posY = mouseOverIsland.value().y;
-
-                const auto& terrainTile{ island->GetLayer(LayerType::TERRAIN)->GetTile(tile.posX, tile.posY, camera->rotation) };
-
-                state->game->DrawString(200, 14, fmt::format("Terrain tile: {}, {}",
-                                        std::to_string(terrainTile.posX),
-                                        std::to_string(terrainTile.posY)),
-                                        olc::RED
-                );
-
-                // the mouse is already calculated for terrain or deep water
-                renderer->RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, &tile, false);
-
-                /*
-                const auto* terrainLayer{ island->GetLayer(LayerType::TERRAIN) };
-                auto* buildingsLayer{ island->GetLayer(LayerType::BUILDINGS) };
-
-                if (terrainLayer->GetTile(mouseOverIsland.value().x, mouseOverIsland.value().y, camera->rotation).HasBuildingAboveWaterAndCoast())
+                for (const auto& offset : offsets)
                 {
-                    std::vector<Tile> newTiles;
-
-                    for (const auto& offset : offsets)
+                    for (auto y{ 0 }; y < Gui::select_building.building->size.h; ++y)
                     {
-                        for (auto y{ 0 }; y < Gui::select_building.building->size.h; ++y)
+                        for (auto x{ 0 }; x < Gui::select_building.building->size.w; ++x)
                         {
-                            for (auto x{ 0 }; x < Gui::select_building.building->size.w; ++x)
+                            const auto offsetX{ x * offset.x };
+                            const auto offsetY{ y * offset.y };
+
+                            const auto posX{ mouseOverIsland.value().x + offsetX };
+                            const auto posY{ mouseOverIsland.value().y + offsetY };
+
+                            if (island->IsWorldPositionOverIsland({ island->startX + posX, island->startY + posY }))
                             {
-                                const auto offsetX{ x * offset.x };
-                                const auto offsetY{ y * offset.y };
-
-                                const auto posX{ mouseOverIsland.value().x + offsetX };
-                                const auto posY{ mouseOverIsland.value().y + offsetY };
-
-                                const auto& terrainTileToCheck{ terrainLayer->GetTile(posX, posY, camera->rotation) };
-                                const auto& buildingTileToCheck{ buildingsLayer->GetTile(posX, posY, camera->rotation) };
+                                const auto& terrainTileToCheck{ island->GetLayer(LayerType::TERRAIN)->GetSortedTile(posX, posY, camera->rotation) };
+                                const auto& buildingTileToCheck{ island->GetLayer(LayerType::BUILDINGS)->GetSortedTile(posX, posY, camera->rotation) };
 
                                 if (terrainTileToCheck.HasBuildingAboveWaterAndCoast() && !buildingTileToCheck.HasBuilding())
                                 {
                                     newTiles.emplace_back(
-                                        Gui::select_building.building,
-                                        magic_enum::enum_integer(Gui::select_building.rotation),
-                                        offset.x < 0 ? Gui::select_building.building->size.w - 1 - x : x,
-                                        offset.y < 0 ? Gui::select_building.building->size.h - 1 - y : y,
-                                        posX, posY
+                                            Gui::select_building.building,
+                                            magic_enum::enum_integer(Gui::select_building.rotation - camera->rotation),
+                                            offset.x < 0 ? Gui::select_building.building->size.w - 1 - x : x,
+                                            offset.y < 0 ? Gui::select_building.building->size.h - 1 - y : y,
+                                            posX, posY
                                     );
                                 }
                             }
                         }
+                    }
 
-                        if (newTiles.size() == Gui::select_building.building->size.h * static_cast<std::size_t>(Gui::select_building.building->size.w))
+                    if (newTiles.size() == Gui::select_building.building->size.h * static_cast<std::size_t>(Gui::select_building.building->size.w))
+                    {
+                        // add on left mouse button click
+                        if (state->game->GetMouse(0).bPressed)
                         {
-                            // add on left mouse button click
-                            if (state->game->GetMouse(0).bPressed)
-                            {
-                                MDCII_LOG_DEBUG("[World::OnUserUpdate()] Add {}", Gui::select_building.building->id);
+                            MDCII_LOG_DEBUG("[World::OnUserUpdate()] Add {}", Gui::select_building.building->id);
 
-                                buildingsLayer->AddBuilding(newTiles);
-                                island->GetLayer(LayerType::MIXED)->AddBuilding(newTiles);
+                            island->GetLayer(LayerType::BUILDINGS)->AddBuilding(newTiles);
+                            island->GetLayer(LayerType::MIXED)->AddBuilding(newTiles);
 
-                                FindVisibleIslands();
-                            }
-
-                            // render the building (dark grey) to be added and a green grid
-                            for (const auto& tile : newTiles)
-                            {
-                                renderer->RenderBuilding(island->startX, island->startY, &tile, olc::DARK_GREY);
-                                renderer->RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, &tile);
-                            }
-
-                            break;
+                            CheckLayer(island, LayerType::BUILDINGS);
+                            CheckLayer(island, LayerType::MIXED);
                         }
-                        else
+
+                        // render the building (dark grey) to be added and a green grid
+                        for (const auto& tile : newTiles)
                         {
-                            std::vector<Tile>().swap(newTiles);
+                            renderer->RenderBuilding(island->startX, island->startY, &tile, olc::DARK_GREY);
+                            renderer->RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, &tile, true);
                         }
+
+                        break; // break offsets loop
+                    }
+                    else
+                    {
+                        std::vector<Tile>().swap(newTiles);
                     }
                 }
-                */
             }
         }
 

@@ -125,4 +125,10 @@ namespace mdcii::world
         const auto result{ (magic_enum::enum_integer(t_rotation) + magic_enum::enum_integer(t_other)) % static_cast<int>(magic_enum::enum_count<Rotation>()) };
         return int_to_rotation(result);
     }
+
+    inline Rotation operator-(const Rotation t_rotation, const Rotation t_other)
+    {
+        const auto result{ (magic_enum::enum_integer(t_rotation) - magic_enum::enum_integer(t_other) + static_cast<int>(magic_enum::enum_count<Rotation>())) % static_cast<int>(magic_enum::enum_count<Rotation>()) };
+        return int_to_rotation(result);
+    }
 }

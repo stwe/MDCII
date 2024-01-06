@@ -48,14 +48,12 @@ mdcii::world::Layer::~Layer() noexcept
 // Getter
 //-------------------------------------------------
 
-mdcii::world::Tile& mdcii::world::Layer::GetTile(const int t_x, const int t_y, const Rotation t_rotation)
+mdcii::world::Tile& mdcii::world::Layer::GetSortedTile(const int t_x, const int t_y, const Rotation t_rotation)
 {
-    return sortedTiles.at(magic_enum::enum_integer(t_rotation)).at(GetMapIndex(t_x, t_y, t_rotation));
-}
+    const auto rotationInt{ magic_enum::enum_integer(t_rotation) };
+    const auto idx{ sortedIndices.at(rotationInt).at(GetMapIndex(t_x, t_y, t_rotation )) };
 
-const mdcii::world::Tile& mdcii::world::Layer::GetTile(const int t_x, const int t_y, const Rotation t_rotation) const
-{
-    return sortedTiles.at(magic_enum::enum_integer(t_rotation)).at(GetMapIndex(t_x, t_y, t_rotation));
+    return sortedTiles.at(rotationInt).at(idx);
 }
 
 //-------------------------------------------------
@@ -139,10 +137,10 @@ void mdcii::world::Layer::InitTileDetails(const int t_x, const int t_y)
         tile.CalculateGfx();
     }
 
-    tile.indices[0] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG0);
-    tile.indices[1] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG90);
-    tile.indices[2] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG180);
-    tile.indices[3] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG270);
+    tile.renderIndices[0] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG0);
+    tile.renderIndices[1] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG90);
+    tile.renderIndices[2] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG180);
+    tile.renderIndices[3] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG270);
 }
 
 //-------------------------------------------------
@@ -159,17 +157,22 @@ void mdcii::world::Layer::AddBuilding(std::vector<Tile>& t_buildingTiles)
     {
         MDCII_ASSERT(tile.HasBuildingAboveWaterAndCoast(), "[Layer::AddBuilding()] Null pointer or invalid building.")
 
-        tile.indices[0] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG0);
-        tile.indices[1] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG90);
-        tile.indices[2] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG180);
-        tile.indices[3] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG270);
+        tile.renderIndices[0] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG0);
+        tile.renderIndices[1] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG90);
+        tile.renderIndices[2] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG180);
+        tile.renderIndices[3] = GetMapIndex(tile.posX, tile.posY, Rotation::DEG270);
 
-        tiles.at(tile.indices[0]) = tile;
+        tiles.at(tile.renderIndices[0]) = tile;
 
-        sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0)).at(tile.indices[0]) = tile;
-        sortedTiles.at(magic_enum::enum_integer(Rotation::DEG90)).at(tile.indices[1]) = tile;
-        sortedTiles.at(magic_enum::enum_integer(Rotation::DEG180)).at(tile.indices[2]) = tile;
-        sortedTiles.at(magic_enum::enum_integer(Rotation::DEG270)).at(tile.indices[3]) = tile;
+        auto idx0{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG0)).at(tile.renderIndices[0]) };
+        auto idx90{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG90)).at(tile.renderIndices[1]) };
+        auto idx180{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG180)).at(tile.renderIndices[2]) };
+        auto idx270{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG270)).at(tile.renderIndices[3]) };
+
+        sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0)).at(idx0) = tile;
+        sortedTiles.at(magic_enum::enum_integer(Rotation::DEG90)).at(idx90) = tile;
+        sortedTiles.at(magic_enum::enum_integer(Rotation::DEG180)).at(idx180) = tile;
+        sortedTiles.at(magic_enum::enum_integer(Rotation::DEG270)).at(idx270) = tile;
     }
 }
 
@@ -188,11 +191,19 @@ void mdcii::world::Layer::SortTilesForRendering()
         // sort tiles by index
         std::ranges::sort(tiles, [&](const Tile& t_a, const Tile& t_b)
         {
-            return t_a.indices[rotationInt] < t_b.indices[rotationInt];
+            return t_a.renderIndices[rotationInt] < t_b.renderIndices[rotationInt];
         });
 
         // copy sorted tiles
         sortedTiles.at(rotationInt) = tiles;
+
+        // the render-index can be negative; saves where the index can be found in sortedTiles
+        auto i{ 0 };
+        for (const auto& t : sortedTiles.at(rotationInt))
+        {
+            sortedIndices.at(rotationInt).emplace(t.renderIndices.at(rotationInt), i);
+            i++;
+        }
     }
 
     // revert tiles sorting = sortedTiles DEG0

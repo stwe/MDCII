@@ -52,28 +52,39 @@ void mdcii::world::MousePicker::OnUserUpdate()
 
     const auto* cheatSprite{ m_world->state->game->assetManager->GetAsset(resource::Asset::CHEAT, m_world->camera->zoom)->Sprite() };
 
+    // set selected
     selected = CalculateSelected();
     selected += CalculateSelectedCheatColorOffset(cheatSprite->GetPixel(m_cellOffset.x, m_cellOffset.y));
 
-    olc::vf2d screenPosition{ m_world->ToScreen(selected.x, selected.y) };
+    // set screen positions
+    olc::vf2d selectedScreenPosition{ m_world->ToScreen(selected.x, selected.y) };
+    olc::vf2d normalSelectedScreenPosition = selectedScreenPosition;
     if (m_calcForTerrain)
     {
-        screenPosition.y -= get_elevation(m_world->camera->zoom);
+        selectedScreenPosition.y -= get_elevation(m_world->camera->zoom);
     }
 
+    // render cursors
     if (m_renderCursor)
     {
         auto* mouseSprite{ m_world->state->game->assetManager->GetAsset(resource::Asset::PURPLE_ISO, m_world->camera->zoom)->Decal() };
-        m_world->state->game->DrawDecal(screenPosition, mouseSprite);
+        m_world->state->game->DrawDecal(selectedScreenPosition, mouseSprite);
     }
 
+    if (m_renderNormalizedCursor)
+    {
+        auto* mouseSprite{ m_world->state->game->assetManager->GetAsset(resource::Asset::BLUE_ISO, m_world->camera->zoom)->Decal() };
+        m_world->state->game->DrawDecal(normalSelectedScreenPosition, mouseSprite);
+    }
+
+    // draw debug info
     auto col{ olc::WHITE };
     if (selected.x < 0 || selected.y < 0)
     {
         col = olc::RED;
     }
 
-    m_world->state->game->DrawString(4, 4, fmt::format("Tile: {}, {}", std::to_string(selected.x),std::to_string(selected.y)), col);
+    m_world->state->game->DrawString(4, 24, fmt::format("Tile: {}, {}", std::to_string(selected.x), std::to_string(selected.y)), col);
 }
 
 //-------------------------------------------------
@@ -83,7 +94,10 @@ void mdcii::world::MousePicker::OnUserUpdate()
 void mdcii::world::MousePicker::RenderImGui()
 {
     ImGui::Separator();
-    ImGui::Checkbox("Mouse For Terrain", &m_calcForTerrain);
+    ImGui::Text("Mouse cursor");
+    ImGui::Checkbox("Cursor for terrain on/off", &m_calcForTerrain);
+    ImGui::Checkbox("Show cursor iso", &m_renderCursor);
+    ImGui::Checkbox("Show normalized cursor iso", &m_renderNormalizedCursor);
     ImGui::Separator();
 }
 

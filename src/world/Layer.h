@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Tile.h"
+#include "vendor/olc/olcPixelGameEngine.h"
 
 namespace mdcii::world
 {
@@ -73,11 +74,14 @@ namespace mdcii::world
         std::vector<Tile> tiles;
 
         /**
-         * @brief An array of std::vectors, each representing a rotation of the tiles.
-         *
-         * Tiles are sorted by index for each rotation.
+         * @brief Contains the tiles for each rotation in the correct order for rendering.
          */
         std::array<std::vector<Tile>, Tile::NR_OF_ROTATIONS> sortedTiles;
+
+        /**
+         * @brief To get the correct position of a tile in sortedTiles from the rotation and render index.
+         */
+        std::array<std::map<int, int>, Tile::NR_OF_ROTATIONS> sortedIndices;
 
         /**
          * @brief The tiles that are currently being rendered.
@@ -120,18 +124,7 @@ namespace mdcii::world
          *
          * @return A reference to the Tile at the specified position and rotation.
          */
-        [[nodiscard]] Tile& GetTile(int t_x, int t_y, Rotation t_rotation);
-
-        /**
-         * @brief Retrieves a const reference to the Tile at the specified position and rotation.
-         *
-         * @param t_x The x position on the layer.
-         * @param t_y The x position on the layer.
-         * @param t_rotation The current camera rotation.
-         *
-         * @return A const reference to the Tile at the specified position and rotation.
-         */
-        [[nodiscard]] const Tile& GetTile(int t_x, int t_y, Rotation t_rotation) const;
+        [[nodiscard]] Tile& GetSortedTile(int t_x, int t_y, Rotation t_rotation);
 
         //-------------------------------------------------
         // Create Tiles

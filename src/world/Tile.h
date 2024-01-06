@@ -124,9 +124,9 @@ namespace mdcii::world
         int posY{ -1 };
 
         /**
-         * @brief The index for each rotation is needed for sorting.
+         * @brief The render index for each rotation.
          */
-        std::array<int, NR_OF_ROTATIONS> indices{};
+        std::array<int, NR_OF_ROTATIONS> renderIndices{};
 
         /**
          * @brief Used to get the current gfx for animation.

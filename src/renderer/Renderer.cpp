@@ -112,7 +112,7 @@ void mdcii::renderer::Renderer::RenderBuilding(
             resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
         },
         { 1.0f, 1.0f },
-        t_tint
+        t_tile->tintFlag == 1 ? olc::BLUE : t_tint
     );
 }
 

@@ -46,7 +46,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief The position of the current tile under the mouse.
+         * @brief The current world position under the mouse.
          */
         olc::vi2d selected;
 
@@ -119,6 +119,13 @@ namespace mdcii::world
          * @brief The tile under the mouse is highlighted.
          */
         bool m_renderCursor{ true };
+
+        /**
+         * @brief The normalized tile under the mouse is highlighted.
+         *
+         * To do this, the increase for the terrain is taken out again.
+         */
+        bool m_renderNormalizedCursor{ false };
 
         //-------------------------------------------------
         // Helper
