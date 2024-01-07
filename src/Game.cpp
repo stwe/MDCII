@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -26,6 +26,7 @@
 #include "resource/OriginalResourcesManager.h"
 #include "resource/MdciiResourcesManager.h"
 #include "resource/TileAtlas.h"
+#include "resource/AnimalsTileAtlas.h"
 #include "resource/AssetManager.h"
 #include "state/StateSystem.h"
 
@@ -56,7 +57,8 @@ bool mdcii::Game::OnUserCreate()
 
     originalResourcesManager = std::make_unique<resource::OriginalResourcesManager>();
     mdciiResourcesManager = std::make_unique<resource::MdciiResourcesManager>();
-    tileAtlas = std::make_unique<resource::TileAtlas>();
+    stadtfldTileAtlas = std::make_unique<resource::TileAtlas>();
+    animalsTileAtlas = std::make_unique<resource::AnimalsTileAtlas>();
     assetManager = std::make_unique<resource::AssetManager>();
 
     gameLayer = static_cast<int>(CreateLayer());

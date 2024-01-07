@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -77,11 +77,11 @@ public class AtlasCreator {
         LOGGER.info("The palette was read successfully.");
 
         // animals
-        //LOGGER.info("Start Tiere Tile Atlas Images creation ...");
-        //CreateAnimalsSgfxAtlas();
-        //CreateAnimalsMgfxAtlas();
-        //CreateAnimalsGfxAtlas();
-        //LOGGER.info("The Tiere Tile Atlas Images have been created successfully.");
+        LOGGER.info("Start Tiere Tile Atlas Images creation ...");
+        createAnimalsSgfxAtlas();
+        createAnimalsMgfxAtlas();
+        createAnimalsGfxAtlas();
+        LOGGER.info("The Tiere Tile Atlas Images have been created successfully.");
 
         // buildings
         LOGGER.info("Start Stadtfld Tile Atlas Images creation ...");
@@ -95,7 +95,7 @@ public class AtlasCreator {
     // Animals
     //-------------------------------------------------
 
-    private void CreateAnimalsSgfxAtlas() throws IOException {
+    private void createAnimalsSgfxAtlas() throws IOException {
         LOGGER.info("Tile Atlas Animals SGFX Images creation ...");
 
         var bshFile = new BshFile(
@@ -131,6 +131,8 @@ public class AtlasCreator {
                                 y * bshFile.getMaxY(),
                                 null
                         );
+
+                        heights.add(bshTextures.get(c).getBufferedImage().getHeight());
                     }
 
                     c++;
@@ -153,7 +155,7 @@ public class AtlasCreator {
         bshFile.cleanUp();
     }
 
-    private void CreateAnimalsMgfxAtlas() throws IOException {
+    private void createAnimalsMgfxAtlas() throws IOException {
         LOGGER.info("Tile Atlas Animals MGFX Images creation ...");
 
         var bshFile = new BshFile(
@@ -189,6 +191,8 @@ public class AtlasCreator {
                                 y * bshFile.getMaxY(),
                                 null
                         );
+
+                        heights.add(bshTextures.get(c).getBufferedImage().getHeight());
                     }
 
                     c++;
@@ -211,7 +215,7 @@ public class AtlasCreator {
         bshFile.cleanUp();
     }
 
-    private void CreateAnimalsGfxAtlas() throws IOException {
+    private void createAnimalsGfxAtlas() throws IOException {
         LOGGER.info("Tile Atlas Animals GFX Images creation ...");
 
         var bshFile = new BshFile(
@@ -247,6 +251,8 @@ public class AtlasCreator {
                                 y * bshFile.getMaxY(),
                                 null
                         );
+
+                        heights.add(bshTextures.get(c).getBufferedImage().getHeight());
                     }
 
                     c++;

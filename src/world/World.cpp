@@ -114,6 +114,12 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
     renderer->RenderDeepWater(m_renderDeepWaterGrid);
     renderer->RenderIslands(m_renderIslandsGrid);
 
+    // todo: tmp code
+    Tile animal;
+    animal.posX = 3;
+    animal.posY = 5;
+    renderer->RenderAnimal(0, 0, &animal);
+
     // ---------------------------------
     // todo: Rendering depends on ImGui
     // ---------------------------------

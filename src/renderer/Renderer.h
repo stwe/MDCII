@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -94,6 +94,8 @@ namespace mdcii::renderer
         [[nodiscard]] float CalcOffset(const world::Tile* t_tile, int t_gfx) const;
         [[nodiscard]] int GetGfxForCurrentRotation(const world::Tile* t_tile) const;
         void RenderBuilding(int t_startX, int t_startY, const world::Tile* t_tile, const olc::Pixel& t_tint = olc::WHITE) const;
+
+        void RenderAnimal(int t_startX, int t_startY, const world::Tile* t_tile) const;
 
         void RenderAsset(
                 resource::Asset t_asset,

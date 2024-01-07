@@ -37,13 +37,13 @@ namespace olc
 namespace mdcii::resource
 {
     //-------------------------------------------------
-    // TileAtlas
+    // AnimalsTileAtlas
     //-------------------------------------------------
 
     /**
-     * @brief Provides a Tile Atlas for all the Stadtfld graphics for each zoom.
+     * @brief Provides a Tile Atlas for all the animal graphics for each zoom.
      */
-    class TileAtlas
+    class AnimalsTileAtlas
     {
     public:
         //-------------------------------------------------
@@ -54,42 +54,42 @@ namespace mdcii::resource
          * @brief Width and height of the largest image.
          */
         static constexpr std::array<std::pair<world::Zoom, std::pair<float, float>>, world::NR_OF_ZOOMS> LARGEST_SIZE{
-            { std::make_pair<world::Zoom, std::pair<float, float>>(world::Zoom::SGFX, std::make_pair<float, float>(16.0f, 71.0f)),
-              std::make_pair<world::Zoom, std::pair<float, float>>(world::Zoom::MGFX, std::make_pair<float, float>(32.0f, 143.0f)),
-              std::make_pair<world::Zoom, std::pair<float, float>>(world::Zoom::GFX, std::make_pair<float, float>(64.0f, 286.0f)) }
+            { std::make_pair<world::Zoom, std::pair<float, float>>(world::Zoom::SGFX, std::make_pair<float, float>(17.0f, 16.0f)),
+              std::make_pair<world::Zoom, std::pair<float, float>>(world::Zoom::MGFX, std::make_pair<float, float>(35.0f, 32.0f)),
+              std::make_pair<world::Zoom, std::pair<float, float>>(world::Zoom::GFX, std::make_pair<float, float>(71.0f, 65.0f)) }
         };
 
         /**
-         * @brief Number of rows in each Tile Atlas.
+         * @brief Number of rows in each Animals Tile Atlas.
          */
-        static constexpr std::array<int, world::NR_OF_ZOOMS> NR_OF_ROWS{ 64, 32, 16 };
+        static constexpr auto NR_OF_ROWS{ 16 };
 
         /**
-         * @brief Number of SGFX Tile Atlas images.
+         * @brief Number of SGFX Animals Tile Atlas images.
          */
-        static constexpr auto NR_OF_SGFX_ATLAS_IMAGES{ 2 };
+        static constexpr auto NR_OF_SGFX_ATLAS_IMAGES{ 3 };
 
         /**
-         * @brief Number of MGFX Tile Atlas images.
+         * @brief Number of MGFX Animals Tile Atlas images.
          */
-        static constexpr auto NR_OF_MGFX_ATLAS_IMAGES{ 6 };
+        static constexpr auto NR_OF_MGFX_ATLAS_IMAGES{ 3 };
 
         /**
-         * @brief Number of GFX Tile Atlas images.
+         * @brief Number of GFX Animals Tile Atlas images.
          */
-        static constexpr auto NR_OF_GFX_ATLAS_IMAGES{ 24 };
+        static constexpr auto NR_OF_GFX_ATLAS_IMAGES{ 3 };
 
         /**
-         * @brief The name and directory of the Tile Atlas.
+         * @brief The name of the Animals Tile Atlas.
          */
-        static constexpr std::string_view TILE_ATLAS_NAME{ "stadtfld" };
+        static constexpr std::string_view TILE_ATLAS_NAME{ "animals" };
 
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
         /**
-          * @brief Contains the TileAtlas images for each zoom as a renderable object.
+          * @brief Contains the AnimalsTileAtlas images for each zoom as a renderable object.
           */
         std::array<std::vector<std::unique_ptr<const olc::Renderable>>, world::NR_OF_ZOOMS> atlas;
 
@@ -102,14 +102,14 @@ namespace mdcii::resource
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        TileAtlas();
+        AnimalsTileAtlas();
 
-        TileAtlas(const TileAtlas& t_other) = delete;
-        TileAtlas(TileAtlas&& t_other) noexcept = delete;
-        TileAtlas& operator=(const TileAtlas& t_other) = delete;
-        TileAtlas& operator=(TileAtlas&& t_other) noexcept = delete;
+        AnimalsTileAtlas(const AnimalsTileAtlas& t_other) = delete;
+        AnimalsTileAtlas(AnimalsTileAtlas&& t_other) noexcept = delete;
+        AnimalsTileAtlas& operator=(const AnimalsTileAtlas& t_other) = delete;
+        AnimalsTileAtlas& operator=(AnimalsTileAtlas&& t_other) noexcept = delete;
 
-        ~TileAtlas() noexcept;
+        ~AnimalsTileAtlas() noexcept;
 
     protected:
 
@@ -119,7 +119,7 @@ namespace mdcii::resource
         //-------------------------------------------------
 
         /**
-         * @brief Initialize the TileAtlas.
+         * @brief Initialize the AnimalsTileAtlas.
          */
         void Init();
 
@@ -128,12 +128,12 @@ namespace mdcii::resource
         //-------------------------------------------------
 
         /**
-         * @brief Load TileAtlas images.
+         * @brief Load AnimalsTileAtlas images.
          */
         void LoadAtlasImages();
 
         /**
-         * @brief Method to load all TileAtlas images heights by given Zoom.
+         * @brief Method to load all AnimalsTileAtlas images heights by given Zoom.
          *
          * @param t_zoom The zoom.
          */

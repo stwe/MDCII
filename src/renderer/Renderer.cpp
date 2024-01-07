@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -25,6 +25,7 @@
 #include "world/World.h"
 #include "world/Layer.h"
 #include "resource/TileAtlas.h"
+#include "resource/AnimalsTileAtlas.h"
 #include "resource/Buildings.h"
 #include "resource/AssetManager.h"
 #include "camera/Camera.h"
@@ -55,7 +56,7 @@ float mdcii::renderer::Renderer::CalcOffset(const world::Tile* t_tile, const int
     auto offset{ 0.0f };
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
     auto tileHeight{ get_tile_height(m_world->camera->zoom) };
-    const auto gfxHeight{ m_world->state->game->tileAtlas->heights[zoomInt][t_gfx] };
+    const auto gfxHeight{ m_world->state->game->stadtfldTileAtlas->heights[zoomInt][t_gfx] };
 
     if (m_world->camera->zoom == world::Zoom::GFX)
     {
@@ -102,7 +103,7 @@ void mdcii::renderer::Renderer::RenderBuilding(
 
     m_world->state->game->DrawPartialDecal(
         screenPosition,
-        m_world->state->game->tileAtlas->atlas[zoomInt][GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt])]->Decal(),
+        m_world->state->game->stadtfldTileAtlas->atlas[zoomInt][GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt])]->Decal(),
         {
             atlasOffset.x * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
             atlasOffset.y * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
@@ -113,6 +114,29 @@ void mdcii::renderer::Renderer::RenderBuilding(
         },
         { 1.0f, 1.0f },
         t_tile->tintFlag == 1 ? olc::BLUE : t_tint
+    );
+}
+
+void mdcii::renderer::Renderer::RenderAnimal(const int t_startX, const int t_startY, const world::Tile* t_tile) const
+{
+    const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
+    const auto gfx{ 8 };
+    const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, resource::AnimalsTileAtlas::NR_OF_ROWS) };
+    const olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
+
+    m_world->state->game->DrawPartialDecal(
+        screenPosition,
+        m_world->state->game->animalsTileAtlas->atlas[zoomInt][GetAtlasIndex(gfx, resource::AnimalsTileAtlas::NR_OF_ROWS)]->Decal(),
+        {
+            atlasOffset.x * resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.first,
+            atlasOffset.y * resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.second
+        },
+        {
+            resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.first,
+            resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.second
+        },
+        { 1.0f, 1.0f },
+        olc::WHITE
     );
 }
 
