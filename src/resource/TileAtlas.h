@@ -18,20 +18,33 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
-#include "world/Zoom.h"
+#include "BshTileAtlas.h"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
 
-namespace olc
+namespace mdcii::world
 {
     /**
-     * @brief Forward declaration class Renderable.
+     * @brief Forward declaration class World.
      */
-    class Renderable;
+    class World;
+
+    /**
+     * @brief Forward declaration struct Tile.
+     */
+    struct Tile;
+
+    /**
+     * @brief Forward declaration enum class LayerType.
+     */
+    enum class LayerType;
+
+    /**
+     * @brief Forward declaration class Island.
+     */
+    class Island;
 }
 
 namespace mdcii::resource
@@ -41,11 +54,44 @@ namespace mdcii::resource
     //-------------------------------------------------
 
     /**
-     * @brief Provides a Tile Atlas for all the Stadtfld graphics for each zoom.
+     * @brief Provides a Tile Atlas for all the Stadtfld graphics.
      */
-    class TileAtlas
+    class TileAtlas : public BshTileAtlas
     {
     public:
+        //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        TileAtlas() = delete;
+
+        /**
+         * @brief Constructs a new TileAtlas object.
+         *
+         * @param t_world Pointer to the parent World.
+         */
+        explicit TileAtlas(const world::World* t_world);
+
+        TileAtlas(const TileAtlas& t_other) = delete;
+        TileAtlas(TileAtlas&& t_other) noexcept = delete;
+        TileAtlas& operator=(const TileAtlas& t_other) = delete;
+        TileAtlas& operator=(TileAtlas&& t_other) noexcept = delete;
+
+        ~TileAtlas() noexcept override;
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
+        void Render(int t_startX, int t_startY, const world::Tile* t_tile, const olc::Pixel& t_tint) const;
+        static void CalcAnimationFrame(float t_elapsedTime);
+        void RenderIsland(const world::Island* t_island, world::LayerType t_layerType, bool t_renderGrid) const;
+        void RenderIslands(bool t_renderGrid) const;
+        void RenderDeepWater(bool t_renderGrid) const;
+
+    protected:
+
+    private:
         //-------------------------------------------------
         // Constants
         //-------------------------------------------------
@@ -84,59 +130,38 @@ namespace mdcii::resource
          */
         static constexpr std::string_view TILE_ATLAS_NAME{ "stadtfld" };
 
+        /**
+         * @brief To avoid m_frame_values[] will exceed that value.
+         */
+        static constexpr int MAX_FRAME_VALUE{ 1000 };
+
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
         /**
-          * @brief Contains the TileAtlas images for each zoom as a renderable object.
-          */
-        std::array<std::vector<std::unique_ptr<const olc::Renderable>>, world::NR_OF_ZOOMS> atlas;
-
-        /**
-         * @brief Array of vectors containing the real heights of each image.
+         * @brief Pointer to the parent World.
          */
-        std::array<std::vector<int>, world::NR_OF_ZOOMS> heights;
-
-        //-------------------------------------------------
-        // Ctors. / Dtor.
-        //-------------------------------------------------
-
-        TileAtlas();
-
-        TileAtlas(const TileAtlas& t_other) = delete;
-        TileAtlas(TileAtlas&& t_other) noexcept = delete;
-        TileAtlas& operator=(const TileAtlas& t_other) = delete;
-        TileAtlas& operator=(TileAtlas&& t_other) noexcept = delete;
-
-        ~TileAtlas() noexcept;
-
-    protected:
-
-    private:
-        //-------------------------------------------------
-        // Init
-        //-------------------------------------------------
+        const world::World* m_world{ nullptr };
 
         /**
-         * @brief Initialize the TileAtlas.
-         */
-        void Init();
-
-        //-------------------------------------------------
-        // Load
-        //-------------------------------------------------
-
-        /**
-         * @brief Load TileAtlas images.
-         */
-        void LoadAtlasImages();
-
-        /**
-         * @brief Method to load all TileAtlas images heights by given Zoom.
+         * @brief Five timers to measure the times for the next frame.
          *
-         * @param t_zoom The zoom.
+         * The animation speeds of the buildings are finally defined.
+         * So after 90, 130, 150, 180, 220 milliseconds the next frame from the animation is used.
          */
-        void LoadHeightsByZoom(world::Zoom t_zoom);
+        inline static std::array m_timer_values{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+
+        /**
+         * @brief When one of the five timers expires, the respective frame is counted up.
+         */
+        inline static std::array m_frame_values{ 0, 0, 0, 0, 0 };
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        [[nodiscard]] int GetGfxForCurrentRotation(const world::Tile* t_tile) const;
+        [[nodiscard]] float CalcOffset(const world::Tile* t_tile, int t_gfx) const;
     };
 }

@@ -17,20 +17,29 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "TileAtlas.h"
-#include "Game.h"
-#include "MdciiException.h"
-#include "MdciiUtils.h"
 #include "MdciiAssert.h"
+#include "Game.h"
+#include "world/World.h"
+#include "world/Island.h"
+#include "world/Layer.h"
+#include "world/DeepWater.h"
+#include "camera/Camera.h"
+#include "state/State.h"
+#include "resource/Buildings.h"
+#include "resource/AssetManager.h"
+#include "renderer/Renderer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::resource::TileAtlas::TileAtlas()
+mdcii::resource::TileAtlas::TileAtlas(const world::World* t_world)
+    : BshTileAtlas(TILE_ATLAS_NAME, NR_OF_SGFX_ATLAS_IMAGES, NR_OF_MGFX_ATLAS_IMAGES, NR_OF_GFX_ATLAS_IMAGES)
+    , m_world{ t_world }
 {
     MDCII_LOG_DEBUG("[TileAtlas::TileAtlas()] Create TileAtlas.");
 
-    Init();
+    MDCII_ASSERT(m_world, "[TileAtlas::TileAtlas()] Null pointer.")
 }
 
 mdcii::resource::TileAtlas::~TileAtlas() noexcept
@@ -39,100 +48,171 @@ mdcii::resource::TileAtlas::~TileAtlas() noexcept
 }
 
 //-------------------------------------------------
-// Init
+// Logic
 //-------------------------------------------------
 
-void mdcii::resource::TileAtlas::Init()
+void mdcii::resource::TileAtlas::Render(const int t_startX, const int t_startY, const world::Tile* t_tile, const olc::Pixel& t_tint) const
 {
-    MDCII_LOG_DEBUG("[TileAtlas::Init()] Start initialization of the Tile Atlas ...");
+    const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
+    const auto gfx{ GetGfxForCurrentRotation(t_tile) };
+    const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
 
-    LoadAtlasImages();
+    olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
+    screenPosition.y -= CalcOffset(t_tile, gfx);
 
-    for (const auto zoom : magic_enum::enum_values<world::Zoom>())
-    {
-        LoadHeightsByZoom(zoom);
-    }
-
-    MDCII_LOG_DEBUG("[TileAtlas::Init()] Tile Atlas were created successfully.");
-}
-
-//-------------------------------------------------
-// Load
-//-------------------------------------------------
-
-void mdcii::resource::TileAtlas::LoadAtlasImages()
-{
-    MDCII_LOG_DEBUG("[TileAtlas::LoadAtlasImages()] Start creating Tile Atlas images ...");
-
-    for (auto i{ 0 }; i < NR_OF_SGFX_ATLAS_IMAGES; ++i)
-    {
-        auto renderable{ std::make_unique<olc::Renderable>() };
-        if(renderable->Load(fmt::format("{}atlas/sgfx/{}/{}.png", Game::RESOURCES_REL_PATH, TILE_ATLAS_NAME, i)) != olc::OK)
+    m_world->state->game->DrawPartialDecal(
+        screenPosition,
+        m_atlas[zoomInt][GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt])]->Decal(),
         {
-            throw MDCII_EXCEPTION("[TileAtlas::LoadAtlasImages()] Error while loading file.");
-        }
-        MDCII_ASSERT(renderable->Decal(), "[TileAtlas::LoadAtlasImages()] Null pointer.")
-        atlas.at(magic_enum::enum_integer(world::Zoom::SGFX)).push_back(std::move(renderable));
-    }
-
-    for (auto i{ 0 }; i < NR_OF_MGFX_ATLAS_IMAGES; ++i)
-    {
-        auto renderable{ std::make_unique<olc::Renderable>() };
-        if (renderable->Load(fmt::format("{}atlas/mgfx/{}/{}.png", Game::RESOURCES_REL_PATH, TILE_ATLAS_NAME, i)) != olc::OK)
+            atlasOffset.x * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
+            atlasOffset.y * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
+        },
         {
-            throw MDCII_EXCEPTION("[TileAtlas::LoadAtlasImages()] Error while loading file.");
-        }
-        MDCII_ASSERT(renderable->Decal(), "[TileAtlas::LoadAtlasImages()] Null pointer.")
-        atlas.at(magic_enum::enum_integer(world::Zoom::MGFX)).push_back(std::move(renderable));
-    }
-
-    for (auto i{ 0 }; i < NR_OF_GFX_ATLAS_IMAGES; ++i)
-    {
-        auto renderable{ std::make_unique<olc::Renderable>() };
-        if (renderable->Load(fmt::format("{}atlas/gfx/{}/{}.png", Game::RESOURCES_REL_PATH, TILE_ATLAS_NAME, i)) != olc::OK)
-        {
-            throw MDCII_EXCEPTION("[TileAtlas::LoadAtlasImages()] Error while loading file.");
-        }
-        MDCII_ASSERT(renderable->Decal(), "[TileAtlas::LoadAtlasImages()] Null pointer.")
-        atlas.at(magic_enum::enum_integer(world::Zoom::GFX)).push_back(std::move(renderable));
-    }
-
-    MDCII_LOG_DEBUG("[TileAtlas::LoadAtlasImages()] Tile Atlas images were created successfully.");
-}
-
-void mdcii::resource::TileAtlas::LoadHeightsByZoom(const world::Zoom t_zoom)
-{
-    MDCII_LOG_DEBUG("[TileAtlas::LoadHeightsByZoom()] Start reading image heights for zoom {} ...", magic_enum::enum_name(t_zoom));
-
-    std::ifstream inputFile(
-        fmt::format("{}atlas/{}/{}/heights.txt",
-        Game::RESOURCES_REL_PATH, to_lower_case(std::string(magic_enum::enum_name(t_zoom))), TILE_ATLAS_NAME
-        )
+            resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
+            resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
+        },
+        { 1.0f, 1.0f },
+        t_tile->tintFlag == 1 ? olc::BLUE : t_tint
     );
-    std::string line;
+}
 
-    const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
-
-    if (inputFile.is_open())
+void mdcii::resource::TileAtlas::CalcAnimationFrame(const float t_elapsedTime)
+{
+    for (auto& timer : m_timer_values)
     {
-        while (std::getline(inputFile, line))
+        timer += t_elapsedTime;
+    }
+
+    if (m_timer_values[0] >= 0.09f)
+    {
+        m_frame_values[0] = ++m_frame_values[0];
+        m_timer_values[0] = 0.0f;
+        m_frame_values[0] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[1] >= 0.13f)
+    {
+        m_frame_values[1] = ++m_frame_values[1];
+        m_timer_values[1] = 0.0f;
+        m_frame_values[1] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[2] >= 0.15f)
+    {
+        m_frame_values[2] = ++m_frame_values[2];
+        m_timer_values[2] = 0.0f;
+        m_frame_values[2] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[3] >= 0.18f)
+    {
+        m_frame_values[3] = ++m_frame_values[3];
+        m_timer_values[3] = 0.0f;
+        m_frame_values[3] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[4] >= 0.22f)
+    {
+        m_frame_values[4] = ++m_frame_values[4];
+        m_timer_values[4] = 0.0f;
+        m_frame_values[4] %= MAX_FRAME_VALUE + 1;
+    }
+}
+
+void mdcii::resource::TileAtlas::RenderIsland(const world::Island* t_island, const world::LayerType t_layerType, const bool t_renderGrid) const
+{
+    for (auto& tile : t_island->layers[magic_enum::enum_integer(t_layerType)]->currentTiles)
+    {
+        if (tile.HasBuilding())
         {
-            if (!line.empty())
+            tile.UpdateFrame(m_frame_values);
+            Render(t_island->startX, t_island->startY, &tile, olc::WHITE);
+            if (t_renderGrid)
             {
-                heights.at(zoomInt).push_back(std::stoi(line));
+                renderer::Renderer::RenderAsset(Asset::GREEN_ISO, t_island->startX, t_island->startY, m_world, &tile, true);
             }
         }
-
-        inputFile.close();
     }
-    else
+}
+
+void mdcii::resource::TileAtlas::RenderIslands(const bool t_renderGrid) const
+{
+    for (auto const& island : m_world->currentIslands)
     {
-        throw MDCII_EXCEPTION("[TileAtlas::LoadHeightsByZoom()] Error while reading file path: " +
-           fmt::format("{}atlas/{}/{}/heights.txt",
-               Game::RESOURCES_REL_PATH, magic_enum::enum_name(t_zoom), TILE_ATLAS_NAME
-           )
-        );
+        if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_MIXED_LAYER))
+        {
+            RenderIsland(island, world::LayerType::MIXED, t_renderGrid);
+        }
+        else
+        {
+            if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_COAST_LAYER))
+            {
+                RenderIsland(island, world::LayerType::COAST, false);
+            }
+            if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_TERRAIN_LAYER))
+            {
+                RenderIsland(island, world::LayerType::TERRAIN, t_renderGrid);
+            }
+            if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_BUILDINGS_LAYER))
+            {
+                RenderIsland(island, world::LayerType::BUILDINGS, t_renderGrid);
+            }
+        }
+    }
+}
+
+void mdcii::resource::TileAtlas::RenderDeepWater(const bool t_renderGrid) const
+{
+    if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_DEEP_WATER_LAYER))
+    {
+        for (auto& tile : m_world->deepWater->layer->currentTiles)
+        {
+            tile.UpdateFrame(m_frame_values);
+            Render(0, 0, &tile, olc::WHITE);
+            if (t_renderGrid)
+            {
+                renderer::Renderer::RenderAsset(Asset::BLUE_ISO, 0, 0, m_world, &tile, false);
+            }
+        }
+    }
+}
+
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+int mdcii::resource::TileAtlas::GetGfxForCurrentRotation(const world::Tile* t_tile) const
+{
+    MDCII_ASSERT(!t_tile->gfxs.empty(), "[TileAtlas::GetGfxForCurrentRotation()] Missing gfx values.")
+
+    if (t_tile->gfxs.size() == 1)
+    {
+        return t_tile->gfxs[0] + t_tile->frame * t_tile->building->animAdd;
     }
 
-    MDCII_LOG_DEBUG("[TileAtlas::LoadHeightsByZoom()] Image heights were read successfully.");
+    const auto worldRotation{ m_world->camera->rotation + world::int_to_rotation(t_tile->rotation) };
+    return t_tile->gfxs[magic_enum::enum_integer(worldRotation)] + t_tile->frame * t_tile->building->animAdd;
+}
+
+float mdcii::resource::TileAtlas::CalcOffset(const world::Tile* t_tile, const int t_gfx) const
+{
+    auto offset{ 0.0f };
+    const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
+    auto tileHeight{ get_tile_height(m_world->camera->zoom) };
+    const auto gfxHeight{ m_heights[zoomInt][t_gfx] };
+
+    if (m_world->camera->zoom == world::Zoom::GFX)
+    {
+        tileHeight = 31;
+    }
+    if (gfxHeight > tileHeight)
+    {
+        offset = static_cast<float>(gfxHeight) - static_cast<float>(tileHeight);
+    }
+    if (t_tile->HasBuildingAboveWaterAndCoast())
+    {
+        offset += world::ELEVATIONS[zoomInt];
+    }
+
+    return offset;
 }

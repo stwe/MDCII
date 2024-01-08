@@ -18,19 +18,22 @@
 
 #include "AnimalsTileAtlas.h"
 #include "Game.h"
-#include "MdciiException.h"
-#include "MdciiUtils.h"
 #include "MdciiAssert.h"
+#include "world/World.h"
+#include "state/State.h"
+#include "camera/Camera.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::resource::AnimalsTileAtlas::AnimalsTileAtlas()
+mdcii::resource::AnimalsTileAtlas::AnimalsTileAtlas(const world::World* t_world)
+    : BshTileAtlas(TILE_ATLAS_NAME, NR_OF_ATLAS_IMAGES, NR_OF_ATLAS_IMAGES, NR_OF_ATLAS_IMAGES)
+    , m_world{ t_world }
 {
     MDCII_LOG_DEBUG("[AnimalsTileAtlas::AnimalsTileAtlas()] Create AnimalsTileAtlas.");
 
-    Init();
+    MDCII_ASSERT(m_world, "[AnimalsTileAtlas::AnimalsTileAtlas()] Null pointer.")
 }
 
 mdcii::resource::AnimalsTileAtlas::~AnimalsTileAtlas() noexcept
@@ -39,100 +42,28 @@ mdcii::resource::AnimalsTileAtlas::~AnimalsTileAtlas() noexcept
 }
 
 //-------------------------------------------------
-// Init
+// Logic
 //-------------------------------------------------
 
-void mdcii::resource::AnimalsTileAtlas::Init()
+void mdcii::resource::AnimalsTileAtlas::Render(const int t_x, const int t_y, const olc::Pixel& t_tint) const
 {
-    MDCII_LOG_DEBUG("[AnimalsTileAtlas::Init()] Start initialization of the Animals Tile Atlas ...");
+    const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
+    const auto gfx{ 8 };
+    const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, resource::AnimalsTileAtlas::NR_OF_ROWS) };
+    const olc::vf2d screenPosition{ m_world->ToScreen(t_x, t_y) };
 
-    LoadAtlasImages();
-
-    for (const auto zoom : magic_enum::enum_values<world::Zoom>())
-    {
-        LoadHeightsByZoom(zoom);
-    }
-
-    MDCII_LOG_DEBUG("[AnimalsTileAtlas::Init()] Animals Tile Atlas were created successfully.");
-}
-
-//-------------------------------------------------
-// Load
-//-------------------------------------------------
-
-void mdcii::resource::AnimalsTileAtlas::LoadAtlasImages()
-{
-    MDCII_LOG_DEBUG("[AnimalsTileAtlas::LoadAtlasImages()] Start creating Animals Tile Atlas images ...");
-
-    for (auto i{ 0 }; i < NR_OF_SGFX_ATLAS_IMAGES; ++i)
-    {
-        auto renderable{ std::make_unique<olc::Renderable>() };
-        if(renderable->Load(fmt::format("{}atlas/sgfx/{}/{}.png", Game::RESOURCES_REL_PATH, TILE_ATLAS_NAME, i)) != olc::OK)
+    m_world->state->game->DrawPartialDecal(
+        screenPosition,
+        m_atlas[zoomInt][GetAtlasIndex(gfx, resource::AnimalsTileAtlas::NR_OF_ROWS)]->Decal(),
         {
-            throw MDCII_EXCEPTION("[AnimalsTileAtlas::LoadAtlasImages()] Error while loading file.");
-        }
-        MDCII_ASSERT(renderable->Decal(), "[AnimalsTileAtlas::LoadAtlasImages()] Null pointer.")
-        atlas.at(magic_enum::enum_integer(world::Zoom::SGFX)).push_back(std::move(renderable));
-    }
-
-    for (auto i{ 0 }; i < NR_OF_MGFX_ATLAS_IMAGES; ++i)
-    {
-        auto renderable{ std::make_unique<olc::Renderable>() };
-        if (renderable->Load(fmt::format("{}atlas/mgfx/{}/{}.png", Game::RESOURCES_REL_PATH, TILE_ATLAS_NAME, i)) != olc::OK)
+            atlasOffset.x * resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.first,
+            atlasOffset.y * resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.second
+        },
         {
-            throw MDCII_EXCEPTION("[AnimalsTileAtlas::LoadAtlasImages()] Error while loading file.");
-        }
-        MDCII_ASSERT(renderable->Decal(), "[AnimalsTileAtlas::LoadAtlasImages()] Null pointer.")
-        atlas.at(magic_enum::enum_integer(world::Zoom::MGFX)).push_back(std::move(renderable));
-    }
-
-    for (auto i{ 0 }; i < NR_OF_GFX_ATLAS_IMAGES; ++i)
-    {
-        auto renderable{ std::make_unique<olc::Renderable>() };
-        if (renderable->Load(fmt::format("{}atlas/gfx/{}/{}.png", Game::RESOURCES_REL_PATH, TILE_ATLAS_NAME, i)) != olc::OK)
-        {
-            throw MDCII_EXCEPTION("[AnimalsTileAtlas::LoadAtlasImages()] Error while loading file.");
-        }
-        MDCII_ASSERT(renderable->Decal(), "[AnimalsTileAtlas::LoadAtlasImages()] Null pointer.")
-        atlas.at(magic_enum::enum_integer(world::Zoom::GFX)).push_back(std::move(renderable));
-    }
-
-    MDCII_LOG_DEBUG("[AnimalsTileAtlas::LoadAtlasImages()] Animals Tile Atlas images were created successfully.");
-}
-
-void mdcii::resource::AnimalsTileAtlas::LoadHeightsByZoom(mdcii::world::Zoom t_zoom)
-{
-    MDCII_LOG_DEBUG("[AnimalsTileAtlas::LoadHeightsByZoom()] Start reading image heights for zoom {} ...", magic_enum::enum_name(t_zoom));
-
-    std::ifstream inputFile(
-            fmt::format("{}atlas/{}/{}/heights.txt",
-               Game::RESOURCES_REL_PATH, to_lower_case(std::string(magic_enum::enum_name(t_zoom))), TILE_ATLAS_NAME
-            )
+            resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.first,
+            resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.second
+        },
+        { 1.0f, 1.0f },
+        t_tint
     );
-    std::string line;
-
-    const auto zoomInt{ magic_enum::enum_integer(t_zoom) };
-
-    if (inputFile.is_open())
-    {
-        while (std::getline(inputFile, line))
-        {
-            if (!line.empty())
-            {
-                heights.at(zoomInt).push_back(std::stoi(line));
-            }
-        }
-
-        inputFile.close();
-    }
-    else
-    {
-        throw MDCII_EXCEPTION("[AnimalsTileAtlas::LoadHeightsByZoom()] Error while reading file path: " +
-                              fmt::format("{}atlas/{}/{}/heights.txt",
-                              Game::RESOURCES_REL_PATH, magic_enum::enum_name(t_zoom), TILE_ATLAS_NAME
-                              )
-        );
-    }
-
-    MDCII_LOG_DEBUG("[AnimalsTileAtlas::LoadHeightsByZoom()] Image heights were read successfully.");
 }

@@ -25,8 +25,6 @@
 #include "Intl.h"
 #include "resource/OriginalResourcesManager.h"
 #include "resource/MdciiResourcesManager.h"
-#include "resource/TileAtlas.h"
-#include "resource/AnimalsTileAtlas.h"
 #include "resource/AssetManager.h"
 #include "state/StateSystem.h"
 
@@ -57,8 +55,6 @@ bool mdcii::Game::OnUserCreate()
 
     originalResourcesManager = std::make_unique<resource::OriginalResourcesManager>();
     mdciiResourcesManager = std::make_unique<resource::MdciiResourcesManager>();
-    stadtfldTileAtlas = std::make_unique<resource::TileAtlas>();
-    animalsTileAtlas = std::make_unique<resource::AnimalsTileAtlas>();
     assetManager = std::make_unique<resource::AssetManager>();
 
     gameLayer = static_cast<int>(CreateLayer());

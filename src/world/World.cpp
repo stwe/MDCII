@@ -27,6 +27,8 @@
 #include "state/State.h"
 #include "resource/MdciiFile.h"
 #include "resource/OriginalResourcesManager.h"
+#include "resource/TileAtlas.h"
+#include "resource/AnimalsTileAtlas.h"
 #include "resource/AssetManager.h"
 #include "renderer/Renderer.h"
 #include "camera/Camera.h"
@@ -78,9 +80,11 @@ void mdcii::world::World::CreateCoreObjects()
     }
 
     deepWater = std::make_unique<DeepWater>(this);
-    renderer = std::make_unique<renderer::Renderer>(this);
     camera = std::make_unique<camera::Camera>(this);
     mousePicker = std::make_unique<MousePicker>(this, true);
+
+    m_tileAtlas = std::make_unique<resource::TileAtlas>(this);
+    m_animalsTileAtlas = std::make_unique<resource::AnimalsTileAtlas>(this);
 }
 
 //-------------------------------------------------
@@ -109,16 +113,13 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
         FindVisibleDeepWaterTiles();
     }
 
-    // render
-    renderer::Renderer::CalcAnimationFrame(t_elapsedTime);
-    renderer->RenderDeepWater(m_renderDeepWaterGrid);
-    renderer->RenderIslands(m_renderIslandsGrid);
+    // render deep water && islands
+    m_tileAtlas->CalcAnimationFrame(t_elapsedTime);
+    m_tileAtlas->RenderDeepWater(m_renderDeepWaterGrid);
+    m_tileAtlas->RenderIslands(m_renderIslandsGrid);
 
-    // todo: tmp code
-    Tile animal;
-    animal.posX = 3;
-    animal.posY = 5;
-    renderer->RenderAnimal(0, 0, &animal);
+    // todo: render animal gfx 8
+    m_animalsTileAtlas->Render(3, 5, olc::WHITE);
 
     // ---------------------------------
     // todo: Rendering depends on ImGui
@@ -194,8 +195,8 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                         // render the building (dark grey) to be added and a green grid
                         for (const auto& tile : newTiles)
                         {
-                            renderer->RenderBuilding(island->startX, island->startY, &tile, olc::DARK_GREY);
-                            renderer->RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, &tile, true);
+                            m_tileAtlas->Render(island->startX, island->startY, &tile, olc::DARK_GREY);
+                            renderer::Renderer::RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, this, &tile, true);
                         }
 
                         break; // break offsets loop

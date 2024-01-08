@@ -18,20 +18,18 @@
 
 #pragma once
 
-#include <memory>
-#include <vector>
-#include "world/Zoom.h"
+#include "BshTileAtlas.h"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
 
-namespace olc
+namespace mdcii::world
 {
     /**
-     * @brief Forward declaration class Renderable.
+     * @brief Forward declaration class World.
      */
-    class Renderable;
+    class World;
 }
 
 namespace mdcii::resource
@@ -41,11 +39,40 @@ namespace mdcii::resource
     //-------------------------------------------------
 
     /**
-     * @brief Provides a Tile Atlas for all the animal graphics for each zoom.
+     * @brief Provides a Tile Atlas for all the animal graphics.
      */
-    class AnimalsTileAtlas
+    class AnimalsTileAtlas : public BshTileAtlas
     {
     public:
+        //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        AnimalsTileAtlas() = delete;
+
+        /**
+         * @brief Constructs a new AnimalsTileAtlas object.
+         *
+         * @param t_world Pointer to the parent World.
+         */
+        explicit AnimalsTileAtlas(const world::World* t_world);
+
+        AnimalsTileAtlas(const AnimalsTileAtlas& t_other) = delete;
+        AnimalsTileAtlas(AnimalsTileAtlas&& t_other) noexcept = delete;
+        AnimalsTileAtlas& operator=(const AnimalsTileAtlas& t_other) = delete;
+        AnimalsTileAtlas& operator=(AnimalsTileAtlas&& t_other) noexcept = delete;
+
+        ~AnimalsTileAtlas() noexcept override;
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
+        void Render(int t_x, int t_y, const olc::Pixel& t_tint) const;
+
+    protected:
+
+    private:
         //-------------------------------------------------
         // Constants
         //-------------------------------------------------
@@ -65,22 +92,12 @@ namespace mdcii::resource
         static constexpr auto NR_OF_ROWS{ 16 };
 
         /**
-         * @brief Number of SGFX Animals Tile Atlas images.
+         * @brief Number of Animals Tile Atlas images for each zoom.
          */
-        static constexpr auto NR_OF_SGFX_ATLAS_IMAGES{ 3 };
+        static constexpr auto NR_OF_ATLAS_IMAGES{ 3 };
 
         /**
-         * @brief Number of MGFX Animals Tile Atlas images.
-         */
-        static constexpr auto NR_OF_MGFX_ATLAS_IMAGES{ 3 };
-
-        /**
-         * @brief Number of GFX Animals Tile Atlas images.
-         */
-        static constexpr auto NR_OF_GFX_ATLAS_IMAGES{ 3 };
-
-        /**
-         * @brief The name of the Animals Tile Atlas.
+         * @brief The name and directory of the Animals Tile Atlas.
          */
         static constexpr std::string_view TILE_ATLAS_NAME{ "animals" };
 
@@ -89,54 +106,8 @@ namespace mdcii::resource
         //-------------------------------------------------
 
         /**
-          * @brief Contains the AnimalsTileAtlas images for each zoom as a renderable object.
-          */
-        std::array<std::vector<std::unique_ptr<const olc::Renderable>>, world::NR_OF_ZOOMS> atlas;
-
-        /**
-         * @brief Array of vectors containing the real heights of each image.
+         * @brief Pointer to the parent World.
          */
-        std::array<std::vector<int>, world::NR_OF_ZOOMS> heights;
-
-        //-------------------------------------------------
-        // Ctors. / Dtor.
-        //-------------------------------------------------
-
-        AnimalsTileAtlas();
-
-        AnimalsTileAtlas(const AnimalsTileAtlas& t_other) = delete;
-        AnimalsTileAtlas(AnimalsTileAtlas&& t_other) noexcept = delete;
-        AnimalsTileAtlas& operator=(const AnimalsTileAtlas& t_other) = delete;
-        AnimalsTileAtlas& operator=(AnimalsTileAtlas&& t_other) noexcept = delete;
-
-        ~AnimalsTileAtlas() noexcept;
-
-    protected:
-
-    private:
-        //-------------------------------------------------
-        // Init
-        //-------------------------------------------------
-
-        /**
-         * @brief Initialize the AnimalsTileAtlas.
-         */
-        void Init();
-
-        //-------------------------------------------------
-        // Load
-        //-------------------------------------------------
-
-        /**
-         * @brief Load AnimalsTileAtlas images.
-         */
-        void LoadAtlasImages();
-
-        /**
-         * @brief Method to load all AnimalsTileAtlas images heights by given Zoom.
-         *
-         * @param t_zoom The zoom.
-         */
-        void LoadHeightsByZoom(world::Zoom t_zoom);
+        const world::World* m_world{ nullptr };
     };
 }

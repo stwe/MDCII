@@ -33,20 +33,25 @@ namespace mdcii::state
     class State;
 }
 
-namespace mdcii::renderer
-{
-    /**
-     * @brief Forward declaration class Renderer.
-     */
-    class Renderer;
-}
-
 namespace mdcii::camera
 {
     /**
      * @brief Forward declaration class Camera.
      */
     class Camera;
+}
+
+namespace mdcii::resource
+{
+    /**
+     * @brief Forward declaration class TileAtlas.
+     */
+    class TileAtlas;
+
+    /**
+     * @brief Forward declaration class AnimalsTileAtlas.
+     */
+    class AnimalsTileAtlas;
 }
 
 namespace mdcii::world
@@ -130,11 +135,6 @@ namespace mdcii::world
          * @brief Pointer to the DeepWater object.
          */
         std::unique_ptr<DeepWater> deepWater;
-
-        /**
-         * @brief For rendering this world.
-         */
-        std::unique_ptr<renderer::Renderer> renderer;
 
         /**
          * @brief A camera to move around.
@@ -270,6 +270,16 @@ namespace mdcii::world
          * @brief Renders a grid on all the islands terrain.
          */
         bool m_renderIslandsGrid{ false };
+
+        /**
+         * @brief Pointer to the TileAtlas object.
+         */
+        std::unique_ptr<resource::TileAtlas> m_tileAtlas;
+
+        /**
+         * @brief Pointer to the AnimalsTileAtlas object.
+         */
+        std::unique_ptr<resource::AnimalsTileAtlas> m_animalsTileAtlas;
 
         //-------------------------------------------------
         // Init

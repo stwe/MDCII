@@ -18,264 +18,36 @@
 
 #include "Renderer.h"
 #include "Game.h"
-#include "GameState.h"
-#include "MdciiAssert.h"
-#include "world/Island.h"
-#include "world/DeepWater.h"
 #include "world/World.h"
-#include "world/Layer.h"
-#include "resource/TileAtlas.h"
-#include "resource/AnimalsTileAtlas.h"
-#include "resource/Buildings.h"
+#include "world/Tile.h"
 #include "resource/AssetManager.h"
 #include "camera/Camera.h"
-
-//-------------------------------------------------
-// Ctors. / Dtor.
-//-------------------------------------------------
-
-mdcii::renderer::Renderer::Renderer(const world::World* t_world)
-    : m_world{ t_world }
-{
-    MDCII_LOG_DEBUG("[Renderer::Renderer()] Create Renderer.");
-
-    MDCII_ASSERT(m_world, "[Renderer::Renderer()] Null pointer.")
-}
-
-mdcii::renderer::Renderer::~Renderer() noexcept
-{
-    MDCII_LOG_DEBUG("[Renderer::~Renderer()] Destruct Renderer.");
-}
+#include "state/State.h"
 
 //-------------------------------------------------
 // Logic
 //-------------------------------------------------
 
-float mdcii::renderer::Renderer::CalcOffset(const world::Tile* t_tile, const int t_gfx) const
-{
-    auto offset{ 0.0f };
-    const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
-    auto tileHeight{ get_tile_height(m_world->camera->zoom) };
-    const auto gfxHeight{ m_world->state->game->stadtfldTileAtlas->heights[zoomInt][t_gfx] };
-
-    if (m_world->camera->zoom == world::Zoom::GFX)
-    {
-        tileHeight = 31;
-    }
-    if (gfxHeight > tileHeight)
-    {
-        offset = static_cast<float>(gfxHeight) - static_cast<float>(tileHeight);
-    }
-    if (t_tile->HasBuildingAboveWaterAndCoast())
-    {
-        offset += world::ELEVATIONS[zoomInt];
-    }
-
-    return offset;
-}
-
-int mdcii::renderer::Renderer::GetGfxForCurrentRotation(const world::Tile* t_tile) const
-{
-    MDCII_ASSERT(!t_tile->gfxs.empty(), "[Renderer::GetGfxForCurrentRotation()] Missing gfx values.")
-
-    if (t_tile->gfxs.size() == 1)
-    {
-        return t_tile->gfxs[0] + t_tile->frame * t_tile->building->animAdd;
-    }
-
-    const auto worldRotation{ m_world->camera->rotation + world::int_to_rotation(t_tile->rotation) };
-    return t_tile->gfxs[magic_enum::enum_integer(worldRotation)] + t_tile->frame * t_tile->building->animAdd;
-}
-
-void mdcii::renderer::Renderer::RenderBuilding(
-    const int t_startX,
-    const int t_startY,
-    const world::Tile* t_tile,
-    const olc::Pixel& t_tint
-) const
-{
-    const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
-    const auto gfx{ GetGfxForCurrentRotation(t_tile) };
-    const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
-
-    olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
-    screenPosition.y -= CalcOffset(t_tile, gfx);
-
-    m_world->state->game->DrawPartialDecal(
-        screenPosition,
-        m_world->state->game->stadtfldTileAtlas->atlas[zoomInt][GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt])]->Decal(),
-        {
-            atlasOffset.x * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
-            atlasOffset.y * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
-        },
-        {
-            resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
-            resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
-        },
-        { 1.0f, 1.0f },
-        t_tile->tintFlag == 1 ? olc::BLUE : t_tint
-    );
-}
-
-void mdcii::renderer::Renderer::RenderAnimal(const int t_startX, const int t_startY, const world::Tile* t_tile) const
-{
-    const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
-    const auto gfx{ 8 };
-    const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, resource::AnimalsTileAtlas::NR_OF_ROWS) };
-    const olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
-
-    m_world->state->game->DrawPartialDecal(
-        screenPosition,
-        m_world->state->game->animalsTileAtlas->atlas[zoomInt][GetAtlasIndex(gfx, resource::AnimalsTileAtlas::NR_OF_ROWS)]->Decal(),
-        {
-            atlasOffset.x * resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.first,
-            atlasOffset.y * resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.second
-        },
-        {
-            resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.first,
-            resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.second
-        },
-        { 1.0f, 1.0f },
-        olc::WHITE
-    );
-}
-
 void mdcii::renderer::Renderer::RenderAsset(
     const resource::Asset t_asset,
     const int t_startX,
     const int t_startY,
+    const world::World* t_world,
     const world::Tile* t_tile,
     const bool t_minusElevation,
     const olc::Pixel& t_tint
-) const
+)
 {
-    olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
+    olc::vf2d screenPosition{ t_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
     if (t_minusElevation)
     {
-        screenPosition.y -= world::ELEVATIONS[magic_enum::enum_integer(m_world->camera->zoom)];
+        screenPosition.y -= world::ELEVATIONS[magic_enum::enum_integer(t_world->camera->zoom)];
     }
 
-    m_world->state->game->DrawDecal(
+    t_world->state->game->DrawDecal(
         screenPosition,
-        m_world->state->game->assetManager->GetAsset(t_asset, m_world->camera->zoom)->Decal(),
+        t_world->state->game->assetManager->GetAsset(t_asset, t_world->camera->zoom)->Decal(),
         { 1.0f, 1.0f },
         t_tint
     );
-}
-
-void mdcii::renderer::Renderer::CalcAnimationFrame(const float t_elapsedTime)
-{
-    for (auto& timer : m_timer_values)
-    {
-        timer += t_elapsedTime;
-    }
-
-    if (m_timer_values[0] >= 0.09f)
-    {
-        m_frame_values[0] = ++m_frame_values[0];
-        m_timer_values[0] = 0.0f;
-        m_frame_values[0] %= MAX_FRAME_VALUE + 1;
-    }
-
-    if (m_timer_values[1] >= 0.13f)
-    {
-        m_frame_values[1] = ++m_frame_values[1];
-        m_timer_values[1] = 0.0f;
-        m_frame_values[1] %= MAX_FRAME_VALUE + 1;
-    }
-
-    if (m_timer_values[2] >= 0.15f)
-    {
-        m_frame_values[2] = ++m_frame_values[2];
-        m_timer_values[2] = 0.0f;
-        m_frame_values[2] %= MAX_FRAME_VALUE + 1;
-    }
-
-    if (m_timer_values[3] >= 0.18f)
-    {
-        m_frame_values[3] = ++m_frame_values[3];
-        m_timer_values[3] = 0.0f;
-        m_frame_values[3] %= MAX_FRAME_VALUE + 1;
-    }
-
-    if (m_timer_values[4] >= 0.22f)
-    {
-        m_frame_values[4] = ++m_frame_values[4];
-        m_timer_values[4] = 0.0f;
-        m_frame_values[4] %= MAX_FRAME_VALUE + 1;
-    }
-}
-
-void mdcii::renderer::Renderer::RenderIsland(const world::Island* t_island, const world::LayerType t_layerType, const bool t_renderGrid) const
-{
-    for (auto& tile : t_island->layers[magic_enum::enum_integer(t_layerType)]->currentTiles)
-    {
-        if (tile.HasBuilding())
-        {
-            tile.UpdateFrame(m_frame_values);
-            RenderBuilding(t_island->startX, t_island->startY, &tile);
-            if (t_renderGrid)
-            {
-                RenderAsset(resource::Asset::GREEN_ISO, t_island->startX, t_island->startY, &tile, true);
-            }
-        }
-    }
-}
-
-void mdcii::renderer::Renderer::RenderIslands(const bool t_renderGrid) const
-{
-    for (auto const& island : m_world->currentIslands)
-    {
-        if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_MIXED_LAYER))
-        {
-            RenderIsland(island, world::LayerType::MIXED, t_renderGrid);
-        }
-        else
-        {
-            if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_COAST_LAYER))
-            {
-                RenderIsland(island, world::LayerType::COAST, false);
-            }
-            if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_TERRAIN_LAYER))
-            {
-                RenderIsland(island, world::LayerType::TERRAIN, t_renderGrid);
-            }
-            if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_BUILDINGS_LAYER))
-            {
-                RenderIsland(island, world::LayerType::BUILDINGS, t_renderGrid);
-            }
-        }
-    }
-}
-
-void mdcii::renderer::Renderer::RenderDeepWater(const bool t_renderGrid) const
-{
-    if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_DEEP_WATER_LAYER))
-    {
-        for (auto& tile : m_world->deepWater->layer->currentTiles)
-        {
-            tile.UpdateFrame(m_frame_values);
-            RenderBuilding(0, 0, &tile);
-            if (t_renderGrid)
-            {
-                RenderAsset(resource::Asset::BLUE_ISO, 0, 0, &tile, false);
-            }
-        }
-    }
-}
-
-//-------------------------------------------------
-// Helper
-//-------------------------------------------------
-
-int mdcii::renderer::Renderer::GetAtlasIndex(const int t_gfx, const int t_rows)
-{
-    return t_gfx / (t_rows * t_rows);
-}
-
-olc::vi2d mdcii::renderer::Renderer::GetAtlasOffset(const int t_gfx, const int t_rows)
-{
-    auto picInPic{ t_gfx % (t_rows * t_rows) };
-
-    return { picInPic % t_rows, picInPic / t_rows };
 }
