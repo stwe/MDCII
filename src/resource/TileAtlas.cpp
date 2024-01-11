@@ -55,21 +55,21 @@ void mdcii::resource::TileAtlas::Render(const int t_startX, const int t_startY, 
 {
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
     const auto gfx{ GetGfxForCurrentRotation(t_tile) };
-    const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt]) };
+    const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, NR_OF_ROWS[zoomInt]) };
 
     olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
     screenPosition.y -= CalcOffset(t_tile, gfx);
 
     m_world->state->game->DrawPartialDecal(
         screenPosition,
-        m_atlas[zoomInt][GetAtlasIndex(gfx, resource::TileAtlas::NR_OF_ROWS[zoomInt])]->Decal(),
+        m_atlas[zoomInt][GetAtlasIndex(gfx, NR_OF_ROWS[zoomInt])]->Decal(),
         {
-            atlasOffset.x * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
-            atlasOffset.y * resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
+            atlasOffset.x * LARGEST_SIZE[zoomInt].second.first,
+            atlasOffset.y * LARGEST_SIZE[zoomInt].second.second
         },
         {
-            resource::TileAtlas::LARGEST_SIZE[zoomInt].second.first,
-            resource::TileAtlas::LARGEST_SIZE[zoomInt].second.second
+            LARGEST_SIZE[zoomInt].second.first,
+            LARGEST_SIZE[zoomInt].second.second
         },
         { 1.0f, 1.0f },
         t_tile->tintFlag == 1 ? olc::BLUE : t_tint

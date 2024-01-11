@@ -20,8 +20,10 @@
 #include "Game.h"
 #include "MdciiAssert.h"
 #include "world/World.h"
+#include "world/Island.h"
 #include "state/State.h"
 #include "camera/Camera.h"
+#include "world/Layer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -45,25 +47,100 @@ mdcii::resource::AnimalsTileAtlas::~AnimalsTileAtlas() noexcept
 // Logic
 //-------------------------------------------------
 
-void mdcii::resource::AnimalsTileAtlas::Render(const int t_x, const int t_y, const olc::Pixel& t_tint) const
+void mdcii::resource::AnimalsTileAtlas::Render(Animation* t_animation, const olc::Pixel& t_tint) const
 {
+    t_animation->frame = m_frame_values[0] % t_animation->spriteSheet->count;
+
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
-    const auto gfx{ 8 };
-    const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, resource::AnimalsTileAtlas::NR_OF_ROWS) };
-    const olc::vf2d screenPosition{ m_world->ToScreen(t_x, t_y) };
+    const auto gfx{ t_animation->spriteSheet->start + t_animation->frame };
+    const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, NR_OF_ROWS) };
+
+    olc::vf2d screenPosition;
+    if (t_animation->island->IsWorldPositionOverIsland({ t_animation->island->startX + t_animation->posX, t_animation->island->startY + t_animation->posY }))
+    {
+        auto& terrainTileToCheck{ t_animation->island->GetLayer(world::LayerType::TERRAIN)->GetSortedTile(t_animation->posX, t_animation->posY, m_world->camera->rotation) };
+        screenPosition = m_world->ToScreen(t_animation->island->startX + t_animation->posX, t_animation->island->startY + t_animation->posY);
+        screenPosition.y -= CalcOffset(&terrainTileToCheck, gfx);
+    }
 
     m_world->state->game->DrawPartialDecal(
         screenPosition,
-        m_atlas[zoomInt][GetAtlasIndex(gfx, resource::AnimalsTileAtlas::NR_OF_ROWS)]->Decal(),
+        m_atlas[zoomInt][GetAtlasIndex(gfx, NR_OF_ROWS)]->Decal(),
         {
-            atlasOffset.x * resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.first,
-            atlasOffset.y * resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.second
+            atlasOffset.x * LARGEST_SIZE[zoomInt].second.first,
+            atlasOffset.y * LARGEST_SIZE[zoomInt].second.second
         },
         {
-            resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.first,
-            resource::AnimalsTileAtlas::LARGEST_SIZE[zoomInt].second.second
+            LARGEST_SIZE[zoomInt].second.first,
+            LARGEST_SIZE[zoomInt].second.second
         },
         { 1.0f, 1.0f },
         t_tint
     );
+}
+
+void mdcii::resource::AnimalsTileAtlas::CalcAnimationFrame(const float t_elapsedTime)
+{
+    for (auto& timer : m_timer_values)
+    {
+        timer += t_elapsedTime;
+    }
+
+    if (m_timer_values[0] >= 0.09f)
+    {
+        m_frame_values[0] = ++m_frame_values[0];
+        m_timer_values[0] = 0.0f;
+        m_frame_values[0] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[1] >= 0.13f)
+    {
+        m_frame_values[1] = ++m_frame_values[1];
+        m_timer_values[1] = 0.0f;
+        m_frame_values[1] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[2] >= 0.15f)
+    {
+        m_frame_values[2] = ++m_frame_values[2];
+        m_timer_values[2] = 0.0f;
+        m_frame_values[2] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[3] >= 0.18f)
+    {
+        m_frame_values[3] = ++m_frame_values[3];
+        m_timer_values[3] = 0.0f;
+        m_frame_values[3] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[4] >= 0.22f)
+    {
+        m_frame_values[4] = ++m_frame_values[4];
+        m_timer_values[4] = 0.0f;
+        m_frame_values[4] %= MAX_FRAME_VALUE + 1;
+    }
+}
+
+float mdcii::resource::AnimalsTileAtlas::CalcOffset(const world::Tile* t_tile, const int t_gfx) const
+{
+    auto offset{ 0.0f };
+    const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
+    auto tileHeight{ get_tile_height(m_world->camera->zoom) };
+    const auto gfxHeight{ m_heights[zoomInt][t_gfx] };
+
+    if (m_world->camera->zoom == world::Zoom::GFX)
+    {
+        tileHeight = 31;
+    }
+    if (gfxHeight > tileHeight)
+    {
+        offset = static_cast<float>(gfxHeight) - static_cast<float>(tileHeight);
+    }
+    if (t_tile->HasBuildingAboveWaterAndCoast())
+    {
+        offset += world::ELEVATIONS[zoomInt];
+    }
+
+    return offset;
 }

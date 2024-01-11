@@ -61,8 +61,6 @@ namespace mdcii::renderer
         // Logic
         //-------------------------------------------------
 
-        // todo: -> AssetManager class
-
         static void RenderAsset(
             resource::Asset t_asset,
             int t_startX,
@@ -71,7 +69,7 @@ namespace mdcii::renderer
             const world::Tile* t_tile,
             bool t_minusElevation,
             const olc::Pixel& t_tint = olc::WHITE
-        ) ;
+        );
 
     protected:
 
