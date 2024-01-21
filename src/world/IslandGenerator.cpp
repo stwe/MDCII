@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,13 +20,10 @@
 #include "IslandGenerator.h"
 #include "MdciiAssert.h"
 #include "Island.h"
-#include "Tile.h"
-#include "Rotation.h"
 #include "Game.h"
 #include "MdciiUtils.h"
 #include "resource/BuildingIds.h"
 #include "resource/OriginalResourcesManager.h"
-#include "resource/MdciiFile.h"
 #include "vendor/fastnoise/FastNoiseLite.h"
 
 //-------------------------------------------------
@@ -621,8 +618,8 @@ void mdcii::world::IslandGenerator::SaveIslandImGui() const
     {
         if (ImGui::Button("Save"))
         {
-            std::vector<Tile> coastTiles;
-            std::vector<Tile> terrainTiles;
+            std::vector<tile::TerrainTile> coastTiles;
+            std::vector<tile::TerrainTile> terrainTiles;
             CreateTerrainTiles(terrainTiles);
             CreateCoastTiles(coastTiles);
 
@@ -871,7 +868,7 @@ void mdcii::world::IslandGenerator::UpdateBySelection(const int32_t t_index)
 // Tiles
 //-------------------------------------------------
 
-void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<Tile>& t_terrainTiles) const
+void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<tile::TerrainTile>& t_terrainTiles) const
 {
     MDCII_LOG_DEBUG("[IslandGenerator::CreateTerrainTiles()] Create terrain tiles.");
 
@@ -976,7 +973,7 @@ void mdcii::world::IslandGenerator::CreateTerrainTiles(std::vector<Tile>& t_terr
     }
 }
 
-void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<Tile>& t_coastTiles) const
+void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<tile::TerrainTile>& t_coastTiles) const
 {
     MDCII_LOG_DEBUG("[IslandGenerator::CreateCoastTiles()] Create coast tiles.");
 
@@ -1107,7 +1104,7 @@ void mdcii::world::IslandGenerator::CreateCoastTiles(std::vector<Tile>& t_coastT
     }
 }
 
-mdcii::world::Tile mdcii::world::IslandGenerator::CreateTile(
+mdcii::world::tile::TerrainTile mdcii::world::IslandGenerator::CreateTile(
     const int32_t t_id,
     const int32_t t_worldX,
     const int32_t t_worldY,

@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -95,7 +95,7 @@ void mdcii::world::Gui::RotatableBuildingGui(const resource::Building* t_buildin
 {
     MDCII_ASSERT(t_building, "[Gui::RotatableBuildingGui()] Null pointer.")
 
-    if (t_building->rotate > 0)
+    if (t_building->HasGfxForEachRotation())
     {
         static bool r = false;
         static bool l = false;

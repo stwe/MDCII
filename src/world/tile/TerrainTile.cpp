@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -16,16 +16,20 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include "Tile.h"
-#include "Rotation.h"
+#include "TerrainTile.h"
 #include "MdciiAssert.h"
 #include "resource/Buildings.h"
+#include "world/Rotation.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::Tile::Tile(
+mdcii::world::tile::TerrainTile::TerrainTile()
+{
+}
+
+mdcii::world::tile::TerrainTile::TerrainTile(
     const resource::Building* t_building,
     const int t_rotation,
     const int t_x,
@@ -33,12 +37,10 @@ mdcii::world::Tile::Tile(
     const int t_posX,
     const int t_posY
 )
-    : building{ t_building }
-    , rotation{ t_rotation }
+    : Tile(t_rotation, t_posX, t_posY)
+    , building{ t_building }
     , x{ t_x }
     , y{ t_y }
-    , posX{ t_posX }
-    , posY{ t_posY }
 {
     CalculateGfx();
 }
@@ -47,7 +49,7 @@ mdcii::world::Tile::Tile(
 // Getter
 //-------------------------------------------------
 
-bool mdcii::world::Tile::HasBuildingAboveWaterAndCoast() const
+bool mdcii::world::tile::TerrainTile::HasBuildingAboveWaterAndCoast() const
 {
     return building != nullptr && building->posoffs > 0;
 }
@@ -56,27 +58,27 @@ bool mdcii::world::Tile::HasBuildingAboveWaterAndCoast() const
 // Logic
 //-------------------------------------------------
 
-void mdcii::world::Tile::UpdateFrame(const std::array<int, NR_OF_ANIM_TIMES>& t_frameValues)
+void mdcii::world::tile::TerrainTile::UpdateFrame(const std::array<int, NR_OF_ANIM_TIMES>& t_frameValues)
 {
     switch (building->animTime)
     {
-    case 90:
-        frame = t_frameValues[0] % building->animAnz;
-        break;
-    case 130:
-        frame = t_frameValues[1] % building->animAnz;
-        break;
-    case 150:
-        frame = t_frameValues[2] % building->animAnz;
-        break;
-    case 180:
-        frame = t_frameValues[3] % building->animAnz;
-        break;
-    case 220:
-        frame = t_frameValues[4] % building->animAnz;
-        break;
-    default:
-        frame = 0;
+        case 90:
+            frame = t_frameValues[0] % building->animAnz;
+            break;
+        case 130:
+            frame = t_frameValues[1] % building->animAnz;
+            break;
+        case 150:
+            frame = t_frameValues[2] % building->animAnz;
+            break;
+        case 180:
+            frame = t_frameValues[3] % building->animAnz;
+            break;
+        case 220:
+            frame = t_frameValues[4] % building->animAnz;
+            break;
+        default:
+            frame = 0;
     }
 }
 
@@ -84,21 +86,21 @@ void mdcii::world::Tile::UpdateFrame(const std::array<int, NR_OF_ANIM_TIMES>& t_
 // Gfx
 //-------------------------------------------------
 
-void mdcii::world::Tile::CalculateGfx()
+void mdcii::world::tile::TerrainTile::CalculateGfx()
 {
-    MDCII_ASSERT(HasBuilding(), "[Tile::CalculateGfx()] Null pointer.")
+    MDCII_ASSERT(HasBuilding(), "[TerrainTile::CalculateGfx()] Null pointer.")
 
     const auto gfx0{ building->gfx };
 
     gfxs.push_back(gfx0);
-    if (building->rotate > 0)
+    if (building->HasGfxForEachRotation())
     {
         gfxs.push_back(gfx0 + (1 * building->rotate));
         gfxs.push_back(gfx0 + (2 * building->rotate));
         gfxs.push_back(gfx0 + (3 * building->rotate));
     }
 
-    if (building->size.w > 1 || building->size.h > 1)
+    if (building->IsBig())
     {
         for (auto& gfx : gfxs)
         {
@@ -107,9 +109,9 @@ void mdcii::world::Tile::CalculateGfx()
     }
 }
 
-void mdcii::world::Tile::AdjustGfxForBigBuildings(int& t_gfx) const
+void mdcii::world::tile::TerrainTile::AdjustGfxForBigBuildings(int& t_gfx) const
 {
-    MDCII_ASSERT(HasBuilding(), "[Tile::AdjustGfxForBigBuildings()] Null pointer.")
+    MDCII_ASSERT(HasBuilding(), "[TerrainTile::AdjustGfxForBigBuildings()] Null pointer.")
 
     // default: orientation 0
     auto rp{ olc::vi2d(x, y) };
@@ -146,10 +148,10 @@ void mdcii::world::Tile::AdjustGfxForBigBuildings(int& t_gfx) const
 }
 
 //-------------------------------------------------
-// Serializing Tile into Json
+// Serializing TerrainTile into Json
 //-------------------------------------------------
 
-void mdcii::world::to_json(nlohmann::json& t_json, const mdcii::world::Tile& t_tile)
+void mdcii::world::tile::to_json(nlohmann::json& t_json, const TerrainTile& t_tile)
 {
     if (t_tile.HasBuilding())
     {

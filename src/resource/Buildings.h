@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -461,6 +461,9 @@ namespace mdcii::resource
             int32_t ziegel{ -1 };
             int32_t kanon{ -1 };
         } houseBuildCosts;
+
+        [[nodiscard]] bool HasGfxForEachRotation() const { return rotate > 0; }
+        [[nodiscard]] bool IsBig() const { return size.w > 1 || size.h > 1; }
     };
 
     //-------------------------------------------------

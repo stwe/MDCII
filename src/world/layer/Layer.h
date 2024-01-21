@@ -18,19 +18,11 @@
 
 #pragma once
 
-#include <memory>
+#include "vendor/nlohmann/json.hpp"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
-
-namespace mdcii::world::layer
-{
-    /**
-     * @brief Forward declaration class TerrainLayer.
-     */
-    class TerrainLayer;
-}
 
 namespace mdcii::world
 {
@@ -38,15 +30,30 @@ namespace mdcii::world
      * @brief Forward declaration class World.
      */
     class World;
+}
 
+namespace mdcii::world::layer
+{
     //-------------------------------------------------
-    // DeepWater
+    // LayerType
     //-------------------------------------------------
 
     /**
-     * @brief Represents the deep water area.
+     * @brief Representing different types of layers.
      */
-    class DeepWater
+    enum class LayerType
+    {
+        COAST, TERRAIN, BUILDINGS, MIXED, DEEP_WATER, NONE
+    };
+
+    //-------------------------------------------------
+    // Layer
+    //-------------------------------------------------
+
+    /**
+     * @brief Base class of all layers used in the game.
+     */
+    class Layer
     {
     public:
         //-------------------------------------------------
@@ -54,33 +61,50 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief The deep water area tile layer.
+         * @brief The type the layer.
          */
-        std::unique_ptr<layer::TerrainLayer> layer;
+        LayerType layerType{ LayerType::NONE };
+
+        /**
+         * @brief The width of the layer.
+         */
+        const int width;
+
+        /**
+         * @brief The height of the layer.
+         */
+        const int height;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        DeepWater() = delete;
+        Layer() = delete;
 
         /**
-         * @brief Constructs a new DeepWater object.
+         * @brief Constructs a new Layer object.
          *
          * @param t_world Pointer to the parent World object.
+         * @param t_layerType The type of the layer.
+         * @param t_width The width of the layer.
+         * @param t_height The height of the layer.
          */
-        explicit DeepWater(World* t_world);
+        Layer(const World* t_world, LayerType t_layerType, int t_width, int t_height);
 
-        DeepWater(const DeepWater& t_other) = delete;
-        DeepWater(DeepWater&& t_other) noexcept = delete;
-        DeepWater& operator=(const DeepWater& t_other) = delete;
-        DeepWater& operator=(DeepWater&& t_other) noexcept = delete;
+        Layer(const Layer& t_other) = delete;
+        Layer(Layer&& t_other) noexcept = delete;
+        Layer& operator=(const Layer& t_other) = delete;
+        Layer& operator=(Layer&& t_other) noexcept = delete;
 
-        ~DeepWater() noexcept;
+        virtual ~Layer() noexcept;
+
+        //-------------------------------------------------
+        // Create Tiles
+        //-------------------------------------------------
+
+        virtual void CreateLayerTiles(const nlohmann::json& t_json) = 0;
 
     protected:
-
-    private:
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
@@ -88,35 +112,9 @@ namespace mdcii::world
         /**
          * @brief Pointer to the parent World object.
          */
-        World* m_world{ nullptr };
+        const World* m_world{ nullptr };
 
-        //-------------------------------------------------
-        // Init
-        //-------------------------------------------------
+    private:
 
-        /**
-         * @brief Initializes the deep water area.
-         */
-        void Init();
-
-        /**
-         * @brief Initialize the deep water layer and its tiles.
-         */
-        void InitLayer();
-
-        /**
-         * @brief Set the world positions for each tile.
-         */
-        void SetWorldPositions();
-
-        /**
-         * @brief Remove tiles that do not belong to the deep water.
-         */
-        void RemoveIrrelevantTiles() const;
-
-        /**
-         * @brief Update the properties of each tile based on the buildingId it contains.
-         */
-        void UpdateTileProperties() const;
     };
 }

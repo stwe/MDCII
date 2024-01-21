@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -22,6 +22,7 @@
 #include <unordered_map>
 #include <array>
 #include <functional>
+#include "world/tile/TerrainTile.h"
 #include "vendor/imgui/imgui.h"
 
 //-------------------------------------------------
@@ -38,11 +39,6 @@ namespace mdcii
 
 namespace mdcii::world
 {
-    /**
-     * @brief Forward declaration struct Tile.
-     */
-    struct Tile;
-
     /**
      * @brief Forward declaration enum class Rotation.
      */
@@ -565,14 +561,14 @@ namespace mdcii::world
          *
          * @param t_terrainTiles The Tile objects.
          */
-        void CreateTerrainTiles(std::vector<Tile>& t_terrainTiles) const;
+        void CreateTerrainTiles(std::vector<tile::TerrainTile>& t_terrainTiles) const;
 
         /**
          * @brief Creates Tile objects for a coast layer.
          *
          * @param t_coastTiles The Tile objects.
          */
-        void CreateCoastTiles(std::vector<Tile>& t_coastTiles) const;
+        void CreateCoastTiles(std::vector<tile::TerrainTile>& t_coastTiles) const;
 
         /**
          * @brief Creates a Tile.
@@ -584,6 +580,6 @@ namespace mdcii::world
          *
          * @return The created Tile.
          */
-        [[nodiscard]] Tile CreateTile(int32_t t_id, int32_t t_worldX, int32_t t_worldY, Rotation t_rotation) const;
+        [[nodiscard]] tile::TerrainTile CreateTile(int32_t t_id, int32_t t_worldX, int32_t t_worldY, Rotation t_rotation) const;
     };
 }

@@ -30,11 +30,14 @@ namespace mdcii::world
      * @brief Forward declaration class World.
      */
     class World;
+}
 
+namespace mdcii::world::tile
+{
     /**
-     * @brief Forward declaration struct Tile.
+     * @brief Forward declaration struct TerrainTile.
      */
-    struct Tile;
+    struct TerrainTile;
 }
 
 namespace mdcii::resource
@@ -51,6 +54,8 @@ namespace mdcii::renderer
     // Renderer
     //-------------------------------------------------
 
+    // todo: -> AssetManager
+
     /**
      * @brief Represents a Renderer.
      */
@@ -66,7 +71,7 @@ namespace mdcii::renderer
             int t_startX,
             int t_startY,
             const world::World* t_world,
-            const world::Tile* t_tile,
+            const world::tile::TerrainTile* t_tile,
             bool t_minusElevation,
             const olc::Pixel& t_tint = olc::WHITE
         );

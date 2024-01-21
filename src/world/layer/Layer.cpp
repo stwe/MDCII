@@ -16,38 +16,21 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include "Renderer.h"
-#include "Game.h"
+#include "Layer.h"
+#include "MdciiAssert.h"
 #include "world/World.h"
-#include "world/tile/TerrainTile.h"
-#include "resource/AssetManager.h"
-#include "camera/Camera.h"
-#include "state/State.h"
 
 //-------------------------------------------------
-// Logic
+// Ctors. / Dtor.
 //-------------------------------------------------
 
-void mdcii::renderer::Renderer::RenderAsset(
-    const resource::Asset t_asset,
-    const int t_startX,
-    const int t_startY,
-    const world::World* t_world,
-    const world::tile::TerrainTile* t_tile,
-    const bool t_minusElevation,
-    const olc::Pixel& t_tint
-)
+mdcii::world::layer::Layer::Layer(const World* t_world, const LayerType t_layerType, const int t_width, const int t_height)
+    : layerType{ t_layerType }
+    , width{ t_width }
+    , height{ t_height }
+    , m_world{ t_world }
 {
-    olc::vf2d screenPosition{ t_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
-    if (t_minusElevation)
-    {
-        screenPosition.y -= world::ELEVATIONS[magic_enum::enum_integer(t_world->camera->zoom)];
-    }
-
-    t_world->state->game->DrawDecal(
-        screenPosition,
-        t_world->state->game->assetManager->GetAsset(t_asset, t_world->camera->zoom)->Decal(),
-        { 1.0f, 1.0f },
-        t_tint
-    );
+    MDCII_ASSERT(m_world, "[Layer::Layer()] Null pointer.")
 }
+
+mdcii::world::layer::Layer::~Layer() noexcept {}

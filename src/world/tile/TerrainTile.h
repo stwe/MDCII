@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "Tile.h"
 #include "vendor/nlohmann/json.hpp"
 
 //-------------------------------------------------
@@ -32,30 +33,25 @@ namespace mdcii::resource
     struct Building;
 }
 
-namespace mdcii::world
+namespace mdcii::world::tile
 {
     //-------------------------------------------------
-    // Tile
+    // TerrainTile
     //-------------------------------------------------
 
     /**
-     * @brief Represents a Tile.
+     * @brief Represents a TerrainTile.
+     *
+     * These tiles make up the deep water area and all islands.
      */
-    struct Tile
+    struct TerrainTile : public Tile
     {
         //-------------------------------------------------
         // Constants
         //-------------------------------------------------
 
         /**
-         * @brief The total number of rotations.
-         *
-         * For better readability.
-         */
-        static constexpr auto NR_OF_ROTATIONS{ 4 };
-
-        /**
-         * @brief The number of different animation times.
+         * @brief The number of possible animation times.
          */
         static constexpr auto NR_OF_ANIM_TIMES{ 5 };
 
@@ -67,18 +63,6 @@ namespace mdcii::world
          * @brief Pointer to the Building object generated from the haeuser.cod file.
          */
         const resource::Building* building{ nullptr };
-
-        /**
-         * @brief The Bsh graphic for each rotation.
-         *
-         * In some cases the same gfx is used for all rotations.
-         */
-        std::vector<int> gfxs{};
-
-        /**
-         * @brief The rotation of the building.
-         */
-        int rotation{ 0 };
 
         /**
          * Example: Bakery
@@ -103,60 +87,23 @@ namespace mdcii::world
          */
         int y{ 0 };
 
-        /**
-         * @brief Represents the x position for DEG0 of a tile relative to its parent island.
-         *
-         * This indicates the local position of the tile on the island, not its global world position.
-         * For example, if the island starts at position (8, 5) in the world, the first tile will be at posX 0.
-         *
-         * However, for deep water areas, posX always represents the world position.
-         */
-        int posX{ -1 };
-
-        /**
-         * @brief Represents the y position for DEG0 of a tile relative to its parent island.
-         *
-         * This indicates the local position of the tile on the island, not its global world position.
-         * For example, if the island starts at position (8, 5) in the world, the first tile will be at posY 0.
-         *
-         * However, for deep water areas, posY always represents the world position.
-         */
-        int posY{ -1 };
-
-        /**
-         * @brief The render index for each rotation.
-         */
-        std::array<int, NR_OF_ROTATIONS> renderIndices{};
-
-        /**
-         * @brief Used to get the current gfx for animation.
-         */
-        int frame{ 0 };
-
-        /**
-         * @brief Can be used as a flag to highlight the tile.
-         */
-        int tintFlag{ -1 };
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        Tile() = default;
+        TerrainTile();
 
         /**
-         * @brief Constructs a new Tile object.
+         * @brief Constructs a new TerrainTile object.
          *
          * @param t_building Pointer to the Building object generated from the haeuser.cod file.
-         * @param t_rotation The rotation of the building.
+         * @param t_rotation The rotation of the tile/building.
          * @param t_x The x position of the tile in local/object space of the building.
          * @param t_y The y position of the tile in local/object space of the building.
          * @param t_posX Represents the x position for DEG0 of a tile relative to its parent island.
          * @param t_posY Represents the y position for DEG0 of a tile relative to its parent island.
          */
-        Tile(const resource::Building* t_building, int t_rotation, int t_x, int t_y, int t_posX, int t_posY);
-
-        ~Tile() noexcept = default;
+        TerrainTile(const resource::Building* t_building, int t_rotation, int t_x, int t_y, int t_posX, int t_posY);
 
         //-------------------------------------------------
         // Getter
@@ -197,16 +144,16 @@ namespace mdcii::world
         void CalculateGfx();
 
         /**
-         * @brief Adjusts gfx values of the tile for large buildings.
+         * @brief Adjusts gfx values for large buildings.
          *
-         * @param t_gfx The gfx of the tile.
+         * @param t_gfx The gfx of the terrain tile.
          */
         void AdjustGfxForBigBuildings(int& t_gfx) const;
     };
 
     //-------------------------------------------------
-    // Serializing Tile into Json
+    // Serializing TerrainTile into Json
     //-------------------------------------------------
 
-    void to_json(nlohmann::json& t_json, const Tile& t_tile);
+    void to_json(nlohmann::json& t_json, const TerrainTile& t_tile);
 }

@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,12 +20,11 @@
 #include "DeepWater.h"
 #include "Game.h"
 #include "World.h"
-#include "Rotation.h"
-#include "Layer.h"
 #include "MdciiAssert.h"
 #include "resource/OriginalResourcesManager.h"
-#include "renderer/Renderer.h"
+#include "resource/BuildingIds.h"
 #include "state/State.h"
+#include "world/layer/TerrainLayer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -66,7 +65,7 @@ void mdcii::world::DeepWater::InitLayer()
 {
     MDCII_LOG_DEBUG("[DeepWater::InitLayer()] Init deep water layer.");
 
-    layer = std::make_unique<Layer>(m_world, LayerType::DEEP_WATER, m_world->worldWidth, m_world->worldHeight);
+    layer = std::make_unique<layer::TerrainLayer>(m_world, layer::LayerType::DEEP_WATER, m_world->worldWidth, m_world->worldHeight);
     layer->tiles.resize(m_world->worldWidth * m_world->worldHeight);
 
     for (auto y{ 0 }; y < m_world->worldHeight; ++y)
@@ -75,7 +74,7 @@ void mdcii::world::DeepWater::InitLayer()
         {
             if (!m_world->IsWorldPositionOnAnyIsland(x, y))
             {
-                const auto& building1201{ m_world->state->game->originalResourcesManager->GetBuildingById(DEEP_WATER_BUILDING_ID) };
+                const auto& building1201{ m_world->state->game->originalResourcesManager->GetBuildingById(resource::DEEP_WATER_BUILDING_ID) };
                 layer->tiles.at(y * m_world->worldWidth + x).building = &building1201;
             }
         }
@@ -121,17 +120,14 @@ void mdcii::world::DeepWater::UpdateTileProperties() const
         const auto gfx0{ tile.building->gfx };
 
         tile.gfxs.push_back(gfx0);
-        if (tile.building->rotate > 0)
+        if (tile.building->HasGfxForEachRotation())
         {
             tile.gfxs.push_back(gfx0 + (1 * tile.building->rotate));
             tile.gfxs.push_back(gfx0 + (2 * tile.building->rotate));
             tile.gfxs.push_back(gfx0 + (3 * tile.building->rotate));
         }
 
-        tile.renderIndices[0] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG0);
-        tile.renderIndices[1] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG90);
-        tile.renderIndices[2] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG180);
-        tile.renderIndices[3] = layer->GetMapIndex(tile.posX, tile.posY, Rotation::DEG270);
+        tile.SetRenderIndices(layer->width, layer->height);
     }
 
     layer->SortTilesForRendering();

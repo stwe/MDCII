@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -21,7 +21,6 @@
 #include "MdciiAssert.h"
 #include "MdciiUtils.h"
 #include "Game.h"
-#include "world/Tile.h"
 #include "vendor/enum/magic_enum.hpp"
 
 //-------------------------------------------------
@@ -67,8 +66,8 @@ bool mdcii::resource::MdciiFile::SetJsonFromFile()
 void mdcii::resource::MdciiFile::SetJsonFromIsland(
     const int t_width, const int t_height,
     const world::ClimateZone t_climateZone,
-    const std::vector<world::Tile>& t_terrainTiles,
-    const std::vector<world::Tile>& t_coastTiles
+    const std::vector<world::tile::TerrainTile>& t_terrainTiles,
+    const std::vector<world::tile::TerrainTile>& t_coastTiles
 )
 {
     MDCII_LOG_DEBUG("[MdciiFile::SetJsonFromIsland()] Set new values for the Json keys.");

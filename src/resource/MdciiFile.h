@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "vendor/nlohmann/json.hpp"
+#include "world/tile/TerrainTile.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -30,11 +30,6 @@ namespace mdcii::world
      * @brief Forward declaration enum class ClimateZone.
      */
     enum class ClimateZone;
-
-    /**
-     * @brief Forward declaration struct Tile.
-     */
-    struct Tile;
 }
 
 namespace mdcii::resource
@@ -110,8 +105,8 @@ namespace mdcii::resource
         void SetJsonFromIsland(
             int t_width, int t_height,
             world::ClimateZone t_climateZone,
-            const std::vector<world::Tile>& t_terrainTiles,
-            const std::vector<world::Tile>& t_coastTiles
+            const std::vector<world::tile::TerrainTile>& t_terrainTiles,
+            const std::vector<world::tile::TerrainTile>& t_coastTiles
         );
 
         //-------------------------------------------------

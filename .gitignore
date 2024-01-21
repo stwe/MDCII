@@ -39,15 +39,12 @@ cmake
 *.sh
 
 !/config.ini
-
-!/resources/data/Buildings.json
-!/resources/data/Menus.json
-!/resources/devlog/*
 !/resources/doc/*
-!/resources/font/DejaVuSansMono.ttf
+!/resources/font/*
+!/resources/map/*
+!/resources/save/*
 !/resources/textures/gfx/*
 !/resources/textures/mgfx/*
 !/resources/textures/sgfx/*
-!/resources/doc/VsSettings.png
-!/src/vendor/ini/LICENSE.txt
 !/src/vendor/imgui/LICENSE.txt
+!/src/vendor/ini/LICENSE.txt
