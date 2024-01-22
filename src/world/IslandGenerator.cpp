@@ -18,6 +18,7 @@
 
 #include <random>
 #include "IslandGenerator.h"
+#include "Rotation.h"
 #include "MdciiAssert.h"
 #include "Island.h"
 #include "Game.h"

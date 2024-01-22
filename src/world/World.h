@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -54,6 +54,14 @@ namespace mdcii::resource
     class AnimalsTileAtlas;
 }
 
+namespace mdcii::world::layer
+{
+    /**
+     * @brief Forward declaration enum class LayerType.
+     */
+    enum class LayerType;
+}
+
 namespace mdcii::world
 {
     /**
@@ -65,11 +73,6 @@ namespace mdcii::world
      * @brief Forward declaration class DeepWater.
      */
     class DeepWater;
-
-    /**
-     * @brief Forward declaration enum class LayerType.
-     */
-    enum class LayerType;
 
     /**
      * @brief Forward declaration class MousePicker.
@@ -307,7 +310,7 @@ namespace mdcii::world
          * @param t_island The island to check.
          * @param t_layerType The layer type to check.
          */
-        void CheckLayer(const Island* t_island, LayerType t_layerType) const;
+        void CheckLayer(const Island* t_island, layer::LayerType t_layerType) const;
 
         /**
          * @brief Identifies the deep water tiles visible on the screen for rendering.

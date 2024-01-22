@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -26,27 +26,25 @@
 // Forward declarations
 //-------------------------------------------------
 
+namespace mdcii::world::layer
+{
+    /**
+     * @brief Forward declaration class TerrainLayer.
+     */
+    class TerrainLayer;
+
+    /**
+     * @brief Forward declaration enum class LayerType.
+     */
+    enum class LayerType;
+}
+
 namespace mdcii::world
 {
     /**
      * @brief Forward declaration class World.
      */
     class World;
-
-    /**
-     * @brief Forward declaration struct Tile.
-     */
-    struct Tile;
-
-    /**
-     * @brief Forward declaration class Layer.
-     */
-    class Layer;
-
-    /**
-     * @brief Forward declaration enum class LayerType.
-     */
-    enum class LayerType;
 
     //-------------------------------------------------
     // ClimateZone
@@ -75,7 +73,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief Number of layers (coast, terrain, buildings, mixed).
+         * @brief Number of layers (COAST, TERRAIN, BUILDINGS, MIXED).
          */
         static constexpr auto NR_OF_LAYERS{ 4 };
 
@@ -109,9 +107,9 @@ namespace mdcii::world
         int startY{ -1 };
 
         /**
-         * @brief The tile layers (coast, terrain, buildings, mixed) of the island.
+         * @brief The island terrain tile layers (COAST, TERRAIN, BUILDINGS, MIXED).
          */
-        std::array<std::unique_ptr<Layer>, NR_OF_LAYERS> layers;
+        std::array<std::unique_ptr<layer::TerrainLayer>, NR_OF_LAYERS> terrainLayers;
 
         /**
          * @brief The climate zone of the island.
@@ -146,20 +144,20 @@ namespace mdcii::world
         /**
          * @brief Getter function to retrieve a pointer to the specified layer.
          *
-         * @param t_layerType The type of layer to retrieve.
+         * @param t_layerType The type of island terrain layer to retrieve.
          *
-         * @return A pointer to the requested layer.
+         * @return A pointer to the requested island terrain layer.
          */
-        [[nodiscard]] Layer* GetLayer(LayerType t_layerType);
+        [[nodiscard]] layer::TerrainLayer* GetTerrainLayer(layer::LayerType t_layerType);
 
         /**
          * @brief Const getter function to retrieve a constant pointer to the specified layer.
          *
-         * @param t_layerType The type of layer to retrieve.
+         * @param t_layerType The type of island terrain layer to retrieve.
          *
-         * @return A constant pointer to the requested layer.
+         * @return A constant pointer to the requested island terrain layer.
          */
-        [[nodiscard]] const Layer* GetLayer(LayerType t_layerType) const;
+        [[nodiscard]] const layer::TerrainLayer* GetTerrainLayer(layer::LayerType t_layerType) const;
 
         //-------------------------------------------------
         // Position
@@ -215,12 +213,12 @@ namespace mdcii::world
         void SetLayerData(const nlohmann::json& t_json);
 
         /**
-         * @brief Sets the tile data of the given layer type using a Json value.
+         * @brief Sets the tile data of the given island layer type using a Json value.
          *
          * @param t_json The Json value containing the tile data to set.
-         * @param t_layerType The type of layer.
+         * @param t_layerType The type of island layer.
          */
-        void SetLayerDataByType(const nlohmann::json& t_json, LayerType t_layerType);
+        void SetLayerDataByType(const nlohmann::json& t_json, layer::LayerType t_layerType);
 
         //-------------------------------------------------
         // Helper
@@ -240,7 +238,7 @@ namespace mdcii::world
         //-------------------------------------------------
 
         /**
-         * @brief Initialises the tile data of the COAST, TERRAIN and BUILDINGS layer.
+         * @brief Initialises the tile data of the COAST, TERRAIN and BUILDINGS island layer.
          */
         void InitLayerData();
 
@@ -265,8 +263,7 @@ namespace mdcii::world
          *
          * @return True if the tile should be replaced; false otherwise.
          */
-        bool ShouldReplaceTile(const Layer* t_layer, int t_index);
-
+        bool ShouldReplaceTile(const layer::TerrainLayer* t_layer, int t_index);
     };
 
     //-------------------------------------------------
