@@ -35,11 +35,6 @@ namespace mdcii::world
      * @brief Forward declaration class Island.
      */
     class Island;
-
-    /**
-     * @brief Forward declaration struct Tile.
-     */
-    struct Tile;
 }
 
 namespace mdcii::resource
@@ -196,6 +191,6 @@ namespace mdcii::resource
          */
         inline static std::array m_frame_values{ 0, 0, 0, 0, 0 };
 
-        [[nodiscard]] float CalcOffset(const world::Tile* t_tile, int t_gfx) const;
+        //[[nodiscard]] float CalcOffset(const world::Tile* t_tile, int t_gfx) const;
     };
 }

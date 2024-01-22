@@ -21,8 +21,8 @@
 #include "Game.h"
 #include "world/World.h"
 #include "world/Island.h"
-#include "world/Layer.h"
 #include "world/DeepWater.h"
+#include "world/layer/TerrainLayer.h"
 #include "camera/Camera.h"
 #include "state/State.h"
 #include "resource/Buildings.h"
@@ -51,7 +51,7 @@ mdcii::resource::TileAtlas::~TileAtlas() noexcept
 // Logic
 //-------------------------------------------------
 
-void mdcii::resource::TileAtlas::Render(const int t_startX, const int t_startY, const world::Tile* t_tile, const olc::Pixel& t_tint) const
+void mdcii::resource::TileAtlas::Render(const int t_startX, const int t_startY, const world::tile::TerrainTile* t_tile, const olc::Pixel& t_tint) const
 {
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
     const auto gfx{ GetGfxForCurrentRotation(t_tile) };
@@ -119,9 +119,9 @@ void mdcii::resource::TileAtlas::CalcAnimationFrame(const float t_elapsedTime)
     }
 }
 
-void mdcii::resource::TileAtlas::RenderIsland(const world::Island* t_island, const world::LayerType t_layerType, const bool t_renderGrid) const
+void mdcii::resource::TileAtlas::RenderIsland(const world::Island* t_island, const world::layer::LayerType t_layerType, const bool t_renderGrid) const
 {
-    for (auto& tile : t_island->layers[magic_enum::enum_integer(t_layerType)]->currentTiles)
+    for (auto& tile : t_island->terrainLayers[magic_enum::enum_integer(t_layerType)]->currentTiles)
     {
         if (tile.HasBuilding())
         {
@@ -141,21 +141,21 @@ void mdcii::resource::TileAtlas::RenderIslands(const bool t_renderGrid) const
     {
         if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_MIXED_LAYER))
         {
-            RenderIsland(island, world::LayerType::MIXED, t_renderGrid);
+            RenderIsland(island, world::layer::LayerType::MIXED, t_renderGrid);
         }
         else
         {
             if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_COAST_LAYER))
             {
-                RenderIsland(island, world::LayerType::COAST, false);
+                RenderIsland(island, world::layer::LayerType::COAST, false);
             }
             if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_TERRAIN_LAYER))
             {
-                RenderIsland(island, world::LayerType::TERRAIN, t_renderGrid);
+                RenderIsland(island, world::layer::LayerType::TERRAIN, t_renderGrid);
             }
             if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_BUILDINGS_LAYER))
             {
-                RenderIsland(island, world::LayerType::BUILDINGS, t_renderGrid);
+                RenderIsland(island, world::layer::LayerType::BUILDINGS, t_renderGrid);
             }
         }
     }
@@ -181,7 +181,7 @@ void mdcii::resource::TileAtlas::RenderDeepWater(const bool t_renderGrid) const
 // Helper
 //-------------------------------------------------
 
-int mdcii::resource::TileAtlas::GetGfxForCurrentRotation(const world::Tile* t_tile) const
+int mdcii::resource::TileAtlas::GetGfxForCurrentRotation(const world::tile::TerrainTile* t_tile) const
 {
     MDCII_ASSERT(!t_tile->gfxs.empty(), "[TileAtlas::GetGfxForCurrentRotation()] Missing gfx values.")
 
@@ -194,7 +194,7 @@ int mdcii::resource::TileAtlas::GetGfxForCurrentRotation(const world::Tile* t_ti
     return t_tile->gfxs[magic_enum::enum_integer(worldRotation)] + t_tile->frame * t_tile->building->animAdd;
 }
 
-float mdcii::resource::TileAtlas::CalcOffset(const world::Tile* t_tile, const int t_gfx) const
+float mdcii::resource::TileAtlas::CalcOffset(const world::tile::TerrainTile* t_tile, const int t_gfx) const
 {
     auto offset{ 0.0f };
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };

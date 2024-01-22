@@ -23,7 +23,6 @@
 #include "world/Island.h"
 #include "state/State.h"
 #include "camera/Camera.h"
-#include "world/Layer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -49,6 +48,7 @@ mdcii::resource::AnimalsTileAtlas::~AnimalsTileAtlas() noexcept
 
 void mdcii::resource::AnimalsTileAtlas::Render(Animation* t_animation, const olc::Pixel& t_tint) const
 {
+    /*
     t_animation->frame = m_frame_values[0] % t_animation->spriteSheet->count;
 
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
@@ -77,6 +77,7 @@ void mdcii::resource::AnimalsTileAtlas::Render(Animation* t_animation, const olc
         { 1.0f, 1.0f },
         t_tint
     );
+    */
 }
 
 void mdcii::resource::AnimalsTileAtlas::CalcAnimationFrame(const float t_elapsedTime)
@@ -122,6 +123,7 @@ void mdcii::resource::AnimalsTileAtlas::CalcAnimationFrame(const float t_elapsed
     }
 }
 
+/*
 float mdcii::resource::AnimalsTileAtlas::CalcOffset(const world::Tile* t_tile, const int t_gfx) const
 {
     auto offset{ 0.0f };
@@ -144,3 +146,4 @@ float mdcii::resource::AnimalsTileAtlas::CalcOffset(const world::Tile* t_tile, c
 
     return offset;
 }
+*/

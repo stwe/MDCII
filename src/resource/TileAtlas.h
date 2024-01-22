@@ -32,19 +32,25 @@ namespace mdcii::world
     class World;
 
     /**
-     * @brief Forward declaration struct Tile.
+     * @brief Forward declaration class Island.
      */
-    struct Tile;
+    class Island;
+}
 
+namespace mdcii::world::tile
+{
+    /**
+     * @brief Forward declaration struct TerrainTile.
+     */
+    struct TerrainTile;
+}
+
+namespace mdcii::world::layer
+{
     /**
      * @brief Forward declaration enum class LayerType.
      */
     enum class LayerType;
-
-    /**
-     * @brief Forward declaration class Island.
-     */
-    class Island;
 }
 
 namespace mdcii::resource
@@ -83,9 +89,9 @@ namespace mdcii::resource
         // Logic
         //-------------------------------------------------
 
-        void Render(int t_startX, int t_startY, const world::Tile* t_tile, const olc::Pixel& t_tint) const;
+        void Render(int t_startX, int t_startY, const world::tile::TerrainTile* t_tile, const olc::Pixel& t_tint) const;
         static void CalcAnimationFrame(float t_elapsedTime);
-        void RenderIsland(const world::Island* t_island, world::LayerType t_layerType, bool t_renderGrid) const;
+        void RenderIsland(const world::Island* t_island, world::layer::LayerType t_layerType, bool t_renderGrid) const;
         void RenderIslands(bool t_renderGrid) const;
         void RenderDeepWater(bool t_renderGrid) const;
 
@@ -161,7 +167,7 @@ namespace mdcii::resource
         // Helper
         //-------------------------------------------------
 
-        [[nodiscard]] int GetGfxForCurrentRotation(const world::Tile* t_tile) const;
-        [[nodiscard]] float CalcOffset(const world::Tile* t_tile, int t_gfx) const;
+        [[nodiscard]] int GetGfxForCurrentRotation(const world::tile::TerrainTile* t_tile) const;
+        [[nodiscard]] float CalcOffset(const world::tile::TerrainTile* t_tile, int t_gfx) const;
     };
 }
