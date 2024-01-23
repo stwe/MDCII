@@ -310,7 +310,7 @@ namespace mdcii::world
          * @param t_island The island to check.
          * @param t_layerType The layer type to check.
          */
-        void CheckLayer(const Island* t_island, layer::LayerType t_layerType) const;
+        void CheckLayer(Island* t_island, layer::LayerType t_layerType) const;
 
         /**
          * @brief Identifies the deep water tiles visible on the screen for rendering.

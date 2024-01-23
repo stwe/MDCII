@@ -43,7 +43,7 @@ namespace mdcii::world::layer
      */
     enum class LayerType
     {
-        COAST, TERRAIN, BUILDINGS, MIXED, DEEP_WATER, NONE
+        COAST, TERRAIN, BUILDINGS, FIGURES, MIXED, DEEP_WATER, NONE
     };
 
     //-------------------------------------------------

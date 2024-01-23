@@ -47,6 +47,22 @@ namespace mdcii::world
     class World;
 
     //-------------------------------------------------
+    // EnumClassHash
+    //-------------------------------------------------
+
+    /**
+     * @brief Functor object to calculate hash of an Enum Class.
+     */
+    struct EnumClassHash
+    {
+        template <typename T>
+        std::size_t operator()(T t_arg) const
+        {
+            return static_cast<std::size_t>(t_arg);
+        }
+    };
+
+    //-------------------------------------------------
     // ClimateZone
     //-------------------------------------------------
 
@@ -68,15 +84,6 @@ namespace mdcii::world
     class Island
     {
     public:
-        //-------------------------------------------------
-        // Constants
-        //-------------------------------------------------
-
-        /**
-         * @brief Number of layers (COAST, TERRAIN, BUILDINGS, MIXED).
-         */
-        static constexpr auto NR_OF_LAYERS{ 4 };
-
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
@@ -105,11 +112,6 @@ namespace mdcii::world
          * @brief The Y-coordinate of the island's initial position in the world.
          */
         int startY{ -1 };
-
-        /**
-         * @brief The island terrain tile layers (COAST, TERRAIN, BUILDINGS, MIXED).
-         */
-        std::array<std::unique_ptr<layer::TerrainLayer>, NR_OF_LAYERS> terrainLayers;
 
         /**
          * @brief The climate zone of the island.
@@ -193,6 +195,11 @@ namespace mdcii::world
          * These define the location of the island in the world, indicating where it starts and ends.
          */
         physics::Aabb m_aabb;
+
+        /**
+         * @brief The island terrain tile layers (COAST, TERRAIN, BUILDINGS, FIGURES, MIXED).
+         */
+        std::unordered_map<layer::LayerType, std::unique_ptr<layer::TerrainLayer>, EnumClassHash> m_terrainLayers;
 
         //-------------------------------------------------
         // Set layer data from Json

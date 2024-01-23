@@ -53,12 +53,18 @@ mdcii::world::Island::~Island() noexcept
 
 mdcii::world::layer::TerrainLayer* mdcii::world::Island::GetTerrainLayer(const layer::LayerType t_layerType)
 {
-    return terrainLayers[magic_enum::enum_integer(t_layerType)].get();
+    MDCII_ASSERT(m_terrainLayers.count(t_layerType), "[Island::GetTerrainLayer()] Missing layer.")
+
+    return m_terrainLayers[t_layerType].get();
 }
 
 const mdcii::world::layer::TerrainLayer* mdcii::world::Island::GetTerrainLayer(const layer::LayerType t_layerType) const
 {
-    return terrainLayers[magic_enum::enum_integer(t_layerType)].get();
+    const auto it{ m_terrainLayers.find(t_layerType) };
+
+    MDCII_ASSERT(it != m_terrainLayers.end(), "[Island::GetTerrainLayer()] Missing layer.")
+
+    return it->second.get();
 }
 
 //-------------------------------------------------
@@ -133,14 +139,14 @@ void mdcii::world::Island::SetLayerData(const nlohmann::json& t_json)
     SetLayerDataByType(t_json, layer::LayerType::BUILDINGS);
 
     // this mixed layer will later be filled with the data from the other layers
-    terrainLayers.at(magic_enum::enum_integer(layer::LayerType::MIXED)) = std::make_unique<layer::TerrainLayer>(world, layer::LayerType::MIXED, width, height);
+    m_terrainLayers.emplace(layer::LayerType::MIXED, std::make_unique<layer::TerrainLayer>(world, layer::LayerType::MIXED, width, height));
 }
 
 void mdcii::world::Island::SetLayerDataByType(const nlohmann::json& t_json, const layer::LayerType t_layerType)
 {
     MDCII_LOG_DEBUG("[Island::SetLayerDataByType()] Sets the island's layer data of type {}.", magic_enum::enum_name(t_layerType));
 
-    terrainLayers.at(magic_enum::enum_integer(t_layerType)) = std::make_unique<layer::TerrainLayer>(world, t_layerType, width, height);
+    m_terrainLayers.emplace(t_layerType, std::make_unique<layer::TerrainLayer>(world, t_layerType, width, height));
 
     for (auto layerJson = t_json.at("layers").items(); const auto& [k, v] : layerJson)
     {

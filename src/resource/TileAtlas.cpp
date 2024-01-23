@@ -119,9 +119,9 @@ void mdcii::resource::TileAtlas::CalcAnimationFrame(const float t_elapsedTime)
     }
 }
 
-void mdcii::resource::TileAtlas::RenderIsland(const world::Island* t_island, const world::layer::LayerType t_layerType, const bool t_renderGrid) const
+void mdcii::resource::TileAtlas::RenderIsland(world::Island* t_island, const world::layer::LayerType t_layerType, const bool t_renderGrid) const
 {
-    for (auto& tile : t_island->terrainLayers[magic_enum::enum_integer(t_layerType)]->currentTiles)
+    for (auto& tile : t_island->GetTerrainLayer(t_layerType)->currentTiles)
     {
         if (tile.HasBuilding())
         {

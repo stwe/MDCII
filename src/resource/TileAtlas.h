@@ -91,7 +91,7 @@ namespace mdcii::resource
 
         void Render(int t_startX, int t_startY, const world::tile::TerrainTile* t_tile, const olc::Pixel& t_tint) const;
         static void CalcAnimationFrame(float t_elapsedTime);
-        void RenderIsland(const world::Island* t_island, world::layer::LayerType t_layerType, bool t_renderGrid) const;
+        void RenderIsland(world::Island* t_island, world::layer::LayerType t_layerType, bool t_renderGrid) const;
         void RenderIslands(bool t_renderGrid) const;
         void RenderDeepWater(bool t_renderGrid) const;
 
