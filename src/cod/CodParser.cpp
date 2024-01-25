@@ -29,7 +29,7 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::cod::CodParser::CodParser(std::string t_codFilePath)
+mdcii::cod::CodParser::CodParser(std::string t_codFilePath, const bool t_decode)
     : m_path{ std::move(t_codFilePath) }
 {
     MDCII_LOG_DEBUG("[CodParser::CodParser()] Create CodParser.");
@@ -44,7 +44,7 @@ mdcii::cod::CodParser::CodParser(std::string t_codFilePath)
         return;
     }
 
-    ReadFile(true);
+    ReadFile(t_decode);
     ParseFile();
 }
 

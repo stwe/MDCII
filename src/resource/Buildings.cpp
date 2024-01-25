@@ -37,7 +37,7 @@ void mdcii::resource::Buildings::GenerateBuildings(const std::string& t_codFileP
 {
     MDCII_LOG_DEBUG("[Buildings::GenerateBuildings()] Generate buildings from haeuser.cod ...");
 
-    const auto cod{ cod::CodParser(t_codFilePath) };
+    const auto cod{ cod::CodParser(t_codFilePath, true) };
     for (auto i{ 0 }; i < cod.objects.object_size(); ++i)
     {
         if (const auto& obj{ cod.objects.object(i) }; obj.name() == "HAUS")

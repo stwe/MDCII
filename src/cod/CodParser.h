@@ -43,7 +43,7 @@ namespace mdcii::cod
 
         CodParser() = delete;
 
-        explicit CodParser(std::string t_codFilePath);
+        CodParser(std::string t_codFilePath, bool t_decode);
 
         CodParser(const CodParser& t_other) = delete;
         CodParser(CodParser&& t_other) noexcept = delete;
