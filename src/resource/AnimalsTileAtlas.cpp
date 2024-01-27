@@ -21,8 +21,10 @@
 #include "MdciiAssert.h"
 #include "world/World.h"
 #include "world/Island.h"
+#include "world/layer/FiguresLayer.h"
 #include "state/State.h"
 #include "camera/Camera.h"
+#include "resource/Buildings.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -46,22 +48,19 @@ mdcii::resource::AnimalsTileAtlas::~AnimalsTileAtlas() noexcept
 // Logic
 //-------------------------------------------------
 
-void mdcii::resource::AnimalsTileAtlas::Render(Animation* t_animation, const olc::Pixel& t_tint) const
+void mdcii::resource::AnimalsTileAtlas::Render(
+    const int t_startX,
+    const int t_startY,
+    const world::tile::FigureTile* t_tile,
+    const olc::Pixel& t_tint
+) const
 {
-    /*
-    t_animation->frame = m_frame_values[0] % t_animation->spriteSheet->count;
-
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
-    const auto gfx{ t_animation->spriteSheet->start + t_animation->frame };
+    const auto gfx{ t_tile->figure->gfx };
     const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, NR_OF_ROWS) };
 
-    olc::vf2d screenPosition;
-    if (t_animation->island->IsWorldPositionOverIsland({ t_animation->island->startX + t_animation->posX, t_animation->island->startY + t_animation->posY }))
-    {
-        auto& terrainTileToCheck{ t_animation->island->GetLayer(world::LayerType::TERRAIN)->GetSortedTile(t_animation->posX, t_animation->posY, m_world->camera->rotation) };
-        screenPosition = m_world->ToScreen(t_animation->island->startX + t_animation->posX, t_animation->island->startY + t_animation->posY);
-        screenPosition.y -= CalcOffset(&terrainTileToCheck, gfx);
-    }
+    olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
+    screenPosition.y -= CalcOffset(gfx);
 
     m_world->state->game->DrawPartialDecal(
         screenPosition,
@@ -77,54 +76,37 @@ void mdcii::resource::AnimalsTileAtlas::Render(Animation* t_animation, const olc
         { 1.0f, 1.0f },
         t_tint
     );
-    */
+}
+
+void mdcii::resource::AnimalsTileAtlas::RenderIsland(world::Island* t_island) const
+{
+    for (auto& tile : t_island->figuresLayer->tiles)
+    {
+        if (tile.figure)
+        {
+            Render(t_island->startX, t_island->startY, &tile, olc::WHITE);
+        }
+    }
+}
+
+void mdcii::resource::AnimalsTileAtlas::RenderIslands() const
+{
+    for (auto const& island : m_world->currentIslands)
+    {
+        RenderIsland(island);
+    }
 }
 
 void mdcii::resource::AnimalsTileAtlas::CalcAnimationFrame(const float t_elapsedTime)
 {
-    for (auto& timer : m_timer_values)
-    {
-        timer += t_elapsedTime;
-    }
 
-    if (m_timer_values[0] >= 0.09f)
-    {
-        m_frame_values[0] = ++m_frame_values[0];
-        m_timer_values[0] = 0.0f;
-        m_frame_values[0] %= MAX_FRAME_VALUE + 1;
-    }
-
-    if (m_timer_values[1] >= 0.13f)
-    {
-        m_frame_values[1] = ++m_frame_values[1];
-        m_timer_values[1] = 0.0f;
-        m_frame_values[1] %= MAX_FRAME_VALUE + 1;
-    }
-
-    if (m_timer_values[2] >= 0.15f)
-    {
-        m_frame_values[2] = ++m_frame_values[2];
-        m_timer_values[2] = 0.0f;
-        m_frame_values[2] %= MAX_FRAME_VALUE + 1;
-    }
-
-    if (m_timer_values[3] >= 0.18f)
-    {
-        m_frame_values[3] = ++m_frame_values[3];
-        m_timer_values[3] = 0.0f;
-        m_frame_values[3] %= MAX_FRAME_VALUE + 1;
-    }
-
-    if (m_timer_values[4] >= 0.22f)
-    {
-        m_frame_values[4] = ++m_frame_values[4];
-        m_timer_values[4] = 0.0f;
-        m_frame_values[4] %= MAX_FRAME_VALUE + 1;
-    }
 }
 
-/*
-float mdcii::resource::AnimalsTileAtlas::CalcOffset(const world::Tile* t_tile, const int t_gfx) const
+//-------------------------------------------------
+// Helper
+//-------------------------------------------------
+
+float mdcii::resource::AnimalsTileAtlas::CalcOffset(const int t_gfx) const
 {
     auto offset{ 0.0f };
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
@@ -139,11 +121,8 @@ float mdcii::resource::AnimalsTileAtlas::CalcOffset(const world::Tile* t_tile, c
     {
         offset = static_cast<float>(gfxHeight) - static_cast<float>(tileHeight);
     }
-    if (t_tile->HasBuildingAboveWaterAndCoast())
-    {
-        offset += world::ELEVATIONS[zoomInt];
-    }
+
+    offset += world::ELEVATIONS[zoomInt];
 
     return offset;
 }
-*/

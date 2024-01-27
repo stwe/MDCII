@@ -37,65 +37,16 @@ namespace mdcii::world
     class Island;
 }
 
+namespace mdcii::world::tile
+{
+    /**
+     * @brief Forward declaration struct FigureTile.
+     */
+    struct FigureTile;
+}
+
 namespace mdcii::resource
 {
-    //-------------------------------------------------
-    // Animation
-    //-------------------------------------------------
-
-    /**
-     * RIND
-     * SCHAF
-     * HIRSCH
-     * ANTILOPE
-     */
-
-    enum class Direction
-    {
-        NORTH,
-        NORTH_EAST,
-        EAST,
-        SOUTH_EAST,
-        SOUTH,
-        SOUTH_WEST,
-        WEST,
-        NORTH_WEST
-    };
-
-    struct SpriteSheet
-    {
-        std::string name;
-        Direction direction;
-        int start;
-        int count;
-
-        SpriteSheet() = delete;
-
-        SpriteSheet(std::string t_name, Direction t_direction, int t_start, int t_count)
-            : name{ std::move(t_name) }
-            , direction{ t_direction }
-            , start{ t_start }
-            , count{ t_count }
-        {}
-    };
-
-    struct Animation
-    {
-        world::Island* island{ nullptr };
-        SpriteSheet* spriteSheet{ nullptr };
-        int posX{ -1 };
-        int posY{ -1 };
-
-        int frame{ 0 };
-
-        Animation(world::Island* t_island, SpriteSheet* t_spriteSheet, int t_posX, int t_posY)
-            : island{ t_island }
-            , spriteSheet{ t_spriteSheet }
-            , posX{ t_posX }
-            , posY{ t_posY }
-        {}
-    };
-
     //-------------------------------------------------
     // AnimalsTileAtlas
     //-------------------------------------------------
@@ -130,8 +81,10 @@ namespace mdcii::resource
         // Logic
         //-------------------------------------------------
 
-        void Render(Animation* t_animation, const olc::Pixel& t_tint) const;
+        void Render(int t_startX, int t_startY, const world::tile::FigureTile* t_tile, const olc::Pixel& t_tint) const;
         static void CalcAnimationFrame(float t_elapsedTime);
+        void RenderIsland(world::Island* t_island) const;
+        void RenderIslands() const;
 
     protected:
 
@@ -164,11 +117,6 @@ namespace mdcii::resource
          */
         static constexpr std::string_view TILE_ATLAS_NAME{ "animals" };
 
-        /**
-         * @brief To avoid m_frame_values[] will exceed that value.
-         */
-        static constexpr int MAX_FRAME_VALUE{ 1000 };
-
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
@@ -178,19 +126,10 @@ namespace mdcii::resource
          */
         const world::World* m_world{ nullptr };
 
-        /**
-         * @brief Five timers to measure the times for the next frame.
-         *
-         * The animation speeds of the animal figures are finally defined.
-         * So after 90, 130, 150, 180, 220 milliseconds the next frame from the animation is used.
-         */
-        inline static std::array m_timer_values{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
 
-        /**
-         * @brief When one of the five timers expires, the respective frame is counted up.
-         */
-        inline static std::array m_frame_values{ 0, 0, 0, 0, 0 };
-
-        //[[nodiscard]] float CalcOffset(const world::Tile* t_tile, int t_gfx) const;
+        [[nodiscard]] float CalcOffset(int t_gfx) const;
     };
 }

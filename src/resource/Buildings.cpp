@@ -21,6 +21,10 @@
 #include "cod/CodParser.h"
 #include "vendor/enum/magic_enum.hpp"
 
+//-------------------------------------------------
+// Building
+//-------------------------------------------------
+
 mdcii::resource::Buildings::Buildings(const std::string& t_codFilePath)
 {
     MDCII_LOG_DEBUG("[Buildings::Buildings()] Create Buildings.");
@@ -416,4 +420,125 @@ mdcii::resource::Building mdcii::resource::Buildings::GenerateBuilding(const cod
     }
 
     return building;
+}
+
+//-------------------------------------------------
+// Figure
+//-------------------------------------------------
+
+mdcii::resource::Figures::Figures(const std::string& t_codFilePath)
+{
+    MDCII_LOG_DEBUG("[Figures::Figures()] Create Figures.");
+
+    GenerateFigures(t_codFilePath);
+}
+
+mdcii::resource::Figures::~Figures() noexcept
+{
+    MDCII_LOG_DEBUG("[Figures::~Figures()] Destruct Figures.");
+}
+
+void mdcii::resource::Figures::GenerateFigures(const std::string& t_codFilePath)
+{
+    MDCII_LOG_DEBUG("[Figures::GenerateFigures()] Generate figures from figuren.cod ...");
+
+    const auto cod{ cod::CodParser(t_codFilePath, true) };
+    for (auto i{ 0 }; i < cod.objects.object_size(); ++i)
+    {
+        if (const auto& obj{ cod.objects.object(i) }; obj.name() == "FIGUR")
+        {
+            for (auto j{ 0 }; j < obj.objects_size(); ++j)
+            {
+                // todo: Animals only now
+                if (FIGURE_ID_MAP.contains(obj.objects(j).name()))
+                {
+                    const auto figure{ GenerateFigure(&obj.objects(j)) };
+                    figuresMap.try_emplace(magic_enum::enum_integer(FIGURE_ID_MAP.at(obj.objects(j).name())), figure);
+                }
+            }
+        }
+    }
+
+    MDCII_LOG_DEBUG("[Figures::GenerateFigures()] The figures were generated successfully from the figuren.cod.");
+}
+
+mdcii::resource::Figure mdcii::resource::Figures::GenerateFigure(const cod_pb::Object* t_obj)
+{
+    Figure figure;
+
+    if (t_obj->has_variables())
+    {
+        for (auto i{ 0 }; i < t_obj->variables().variable_size(); ++i)
+        {
+            const auto var{ t_obj->variables().variable(i) };
+            if (var.name() == "Gfx")
+            {
+                figure.gfx = var.value_int();
+            }
+            else if (var.name() == "Rotate")
+            {
+                figure.rotate = var.value_int();
+            }
+        }
+    }
+
+    if (t_obj->objects_size() > 0)
+    {
+        for (auto i{ 0 }; i < t_obj->objects_size(); ++i)
+        {
+            const auto &nestedObj{ t_obj->objects(i) };
+            if (nestedObj.name() == "ANIM")
+            {
+                if (nestedObj.objects_size() > 0)
+                {
+                    for (auto j{ 0 }; j < nestedObj.objects_size(); ++j)
+                    {
+                        if (nestedObj.objects(j).has_variables())
+                        {
+                            FigureAnimation figureAnimation;
+                            for (auto k{ 0 }; k < nestedObj.objects(j).variables().variable_size(); ++k)
+                            {
+                                const auto var{ nestedObj.objects(j).variables().variable(k) };
+                                if (var.name() == "Gfx")
+                                {
+                                    figureAnimation.gfx = figure.gfx; // todo: normally is 0
+                                }
+                                if (var.name() == "Kind")
+                                {
+                                    const auto kind{ magic_enum::enum_cast<AnimationKindType>(var.value_string()) };
+                                    if (kind.has_value())
+                                    {
+                                        figureAnimation.animationKind = kind.value();
+                                    }
+                                }
+                                else if (var.name() == "AnimOffs")
+                                {
+                                    figureAnimation.animOffs = var.value_int();
+                                }
+                                else if (var.name() == "AnimAdd")
+                                {
+                                    figureAnimation.animAdd = var.value_int();
+                                }
+                                else if (var.name() == "AnimAnz")
+                                {
+                                    figureAnimation.animAnz = var.value_int();
+                                }
+                                else if (var.name() == "AnimSpeed")
+                                {
+                                    figureAnimation.animSpeed = var.value_int();
+                                }
+                                else if (var.name() == "Rotate")
+                                {
+                                    figureAnimation.rotate = var.value_int();
+                                }
+                            }
+                            figure.animations.push_back(figureAnimation);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return figure;
 }

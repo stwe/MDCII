@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -67,6 +67,11 @@ namespace mdcii::resource
          */
         std::unique_ptr<const Buildings> buildings;
 
+        /**
+         * @brief The decrypted content of the figuren.cod.
+         */
+        std::unique_ptr<const Figures> figures;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -85,13 +90,22 @@ namespace mdcii::resource
         //-------------------------------------------------
 
         /**
-         * @brief For convenience and better readability. Get a building object by Id.
+         * @brief For convenience and better readability. Get a Building object by Id.
          *
          * @param t_id The given Id.
          *
-         * @return The building object.
+         * @return The Building object.
          */
         [[nodiscard]] const Building& GetBuildingById(int t_id) const;
+
+        /**
+         * @brief For convenience and better readability. Get a Figure object by Id.
+         *
+         * @param t_id The given Id.
+         *
+         * @return The Figure object.
+         */
+        [[nodiscard]] const Figure& GetFigureById(int t_id) const;
 
     protected:
 
@@ -104,6 +118,11 @@ namespace mdcii::resource
          * @brief The path to the haeuser.cod file.
          */
         std::filesystem::path m_buildingsPath;
+
+        /**
+         * @brief The path to the figuren.cod file.
+         */
+        std::filesystem::path m_figuresPath;
 
         /**
          * @brief The path to the palette file.
@@ -155,6 +174,11 @@ namespace mdcii::resource
          * @brief Finds the path to the haeuser.cod file.
          */
         void FindBuildingsCodFilePath();
+
+        /**
+         * @brief Finds the path to the figuren.cod file.
+         */
+        void FindFiguresCodFilePath();
 
         /**
          * @brief Finds the paths to all bauhaus.bsh files.

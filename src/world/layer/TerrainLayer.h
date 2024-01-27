@@ -103,18 +103,13 @@ namespace mdcii::world::layer
         //-------------------------------------------------
 
         void CreateLayerTiles(const nlohmann::json& t_json) override;
+        void InitLayerTiles() override;
 
         //-------------------------------------------------
-        // Create Tile
+        // Create / Init Tile
         //-------------------------------------------------
 
         tile::TerrainTile CreateLayerTile(const nlohmann::json& t_json);
-
-        //-------------------------------------------------
-        // Init Tiles
-        //-------------------------------------------------
-
-        void InitLayerTiles();
         void InitLayerTile(int t_x, int t_y);
 
         //-------------------------------------------------

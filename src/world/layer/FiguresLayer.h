@@ -18,42 +18,21 @@
 
 #pragma once
 
-#include "vendor/nlohmann/json.hpp"
-
-//-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii::world
-{
-    /**
-     * @brief Forward declaration class World.
-     */
-    class World;
-}
+#include "Layer.h"
+#include "world/tile/FigureTile.h"
 
 namespace mdcii::world::layer
 {
     //-------------------------------------------------
-    // LayerType
+    // FiguresLayer
     //-------------------------------------------------
 
     /**
-     * @brief Representing different types of layers.
+     * @brief Represents a FiguresLayer.
+     *
+     * Creates all figures.
      */
-    enum class LayerType
-    {
-        COAST, TERRAIN, BUILDINGS, FIGURES, MIXED, DEEP_WATER, NONE
-    };
-
-    //-------------------------------------------------
-    // Layer
-    //-------------------------------------------------
-
-    /**
-     * @brief Base class of all layers used in the game.
-     */
-    class Layer
+    class FiguresLayer : public Layer
     {
     public:
         //-------------------------------------------------
@@ -61,59 +40,46 @@ namespace mdcii::world::layer
         //-------------------------------------------------
 
         /**
-         * @brief The type the layer.
+         * @brief A vector holding all tiles belonging to this layer.
          */
-        LayerType layerType{ LayerType::NONE };
-
-        /**
-         * @brief The width of the layer.
-         */
-        const int width;
-
-        /**
-         * @brief The height of the layer.
-         */
-        const int height;
+        std::vector<tile::FigureTile> tiles;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        Layer() = delete;
+        FiguresLayer() = delete;
 
         /**
-         * @brief Constructs a new Layer object.
+         * @brief Constructs a new FiguresLayer object.
          *
          * @param t_world Pointer to the parent World object.
-         * @param t_layerType The type of the layer.
          * @param t_width The width of the layer.
          * @param t_height The height of the layer.
          */
-        Layer(const World* t_world, LayerType t_layerType, int t_width, int t_height);
+        FiguresLayer(const World* t_world, int t_width, int t_height);
 
-        Layer(const Layer& t_other) = delete;
-        Layer(Layer&& t_other) noexcept = delete;
-        Layer& operator=(const Layer& t_other) = delete;
-        Layer& operator=(Layer&& t_other) noexcept = delete;
+        FiguresLayer(const FiguresLayer& t_other) = delete;
+        FiguresLayer(FiguresLayer&& t_other) noexcept = delete;
+        FiguresLayer& operator=(const FiguresLayer& t_other) = delete;
+        FiguresLayer& operator=(FiguresLayer&& t_other) noexcept = delete;
 
-        virtual ~Layer() noexcept;
+        ~FiguresLayer() noexcept override;
 
         //-------------------------------------------------
-        // Create Tiles
+        // Override
         //-------------------------------------------------
 
-        virtual void CreateLayerTiles(const nlohmann::json& t_json) = 0;
-        virtual void InitLayerTiles() {}
+        void CreateLayerTiles(const nlohmann::json& t_json) override;
+        void InitLayerTiles() override;
+
+        //-------------------------------------------------
+        // Create Tile
+        //-------------------------------------------------
+
+        tile::FigureTile CreateLayerTile(const nlohmann::json& t_json);
 
     protected:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * @brief Pointer to the parent World object.
-         */
-        const World* m_world{ nullptr };
 
     private:
 

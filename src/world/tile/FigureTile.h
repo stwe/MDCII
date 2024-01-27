@@ -20,6 +20,18 @@
 
 #include "Tile.h"
 
+//-------------------------------------------------
+// Forward declarations
+//-------------------------------------------------
+
+namespace mdcii::resource
+{
+    /**
+     * @brief Forward declaration struct Figure.
+     */
+    struct Figure;
+}
+
 namespace mdcii::world::tile
 {
     //-------------------------------------------------
@@ -29,9 +41,33 @@ namespace mdcii::world::tile
     /**
      * @brief Represents a FigureTile.
      *
-     * These tiles are intended to represent all the figures.
+     * These tiles are intended to represent all the figures like animals or soldiers.
      */
     struct FigureTile : public Tile
     {
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * @brief Pointer to the Figure object generated from the figuren.cod file.
+         */
+        const resource::Figure* figure{ nullptr };
+
+        //-------------------------------------------------
+        // Ctors. / Dtor.
+        //-------------------------------------------------
+
+        FigureTile();
+
+        /**
+         * @brief Constructs a new TerrainTile object.
+         *
+         * @param t_figure Pointer to the Figure object generated from the figuren.cod file.
+         * @param t_rotation The rotation of the tile/building.
+         * @param t_posX Represents the x position for DEG0 of a tile relative to its parent island.
+         * @param t_posY Represents the y position for DEG0 of a tile relative to its parent island.
+         */
+        FigureTile(const resource::Figure* t_figure, int t_rotation, int t_posX, int t_posY);
     };
 }

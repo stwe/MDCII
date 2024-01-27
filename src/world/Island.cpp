@@ -22,6 +22,7 @@
 #include "MdciiAssert.h"
 #include "MdciiUtils.h"
 #include "world/layer/TerrainLayer.h"
+#include "world/layer/FiguresLayer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -138,6 +139,20 @@ void mdcii::world::Island::SetLayerData(const nlohmann::json& t_json)
     SetLayerDataByType(t_json, layer::LayerType::TERRAIN);
     SetLayerDataByType(t_json, layer::LayerType::BUILDINGS);
 
+    // todo: refactor
+    // figures layer
+    figuresLayer = std::make_unique<layer::FiguresLayer>(world, width, height);
+    for (auto layerJson = t_json.at("layers").items(); const auto& [k, v] : layerJson)
+    {
+        for (const auto& [layerNameJson, layerTilesJson] : v.items())
+        {
+            if (layerNameJson == to_lower_case(std::string(magic_enum::enum_name(layer::LayerType::FIGURES))))
+            {
+                figuresLayer->CreateLayerTiles(layerTilesJson);
+            }
+        }
+    }
+
     // this mixed layer will later be filled with the data from the other layers
     m_terrainLayers.emplace(layer::LayerType::MIXED, std::make_unique<layer::TerrainLayer>(world, layer::LayerType::MIXED, width, height));
 }
@@ -180,6 +195,8 @@ void mdcii::world::Island::InitLayerData()
     GetTerrainLayer(layer::LayerType::COAST)->InitLayerTiles();
     GetTerrainLayer(layer::LayerType::TERRAIN)->InitLayerTiles();
     GetTerrainLayer(layer::LayerType::BUILDINGS)->InitLayerTiles();
+
+    figuresLayer->InitLayerTiles();
 }
 
 void mdcii::world::Island::InitMixedLayerData()

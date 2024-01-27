@@ -34,6 +34,11 @@ namespace mdcii::world::layer
     class TerrainLayer;
 
     /**
+     * @brief Forward declaration class FiguresLayer.
+     */
+    class FiguresLayer;
+
+    /**
      * @brief Forward declaration enum class LayerType.
      */
     enum class LayerType;
@@ -118,6 +123,11 @@ namespace mdcii::world
          */
         ClimateZone climateZone{ ClimateZone::NORTH };
 
+        /**
+         * @brief The FiguresLayer object.
+         */
+        std::unique_ptr<layer::FiguresLayer> figuresLayer;
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -197,7 +207,7 @@ namespace mdcii::world
         physics::Aabb m_aabb;
 
         /**
-         * @brief The island terrain tile layers (COAST, TERRAIN, BUILDINGS, FIGURES, MIXED).
+         * @brief The island terrain tile layers (COAST, TERRAIN, BUILDINGS, MIXED).
          */
         std::unordered_map<layer::LayerType, std::unique_ptr<layer::TerrainLayer>, EnumClassHash> m_terrainLayers;
 

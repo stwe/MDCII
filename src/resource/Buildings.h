@@ -20,8 +20,8 @@
 
 #include <unordered_map>
 #include <vector>
-#include <cstdint>
 #include <string>
+#include "BuildingIds.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -379,67 +379,67 @@ namespace mdcii::resource
     //-------------------------------------------------
 
     /**
-     * @brief Represents a graphic object on the isometric map.
+     * @brief Represents a Building object on the isometric map.
      */
     struct Building
     {
-        int32_t id{ -1 };
-        int32_t gfx{ -1 };
-        int32_t blocknr{ -1 };
-        int32_t posoffs{ -1 };
-        int32_t highflg{ -1 };
-        int32_t einhoffs{ -1 };
-        int32_t maxenergy{ -1 };
-        int32_t maxbrand{ -1 };
-        int32_t rotate{ -1 };
-        int32_t randAnz{ -1 };
-        int32_t animAnz{ 0 };
-        int32_t animTime{ -1 };
-        int32_t animFrame{ 0 };
-        int32_t animAdd{ 0 };
-        int32_t baugfx{ -1 };
-        int32_t kreuzBase{ -1 };
-        int32_t randwachs{ -1 };
-        int32_t randAdd{ -1 };
-        int32_t strandoff{ -1 };
-        int32_t placeFlg{ -1 };
-        int32_t noShotFlg{ -1 };
-        int32_t strandflg{ -1 };
-        int32_t ausbauflg{ -1 };
-        int32_t tuerflg{ -1 };
-        int32_t destroyflg{ -1 };
+        int id{ -1 };
+        int gfx{ -1 };
+        int blocknr{ -1 };
+        int posoffs{ -1 };
+        int highflg{ -1 };
+        int einhoffs{ -1 };
+        int maxenergy{ -1 };
+        int maxbrand{ -1 };
+        int rotate{ -1 };
+        int randAnz{ -1 };
+        int animAnz{ 0 };
+        int animTime{ -1 };
+        int animFrame{ 0 };
+        int animAdd{ 0 };
+        int baugfx{ -1 };
+        int kreuzBase{ -1 };
+        int randwachs{ -1 };
+        int randAdd{ -1 };
+        int strandoff{ -1 };
+        int placeFlg{ -1 };
+        int noShotFlg{ -1 };
+        int strandflg{ -1 };
+        int ausbauflg{ -1 };
+        int tuerflg{ -1 };
+        int destroyflg{ -1 };
 
         KindType kind{ KindType::UNSET };                // WALD, RUINE, STRANDHAUS, MEER, FLUSS etc.
         BausampleType bausample{ BausampleType::UNSET }; // Wav samples
         RuinenrType ruinenr{ RuinenrType::UNSET };       // RUINE_KONTOR_N1, RUINE_MARKT, RUINE_ROAD_FELD etc.
-        std::vector<int32_t> wegspeed = {};
+        std::vector<int> wegspeed = {};
 
         struct
         {
-            int32_t w{ 0 };
-            int32_t h{ 0 };
+            int w{ 0 };
+            int h{ 0 };
         } size;
 
         struct
         {
-            int32_t bGruppe{ -1 };
-            int32_t anicontflg{ -1 };
-            int32_t makLagFlg{ -1 };
-            int32_t nativflg{ -1 };
-            int32_t lagAniFlg{ -1 };
-            int32_t doerrflg{ -1 };
-            int32_t noMoreWork{ -1 };
-            int32_t workmenge{ -1 };
-            int32_t noLagVoll{ -1 };
-            int32_t radius{ -1 };
-            int32_t rohmenge{ -1 };
-            int32_t prodmenge{ -1 };
-            int32_t randwachs{ -1 };
-            int32_t maxlager{ -1 };
-            int32_t maxnorohst{ -1 };
-            int32_t arbeiter{ -1 };
-            int32_t figuranz{ -1 };
-            int32_t interval{ -1 };
+            int bGruppe{ -1 };
+            int anicontflg{ -1 };
+            int makLagFlg{ -1 };
+            int nativflg{ -1 };
+            int lagAniFlg{ -1 };
+            int doerrflg{ -1 };
+            int noMoreWork{ -1 };
+            int workmenge{ -1 };
+            int noLagVoll{ -1 };
+            int radius{ -1 };
+            int rohmenge{ -1 };
+            int prodmenge{ -1 };
+            int randwachs{ -1 };
+            int maxlager{ -1 };
+            int maxnorohst{ -1 };
+            int arbeiter{ -1 };
+            int figuranz{ -1 };
+            int interval{ -1 };
             WorkstoffType workstoff{ WorkstoffType::UNSET };    // or HOLZ, STOFFE
             ErzbergnrType erzbergnr{ ErzbergnrType::UNSET };    // or ERZBERG_KLEIN, ERZBERG_GROSS
             ProdtypKindType kind{ ProdtypKindType::UNSET };     // BRUNNEN, THEATER, KLINIK, BERGWERK etc.
@@ -449,26 +449,22 @@ namespace mdcii::resource
             BauinfraType bauinfra{ BauinfraType::UNSET };       // INFRA_STUFE_1A, INFRA_STUFE_2A, INFRA_STUFE_2B etc.
             FigurnrType figurnr{ FigurnrType::UNSET };          // HOLZFAELLER, PFLUECKER, ARZT, JAEGER etc.
             RauchfignrType rauchfignr{ RauchfignrType::UNSET }; // FAHNETURM3, RAUCHGOLD, RAUCHBAECK etc.
-            std::vector<int32_t> maxware = {};
-            std::vector<int32_t> kosten = {};
+            std::vector<int> maxware = {};
+            std::vector<int> kosten = {};
         } houseProductionType;
 
         struct
         {
-            int32_t money{ -1 };
-            int32_t werkzeug{ -1 };
-            int32_t holz{ -1 };
-            int32_t ziegel{ -1 };
-            int32_t kanon{ -1 };
+            int money{ -1 };
+            int werkzeug{ -1 };
+            int holz{ -1 };
+            int ziegel{ -1 };
+            int kanon{ -1 };
         } houseBuildCosts;
 
         [[nodiscard]] bool HasGfxForEachRotation() const { return rotate > 0; }
         [[nodiscard]] bool IsBig() const { return size.w > 1 || size.h > 1; }
     };
-
-    //-------------------------------------------------
-    // Buildings
-    //-------------------------------------------------
 
     /**
      * @brief The decrypted content of the haeuser.cod.
@@ -476,12 +472,7 @@ namespace mdcii::resource
     class Buildings
     {
     public:
-        /**
-         * @brief The map with all building objects.
-         *
-         * The building ID is the key for each building.
-         */
-        std::unordered_map<int32_t, const Building> buildingsMap;
+        std::unordered_map<int, const Building> buildingsMap;
 
         Buildings() = delete;
 
@@ -503,7 +494,7 @@ namespace mdcii::resource
 
     private:
         /**
-         * @brief Creates the building objects.
+         * @brief Creates all the building objects.
          *
          * @param t_codFilePath The path to the haeuser.cod.
          */
@@ -516,6 +507,84 @@ namespace mdcii::resource
          *
          * @return A building object.
          */
-        static Building GenerateBuilding(const cod_pb::Object* t_obj) ;
+        static Building GenerateBuilding(const cod_pb::Object* t_obj);
+    };
+
+    //-------------------------------------------------
+    // Figure
+    //-------------------------------------------------
+
+    enum class AnimationKindType
+    {
+        UNSET,
+        ENDLESS,
+        RANDOM,
+        JUMPTO
+    };
+
+    struct FigureAnimation
+    {
+        int gfx{ -1 };
+        AnimationKindType animationKind{ AnimationKindType::UNSET };
+        int animOffs{ 0 };
+        int animAdd{ 1 };
+        int animAnz{ -1 };
+        int animSpeed{ -1 };
+        int rotate{ -1 };
+    };
+
+    /**
+     * @brief Represents a Figure object on the isometric map.
+     */
+    struct Figure
+    {
+        FigureId id{ FigureId::UNSET };
+        int gfx{ -1 };
+        int rotate{ -1 };
+        std::vector<FigureAnimation> animations;
+    };
+
+    /**
+     * @brief The decrypted content of the figuren.cod.
+     */
+    class Figures
+    {
+    public:
+        std::unordered_map<int, const Figure> figuresMap;
+
+        Figures() = delete;
+
+        /**
+         * @brief Constructs a new Figures object.
+         *
+         * @param t_codFilePath The path to the figuren.cod.
+         */
+        explicit Figures(const std::string& t_codFilePath);
+
+        Figures(const Figures& t_other) = delete;
+        Figures(Figures&& t_other) noexcept = delete;
+        Figures& operator=(const Figures& t_other) = delete;
+        Figures& operator=(Figures&& t_other) noexcept = delete;
+
+        ~Figures() noexcept;
+
+    protected:
+
+    private:
+        /**
+         * @brief Creates all the Figure objects.
+         *
+         * @param t_codFilePath The path to the figuren.cod.
+         */
+        void GenerateFigures(const std::string& t_codFilePath);
+
+        /**
+         * @brief Creates a single Figure object.
+         *
+         * @param t_obj A Cod object.
+         *
+         * @return A figure object.
+         */
+        static Figure GenerateFigure(const cod_pb::Object* t_obj);
     };
 }

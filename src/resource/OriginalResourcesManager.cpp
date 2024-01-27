@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -52,6 +52,14 @@ const mdcii::resource::Building& mdcii::resource::OriginalResourcesManager::GetB
     return buildings->buildingsMap.at(t_id);
 }
 
+const mdcii::resource::Figure &mdcii::resource::OriginalResourcesManager::GetFigureById(const int t_id) const
+{
+    // 0 = UNSET
+    MDCII_ASSERT(t_id > 0, "[OriginalResourcesManager::GetFigureById()] Invalid Id given.")
+
+    return figures->figuresMap.at(t_id);
+}
+
 //-------------------------------------------------
 // Path to the original data
 //-------------------------------------------------
@@ -63,6 +71,7 @@ void mdcii::resource::OriginalResourcesManager::GetPathsFromOriginal()
     FindBauhausBshFilePaths();
     FindPaletteFilePath();
     FindBuildingsCodFilePath();
+    FindFiguresCodFilePath();
 
     MDCII_LOG_DEBUG("[OriginalResourcesManager::GetPathsFromOriginal()] All paths were found successfully.");
 }
@@ -117,6 +126,23 @@ void mdcii::resource::OriginalResourcesManager::FindBuildingsCodFilePath()
     }
 
     MDCII_LOG_DEBUG("[OriginalResourcesManager::FindBuildingsCodFilePath()] The path to the haeuser.cod file was found successfully.");
+}
+
+void mdcii::resource::OriginalResourcesManager::FindFiguresCodFilePath()
+{
+    IterateFilesystem("figuren.cod", [this](const std::filesystem::directory_entry& t_entry, const std::string& t_fileName) {
+        if (to_upper_case(t_entry.path().filename().string()) == to_upper_case(t_fileName))
+        {
+            m_figuresPath = t_entry.path();
+        }
+    });
+
+    if (m_figuresPath.empty())
+    {
+        throw MDCII_EXCEPTION("[OriginalResourcesManager::FindFiguresCodFilePath()] Error while reading figures file path.");
+    }
+
+    MDCII_LOG_DEBUG("[OriginalResourcesManager::FindFiguresCodFilePath()] The path to the figuren.cod file was found successfully.");
 }
 
 void mdcii::resource::OriginalResourcesManager::FindBauhausBshFilePaths()
@@ -190,7 +216,8 @@ void mdcii::resource::OriginalResourcesManager::LoadFiles()
         bauhausBshFiles.try_emplace(zoom, std::move(bauhausBshFile));
     }
 
-    buildings = std::make_unique<Buildings>(m_buildingsPath);
+    buildings = std::make_unique<const Buildings>(m_buildingsPath);
+    figures = std::make_unique<const Figures>(m_figuresPath);
 
     MDCII_LOG_DEBUG("[OriginalResourcesManager::LoadFiles()] All files have been loaded successfully.");
 }

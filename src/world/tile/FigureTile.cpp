@@ -17,3 +17,25 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "FigureTile.h"
+#include "resource/Buildings.h"
+
+//-------------------------------------------------
+// Ctors. / Dtor.
+//-------------------------------------------------
+
+mdcii::world::tile::FigureTile::FigureTile()
+{
+
+}
+
+mdcii::world::tile::FigureTile::FigureTile(
+    const resource::Figure* t_figure,
+    const int t_rotation,
+    const int t_posX,
+    const int t_posY
+)
+    : Tile(t_rotation, t_posX, t_posY)
+    , figure{ t_figure }
+{
+
+}

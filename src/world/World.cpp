@@ -118,16 +118,8 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
     m_tileAtlas->RenderDeepWater(m_renderDeepWaterGrid);
     m_tileAtlas->RenderIslands(m_renderIslandsGrid);
 
-    /*
-    resource::SpriteSheet spriteSheetN{ "BEEF_N", resource::Direction::NORTH, 0, 8 };
-    resource::SpriteSheet spriteSheetNe{ "BEEF_NE", resource::Direction::NORTH_EAST, 8, 8 };
-    resource::Animation animationN{ islands.at(0).get(), &spriteSheetN, 3, 5 };
-    resource::Animation animationNe{ islands.at(0).get(), &spriteSheetNe, 2, 5 };
-
-    m_animalsTileAtlas->CalcAnimationFrame(t_elapsedTime);
-    m_animalsTileAtlas->Render(&animationN, olc::WHITE);
-    m_animalsTileAtlas->Render(&animationNe, olc::WHITE);
-    */
+    // render animals
+    m_animalsTileAtlas->RenderIslands();
 
     // ---------------------------------
     // todo: Rendering depends on ImGui

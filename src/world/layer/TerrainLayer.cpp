@@ -66,8 +66,27 @@ void mdcii::world::layer::TerrainLayer::CreateLayerTiles(const nlohmann::json& t
     MDCII_ASSERT(tiles.size() == width * static_cast<size_t>(height), "[TerrainLayer::CreateLayerTiles()] Invalid number of tiles.")
 }
 
+void mdcii::world::layer::TerrainLayer::InitLayerTiles()
+{
+    MDCII_LOG_DEBUG("[TerrainLayer::InitLayerTiles()] Start initializing layer tiles for {} ...", magic_enum::enum_name(layerType));
+
+    MDCII_ASSERT(!tiles.empty(), "[TerrainLayer::InitLayerTiles()] Invalid number of tiles.")
+
+    for (auto h{ 0 }; h < height; ++h)
+    {
+        for (auto w{ 0 }; w < width; ++w)
+        {
+            InitLayerTile(w, h);
+        }
+    }
+
+    SortTilesForRendering();
+
+    MDCII_LOG_DEBUG("[TerrainLayer::InitLayerTiles()] The layer tiles were initialized successfully.");
+}
+
 //-------------------------------------------------
-// Create Tile
+// Create / Init Tile
 //-------------------------------------------------
 
 mdcii::world::tile::TerrainTile mdcii::world::layer::TerrainLayer::CreateLayerTile(const nlohmann::json& t_json)
@@ -105,29 +124,6 @@ mdcii::world::tile::TerrainTile mdcii::world::layer::TerrainLayer::CreateLayerTi
     }
 
     return tile;
-}
-
-//-------------------------------------------------
-// Init Tiles
-//-------------------------------------------------
-
-void mdcii::world::layer::TerrainLayer::InitLayerTiles()
-{
-    MDCII_LOG_DEBUG("[TerrainLayer::InitLayerTiles()] Start initializing layer tiles for {} ...", magic_enum::enum_name(layerType));
-
-    MDCII_ASSERT(!tiles.empty(), "[TerrainLayer::InitLayerTiles()] Invalid number of tiles.")
-
-    for (auto h{ 0 }; h < height; ++h)
-    {
-        for (auto w{ 0 }; w < width; ++w)
-        {
-            InitLayerTile(w, h);
-        }
-    }
-
-    SortTilesForRendering();
-
-    MDCII_LOG_DEBUG("[TerrainLayer::InitLayerTiles()] The layer tiles were initialized successfully.");
 }
 
 void mdcii::world::layer::TerrainLayer::InitLayerTile(const int t_x, const int t_y)

@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,6 +20,7 @@
 
 #include <unordered_set>
 #include <array>
+#include <unordered_map>
 
 namespace mdcii::resource
 {
@@ -60,4 +61,18 @@ namespace mdcii::resource
 
     static constexpr std::array NORTH_TREES_BUILDING_IDS{ 1304, 1306, 1308, 1310, 1312, 1314, 1316, 1318, 1320, 1322, 1324 };
     static constexpr std::array SOUTH_TREES_BUILDING_IDS{ 1352, 1354, 1356, 1358, 1360, 1362, 1364, 1366, 1368, 1370, 1372 };
+
+    // Figures
+
+    enum class FigureId
+    {
+        UNSET, CATTLE_ID, SHEEP_ID, DEER_ID, ANTELOPE_ID
+    };
+
+    static const std::unordered_map<std::string, FigureId> FIGURE_ID_MAP = {
+         { "RIND", FigureId::CATTLE_ID },
+         { "SCHAF", FigureId::SHEEP_ID },
+         { "HIRSCH", FigureId::DEER_ID },
+         { "ANTILOPE", FigureId::ANTELOPE_ID },
+    };
 }
