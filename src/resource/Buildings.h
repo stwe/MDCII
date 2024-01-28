@@ -550,7 +550,7 @@ namespace mdcii::resource
     class Figures
     {
     public:
-        std::unordered_map<int, const Figure> figuresMap;
+        std::unordered_map<FigureId, const Figure> figuresMap;
 
         Figures() = delete;
 
@@ -581,10 +581,11 @@ namespace mdcii::resource
         /**
          * @brief Creates a single Figure object.
          *
+         * @param t_figureId The Id of the Figure object.
          * @param t_obj A Cod object.
          *
          * @return A figure object.
          */
-        static Figure GenerateFigure(const cod_pb::Object* t_obj);
+        static Figure GenerateFigure(FigureId t_figureId, const cod_pb::Object* t_obj);
     };
 }

@@ -89,14 +89,15 @@ mdcii::world::tile::FigureTile mdcii::world::layer::FiguresLayer::CreateLayerTil
 
     if (t_json.count("id") && t_json.at("id") > 0) // 0 = UNSET
     {
-        if (m_world)
+        const auto figureIdOpt{ magic_enum::enum_cast<resource::FigureId>(t_json.at("id")) };
+        if (m_world && figureIdOpt.has_value())
         {
-            const auto& figure{ m_world->state->game->originalResourcesManager->GetFigureById(t_json.at("id")) };
+            const auto& figure{ m_world->state->game->originalResourcesManager->GetFigureById(figureIdOpt.value()) };
             tile.figure = &figure;
         }
         else
         {
-            throw MDCII_EXCEPTION("[FiguresLayer::CreateLayerTile()] Null pointer.");
+            throw MDCII_EXCEPTION("[FiguresLayer::CreateLayerTile()] Null pointer or invalid figure Id.");
         }
     }
 

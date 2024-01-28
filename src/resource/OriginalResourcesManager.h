@@ -101,11 +101,11 @@ namespace mdcii::resource
         /**
          * @brief For convenience and better readability. Get a Figure object by Id.
          *
-         * @param t_id The given Id.
+         * @param t_figureId The Id of the Figure object to return.
          *
          * @return The Figure object.
          */
-        [[nodiscard]] const Figure& GetFigureById(int t_id) const;
+        [[nodiscard]] const Figure& GetFigureById(FigureId t_figureId) const;
 
     protected:
 

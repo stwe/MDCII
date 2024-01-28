@@ -450,10 +450,11 @@ void mdcii::resource::Figures::GenerateFigures(const std::string& t_codFilePath)
             for (auto j{ 0 }; j < obj.objects_size(); ++j)
             {
                 // todo: Animals only now
-                if (FIGURE_ID_MAP.contains(obj.objects(j).name()))
+                if (FIGURE_STRING_TO_ID_MAP.contains(obj.objects(j).name()))
                 {
-                    const auto figure{ GenerateFigure(&obj.objects(j)) };
-                    figuresMap.try_emplace(magic_enum::enum_integer(FIGURE_ID_MAP.at(obj.objects(j).name())), figure);
+                    const auto figureId{ FIGURE_STRING_TO_ID_MAP.at(obj.objects(j).name()) };
+                    const auto figure{ GenerateFigure(figureId, &obj.objects(j)) };
+                    figuresMap.try_emplace(figureId, figure);
                 }
             }
         }
@@ -462,9 +463,10 @@ void mdcii::resource::Figures::GenerateFigures(const std::string& t_codFilePath)
     MDCII_LOG_DEBUG("[Figures::GenerateFigures()] The figures were generated successfully from the figuren.cod.");
 }
 
-mdcii::resource::Figure mdcii::resource::Figures::GenerateFigure(const cod_pb::Object* t_obj)
+mdcii::resource::Figure mdcii::resource::Figures::GenerateFigure(const FigureId t_figureId, const cod_pb::Object* t_obj)
 {
     Figure figure;
+    figure.id = t_figureId;
 
     if (t_obj->has_variables())
     {

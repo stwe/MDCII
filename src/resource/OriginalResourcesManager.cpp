@@ -52,12 +52,11 @@ const mdcii::resource::Building& mdcii::resource::OriginalResourcesManager::GetB
     return buildings->buildingsMap.at(t_id);
 }
 
-const mdcii::resource::Figure &mdcii::resource::OriginalResourcesManager::GetFigureById(const int t_id) const
+const mdcii::resource::Figure& mdcii::resource::OriginalResourcesManager::GetFigureById(const FigureId t_figureId) const
 {
-    // 0 = UNSET
-    MDCII_ASSERT(t_id > 0, "[OriginalResourcesManager::GetFigureById()] Invalid Id given.")
+    MDCII_ASSERT(t_figureId != FigureId::UNSET, "[OriginalResourcesManager::GetFigureById()] Invalid Id given.")
 
-    return figures->figuresMap.at(t_id);
+    return figures->figuresMap.at(t_figureId);
 }
 
 //-------------------------------------------------

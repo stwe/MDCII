@@ -21,6 +21,7 @@
 #include <unordered_set>
 #include <array>
 #include <unordered_map>
+#include <string>
 
 namespace mdcii::resource
 {
@@ -69,7 +70,7 @@ namespace mdcii::resource
         UNSET, CATTLE_ID, SHEEP_ID, DEER_ID, ANTELOPE_ID
     };
 
-    static const std::unordered_map<std::string, FigureId> FIGURE_ID_MAP = {
+    static const std::unordered_map<std::string, FigureId> FIGURE_STRING_TO_ID_MAP = {
          { "RIND", FigureId::CATTLE_ID },
          { "SCHAF", FigureId::SHEEP_ID },
          { "HIRSCH", FigureId::DEER_ID },
