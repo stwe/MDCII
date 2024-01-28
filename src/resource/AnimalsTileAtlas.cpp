@@ -57,11 +57,8 @@ void mdcii::resource::AnimalsTileAtlas::Render(
 {
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
 
-    // todo: rotation Rind = 8 / Camera = 4
     const auto gfx{
-        // 0                  7 * 8 = 56
-        // base gfx           // current rot      // all avail rot
-        t_tile->figure->gfx + (t_tile->rotation * t_tile->figure->rotate)
+        t_tile->figure->gfx + (t_tile->rotation * t_tile->figure->rotate) + t_tile->frame
     };
 
     const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, NR_OF_ROWS) };
@@ -91,6 +88,7 @@ void mdcii::resource::AnimalsTileAtlas::RenderIsland(world::Island* t_island) co
     {
         if (tile.figure)
         {
+            tile.UpdateFrame(m_frame_values);
             Render(t_island->startX, t_island->startY, &tile, olc::WHITE);
         }
     }
@@ -106,7 +104,73 @@ void mdcii::resource::AnimalsTileAtlas::RenderIslands() const
 
 void mdcii::resource::AnimalsTileAtlas::CalcAnimationFrame(const float t_elapsedTime)
 {
+    for (auto& timer : m_timer_values)
+    {
+        timer += t_elapsedTime;
+    }
 
+    if (m_timer_values[0] >= 0.075f)
+    {
+        m_frame_values[0] = ++m_frame_values[0];
+        m_timer_values[0] = 0.0f;
+        m_frame_values[0] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[1] >= 0.11f)
+    {
+        m_frame_values[1] = ++m_frame_values[1];
+        m_timer_values[1] = 0.0f;
+        m_frame_values[1] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[2] >= 0.13f)
+    {
+        m_frame_values[2] = ++m_frame_values[2];
+        m_timer_values[2] = 0.0f;
+        m_frame_values[2] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[3] >= 0.135f)
+    {
+        m_frame_values[3] = ++m_frame_values[3];
+        m_timer_values[3] = 0.0f;
+        m_frame_values[3] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[4] >= 0.195f)
+    {
+        m_frame_values[4] = ++m_frame_values[4];
+        m_timer_values[4] = 0.0f;
+        m_frame_values[4] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[5] >= 0.3f)
+    {
+        m_frame_values[5] = ++m_frame_values[5];
+        m_timer_values[5] = 0.0f;
+        m_frame_values[5] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[6] >= 0.5f)
+    {
+        m_frame_values[6] = ++m_frame_values[6];
+        m_timer_values[6] = 0.0f;
+        m_frame_values[6] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[7] >= 0.75f)
+    {
+        m_frame_values[7] = ++m_frame_values[7];
+        m_timer_values[7] = 0.0f;
+        m_frame_values[7] %= MAX_FRAME_VALUE + 1;
+    }
+
+    if (m_timer_values[8] >= 1.0f)
+    {
+        m_frame_values[8] = ++m_frame_values[8];
+        m_timer_values[8] = 0.0f;
+        m_frame_values[8] %= MAX_FRAME_VALUE + 1;
+    }
 }
 
 //-------------------------------------------------

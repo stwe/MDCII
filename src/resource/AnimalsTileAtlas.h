@@ -117,6 +117,11 @@ namespace mdcii::resource
          */
         static constexpr std::string_view TILE_ATLAS_NAME{ "animals" };
 
+        /**
+         * @brief To avoid m_frame_values[] will exceed that value.
+         */
+        static constexpr int MAX_FRAME_VALUE{ 1000 };
+
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
@@ -125,6 +130,19 @@ namespace mdcii::resource
          * @brief Pointer to the parent World.
          */
         const world::World* m_world{ nullptr };
+
+        /**
+         * @brief Timers to measure the times for the next frame.
+         *
+         * The animation speeds of the animals are finally defined.
+         * So after 75, 110, 130, 135, 195, 300, 500, 750 and 1000 milliseconds the next frame from the animation is used.
+         */
+        inline static std::array m_timer_values{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+
+        /**
+         * @brief When one of the timers expires, the respective frame is counted up.
+         */
+        inline static std::array m_frame_values{ 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
         //-------------------------------------------------
         // Helper

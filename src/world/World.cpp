@@ -119,6 +119,7 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
     m_tileAtlas->RenderIslands(m_renderIslandsGrid);
 
     // render animals
+    m_animalsTileAtlas->CalcAnimationFrame(t_elapsedTime);
     m_animalsTileAtlas->RenderIslands();
 
     // ---------------------------------

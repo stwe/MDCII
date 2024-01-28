@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <array>
 #include "Tile.h"
 
 //-------------------------------------------------
@@ -45,6 +46,15 @@ namespace mdcii::world::tile
      */
     struct FigureTile : public Tile
     {
+        //-------------------------------------------------
+        // Constants
+        //-------------------------------------------------
+
+        /**
+         * @brief The number of possible animation times.
+         */
+        static constexpr auto NR_OF_ANIM_TIMES{ 9 };
+
         //-------------------------------------------------
         // Member
         //-------------------------------------------------
@@ -80,5 +90,16 @@ namespace mdcii::world::tile
          * @return True if a Figure object is present.
          */
         [[nodiscard]] bool HasFigure() const { return figure != nullptr; }
+
+        //-------------------------------------------------
+        // Logic
+        //-------------------------------------------------
+
+        /**
+         * @brief Set the current animation frame.
+         *
+         * @param t_frameValues The current frame values for all animation times.
+         */
+        void UpdateFrame(const std::array<int, NR_OF_ANIM_TIMES>& t_frameValues);
     };
 }
