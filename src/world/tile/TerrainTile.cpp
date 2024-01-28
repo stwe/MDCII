@@ -93,7 +93,7 @@ void mdcii::world::tile::TerrainTile::CalculateGfx()
     const auto gfx0{ building->gfx };
 
     gfxs.push_back(gfx0);
-    if (building->HasGfxForEachRotation())
+    if (building->IsRotatable())
     {
         gfxs.push_back(gfx0 + (1 * building->rotate));
         gfxs.push_back(gfx0 + (2 * building->rotate));

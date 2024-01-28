@@ -120,7 +120,7 @@ void mdcii::world::DeepWater::UpdateTileProperties() const
         const auto gfx0{ tile.building->gfx };
 
         tile.gfxs.push_back(gfx0);
-        if (tile.building->HasGfxForEachRotation())
+        if (tile.building->IsRotatable())
         {
             tile.gfxs.push_back(gfx0 + (1 * tile.building->rotate));
             tile.gfxs.push_back(gfx0 + (2 * tile.building->rotate));

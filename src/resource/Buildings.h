@@ -379,7 +379,7 @@ namespace mdcii::resource
     //-------------------------------------------------
 
     /**
-     * @brief Represents a Building object on the isometric map.
+     * @brief Represents a building asset.
      */
     struct Building
     {
@@ -462,7 +462,7 @@ namespace mdcii::resource
             int kanon{ -1 };
         } houseBuildCosts;
 
-        [[nodiscard]] bool HasGfxForEachRotation() const { return rotate > 0; }
+        [[nodiscard]] bool IsRotatable() const { return rotate > 0; }
         [[nodiscard]] bool IsBig() const { return size.w > 1 || size.h > 1; }
     };
 
@@ -534,7 +534,7 @@ namespace mdcii::resource
     };
 
     /**
-     * @brief Represents a Figure object on the isometric map.
+     * @brief Represents a figure asset.
      */
     struct Figure
     {
@@ -542,6 +542,8 @@ namespace mdcii::resource
         int gfx{ -1 };
         int rotate{ -1 };
         std::vector<FigureAnimation> animations;
+
+        [[nodiscard]] bool IsRotatable() const { return rotate > 0; }
     };
 
     /**

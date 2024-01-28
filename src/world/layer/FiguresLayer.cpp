@@ -104,6 +104,13 @@ mdcii::world::tile::FigureTile mdcii::world::layer::FiguresLayer::CreateLayerTil
     if (t_json.count("rotation"))
     {
         tile.rotation = t_json.at("rotation");
+        if (tile.HasFigure() && tile.figure->IsRotatable())
+        {
+            if (tile.rotation < 0 || tile.rotation >= tile.figure->rotate)
+            {
+                throw MDCII_EXCEPTION("[FiguresLayer::CreateLayerTile()] Invalid figure rotation.");
+            }
+        }
     }
 
     return tile;

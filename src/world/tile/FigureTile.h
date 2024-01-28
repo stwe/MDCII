@@ -69,5 +69,16 @@ namespace mdcii::world::tile
          * @param t_posY Represents the y position for DEG0 of a tile relative to its parent island.
          */
         FigureTile(const resource::Figure* t_figure, int t_rotation, int t_posX, int t_posY);
+
+        //-------------------------------------------------
+        // Getter
+        //-------------------------------------------------
+
+        /**
+         * @brief For better readability/convenience.
+         *
+         * @return True if a Figure object is present.
+         */
+        [[nodiscard]] bool HasFigure() const { return figure != nullptr; }
     };
 }

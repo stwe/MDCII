@@ -95,7 +95,7 @@ void mdcii::world::Gui::RotatableBuildingGui(const resource::Building* t_buildin
 {
     MDCII_ASSERT(t_building, "[Gui::RotatableBuildingGui()] Null pointer.")
 
-    if (t_building->HasGfxForEachRotation())
+    if (t_building && t_building->IsRotatable())
     {
         static bool r = false;
         static bool l = false;

@@ -111,6 +111,13 @@ mdcii::world::tile::TerrainTile mdcii::world::layer::TerrainLayer::CreateLayerTi
     if (t_json.count("rotation"))
     {
         tile.rotation = t_json.at("rotation");
+        if (tile.HasBuilding() && tile.building->IsRotatable())
+        {
+            if (tile.rotation < 0 || tile.rotation > 3)
+            {
+                throw MDCII_EXCEPTION("[TerrainLayer::CreateLayerTile()] Invalid building rotation.");
+            }
+        }
     }
 
     if (t_json.count("x"))

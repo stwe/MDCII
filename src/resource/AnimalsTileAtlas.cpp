@@ -56,7 +56,14 @@ void mdcii::resource::AnimalsTileAtlas::Render(
 ) const
 {
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
-    const auto gfx{ t_tile->figure->gfx };
+
+    // todo: rotation Rind = 8 / Camera = 4
+    const auto gfx{
+        // 0                  7 * 8 = 56
+        // base gfx           // current rot      // all avail rot
+        t_tile->figure->gfx + (t_tile->rotation * t_tile->figure->rotate)
+    };
+
     const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, NR_OF_ROWS) };
 
     olc::vf2d screenPosition{ m_world->ToScreen(t_tile->posX + t_startX, t_tile->posY + t_startY) };
