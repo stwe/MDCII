@@ -30,12 +30,14 @@ mdcii::world::tile::FigureTile::FigureTile()
 
 mdcii::world::tile::FigureTile::FigureTile(
     const resource::Figure* t_figure,
+    const int t_currentAnimation,
     const int t_rotation,
     const int t_posX,
     const int t_posY
 )
     : Tile(t_rotation, t_posX, t_posY)
     , figure{ t_figure }
+    , currentAnimation{ t_currentAnimation }
 {
 
 }
@@ -47,36 +49,34 @@ mdcii::world::tile::FigureTile::FigureTile(
 void mdcii::world::tile::FigureTile::UpdateFrame(const std::array<int, NR_OF_ANIM_TIMES>& t_frameValues)
 {
     // 75, 110, 130, 135, 195, 300, 500, 750, 1000
-
-    // todo: statt dessen die aktive Animation auswählen
-    switch (figure->animations[0].animSpeed)
+    switch (figure->animations[currentAnimation].animSpeed)
     {
         case 75:
-            frame = t_frameValues[0] % figure->animations[0].animAnz;
+            frame = t_frameValues[0] % figure->animations[currentAnimation].animAnz;
             break;
         case 110:
-            frame = t_frameValues[1] % figure->animations[0].animAnz;
+            frame = t_frameValues[1] % figure->animations[currentAnimation].animAnz;
             break;
         case 130:
-            frame = t_frameValues[2] % figure->animations[0].animAnz;
+            frame = t_frameValues[2] % figure->animations[currentAnimation].animAnz;
             break;
         case 135:
-            frame = t_frameValues[3] % figure->animations[0].animAnz;
+            frame = t_frameValues[3] % figure->animations[currentAnimation].animAnz;
             break;
         case 195:
-            frame = t_frameValues[4] % figure->animations[0].animAnz;
+            frame = t_frameValues[4] % figure->animations[currentAnimation].animAnz;
             break;
         case 300:
-            frame = t_frameValues[5] % figure->animations[0].animAnz;
+            frame = t_frameValues[5] % figure->animations[currentAnimation].animAnz;
             break;
         case 500:
-            frame = t_frameValues[6] % figure->animations[0].animAnz;
+            frame = t_frameValues[6] % figure->animations[currentAnimation].animAnz;
             break;
         case 750:
-            frame = t_frameValues[7] % figure->animations[0].animAnz;
+            frame = t_frameValues[7] % figure->animations[currentAnimation].animAnz;
             break;
         case 1000:
-            frame = t_frameValues[8] % figure->animations[0].animAnz;
+            frame = t_frameValues[8] % figure->animations[currentAnimation].animAnz;
             break;
         default:
             frame = 0;

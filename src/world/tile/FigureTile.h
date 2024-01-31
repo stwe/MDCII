@@ -64,6 +64,11 @@ namespace mdcii::world::tile
          */
         const resource::Figure* figure{ nullptr };
 
+        /**
+         * @brief The index of the animation currently in use.
+         */
+        int currentAnimation{ 0 };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -74,11 +79,12 @@ namespace mdcii::world::tile
          * @brief Constructs a new TerrainTile object.
          *
          * @param t_figure Pointer to the Figure object generated from the figuren.cod file.
+         * @param t_currentAnimation The index of the animation currently in use.
          * @param t_rotation The rotation of the tile/building.
          * @param t_posX Represents the x position for DEG0 of a tile relative to its parent island.
          * @param t_posY Represents the y position for DEG0 of a tile relative to its parent island.
          */
-        FigureTile(const resource::Figure* t_figure, int t_rotation, int t_posX, int t_posY);
+        FigureTile(const resource::Figure* t_figure, int t_currentAnimation, int t_rotation, int t_posX, int t_posY);
 
         //-------------------------------------------------
         // Getter

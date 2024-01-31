@@ -57,8 +57,9 @@ void mdcii::resource::AnimalsTileAtlas::Render(
 {
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
 
+    const auto animationOffset{ t_tile->figure->animations[t_tile->currentAnimation].animOffs };
     const auto gfx{
-        t_tile->figure->gfx + (t_tile->rotation * t_tile->figure->rotate) + t_tile->frame
+        t_tile->figure->gfx + animationOffset + (t_tile->rotation * t_tile->figure->animations[t_tile->currentAnimation].animAnz) + t_tile->frame
     };
 
     const olc::vf2d atlasOffset{ GetAtlasOffset(gfx, NR_OF_ROWS) };

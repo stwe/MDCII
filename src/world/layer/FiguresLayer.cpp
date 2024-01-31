@@ -113,5 +113,17 @@ mdcii::world::tile::FigureTile mdcii::world::layer::FiguresLayer::CreateLayerTil
         }
     }
 
+    if (t_json.count("animation"))
+    {
+        tile.currentAnimation = t_json.at("animation");
+        if (tile.HasFigure() && tile.figure->IsRotatable())
+        {
+            if (tile.currentAnimation < 0 || static_cast<size_t>(tile.currentAnimation) > tile.figure->animations.size() - 1)
+            {
+                throw MDCII_EXCEPTION("[FiguresLayer::CreateLayerTile()] Invalid figure animation.");
+            }
+        }
+    }
+
     return tile;
 }
