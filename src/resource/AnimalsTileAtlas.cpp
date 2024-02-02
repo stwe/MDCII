@@ -85,9 +85,10 @@ void mdcii::resource::AnimalsTileAtlas::Render(
 
 void mdcii::resource::AnimalsTileAtlas::RenderIsland(world::Island* t_island) const
 {
-    for (auto& tile : t_island->figuresLayer->tiles)
+    // todo: ->currentTiles
+    for (auto& tile : t_island->GetFiguresLayer()->tiles)
     {
-        if (tile.figure)
+        if (tile.HasFigure())
         {
             tile.UpdateFrame(m_frame_values);
             Render(t_island->startX, t_island->startY, &tile, olc::WHITE);
@@ -99,7 +100,10 @@ void mdcii::resource::AnimalsTileAtlas::RenderIslands() const
 {
     for (auto const& island : m_world->currentIslands)
     {
-        RenderIsland(island);
+        if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_FIGURES_LAYER))
+        {
+            RenderIsland(island);
+        }
     }
 }
 

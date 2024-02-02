@@ -68,6 +68,16 @@ const mdcii::world::layer::TerrainLayer* mdcii::world::Island::GetTerrainLayer(c
     return it->second.get();
 }
 
+mdcii::world::layer::FiguresLayer *mdcii::world::Island::GetFiguresLayer()
+{
+    return m_figuresLayer.get();
+}
+
+const mdcii::world::layer::FiguresLayer *mdcii::world::Island::GetFiguresLayer() const
+{
+    return m_figuresLayer.get();
+}
+
 //-------------------------------------------------
 // Position
 //-------------------------------------------------
@@ -141,14 +151,14 @@ void mdcii::world::Island::SetLayerData(const nlohmann::json& t_json)
 
     // todo: refactor
     // figures layer
-    figuresLayer = std::make_unique<layer::FiguresLayer>(world, width, height);
+    m_figuresLayer = std::make_unique<layer::FiguresLayer>(world, width, height);
     for (auto layerJson = t_json.at("layers").items(); const auto& [k, v] : layerJson)
     {
         for (const auto& [layerNameJson, layerTilesJson] : v.items())
         {
             if (layerNameJson == to_lower_case(std::string(magic_enum::enum_name(layer::LayerType::FIGURES))))
             {
-                figuresLayer->CreateLayerTiles(layerTilesJson);
+                m_figuresLayer->CreateLayerTiles(layerTilesJson);
             }
         }
     }
@@ -196,7 +206,7 @@ void mdcii::world::Island::InitLayerData()
     GetTerrainLayer(layer::LayerType::TERRAIN)->InitLayerTiles();
     GetTerrainLayer(layer::LayerType::BUILDINGS)->InitLayerTiles();
 
-    figuresLayer->InitLayerTiles();
+    m_figuresLayer->InitLayerTiles();
 }
 
 void mdcii::world::Island::InitMixedLayerData()

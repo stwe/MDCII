@@ -231,8 +231,10 @@ void mdcii::world::World::RenderImGui()
     static auto renderCoastLayer{ false };
     static auto renderTerrainLayer{ false };
     static auto renderBuildingsLayer{ false };
+
     static auto renderMixedLayer{ true };
     static auto renderDeepWaterLayer{ true };
+    static auto renderFiguresLayer{ true };
 
     ImGui::Checkbox("Render islands terrain grid", &m_renderIslandsGrid);
     ImGui::Checkbox("Render deep water grid", &m_renderDeepWaterGrid);
@@ -257,6 +259,12 @@ void mdcii::world::World::RenderImGui()
     {
         ToggleRenderLayer(RENDER_BUILDINGS_LAYER);
         DisableRenderLayer(RENDER_MIXED_LAYER, renderMixedLayer);
+
+        FindVisibleIslands();
+    }
+    if (ImGui::Checkbox("Render Figures Layer", &renderFiguresLayer))
+    {
+        ToggleRenderLayer(RENDER_FIGURES_LAYER);
 
         FindVisibleIslands();
     }

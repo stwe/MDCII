@@ -123,11 +123,6 @@ namespace mdcii::world
          */
         ClimateZone climateZone{ ClimateZone::NORTH };
 
-        /**
-         * @brief The FiguresLayer object.
-         */
-        std::unique_ptr<layer::FiguresLayer> figuresLayer;
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -171,6 +166,20 @@ namespace mdcii::world
          */
         [[nodiscard]] const layer::TerrainLayer* GetTerrainLayer(layer::LayerType t_layerType) const;
 
+        /**
+         * @brief Getter function to retrieve a pointer to the figures layer.
+         *
+         * @return A pointer to the island figures layer.
+         */
+        [[nodiscard]] layer::FiguresLayer* GetFiguresLayer();
+
+        /**
+         * @brief Const getter function to retrieve a constant pointer to the figures layer.
+         *
+         * @return A constant pointer to the island figures layer.
+         */
+        [[nodiscard]] const layer::FiguresLayer* GetFiguresLayer() const;
+
         //-------------------------------------------------
         // Position
         //-------------------------------------------------
@@ -210,6 +219,11 @@ namespace mdcii::world
          * @brief The island terrain tile layers (COAST, TERRAIN, BUILDINGS, MIXED).
          */
         std::unordered_map<layer::LayerType, std::unique_ptr<layer::TerrainLayer>, EnumClassHash> m_terrainLayers;
+
+        /**
+         * @brief The island figures layer.
+         */
+        std::unique_ptr<layer::FiguresLayer> m_figuresLayer;
 
         //-------------------------------------------------
         // Set layer data from Json
