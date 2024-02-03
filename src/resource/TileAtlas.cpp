@@ -51,7 +51,12 @@ mdcii::resource::TileAtlas::~TileAtlas() noexcept
 // Logic
 //-------------------------------------------------
 
-void mdcii::resource::TileAtlas::Render(const int t_startX, const int t_startY, const world::tile::TerrainTile* t_tile, const olc::Pixel& t_tint) const
+void mdcii::resource::TileAtlas::Render(
+    const int t_startX,
+    const int t_startY,
+    const world::tile::TerrainTile* t_tile,
+    const olc::Pixel& t_tint
+) const
 {
     const auto zoomInt{ magic_enum::enum_integer(m_world->camera->zoom) };
     const auto gfx{ GetGfxForCurrentRotation(t_tile) };

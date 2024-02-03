@@ -32,6 +32,7 @@
 #include "renderer/Renderer.h"
 #include "camera/Camera.h"
 #include "world/layer/TerrainLayer.h"
+#include "world/layer/FiguresLayer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -361,6 +362,11 @@ void mdcii::world::World::FindVisibleIslands()
 
     for (const auto& island : islands)
     {
+        if (HasRenderLayerOption(RenderLayer::RENDER_FIGURES_LAYER))
+        {
+            CheckLayer(island.get(), layer::LayerType::FIGURES);
+        }
+
         if (HasRenderLayerOption(RenderLayer::RENDER_MIXED_LAYER))
         {
             CheckLayer(island.get(), layer::LayerType::MIXED);
@@ -412,16 +418,30 @@ void mdcii::world::World::FindVisibleIslands()
 
 void mdcii::world::World::CheckLayer(Island* t_island, const layer::LayerType t_layerType) const
 {
-    std::vector<tile::TerrainTile>().swap(t_island->GetTerrainLayer(t_layerType)->currentTiles);
-
-    t_island->GetTerrainLayer(t_layerType)->currentTiles = t_island->GetTerrainLayer(t_layerType)->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
-
-    auto [begin, end]{ std::ranges::remove_if(t_island->GetTerrainLayer(t_layerType)->currentTiles, [&](const tile::TerrainTile& t_tile)
+    if (t_layerType == layer::LayerType::FIGURES)
     {
-        return IsWorldPositionOutsideScreen(t_tile.posX + t_island->startX, t_tile.posY + t_island->startY);
-    }) };
+        std::vector<tile::FigureTile>().swap(t_island->GetFiguresLayer()->currentTiles);
+        t_island->GetFiguresLayer()->currentTiles = t_island->GetFiguresLayer()->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
 
-    t_island->GetTerrainLayer(t_layerType)->currentTiles.erase(begin, end);
+        auto [begin, end]{ std::ranges::remove_if(t_island->GetFiguresLayer()->currentTiles,
+                                                  [&](const tile::FigureTile& t_tile) {
+                                                      return IsWorldPositionOutsideScreen(t_tile.posX + t_island->startX, t_tile.posY + t_island->startY);
+                                                  } )};
+
+        t_island->GetFiguresLayer()->currentTiles.erase(begin, end);
+    }
+    else
+    {
+        std::vector<tile::TerrainTile>().swap(t_island->GetTerrainLayer(t_layerType)->currentTiles);
+        t_island->GetTerrainLayer(t_layerType)->currentTiles = t_island->GetTerrainLayer(t_layerType)->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
+
+        auto [begin, end]{ std::ranges::remove_if(t_island->GetTerrainLayer(t_layerType)->currentTiles,
+                                                 [&](const tile::TerrainTile& t_tile) {
+                                                     return IsWorldPositionOutsideScreen(t_tile.posX + t_island->startX, t_tile.posY + t_island->startY);
+                                                 } )};
+
+        t_island->GetTerrainLayer(t_layerType)->currentTiles.erase(begin, end);
+    }
 }
 
 void mdcii::world::World::FindVisibleDeepWaterTiles() const

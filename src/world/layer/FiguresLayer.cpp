@@ -73,8 +73,7 @@ void mdcii::world::layer::FiguresLayer::InitLayerTiles()
         }
     }
 
-    // todo
-    //SortTilesForRendering();
+    SortTilesForRendering();
 
     MDCII_LOG_DEBUG("[FiguresLayer::InitLayerTiles()] The figures layer tiles were initialized successfully.");
 }
@@ -126,4 +125,38 @@ mdcii::world::tile::FigureTile mdcii::world::layer::FiguresLayer::CreateLayerTil
     }
 
     return tile;
+}
+
+//-------------------------------------------------
+// Sort
+//-------------------------------------------------
+
+void mdcii::world::layer::FiguresLayer::SortTilesForRendering()
+{
+    MDCII_LOG_DEBUG("[FiguresLayer::SortTilesForRendering()] Sort figures tiles for rendering.");
+
+    for (const auto rotation : magic_enum::enum_values<Rotation>())
+    {
+        const auto rotationInt{ magic_enum::enum_integer(rotation) };
+
+        // sort tiles by index
+        std::ranges::sort(tiles, [&](const tile::FigureTile& t_a, const tile::FigureTile& t_b)
+        {
+            return t_a.renderIndices[rotationInt] < t_b.renderIndices[rotationInt];
+        });
+
+        // copy sorted tiles
+        sortedTiles.at(rotationInt) = tiles;
+
+        // the render-index can be negative; saves where the new index (i) can be found in sortedTiles
+        auto i{ 0 };
+        for (const auto& t : sortedTiles.at(rotationInt))
+        {
+            sortedIndices.at(rotationInt).emplace(t.renderIndices.at(rotationInt), i);
+            i++;
+        }
+    }
+
+    // revert tiles sorting = sortedTiles DEG0
+    tiles = sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0));
 }

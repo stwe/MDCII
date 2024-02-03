@@ -185,7 +185,7 @@ void mdcii::world::layer::TerrainLayer::AddBuilding(std::vector<tile::TerrainTil
 
 void mdcii::world::layer::TerrainLayer::SortTilesForRendering()
 {
-    MDCII_LOG_DEBUG("[TerrainLayer::SortTilesForRendering()] Sort tiles for rendering.");
+    MDCII_LOG_DEBUG("[TerrainLayer::SortTilesForRendering()] Sort terrain tiles for rendering.");
 
     for (const auto rotation : magic_enum::enum_values<Rotation>())
     {

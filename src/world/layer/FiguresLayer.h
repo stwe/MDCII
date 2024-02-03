@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Layer.h"
+#include "world/Rotation.h"
 #include "world/tile/FigureTile.h"
 
 namespace mdcii::world::layer
@@ -43,6 +44,21 @@ namespace mdcii::world::layer
          * @brief A vector holding all tiles belonging to this layer.
          */
         std::vector<tile::FigureTile> tiles;
+
+        /**
+         * @brief Contains the tiles for each rotation in the correct order for rendering.
+         */
+        std::array<std::vector<tile::FigureTile>, magic_enum::enum_count<Rotation>()> sortedTiles;
+
+        /**
+         * @brief To get the correct position of a tile in `sortedTiles` from rotation and render index.
+         */
+        std::array<std::map<int, int>, magic_enum::enum_count<Rotation>()> sortedIndices;
+
+        /**
+         * @brief The tiles that are currently being rendered.
+         */
+        std::vector<tile::FigureTile> currentTiles;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -78,6 +94,17 @@ namespace mdcii::world::layer
         //-------------------------------------------------
 
         tile::FigureTile CreateLayerTile(const nlohmann::json& t_json);
+
+        //-------------------------------------------------
+        // Sort
+        //-------------------------------------------------
+
+        /**
+         * @brief Sorts the tiles for correct rendering order.
+         *
+         * The sorted tiles are stored in `sortedTiles`.
+         */
+        void SortTilesForRendering();
 
     protected:
 

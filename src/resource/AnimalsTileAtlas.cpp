@@ -85,8 +85,7 @@ void mdcii::resource::AnimalsTileAtlas::Render(
 
 void mdcii::resource::AnimalsTileAtlas::RenderIsland(world::Island* t_island) const
 {
-    // todo: ->currentTiles
-    for (auto& tile : t_island->GetFiguresLayer()->tiles)
+    for (auto& tile : t_island->GetFiguresLayer()->currentTiles)
     {
         if (tile.HasFigure())
         {
