@@ -30,11 +30,6 @@ namespace mdcii::world
      * @brief Forward declaration class World.
      */
     class World;
-
-    /**
-     * @brief Forward declaration class Island.
-     */
-    class Island;
 }
 
 namespace mdcii::world::tile
@@ -43,14 +38,6 @@ namespace mdcii::world::tile
      * @brief Forward declaration struct TerrainTile.
      */
     struct TerrainTile;
-}
-
-namespace mdcii::world::layer
-{
-    /**
-     * @brief Forward declaration enum class LayerType.
-     */
-    enum class LayerType;
 }
 
 namespace mdcii::resource
@@ -65,6 +52,15 @@ namespace mdcii::resource
     class TileAtlas : public BshTileAtlas
     {
     public:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * @brief When one of the five timers expires, the respective frame is counted up.
+         */
+        inline static std::array frame_values{ 0, 0, 0, 0, 0 };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -89,11 +85,8 @@ namespace mdcii::resource
         // Logic
         //-------------------------------------------------
 
-        void Render(int t_startX, int t_startY, const world::tile::TerrainTile* t_tile, const olc::Pixel& t_tint) const;
+        void RenderTile(int t_startX, int t_startY, const world::tile::TerrainTile* t_tile, const olc::Pixel& t_tint) const;
         static void CalcAnimationFrame(float t_elapsedTime);
-        void RenderIsland(world::Island* t_island, world::layer::LayerType t_layerType, bool t_renderGrid) const;
-        void RenderIslands(bool t_renderGrid) const;
-        void RenderDeepWater(bool t_renderGrid) const;
 
     protected:
 
@@ -157,11 +150,6 @@ namespace mdcii::resource
          * So after 90, 130, 150, 180, 220 milliseconds the next frame from the animation is used.
          */
         inline static std::array m_timer_values{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-
-        /**
-         * @brief When one of the five timers expires, the respective frame is counted up.
-         */
-        inline static std::array m_frame_values{ 0, 0, 0, 0, 0 };
 
         //-------------------------------------------------
         // Helper

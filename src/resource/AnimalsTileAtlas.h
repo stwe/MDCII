@@ -30,11 +30,6 @@ namespace mdcii::world
      * @brief Forward declaration class World.
      */
     class World;
-
-    /**
-     * @brief Forward declaration class Island.
-     */
-    class Island;
 }
 
 namespace mdcii::world::tile
@@ -57,6 +52,15 @@ namespace mdcii::resource
     class AnimalsTileAtlas : public BshTileAtlas
     {
     public:
+        //-------------------------------------------------
+        // Member
+        //-------------------------------------------------
+
+        /**
+         * @brief When one of the timers expires, the respective frame is counted up.
+         */
+        inline static std::array frame_values{ 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
@@ -81,10 +85,8 @@ namespace mdcii::resource
         // Logic
         //-------------------------------------------------
 
-        void Render(int t_startX, int t_startY, const world::tile::FigureTile* t_tile, const olc::Pixel& t_tint) const;
+        void RenderTile(int t_startX, int t_startY, const world::tile::FigureTile* t_tile, const olc::Pixel& t_tint) const;
         static void CalcAnimationFrame(float t_elapsedTime);
-        void RenderIsland(world::Island* t_island) const;
-        void RenderIslands() const;
 
     protected:
 
@@ -138,11 +140,6 @@ namespace mdcii::resource
          * So after 75, 110, 130, 135, 195, 300, 500, 750 and 1000 milliseconds the next frame from the animation is used.
          */
         inline static std::array m_timer_values{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-
-        /**
-         * @brief When one of the timers expires, the respective frame is counted up.
-         */
-        inline static std::array m_frame_values{ 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
         //-------------------------------------------------
         // Helper

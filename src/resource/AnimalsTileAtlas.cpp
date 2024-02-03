@@ -20,7 +20,6 @@
 #include "Game.h"
 #include "MdciiAssert.h"
 #include "world/World.h"
-#include "world/Island.h"
 #include "world/layer/FiguresLayer.h"
 #include "state/State.h"
 #include "camera/Camera.h"
@@ -48,7 +47,7 @@ mdcii::resource::AnimalsTileAtlas::~AnimalsTileAtlas() noexcept
 // Logic
 //-------------------------------------------------
 
-void mdcii::resource::AnimalsTileAtlas::Render(
+void mdcii::resource::AnimalsTileAtlas::RenderTile(
     const int t_startX,
     const int t_startY,
     const world::tile::FigureTile* t_tile,
@@ -83,29 +82,6 @@ void mdcii::resource::AnimalsTileAtlas::Render(
     );
 }
 
-void mdcii::resource::AnimalsTileAtlas::RenderIsland(world::Island* t_island) const
-{
-    for (auto& tile : t_island->GetFiguresLayer()->currentTiles)
-    {
-        if (tile.HasFigure())
-        {
-            tile.UpdateFrame(m_frame_values);
-            Render(t_island->startX, t_island->startY, &tile, olc::WHITE);
-        }
-    }
-}
-
-void mdcii::resource::AnimalsTileAtlas::RenderIslands() const
-{
-    for (auto const& island : m_world->currentIslands)
-    {
-        if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_FIGURES_LAYER))
-        {
-            RenderIsland(island);
-        }
-    }
-}
-
 void mdcii::resource::AnimalsTileAtlas::CalcAnimationFrame(const float t_elapsedTime)
 {
     for (auto& timer : m_timer_values)
@@ -115,65 +91,65 @@ void mdcii::resource::AnimalsTileAtlas::CalcAnimationFrame(const float t_elapsed
 
     if (m_timer_values[0] >= 0.075f)
     {
-        m_frame_values[0] = ++m_frame_values[0];
+        frame_values[0] = ++frame_values[0];
         m_timer_values[0] = 0.0f;
-        m_frame_values[0] %= MAX_FRAME_VALUE + 1;
+        frame_values[0] %= MAX_FRAME_VALUE + 1;
     }
 
     if (m_timer_values[1] >= 0.11f)
     {
-        m_frame_values[1] = ++m_frame_values[1];
+        frame_values[1] = ++frame_values[1];
         m_timer_values[1] = 0.0f;
-        m_frame_values[1] %= MAX_FRAME_VALUE + 1;
+        frame_values[1] %= MAX_FRAME_VALUE + 1;
     }
 
     if (m_timer_values[2] >= 0.13f)
     {
-        m_frame_values[2] = ++m_frame_values[2];
+        frame_values[2] = ++frame_values[2];
         m_timer_values[2] = 0.0f;
-        m_frame_values[2] %= MAX_FRAME_VALUE + 1;
+        frame_values[2] %= MAX_FRAME_VALUE + 1;
     }
 
     if (m_timer_values[3] >= 0.135f)
     {
-        m_frame_values[3] = ++m_frame_values[3];
+        frame_values[3] = ++frame_values[3];
         m_timer_values[3] = 0.0f;
-        m_frame_values[3] %= MAX_FRAME_VALUE + 1;
+        frame_values[3] %= MAX_FRAME_VALUE + 1;
     }
 
     if (m_timer_values[4] >= 0.195f)
     {
-        m_frame_values[4] = ++m_frame_values[4];
+        frame_values[4] = ++frame_values[4];
         m_timer_values[4] = 0.0f;
-        m_frame_values[4] %= MAX_FRAME_VALUE + 1;
+        frame_values[4] %= MAX_FRAME_VALUE + 1;
     }
 
     if (m_timer_values[5] >= 0.3f)
     {
-        m_frame_values[5] = ++m_frame_values[5];
+        frame_values[5] = ++frame_values[5];
         m_timer_values[5] = 0.0f;
-        m_frame_values[5] %= MAX_FRAME_VALUE + 1;
+        frame_values[5] %= MAX_FRAME_VALUE + 1;
     }
 
     if (m_timer_values[6] >= 0.5f)
     {
-        m_frame_values[6] = ++m_frame_values[6];
+        frame_values[6] = ++frame_values[6];
         m_timer_values[6] = 0.0f;
-        m_frame_values[6] %= MAX_FRAME_VALUE + 1;
+        frame_values[6] %= MAX_FRAME_VALUE + 1;
     }
 
     if (m_timer_values[7] >= 0.75f)
     {
-        m_frame_values[7] = ++m_frame_values[7];
+        frame_values[7] = ++frame_values[7];
         m_timer_values[7] = 0.0f;
-        m_frame_values[7] %= MAX_FRAME_VALUE + 1;
+        frame_values[7] %= MAX_FRAME_VALUE + 1;
     }
 
     if (m_timer_values[8] >= 1.0f)
     {
-        m_frame_values[8] = ++m_frame_values[8];
+        frame_values[8] = ++frame_values[8];
         m_timer_values[8] = 0.0f;
-        m_frame_values[8] %= MAX_FRAME_VALUE + 1;
+        frame_values[8] %= MAX_FRAME_VALUE + 1;
     }
 }
 

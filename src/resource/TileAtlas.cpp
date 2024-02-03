@@ -20,14 +20,10 @@
 #include "MdciiAssert.h"
 #include "Game.h"
 #include "world/World.h"
-#include "world/Island.h"
-#include "world/DeepWater.h"
 #include "world/layer/TerrainLayer.h"
 #include "camera/Camera.h"
 #include "state/State.h"
 #include "resource/Buildings.h"
-#include "resource/AssetManager.h"
-#include "renderer/Renderer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -51,7 +47,7 @@ mdcii::resource::TileAtlas::~TileAtlas() noexcept
 // Logic
 //-------------------------------------------------
 
-void mdcii::resource::TileAtlas::Render(
+void mdcii::resource::TileAtlas::RenderTile(
     const int t_startX,
     const int t_startY,
     const world::tile::TerrainTile* t_tile,
@@ -90,95 +86,37 @@ void mdcii::resource::TileAtlas::CalcAnimationFrame(const float t_elapsedTime)
 
     if (m_timer_values[0] >= 0.09f)
     {
-        m_frame_values[0] = ++m_frame_values[0];
+        frame_values[0] = ++frame_values[0];
         m_timer_values[0] = 0.0f;
-        m_frame_values[0] %= MAX_FRAME_VALUE + 1;
+        frame_values[0] %= MAX_FRAME_VALUE + 1;
     }
 
     if (m_timer_values[1] >= 0.13f)
     {
-        m_frame_values[1] = ++m_frame_values[1];
+        frame_values[1] = ++frame_values[1];
         m_timer_values[1] = 0.0f;
-        m_frame_values[1] %= MAX_FRAME_VALUE + 1;
+        frame_values[1] %= MAX_FRAME_VALUE + 1;
     }
 
     if (m_timer_values[2] >= 0.15f)
     {
-        m_frame_values[2] = ++m_frame_values[2];
+        frame_values[2] = ++frame_values[2];
         m_timer_values[2] = 0.0f;
-        m_frame_values[2] %= MAX_FRAME_VALUE + 1;
+        frame_values[2] %= MAX_FRAME_VALUE + 1;
     }
 
     if (m_timer_values[3] >= 0.18f)
     {
-        m_frame_values[3] = ++m_frame_values[3];
+        frame_values[3] = ++frame_values[3];
         m_timer_values[3] = 0.0f;
-        m_frame_values[3] %= MAX_FRAME_VALUE + 1;
+        frame_values[3] %= MAX_FRAME_VALUE + 1;
     }
 
     if (m_timer_values[4] >= 0.22f)
     {
-        m_frame_values[4] = ++m_frame_values[4];
+        frame_values[4] = ++frame_values[4];
         m_timer_values[4] = 0.0f;
-        m_frame_values[4] %= MAX_FRAME_VALUE + 1;
-    }
-}
-
-void mdcii::resource::TileAtlas::RenderIsland(world::Island* t_island, const world::layer::LayerType t_layerType, const bool t_renderGrid) const
-{
-    for (auto& tile : t_island->GetTerrainLayer(t_layerType)->currentTiles)
-    {
-        if (tile.HasBuilding())
-        {
-            tile.UpdateFrame(m_frame_values);
-            Render(t_island->startX, t_island->startY, &tile, olc::WHITE);
-            if (t_renderGrid)
-            {
-                renderer::Renderer::RenderAsset(Asset::GREEN_ISO, t_island->startX, t_island->startY, m_world, &tile, true);
-            }
-        }
-    }
-}
-
-void mdcii::resource::TileAtlas::RenderIslands(const bool t_renderGrid) const
-{
-    for (auto const& island : m_world->currentIslands)
-    {
-        if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_MIXED_LAYER))
-        {
-            RenderIsland(island, world::layer::LayerType::MIXED, t_renderGrid);
-        }
-        else
-        {
-            if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_COAST_LAYER))
-            {
-                RenderIsland(island, world::layer::LayerType::COAST, false);
-            }
-            if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_TERRAIN_LAYER))
-            {
-                RenderIsland(island, world::layer::LayerType::TERRAIN, t_renderGrid);
-            }
-            if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_BUILDINGS_LAYER))
-            {
-                RenderIsland(island, world::layer::LayerType::BUILDINGS, t_renderGrid);
-            }
-        }
-    }
-}
-
-void mdcii::resource::TileAtlas::RenderDeepWater(const bool t_renderGrid) const
-{
-    if (m_world->HasRenderLayerOption(world::RenderLayer::RENDER_DEEP_WATER_LAYER))
-    {
-        for (auto& tile : m_world->deepWater->layer->currentTiles)
-        {
-            tile.UpdateFrame(m_frame_values);
-            Render(0, 0, &tile, olc::WHITE);
-            if (t_renderGrid)
-            {
-                renderer::Renderer::RenderAsset(Asset::BLUE_ISO, 0, 0, m_world, &tile, false);
-            }
-        }
+        frame_values[4] %= MAX_FRAME_VALUE + 1;
     }
 }
 
