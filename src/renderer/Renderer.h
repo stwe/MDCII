@@ -30,6 +30,11 @@ namespace mdcii::world
      * @brief Forward declaration class World.
      */
     class World;
+
+    /**
+     * @brief Forward declaration class Island.
+     */
+    class Island;
 }
 
 namespace mdcii::world::tile
@@ -38,6 +43,14 @@ namespace mdcii::world::tile
      * @brief Forward declaration struct TerrainTile.
      */
     struct TerrainTile;
+}
+
+namespace mdcii::world::layer
+{
+    /**
+     * @brief Forward declaration enum class LayerType.
+     */
+    enum class LayerType;
 }
 
 namespace mdcii::resource
@@ -54,8 +67,6 @@ namespace mdcii::renderer
     // Renderer
     //-------------------------------------------------
 
-    // todo: -> AssetManager
-
     /**
      * @brief Represents a Renderer.
      */
@@ -66,6 +77,17 @@ namespace mdcii::renderer
         // Logic
         //-------------------------------------------------
 
+        /**
+         * @brief Renders a specific asset on the screen.
+         *
+         * @param t_asset The asset to render.
+         * @param t_startX The x offset.
+         * @param t_startY The y offset.
+         * @param t_world Pointer to the World object.
+         * @param t_tile Pointer to the TerrainTile object associated with the asset.
+         * @param t_minusElevation Indicates whether to adjust for elevation.
+         * @param t_tint Color tint for the asset (default is white).
+         */
         static void RenderAsset(
             resource::Asset t_asset,
             int t_startX,
@@ -75,6 +97,31 @@ namespace mdcii::renderer
             bool t_minusElevation,
             const olc::Pixel& t_tint = olc::WHITE
         );
+
+        /**
+         * @brief Renders an island based on the specified layer type.
+         *
+         * @param t_world Pointer to the World object.
+         * @param t_island Pointer to the Island object to be rendered.
+         * @param t_layerType The type of layer to render.
+         */
+        static void RenderIsland(const world::World* t_world, world::Island* t_island, world::layer::LayerType t_layerType);
+
+        /**
+         * @brief Renders various parts of the world, such as deep water and islands.
+         *
+         * @param t_world Pointer to the World object.
+         * @param t_elapsedTime The elapsed time for animations.
+         */
+        static void RenderWorldParts(const world::World* t_world, float t_elapsedTime);
+
+        /**
+         * @brief Renders the entire world, including deep water, islands and figures.
+         *
+         * @param t_world Pointer to the World object.
+         * @param t_elapsedTime The elapsed time for animations.
+         */
+        static void RenderWorld(const world::World* t_world, float t_elapsedTime);
 
     protected:
 
