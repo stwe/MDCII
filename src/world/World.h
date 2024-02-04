@@ -93,7 +93,8 @@ namespace mdcii::world
         RENDER_BUILDINGS_LAYER = 4,
         RENDER_FIGURES_LAYER = 8,
         RENDER_MIXED_LAYER = 16,
-        RENDER_DEEP_WATER_LAYER = 32
+        RENDER_DEEP_WATER_LAYER = 32,
+        RENDER_ALL = 64
     };
 
     //-------------------------------------------------
@@ -151,9 +152,29 @@ namespace mdcii::world
         std::unique_ptr<world::MousePicker> mousePicker;
 
         /**
+         * @brief Pointer to the TileAtlas object.
+         */
+        std::unique_ptr<resource::TileAtlas> tileAtlas;
+
+        /**
+         * @brief Pointer to the AnimalsTileAtlas object.
+         */
+        std::unique_ptr<resource::AnimalsTileAtlas> animalsTileAtlas;
+
+        /**
+         * @brief Renders a grid on the deep water.
+         */
+        bool renderDeepWaterGrid{ false };
+
+        /**
+         * @brief Renders a grid on all the islands terrain.
+         */
+        bool renderIslandsGrid{ false };
+
+        /**
          * @brief Representing the currently selected layers for rendering in the game world.
          */
-        int renderLayer{ RENDER_FIGURES_LAYER | RENDER_MIXED_LAYER | RENDER_DEEP_WATER_LAYER };
+        int renderLayer{ RENDER_ALL };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -264,26 +285,6 @@ namespace mdcii::world
          * @brief Initial access flag.
          */
         bool m_flag{ true };
-
-        /**
-         * @brief Renders a grid on the deep water.
-         */
-        bool m_renderDeepWaterGrid{ false };
-
-        /**
-         * @brief Renders a grid on all the islands terrain.
-         */
-        bool m_renderIslandsGrid{ false };
-
-        /**
-         * @brief Pointer to the TileAtlas object.
-         */
-        std::unique_ptr<resource::TileAtlas> m_tileAtlas;
-
-        /**
-         * @brief Pointer to the AnimalsTileAtlas object.
-         */
-        std::unique_ptr<resource::AnimalsTileAtlas> m_animalsTileAtlas;
 
         //-------------------------------------------------
         // Init
