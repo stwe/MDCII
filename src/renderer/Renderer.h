@@ -99,15 +99,6 @@ namespace mdcii::renderer
         );
 
         /**
-         * @brief Renders an island based on the specified layer type.
-         *
-         * @param t_world Pointer to the World object.
-         * @param t_island Pointer to the Island object to be rendered.
-         * @param t_layerType The type of layer to render.
-         */
-        static void RenderIsland(const world::World* t_world, world::Island* t_island, world::layer::LayerType t_layerType);
-
-        /**
          * @brief Renders various parts of the world, such as deep water and islands.
          *
          * @param t_world Pointer to the World object.
@@ -126,6 +117,21 @@ namespace mdcii::renderer
     protected:
 
     private:
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
 
+        /**
+         * @brief Renders an island based on the specified layer type.
+         *
+         * @param t_world Pointer to the World object.
+         * @param t_island Pointer to the Island object to be rendered.
+         * @param t_layerType The type of layer to render.
+         */
+        static void RenderIsland(const world::World* t_world, world::Island* t_island, world::layer::LayerType t_layerType);
+        static void UpdateAnimations(const world::World* t_world, float t_elapsedTime);
+        static void RenderDeepWater(const world::World* t_world);
+        static void RenderFigureOnTopOfTerrainTile(const world::World* t_world, world::Island* t_island, const world::tile::TerrainTile* t_terrainTile);
+        static void RenderTerrainTile(const world::World* t_world, const world::Island* t_island, world::tile::TerrainTile* t_terrainTile);
     };
 }
