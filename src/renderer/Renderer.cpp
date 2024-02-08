@@ -157,11 +157,6 @@ void mdcii::renderer::Renderer::RenderFigureOnTopOfTerrainTile(
     const world::tile::TerrainTile* t_terrainTile
 )
 {
-    if (!t_island->GetFiguresLayer())
-    {
-        return;
-    }
-
     const auto rotationInt{ magic_enum::enum_integer(t_world->camera->rotation) };
 
     const auto terrainIdx{ t_island->GetTerrainLayer(world::layer::LayerType::TERRAIN)->sortedIndices.at(rotationInt).at(world::tile::Tile::GetRenderIndex(
@@ -174,11 +169,7 @@ void mdcii::renderer::Renderer::RenderFigureOnTopOfTerrainTile(
     };
 
     auto &figureTile{ t_island->GetFiguresLayer()->sortedTiles.at(rotationInt).at(terrainIdx) };
-    if (figureTile.HasFigure())
-    {
-        figureTile.UpdateFrame(t_world->animalsTileAtlas->frame_values);
-        t_world->animalsTileAtlas->RenderTile(t_island->startX, t_island->startY, &figureTile, olc::WHITE);
-    }
+    RenderFigureTile(t_world, t_island, &figureTile);
 }
 
 void mdcii::renderer::Renderer::RenderTerrainTile(
@@ -195,5 +186,18 @@ void mdcii::renderer::Renderer::RenderTerrainTile(
         {
             RenderAsset(resource::Asset::GREEN_ISO, t_island->startX, t_island->startY, t_world, t_terrainTile, true);
         }
+    }
+}
+
+void mdcii::renderer::Renderer::RenderFigureTile(
+    const world::World* t_world,
+    const world::Island* t_island,
+    world::tile::FigureTile* t_figureTile
+)
+{
+    if (t_figureTile->HasFigure())
+    {
+        t_figureTile->UpdateFrame(t_world->animalsTileAtlas->frame_values);
+        t_world->animalsTileAtlas->RenderTile(t_island->startX, t_island->startY, t_figureTile, olc::WHITE);
     }
 }

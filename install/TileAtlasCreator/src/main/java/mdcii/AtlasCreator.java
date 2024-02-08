@@ -102,7 +102,8 @@ public class AtlasCreator {
                 Paths.get(CreatorConfig.ROOT_PATH + "/SGFX/Tiere.bsh"),
                 paletteFile.getPalette(),
                 BshFile.Zoom.SGFX,
-                CreatorConfig.CREATE_PNGS
+                CreatorConfig.CREATE_PNGS,
+                true
         );
         var bshTextures = bshFile.getBshTextures();
         var atlasImages = new ArrayList<BufferedImage>();
@@ -162,7 +163,8 @@ public class AtlasCreator {
                 Paths.get(CreatorConfig.ROOT_PATH + "/MGFX/TIERE.BSH"),
                 paletteFile.getPalette(),
                 BshFile.Zoom.MGFX,
-                CreatorConfig.CREATE_PNGS
+                CreatorConfig.CREATE_PNGS,
+                true
         );
         var bshTextures = bshFile.getBshTextures();
         var atlasImages = new ArrayList<BufferedImage>();
@@ -222,7 +224,8 @@ public class AtlasCreator {
                 Paths.get(CreatorConfig.ROOT_PATH + "/GFX/TIERE.BSH"),
                 paletteFile.getPalette(),
                 BshFile.Zoom.GFX,
-                CreatorConfig.CREATE_PNGS
+                CreatorConfig.CREATE_PNGS,
+                true
         );
         var bshTextures = bshFile.getBshTextures();
         var atlasImages = new ArrayList<BufferedImage>();
@@ -291,7 +294,8 @@ public class AtlasCreator {
                 Paths.get(CreatorConfig.ROOT_PATH + "/SGFX/Stadtfld.bsh"),
                 paletteFile.getPalette(),
                 BshFile.Zoom.SGFX,
-                CreatorConfig.CREATE_PNGS
+                CreatorConfig.CREATE_PNGS,
+                false
         );
         var bshTextures = bshFile.getBshTextures();
         var atlasImages = new ArrayList<BufferedImage>();
@@ -356,7 +360,8 @@ public class AtlasCreator {
                 Paths.get(CreatorConfig.ROOT_PATH + "/MGFX/Stadtfld.bsh"),
                 paletteFile.getPalette(),
                 BshFile.Zoom.MGFX,
-                CreatorConfig.CREATE_PNGS
+                CreatorConfig.CREATE_PNGS,
+                false
         );
         var bshTextures = bshFile.getBshTextures();
         var atlasImages = new ArrayList<BufferedImage>();
@@ -421,7 +426,8 @@ public class AtlasCreator {
                 Paths.get(CreatorConfig.ROOT_PATH + "/GFX/STADTFLD.BSH"),
                 paletteFile.getPalette(),
                 BshFile.Zoom.GFX,
-                CreatorConfig.CREATE_PNGS
+                CreatorConfig.CREATE_PNGS,
+                false
         );
         var bshTextures = bshFile.getBshTextures();
         var atlasImages = new ArrayList<BufferedImage>();

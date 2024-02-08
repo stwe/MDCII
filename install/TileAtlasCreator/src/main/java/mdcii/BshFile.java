@@ -197,6 +197,11 @@ public class BshFile extends BinaryFile {
     private final boolean saveAsPng;
 
     /**
+     * Prevents transparent lines at the top of each image.
+     */
+    private final boolean moveUp;
+
+    /**
      * The offsets to the Bsh images.
      */
     private final ArrayList<Integer> offsets = new ArrayList<>();
@@ -243,9 +248,10 @@ public class BshFile extends BinaryFile {
      * @param palette The color values from the <i>stadtfld.col</i> file.
      * @param zoom The {@link Zoom} of the (zoomable) Bsh file.
      * @param saveAsPng If the variable is true, all images are saved as a Png.
+     * @param moveUp Prevents transparent lines at the top of each image.
      * @throws IOException If an I/O error is thrown.
      */
-    public BshFile(Path path, int[] palette, Zoom zoom, boolean saveAsPng) throws IOException {
+    public BshFile(Path path, int[] palette, Zoom zoom, boolean saveAsPng, boolean moveUp) throws IOException {
         super(Objects.requireNonNull(path, "path must not be null"));
 
         LOGGER.debug("Creates BshFile object from file {}.", path);
@@ -253,6 +259,7 @@ public class BshFile extends BinaryFile {
         this.zoom = zoom;
         this.palette = Objects.requireNonNull(palette, "palette must not be null");
         this.saveAsPng = saveAsPng;
+        this.moveUp = moveUp;
 
         if (getNumberOfChunks() != NUMBER_OF_CHUNKS) {
             throw new RuntimeException("Invalid number of Chunks.");
@@ -422,6 +429,9 @@ public class BshFile extends BinaryFile {
         int x = 0;
         int y = 0;
 
+        int firstPixelY = 0;
+        boolean setFirstPixel = false;
+
         while (true) {
             int numAlpha = chunk0.getData().getInt();
 
@@ -441,6 +451,10 @@ public class BshFile extends BinaryFile {
             }
 
             int numPixels = chunk0.getData().getInt();
+            if (numPixels > 0 && !setFirstPixel) {
+                firstPixelY = y;
+                setFirstPixel = true;
+            }
             for (int i = 0; i < numPixels; i++) {
                 var b = chunk0.getData().get();
                 var g = chunk0.getData().get();
@@ -448,8 +462,11 @@ public class BshFile extends BinaryFile {
                 var a = chunk0.getData().get();
 
                 var color = Util.rgbToInt(Util.byteToInt(r), Util.byteToInt(g), Util.byteToInt(b));
-
-                bufferedBshImage.image.setRGB(x, y, color);
+                if (moveUp) {
+                    bufferedBshImage.image.setRGB(x, y - firstPixelY, color);
+                } else {
+                    bufferedBshImage.image.setRGB(x, y, color);
+                }
                 x++;
             }
         }
@@ -469,6 +486,9 @@ public class BshFile extends BinaryFile {
     private void decodeTexture(BufferedBshImage bufferedBshImage) throws IOException {
         int x = 0;
         int y = 0;
+
+        int firstPixelY = 0;
+        boolean setFirstPixel = false;
 
         while (true) {
             int numAlpha = Util.byteToInt(chunk0.getData().get());
@@ -494,11 +514,19 @@ public class BshFile extends BinaryFile {
 
             // number of pixels that follow
             int numPixels = Util.byteToInt(chunk0.getData().get());
+            if (numPixels > 0 && !setFirstPixel) {
+                firstPixelY = y;
+                setFirstPixel = true;
+            }
             for (int i = 0; i < numPixels; i++) {
                 // pixels to insert at current position
                 var colorIndex = Util.byteToInt(chunk0.getData().get());
                 var color = palette[colorIndex];
-                bufferedBshImage.image.setRGB(x, y, color);
+                if (moveUp) {
+                    bufferedBshImage.image.setRGB(x, y - firstPixelY, color);
+                } else {
+                    bufferedBshImage.image.setRGB(x, y, color);
+                }
                 x++;
             }
         }

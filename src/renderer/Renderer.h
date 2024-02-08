@@ -43,6 +43,11 @@ namespace mdcii::world::tile
      * @brief Forward declaration struct TerrainTile.
      */
     struct TerrainTile;
+
+    /**
+     * @brief Forward declaration struct FigureTile.
+     */
+    struct FigureTile;
 }
 
 namespace mdcii::world::layer
@@ -129,9 +134,11 @@ namespace mdcii::renderer
          * @param t_layerType The type of layer to render.
          */
         static void RenderIsland(const world::World* t_world, world::Island* t_island, world::layer::LayerType t_layerType);
+
         static void UpdateAnimations(const world::World* t_world, float t_elapsedTime);
         static void RenderDeepWater(const world::World* t_world);
         static void RenderFigureOnTopOfTerrainTile(const world::World* t_world, world::Island* t_island, const world::tile::TerrainTile* t_terrainTile);
         static void RenderTerrainTile(const world::World* t_world, const world::Island* t_island, world::tile::TerrainTile* t_terrainTile);
+        static void RenderFigureTile(const world::World* t_world, const world::Island* t_island, world::tile::FigureTile* t_figureTile);
     };
 }
