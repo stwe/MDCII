@@ -82,3 +82,19 @@ void mdcii::world::tile::FigureTile::UpdateFrame(const std::array<int, NR_OF_ANI
             frame = 0;
     }
 }
+
+void mdcii::world::tile::to_json(nlohmann::json& t_json, const world::tile::FigureTile& t_tile)
+{
+    if (t_tile.HasFigure())
+    {
+        t_json = nlohmann::json{
+            { "id", t_tile.figure->id },
+            { "rotation", t_tile.rotation },
+            { "animation", t_tile.currentAnimation },
+        };
+    }
+    else
+    {
+        t_json = nlohmann::json::object();
+    }
+}

@@ -18,8 +18,8 @@
 
 #pragma once
 
-#include <array>
 #include "Tile.h"
+#include "vendor/nlohmann/json.hpp"
 
 //-------------------------------------------------
 // Forward declarations
@@ -108,4 +108,10 @@ namespace mdcii::world::tile
          */
         void UpdateFrame(const std::array<int, NR_OF_ANIM_TIMES>& t_frameValues);
     };
+
+    //-------------------------------------------------
+    // Serializing TerrainTile into Json
+    //-------------------------------------------------
+
+    void to_json(nlohmann::json& t_json, const FigureTile& t_tile);
 }

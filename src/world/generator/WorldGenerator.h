@@ -43,7 +43,10 @@ namespace mdcii::world
      * @brief Forward declaration class Island.
      */
     class Island;
+}
 
+namespace mdcii::world::generator
+{
     //-------------------------------------------------
     // WorldGenerator
     //-------------------------------------------------

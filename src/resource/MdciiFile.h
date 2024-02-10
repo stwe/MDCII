@@ -98,12 +98,16 @@ namespace mdcii::resource
          *
          * @param t_width The width of the island.
          * @param t_height The height of the island.
+         * @param t_seed Seed used for noise.
+         * @param t_frequency Frequency for noise.
+         * @param t_waterLevel Elevation values above this value are used as terrain, all others as water.
          * @param t_climateZone The climate zone of the island.
          * @param t_terrainTiles The terrain tile of the island.
          * @param t_coastTiles The coast tiles of the island.
          */
         void SetJsonFromIsland(
             int t_width, int t_height,
+            int t_seed, float t_frequency, float t_waterLevel,
             world::ClimateZone t_climateZone,
             const std::vector<world::tile::TerrainTile>& t_terrainTiles,
             const std::vector<world::tile::TerrainTile>& t_coastTiles

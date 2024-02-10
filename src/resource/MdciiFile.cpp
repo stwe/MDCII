@@ -21,6 +21,8 @@
 #include "MdciiAssert.h"
 #include "MdciiUtils.h"
 #include "Game.h"
+#include "world/tile/FigureTile.h"
+#include "world/Island.h"
 #include "vendor/enum/magic_enum.hpp"
 
 //-------------------------------------------------
@@ -65,6 +67,7 @@ bool mdcii::resource::MdciiFile::SetJsonFromFile()
 
 void mdcii::resource::MdciiFile::SetJsonFromIsland(
     const int t_width, const int t_height,
+    const int t_seed, const float t_frequency, const float t_waterLevel,
     const world::ClimateZone t_climateZone,
     const std::vector<world::tile::TerrainTile>& t_terrainTiles,
     const std::vector<world::tile::TerrainTile>& t_coastTiles
@@ -79,19 +82,46 @@ void mdcii::resource::MdciiFile::SetJsonFromIsland(
     m_json["height"] = t_height;
     m_json["x"] = -1;
     m_json["y"] = -1;
-    m_json["climate"] = std::string(magic_enum::enum_name(t_climateZone));
+
+    const auto cZone{ std::string(magic_enum::enum_name(t_climateZone)) };
+    MDCII_ASSERT(!cZone.empty(), "[MdciiFile::SetJsonFromIsland()] Invalid climate zone.")
+    m_json["climate"] = cZone;
+
+    // so we can recreate the island
+    m_json["seed"] = t_seed;
+    m_json["frequency"] = t_frequency;
+    m_json["waterlevel"] = t_waterLevel;
 
     // layers
     m_json["layers"] = nlohmann::json::array();
 
     auto c = nlohmann::json::object();
-    c["coast"] = t_terrainTiles;
+    c["coast"] = t_coastTiles;
 
     auto t = nlohmann::json::object();
-    t["terrain"] = t_coastTiles;
+    t["terrain"] = t_terrainTiles;
+
+    // create dummy building && figure tiles
+    std::vector<world::tile::TerrainTile> buildingTiles;
+    std::vector<world::tile::FigureTile> figureTiles;
+    for (auto y{ 0 }; y < t_height; ++y)
+    {
+        for (auto x{ 0 }; x < t_width; ++x)
+        {
+            buildingTiles.emplace_back();
+            figureTiles.emplace_back();
+        }
+    }
+    auto b = nlohmann::json::object();
+    b["buildings"] = buildingTiles;
+
+    auto f = nlohmann::json::object();
+    f["figures"] = figureTiles;
 
     m_json["layers"].push_back(c);
     m_json["layers"].push_back(t);
+    m_json["layers"].push_back(b);
+    m_json["layers"].push_back(f);
 }
 
 //-------------------------------------------------

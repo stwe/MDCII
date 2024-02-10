@@ -19,10 +19,10 @@
 #include "WorldGenerator.h"
 #include "Game.h"
 #include "MdciiAssert.h"
-#include "World.h"
-#include "Island.h"
 #include "MdciiUtils.h"
-#include "MousePicker.h"
+#include "world/World.h"
+#include "world/Island.h"
+#include "world/MousePicker.h"
 #include "state/State.h"
 #include "resource/MdciiResourcesManager.h"
 
@@ -30,7 +30,7 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::WorldGenerator::WorldGenerator(state::State* t_state)
+mdcii::world::generator::WorldGenerator::WorldGenerator(state::State* t_state)
     : m_state{ t_state }
 {
     MDCII_LOG_DEBUG("[WorldGenerator::WorldGenerator()] Create WorldGenerator.");
@@ -38,7 +38,7 @@ mdcii::world::WorldGenerator::WorldGenerator(state::State* t_state)
     MDCII_ASSERT(m_state, "[WorldGenerator::WorldGenerator()] Null pointer.")
 }
 
-mdcii::world::WorldGenerator::~WorldGenerator() noexcept
+mdcii::world::generator::WorldGenerator::~WorldGenerator() noexcept
 {
     MDCII_LOG_DEBUG("[WorldGenerator::~WorldGenerator()] Destruct WorldGenerator.");
 }
@@ -47,7 +47,7 @@ mdcii::world::WorldGenerator::~WorldGenerator() noexcept
 // Logic
 //-------------------------------------------------
 
-void mdcii::world::WorldGenerator::OnUserUpdate(const float t_elapsedTime)
+void mdcii::world::generator::WorldGenerator::OnUserUpdate(const float t_elapsedTime)
 {
     world->OnUserUpdate(t_elapsedTime);
 
@@ -91,7 +91,7 @@ void mdcii::world::WorldGenerator::OnUserUpdate(const float t_elapsedTime)
     SaveWorldImGui();
 }
 
-void mdcii::world::WorldGenerator::SaveWorldImGui() const
+void mdcii::world::generator::WorldGenerator::SaveWorldImGui() const
 {
     static bool error{ false };
     static bool saved{ false };

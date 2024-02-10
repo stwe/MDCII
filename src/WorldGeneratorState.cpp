@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -20,7 +20,7 @@
 #include "MdciiAssert.h"
 #include "Game.h"
 #include "world/World.h"
-#include "world/WorldGenerator.h"
+#include "world/generator/WorldGenerator.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -48,7 +48,7 @@ bool mdcii::WorldGeneratorState::OnUserCreate(void* t_data)
     auto* vi2dData{ reinterpret_cast<olc::vi2d*>(t_data) };
     MDCII_ASSERT(vi2dData, "[WorldGeneratorState::OnUserCreate()] Null pointer.")
 
-    worldGenerator = std::make_unique<world::WorldGenerator>(this);
+    worldGenerator = std::make_unique<world::generator::WorldGenerator>(this);
     worldGenerator->world = std::make_unique<world::World>(this, vi2dData->x, vi2dData->y);
 
     return true;

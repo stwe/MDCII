@@ -43,7 +43,10 @@ namespace mdcii::world
      * @brief Forward declaration enum class Rotation.
      */
     enum class Rotation;
+}
 
+namespace mdcii::world::generator
+{
     //-------------------------------------------------
     // IslandGenerator
     //-------------------------------------------------
@@ -191,15 +194,15 @@ namespace mdcii::world
 
         // Known bitmask values.
 
-        static constexpr int32_t CORNER_OUT_TL{ 383 };
-        static constexpr int32_t CORNER_OUT_TR{ 479 };
-        static constexpr int32_t CORNER_OUT_BL{ 507 };
-        static constexpr int32_t CORNER_OUT_BR{ 510 };
+        static constexpr int CORNER_OUT_TL{ 383 };
+        static constexpr int CORNER_OUT_TR{ 479 };
+        static constexpr int CORNER_OUT_BL{ 507 };
+        static constexpr int CORNER_OUT_BR{ 510 };
 
         /**
          * @brief Known embankment bitmask values.
          */
-        const std::unordered_map<int32_t, TileType> m_embankmentBitmaskTileTypes = {
+        const std::unordered_map<int, TileType> m_embankmentBitmaskTileTypes = {
             { CORNER_OUT_TL, TileType::CORNER_OUT_TL },
             { CORNER_OUT_TR, TileType::CORNER_OUT_TR },
             { CORNER_OUT_BL, TileType::CORNER_OUT_BL },
@@ -253,7 +256,7 @@ namespace mdcii::world
         /**
          * @brief Known coast bitmask values.
          */
-        const std::unordered_map<int32_t, TileType> m_coastBitmaskTileTypes = {
+        const std::unordered_map<int, TileType> m_coastBitmaskTileTypes = {
             { CORNER_OUT_TL + 256, TileType::CORNER_OUT_TL },
             { CORNER_OUT_TR + 256, TileType::CORNER_OUT_TR },
             { CORNER_OUT_BL + 256, TileType::CORNER_OUT_BL },
@@ -300,7 +303,7 @@ namespace mdcii::world
         /**
          * @brief Known shallow bitmask values.
          */
-        const std::unordered_map<int32_t, TileType> m_shallowBitmaskTileTypes = {
+        const std::unordered_map<int, TileType> m_shallowBitmaskTileTypes = {
             { CORNER_OUT_TL + 256 + 256, TileType::CORNER_OUT_TL },
             { CORNER_OUT_TR + 256 + 256, TileType::CORNER_OUT_TR },
             { CORNER_OUT_BL + 256 + 256, TileType::CORNER_OUT_BL },
@@ -310,7 +313,7 @@ namespace mdcii::world
         /**
          * @brief Known medium bitmask values.
          */
-        const std::unordered_map<int32_t, TileType> m_mediumBitmaskTileTypes = {
+        const std::unordered_map<int, TileType> m_mediumBitmaskTileTypes = {
             { CORNER_OUT_TL + 256 + 256 + 256, TileType::CORNER_OUT_TL },
             { CORNER_OUT_TR + 256 + 256 + 256, TileType::CORNER_OUT_TR },
             { CORNER_OUT_BL + 256 + 256 + 256, TileType::CORNER_OUT_BL },
@@ -345,7 +348,7 @@ namespace mdcii::world
         /**
          * @brief The tile type for bitmask values by map type.
          */
-        const std::unordered_map<MapType, std::unordered_map<int32_t, TileType>> m_bitmaskTileTypes = {
+        const std::unordered_map<MapType, std::unordered_map<int, TileType>> m_bitmaskTileTypes = {
             { MapType::EMBANKMENT, m_embankmentBitmaskTileTypes },
             { MapType::COAST, m_coastBitmaskTileTypes },
             { MapType::SHALLOW_WATER, m_shallowBitmaskTileTypes },
@@ -387,7 +390,7 @@ namespace mdcii::world
         /**
          * @brief Elevation values above this value are used as terrain, all others as water.
          */
-        inline static float m_water_level{ 0.5f };
+        inline static auto m_water_level{ 0.5f };
 
         /**
          * @brief Generate trees for an island in the south or north.
@@ -397,12 +400,22 @@ namespace mdcii::world
         /**
          * @brief The width of the island.
          */
-        inline static int32_t m_width{ 33 };
+        inline static auto m_width{ 33 };
 
         /**
          * @brief The height of the island.
          */
-        inline static int32_t m_height{ 30 };
+        inline static auto m_height{ 30 };
+
+        /**
+         * @brief Seed used for noise.
+         */
+        inline static auto m_seed{ 5990 };
+
+        /**
+         * @brief Frequency for noise.
+         */
+        inline static auto m_frequency{ 0.116f };
 
         /**
          * @brief Stores a map type for each position.
@@ -412,7 +425,7 @@ namespace mdcii::world
         /**
          * @brief Stores a bitmask value for each position.
          */
-        std::vector<int32_t> m_bitmaskValues;
+        std::vector<int> m_bitmaskValues;
 
         /**
          * @brief A helper flag that controls the rendering of ImGui menus.
@@ -433,22 +446,22 @@ namespace mdcii::world
         // Noise
         //-------------------------------------------------
 
-        void CalcMapTypes(int32_t t_seed, float t_frequency, int32_t t_width, int32_t t_height);
+        void CalcMapTypes(int t_seed, float t_frequency, int t_width, int t_height);
         void CalcBitmaskValues();
 
         //-------------------------------------------------
         // Bitmasking
         //-------------------------------------------------
 
-        [[nodiscard]] int32_t GetNorthValue(int32_t t_x, int32_t t_y) const;
-        [[nodiscard]] int32_t GetEastValue(int32_t t_x, int32_t t_y) const;
-        [[nodiscard]] int32_t GetSouthValue(int32_t t_x, int32_t t_y) const;
-        [[nodiscard]] int32_t GetWestValue(int32_t t_x, int32_t t_y) const;
+        [[nodiscard]] int GetNorthValue(int t_x, int t_y) const;
+        [[nodiscard]] int GetEastValue(int t_x, int t_y) const;
+        [[nodiscard]] int GetSouthValue(int t_x, int t_y) const;
+        [[nodiscard]] int GetWestValue(int t_x, int t_y) const;
 
-        [[nodiscard]] int32_t GetNorthWestValue(int32_t t_x, int32_t t_y) const;
-        [[nodiscard]] int32_t GetNorthEastValue(int32_t t_x, int32_t t_y) const;
-        [[nodiscard]] int32_t GetSouthWestValue(int32_t t_x, int32_t t_y) const;
-        [[nodiscard]] int32_t GetSouthEastValue(int32_t t_x, int32_t t_y) const;
+        [[nodiscard]] int GetNorthWestValue(int t_x, int t_y) const;
+        [[nodiscard]] int GetNorthEastValue(int t_x, int t_y) const;
+        [[nodiscard]] int GetSouthWestValue(int t_x, int t_y) const;
+        [[nodiscard]] int GetSouthEastValue(int t_x, int t_y) const;
 
         //-------------------------------------------------
         // ImGui
@@ -477,7 +490,7 @@ namespace mdcii::world
          * @param t_index The index within the map.
          * @param t_func A callback function run if button pressed.
          */
-        static void RenderCharButtonImGui(MapType t_mapType, std::string t_char, int32_t t_index, const std::function<void()>& t_func) ;
+        static void RenderCharButtonImGui(MapType t_mapType, std::string t_char, int t_index, const std::function<void()>& t_func) ;
 
         /**
          * @brief Menu to edit the island.
@@ -502,7 +515,7 @@ namespace mdcii::world
          *
          * @return The index.
          */
-        [[nodiscard]] static int32_t GetIndex(int32_t t_x, int32_t t_y, int32_t t_width);
+        [[nodiscard]] static int GetIndex(int t_x, int t_y, int t_width);
 
         /**
          * @brief Resets all values for a new island.
@@ -516,7 +529,7 @@ namespace mdcii::world
          *
          * @return Map type and color.
          */
-        [[nodiscard]] static MapTypeCol Bitmask2MapTypeCol(int32_t t_bitmask);
+        [[nodiscard]] static MapTypeCol Bitmask2MapTypeCol(int t_bitmask);
 
         /**
          * @brief Adds a map type (SHALLOW_WATER, COAST, EMBANKMENT) to the island.
@@ -533,7 +546,7 @@ namespace mdcii::world
          *
          * @return True or false.
          */
-        [[nodiscard]] bool IsTileTypeKnown(MapType t_mapType, int32_t t_bitmask) const;
+        [[nodiscard]] bool IsTileTypeKnown(MapType t_mapType, int t_bitmask) const;
 
         /**
          * @brief Returns the tile type for the map type and bitmask.
@@ -543,14 +556,14 @@ namespace mdcii::world
          *
          * @return The tile type.
          */
-        [[nodiscard]] TileType GetTileType(MapType t_mapType, int32_t t_bitmask) const;
+        [[nodiscard]] TileType GetTileType(MapType t_mapType, int t_bitmask) const;
 
         /**
          * @brief Updates the tile type.
          *
          * @param t_index The index within the map.
          */
-        void UpdateBySelection(int32_t t_index);
+        void UpdateBySelection(int t_index);
 
         //-------------------------------------------------
         // Tiles
@@ -580,6 +593,6 @@ namespace mdcii::world
          *
          * @return The created Tile.
          */
-        [[nodiscard]] tile::TerrainTile CreateTile(int32_t t_id, int32_t t_worldX, int32_t t_worldY, Rotation t_rotation) const;
+        [[nodiscard]] tile::TerrainTile CreateTile(int t_id, int t_worldX, int t_worldY, Rotation t_rotation) const;
     };
 }

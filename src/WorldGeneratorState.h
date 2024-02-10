@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -25,7 +25,7 @@
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::world
+namespace mdcii::world::generator
 {
     /**
      * @brief Forward declaration class WorldGenerator.
@@ -52,7 +52,7 @@ namespace mdcii
         /**
          * @brief The WorldGenerator object.
          */
-        std::unique_ptr<world::WorldGenerator> worldGenerator;
+        std::unique_ptr<world::generator::WorldGenerator> worldGenerator;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

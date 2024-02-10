@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -19,7 +19,7 @@
 #include "IslandGeneratorState.h"
 #include "Log.h"
 #include "Game.h"
-#include "world/IslandGenerator.h"
+#include "world/generator/IslandGenerator.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -44,7 +44,7 @@ bool mdcii::IslandGeneratorState::OnUserCreate(void* t_data)
 {
     MDCII_LOG_DEBUG("[IslandGeneratorState::OnUserCreate()] Init IslandGeneratorState.");
 
-    m_islandGenerator = std::make_unique<world::IslandGenerator>(game);
+    m_islandGenerator = std::make_unique<world::generator::IslandGenerator>(game);
 
     return true;
 }

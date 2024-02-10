@@ -271,7 +271,11 @@ void mdcii::world::to_json(nlohmann::json& t_json, const Island& t_island)
     auto b = nlohmann::json::object();
     b["buildings"] = t_island.GetTerrainLayer(layer::LayerType::BUILDINGS)->tiles;
 
+    auto f = nlohmann::json::object();
+    f["figures"] = t_island.GetFiguresLayer()->tiles;
+
     t_json["layers"].push_back(c);
     t_json["layers"].push_back(t);
     t_json["layers"].push_back(b);
+    t_json["layers"].push_back(f);
 }
