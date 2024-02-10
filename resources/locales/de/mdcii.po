@@ -127,3 +127,6 @@ msgstr "Spielmenü"
 
 msgid "Exit Game"
 msgstr "Spiel beenden"
+
+msgid "Save Game"
+msgstr "Spiel speichern"

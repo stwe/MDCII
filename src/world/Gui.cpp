@@ -23,6 +23,7 @@
 #include "Rotation.h"
 #include "resource/OriginalResourcesManager.h"
 #include "resource/BshFile.h"
+#include "world/World.h"
 
 mdcii::world::SelectBuilding mdcii::world::Gui::select_building{ nullptr, Rotation::DEG0 };
 
@@ -139,5 +140,29 @@ void mdcii::world::Gui::RotatableBuildingGui(const resource::Building* t_buildin
         ImGui::EndDisabled();
 
         ImGui::Separator();
+    }
+}
+
+void mdcii::world::Gui::SaveGameGui(const World* t_world)
+{
+    const auto fileName{ Game::RESOURCES_REL_PATH + Game::INI.Get<std::string>("content", "save_game_map") };
+
+    if (ImGui::Button(_("Save Game")))
+    {
+        MDCII_LOG_DEBUG("[Gui::SaveGameGui()] Start saving the game in file {}...", fileName);
+
+        nlohmann::json json;
+
+        std::ofstream file{ fileName };
+        if (!file)
+        {
+            throw MDCII_EXCEPTION("[Gui::SaveGameGui()] Error while opening file " + fileName + ".");
+        }
+
+        json = *t_world;
+
+        file << json;
+
+        MDCII_LOG_DEBUG("[Gui::SaveGameGui()] The game has been successfully saved in file {}.", fileName);
     }
 }

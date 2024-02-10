@@ -223,6 +223,8 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
 
 void mdcii::world::World::RenderImGui()
 {
+    Gui::SaveGameGui(this);
+
     mousePicker->RenderImGui();
 
     static auto renderCoastLayer{ false };

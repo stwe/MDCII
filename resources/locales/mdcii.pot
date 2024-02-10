@@ -127,3 +127,6 @@ msgstr ""
 
 msgid "Exit Game"
 msgstr ""
+
+msgid "Save Game"
+msgstr ""

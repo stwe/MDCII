@@ -45,6 +45,11 @@ namespace mdcii::world
      */
     enum class Rotation;
 
+    /**
+     * @brief Forward declaration class World.
+     */
+    class World;
+
     //-------------------------------------------------
     // SelectBuilding
     //-------------------------------------------------
@@ -94,6 +99,13 @@ namespace mdcii::world
          * @param t_building The building to be rotated.
          */
         static void RotatableBuildingGui(const resource::Building* t_building);
+
+        /**
+         * @brief Renders an ImGui menu to save the game.
+         *
+         * @param t_world Pointer to the World object.
+         */
+        static void SaveGameGui(const World* t_world);
 
     protected:
 
