@@ -117,6 +117,8 @@ void mdcii::world::Gui::RotatableBuildingGui(const resource::Building* t_buildin
         }
         ImGui::EndDisabled();
 
+        ImGui::Text("Building rotation %s", magic_enum::enum_name(select_building.rotation).data());
+
         ImGui::Separator();
     }
 }

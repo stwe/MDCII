@@ -151,8 +151,44 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                     {
                         for (auto x{ 0 }; x < Gui::select_building.building->size.w; ++x)
                         {
-                            const auto offsetX{ x * offset.x };
-                            const auto offsetY{ y * offset.y };
+                            olc::vi2d rp{ x, y };
+                            auto ro = offset;
+
+                            if (Gui::select_building.building->size.w != Gui::select_building.building->size.h)
+                            {
+                                if (camera->rotation == Rotation::DEG0 || camera->rotation == Rotation::DEG180)
+                                {
+                                    if (Gui::select_building.rotation == world::Rotation::DEG90 || Gui::select_building.rotation == world::Rotation::DEG270)
+                                    {
+                                        rp = world::rotate_position(x, y,
+                                                                    Gui::select_building.building->size.h,
+                                                                    Gui::select_building.building->size.w,
+                                                                    Rotation::DEG90);
+                                        ro = world::rotate_position(offset.x, offset.y,
+                                                                    Gui::select_building.building->size.h,
+                                                                    Gui::select_building.building->size.w,
+                                                                    Rotation::DEG90);
+                                    }
+                                }
+
+                                if (camera->rotation == Rotation::DEG90 || camera->rotation == Rotation::DEG270)
+                                {
+                                    if (Gui::select_building.rotation == world::Rotation::DEG0 || Gui::select_building.rotation == world::Rotation::DEG180)
+                                    {
+                                        rp = world::rotate_position(x, y,
+                                                                    Gui::select_building.building->size.h,
+                                                                    Gui::select_building.building->size.w,
+                                                                    Rotation::DEG90);
+                                        ro = world::rotate_position(offset.x, offset.y,
+                                                                    Gui::select_building.building->size.h,
+                                                                    Gui::select_building.building->size.w,
+                                                                    Rotation::DEG90);
+                                    }
+                                }
+                            }
+
+                            const auto offsetX{ rp.x * ro.x };
+                            const auto offsetY{ rp.y * ro.y };
 
                             const auto posX{ mouseOverIsland.value().x + offsetX };
                             const auto posY{ mouseOverIsland.value().y + offsetY };
@@ -165,11 +201,11 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                                 if (terrainTileToCheck.HasBuildingAboveWaterAndCoast() && !buildingTileToCheck.HasBuilding())
                                 {
                                     newTiles.emplace_back(
-                                            Gui::select_building.building,
-                                            magic_enum::enum_integer(Gui::select_building.rotation - camera->rotation),
-                                            offset.x < 0 ? Gui::select_building.building->size.w - 1 - x : x,
-                                            offset.y < 0 ? Gui::select_building.building->size.h - 1 - y : y,
-                                            posX, posY
+                                        Gui::select_building.building,
+                                        magic_enum::enum_integer(Gui::select_building.rotation - camera->rotation),
+                                        ro.x < 0 ? Gui::select_building.building->size.h - 1 - rp.x : rp.x,
+                                        ro.y < 0 ? Gui::select_building.building->size.w - 1 - rp.y : rp.y,
+                                        posX, posY
                                     );
                                 }
                             }
@@ -224,6 +260,10 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
 void mdcii::world::World::RenderImGui()
 {
     Gui::SaveGameGui(this);
+
+    ImGui::Separator();
+
+    ImGui::Text("Camera rotation %s", magic_enum::enum_name(camera->rotation).data());
 
     mousePicker->RenderImGui();
 
