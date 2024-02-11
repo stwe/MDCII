@@ -71,9 +71,6 @@ msgstr "Weberei"
 msgid "Wind mill"
 msgstr "Getreidemühle"
 
-msgid "Workshops"
-msgstr "Handwerksbetriebe"
-
 msgid "Close"
 msgstr "Schließen"
 
@@ -130,3 +127,78 @@ msgstr "Spiel beenden"
 
 msgid "Save Game"
 msgstr "Spiel speichern"
+
+msgid "Craft buildings"
+msgstr "Handwerksbetriebe"
+
+msgid "Residential buildings"
+msgstr "Wohngebäude"
+
+msgid "Public buildings"
+msgstr "Öffentliche Gebäude"
+
+msgid "Military buildings"
+msgstr "Militärgebäude"
+
+msgid "Coastal buildings"
+msgstr "Küstenbebauung"
+
+msgid "Pioneers"
+msgstr "Pioniere"
+
+msgid "Settlers"
+msgstr "Siedler"
+
+msgid "Citizens"
+msgstr "Bürger"
+
+msgid "Merchants"
+msgstr "Kaufleute"
+
+msgid "Aristocrats"
+msgstr "Aristokraten"
+
+msgid "Church"
+msgstr "Kirche"
+
+msgid "Tavern"
+msgstr "Wirtshaus"
+
+msgid "Market place"
+msgstr "Marktplatz"
+
+msgid "Fire department"
+msgstr "Feuerwehr"
+
+msgid "Doctor"
+msgstr "Arzt"
+
+msgid "University"
+msgstr "Hochschule"
+
+msgid "School"
+msgstr "Schule"
+
+msgid "City Gate"
+msgstr "Stadttor"
+
+msgid "City Wall"
+msgstr "Stadtmauer"
+
+msgid "Fishers hut"
+msgstr "Fischerhütte"
+
+msgid "Warehouse coast"
+msgstr "Kontorküste"
+
+msgid "Warehouse 1"
+msgstr "Kontor 1"
+
+msgid "Warehouse 2"
+msgstr "Kontor 2"
+
+msgid "Warehouse 3"
+msgstr "Kontor 3"
+
+msgid "Warehouse 4"
+msgstr "Kontor 4"

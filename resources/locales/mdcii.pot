@@ -71,9 +71,6 @@ msgstr ""
 msgid "Wind mill"
 msgstr ""
 
-msgid "Workshops"
-msgstr ""
-
 msgid "Close"
 msgstr ""
 
@@ -129,4 +126,79 @@ msgid "Exit Game"
 msgstr ""
 
 msgid "Save Game"
+msgstr ""
+
+msgid "Craft buildings"
+msgstr ""
+
+msgid "Residential buildings"
+msgstr ""
+
+msgid "Public buildings"
+msgstr ""
+
+msgid "Military buildings"
+msgstr ""
+
+msgid "Coastal buildings"
+msgstr ""
+
+msgid "Pioneers"
+msgstr ""
+
+msgid "Settlers"
+msgstr ""
+
+msgid "Citizens"
+msgstr ""
+
+msgid "Merchants"
+msgstr ""
+
+msgid "Aristocrats"
+msgstr ""
+
+msgid "Church"
+msgstr ""
+
+msgid "Tavern"
+msgstr ""
+
+msgid "Market place"
+msgstr ""
+
+msgid "Fire department"
+msgstr ""
+
+msgid "Doctor"
+msgstr ""
+
+msgid "University"
+msgstr ""
+
+msgid "School"
+msgstr ""
+
+msgid "City Gate"
+msgstr ""
+
+msgid "City Wall"
+msgstr ""
+
+msgid "Fishers hut"
+msgstr ""
+
+msgid "Warehouse coast"
+msgstr ""
+
+msgid "Warehouse 1"
+msgstr ""
+
+msgid "Warehouse 2"
+msgstr ""
+
+msgid "Warehouse 3"
+msgstr ""
+
+msgid "Warehouse 4"
 msgstr ""

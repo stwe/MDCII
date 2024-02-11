@@ -20,8 +20,8 @@
 
 #include <unordered_set>
 #include <array>
+#include <vector>
 #include <unordered_map>
-#include <string>
 
 namespace mdcii::resource
 {
@@ -75,5 +75,28 @@ namespace mdcii::resource
          { "SCHAF", FigureId::SHEEP_ID },
          { "HIRSCH", FigureId::DEER_ID },
          { "ANTILOPE", FigureId::ANTELOPE_ID },
+    };
+
+    // Buildings
+
+    static const std::vector CRAFT_BUILDING_IDS{
+        501, 503, 505, 507, 509, 511, 513, 515,
+        517, 519, 521, 525, 527, 529, 531, 533
+    };
+
+    static const std::vector RESIDENTIAL_BUILDING_IDS{
+        605, 621, 631, 641, 651
+    };
+
+    static const std::vector PUBLIC_BUILDING_IDS{
+        805, 807, 809, 811, 817, 819, 821
+    };
+
+    static const std::vector MILITARY_BUILDING_IDS{
+        303, 2501
+    };
+
+    static const std::vector COASTAL_BUILDING_IDS{
+        1075, 1073, 2101, 2103, 2105, 2107
     };
 }

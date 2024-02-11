@@ -35,61 +35,39 @@ void mdcii::world::Gui::RenderAddBuildingsGui(const Game* t_game)
 {
     MDCII_ASSERT(t_game, "[Gui::RenderAddBuildingsGui()] Null pointer.")
 
-    static constexpr std::array<int, 16> workshopsBuildingIds{
-        501, 503, 505, 507, 509, 511, 513, 515,
-        517, 519, 521, 525, 527, 529, 531, 533
-    };
-
-    static std::array<std::string_view, 16> workshopNames{
+    std::vector<std::string_view> craftBuildingNames{
         _("Wind mill"), _("Bakery"), _("Taylor"), _("Weaving hut"),
         _("Water mill"), _("Butcher"), _("Stonemason"), _("Tool smithy"),
         _("Swordsmith"), _("Rum distillery"), _("Ore refinery"), _("Tobacco products"),
         _("Cannon foundry"), _("Gunsmith"), _("Weaving mill"), _("Goldsmith")
     };
 
-    const auto zoomOpt{ magic_enum::enum_cast<Zoom>(Game::INI.Get<std::string>("menu", "bauhaus_zoom")) };
-    const auto& bshTextures{ t_game->originalResourcesManager->bauhausBshFiles[
-        zoomOpt.value_or(Zoom::GFX)
-    ]->bshTextures };
+    std::vector<std::string_view> residentialBuildingNames{
+        _("Pioneers"), _("Settlers"), _("Citizens"), _("Merchants"), _("Aristocrats"),
+    };
+
+    std::vector<std::string_view> publicBuildingNames{
+        _("Church"), _("Tavern"), _("Market place"), _("Fire department"), _("Doctor"), _("University"), _("School")
+    };
+
+    std::vector<std::string_view> militaryBuildingNames{
+        _("City Gate"), _("City Wall")
+    };
+
+    std::vector<std::string_view> coastalBuildingNames{
+        _("Fishers hut"), _("Warehouse coast"), _("Warehouse 1"), _("Warehouse 2"), _("Warehouse 3"), _("Warehouse 4")
+    };
 
     if (select_building.building)
     {
         RotatableBuildingGui(select_building.building);
     }
 
-    if (ImGui::TreeNode(_("Workshops")))
-    {
-        auto i{ 0 };
-        for (const auto buildingId : workshopsBuildingIds)
-        {
-            if (ImGui::TreeNode(workshopNames.at(i).data()))
-            {
-                const auto& building{ t_game->originalResourcesManager->GetBuildingById(buildingId) };
-
-                if (const auto& renderableBauhaus{ bshTextures.at(building.baugfx + magic_enum::enum_integer(select_building.rotation))->decal };
-                    ImGui::ImageButton(
-                        reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(renderableBauhaus->id)),  // texture-Id
-                        ImVec2(static_cast<float>(renderableBauhaus->sprite->width),
-                            static_cast<float>(renderableBauhaus->sprite->height)),                    // size
-                        ImVec2(0.0f, 0.0f),            // uv0
-                        ImVec2(1.0f, 1.0f),            // uv1
-                        -1,                            // frame padding
-                        ImVec4(0.0f, 0.0f, 0.0f, 1.0f) // bg color
-                    ))
-                {
-                    MDCII_LOG_DEBUG("[Gui::RenderAddBuildingsGui()] Select Building {}", workshopNames.at(i).data());
-                    select_building.building = &building;
-                    select_building.rotation = Rotation::DEG0;
-                }
-
-                ImGui::TreePop();
-            }
-
-            i++;
-        }
-
-        ImGui::TreePop();
-    }
+    RenderBuildingsByTitleGui(t_game, "Craft buildings", resource::CRAFT_BUILDING_IDS, craftBuildingNames);
+    RenderBuildingsByTitleGui(t_game, "Residential buildings", resource::RESIDENTIAL_BUILDING_IDS, residentialBuildingNames);
+    RenderBuildingsByTitleGui(t_game, "Public buildings", resource::PUBLIC_BUILDING_IDS, publicBuildingNames);
+    RenderBuildingsByTitleGui(t_game, "Military buildings", resource::MILITARY_BUILDING_IDS, militaryBuildingNames);
+    RenderBuildingsByTitleGui(t_game, "Coastal buildings", resource::COASTAL_BUILDING_IDS, coastalBuildingNames);
 }
 
 void mdcii::world::Gui::RotatableBuildingGui(const resource::Building* t_building)
@@ -164,5 +142,51 @@ void mdcii::world::Gui::SaveGameGui(const World* t_world)
         file << json;
 
         MDCII_LOG_DEBUG("[Gui::SaveGameGui()] The game has been successfully saved in file {}.", fileName);
+    }
+}
+
+void mdcii::world::Gui::RenderBuildingsByTitleGui(
+    const Game* t_game,
+    const std::string& t_title,
+    const std::vector<int>& t_buildingIds,
+    const std::vector<std::string_view>& t_buildingNames
+)
+{
+    const auto zoomOpt{ magic_enum::enum_cast<Zoom>(Game::INI.Get<std::string>("menu", "bauhaus_zoom")) };
+    const auto& bshTextures{ t_game->originalResourcesManager->bauhausBshFiles[zoomOpt.value_or(Zoom::GFX)]->bshTextures };
+
+    if (ImGui::TreeNode(_(t_title.c_str())))
+    {
+        auto i{ 0 };
+        for (const auto buildingId : t_buildingIds)
+        {
+            if (ImGui::TreeNode(t_buildingNames.at(i).data()))
+            {
+                const auto& building{ t_game->originalResourcesManager->GetBuildingById(buildingId) };
+
+                if (const auto& renderableBauhaus{ bshTextures.at(building.baugfx + magic_enum::enum_integer(select_building.rotation))->decal };
+                    ImGui::ImageButton(
+                        reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(renderableBauhaus->id)),  // texture-Id
+                        ImVec2(static_cast<float>(renderableBauhaus->sprite->width),
+                               static_cast<float>(renderableBauhaus->sprite->height)),  // size
+                        ImVec2(0.0f, 0.0f),                                     // uv0
+                        ImVec2(1.0f, 1.0f),                                     // uv1
+                        -1,                                                   // frame padding
+                        ImVec4(0.0f, 0.0f, 0.0f, 1.0f)                  // bg color
+                    ))
+                {
+                    MDCII_LOG_DEBUG("[Gui::RenderBuildingsByTitleGui()] Select building {}", t_buildingNames.at(i).data());
+
+                    select_building.building = &building;
+                    select_building.rotation = Rotation::DEG0;
+                }
+
+                ImGui::TreePop();
+            }
+
+            i++;
+        }
+
+        ImGui::TreePop();
     }
 }

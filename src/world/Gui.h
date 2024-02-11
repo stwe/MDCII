@@ -18,6 +18,9 @@
 
 #pragma once
 
+#include <vector>
+#include <string>
+
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
@@ -111,5 +114,19 @@ namespace mdcii::world
 
     private:
 
+        /**
+         * @brief Renders the buildings for a specific title.
+         *
+         * @param t_game Pointer to the parent Game object.
+         * @param t_title The title of the buildings.
+         * @param t_buildingIds The IDs of the buildings.
+         * @param t_buildingNames The names of the buildings.
+         */
+        static void RenderBuildingsByTitleGui(
+            const Game* t_game,
+            const std::string& t_title,
+            const std::vector<int>& t_buildingIds,
+            const std::vector<std::string_view>& t_buildingNames
+        );
     };
 }
