@@ -156,18 +156,22 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
 
                             if (Gui::select_building.building->size.w != Gui::select_building.building->size.h)
                             {
+                                auto updatePositions = [&]() {
+                                    rp = world::rotate_position(x, y,
+                                                                Gui::select_building.building->size.h,
+                                                                Gui::select_building.building->size.w,
+                                                                Rotation::DEG90);
+                                    ro = world::rotate_position(offset.x, offset.y,
+                                                                Gui::select_building.building->size.h,
+                                                                Gui::select_building.building->size.w,
+                                                                Rotation::DEG90);
+                                };
+
                                 if (camera->rotation == Rotation::DEG0 || camera->rotation == Rotation::DEG180)
                                 {
                                     if (Gui::select_building.rotation == world::Rotation::DEG90 || Gui::select_building.rotation == world::Rotation::DEG270)
                                     {
-                                        rp = world::rotate_position(x, y,
-                                                                    Gui::select_building.building->size.h,
-                                                                    Gui::select_building.building->size.w,
-                                                                    Rotation::DEG90);
-                                        ro = world::rotate_position(offset.x, offset.y,
-                                                                    Gui::select_building.building->size.h,
-                                                                    Gui::select_building.building->size.w,
-                                                                    Rotation::DEG90);
+                                        updatePositions();
                                     }
                                 }
 
@@ -175,14 +179,7 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                                 {
                                     if (Gui::select_building.rotation == world::Rotation::DEG0 || Gui::select_building.rotation == world::Rotation::DEG180)
                                     {
-                                        rp = world::rotate_position(x, y,
-                                                                    Gui::select_building.building->size.h,
-                                                                    Gui::select_building.building->size.w,
-                                                                    Rotation::DEG90);
-                                        ro = world::rotate_position(offset.x, offset.y,
-                                                                    Gui::select_building.building->size.h,
-                                                                    Gui::select_building.building->size.w,
-                                                                    Rotation::DEG90);
+                                        updatePositions();
                                     }
                                 }
                             }
