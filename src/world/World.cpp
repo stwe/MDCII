@@ -200,8 +200,8 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                                     newTiles.emplace_back(
                                         Gui::select_building.building,
                                         magic_enum::enum_integer(Gui::select_building.rotation - camera->rotation),
-                                        ro.x < 0 ? Gui::select_building.building->size.h - 1 - rp.x : rp.x,
-                                        ro.y < 0 ? Gui::select_building.building->size.w - 1 - rp.y : rp.y,
+                                        ro.x < 0 ? Gui::select_building.building->size.w - 1 - rp.x : rp.x,
+                                        ro.y < 0 ? Gui::select_building.building->size.h - 1 - rp.y : rp.y,
                                         posX, posY
                                     );
                                 }

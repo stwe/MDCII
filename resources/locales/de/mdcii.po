@@ -202,3 +202,30 @@ msgstr "Kontor 3"
 
 msgid "Warehouse 4"
 msgstr "Kontor 4"
+
+msgid "Roads"
+msgstr "Strassen und Wege"
+
+msgid "Stone road"
+msgstr "Strasse"
+
+msgid "Stone road curved"
+msgstr "Strasse Ecke"
+
+msgid "Stone T-intersection"
+msgstr "Strasse Einmündung"
+
+msgid "Stone crossroad"
+msgstr "Strassenkreuzung"
+
+msgid "Dirt road"
+msgstr "Weg"
+
+msgid "Dirt road curved"
+msgstr "Weg Ecke"
+
+msgid "Dirt T-intersection"
+msgstr "Weg Einmündung"
+
+msgid "Dirt crossroad"
+msgstr "Wegkreuzung"

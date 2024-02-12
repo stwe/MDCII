@@ -58,6 +58,11 @@ void mdcii::world::Gui::RenderAddBuildingsGui(const Game* t_game)
         _("Fishers hut"), _("Warehouse coast"), _("Warehouse 1"), _("Warehouse 2"), _("Warehouse 3"), _("Warehouse 4")
     };
 
+    std::vector<std::string_view> streetBuildingNames{
+        _("Stone road"), _("Stone road curved"), _("Stone T-intersection"), _("Stone crossroad"),
+        _("Dirt road"), _("Dirt road curved"), _("Dirt T-intersection"), _("Dirt crossroad"),
+    };
+
     if (select_building.building)
     {
         RotatableBuildingGui(select_building.building);
@@ -68,6 +73,7 @@ void mdcii::world::Gui::RenderAddBuildingsGui(const Game* t_game)
     RenderBuildingsByTitleGui(t_game, "Public buildings", resource::PUBLIC_BUILDING_IDS, publicBuildingNames);
     RenderBuildingsByTitleGui(t_game, "Military buildings", resource::MILITARY_BUILDING_IDS, militaryBuildingNames);
     RenderBuildingsByTitleGui(t_game, "Coastal buildings", resource::COASTAL_BUILDING_IDS, coastalBuildingNames);
+    RenderBuildingsByTitleGui(t_game, "Roads", resource::ROAD_BUILDING_IDS, streetBuildingNames);
 }
 
 void mdcii::world::Gui::RotatableBuildingGui(const resource::Building* t_building)
@@ -169,12 +175,11 @@ void mdcii::world::Gui::RenderBuildingsByTitleGui(
                 if (const auto& renderableBauhaus{ bshTextures.at(building.baugfx + magic_enum::enum_integer(select_building.rotation))->decal };
                     ImGui::ImageButton(
                         reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(renderableBauhaus->id)),  // texture-Id
-                        ImVec2(static_cast<float>(renderableBauhaus->sprite->width),
-                               static_cast<float>(renderableBauhaus->sprite->height)),  // size
-                        ImVec2(0.0f, 0.0f),                                     // uv0
-                        ImVec2(1.0f, 1.0f),                                     // uv1
-                        -1,                                                   // frame padding
-                        ImVec4(0.0f, 0.0f, 0.0f, 1.0f)                  // bg color
+                        ImVec2(static_cast<float>(renderableBauhaus->sprite->width), static_cast<float>(renderableBauhaus->sprite->height)), // size
+                        ImVec2(0.0f, 0.0f),                     // uv0
+                        ImVec2(1.0f, 1.0f),                     // uv1
+                        -1,                                   // frame padding
+                        ImVec4(0.0f, 0.0f, 0.0f, 1.0f)  // bg color
                     ))
                 {
                     MDCII_LOG_DEBUG("[Gui::RenderBuildingsByTitleGui()] Select building {}", t_buildingNames.at(i).data());

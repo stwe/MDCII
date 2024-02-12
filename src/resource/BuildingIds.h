@@ -99,4 +99,8 @@ namespace mdcii::resource
     static const std::vector COASTAL_BUILDING_IDS{
         1075, 1073, 2101, 2103, 2105, 2107
     };
+
+    static const std::vector ROAD_BUILDING_IDS{
+        401, 402, 403, 404, 411, 412, 413, 414
+    };
 }

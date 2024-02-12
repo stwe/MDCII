@@ -47,7 +47,7 @@ mdcii::resource::OriginalResourcesManager::~OriginalResourcesManager() noexcept
 
 const mdcii::resource::Building& mdcii::resource::OriginalResourcesManager::GetBuildingById(const int t_id) const
 {
-    MDCII_ASSERT(t_id >= 0, "[OriginalResourcesManager::GetBuildingById()] Invalid Id given.")
+    MDCII_ASSERT(t_id >= 0 && buildings->buildingsMap.count(t_id), "[OriginalResourcesManager::GetBuildingById()] Invalid Id given.")
 
     return buildings->buildingsMap.at(t_id);
 }

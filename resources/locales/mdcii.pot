@@ -202,3 +202,30 @@ msgstr ""
 
 msgid "Warehouse 4"
 msgstr ""
+
+msgid "Roads"
+msgstr ""
+
+msgid "Stone road"
+msgstr ""
+
+msgid "Stone road curved"
+msgstr ""
+
+msgid "Stone T-intersection"
+msgstr ""
+
+msgid "Stone crossroad"
+msgstr ""
+
+msgid "Dirt road"
+msgstr ""
+
+msgid "Dirt road curved"
+msgstr ""
+
+msgid "Dirt T-intersection"
+msgstr ""
+
+msgid "Dirt crossroad"
+msgstr ""
