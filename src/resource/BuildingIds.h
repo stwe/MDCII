@@ -70,7 +70,7 @@ namespace mdcii::resource
         UNSET, CATTLE_ID, SHEEP_ID, DEER_ID, ANTELOPE_ID
     };
 
-    static const std::unordered_map<std::string, FigureId> FIGURE_STRING_TO_ID_MAP = {
+    static const std::unordered_map<std::string, FigureId> FIGURE_STRING_TO_ID_MAP{
          { "RIND", FigureId::CATTLE_ID },
          { "SCHAF", FigureId::SHEEP_ID },
          { "HIRSCH", FigureId::DEER_ID },
@@ -102,5 +102,18 @@ namespace mdcii::resource
 
     static const std::vector ROAD_BUILDING_IDS{
         401, 402, 403, 404, 411, 412, 413, 414
+    };
+
+    // ID -> Baugfx
+
+    static const std::unordered_map<int, int> BAUGFX_MAP{
+        { 401, 288 },
+        { 402, 292 },
+        { 403, 296 },
+        { 404, 300 },
+        { 411, 308 },
+        { 412, 312 },
+        { 413, 316 },
+        { 414, 320 }
     };
 }

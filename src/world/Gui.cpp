@@ -172,7 +172,18 @@ void mdcii::world::Gui::RenderBuildingsByTitleGui(
             {
                 const auto& building{ t_game->originalResourcesManager->GetBuildingById(buildingId) };
 
-                if (const auto& renderableBauhaus{ bshTextures.at(building.baugfx + magic_enum::enum_integer(select_building.rotation))->decal };
+                auto baugfx{ building.baugfx };
+                // get the baugfx for roads from a map
+                if (resource::BAUGFX_MAP.count(buildingId))
+                {
+                    baugfx = resource::BAUGFX_MAP.at(buildingId);
+                }
+                if (building.IsRotatable())
+                {
+                    baugfx += magic_enum::enum_integer(select_building.rotation);
+                }
+
+                if (const auto& renderableBauhaus{ bshTextures.at(baugfx)->decal };
                     ImGui::ImageButton(
                         reinterpret_cast<ImTextureID>(static_cast<uintptr_t>(renderableBauhaus->id)),  // texture-Id
                         ImVec2(static_cast<float>(renderableBauhaus->sprite->width), static_cast<float>(renderableBauhaus->sprite->height)), // size
@@ -182,7 +193,7 @@ void mdcii::world::Gui::RenderBuildingsByTitleGui(
                         ImVec4(0.0f, 0.0f, 0.0f, 1.0f)  // bg color
                     ))
                 {
-                    MDCII_LOG_DEBUG("[Gui::RenderBuildingsByTitleGui()] Select building {}", t_buildingNames.at(i).data());
+                    MDCII_LOG_DEBUG("[Gui::RenderBuildingsByTitleGui()] Select building {}.", t_buildingNames.at(i).data());
 
                     select_building.building = &building;
                     select_building.rotation = Rotation::DEG0;
