@@ -17,12 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "Island.h"
-#include "World.h"
 #include "MousePicker.h"
-#include "MdciiAssert.h"
 #include "MdciiUtils.h"
-#include "world/layer/TerrainLayer.h"
-#include "world/layer/FiguresLayer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -52,14 +48,14 @@ mdcii::world::Island::~Island() noexcept
 // Getter
 //-------------------------------------------------
 
-mdcii::world::layer::TerrainLayer* mdcii::world::Island::GetTerrainLayer(const layer::LayerType t_layerType)
+mdcii::world::layer::TerrainLayer<mdcii::world::tile::TerrainTile>* mdcii::world::Island::GetTerrainLayer(const layer::LayerType t_layerType)
 {
     MDCII_ASSERT(m_terrainLayers.count(t_layerType), "[Island::GetTerrainLayer()] Missing layer.")
 
     return m_terrainLayers[t_layerType].get();
 }
 
-const mdcii::world::layer::TerrainLayer* mdcii::world::Island::GetTerrainLayer(const layer::LayerType t_layerType) const
+const mdcii::world::layer::TerrainLayer<mdcii::world::tile::TerrainTile>* mdcii::world::Island::GetTerrainLayer(const layer::LayerType t_layerType) const
 {
     const auto it{ m_terrainLayers.find(t_layerType) };
 
@@ -68,12 +64,12 @@ const mdcii::world::layer::TerrainLayer* mdcii::world::Island::GetTerrainLayer(c
     return it->second.get();
 }
 
-mdcii::world::layer::FiguresLayer *mdcii::world::Island::GetFiguresLayer()
+mdcii::world::layer::FiguresLayer<mdcii::world::tile::FigureTile>* mdcii::world::Island::GetFiguresLayer()
 {
     return m_figuresLayer.get();
 }
 
-const mdcii::world::layer::FiguresLayer *mdcii::world::Island::GetFiguresLayer() const
+const mdcii::world::layer::FiguresLayer<mdcii::world::tile::FigureTile>* mdcii::world::Island::GetFiguresLayer() const
 {
     return m_figuresLayer.get();
 }
@@ -151,27 +147,27 @@ void mdcii::world::Island::SetLayerData(const nlohmann::json& t_json)
 
     // todo: refactor
     // figures layer
-    m_figuresLayer = std::make_unique<layer::FiguresLayer>(world, width, height);
+    m_figuresLayer = std::make_unique<layer::FiguresLayer<tile::FigureTile>>(world, width, height);
     for (auto layerJson = t_json.at("layers").items(); const auto& [k, v] : layerJson)
     {
         for (const auto& [layerNameJson, layerTilesJson] : v.items())
         {
             if (layerNameJson == to_lower_case(std::string(magic_enum::enum_name(layer::LayerType::FIGURES))))
             {
-                m_figuresLayer->CreateLayerTiles(layerTilesJson);
+                m_figuresLayer->CreateTiles(layerTilesJson);
             }
         }
     }
 
     // this mixed layer will later be filled with the data from the other layers
-    m_terrainLayers.emplace(layer::LayerType::MIXED, std::make_unique<layer::TerrainLayer>(world, layer::LayerType::MIXED, width, height));
+    m_terrainLayers.emplace(layer::LayerType::MIXED, std::make_unique<layer::TerrainLayer<tile::TerrainTile>>(world, layer::LayerType::MIXED, width, height));
 }
 
 void mdcii::world::Island::SetLayerDataByType(const nlohmann::json& t_json, const layer::LayerType t_layerType)
 {
     MDCII_LOG_DEBUG("[Island::SetLayerDataByType()] Sets the island's layer data of type {}.", magic_enum::enum_name(t_layerType));
 
-    m_terrainLayers.emplace(t_layerType, std::make_unique<layer::TerrainLayer>(world, t_layerType, width, height));
+    m_terrainLayers.emplace(t_layerType, std::make_unique<layer::TerrainLayer<tile::TerrainTile>>(world, t_layerType, width, height));
 
     for (auto layerJson = t_json.at("layers").items(); const auto& [k, v] : layerJson)
     {
@@ -179,7 +175,7 @@ void mdcii::world::Island::SetLayerDataByType(const nlohmann::json& t_json, cons
         {
             if (layerNameJson == to_lower_case(std::string(magic_enum::enum_name(t_layerType))))
             {
-                GetTerrainLayer(t_layerType)->CreateLayerTiles(layerTilesJson);
+                GetTerrainLayer(t_layerType)->CreateTiles(layerTilesJson);
             }
         }
     }
@@ -202,11 +198,11 @@ void mdcii::world::Island::InitLayerData()
 {
     MDCII_LOG_DEBUG("[Island::InitLayerData()] Initialises the tile data of the COAST, TERRAIN and BUILDINGS layer.");
 
-    GetTerrainLayer(layer::LayerType::COAST)->InitLayerTiles();
-    GetTerrainLayer(layer::LayerType::TERRAIN)->InitLayerTiles();
-    GetTerrainLayer(layer::LayerType::BUILDINGS)->InitLayerTiles();
+    GetTerrainLayer(layer::LayerType::COAST)->InitTiles();
+    GetTerrainLayer(layer::LayerType::TERRAIN)->InitTiles();
+    GetTerrainLayer(layer::LayerType::BUILDINGS)->InitTiles();
 
-    m_figuresLayer->InitLayerTiles();
+    m_figuresLayer->InitTiles();
 }
 
 void mdcii::world::Island::InitMixedLayerData()
@@ -243,7 +239,7 @@ void mdcii::world::Island::PopulateMixedLayer(const int t_x, const int t_y)
     }
 }
 
-bool mdcii::world::Island::ShouldReplaceTile(const layer::TerrainLayer* t_layer, const int t_index)
+bool mdcii::world::Island::ShouldReplaceTile(const layer::TerrainLayer<tile::TerrainTile>* t_layer, const int t_index)
 {
     return t_layer->tiles.at(t_index).HasBuilding() && !GetTerrainLayer(layer::LayerType::BUILDINGS)->tiles.at(t_index).HasBuilding();
 }

@@ -18,27 +18,14 @@
 
 #pragma once
 
-#include <memory>
+#include "world/layer/Layer.h"
 
 //-------------------------------------------------
 // Forward declarations
 //-------------------------------------------------
 
-namespace mdcii::world::layer
-{
-    /**
-     * @brief Forward declaration class TerrainLayer.
-     */
-    class TerrainLayer;
-}
-
 namespace mdcii::world
 {
-    /**
-     * @brief Forward declaration class World.
-     */
-    class World;
-
     //-------------------------------------------------
     // DeepWater
     //-------------------------------------------------
@@ -56,7 +43,7 @@ namespace mdcii::world
         /**
          * @brief The deep water area tile layer.
          */
-        std::unique_ptr<layer::TerrainLayer> layer;
+        std::unique_ptr<layer::TerrainLayer<tile::TerrainTile>> layer;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

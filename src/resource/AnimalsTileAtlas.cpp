@@ -17,13 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "AnimalsTileAtlas.h"
-#include "Game.h"
-#include "MdciiAssert.h"
-#include "world/World.h"
-#include "world/layer/FiguresLayer.h"
-#include "state/State.h"
+#include "world/layer/Layer.h"
 #include "camera/Camera.h"
-#include "resource/Buildings.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

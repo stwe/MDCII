@@ -43,6 +43,15 @@ mdcii::world::tile::FigureTile::FigureTile(
 }
 
 //-------------------------------------------------
+// Getter
+//-------------------------------------------------
+
+bool mdcii::world::tile::FigureTile::HasFigure(const resource::FigureId t_figureId) const
+{
+    return HasFigure() && figure->id == t_figureId;
+}
+
+//-------------------------------------------------
 // Logic
 //-------------------------------------------------
 

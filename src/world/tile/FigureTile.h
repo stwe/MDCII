@@ -31,6 +31,11 @@ namespace mdcii::resource
      * @brief Forward declaration struct Figure.
      */
     struct Figure;
+
+    /**
+     * @brief Forward declaration enum class FigureId.
+     */
+    enum class FigureId;
 }
 
 namespace mdcii::world::tile
@@ -96,6 +101,15 @@ namespace mdcii::world::tile
          * @return True if a Figure object is present.
          */
         [[nodiscard]] bool HasFigure() const { return figure != nullptr; }
+
+        /**
+         * @brief For better readability/convenience.
+         *
+         * @param t_figureId The character's Id.
+         *
+         * @return True if a Figure object is present.
+         */
+        [[nodiscard]] bool HasFigure(resource::FigureId t_figureId) const;
 
         //-------------------------------------------------
         // Logic

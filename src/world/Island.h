@@ -18,39 +18,11 @@
 
 #pragma once
 
-#include <optional>
 #include "physics/Aabb.h"
-#include "vendor/nlohmann/json.hpp"
-
-//-------------------------------------------------
-// Forward declarations
-//-------------------------------------------------
-
-namespace mdcii::world::layer
-{
-    /**
-     * @brief Forward declaration class TerrainLayer.
-     */
-    class TerrainLayer;
-
-    /**
-     * @brief Forward declaration class FiguresLayer.
-     */
-    class FiguresLayer;
-
-    /**
-     * @brief Forward declaration enum class LayerType.
-     */
-    enum class LayerType;
-}
+#include "world/layer/Layer.h"
 
 namespace mdcii::world
 {
-    /**
-     * @brief Forward declaration class World.
-     */
-    class World;
-
     //-------------------------------------------------
     // EnumClassHash
     //-------------------------------------------------
@@ -155,7 +127,7 @@ namespace mdcii::world
          *
          * @return A pointer to the requested island terrain layer.
          */
-        [[nodiscard]] layer::TerrainLayer* GetTerrainLayer(layer::LayerType t_layerType);
+        [[nodiscard]] layer::TerrainLayer<tile::TerrainTile>* GetTerrainLayer(layer::LayerType t_layerType);
 
         /**
          * @brief Const getter function to retrieve a constant pointer to the specified layer.
@@ -164,21 +136,21 @@ namespace mdcii::world
          *
          * @return A constant pointer to the requested island terrain layer.
          */
-        [[nodiscard]] const layer::TerrainLayer* GetTerrainLayer(layer::LayerType t_layerType) const;
+        [[nodiscard]] const layer::TerrainLayer<tile::TerrainTile>* GetTerrainLayer(layer::LayerType t_layerType) const;
 
         /**
          * @brief Getter function to retrieve a pointer to the figures layer.
          *
          * @return A pointer to the island figures layer.
          */
-        [[nodiscard]] layer::FiguresLayer* GetFiguresLayer();
+        [[nodiscard]] layer::FiguresLayer<tile::FigureTile>* GetFiguresLayer();
 
         /**
          * @brief Const getter function to retrieve a constant pointer to the figures layer.
          *
          * @return A constant pointer to the island figures layer.
          */
-        [[nodiscard]] const layer::FiguresLayer* GetFiguresLayer() const;
+        [[nodiscard]] const layer::FiguresLayer<tile::FigureTile>* GetFiguresLayer() const;
 
         //-------------------------------------------------
         // Position
@@ -218,12 +190,12 @@ namespace mdcii::world
         /**
          * @brief The island terrain tile layers (COAST, TERRAIN, BUILDINGS, MIXED).
          */
-        std::unordered_map<layer::LayerType, std::unique_ptr<layer::TerrainLayer>, EnumClassHash> m_terrainLayers;
+        std::unordered_map<layer::LayerType, std::unique_ptr<layer::TerrainLayer<tile::TerrainTile>>, EnumClassHash> m_terrainLayers;
 
         /**
          * @brief The island figures layer.
          */
-        std::unique_ptr<layer::FiguresLayer> m_figuresLayer;
+        std::unique_ptr<layer::FiguresLayer<tile::FigureTile>> m_figuresLayer;
 
         //-------------------------------------------------
         // Set layer data from Json
@@ -294,7 +266,7 @@ namespace mdcii::world
          *
          * @return True if the tile should be replaced; false otherwise.
          */
-        bool ShouldReplaceTile(const layer::TerrainLayer* t_layer, int t_index);
+        bool ShouldReplaceTile(const layer::TerrainLayer<tile::TerrainTile>* t_layer, int t_index);
     };
 
     //-------------------------------------------------

@@ -17,22 +17,16 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "World.h"
-#include "Game.h"
 #include "Island.h"
 #include "MousePicker.h"
 #include "DeepWater.h"
-#include "MdciiAssert.h"
 #include "Gui.h"
-#include "state/State.h"
-#include "resource/MdciiFile.h"
-#include "resource/OriginalResourcesManager.h"
 #include "resource/TileAtlas.h"
 #include "resource/AnimalsTileAtlas.h"
 #include "resource/AssetManager.h"
 #include "renderer/Renderer.h"
 #include "camera/Camera.h"
-#include "world/layer/TerrainLayer.h"
-#include "world/layer/FiguresLayer.h"
+#include "world/layer/Layer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -495,6 +489,9 @@ void mdcii::world::World::CheckLayer(Island* t_island, const layer::LayerType t_
     if (t_layerType == layer::LayerType::FIGURES)
     {
         std::vector<tile::FigureTile>().swap(t_island->GetFiguresLayer()->currentTiles);
+
+        // todo: remove tile if figure (or building) in tile is null
+
         t_island->GetFiguresLayer()->currentTiles = t_island->GetFiguresLayer()->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
 
         auto [begin, end]{ std::ranges::remove_if(t_island->GetFiguresLayer()->currentTiles,

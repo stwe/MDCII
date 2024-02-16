@@ -17,13 +17,8 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "TileAtlas.h"
-#include "MdciiAssert.h"
-#include "Game.h"
-#include "world/World.h"
-#include "world/layer/TerrainLayer.h"
+#include "world/layer/Layer.h"
 #include "camera/Camera.h"
-#include "state/State.h"
-#include "resource/Buildings.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.

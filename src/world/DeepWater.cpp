@@ -16,15 +16,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include <algorithm>
 #include "DeepWater.h"
-#include "Game.h"
-#include "World.h"
-#include "MdciiAssert.h"
-#include "resource/OriginalResourcesManager.h"
-#include "resource/BuildingIds.h"
-#include "state/State.h"
-#include "world/layer/TerrainLayer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -65,7 +57,7 @@ void mdcii::world::DeepWater::InitLayer()
 {
     MDCII_LOG_DEBUG("[DeepWater::InitLayer()] Init deep water layer.");
 
-    layer = std::make_unique<layer::TerrainLayer>(m_world, layer::LayerType::DEEP_WATER, m_world->worldWidth, m_world->worldHeight);
+    layer = std::make_unique<layer::TerrainLayer<tile::TerrainTile>>(m_world, layer::LayerType::DEEP_WATER, m_world->worldWidth, m_world->worldHeight);
     layer->tiles.resize(m_world->worldWidth * m_world->worldHeight);
 
     for (auto y{ 0 }; y < m_world->worldHeight; ++y)
