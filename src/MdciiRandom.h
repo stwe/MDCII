@@ -23,14 +23,14 @@
 static std::mt19937 mdcii_mersenne_engine(std::random_device{}());
 
 template <typename IntType>
-IntType uniform_random_int(IntType t_a, IntType t_b)
+IntType mdcii_uniform_random_int(IntType t_a, IntType t_b)
 {
     std::uniform_int_distribution<IntType> dist(t_a, t_b);
     return dist(mdcii_mersenne_engine);
 }
 
 template <typename RealType>
-RealType uniform_random_real(RealType t_a, RealType t_b)
+RealType mdcii_uniform_random_real(RealType t_a, RealType t_b)
 {
     std::uniform_real_distribution<RealType> dist(t_a, t_b);
     return dist(mdcii_mersenne_engine);
