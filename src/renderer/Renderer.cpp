@@ -17,17 +17,14 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "Renderer.h"
-#include "Game.h"
-#include "world/World.h"
+#include "MdciiRandom.h"
 #include "world/Island.h"
 #include "world/DeepWater.h"
-#include "world/layer/TerrainLayer.h"
-#include "world/layer/FiguresLayer.h"
+#include "world/layer/Layer.h"
 #include "resource/AssetManager.h"
 #include "resource/TileAtlas.h"
 #include "resource/AnimalsTileAtlas.h"
 #include "camera/Camera.h"
-#include "state/State.h"
 
 //-------------------------------------------------
 // Logic
@@ -109,7 +106,7 @@ void mdcii::renderer::Renderer::RenderWorld(const world::World* t_world, const f
             // render terrain tile
             RenderTerrainTile(t_world, island, &terrainTile);
 
-            // render a given figure on top of the terrain tile
+            // render an existing figure on top of the terrain tile
             RenderFigureOnTopOfTerrainTile(t_world, island, &terrainTile);
         }
     }
@@ -157,19 +154,36 @@ void mdcii::renderer::Renderer::RenderFigureOnTopOfTerrainTile(
     const world::tile::TerrainTile* t_terrainTile
 )
 {
-    const auto rotationInt{ magic_enum::enum_integer(t_world->camera->rotation) };
+    // todo TEMP Code
 
-    const auto terrainIdx{ t_island->GetTerrainLayer(world::layer::LayerType::TERRAIN)->sortedIndices.at(rotationInt).at(world::tile::Tile::GetRenderIndex(
-        t_terrainTile->posX,
-        t_terrainTile->posY,
-        t_island->GetTerrainLayer(world::layer::LayerType::TERRAIN)->width,
-        t_island->GetTerrainLayer(world::layer::LayerType::TERRAIN)->height,
-        t_world->camera->rotation)
-        )
-    };
+    auto& terrainTile{ t_island->GetTerrainLayer(world::layer::LayerType::TERRAIN)->GetSortedTile(t_terrainTile->posX, t_terrainTile->posY, t_world->camera->rotation) };
+    auto& buildingsTile{ t_island->GetTerrainLayer(world::layer::LayerType::BUILDINGS)->GetSortedTile(t_terrainTile->posX, t_terrainTile->posY, t_world->camera->rotation) };
+    auto& figureTile{ t_island->GetFiguresLayer()->GetSortedTile(t_terrainTile->posX, t_terrainTile->posY, t_world->camera->rotation) };
 
-    auto &figureTile{ t_island->GetFiguresLayer()->sortedTiles.at(rotationInt).at(terrainIdx) };
-    RenderFigureTile(t_world, t_island, &figureTile);
+    if (figureTile.HasFigure())
+    {
+        RenderFigureTile(t_world, t_island, &figureTile);
+    }
+    else if (t_island->GetFiguresLayer()->CountFigures(resource::FigureId::DEER_ID) < 3)
+    {
+        if (terrainTile.HasBuildingAboveWaterAndCoast() && !buildingsTile.HasBuilding())
+        {
+            if (mdcii_uniform_random_int<int>(1, 1000) == 1000)
+            {
+                MDCII_LOG_DEBUG("[Renderer::RenderFigureOnTopOfTerrainTile()] Create new deer at ({}, {}).", t_terrainTile->posX, t_terrainTile->posX);
+
+                auto& figure{ t_world->state->game->originalResourcesManager->GetFigureById(resource::FigureId::DEER_ID) };
+                figureTile.figure = &figure;
+                figureTile.rotation = mdcii_uniform_random_int<int>(1, 4);
+                figureTile.currentAnimation = 1;
+
+                // todo: write back to sortedTiles and tiles
+
+                // for count
+                t_island->GetFiguresLayer()->tiles.at(t_island->GetFiguresLayer()->GetSortedIndex(t_terrainTile->posX, t_terrainTile->posY, world::Rotation::DEG0)) = figureTile;
+            }
+        }
+    }
 }
 
 void mdcii::renderer::Renderer::RenderTerrainTile(
