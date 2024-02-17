@@ -121,6 +121,17 @@ namespace mdcii::world::tile
          * @param t_frameValues The current frame values for all animation times.
          */
         void UpdateFrame(const std::array<int, NR_OF_ANIM_TIMES>& t_frameValues);
+
+        //-------------------------------------------------
+        // Override
+        //-------------------------------------------------
+
+        /**
+         * @brief The tile cannot be rendered if there is no figure.
+         *
+         * @return True if there is no figure; otherwise false.
+         */
+        [[nodiscard]] bool IsNotRenderable() const override { return !HasFigure(); }
     };
 
     //-------------------------------------------------

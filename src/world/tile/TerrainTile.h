@@ -149,6 +149,17 @@ namespace mdcii::world::tile
          * @param t_gfx The gfx of the terrain tile.
          */
         void AdjustGfxForBigBuildings(int& t_gfx) const;
+
+        //-------------------------------------------------
+        // Override
+        //-------------------------------------------------
+
+        /**
+         * @brief The tile cannot be rendered if there is no building.
+         *
+         * @return True if there is no building; otherwise false.
+         */
+        [[nodiscard]] bool IsNotRenderable() const override { return !HasBuilding(); }
     };
 
     //-------------------------------------------------

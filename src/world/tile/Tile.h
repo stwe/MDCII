@@ -115,6 +115,17 @@ namespace mdcii::world::tile
         virtual ~Tile() noexcept;
 
         //-------------------------------------------------
+        // Override
+        //-------------------------------------------------
+
+        /**
+         * @brief Returns whether a tile is renderable.
+         *
+         * @return True or false.
+         */
+        [[nodiscard]] virtual bool IsNotRenderable() const = 0;
+
+        //-------------------------------------------------
         // Render index
         //-------------------------------------------------
 
