@@ -411,78 +411,66 @@ void mdcii::world::World::Init(const nlohmann::json& t_json)
 // Render helper
 //-------------------------------------------------
 
+void mdcii::world::World::AddIslandToRenderList(Island* t_island)
+{
+    currentIslands.insert(t_island);
+}
+
 void mdcii::world::World::FindVisibleIslands()
 {
-    std::vector<Island*>().swap(currentIslands);
+    currentIslands.clear();
 
     for (const auto& island : islands)
     {
         if (HasRenderLayerOption(RenderLayer::RENDER_FIGURES_LAYER))
         {
-            island->GetFiguresLayer()->UpdateCurrentTiles(island->startX, island->startY);
-
-            if (!island->GetFiguresLayer()->currentTiles.empty())
+            if (island->GetFiguresLayer()->UpdateCurrentTiles(island->startX, island->startY))
             {
-                currentIslands.push_back(island.get());
+                AddIslandToRenderList(island.get());
             }
         }
 
         if (HasRenderLayerOption(RenderLayer::RENDER_MIXED_LAYER))
         {
-            island->GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(island->startX, island->startY);
-
-            if (!island->GetTerrainLayer(layer::LayerType::MIXED)->currentTiles.empty())
+            if (island->GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(island->startX, island->startY))
             {
-                currentIslands.push_back(island.get());
+                AddIslandToRenderList(island.get());
             }
         }
         else if (HasRenderLayerOption(RenderLayer::RENDER_COAST_LAYER) ||
                  HasRenderLayerOption(RenderLayer::RENDER_TERRAIN_LAYER) ||
                  HasRenderLayerOption(RenderLayer::RENDER_BUILDINGS_LAYER))
         {
-            auto dirty{ false };
             if (HasRenderLayerOption(RenderLayer::RENDER_COAST_LAYER))
             {
-                island->GetTerrainLayer(layer::LayerType::COAST)->UpdateCurrentTiles(island->startX, island->startY);
-
-                if (!island->GetTerrainLayer(layer::LayerType::COAST)->currentTiles.empty())
+                if (island->GetTerrainLayer(layer::LayerType::COAST)->UpdateCurrentTiles(island->startX, island->startY))
                 {
-                    dirty = true;
+                    AddIslandToRenderList(island.get());
                 }
             }
             if (HasRenderLayerOption(RenderLayer::RENDER_TERRAIN_LAYER))
             {
-                island->GetTerrainLayer(layer::LayerType::TERRAIN)->UpdateCurrentTiles(island->startX, island->startY);
-
-                if (!island->GetTerrainLayer(layer::LayerType::TERRAIN)->currentTiles.empty())
+                if (island->GetTerrainLayer(layer::LayerType::TERRAIN)->UpdateCurrentTiles(island->startX, island->startY))
                 {
-                    dirty = true;
+                    AddIslandToRenderList(island.get());
                 }
             }
             if (HasRenderLayerOption(RenderLayer::RENDER_BUILDINGS_LAYER))
             {
-                island->GetTerrainLayer(layer::LayerType::BUILDINGS)->UpdateCurrentTiles(island->startX, island->startY);
-
-                if (!island->GetTerrainLayer(layer::LayerType::BUILDINGS)->currentTiles.empty())
+                if (island->GetTerrainLayer(layer::LayerType::BUILDINGS)->UpdateCurrentTiles(island->startX, island->startY))
                 {
-                    dirty = true;
+                    AddIslandToRenderList(island.get());
                 }
-            }
-
-            if (dirty)
-            {
-                currentIslands.push_back(island.get());
             }
         }
 
         if (HasRenderLayerOption(RenderLayer::RENDER_ALL))
         {
-            island->GetFiguresLayer()->UpdateCurrentTiles(island->startX, island->startY);
-            island->GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(island->startX, island->startY);
-
-            if (!island->GetTerrainLayer(layer::LayerType::MIXED)->currentTiles.empty())
+            const auto f{ island->GetFiguresLayer()->UpdateCurrentTiles(island->startX, island->startY) };
+            const auto m{ island->GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(island->startX, island->startY) };
+            if (f || m)
             {
-                currentIslands.push_back(island.get());
+                AddIslandToRenderList(island.get());
             }
         }
     }

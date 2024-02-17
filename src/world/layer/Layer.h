@@ -279,8 +279,10 @@ namespace mdcii::world::layer
          *
          * @param t_xOffset The x offset.
          * @param t_yOffset The y offset.
+         *
+         * @return True if visible tiles were found; false otherwise.
          */
-        void UpdateCurrentTiles(const int t_xOffset, const int t_yOffset)
+        bool UpdateCurrentTiles(const int t_xOffset, const int t_yOffset)
         {
             std::vector<T>().swap(currentTiles);
             currentTiles = sortedTiles.at(magic_enum::enum_integer(m_world->camera->rotation));
@@ -295,6 +297,8 @@ namespace mdcii::world::layer
                 currentTiles.size(),
                 magic_enum::enum_name(layerType)
             );
+
+            return !currentTiles.empty();
         }
 
     protected:

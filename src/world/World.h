@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include <unordered_set>
 #include "vendor/olc/olcPixelGameEngine.h"
 #include "vendor/nlohmann/json.hpp"
 
@@ -134,7 +135,7 @@ namespace mdcii::world
         /**
          * @brief Pointer to the Islands objects that are currently being rendered.
          */
-        std::vector<Island*> currentIslands;
+        std::unordered_set<Island*> currentIslands;
 
         /**
          * @brief Pointer to the DeepWater object.
@@ -300,6 +301,13 @@ namespace mdcii::world
         //-------------------------------------------------
         // Render helper
         //-------------------------------------------------
+
+        /**
+         * @brief Adds the given island to the render list.
+         *
+         * @param t_island The island to be added to the render list.
+         */
+        void AddIslandToRenderList(Island* t_island);
 
         /**
          * @brief Identifies the islands visible on the screen for rendering.
