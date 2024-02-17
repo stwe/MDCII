@@ -16,10 +16,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-#include <random>
 #include "IslandGenerator.h"
 #include "MdciiAssert.h"
 #include "Game.h"
+#include "MdciiRandom.h"
 #include "MdciiUtils.h"
 #include "world/Rotation.h"
 #include "world/Island.h"
@@ -878,8 +878,6 @@ void mdcii::world::generator::IslandGenerator::CreateTerrainTiles(std::vector<ti
         }
     }
 
-    std::random_device rd;
-    std::mt19937 gen(rd());
     std::uniform_int_distribution randForTrees(0, 10);
     std::uniform_int_distribution randForEmbankment(0, 9);
     std::uniform_int_distribution randForEmbankmentCorner(0, 2);
@@ -896,9 +894,9 @@ void mdcii::world::generator::IslandGenerator::CreateTerrainTiles(std::vector<ti
             {
                 if (m_south)
                 {
-                    if (const auto r{ randForTrees(gen) }; r >= 7)
+                    if (const auto r{ randForTrees(mdcii_mersenne_engine) }; r >= 7)
                     {
-                        t_terrainTiles.at(idx) = CreateTile(resource::SOUTH_TREES_BUILDING_IDS.at(randForTrees(gen)), x, y, Rotation::DEG0);
+                        t_terrainTiles.at(idx) = CreateTile(resource::SOUTH_TREES_BUILDING_IDS.at(randForTrees(mdcii_mersenne_engine)), x, y, Rotation::DEG0);
                     }
                     else
                     {
@@ -907,9 +905,9 @@ void mdcii::world::generator::IslandGenerator::CreateTerrainTiles(std::vector<ti
                 }
                 else
                 {
-                    if (const auto r{ randForTrees(gen) }; r >= 7)
+                    if (const auto r{ randForTrees(mdcii_mersenne_engine) }; r >= 7)
                     {
-                        t_terrainTiles.at(idx) = CreateTile(resource::NORTH_TREES_BUILDING_IDS.at(randForTrees(gen)), x, y, Rotation::DEG0);
+                        t_terrainTiles.at(idx) = CreateTile(resource::NORTH_TREES_BUILDING_IDS.at(randForTrees(mdcii_mersenne_engine)), x, y, Rotation::DEG0);
                     }
                     else
                     {
@@ -924,42 +922,42 @@ void mdcii::world::generator::IslandGenerator::CreateTerrainTiles(std::vector<ti
                     switch (m_bitmaskTileTypes.at(MapType::EMBANKMENT).at(bitmask))
                     {
                     case TileType::TOP:
-                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(gen)), x, y, Rotation::DEG180);
+                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(mdcii_mersenne_engine)), x, y, Rotation::DEG180);
                         break;
                     case TileType::BOTTOM:
-                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(gen)), x, y, Rotation::DEG0);
+                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(mdcii_mersenne_engine)), x, y, Rotation::DEG0);
                         break;
                     case TileType::LEFT:
-                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(gen)), x, y, Rotation::DEG90);
+                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(mdcii_mersenne_engine)), x, y, Rotation::DEG90);
                         break;
                     case TileType::RIGHT:
-                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(gen)), x, y, Rotation::DEG270);
+                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_BUILDING_IDS.at(randForEmbankment(mdcii_mersenne_engine)), x, y, Rotation::DEG270);
                         break;
 
                     case TileType::CORNER_OUT_TL:
-                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(gen)), x, y, Rotation::DEG90);
+                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(mdcii_mersenne_engine)), x, y, Rotation::DEG90);
                         break;
                     case TileType::CORNER_OUT_TR:
-                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(gen)), x, y, Rotation::DEG180);
+                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(mdcii_mersenne_engine)), x, y, Rotation::DEG180);
                         break;
                     case TileType::CORNER_OUT_BL:
-                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(gen)), x, y, Rotation::DEG0);
+                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(mdcii_mersenne_engine)), x, y, Rotation::DEG0);
                         break;
                     case TileType::CORNER_OUT_BR:
-                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(gen)), x, y, Rotation::DEG270);
+                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_BUILDING_IDS.at(randForEmbankmentCorner(mdcii_mersenne_engine)), x, y, Rotation::DEG270);
                         break;
 
                     case TileType::CORNER_IN_TL:
-                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(gen)), x, y, Rotation::DEG270);
+                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(mdcii_mersenne_engine)), x, y, Rotation::DEG270);
                         break;
                     case TileType::CORNER_IN_TR:
-                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(gen)), x, y, Rotation::DEG0);
+                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(mdcii_mersenne_engine)), x, y, Rotation::DEG0);
                         break;
                     case TileType::CORNER_IN_BL:
-                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(gen)), x, y, Rotation::DEG180);
+                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(mdcii_mersenne_engine)), x, y, Rotation::DEG180);
                         break;
                     case TileType::CORNER_IN_BR:
-                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(gen)), x, y, Rotation::DEG90);
+                        t_terrainTiles.at(idx) = CreateTile(resource::EMBANKMENT_CORNER_INSIDE_BUILDING_IDS.at(randForEmbankmentCornerInside(mdcii_mersenne_engine)), x, y, Rotation::DEG90);
                         break;
 
                     default:

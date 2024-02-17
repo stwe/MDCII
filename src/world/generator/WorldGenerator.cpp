@@ -17,13 +17,9 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "WorldGenerator.h"
-#include "Game.h"
-#include "MdciiAssert.h"
 #include "MdciiUtils.h"
-#include "world/World.h"
 #include "world/Island.h"
 #include "world/MousePicker.h"
-#include "state/State.h"
 #include "resource/MdciiResourcesManager.h"
 
 //-------------------------------------------------
