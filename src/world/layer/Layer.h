@@ -26,6 +26,7 @@
 #include "world/World.h"
 #include "state/State.h"
 #include "resource/OriginalResourcesManager.h"
+#include "camera/Camera.h"
 
 namespace mdcii::world::layer
 {
@@ -271,6 +272,29 @@ namespace mdcii::world::layer
             tiles = sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0));
 
             MDCII_LOG_DEBUG("[Layer::SortTilesForRendering()] The tiles were sorted successfully.");
+        }
+
+        /**
+         * @brief Set `currentTiles` with the visible tiles to render.
+         *
+         * @param t_xOffset The x offset.
+         * @param t_yOffset The y offset.
+         */
+        void UpdateCurrentTiles(const int t_xOffset, const int t_yOffset)
+        {
+            std::vector<T>().swap(currentTiles);
+            currentTiles = sortedTiles.at(magic_enum::enum_integer(m_world->camera->rotation));
+
+            auto [begin, end]{ std::ranges::remove_if(currentTiles, [&](const T& t_tile) {
+                return m_world->IsWorldPositionOutsideScreen(t_tile.posX + t_xOffset, t_tile.posY + t_yOffset) || t_tile.IsNotRenderable();
+            } )};
+
+            currentTiles.erase(begin, end);
+
+            MDCII_LOG_DEBUG("[Layer::UpdateCurrentTiles()] Render {} current tiles for layer {}.",
+                currentTiles.size(),
+                magic_enum::enum_name(layerType)
+            );
         }
 
     protected:

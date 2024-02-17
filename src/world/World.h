@@ -307,14 +307,6 @@ namespace mdcii::world
         void FindVisibleIslands();
 
         /**
-         * @brief Checks if a given layer of an island is visible on the screen.
-         *
-         * @param t_island The island to check.
-         * @param t_layerType The layer type to check.
-         */
-        void CheckLayer(Island* t_island, layer::LayerType t_layerType) const;
-
-        /**
          * @brief Identifies the deep water tiles visible on the screen for rendering.
          */
         void FindVisibleDeepWaterTiles() const;

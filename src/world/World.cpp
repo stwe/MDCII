@@ -213,8 +213,8 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                             island->GetTerrainLayer(layer::LayerType::BUILDINGS)->AddBuilding(newTiles);
                             island->GetTerrainLayer(layer::LayerType::MIXED)->AddBuilding(newTiles);
 
-                            CheckLayer(island, layer::LayerType::BUILDINGS);
-                            CheckLayer(island, layer::LayerType::MIXED);
+                            island->GetTerrainLayer(layer::LayerType::BUILDINGS)->UpdateCurrentTiles(island->startX, island->startY);
+                            island->GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(island->startX, island->startY);
                         }
 
                         // render the building (dark grey) to be added and a green grid
@@ -419,7 +419,8 @@ void mdcii::world::World::FindVisibleIslands()
     {
         if (HasRenderLayerOption(RenderLayer::RENDER_FIGURES_LAYER))
         {
-            CheckLayer(island.get(), layer::LayerType::FIGURES);
+            island->GetFiguresLayer()->UpdateCurrentTiles(island->startX, island->startY);
+
             if (!island->GetFiguresLayer()->currentTiles.empty())
             {
                 currentIslands.push_back(island.get());
@@ -428,7 +429,8 @@ void mdcii::world::World::FindVisibleIslands()
 
         if (HasRenderLayerOption(RenderLayer::RENDER_MIXED_LAYER))
         {
-            CheckLayer(island.get(), layer::LayerType::MIXED);
+            island->GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(island->startX, island->startY);
+
             if (!island->GetTerrainLayer(layer::LayerType::MIXED)->currentTiles.empty())
             {
                 currentIslands.push_back(island.get());
@@ -441,7 +443,8 @@ void mdcii::world::World::FindVisibleIslands()
             auto dirty{ false };
             if (HasRenderLayerOption(RenderLayer::RENDER_COAST_LAYER))
             {
-                CheckLayer(island.get(), layer::LayerType::COAST);
+                island->GetTerrainLayer(layer::LayerType::COAST)->UpdateCurrentTiles(island->startX, island->startY);
+
                 if (!island->GetTerrainLayer(layer::LayerType::COAST)->currentTiles.empty())
                 {
                     dirty = true;
@@ -449,7 +452,8 @@ void mdcii::world::World::FindVisibleIslands()
             }
             if (HasRenderLayerOption(RenderLayer::RENDER_TERRAIN_LAYER))
             {
-                CheckLayer(island.get(), layer::LayerType::TERRAIN);
+                island->GetTerrainLayer(layer::LayerType::TERRAIN)->UpdateCurrentTiles(island->startX, island->startY);
+
                 if (!island->GetTerrainLayer(layer::LayerType::TERRAIN)->currentTiles.empty())
                 {
                     dirty = true;
@@ -457,7 +461,8 @@ void mdcii::world::World::FindVisibleIslands()
             }
             if (HasRenderLayerOption(RenderLayer::RENDER_BUILDINGS_LAYER))
             {
-                CheckLayer(island.get(), layer::LayerType::BUILDINGS);
+                island->GetTerrainLayer(layer::LayerType::BUILDINGS)->UpdateCurrentTiles(island->startX, island->startY);
+
                 if (!island->GetTerrainLayer(layer::LayerType::BUILDINGS)->currentTiles.empty())
                 {
                     dirty = true;
@@ -472,8 +477,9 @@ void mdcii::world::World::FindVisibleIslands()
 
         if (HasRenderLayerOption(RenderLayer::RENDER_ALL))
         {
-            CheckLayer(island.get(), layer::LayerType::FIGURES);
-            CheckLayer(island.get(), layer::LayerType::MIXED);
+            island->GetFiguresLayer()->UpdateCurrentTiles(island->startX, island->startY);
+            island->GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(island->startX, island->startY);
+
             if (!island->GetTerrainLayer(layer::LayerType::MIXED)->currentTiles.empty())
             {
                 currentIslands.push_back(island.get());
@@ -484,57 +490,9 @@ void mdcii::world::World::FindVisibleIslands()
     MDCII_LOG_DEBUG("[World::FindVisibleIslands()] Render {} islands.", currentIslands.size());
 }
 
-void mdcii::world::World::CheckLayer(Island* t_island, const layer::LayerType t_layerType) const
-{
-    if (t_layerType == layer::LayerType::FIGURES)
-    {
-        std::vector<tile::FigureTile>().swap(t_island->GetFiguresLayer()->currentTiles);
-
-        // todo: remove tile if figure (or building) in tile is null
-
-        t_island->GetFiguresLayer()->currentTiles = t_island->GetFiguresLayer()->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
-
-        auto [begin, end]{ std::ranges::remove_if(t_island->GetFiguresLayer()->currentTiles,
-                                                  [&](const tile::FigureTile& t_tile) {
-                                                      return IsWorldPositionOutsideScreen(t_tile.posX + t_island->startX, t_tile.posY + t_island->startY);
-                                                  } )};
-
-        t_island->GetFiguresLayer()->currentTiles.erase(begin, end);
-    }
-    else
-    {
-        std::vector<tile::TerrainTile>().swap(t_island->GetTerrainLayer(t_layerType)->currentTiles);
-        t_island->GetTerrainLayer(t_layerType)->currentTiles = t_island->GetTerrainLayer(t_layerType)->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
-
-        auto [begin, end]{ std::ranges::remove_if(t_island->GetTerrainLayer(t_layerType)->currentTiles,
-                                                 [&](const tile::TerrainTile& t_tile) {
-                                                     return IsWorldPositionOutsideScreen(t_tile.posX + t_island->startX, t_tile.posY + t_island->startY);
-                                                 } )};
-
-        t_island->GetTerrainLayer(t_layerType)->currentTiles.erase(begin, end);
-    }
-}
-
 void mdcii::world::World::FindVisibleDeepWaterTiles() const
 {
-    if (!HasRenderLayerOption(RenderLayer::RENDER_DEEP_WATER_LAYER) && !HasRenderLayerOption(RenderLayer::RENDER_ALL))
-    {
-        std::vector<tile::TerrainTile>().swap(deepWater->layer->currentTiles);
-        MDCII_LOG_DEBUG("[World::FindVisibleDeepWaterTiles()] Render {} deep water tiles.", deepWater->layer->currentTiles.size());
-
-        return;
-    }
-
-    const auto shouldBeRemoved = [&](const tile::TerrainTile& t_tile)
-    {
-        return IsWorldPositionOutsideScreen(t_tile.posX, t_tile.posY);
-    };
-
-    std::vector<tile::TerrainTile>().swap(deepWater->layer->currentTiles);
-    deepWater->layer->currentTiles = deepWater->layer->sortedTiles.at(magic_enum::enum_integer(camera->rotation));
-
-    auto [begin, end]{ std::ranges::remove_if(deepWater->layer->currentTiles, shouldBeRemoved) };
-    deepWater->layer->currentTiles.erase(begin, end);
+    deepWater->layer->UpdateCurrentTiles(0, 0);
 
     MDCII_LOG_DEBUG("[World::FindVisibleDeepWaterTiles()] Render {} deep water tiles.", deepWater->layer->currentTiles.size());
 }
