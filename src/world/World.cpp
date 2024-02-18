@@ -127,47 +127,30 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
     if (Gui::select_building.building)
     {
         const std::array offsets{
-            olc::vi2d(+1, +1), // + x, + y
-            olc::vi2d(-1, -1), // - x, - y
-            olc::vi2d(+1, -1), // + x, - y
-            olc::vi2d(-1, +1), // - x, + y
+            olc::vi2d(0, 0),
+            olc::vi2d(Gui::select_building.building->size.w - 1, 0),
+            olc::vi2d(0, Gui::select_building.building->size.h - 1)
         };
 
         for (auto* island : currentIslands)
         {
-            if (auto mouseOverIsland{ island->IsMouseOverIsland() }; mouseOverIsland.has_value())
+            for (const auto& offset : offsets)
             {
-                auto newTiles{ island->AddBuilding(Gui::select_building.building, Gui::select_building.rotation, mouseOverIsland.value(), 0, 0) };
-
-                /*
-                if (newTiles.has_value())
+                if (const auto mouseOverIsland{ island->IsMouseOverIsland() }; mouseOverIsland.has_value())
                 {
-                    // add on left mouse button click
-                    if (state->game->GetMouse(0).bPressed)
+                    const auto startPosition{ olc::vi2d(mouseOverIsland.value().x - offset.x, mouseOverIsland.value().y - offset.y) };
+                    auto newTiles = island->CreateNewBuilding(Gui::select_building.building, Gui::select_building.rotation, startPosition);
+                    if (newTiles.has_value())
                     {
-                        MDCII_LOG_DEBUG("[World::OnUserUpdate()] Add {}", Gui::select_building.building->id);
+                        // todo:
+                        if (state->game->GetMouse(0).bPressed)
+                        {
+                            island->AddNewBuilding(newTiles.value());
+                        }
 
-                        island->GetTerrainLayer(layer::LayerType::BUILDINGS)->AddBuilding(newTiles.value());
-                        island->GetTerrainLayer(layer::LayerType::MIXED)->AddBuilding(newTiles.value());
-
-                        island->GetTerrainLayer(layer::LayerType::BUILDINGS)->UpdateCurrentTiles(island->startX, island->startY);
-                        island->GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(island->startX, island->startY);
+                        break;
                     }
-
-                    // render the building (dark grey) to be added and a green grid
-                    for (const auto& tile : newTiles.value())
-                    {
-                        tileAtlas->RenderTile(island->startX, island->startY, &tile, olc::DARK_GREY);
-                        renderer::Renderer::RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, this, &tile, true);
-                    }
-
-                    break; // break offsets loop
                 }
-                else
-                {
-                    std::vector<tile::TerrainTile>().swap(newTiles.value());
-                }
-                */
             }
         }
 

@@ -21,6 +21,7 @@
 #include "MdciiUtils.h"
 #include "renderer/Renderer.h"
 #include "resource/AssetManager.h"
+#include "resource/TileAtlas.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -102,11 +103,10 @@ std::optional<olc::vi2d> mdcii::world::Island::IsMouseOverIsland() const
 // Add building
 //-------------------------------------------------
 
-std::optional<std::vector<mdcii::world::tile::TerrainTile>> mdcii::world::Island::AddBuilding(
+std::optional<std::vector<mdcii::world::tile::TerrainTile>> mdcii::world::Island::CreateNewBuilding(
     const resource::Building* t_building,
     const Rotation t_rotation,
-    const olc::vi2d& t_mouseOverIsland,
-    const int t_xOffset, const int t_yOffset
+    const olc::vi2d& t_position
 )
 {
     std::vector<tile::TerrainTile> newTiles;
@@ -123,8 +123,8 @@ std::optional<std::vector<mdcii::world::tile::TerrainTile>> mdcii::world::Island
                 rp = world::rotate_position(x, y,t_building->size.h, t_building->size.w, buildingRotation);
             }
 
-            auto posX{ t_mouseOverIsland.x + rp.x };
-            auto posY{ t_mouseOverIsland.y + rp.y };
+            const auto posX{ t_position.x + rp.x };
+            const auto posY{ t_position.y + rp.y };
 
             if (IsWorldPositionOverIsland({ startX + posX, startY + posY }))
             {
@@ -146,15 +146,20 @@ std::optional<std::vector<mdcii::world::tile::TerrainTile>> mdcii::world::Island
 
     if (newTiles.size() == t_building->size.h * static_cast<std::size_t>(t_building->size.w))
     {
-        for (const auto& tile : newTiles)
-        {
-            renderer::Renderer::RenderAsset(resource::Asset::GREEN_ISO, startX, startY, world, &tile, true);
-        }
-
+        PreviewNewBuilding(newTiles);
         return newTiles;
     }
 
     return std::nullopt;
+}
+
+void mdcii::world::Island::AddNewBuilding(std::vector<tile::TerrainTile>& t_buildingTiles)
+{
+    GetTerrainLayer(layer::LayerType::BUILDINGS)->AddBuilding(t_buildingTiles);
+    GetTerrainLayer(layer::LayerType::MIXED)->AddBuilding(t_buildingTiles);
+
+    GetTerrainLayer(layer::LayerType::BUILDINGS)->UpdateCurrentTiles(startX, startY);
+    GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(startX, startY);
 }
 
 //-------------------------------------------------
@@ -303,6 +308,19 @@ void mdcii::world::Island::PopulateMixedLayer(const int t_x, const int t_y)
 bool mdcii::world::Island::ShouldReplaceTile(const layer::TerrainLayer<tile::TerrainTile>* t_layer, const int t_index)
 {
     return t_layer->tiles.at(t_index).HasBuilding() && !GetTerrainLayer(layer::LayerType::BUILDINGS)->tiles.at(t_index).HasBuilding();
+}
+
+//-------------------------------------------------
+// New building
+//-------------------------------------------------
+
+void mdcii::world::Island::PreviewNewBuilding(const std::vector<tile::TerrainTile>& t_buildingTiles) const
+{
+    for (const auto& tile : t_buildingTiles)
+    {
+        world->tileAtlas->RenderTile(startX, startY, &tile, olc::DARK_GREY);
+        renderer::Renderer::RenderAsset(resource::Asset::GREEN_ISO, startX, startY, world, &tile, true);
+    }
 }
 
 //-------------------------------------------------

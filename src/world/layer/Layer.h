@@ -277,8 +277,8 @@ namespace mdcii::world::layer
         /**
          * @brief Set `currentTiles` with the visible tiles to render.
          *
-         * @param t_xOffset The x offset.
-         * @param t_yOffset The y offset.
+         * @param t_xOffset The x offset to check if the position is off screen.
+         * @param t_yOffset The y offset to check if the position is off screen.
          *
          * @return True if visible tiles were found; false otherwise.
          */
