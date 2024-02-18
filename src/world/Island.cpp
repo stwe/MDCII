@@ -19,6 +19,8 @@
 #include "Island.h"
 #include "MousePicker.h"
 #include "MdciiUtils.h"
+#include "renderer/Renderer.h"
+#include "resource/AssetManager.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -91,6 +93,65 @@ std::optional<olc::vi2d> mdcii::world::Island::IsMouseOverIsland() const
             world->mousePicker->selected.x - startX,
             world->mousePicker->selected.y - startY
         );
+    }
+
+    return std::nullopt;
+}
+
+//-------------------------------------------------
+// Add building
+//-------------------------------------------------
+
+std::optional<std::vector<mdcii::world::tile::TerrainTile>> mdcii::world::Island::AddBuilding(
+    const resource::Building* t_building,
+    const Rotation t_rotation,
+    const olc::vi2d& t_mouseOverIsland,
+    const int t_xOffset, const int t_yOffset
+)
+{
+    std::vector<tile::TerrainTile> newTiles;
+
+    for (auto y{ 0 }; y < t_building->size.h; ++y)
+    {
+        for (auto x{ 0 }; x < t_building->size.w; ++x)
+        {
+            const auto buildingRotation{ t_rotation - world->camera->rotation };
+
+            auto rp{ world::rotate_position(x, y, t_building->size.w, t_building->size.h, buildingRotation) };
+            if (buildingRotation == Rotation::DEG90 || buildingRotation == Rotation::DEG270)
+            {
+                rp = world::rotate_position(x, y,t_building->size.h, t_building->size.w, buildingRotation);
+            }
+
+            auto posX{ t_mouseOverIsland.x + rp.x };
+            auto posY{ t_mouseOverIsland.y + rp.y };
+
+            if (IsWorldPositionOverIsland({ startX + posX, startY + posY }))
+            {
+                const auto &terrainTileToCheck{ GetTerrainLayer(layer::LayerType::TERRAIN)->GetSortedTile(posX, posY, world->camera->rotation) };
+                const auto &buildingTileToCheck{ GetTerrainLayer(layer::LayerType::BUILDINGS)->GetSortedTile(posX, posY, world->camera->rotation) };
+
+                if (terrainTileToCheck.HasBuildingAboveWaterAndCoast() && !buildingTileToCheck.HasBuilding())
+                {
+                    newTiles.emplace_back(
+                        t_building,
+                        magic_enum::enum_integer(buildingRotation),
+                        rp.x, rp.y,
+                        posX, posY
+                    );
+                }
+            }
+        }
+    }
+
+    if (newTiles.size() == t_building->size.h * static_cast<std::size_t>(t_building->size.w))
+    {
+        for (const auto& tile : newTiles)
+        {
+            renderer::Renderer::RenderAsset(resource::Asset::GREEN_ISO, startX, startY, world, &tile, true);
+        }
+
+        return newTiles;
     }
 
     return std::nullopt;

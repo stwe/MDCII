@@ -137,57 +137,25 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
         {
             if (auto mouseOverIsland{ island->IsMouseOverIsland() }; mouseOverIsland.has_value())
             {
-                std::vector<tile::TerrainTile> newTiles;
+                auto newTiles{ island->AddBuilding(Gui::select_building.building, Gui::select_building.rotation, mouseOverIsland.value(), 0, 0) };
 
-                for (auto y{ 0 }; y < Gui::select_building.building->size.h; ++y)
-                {
-                    for (auto x{ 0 }; x < Gui::select_building.building->size.w; ++x)
-                    {
-                        auto rp = world::rotate_position(x, y, Gui::select_building.building->size.w, Gui::select_building.building->size.h,
-                                                         Gui::select_building.rotation - camera->rotation);
-                        if (Gui::select_building.rotation - camera->rotation == Rotation::DEG90 || Gui::select_building.rotation - camera->rotation == Rotation::DEG270)
-                        {
-                            rp = world::rotate_position(x, y, Gui::select_building.building->size.h, Gui::select_building.building->size.w,
-                                                        Gui::select_building.rotation - camera->rotation);
-                        }
-
-                        auto posX{ mouseOverIsland.value().x + rp.x };
-                        auto posY{ mouseOverIsland.value().y + rp.y };
-
-                        if (island->IsWorldPositionOverIsland({ island->startX + posX, island->startY + posY }))
-                        {
-                            const auto &terrainTileToCheck{ island->GetTerrainLayer(layer::LayerType::TERRAIN)->GetSortedTile(posX, posY, camera->rotation) };
-                            const auto &buildingTileToCheck{ island->GetTerrainLayer(layer::LayerType::BUILDINGS)->GetSortedTile(posX, posY, camera->rotation) };
-
-                            if (terrainTileToCheck.HasBuildingAboveWaterAndCoast() && !buildingTileToCheck.HasBuilding())
-                            {
-                                newTiles.emplace_back(
-                                    Gui::select_building.building,
-                                    magic_enum::enum_integer(Gui::select_building.rotation - camera->rotation),
-                                    rp.x, rp.y,
-                                    posX, posY
-                                );
-                            }
-                        }
-                    }
-                }
-
-                if (newTiles.size() == Gui::select_building.building->size.h * static_cast<std::size_t>(Gui::select_building.building->size.w))
+                /*
+                if (newTiles.has_value())
                 {
                     // add on left mouse button click
                     if (state->game->GetMouse(0).bPressed)
                     {
                         MDCII_LOG_DEBUG("[World::OnUserUpdate()] Add {}", Gui::select_building.building->id);
 
-                        island->GetTerrainLayer(layer::LayerType::BUILDINGS)->AddBuilding(newTiles);
-                        island->GetTerrainLayer(layer::LayerType::MIXED)->AddBuilding(newTiles);
+                        island->GetTerrainLayer(layer::LayerType::BUILDINGS)->AddBuilding(newTiles.value());
+                        island->GetTerrainLayer(layer::LayerType::MIXED)->AddBuilding(newTiles.value());
 
                         island->GetTerrainLayer(layer::LayerType::BUILDINGS)->UpdateCurrentTiles(island->startX, island->startY);
                         island->GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(island->startX, island->startY);
                     }
 
                     // render the building (dark grey) to be added and a green grid
-                    for (const auto& tile : newTiles)
+                    for (const auto& tile : newTiles.value())
                     {
                         tileAtlas->RenderTile(island->startX, island->startY, &tile, olc::DARK_GREY);
                         renderer::Renderer::RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, this, &tile, true);
@@ -197,8 +165,9 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                 }
                 else
                 {
-                    std::vector<tile::TerrainTile>().swap(newTiles);
+                    std::vector<tile::TerrainTile>().swap(newTiles.value());
                 }
+                */
             }
         }
 

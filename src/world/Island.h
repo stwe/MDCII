@@ -172,6 +172,12 @@ namespace mdcii::world
          */
         [[nodiscard]] std::optional<olc::vi2d> IsMouseOverIsland() const;
 
+        //-------------------------------------------------
+        // Add building
+        //-------------------------------------------------
+
+        [[nodiscard]] std::optional<std::vector<tile::TerrainTile>> AddBuilding(const resource::Building* t_building, Rotation t_rotation, const olc::vi2d& t_mouseOverIsland, int t_xOffset, int t_yOffset);
+
     protected:
 
     private:
