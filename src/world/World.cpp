@@ -139,97 +139,65 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
             {
                 std::vector<tile::TerrainTile> newTiles;
 
-                for (const auto& offset : offsets)
+                for (auto y{ 0 }; y < Gui::select_building.building->size.h; ++y)
                 {
-                    for (auto y{ 0 }; y < Gui::select_building.building->size.h; ++y)
+                    for (auto x{ 0 }; x < Gui::select_building.building->size.w; ++x)
                     {
-                        for (auto x{ 0 }; x < Gui::select_building.building->size.w; ++x)
+                        auto rp = world::rotate_position(x, y, Gui::select_building.building->size.w, Gui::select_building.building->size.h,
+                                                         Gui::select_building.rotation - camera->rotation);
+                        if (Gui::select_building.rotation - camera->rotation == Rotation::DEG90 || Gui::select_building.rotation - camera->rotation == Rotation::DEG270)
                         {
-                            olc::vi2d rp{ x, y };
-                            auto ro = offset;
+                            rp = world::rotate_position(x, y, Gui::select_building.building->size.h, Gui::select_building.building->size.w,
+                                                        Gui::select_building.rotation - camera->rotation);
+                        }
 
-                            if (Gui::select_building.building->size.w != Gui::select_building.building->size.h)
+                        auto posX{ mouseOverIsland.value().x + rp.x };
+                        auto posY{ mouseOverIsland.value().y + rp.y };
+
+                        if (island->IsWorldPositionOverIsland({ island->startX + posX, island->startY + posY }))
+                        {
+                            const auto &terrainTileToCheck{ island->GetTerrainLayer(layer::LayerType::TERRAIN)->GetSortedTile(posX, posY, camera->rotation) };
+                            const auto &buildingTileToCheck{ island->GetTerrainLayer(layer::LayerType::BUILDINGS)->GetSortedTile(posX, posY, camera->rotation) };
+
+                            if (terrainTileToCheck.HasBuildingAboveWaterAndCoast() && !buildingTileToCheck.HasBuilding())
                             {
-                                auto updatePositions = [&]() {
-                                    rp = world::rotate_position(x, y,
-                                                                Gui::select_building.building->size.h,
-                                                                Gui::select_building.building->size.w,
-                                                                Rotation::DEG90);
-                                    ro = world::rotate_position(offset.x, offset.y,
-                                                                Gui::select_building.building->size.h,
-                                                                Gui::select_building.building->size.w,
-                                                                Rotation::DEG90);
-                                };
-
-                                if (camera->rotation == Rotation::DEG0 || camera->rotation == Rotation::DEG180)
-                                {
-                                    if (Gui::select_building.rotation == world::Rotation::DEG90 || Gui::select_building.rotation == world::Rotation::DEG270)
-                                    {
-                                        updatePositions();
-                                    }
-                                }
-
-                                if (camera->rotation == Rotation::DEG90 || camera->rotation == Rotation::DEG270)
-                                {
-                                    if (Gui::select_building.rotation == world::Rotation::DEG0 || Gui::select_building.rotation == world::Rotation::DEG180)
-                                    {
-                                        updatePositions();
-                                    }
-                                }
-                            }
-
-                            const auto offsetX{ rp.x * ro.x };
-                            const auto offsetY{ rp.y * ro.y };
-
-                            const auto posX{ mouseOverIsland.value().x + offsetX };
-                            const auto posY{ mouseOverIsland.value().y + offsetY };
-
-                            if (island->IsWorldPositionOverIsland({ island->startX + posX, island->startY + posY }))
-                            {
-                                const auto& terrainTileToCheck{ island->GetTerrainLayer(layer::LayerType::TERRAIN)->GetSortedTile(posX, posY, camera->rotation) };
-                                const auto& buildingTileToCheck{ island->GetTerrainLayer(layer::LayerType::BUILDINGS)->GetSortedTile(posX, posY, camera->rotation) };
-
-                                if (terrainTileToCheck.HasBuildingAboveWaterAndCoast() && !buildingTileToCheck.HasBuilding())
-                                {
-                                    newTiles.emplace_back(
-                                        Gui::select_building.building,
-                                        magic_enum::enum_integer(Gui::select_building.rotation - camera->rotation),
-                                        ro.x < 0 ? Gui::select_building.building->size.w - 1 - rp.x : rp.x,
-                                        ro.y < 0 ? Gui::select_building.building->size.h - 1 - rp.y : rp.y,
-                                        posX, posY
-                                    );
-                                }
+                                newTiles.emplace_back(
+                                    Gui::select_building.building,
+                                    magic_enum::enum_integer(Gui::select_building.rotation - camera->rotation),
+                                    rp.x, rp.y,
+                                    posX, posY
+                                );
                             }
                         }
                     }
+                }
 
-                    if (newTiles.size() == Gui::select_building.building->size.h * static_cast<std::size_t>(Gui::select_building.building->size.w))
+                if (newTiles.size() == Gui::select_building.building->size.h * static_cast<std::size_t>(Gui::select_building.building->size.w))
+                {
+                    // add on left mouse button click
+                    if (state->game->GetMouse(0).bPressed)
                     {
-                        // add on left mouse button click
-                        if (state->game->GetMouse(0).bPressed)
-                        {
-                            MDCII_LOG_DEBUG("[World::OnUserUpdate()] Add {}", Gui::select_building.building->id);
+                        MDCII_LOG_DEBUG("[World::OnUserUpdate()] Add {}", Gui::select_building.building->id);
 
-                            island->GetTerrainLayer(layer::LayerType::BUILDINGS)->AddBuilding(newTiles);
-                            island->GetTerrainLayer(layer::LayerType::MIXED)->AddBuilding(newTiles);
+                        island->GetTerrainLayer(layer::LayerType::BUILDINGS)->AddBuilding(newTiles);
+                        island->GetTerrainLayer(layer::LayerType::MIXED)->AddBuilding(newTiles);
 
-                            island->GetTerrainLayer(layer::LayerType::BUILDINGS)->UpdateCurrentTiles(island->startX, island->startY);
-                            island->GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(island->startX, island->startY);
-                        }
-
-                        // render the building (dark grey) to be added and a green grid
-                        for (const auto& tile : newTiles)
-                        {
-                            tileAtlas->RenderTile(island->startX, island->startY, &tile, olc::DARK_GREY);
-                            renderer::Renderer::RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, this, &tile, true);
-                        }
-
-                        break; // break offsets loop
+                        island->GetTerrainLayer(layer::LayerType::BUILDINGS)->UpdateCurrentTiles(island->startX, island->startY);
+                        island->GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(island->startX, island->startY);
                     }
-                    else
+
+                    // render the building (dark grey) to be added and a green grid
+                    for (const auto& tile : newTiles)
                     {
-                        std::vector<tile::TerrainTile>().swap(newTiles);
+                        tileAtlas->RenderTile(island->startX, island->startY, &tile, olc::DARK_GREY);
+                        renderer::Renderer::RenderAsset(resource::Asset::GREEN_ISO, island->startX, island->startY, this, &tile, true);
                     }
+
+                    break; // break offsets loop
+                }
+                else
+                {
+                    std::vector<tile::TerrainTile>().swap(newTiles);
                 }
             }
         }
