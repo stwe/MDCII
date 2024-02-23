@@ -58,7 +58,7 @@ int mdcii::world::tile::Tile::GetRenderIndex(const int t_x, const int t_y, const
     return position.y * t_height + position.x;
 }
 
-void mdcii::world::tile::Tile::SetRenderIndices(const int t_width, const int t_height)
+void mdcii::world::tile::Tile::CalcRenderPositions(const int t_width, const int t_height)
 {
     renderIndices.resize(magic_enum::enum_count<Rotation>());
     renderIndices[0] = GetRenderIndex(posX, posY, t_width, t_height, Rotation::DEG0);

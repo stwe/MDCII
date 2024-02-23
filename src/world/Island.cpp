@@ -155,8 +155,8 @@ std::optional<std::vector<mdcii::world::tile::TerrainTile>> mdcii::world::Island
 
 void mdcii::world::Island::AddNewBuilding(std::vector<tile::TerrainTile>& t_buildingTiles)
 {
-    GetTerrainLayer(layer::LayerType::BUILDINGS)->AddBuilding(t_buildingTiles);
-    GetTerrainLayer(layer::LayerType::MIXED)->AddBuilding(t_buildingTiles);
+    GetTerrainLayer(layer::LayerType::BUILDINGS)->AddTiles(t_buildingTiles);
+    GetTerrainLayer(layer::LayerType::MIXED)->AddTiles(t_buildingTiles);
 
     GetTerrainLayer(layer::LayerType::BUILDINGS)->UpdateCurrentTiles(startX, startY);
     GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(startX, startY);

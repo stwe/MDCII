@@ -139,6 +139,8 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
                 if (const auto mouseOverIsland{ island->IsMouseOverIsland() }; mouseOverIsland.has_value())
                 {
                     const auto startPosition{ olc::vi2d(mouseOverIsland.value().x - offset.x, mouseOverIsland.value().y - offset.y) };
+
+                    // todo: newTiles in Island erstellen
                     auto newTiles = island->CreateNewBuilding(Gui::select_building.building, Gui::select_building.rotation, startPosition);
                     if (newTiles.has_value())
                     {

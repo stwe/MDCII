@@ -119,7 +119,7 @@ void mdcii::world::DeepWater::UpdateTileProperties() const
             tile.gfxs.push_back(gfx0 + (3 * tile.building->rotate));
         }
 
-        tile.SetRenderIndices(layer->width, layer->height);
+        tile.CalcRenderPositions(layer->width, layer->height);
     }
 
     layer->SortTilesForRendering();

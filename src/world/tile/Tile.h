@@ -146,11 +146,11 @@ namespace mdcii::world::tile
         [[nodiscard]] static int GetRenderIndex(int t_x, int t_y, int t_width, int t_height, Rotation t_rotation);
 
         /**
-         * @brief Calculates the render index for the tile position for all rotation directions.
+         * @brief Calculates the render sort positions for all rotations.
          *
          * @param t_width The width of the 2D array.
          * @param t_height The height of the 2D array.
          */
-        void SetRenderIndices(int t_width, int t_height);
+        void CalcRenderPositions(int t_width, int t_height);
     };
 }

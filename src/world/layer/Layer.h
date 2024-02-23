@@ -91,7 +91,7 @@ namespace mdcii::world::layer
         const int height;
 
         /**
-         * @brief A vector holding all tiles belonging to this layer.
+         * @brief Contains all tiles of the layer, sorted as in rotation DEG0.
          */
         std::vector<T> tiles;
 
@@ -166,7 +166,7 @@ namespace mdcii::world::layer
         }
 
         //-------------------------------------------------
-        // Create && Init Tile
+        // Interface
         //-------------------------------------------------
 
         /**
@@ -187,7 +187,7 @@ namespace mdcii::world::layer
         virtual void InitTile(int t_x, int t_y) = 0;
 
         //-------------------------------------------------
-        // Create && Init Tiles
+        // Create and init tiles from Json
         //-------------------------------------------------
 
         /**
@@ -232,7 +232,7 @@ namespace mdcii::world::layer
         };
 
         //-------------------------------------------------
-        // Sort
+        // Sort tiles
         //-------------------------------------------------
 
         /**
@@ -274,6 +274,10 @@ namespace mdcii::world::layer
             MDCII_LOG_DEBUG("[Layer::SortTilesForRendering()] The tiles were sorted successfully.");
         }
 
+        //-------------------------------------------------
+        // Current tiles to render
+        //-------------------------------------------------
+
         /**
          * @brief Set `currentTiles` with the visible tiles to render.
          *
@@ -301,6 +305,40 @@ namespace mdcii::world::layer
             return !currentTiles.empty();
         }
 
+        //-------------------------------------------------
+        // Add tiles
+        //-------------------------------------------------
+
+        /**
+         * @brief Adds a tile to the layer.
+         *
+         * @param t_tile The tile to be added.
+         */
+        void AddTile(T& t_tile)
+        {
+            t_tile.CalcRenderPositions(width, height);
+
+            IntoTilesArray(t_tile);
+            IntoSortedTilesArray(t_tile);
+        }
+
+        /**
+         * @brief Adds tiles to the layer.
+         *
+         * @param t_tiles The tiles to be added.
+         */
+        void AddTiles(std::vector<T>& t_tiles)
+        {
+            MDCII_ASSERT(!t_tiles.empty(), "[Layer::AddTiles()] Invalid number of tiles.")
+
+            MDCII_LOG_DEBUG("[Layer::AddTiles()] Add {} tiles to the {} layer.", t_tiles.size(), magic_enum::enum_name(layerType));
+
+            for (auto& tile : t_tiles)
+            {
+                AddTile(tile);
+            }
+        }
+
     protected:
         //-------------------------------------------------
         // Member
@@ -310,6 +348,38 @@ namespace mdcii::world::layer
          * @brief Pointer to the parent World object.
          */
         const World* m_world{ nullptr };
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        /**
+         * @brief Copies a tile into the `tiles` array.
+         *
+         * @param t_tile The tile to copy.
+         */
+        void IntoTilesArray(T& t_tile)
+        {
+            tiles.at(t_tile.renderIndices[0]) = t_tile;
+        }
+
+        /**
+         * @brief Copies a tile into the `sortedTiles` array.
+         *
+         * @param t_tile The tile to copy.
+         */
+        void IntoSortedTilesArray(T& t_tile)
+        {
+            auto idx0{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG0)).at(t_tile.renderIndices[0]) };
+            auto idx90{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG90)).at(t_tile.renderIndices[1]) };
+            auto idx180{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG180)).at(t_tile.renderIndices[2]) };
+            auto idx270{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG270)).at(t_tile.renderIndices[3]) };
+
+            sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0)).at(idx0) = t_tile;
+            sortedTiles.at(magic_enum::enum_integer(Rotation::DEG90)).at(idx90) = t_tile;
+            sortedTiles.at(magic_enum::enum_integer(Rotation::DEG180)).at(idx180) = t_tile;
+            sortedTiles.at(magic_enum::enum_integer(Rotation::DEG270)).at(idx270) = t_tile;
+        }
 
     private:
 
@@ -357,7 +427,7 @@ namespace mdcii::world::layer
         }
 
         //-------------------------------------------------
-        // Create && Init Tile
+        // Interface
         //-------------------------------------------------
 
         /**
@@ -426,44 +496,7 @@ namespace mdcii::world::layer
                 tile.CalculateGfx();
             }
 
-            tile.SetRenderIndices(width, height);
-        }
-
-        //-------------------------------------------------
-        // Add Tiles
-        //-------------------------------------------------
-
-        /**
-         * @brief Adds a building to the layer.
-         *
-         * @param t_buildingTiles The tiles of the building to be added.
-         */
-        void AddBuilding(std::vector<tile::TerrainTile>& t_buildingTiles)
-        {
-            MDCII_ASSERT(!t_buildingTiles.empty(), "[TerrainLayer::AddBuilding()] Invalid number of tiles.")
-
-            MDCII_LOG_DEBUG("[TerrainLayer::AddBuilding()] Add {} tiles for a building to the {} layer.", t_buildingTiles.size(), magic_enum::enum_name(layerType));
-
-            for (auto& tile : t_buildingTiles)
-            {
-                MDCII_ASSERT(tile.HasBuildingAboveWaterAndCoast(), "[TerrainLayer::AddBuilding()] Null pointer or invalid building.")
-
-                tile.SetRenderIndices(width, height);
-
-                // todo: refactor
-
-                tiles.at(tile.renderIndices[0]) = tile;
-
-                auto idx0{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG0)).at(tile.renderIndices[0]) };
-                auto idx90{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG90)).at(tile.renderIndices[1]) };
-                auto idx180{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG180)).at(tile.renderIndices[2]) };
-                auto idx270{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG270)).at(tile.renderIndices[3]) };
-
-                sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0)).at(idx0) = tile;
-                sortedTiles.at(magic_enum::enum_integer(Rotation::DEG90)).at(idx90) = tile;
-                sortedTiles.at(magic_enum::enum_integer(Rotation::DEG180)).at(idx180) = tile;
-                sortedTiles.at(magic_enum::enum_integer(Rotation::DEG270)).at(idx270) = tile;
-            }
+            tile.CalcRenderPositions(width, height);
         }
 
     protected:
@@ -513,7 +546,7 @@ namespace mdcii::world::layer
         }
 
         //-------------------------------------------------
-        // Create && Init Tile
+        // Interface
         //-------------------------------------------------
 
         /**
@@ -580,7 +613,7 @@ namespace mdcii::world::layer
             tile.posX = t_x;
             tile.posY = t_y;
 
-            tile.SetRenderIndices(width, height);
+            tile.CalcRenderPositions(width, height);
         }
 
         //-------------------------------------------------
