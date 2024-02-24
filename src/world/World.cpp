@@ -123,39 +123,36 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
         return;
     }
 
+    // update current island under mouse
+    m_currentIslandUnderMouse = GetCurrentIslandUnderMouse();
+
     // render the selected building to add it
-    if (Gui::select_building.building)
+    if (Gui::select_building.building && m_currentIslandUnderMouse.island)
     {
-        const std::array offsets{
-            olc::vi2d(0, 0),
-            olc::vi2d(Gui::select_building.building->size.w - 1, 0),
-            olc::vi2d(0, Gui::select_building.building->size.h - 1)
-        };
+        auto canAdd{ false };
 
-        for (auto* island : currentIslands)
+        for (const auto& [offsetX, offsetY] : Gui::select_building.building->CreateBuildingStartOffsets())
         {
-            for (const auto& offset : offsets)
+            canAdd = m_currentIslandUnderMouse.island->CreateNewBuildingTiles(
+                Gui::select_building.building,
+                Gui::select_building.rotation,
+                { m_currentIslandUnderMouse.position.x - offsetX, m_currentIslandUnderMouse.position.y - offsetY }
+            );
+
+            if (canAdd)
             {
-                if (const auto mouseOverIsland{ island->IsMouseOverIsland() }; mouseOverIsland.has_value())
-                {
-                    const auto startPosition{ olc::vi2d(mouseOverIsland.value().x - offset.x, mouseOverIsland.value().y - offset.y) };
-
-                    // todo: newTiles in Island erstellen
-                    auto newTiles = island->CreateNewBuilding(Gui::select_building.building, Gui::select_building.rotation, startPosition);
-                    if (newTiles.has_value())
-                    {
-                        // todo:
-                        if (state->game->GetMouse(0).bPressed)
-                        {
-                            island->AddNewBuilding(newTiles.value());
-                        }
-
-                        break;
-                    }
-                }
+                m_currentIslandUnderMouse.island->PreviewNewBuildingTiles();
+                break;
             }
         }
 
+        // left mouse button
+        if (state->game->GetMouse(0).bPressed && canAdd)
+        {
+            m_currentIslandUnderMouse.island->AddNewBuildingTiles();
+        }
+
+        // right mouse button
         if (state->game->GetMouse(1).bHeld)
         {
             Gui::select_building.building = nullptr;
@@ -281,12 +278,26 @@ olc::vi2d mdcii::world::World::ToScreen(const int t_x, const int t_y) const
     };
 }
 
-bool mdcii::world::World::IsWorldPositionOnAnyIsland(const int t_x, const int t_y) const
+bool mdcii::world::World::IsWorldPositionOverAnyIsland(const int t_x, const int t_y) const
 {
     return std::ranges::any_of(islands, [t_x, t_y](auto const& t_island)
     {
         return t_island->IsWorldPositionOverIsland({ t_x, t_y });
     });
+}
+
+mdcii::world::CurrentIsland mdcii::world::World::GetCurrentIslandUnderMouse() const
+{
+    // iter only over the current visible islands
+    for (const auto& island : currentIslands)
+    {
+        if (const auto mouseOverIsland{ island->IsMouseOverIsland() }; mouseOverIsland.has_value())
+        {
+            return { island, mouseOverIsland.value() };
+        }
+    }
+
+    return { nullptr, {} };
 }
 
 bool mdcii::world::World::IsWorldPositionOutsideScreen(const int t_x, const int t_y) const

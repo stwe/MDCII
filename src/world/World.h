@@ -99,6 +99,26 @@ namespace mdcii::world
     };
 
     //-------------------------------------------------
+    // Current Island
+    //-------------------------------------------------
+
+    /**
+     * @brief Encapsulates the current island and the current position of the mouse on the island.
+     */
+    struct CurrentIsland
+    {
+        /**
+         * @brief Pointer to the current Island under mouse.
+         */
+        Island* island{ nullptr };
+
+        /**
+         * @brief The mouse position relative to the current island.
+         */
+        olc::vi2d position{ -1, -1 };
+    };
+
+    //-------------------------------------------------
     // World
     //-------------------------------------------------
 
@@ -250,7 +270,14 @@ namespace mdcii::world
          *
          * @return True if the position falls on an island. Otherwise, it returns false.
          */
-        [[nodiscard]] bool IsWorldPositionOnAnyIsland(int t_x, int t_y) const;
+        [[nodiscard]] bool IsWorldPositionOverAnyIsland(int t_x, int t_y) const;
+
+        /**
+         * @brief Checks whether the mouse is on any island.
+         *
+         * @return The current island and the current position of the mouse on this island.
+         */
+        [[nodiscard]] CurrentIsland GetCurrentIslandUnderMouse() const;
 
         /**
          * @brief Checks whether the given world position is outside the screen.
@@ -286,6 +313,11 @@ namespace mdcii::world
          * @brief Initial access flag.
          */
         bool m_flag{ true };
+
+        /**
+         * @brief The current island under mouse.
+         */
+        CurrentIsland m_currentIslandUnderMouse;
 
         //-------------------------------------------------
         // Init

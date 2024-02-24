@@ -103,7 +103,7 @@ std::optional<olc::vi2d> mdcii::world::Island::IsMouseOverIsland() const
 // Add building
 //-------------------------------------------------
 
-std::optional<std::vector<mdcii::world::tile::TerrainTile>> mdcii::world::Island::CreateNewBuilding(
+bool mdcii::world::Island::CreateNewBuildingTiles(
     const resource::Building* t_building,
     const Rotation t_rotation,
     const olc::vi2d& t_position
@@ -146,20 +146,44 @@ std::optional<std::vector<mdcii::world::tile::TerrainTile>> mdcii::world::Island
 
     if (newTiles.size() == t_building->size.h * static_cast<std::size_t>(t_building->size.w))
     {
-        PreviewNewBuilding(newTiles);
-        return newTiles;
+        m_newBuildingTiles = newTiles;
+
+        return true;
     }
 
-    return std::nullopt;
+    m_newBuildingTiles = std::nullopt;
+
+    return false;
 }
 
-void mdcii::world::Island::AddNewBuilding(std::vector<tile::TerrainTile>& t_buildingTiles)
+void mdcii::world::Island::PreviewNewBuildingTiles() const
 {
-    GetTerrainLayer(layer::LayerType::BUILDINGS)->AddTiles(t_buildingTiles);
-    GetTerrainLayer(layer::LayerType::MIXED)->AddTiles(t_buildingTiles);
+    if (!m_newBuildingTiles.has_value())
+    {
+        return;
+    }
 
-    GetTerrainLayer(layer::LayerType::BUILDINGS)->UpdateCurrentTiles(startX, startY);
-    GetTerrainLayer(layer::LayerType::MIXED)->UpdateCurrentTiles(startX, startY);
+    for (const auto& tile : m_newBuildingTiles.value())
+    {
+        world->tileAtlas->RenderTile(startX, startY, &tile, olc::DARK_GREY);
+        renderer::Renderer::RenderAsset(resource::Asset::GREEN_ISO, startX, startY, world, &tile, true);
+    }
+}
+
+void mdcii::world::Island::AddNewBuildingTiles()
+{
+    if (!m_newBuildingTiles.has_value())
+    {
+        return;
+    }
+
+    using enum layer::LayerType;
+
+    GetTerrainLayer(BUILDINGS)->AddTiles(m_newBuildingTiles.value());
+    GetTerrainLayer(MIXED)->AddTiles(m_newBuildingTiles.value());
+
+    GetTerrainLayer(BUILDINGS)->UpdateCurrentTiles(startX, startY);
+    GetTerrainLayer(MIXED)->UpdateCurrentTiles(startX, startY);
 }
 
 //-------------------------------------------------
@@ -207,9 +231,10 @@ void mdcii::world::Island::SetLayerData(const nlohmann::json& t_json)
     MDCII_LOG_DEBUG("[Island::SetLayerData()] Sets the island's layer data.");
 
     // the data for these three island layers is read from a file
-    SetLayerDataByType(t_json, layer::LayerType::COAST);
-    SetLayerDataByType(t_json, layer::LayerType::TERRAIN);
-    SetLayerDataByType(t_json, layer::LayerType::BUILDINGS);
+    using enum layer::LayerType;
+    SetLayerDataByType(t_json, COAST);
+    SetLayerDataByType(t_json, TERRAIN);
+    SetLayerDataByType(t_json, BUILDINGS);
 
     // todo: refactor
     // figures layer
@@ -218,7 +243,7 @@ void mdcii::world::Island::SetLayerData(const nlohmann::json& t_json)
     {
         for (const auto& [layerNameJson, layerTilesJson] : v.items())
         {
-            if (layerNameJson == to_lower_case(std::string(magic_enum::enum_name(layer::LayerType::FIGURES))))
+            if (layerNameJson == to_lower_case(std::string(magic_enum::enum_name(FIGURES))))
             {
                 m_figuresLayer->CreateTiles(layerTilesJson);
             }
@@ -226,7 +251,7 @@ void mdcii::world::Island::SetLayerData(const nlohmann::json& t_json)
     }
 
     // this mixed layer will later be filled with the data from the other layers
-    m_terrainLayers.emplace(layer::LayerType::MIXED, std::make_unique<layer::TerrainLayer<tile::TerrainTile>>(world, layer::LayerType::MIXED, width, height));
+    m_terrainLayers.emplace(MIXED, std::make_unique<layer::TerrainLayer<tile::TerrainTile>>(world, MIXED, width, height));
 }
 
 void mdcii::world::Island::SetLayerDataByType(const nlohmann::json& t_json, const layer::LayerType t_layerType)
@@ -264,6 +289,7 @@ void mdcii::world::Island::InitLayerData()
 {
     MDCII_LOG_DEBUG("[Island::InitLayerData()] Initialises the tile data of the COAST, TERRAIN and BUILDINGS layer.");
 
+    using enum layer::LayerType;
     GetTerrainLayer(layer::LayerType::COAST)->InitTiles();
     GetTerrainLayer(layer::LayerType::TERRAIN)->InitTiles();
     GetTerrainLayer(layer::LayerType::BUILDINGS)->InitTiles();
@@ -294,33 +320,22 @@ void mdcii::world::Island::PopulateMixedLayer(const int t_x, const int t_y)
 
     MDCII_ASSERT(index >= 0 && index < width * height, "[Island::PopulateMixedLayer()] Invalid index.")
 
-    if (ShouldReplaceTile(GetTerrainLayer(layer::LayerType::COAST), index))
+    using enum layer::LayerType;
+
+    if (ShouldReplaceTile(GetTerrainLayer(COAST), index))
     {
-        GetTerrainLayer(layer::LayerType::MIXED)->tiles.at(index) = GetTerrainLayer(layer::LayerType::COAST)->tiles.at(index);
+        GetTerrainLayer(MIXED)->tiles.at(index) = GetTerrainLayer(COAST)->tiles.at(index);
     }
 
-    if (ShouldReplaceTile(GetTerrainLayer(layer::LayerType::TERRAIN), index))
+    if (ShouldReplaceTile(GetTerrainLayer(TERRAIN), index))
     {
-        GetTerrainLayer(layer::LayerType::MIXED)->tiles.at(index) = GetTerrainLayer(layer::LayerType::TERRAIN)->tiles.at(index);
+        GetTerrainLayer(MIXED)->tiles.at(index) = GetTerrainLayer(TERRAIN)->tiles.at(index);
     }
 }
 
 bool mdcii::world::Island::ShouldReplaceTile(const layer::TerrainLayer<tile::TerrainTile>* t_layer, const int t_index)
 {
     return t_layer->tiles.at(t_index).HasBuilding() && !GetTerrainLayer(layer::LayerType::BUILDINGS)->tiles.at(t_index).HasBuilding();
-}
-
-//-------------------------------------------------
-// New building
-//-------------------------------------------------
-
-void mdcii::world::Island::PreviewNewBuilding(const std::vector<tile::TerrainTile>& t_buildingTiles) const
-{
-    for (const auto& tile : t_buildingTiles)
-    {
-        world->tileAtlas->RenderTile(startX, startY, &tile, olc::DARK_GREY);
-        renderer::Renderer::RenderAsset(resource::Asset::GREEN_ISO, startX, startY, world, &tile, true);
-    }
 }
 
 //-------------------------------------------------

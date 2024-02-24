@@ -173,26 +173,29 @@ namespace mdcii::world
         [[nodiscard]] std::optional<olc::vi2d> IsMouseOverIsland() const;
 
         //-------------------------------------------------
-        // Add building
+        // New building
         //-------------------------------------------------
 
         /**
-         * @brief Creates the tiles for a new building.
+         * @brief Creates `m_newBuildingTiles` representing a new building.
          *
          * @param t_building Pointer to a Building object.
          * @param t_rotation The building rotation.
          * @param t_position The building position.
          *
-         * @return The newly created tiles of the building.
+         * @return True if building tiles can be added; otherwise false.
          */
-        [[nodiscard]] std::optional<std::vector<tile::TerrainTile>> CreateNewBuilding(const resource::Building* t_building, Rotation t_rotation, const olc::vi2d& t_position);
+        bool CreateNewBuildingTiles(const resource::Building* t_building, Rotation t_rotation, const olc::vi2d& t_position);
 
         /**
-         * @brief Adds the tiles of a building to the layers.
-         *
-         * @param t_buildingTiles The tiles of the building to add.
+         * @brief Shows the content of `m_newBuildingTiles`.
          */
-        void AddNewBuilding(std::vector<tile::TerrainTile>& t_buildingTiles);
+        void PreviewNewBuildingTiles() const;
+
+        /**
+         * @brief Adds the content of `m_newBuildingTiles` to the layers.
+         */
+        void AddNewBuildingTiles();
 
     protected:
 
@@ -218,6 +221,11 @@ namespace mdcii::world
          * @brief The island figures layer.
          */
         std::unique_ptr<layer::FiguresLayer<tile::FigureTile>> m_figuresLayer;
+
+        /**
+         * @brief Tiles to create a new building.
+         */
+        std::optional<std::vector<tile::TerrainTile>> m_newBuildingTiles;
 
         //-------------------------------------------------
         // Set layer data from Json
@@ -289,17 +297,6 @@ namespace mdcii::world
          * @return True if the tile should be replaced; false otherwise.
          */
         bool ShouldReplaceTile(const layer::TerrainLayer<tile::TerrainTile>* t_layer, int t_index);
-
-        //-------------------------------------------------
-        // New building
-        //-------------------------------------------------
-
-        /**
-         * @brief Shows the building that is currently to be added to the island.
-         *
-         * @param t_buildingTiles The tiles of the building.
-         */
-        void PreviewNewBuilding(const std::vector<tile::TerrainTile>& t_buildingTiles) const;
     };
 
     //-------------------------------------------------
