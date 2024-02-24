@@ -35,7 +35,7 @@ void mdcii::renderer::Renderer::RenderAsset(
     const int t_startX,
     const int t_startY,
     const world::World* t_world,
-    const world::tile::TerrainTile* t_tile,
+    const world::tile::Tile* t_tile,
     const bool t_minusElevation,
     const olc::Pixel& t_tint
 )
@@ -57,7 +57,7 @@ void mdcii::renderer::Renderer::RenderAsset(
 void mdcii::renderer::Renderer::RenderWorldParts(const world::World* t_world, const float t_elapsedTime)
 {
     // update animations
-    UpdateAnimations(t_world, t_elapsedTime);
+    UpdateAnimations(t_elapsedTime);
 
     // render deep water
     if (t_world->HasRenderLayerOption(world::RenderLayer::RENDER_DEEP_WATER_LAYER))
@@ -68,23 +68,25 @@ void mdcii::renderer::Renderer::RenderWorldParts(const world::World* t_world, co
     // render islands
     for (auto const& island : t_world->currentIslands)
     {
+        using enum world::layer::LayerType;
+
         if (t_world->HasRenderLayerOption(world::RenderLayer::RENDER_MIXED_LAYER))
         {
-            RenderIsland(t_world, island, world::layer::LayerType::MIXED);
+            RenderIsland(t_world, island, MIXED);
         }
         else
         {
             if (t_world->HasRenderLayerOption(world::RenderLayer::RENDER_COAST_LAYER))
             {
-                RenderIsland(t_world, island, world::layer::LayerType::COAST);
+                RenderIsland(t_world, island, COAST);
             }
             if (t_world->HasRenderLayerOption(world::RenderLayer::RENDER_TERRAIN_LAYER))
             {
-                RenderIsland(t_world, island, world::layer::LayerType::TERRAIN);
+                RenderIsland(t_world, island, TERRAIN);
             }
             if (t_world->HasRenderLayerOption(world::RenderLayer::RENDER_BUILDINGS_LAYER))
             {
-                RenderIsland(t_world, island, world::layer::LayerType::BUILDINGS);
+                RenderIsland(t_world, island, BUILDINGS);
             }
         }
     }
@@ -93,7 +95,7 @@ void mdcii::renderer::Renderer::RenderWorldParts(const world::World* t_world, co
 void mdcii::renderer::Renderer::RenderWorld(const world::World* t_world, const float t_elapsedTime)
 {
     // update animations
-    UpdateAnimations(t_world, t_elapsedTime);
+    UpdateAnimations(t_elapsedTime);
 
     // render deep water
     RenderDeepWater(t_world);
@@ -129,17 +131,17 @@ void mdcii::renderer::Renderer::RenderIsland(const world::World* t_world, world:
     }
 }
 
-void mdcii::renderer::Renderer::UpdateAnimations(const world::World* t_world, const float t_elapsedTime)
+void mdcii::renderer::Renderer::UpdateAnimations(const float t_elapsedTime)
 {
-    t_world->tileAtlas->CalcAnimationFrame(t_elapsedTime);
-    t_world->animalsTileAtlas->CalcAnimationFrame(t_elapsedTime);
+    resource::TileAtlas::CalcAnimationFrame(t_elapsedTime);
+    resource::AnimalsTileAtlas::CalcAnimationFrame(t_elapsedTime);
 }
 
 void mdcii::renderer::Renderer::RenderDeepWater(const world::World* t_world)
 {
     for (auto& waterTile : t_world->deepWater->layer->currentTiles)
     {
-        waterTile.UpdateFrame(t_world->tileAtlas->frame_values);
+        waterTile.UpdateFrame(resource::TileAtlas::frame_values);
         t_world->tileAtlas->RenderTile(0, 0, &waterTile, olc::WHITE);
         if (t_world->renderDeepWaterGrid)
         {
@@ -156,8 +158,8 @@ void mdcii::renderer::Renderer::RenderFigureOnTopOfTerrainTile(
 {
     // todo TEMP Code
 
-    auto& terrainTile{ t_island->GetTerrainLayer(world::layer::LayerType::TERRAIN)->GetSortedTile(t_terrainTile->posX, t_terrainTile->posY, t_world->camera->rotation) };
-    auto& buildingsTile{ t_island->GetTerrainLayer(world::layer::LayerType::BUILDINGS)->GetSortedTile(t_terrainTile->posX, t_terrainTile->posY, t_world->camera->rotation) };
+    auto const& terrainTile{ t_island->GetTerrainLayer(world::layer::LayerType::TERRAIN)->GetSortedTile(t_terrainTile->posX, t_terrainTile->posY, t_world->camera->rotation) };
+    auto const& buildingsTile{ t_island->GetTerrainLayer(world::layer::LayerType::BUILDINGS)->GetSortedTile(t_terrainTile->posX, t_terrainTile->posY, t_world->camera->rotation) };
     auto& figureTile{ t_island->GetFiguresLayer()->GetSortedTile(t_terrainTile->posX, t_terrainTile->posY, t_world->camera->rotation) };
 
     if (figureTile.HasFigure())
@@ -189,13 +191,14 @@ void mdcii::renderer::Renderer::RenderFigureOnTopOfTerrainTile(
 void mdcii::renderer::Renderer::RenderTerrainTile(
     const world::World* t_world,
     const world::Island* t_island,
-    world::tile::TerrainTile* t_terrainTile
+    world::tile::TerrainTile* t_terrainTile,
+    const olc::Pixel& t_tint
 )
 {
     if (t_terrainTile->HasBuilding())
     {
-        t_terrainTile->UpdateFrame(t_world->tileAtlas->frame_values);
-        t_world->tileAtlas->RenderTile(t_island->startX, t_island->startY, t_terrainTile, olc::WHITE);
+        t_terrainTile->UpdateFrame(resource::TileAtlas::frame_values);
+        t_world->tileAtlas->RenderTile(t_island->startX, t_island->startY, t_terrainTile, t_tint);
         if (t_world->renderIslandsGrid)
         {
             RenderAsset(resource::Asset::GREEN_ISO, t_island->startX, t_island->startY, t_world, t_terrainTile, true);
@@ -211,7 +214,7 @@ void mdcii::renderer::Renderer::RenderFigureTile(
 {
     if (t_figureTile->HasFigure())
     {
-        t_figureTile->UpdateFrame(t_world->animalsTileAtlas->frame_values);
+        t_figureTile->UpdateFrame(resource::AnimalsTileAtlas::frame_values);
         t_world->animalsTileAtlas->RenderTile(t_island->startX, t_island->startY, t_figureTile, olc::WHITE);
     }
 }

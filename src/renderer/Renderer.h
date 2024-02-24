@@ -40,6 +40,11 @@ namespace mdcii::world
 namespace mdcii::world::tile
 {
     /**
+     * @brief Forward declaration struct Tile.
+     */
+    struct Tile;
+
+    /**
      * @brief Forward declaration struct TerrainTile.
      */
     struct TerrainTile;
@@ -98,7 +103,7 @@ namespace mdcii::renderer
             int t_startX,
             int t_startY,
             const world::World* t_world,
-            const world::tile::TerrainTile* t_tile,
+            const world::tile::Tile* t_tile,
             bool t_minusElevation,
             const olc::Pixel& t_tint = olc::WHITE
         );
@@ -135,10 +140,10 @@ namespace mdcii::renderer
          */
         static void RenderIsland(const world::World* t_world, world::Island* t_island, world::layer::LayerType t_layerType);
 
-        static void UpdateAnimations(const world::World* t_world, float t_elapsedTime);
+        static void UpdateAnimations(float t_elapsedTime);
         static void RenderDeepWater(const world::World* t_world);
         static void RenderFigureOnTopOfTerrainTile(const world::World* t_world, world::Island* t_island, const world::tile::TerrainTile* t_terrainTile);
-        static void RenderTerrainTile(const world::World* t_world, const world::Island* t_island, world::tile::TerrainTile* t_terrainTile);
+        static void RenderTerrainTile(const world::World* t_world, const world::Island* t_island, world::tile::TerrainTile* t_terrainTile, const olc::Pixel& t_tint = olc::WHITE);
         static void RenderFigureTile(const world::World* t_world, const world::Island* t_island, world::tile::FigureTile* t_figureTile);
     };
 }

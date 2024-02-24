@@ -290,9 +290,9 @@ void mdcii::world::Island::InitLayerData()
     MDCII_LOG_DEBUG("[Island::InitLayerData()] Initialises the tile data of the COAST, TERRAIN and BUILDINGS layer.");
 
     using enum layer::LayerType;
-    GetTerrainLayer(layer::LayerType::COAST)->InitTiles();
-    GetTerrainLayer(layer::LayerType::TERRAIN)->InitTiles();
-    GetTerrainLayer(layer::LayerType::BUILDINGS)->InitTiles();
+    GetTerrainLayer(COAST)->InitTiles();
+    GetTerrainLayer(TERRAIN)->InitTiles();
+    GetTerrainLayer(BUILDINGS)->InitTiles();
 
     m_figuresLayer->InitTiles();
 }
@@ -301,7 +301,9 @@ void mdcii::world::Island::InitMixedLayerData()
 {
     MDCII_LOG_DEBUG("[Island::InitMixedLayerData()] Initializing the MIXED layer tile data.");
 
-    GetTerrainLayer(layer::LayerType::MIXED)->tiles = GetTerrainLayer(layer::LayerType::BUILDINGS)->tiles;
+    using enum layer::LayerType;
+
+    GetTerrainLayer(MIXED)->tiles = GetTerrainLayer(BUILDINGS)->tiles;
 
     for (auto h{ 0 }; h < height; ++h)
     {
@@ -311,7 +313,7 @@ void mdcii::world::Island::InitMixedLayerData()
         }
     }
 
-    GetTerrainLayer(layer::LayerType::MIXED)->SortTilesForRendering();
+    GetTerrainLayer(MIXED)->SortTilesForRendering();
 }
 
 void mdcii::world::Island::PopulateMixedLayer(const int t_x, const int t_y)
@@ -344,6 +346,8 @@ bool mdcii::world::Island::ShouldReplaceTile(const layer::TerrainLayer<tile::Ter
 
 void mdcii::world::to_json(nlohmann::json& t_json, const Island& t_island)
 {
+    using enum layer::LayerType;
+
     t_json["width"] = t_island.width;
     t_json["height"] = t_island.height;
     t_json["x"] = t_island.startX;
@@ -353,13 +357,13 @@ void mdcii::world::to_json(nlohmann::json& t_json, const Island& t_island)
     t_json["layers"] = nlohmann::json::array();
 
     auto c = nlohmann::json::object();
-    c["coast"] = t_island.GetTerrainLayer(layer::LayerType::COAST)->tiles;
+    c["coast"] = t_island.GetTerrainLayer(COAST)->tiles;
 
     auto t = nlohmann::json::object();
-    t["terrain"] = t_island.GetTerrainLayer(layer::LayerType::TERRAIN)->tiles;
+    t["terrain"] = t_island.GetTerrainLayer(TERRAIN)->tiles;
 
     auto b = nlohmann::json::object();
-    b["buildings"] = t_island.GetTerrainLayer(layer::LayerType::BUILDINGS)->tiles;
+    b["buildings"] = t_island.GetTerrainLayer(BUILDINGS)->tiles;
 
     auto f = nlohmann::json::object();
     f["figures"] = t_island.GetFiguresLayer()->tiles;

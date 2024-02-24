@@ -54,13 +54,13 @@ bool mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
     {
         --zoom;
         dirty = true;
-        MDCII_LOG_DEBUG("Zoom-- {}", magic_enum::enum_name(zoom));
+        MDCII_LOG_DEBUG("[Camera::OnUserUpdate()] Zoom-- {}", magic_enum::enum_name(zoom));
     }
     if (m_world->state->game->GetMouseWheel() < 0)
     {
         ++zoom;
         dirty = true;
-        MDCII_LOG_DEBUG("Zoom++ {}", magic_enum::enum_name(zoom));
+        MDCII_LOG_DEBUG("[Camera::OnUserUpdate()] Zoom++ {}", magic_enum::enum_name(zoom));
     }
 
     // rotation
@@ -68,13 +68,13 @@ bool mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
     {
         ++rotation;
         dirty = true;
-        MDCII_LOG_DEBUG("World rotation++ {}", magic_enum::enum_name(rotation));
+        MDCII_LOG_DEBUG("[Camera::OnUserUpdate()] World rotation++ {}", magic_enum::enum_name(rotation));
     }
     if (m_world->state->game->GetKey(olc::Key::PGDN).bPressed)
     {
         --rotation;
         dirty = true;
-        MDCII_LOG_DEBUG("World rotation-- {}", magic_enum::enum_name(rotation));
+        MDCII_LOG_DEBUG("[Camera::OnUserUpdate()] World rotation-- {}", magic_enum::enum_name(rotation));
     }
 
     // world
