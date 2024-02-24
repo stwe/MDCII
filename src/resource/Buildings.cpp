@@ -25,12 +25,12 @@
 // Building
 //-------------------------------------------------
 
-std::vector<olc::vi2d> mdcii::resource::Building::CreateBuildingStartOffsets() const
+std::vector<std::pair<int, int>> mdcii::resource::Building::CreateBuildingStartOffsets() const
 {
     return {
-        olc::vi2d(0, 0),
-        olc::vi2d(size.w - 1, 0),
-        olc::vi2d(0, size.h - 1)
+        { 0, 0 },
+        { size.w - 1, 0 },
+        { 0, size.h - 1 }
     };
 }
 
