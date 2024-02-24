@@ -64,7 +64,7 @@ void mdcii::world::DeepWater::InitLayer()
     {
         for (auto x{ 0 }; x < m_world->worldWidth; ++x)
         {
-            if (!m_world->IsWorldPositionOnAnyIsland(x, y))
+            if (!m_world->IsWorldPositionOverAnyIsland(x, y))
             {
                 const auto& building1201{ m_world->state->game->originalResourcesManager->GetBuildingById(resource::DEEP_WATER_BUILDING_ID) };
                 layer->tiles.at(y * m_world->worldWidth + x).building = &building1201;
