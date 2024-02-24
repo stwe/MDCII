@@ -25,6 +25,19 @@
 // Building
 //-------------------------------------------------
 
+std::vector<olc::vi2d> mdcii::resource::Building::CreateBuildingStartOffsets() const
+{
+    return {
+        olc::vi2d(0, 0),
+        olc::vi2d(size.w - 1, 0),
+        olc::vi2d(0, size.h - 1)
+    };
+}
+
+//-------------------------------------------------
+// Buildings
+//-------------------------------------------------
+
 mdcii::resource::Buildings::Buildings(const std::string& t_codFilePath)
 {
     MDCII_LOG_DEBUG("[Buildings::Buildings()] Create Buildings.");

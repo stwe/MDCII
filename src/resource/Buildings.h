@@ -18,10 +18,8 @@
 
 #pragma once
 
-#include <unordered_map>
-#include <vector>
-#include <string>
 #include "BuildingIds.h"
+#include "vendor/olc/olcPixelGameEngine.h"
 
 //-------------------------------------------------
 // Forward declarations
@@ -464,7 +462,12 @@ namespace mdcii::resource
 
         [[nodiscard]] bool IsRotatable() const { return rotate > 0; }
         [[nodiscard]] bool IsBig() const { return size.w > 1 || size.h > 1; }
+        [[nodiscard]] std::vector<olc::vi2d> CreateBuildingStartOffsets() const;
     };
+
+    //-------------------------------------------------
+    // Buildings
+    //-------------------------------------------------
 
     /**
      * @brief The decrypted content of the haeuser.cod.
