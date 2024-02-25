@@ -113,6 +113,42 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
         renderer::Renderer::RenderWorld(this, t_elapsedTime) :     // should be used in the release
         renderer::Renderer::RenderWorldParts(this, t_elapsedTime); // ability to switch layers on and off
 
+    // update current island && tiles
+    SetCurrentIslandUnderMouse();
+    SetCurrentTilesUnderMouse();
+
+    // render terrain neighbors
+    if (m_currentIslandUnderMouse.island && m_currentTilesUnderMouse.terrainTile)
+    {
+        for (const auto* neighbor : m_currentTilesUnderMouse.terrainTile->neighbors)
+        {
+            renderer::Renderer::RenderAsset(
+                resource::Asset::BLUE_ISO,
+                m_currentIslandUnderMouse.island->startX,
+                m_currentIslandUnderMouse.island->startY,
+                this,
+                neighbor,
+                true
+            );
+        }
+    }
+
+    // render building neighbors
+    if (m_currentIslandUnderMouse.island && m_currentTilesUnderMouse.buildingTile)
+    {
+        for (const auto* neighbor : m_currentTilesUnderMouse.buildingTile->neighbors)
+        {
+            renderer::Renderer::RenderAsset(
+                resource::Asset::GREEN_ISO,
+                m_currentIslandUnderMouse.island->startX,
+                m_currentIslandUnderMouse.island->startY,
+                this,
+                neighbor,
+                true
+            );
+        }
+    }
+
     // ---------------------------------
     // todo: Rendering depends on ImGui
     // ---------------------------------
@@ -122,9 +158,6 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
     {
         return;
     }
-
-    // update current island under mouse
-    m_currentIslandUnderMouse = GetCurrentIslandUnderMouse();
 
     // render the selected building to add it
     if (Gui::select_building.building && m_currentIslandUnderMouse.island)
@@ -174,6 +207,19 @@ void mdcii::world::World::RenderImGui()
     ImGui::Separator();
 
     ImGui::Text("Camera rotation %s", magic_enum::enum_name(camera->rotation).data());
+
+    if (m_currentIslandUnderMouse.island && m_currentTilesUnderMouse.terrainTile)
+    {
+        ImGui::Separator();
+        ImGui::Text("Terrain");
+        m_currentTilesUnderMouse.terrainTile->RenderImGui();
+    }
+    if (m_currentIslandUnderMouse.island && m_currentTilesUnderMouse.buildingTile)
+    {
+        ImGui::Separator();
+        ImGui::Text("Building");
+        m_currentTilesUnderMouse.buildingTile->RenderImGui();
+    }
 
     mousePicker->RenderImGui();
 
@@ -286,18 +332,48 @@ bool mdcii::world::World::IsWorldPositionOverAnyIsland(const int t_x, const int 
     });
 }
 
-mdcii::world::CurrentIsland mdcii::world::World::GetCurrentIslandUnderMouse() const
+void mdcii::world::World::SetCurrentIslandUnderMouse()
 {
-    // iter only over the current visible islands
+    CurrentIsland currentIsland{};
+
     for (const auto& island : currentIslands)
     {
         if (const auto mouseOverIsland{ island->IsMouseOverIsland() }; mouseOverIsland.has_value())
         {
-            return { island, mouseOverIsland.value() };
+            currentIsland = { island, mouseOverIsland.value() };
+            break;
         }
     }
 
-    return { nullptr, {} };
+    if (currentIsland.island)
+    {
+        m_currentIslandUnderMouse = currentIsland;
+    }
+}
+
+void mdcii::world::World::SetCurrentTilesUnderMouse()
+{
+    m_currentTilesUnderMouse.terrainTile = nullptr;
+    m_currentTilesUnderMouse.buildingTile = nullptr;
+
+    if (m_currentIslandUnderMouse.island)
+    {
+        auto& terrainTile{ m_currentIslandUnderMouse.island->GetTerrainLayer(layer::LayerType::TERRAIN)->GetSortedTile(
+                m_currentIslandUnderMouse.position.x, m_currentIslandUnderMouse.position.y, camera->rotation) };
+
+        auto& buildingTile{ m_currentIslandUnderMouse.island->GetTerrainLayer(layer::LayerType::BUILDINGS)->GetSortedTile(
+                m_currentIslandUnderMouse.position.x, m_currentIslandUnderMouse.position.y, camera->rotation) };
+
+        if (terrainTile.HasBuilding())
+        {
+            m_currentTilesUnderMouse.terrainTile = &terrainTile;
+        }
+
+        if (buildingTile.HasBuilding())
+        {
+            m_currentTilesUnderMouse.buildingTile = &buildingTile;
+        }
+    }
 }
 
 bool mdcii::world::World::IsWorldPositionOutsideScreen(const int t_x, const int t_y) const

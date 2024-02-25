@@ -42,6 +42,21 @@ namespace mdcii::world::tile
     struct Tile
     {
         //-------------------------------------------------
+        // Types
+        //-------------------------------------------------
+
+        /**
+         * @brief The type of the tile.
+         */
+        enum class TileType
+        {
+            NONE,
+            RESIDENTIAL,
+            TRAFFIC,
+            PLANTS
+        };
+
+        //-------------------------------------------------
         // Member
         //-------------------------------------------------
 
@@ -96,6 +111,20 @@ namespace mdcii::world::tile
          * @brief Can be used e.g. as a flag to highlight the tile.
          */
         int tintFlag{ -1 };
+
+        /**
+         * @brief The type of the Tile.
+         */
+        TileType type{ TileType::NONE };
+
+        // Neighbors
+
+        Tile* n{ nullptr };
+        Tile* s{ nullptr };
+        Tile* e{ nullptr };
+        Tile* w{ nullptr };
+
+        std::vector<Tile*> neighbors;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

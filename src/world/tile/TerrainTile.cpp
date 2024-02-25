@@ -20,6 +20,7 @@
 #include "MdciiAssert.h"
 #include "resource/Buildings.h"
 #include "world/Rotation.h"
+#include "vendor/imgui/imgui.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -82,6 +83,17 @@ void mdcii::world::tile::TerrainTile::UpdateFrame(const std::array<int, NR_OF_AN
     }
 }
 
+void mdcii::world::tile::TerrainTile::RenderImGui() const
+{
+    if (HasBuilding())
+    {
+        ImGui::Text("Building Id: %d", building->id);
+        ImGui::Text("Building Gfx: %d", building->gfx);
+    }
+    ImGui::Text("Building x: %d", x);
+    ImGui::Text("Building y: %d", y);
+}
+
 //-------------------------------------------------
 // Gfx
 //-------------------------------------------------
@@ -116,35 +128,105 @@ void mdcii::world::tile::TerrainTile::AdjustGfxForBigBuildings(int& t_gfx) const
     // default: orientation 0
     auto rp{ olc::vi2d(x, y) };
 
-    if (rotation == magic_enum::enum_integer(Rotation::DEG270))
+    using enum Rotation;
+
+    if (rotation == magic_enum::enum_integer(DEG270))
     {
         rp = rotate_position(
             x, y,
             building->size.w, building->size.h,
-            Rotation::DEG90
+            DEG90
         );
     }
 
-    if (rotation == magic_enum::enum_integer(Rotation::DEG180))
+    if (rotation == magic_enum::enum_integer(DEG180))
     {
         rp = rotate_position(
             x, y,
             building->size.w, building->size.h,
-            Rotation::DEG180
+            DEG180
         );
     }
 
-    if (rotation == magic_enum::enum_integer(Rotation::DEG90))
+    if (rotation == magic_enum::enum_integer(DEG90))
     {
         rp = rotate_position(
             x, y,
             building->size.w, building->size.h,
-            Rotation::DEG270
+            DEG270
         );
     }
 
     const auto offset{ rp.y * building->size.w + rp.x };
     t_gfx += offset;
+}
+
+bool mdcii::world::tile::TerrainTile::DetermineNeighborType()
+{
+    uint8_t neighbors{ 0 };
+
+    if (n && n->type == TileType::TRAFFIC)
+    {
+        neighbors = NORTH;
+    }
+
+    if (e && e->type == TileType::TRAFFIC)
+    {
+        neighbors |= EAST;
+    }
+
+    if (s && s->type == TileType::TRAFFIC)
+    {
+        neighbors |= SOUTH;
+    }
+
+    if (w && w->type == TileType::TRAFFIC)
+    {
+        neighbors |= WEST;
+    }
+
+    NeighborType newNeighborType;
+    switch (neighbors)
+    {
+        using enum NeighborType;
+        case 0: newNeighborType = NEIGHBOR_NONE; // keine Nachbarn
+            break;
+        case 1: newNeighborType = NEIGHBOR_V;    // Norden
+            break;
+        case 2: newNeighborType = NEIGHBOR_H;    // Osten
+            break;
+        case 3: newNeighborType = NEIGHBOR_C3;   // Norden - Osten
+            break;
+        case 4:                                  // Sueden
+        case 5: newNeighborType = NEIGHBOR_V;    // Sueden - Norden
+            break;
+        case 6: newNeighborType = NEIGHBOR_C1;   // Sueden - Osten
+            break;
+        case 7: newNeighborType = NEIGHBOR_T2;   // Norden - Osten - Sueden
+            break;
+        case 8: newNeighborType = NEIGHBOR_H;    // Westen
+            break;
+        case 9: newNeighborType = NEIGHBOR_C4;   // Westen - Norden
+            break;
+        case 10: newNeighborType = NEIGHBOR_H;   // Westen - Osten
+            break;
+        case 11: newNeighborType = NEIGHBOR_T4;  // Westen - Osten - Norden
+            break;
+        case 12: newNeighborType = NEIGHBOR_C2;  // Westen - Sueden
+            break;
+        case 13: newNeighborType = NEIGHBOR_T3;  // Westen - Sueden - Norden
+            break;
+        case 14: newNeighborType = NEIGHBOR_T1;  // Westen - Sueden - Osten
+            break;
+        case 15: newNeighborType = NEIGHBOR_X;
+            break;
+        default: newNeighborType = NEIGHBOR_NONE;
+    }
+
+    const auto oldNeighborType{ neighborType };
+    neighborType = newNeighborType;
+
+    return oldNeighborType != newNeighborType;
 }
 
 //-------------------------------------------------

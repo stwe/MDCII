@@ -46,6 +46,36 @@ namespace mdcii::world::tile
      */
     struct TerrainTile : public Tile
     {
+        /**
+         * @brief Possible tile neighbors. Each flag can set by using the OR operator.
+         */
+        enum NeighborFlag : uint8_t
+        {
+            NORTH = 1,
+            EAST = 2,
+            SOUTH = 4,
+            WEST = 8
+        };
+
+        /**
+         * @brief The value corresponds to the index in the texture atlas.
+         */
+        enum class NeighborType
+        {
+            NEIGHBOR_NONE = -1,
+            NEIGHBOR_V = 0,
+            NEIGHBOR_H = 1,
+            NEIGHBOR_C1 = 4,
+            NEIGHBOR_T1 = 5,
+            NEIGHBOR_C2 = 6,
+            NEIGHBOR_T2 = 8,
+            NEIGHBOR_X = 9,
+            NEIGHBOR_T3 = 10,
+            NEIGHBOR_C3 = 12,
+            NEIGHBOR_T4 = 13,
+            NEIGHBOR_C4 = 14,
+        };
+
         //-------------------------------------------------
         // Constants
         //-------------------------------------------------
@@ -86,6 +116,11 @@ namespace mdcii::world::tile
          * @brief The y position of the tile in local/object space of the building.
          */
         int y{ 0 };
+
+        /**
+         * @brief The type of a possible neighbor.
+         */
+        NeighborType neighborType{ NeighborType::NEIGHBOR_NONE };
 
         //-------------------------------------------------
         // Ctors. / Dtor.
@@ -134,6 +169,11 @@ namespace mdcii::world::tile
          */
         void UpdateFrame(const std::array<int, NR_OF_ANIM_TIMES>& t_frameValues);
 
+        /**
+         * @brief Renders some information about this tile using ImGui.
+         */
+        void RenderImGui() const;
+
         //-------------------------------------------------
         // Gfx
         //-------------------------------------------------
@@ -160,6 +200,17 @@ namespace mdcii::world::tile
          * @return True if there is no building; otherwise false.
          */
         [[nodiscard]] bool IsNotRenderable() const override { return !HasBuilding(); }
+
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
+
+        /**
+         * @brief Determines the correct NeighborType for this Tile depending on the neighbors.
+         *
+         * @return True if the type has changed.
+         */
+        [[nodiscard]] bool DetermineNeighborType();
     };
 
     //-------------------------------------------------

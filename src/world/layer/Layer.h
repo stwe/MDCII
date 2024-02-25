@@ -226,6 +226,7 @@ namespace mdcii::world::layer
                 }
             }
 
+            AddTileNeighbors();
             SortTilesForRendering();
 
             MDCII_LOG_DEBUG("[Layer::InitTiles()] The tiles were initialized successfully.");
@@ -272,6 +273,52 @@ namespace mdcii::world::layer
             tiles = sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0));
 
             MDCII_LOG_DEBUG("[Layer::SortTilesForRendering()] The tiles were sorted successfully.");
+        }
+
+        //-------------------------------------------------
+        // Neighbors
+        //-------------------------------------------------
+
+        /**
+         * @brief Stores a pointer to all neighbors for each tile.
+         */
+        void AddTileNeighbors()
+        {
+            MDCII_LOG_DEBUG("[Layer::AddTileNeighbors()] Save the neighbors for each tile ...");
+
+            for (auto y{ 0 }; y < height; ++y)
+            {
+                for (auto x{ 0 }; x < width; ++x)
+                {
+                    const auto i{ y * width + x };
+
+                    if (y > 0)
+                    {
+                        tiles.at(i).n = &tiles.at((y - 1) * width + x);
+                        tiles.at(i).neighbors.push_back(tiles.at(i).n);
+                    }
+
+                    if (y < height - 1)
+                    {
+                        tiles.at(i).s = &tiles.at((y + 1) * width + x);
+                        tiles.at(i).neighbors.push_back(tiles.at(i).s);
+                    }
+
+                    if (x > 0)
+                    {
+                        tiles.at(i).w = &tiles.at(y * width + (x - 1));
+                        tiles.at(i).neighbors.push_back(tiles.at(i).w);
+                    }
+
+                    if (x < width - 1)
+                    {
+                        tiles.at(i).e = &tiles.at(y * width + (x + 1));
+                        tiles.at(i).neighbors.push_back(tiles.at(i).e);
+                    }
+                }
+            }
+
+            MDCII_LOG_DEBUG("[Layer::AddTileNeighbors()] The neighbors have been saved successfully.");
         }
 
         //-------------------------------------------------
@@ -370,15 +417,17 @@ namespace mdcii::world::layer
          */
         void IntoSortedTilesArray(T& t_tile)
         {
-            auto idx0{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG0)).at(t_tile.renderIndices[0]) };
-            auto idx90{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG90)).at(t_tile.renderIndices[1]) };
-            auto idx180{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG180)).at(t_tile.renderIndices[2]) };
-            auto idx270{ sortedIndices.at(magic_enum::enum_integer(Rotation::DEG270)).at(t_tile.renderIndices[3]) };
+            using enum Rotation;
 
-            sortedTiles.at(magic_enum::enum_integer(Rotation::DEG0)).at(idx0) = t_tile;
-            sortedTiles.at(magic_enum::enum_integer(Rotation::DEG90)).at(idx90) = t_tile;
-            sortedTiles.at(magic_enum::enum_integer(Rotation::DEG180)).at(idx180) = t_tile;
-            sortedTiles.at(magic_enum::enum_integer(Rotation::DEG270)).at(idx270) = t_tile;
+            auto idx0{ sortedIndices.at(magic_enum::enum_integer(DEG0)).at(t_tile.renderIndices[0]) };
+            auto idx90{ sortedIndices.at(magic_enum::enum_integer(DEG90)).at(t_tile.renderIndices[1]) };
+            auto idx180{ sortedIndices.at(magic_enum::enum_integer(DEG180)).at(t_tile.renderIndices[2]) };
+            auto idx270{ sortedIndices.at(magic_enum::enum_integer(DEG270)).at(t_tile.renderIndices[3]) };
+
+            sortedTiles.at(magic_enum::enum_integer(DEG0)).at(idx0) = t_tile;
+            sortedTiles.at(magic_enum::enum_integer(DEG90)).at(idx90) = t_tile;
+            sortedTiles.at(magic_enum::enum_integer(DEG180)).at(idx180) = t_tile;
+            sortedTiles.at(magic_enum::enum_integer(DEG270)).at(idx270) = t_tile;
         }
 
     private:

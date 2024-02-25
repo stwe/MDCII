@@ -63,6 +63,14 @@ namespace mdcii::world::layer
     enum class LayerType;
 }
 
+namespace mdcii::world::tile
+{
+    /**
+     * @brief Forward declaration struct TerrainTile.
+     */
+    struct TerrainTile;
+}
+
 namespace mdcii::world
 {
     /**
@@ -99,16 +107,16 @@ namespace mdcii::world
     };
 
     //-------------------------------------------------
-    // Current Island
+    // Current
     //-------------------------------------------------
 
     /**
-     * @brief Encapsulates the current island and the current position of the mouse on the island.
+     * @brief Encapsulates the current island and the current position of the mouse on this island.
      */
     struct CurrentIsland
     {
         /**
-         * @brief Pointer to the current Island under mouse.
+         * @brief Pointer to the current Island object under mouse.
          */
         Island* island{ nullptr };
 
@@ -116,6 +124,22 @@ namespace mdcii::world
          * @brief The mouse position relative to the current island.
          */
         olc::vi2d position{ -1, -1 };
+    };
+
+    /**
+     * @brief Encapsulates the current tiles under the mouse.
+     */
+    struct CurrentTiles
+    {
+        /**
+         * @brief Pointer to the current terrain layer tile.
+         */
+        tile::TerrainTile* terrainTile{ nullptr };
+
+        /**
+         * @brief Pointer to the current building layer tile.
+         */
+        tile::TerrainTile* buildingTile{ nullptr };
     };
 
     //-------------------------------------------------
@@ -273,11 +297,14 @@ namespace mdcii::world
         [[nodiscard]] bool IsWorldPositionOverAnyIsland(int t_x, int t_y) const;
 
         /**
-         * @brief Checks whether the mouse is on any island.
-         *
-         * @return The current island and the current position of the mouse on this island.
+         * @brief Determines the current island under the mouse.
          */
-        [[nodiscard]] CurrentIsland GetCurrentIslandUnderMouse() const;
+        void SetCurrentIslandUnderMouse();
+
+        /**
+         * @brief Determines the current tiles under the mouse.
+         */
+        void SetCurrentTilesUnderMouse();
 
         /**
          * @brief Checks whether the given world position is outside the screen.
@@ -315,9 +342,14 @@ namespace mdcii::world
         bool m_flag{ true };
 
         /**
-         * @brief The current island under mouse.
+         * @brief The current island under the mouse.
          */
         CurrentIsland m_currentIslandUnderMouse;
+
+        /**
+         * @brief The current terrain and building layer tile under the mouse.
+         */
+        CurrentTiles m_currentTilesUnderMouse;
 
         //-------------------------------------------------
         // Init
