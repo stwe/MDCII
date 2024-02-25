@@ -140,6 +140,19 @@ namespace mdcii::world::tile
          */
         TerrainTile(const resource::Building* t_building, int t_rotation, int t_x, int t_y, int t_posX, int t_posY);
 
+        /**
+         * @brief Constructs a new TerrainTile object.
+         *
+         * @param t_building Pointer to the Building object generated from the haeuser.cod file.
+         * @param t_rotation The rotation of the tile/building.
+         * @param t_x The x position of the tile in local/object space of the building.
+         * @param t_y The y position of the tile in local/object space of the building.
+         * @param t_posX Represents the x position for DEG0 of a tile relative to its parent island.
+         * @param t_posY Represents the y position for DEG0 of a tile relative to its parent island.
+         * @param t_tileType The tile type.
+         */
+        TerrainTile(const resource::Building* t_building, int t_rotation, int t_x, int t_y, int t_posX, int t_posY, TileType t_tileType);
+
         //-------------------------------------------------
         // Getter
         //-------------------------------------------------

@@ -46,6 +46,23 @@ mdcii::world::tile::TerrainTile::TerrainTile(
     CalculateGfx();
 }
 
+mdcii::world::tile::TerrainTile::TerrainTile(
+    const resource::Building* t_building,
+    const int t_rotation,
+    const int t_x,
+    const int t_y,
+    const int t_posX,
+    const int t_posY,
+    const TileType t_tileType
+)
+    : Tile(t_rotation, t_posX, t_posY, t_tileType)
+    , building{ t_building }
+    , x{ t_x }
+    , y{ t_y }
+{
+    CalculateGfx();
+}
+
 //-------------------------------------------------
 // Getter
 //-------------------------------------------------

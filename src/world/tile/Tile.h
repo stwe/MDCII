@@ -141,6 +141,16 @@ namespace mdcii::world::tile
          */
         Tile(int t_rotation, int t_posX, int t_posY);
 
+        /**
+         * @brief Constructs a new Tile object.
+         *
+         * @param t_rotation The rotation of the tile.
+         * @param t_posX The x position for the first rotation (e.g. DEG0) of a tile relative to its parent island.
+         * @param t_posY The y position for the first rotation (e.g. DEG0) of a tile relative to its parent island.
+         * @param t_tileType The tile type.
+         */
+        Tile(int t_rotation, int t_posX, int t_posY, TileType t_tileType);
+
         virtual ~Tile() noexcept;
 
         //-------------------------------------------------

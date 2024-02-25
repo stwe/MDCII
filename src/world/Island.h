@@ -185,7 +185,7 @@ namespace mdcii::world
          *
          * @return True if building tiles can be added; otherwise false.
          */
-        bool CreateNewBuildingTiles(const resource::Building* t_building, Rotation t_rotation, const olc::vi2d& t_position);
+        [[nodiscard]] bool CreateNewBuildingTiles(const resource::Building* t_building, Rotation t_rotation, const olc::vi2d& t_position);
 
         /**
          * @brief Shows the content of `m_newBuildingTiles`.

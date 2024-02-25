@@ -133,11 +133,19 @@ bool mdcii::world::Island::CreateNewBuildingTiles(
 
                 if (terrainTileToCheck.HasBuildingAboveWaterAndCoast() && !buildingTileToCheck.HasBuilding())
                 {
+                    // todo: set other types
+                    tile::TerrainTile::TileType tileType{ tile::Tile::TileType::NONE };
+                    if (std::ranges::find(mdcii::resource::ROAD_BUILDING_IDS, t_building->id) != mdcii::resource::ROAD_BUILDING_IDS.end())
+                    {
+                        tileType = tile::Tile::TileType::TRAFFIC;
+                    }
+
                     newTiles.emplace_back(
                         t_building,
                         magic_enum::enum_integer(buildingRotation),
                         rp.x, rp.y,
-                        posX, posY
+                        posX, posY,
+                        tileType
                     );
                 }
             }

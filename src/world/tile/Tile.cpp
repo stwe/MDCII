@@ -35,6 +35,14 @@ mdcii::world::tile::Tile::Tile(const int t_rotation, const int t_posX, const int
 {
 }
 
+mdcii::world::tile::Tile::Tile(const int t_rotation, const int t_posX, const int t_posY, const TileType t_tileType)
+    : rotation{ t_rotation }
+    , posX{ t_posX }
+    , posY{ t_posY }
+    , type{ t_tileType }
+{
+}
+
 mdcii::world::tile::Tile::~Tile() noexcept
 {
 }
