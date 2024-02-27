@@ -78,7 +78,7 @@ namespace mdcii::resource
          { "ANTILOPE", FigureId::ANTELOPE_ID },
     };
 
-    // Buildings
+    // Building ID arrays
 
     static const std::vector CRAFT_BUILDING_IDS{
         501, 503, 505, 507, 509, 511, 513, 515,
@@ -102,19 +102,33 @@ namespace mdcii::resource
     };
 
     static const std::vector ROAD_BUILDING_IDS{
-        401, 402, 403, 404, 411, 412, 413, 414
+        401, 411
     };
 
-    // ID -> Baugfx
+    // Road
 
-    static const std::unordered_map<int, int> BAUGFX_MAP{
-        { 401, 288 },
-        { 402, 292 },
-        { 403, 296 },
-        { 404, 300 },
-        { 411, 308 },
-        { 412, 312 },
-        { 413, 316 },
-        { 414, 320 }
+    static constexpr auto ROAD_ID{ 401 };
+    static constexpr auto DIRT_ROAD_ID{ 411 };
+
+    enum class RoadGfx
+    {
+        // ID 401
+        ROAD_V = 1260,
+        ROAD_H = 1261,  // + 1262, 1263 same
+
+        // ID 402
+        ROAD_C1 = 1264,
+        ROAD_C2 = 1265,
+        ROAD_C3 = 1266,
+        ROAD_C4 = 1267,
+
+        // ID 403
+        ROAD_T1 = 1268,
+        ROAD_T2 = 1269,
+        ROAD_T3 = 1270,
+        ROAD_T4 = 1271,
+
+        // ID 404
+        ROAD_X = 1272,
     };
 }

@@ -461,6 +461,7 @@ namespace mdcii::resource
         } houseBuildCosts;
 
         [[nodiscard]] bool IsRotatable() const { return rotate > 0; }
+        [[nodiscard]] bool IsNotRoad() const { return id != ROAD_ID && id != DIRT_ROAD_ID; }
         [[nodiscard]] bool IsBig() const { return size.w > 1 || size.h > 1; }
         [[nodiscard]] std::vector<std::pair<int, int>> CreateBuildingStartOffsets() const;
     };

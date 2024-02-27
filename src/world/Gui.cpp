@@ -59,8 +59,7 @@ void mdcii::world::Gui::RenderAddBuildingsGui(const Game* t_game)
     };
 
     std::vector<std::string_view> streetBuildingNames{
-        _("Stone road"), _("Stone road curved"), _("Stone T-intersection"), _("Stone crossroad"),
-        _("Dirt road"), _("Dirt road curved"), _("Dirt T-intersection"), _("Dirt crossroad"),
+        _("Stone road"), _("Dirt road")
     };
 
     if (select_building.building)
@@ -80,7 +79,7 @@ void mdcii::world::Gui::RotatableBuildingGui(const resource::Building* t_buildin
 {
     MDCII_ASSERT(t_building, "[Gui::RotatableBuildingGui()] Null pointer.")
 
-    if (t_building && t_building->IsRotatable())
+    if (t_building && t_building->IsRotatable() && t_building->IsNotRoad())
     {
         static bool r = false;
         static bool l = false;
@@ -173,12 +172,7 @@ void mdcii::world::Gui::RenderBuildingsByTitleGui(
                 const auto& building{ t_game->originalResourcesManager->GetBuildingById(buildingId) };
 
                 auto baugfx{ building.baugfx };
-                // get the baugfx for roads from a map
-                if (resource::BAUGFX_MAP.count(buildingId))
-                {
-                    baugfx = resource::BAUGFX_MAP.at(buildingId);
-                }
-                if (building.IsRotatable())
+                if (building.IsRotatable() && building.IsNotRoad())
                 {
                     baugfx += magic_enum::enum_integer(select_building.rotation);
                 }
