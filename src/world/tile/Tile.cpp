@@ -24,26 +24,11 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::tile::Tile::Tile()
-{
-}
-
-mdcii::world::tile::Tile::Tile(const int t_rotation, const int t_posX, const int t_posY)
-    : rotation{ t_rotation }
-    , posX{ t_posX }
-    , posY{ t_posY }
-{
-}
-
 mdcii::world::tile::Tile::Tile(const int t_rotation, const int t_posX, const int t_posY, const TileType t_tileType)
     : rotation{ t_rotation }
     , posX{ t_posX }
     , posY{ t_posY }
     , type{ t_tileType }
-{
-}
-
-mdcii::world::tile::Tile::~Tile() noexcept
 {
 }
 
@@ -68,9 +53,10 @@ int mdcii::world::tile::Tile::GetRenderIndex(const int t_x, const int t_y, const
 
 void mdcii::world::tile::Tile::CalcRenderPositions(const int t_width, const int t_height)
 {
+    using enum Rotation;
     renderIndices.resize(magic_enum::enum_count<Rotation>());
-    renderIndices[0] = GetRenderIndex(posX, posY, t_width, t_height, Rotation::DEG0);
-    renderIndices[1] = GetRenderIndex(posX, posY, t_width, t_height, Rotation::DEG90);
-    renderIndices[2] = GetRenderIndex(posX, posY, t_width, t_height, Rotation::DEG180);
-    renderIndices[3] = GetRenderIndex(posX, posY, t_width, t_height, Rotation::DEG270);
+    renderIndices[0] = GetRenderIndex(posX, posY, t_width, t_height, DEG0);
+    renderIndices[1] = GetRenderIndex(posX, posY, t_width, t_height, DEG90);
+    renderIndices[2] = GetRenderIndex(posX, posY, t_width, t_height, DEG180);
+    renderIndices[3] = GetRenderIndex(posX, posY, t_width, t_height, DEG270);
 }

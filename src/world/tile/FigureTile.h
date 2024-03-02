@@ -78,7 +78,7 @@ namespace mdcii::world::tile
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        FigureTile();
+        FigureTile() = default;
 
         /**
          * @brief Constructs a new TerrainTile object.
@@ -132,6 +132,11 @@ namespace mdcii::world::tile
          * @return True if there is no figure; otherwise false.
          */
         [[nodiscard]] bool IsNotRenderable() const override { return !HasFigure(); }
+
+        /**
+         * @brief Calculates all gfx values to be stored in `gfxs`.
+         */
+        void CalculateGfxValues() override {}
     };
 
     //-------------------------------------------------

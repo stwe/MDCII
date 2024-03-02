@@ -19,6 +19,7 @@
 #pragma once
 
 #include <vector>
+#include <cstdint>
 
 namespace mdcii::world
 {
@@ -54,6 +55,17 @@ namespace mdcii::world::tile
             RESIDENTIAL,
             TRAFFIC,
             PLANTS
+        };
+
+        /**
+         * @brief Possible tile neighbors. Each flag can set by using the OR operator.
+         */
+        enum NeighborFlag : uint8_t
+        {
+            NORTH = 1,
+            EAST = 2,
+            SOUTH = 4,
+            WEST = 8
         };
 
         //-------------------------------------------------
@@ -117,29 +129,56 @@ namespace mdcii::world::tile
          */
         TileType type{ TileType::NONE };
 
-        // Neighbors
-
+        /**
+         * @brief Pointer the north neighbor.
+         */
         Tile* n{ nullptr };
+
+        /**
+         * @brief Pointer the south neighbor.
+         */
         Tile* s{ nullptr };
+
+        /**
+         * @brief Pointer the east neighbor.
+         */
         Tile* e{ nullptr };
+
+        /**
+         * @brief Pointer the west neighbor.
+         */
         Tile* w{ nullptr };
 
+        /**
+         * @brief Pointer the north-west neighbor.
+         */
+        Tile* nw{ nullptr };
+
+        /**
+         * @brief Pointer the north-east neighbor.
+         */
+        Tile* ne{ nullptr };
+
+        /**
+         * @brief Pointer the south-west neighbor.
+         */
+        Tile* sw{ nullptr };
+
+        /**
+         * @brief Pointer the south-east neighbor.
+         */
+        Tile* se{ nullptr };
+
+        /**
+         * @brief Contains all pointers to the neighboring tiles for iteration.
+         */
         std::vector<Tile*> neighbors;
 
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        Tile();
-
-        /**
-         * @brief Constructs a new Tile object.
-         *
-         * @param t_rotation The rotation of the tile.
-         * @param t_posX The x position for the first rotation (e.g. DEG0) of a tile relative to its parent island.
-         * @param t_posY The y position for the first rotation (e.g. DEG0) of a tile relative to its parent island.
-         */
-        Tile(int t_rotation, int t_posX, int t_posY);
+        Tile() = default;
 
         /**
          * @brief Constructs a new Tile object.
@@ -149,20 +188,25 @@ namespace mdcii::world::tile
          * @param t_posY The y position for the first rotation (e.g. DEG0) of a tile relative to its parent island.
          * @param t_tileType The tile type.
          */
-        Tile(int t_rotation, int t_posX, int t_posY, TileType t_tileType);
+        Tile(int t_rotation, int t_posX, int t_posY, TileType t_tileType = TileType::NONE);
 
-        virtual ~Tile() noexcept;
+        virtual ~Tile() noexcept = default;
 
         //-------------------------------------------------
         // Override
         //-------------------------------------------------
 
         /**
-         * @brief Returns whether a tile is renderable.
+         * @brief Returns whether a tile is not renderable.
          *
          * @return True or false.
          */
         [[nodiscard]] virtual bool IsNotRenderable() const = 0;
+
+        /**
+         * @brief Calculates all gfx values to be stored in `gfxs`.
+         */
+        virtual void CalculateGfxValues() = 0;
 
         //-------------------------------------------------
         // Render index

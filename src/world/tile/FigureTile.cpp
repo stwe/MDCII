@@ -23,11 +23,6 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::tile::FigureTile::FigureTile()
-{
-
-}
-
 mdcii::world::tile::FigureTile::FigureTile(
     const resource::Figure* t_figure,
     const int t_currentAnimation,

@@ -26,10 +26,6 @@
 // Ctors. / Dtor.
 //-------------------------------------------------
 
-mdcii::world::tile::TerrainTile::TerrainTile()
-{
-}
-
 mdcii::world::tile::TerrainTile::TerrainTile(
     const resource::Building* t_building,
     const int t_rotation,
@@ -43,7 +39,7 @@ mdcii::world::tile::TerrainTile::TerrainTile(
     , x{ t_x }
     , y{ t_y }
 {
-    CalculateGfx();
+    CalculateGfxs();
 }
 
 mdcii::world::tile::TerrainTile::TerrainTile(
@@ -60,7 +56,7 @@ mdcii::world::tile::TerrainTile::TerrainTile(
     , x{ t_x }
     , y{ t_y }
 {
-    CalculateGfx();
+    CalculateGfxs();
 }
 
 //-------------------------------------------------
@@ -115,29 +111,6 @@ void mdcii::world::tile::TerrainTile::RenderImGui() const
 // Gfx
 //-------------------------------------------------
 
-void mdcii::world::tile::TerrainTile::CalculateGfx()
-{
-    MDCII_ASSERT(HasBuilding(), "[TerrainTile::CalculateGfx()] Null pointer.")
-
-    const auto gfx0{ building->gfx };
-
-    gfxs.push_back(gfx0);
-    if (building->IsRotatable())
-    {
-        gfxs.push_back(gfx0 + (1 * building->rotate));
-        gfxs.push_back(gfx0 + (2 * building->rotate));
-        gfxs.push_back(gfx0 + (3 * building->rotate));
-    }
-
-    if (building->IsBig())
-    {
-        for (auto& gfx : gfxs)
-        {
-            AdjustGfxForBigBuildings(gfx);
-        }
-    }
-}
-
 void mdcii::world::tile::TerrainTile::AdjustGfxForBigBuildings(int& t_gfx) const
 {
     MDCII_ASSERT(HasBuilding(), "[TerrainTile::AdjustGfxForBigBuildings()] Null pointer.")
@@ -178,72 +151,109 @@ void mdcii::world::tile::TerrainTile::AdjustGfxForBigBuildings(int& t_gfx) const
     t_gfx += offset;
 }
 
-bool mdcii::world::tile::TerrainTile::DetermineNeighborType()
+bool mdcii::world::tile::TerrainTile::DetermineTrafficGfx()
 {
+    MDCII_ASSERT(HasBuilding(), "[TerrainTile::DetermineTrafficGfx()] Null pointer.")
+
     uint8_t neighbors{ 0 };
 
     if (n && n->type == TileType::TRAFFIC)
     {
+        MDCII_LOG_DEBUG("[TerrainTile::DetermineTrafficGfx()] Found traffic north neighbor.");
         neighbors = NORTH;
     }
 
     if (e && e->type == TileType::TRAFFIC)
     {
+        MDCII_LOG_DEBUG("[TerrainTile::DetermineTrafficGfx()] Found traffic east neighbor.");
         neighbors |= EAST;
     }
 
     if (s && s->type == TileType::TRAFFIC)
     {
+        MDCII_LOG_DEBUG("[TerrainTile::DetermineTrafficGfx()] Found traffic south neighbor.");
         neighbors |= SOUTH;
     }
 
     if (w && w->type == TileType::TRAFFIC)
     {
+        MDCII_LOG_DEBUG("[TerrainTile::DetermineTrafficGfx()] Found traffic west neighbor.");
         neighbors |= WEST;
     }
 
-    NeighborType newNeighborType;
+    resource::RoadGfx roadGfx;
     switch (neighbors)
     {
-        using enum NeighborType;
-        case 0: newNeighborType = NEIGHBOR_NONE; // keine Nachbarn
+        using enum resource::RoadGfx;
+        case 0: // no neighbors
+        case 1: roadGfx = ROAD_NS;
             break;
-        case 1: newNeighborType = NEIGHBOR_V;    // Norden
+        case 2: roadGfx = ROAD_WE;
             break;
-        case 2: newNeighborType = NEIGHBOR_H;    // Osten
+        case 3: roadGfx = ROAD_C_NE;
             break;
-        case 3: newNeighborType = NEIGHBOR_C3;   // Norden - Osten
+        case 4:
+        case 5: roadGfx = ROAD_NS;
             break;
-        case 4:                                  // Sueden
-        case 5: newNeighborType = NEIGHBOR_V;    // Sueden - Norden
+        case 6: roadGfx = ROAD_C_ES;
             break;
-        case 6: newNeighborType = NEIGHBOR_C1;   // Sueden - Osten
+        case 7: roadGfx = ROAD_T_NES;
             break;
-        case 7: newNeighborType = NEIGHBOR_T2;   // Norden - Osten - Sueden
+        case 8: roadGfx = ROAD_WE;
             break;
-        case 8: newNeighborType = NEIGHBOR_H;    // Westen
+        case 9: roadGfx = ROAD_C_WN;
             break;
-        case 9: newNeighborType = NEIGHBOR_C4;   // Westen - Norden
+        case 10: roadGfx = ROAD_WE;
             break;
-        case 10: newNeighborType = NEIGHBOR_H;   // Westen - Osten
+        case 11: roadGfx = ROAD_T_WNE;
             break;
-        case 11: newNeighborType = NEIGHBOR_T4;  // Westen - Osten - Norden
+        case 12: roadGfx = ROAD_C_SW;
             break;
-        case 12: newNeighborType = NEIGHBOR_C2;  // Westen - Sueden
+        case 13: roadGfx = ROAD_T_NSW;
             break;
-        case 13: newNeighborType = NEIGHBOR_T3;  // Westen - Sueden - Norden
+        case 14: roadGfx = ROAD_T_WES;
             break;
-        case 14: newNeighborType = NEIGHBOR_T1;  // Westen - Sueden - Osten
+        case 15: roadGfx = ROAD_X;
             break;
-        case 15: newNeighborType = NEIGHBOR_X;
-            break;
-        default: newNeighborType = NEIGHBOR_NONE;
+        default: roadGfx = ROAD_NS;
     }
 
-    const auto oldNeighborType{ neighborType };
-    neighborType = newNeighborType;
+    const auto newGfxInt{ magic_enum::enum_integer(roadGfx) };
 
-    return oldNeighborType != newNeighborType;
+    MDCII_ASSERT(!gfxs.empty(), "[TerrainTile::DetermineTrafficGfx()] Invalid gfx values.")
+
+    const auto oldGfx{ gfxs[0] };
+    gfxs[0] = newGfxInt;
+
+    return oldGfx != newGfxInt;
+}
+
+//-------------------------------------------------
+// Override
+//-------------------------------------------------
+
+void mdcii::world::tile::TerrainTile::CalculateGfxValues()
+{
+    MDCII_ASSERT(HasBuilding(), "[TerrainTile::CalculateGfxValues()] Null pointer.")
+    MDCII_ASSERT(gfxs.empty(), "[TerrainTile::CalculateGfxValues()] Invalid gfx values.")
+
+    const auto gfx0{ building->gfx };
+
+    gfxs.push_back(gfx0);
+    if (building->IsRotatable())
+    {
+        gfxs.push_back(gfx0 + (1 * building->rotate));
+        gfxs.push_back(gfx0 + (2 * building->rotate));
+        gfxs.push_back(gfx0 + (3 * building->rotate));
+    }
+
+    if (building->IsBig())
+    {
+        for (auto& gfx : gfxs)
+        {
+            AdjustGfxForBigBuildings(gfx);
+        }
+    }
 }
 
 //-------------------------------------------------

@@ -46,36 +46,6 @@ namespace mdcii::world::tile
      */
     struct TerrainTile : public Tile
     {
-        /**
-         * @brief Possible tile neighbors. Each flag can set by using the OR operator.
-         */
-        enum NeighborFlag : uint8_t
-        {
-            NORTH = 1,
-            EAST = 2,
-            SOUTH = 4,
-            WEST = 8
-        };
-
-        /**
-         * @brief The value corresponds to the index in the texture atlas.
-         */
-        enum class NeighborType
-        {
-            NEIGHBOR_NONE = -1,
-            NEIGHBOR_V = 0,
-            NEIGHBOR_H = 1,
-            NEIGHBOR_C1 = 4,
-            NEIGHBOR_T1 = 5,
-            NEIGHBOR_C2 = 6,
-            NEIGHBOR_T2 = 8,
-            NEIGHBOR_X = 9,
-            NEIGHBOR_T3 = 10,
-            NEIGHBOR_C3 = 12,
-            NEIGHBOR_T4 = 13,
-            NEIGHBOR_C4 = 14,
-        };
-
         //-------------------------------------------------
         // Constants
         //-------------------------------------------------
@@ -117,16 +87,11 @@ namespace mdcii::world::tile
          */
         int y{ 0 };
 
-        /**
-         * @brief The type of a possible neighbor.
-         */
-        NeighborType neighborType{ NeighborType::NEIGHBOR_NONE };
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
 
-        TerrainTile();
+        TerrainTile() = default;
 
         /**
          * @brief Constructs a new TerrainTile object.
@@ -192,9 +157,9 @@ namespace mdcii::world::tile
         //-------------------------------------------------
 
         /**
-         * @brief Calculates a gfx for each rotation.
+         * @brief Calculates all gfx values to be stored in `gfxs`.
          */
-        void CalculateGfx();
+        void CalculateGfxs() { CalculateGfxValues(); }
 
         /**
          * @brief Adjusts gfx values for large buildings.
@@ -202,6 +167,13 @@ namespace mdcii::world::tile
          * @param t_gfx The gfx of the terrain tile.
          */
         void AdjustGfxForBigBuildings(int& t_gfx) const;
+
+        /**
+         * @brief Determines the correct gfx for this tile depending on the neighbors.
+         *
+         * @return True if the gfx has changed.
+         */
+        [[nodiscard]] bool DetermineTrafficGfx();
 
         //-------------------------------------------------
         // Override
@@ -214,16 +186,10 @@ namespace mdcii::world::tile
          */
         [[nodiscard]] bool IsNotRenderable() const override { return !HasBuilding(); }
 
-        //-------------------------------------------------
-        // Helper
-        //-------------------------------------------------
-
         /**
-         * @brief Determines the correct NeighborType for this Tile depending on the neighbors.
-         *
-         * @return True if the type has changed.
+         * @brief Calculates all gfx values to be stored in `gfxs`.
          */
-        [[nodiscard]] bool DetermineNeighborType();
+        void CalculateGfxValues() override;
     };
 
     //-------------------------------------------------
