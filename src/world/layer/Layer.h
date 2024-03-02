@@ -187,6 +187,13 @@ namespace mdcii::world::layer
         virtual void InitTile(int t_x, int t_y) = 0;
 
         /**
+         * Does stuff before the tile is add to the layer.
+         *
+         * @param t_tile The tile to add.
+         */
+        virtual void PreTileAdd(T& t_tile) {};
+
+        /**
          * Does stuff after the tile was added to the layer.
          *
          * @param t_tile The tile that was added.
@@ -398,23 +405,7 @@ namespace mdcii::world::layer
         {
             t_tile.CalcRenderPositions(width, height);
 
-            // todo: virtual PreInsert() method
-            if (t_tile.type == tile::Tile::TileType::TRAFFIC)
-            {
-                t_tile.neighbors = tiles.at(t_tile.renderIndices[0]).neighbors;
-
-                t_tile.n = tiles.at(t_tile.renderIndices[0]).n;
-                t_tile.s = tiles.at(t_tile.renderIndices[0]).s;
-                t_tile.e = tiles.at(t_tile.renderIndices[0]).e;
-                t_tile.w = tiles.at(t_tile.renderIndices[0]).w;
-
-                t_tile.nw = tiles.at(t_tile.renderIndices[0]).nw;
-                t_tile.ne = tiles.at(t_tile.renderIndices[0]).ne;
-                t_tile.sw = tiles.at(t_tile.renderIndices[0]).sw;
-                t_tile.se = tiles.at(t_tile.renderIndices[0]).se;
-
-                t_tile.DetermineTrafficGfx();
-            }
+            PreTileAdd(t_tile);
 
             ReplaceTileInTilesArray(t_tile);
             IntoSortedTilesArray(t_tile);
@@ -602,6 +593,31 @@ namespace mdcii::world::layer
         }
 
         /**
+         * Does stuff before the tile is add to the layer.
+         *
+         * @param t_tile The tile to add.
+         */
+        void PreTileAdd(tile::TerrainTile& t_tile) override
+        {
+            if (t_tile.type == tile::Tile::TileType::TRAFFIC)
+            {
+                t_tile.neighbors = tiles.at(t_tile.renderIndices[0]).neighbors;
+
+                t_tile.n = tiles.at(t_tile.renderIndices[0]).n;
+                t_tile.s = tiles.at(t_tile.renderIndices[0]).s;
+                t_tile.e = tiles.at(t_tile.renderIndices[0]).e;
+                t_tile.w = tiles.at(t_tile.renderIndices[0]).w;
+
+                t_tile.nw = tiles.at(t_tile.renderIndices[0]).nw;
+                t_tile.ne = tiles.at(t_tile.renderIndices[0]).ne;
+                t_tile.sw = tiles.at(t_tile.renderIndices[0]).sw;
+                t_tile.se = tiles.at(t_tile.renderIndices[0]).se;
+
+                t_tile.DetermineTrafficGfx();
+            }
+        }
+
+        /**
          * Does stuff after the tile was added to the layer.
          *
          * @param t_tile The tile that was added.
@@ -622,9 +638,9 @@ namespace mdcii::world::layer
         //-------------------------------------------------
 
         /**
+         * Fixes the Gfx of all neighbors of a traffic tile.
          *
-         *
-         * @param t_tile
+         * @param t_tile The tile from which the neighbors are to be corrected.
          */
         void HandleTrafficNeighbors(const tile::TerrainTile& t_tile)
         {

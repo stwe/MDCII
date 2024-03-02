@@ -173,7 +173,7 @@ namespace mdcii::world::tile
          *
          * @return True if the gfx has changed.
          */
-        [[nodiscard]] bool DetermineTrafficGfx();
+        bool DetermineTrafficGfx();
 
         //-------------------------------------------------
         // Override
