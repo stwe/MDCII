@@ -186,6 +186,13 @@ namespace mdcii::world::layer
          */
         virtual void InitTile(int t_x, int t_y) = 0;
 
+        /**
+         * Does stuff after the tile was added to the layer.
+         *
+         * @param t_tile The tile that was added.
+         */
+        virtual void PostTileAdd(T& t_tile) {};
+
         //-------------------------------------------------
         // Create and init tiles from Json
         //-------------------------------------------------
@@ -382,23 +389,6 @@ namespace mdcii::world::layer
         // Add tiles
         //-------------------------------------------------
 
-        void HandleTrafficNeighbors(T& t_tile)
-        {
-            for (auto* n : t_tile.neighbors)
-            {
-                if (n)
-                {
-                    auto *nn = static_cast<tile::TerrainTile*>(n); // todo: not applicable with the virtual method
-                    if (nn->HasBuilding() && nn->type == tile::Tile::TileType::TRAFFIC)
-                    {
-                        nn->DetermineTrafficGfx();
-                        ReplaceTileInTilesArray(*nn);
-                        IntoSortedTilesArray(*nn);
-                    }
-                }
-            }
-        }
-
         /**
          * @brief Adds a tile to the layer.
          *
@@ -426,16 +416,10 @@ namespace mdcii::world::layer
                 t_tile.DetermineTrafficGfx();
             }
 
-            // After next step, the tile will be available for all rotations in the layer.
             ReplaceTileInTilesArray(t_tile);
             IntoSortedTilesArray(t_tile);
 
-            // todo: virtual AfterInsert() method
-            // In case of road the neighbors must be updated after insert.
-            if (t_tile.type == tile::Tile::TileType::TRAFFIC)
-            {
-                HandleTrafficNeighbors(t_tile);
-            }
+            PostTileAdd(t_tile);
         }
 
         /**
@@ -617,10 +601,49 @@ namespace mdcii::world::layer
             tile.CalcRenderPositions(width, height);
         }
 
+        /**
+         * Does stuff after the tile was added to the layer.
+         *
+         * @param t_tile The tile that was added.
+         */
+        void PostTileAdd(tile::TerrainTile& t_tile) override
+        {
+            if (t_tile.type == tile::Tile::TileType::TRAFFIC)
+            {
+                HandleTrafficNeighbors(t_tile);
+            }
+        }
+
     protected:
 
     private:
+        //-------------------------------------------------
+        // Helper
+        //-------------------------------------------------
 
+        /**
+         *
+         *
+         * @param t_tile
+         */
+        void HandleTrafficNeighbors(const tile::TerrainTile& t_tile)
+        {
+            for (auto* neighborTile : t_tile.neighbors)
+            {
+                if (neighborTile)
+                {
+                    auto* neighborTerrainTile{ dynamic_cast<tile::TerrainTile*>(neighborTile) };
+                    if (neighborTerrainTile->HasBuilding() && neighborTerrainTile->type == tile::Tile::TileType::TRAFFIC)
+                    {
+                        if (neighborTerrainTile->DetermineTrafficGfx())
+                        {
+                            ReplaceTileInTilesArray(*neighborTerrainTile);
+                            IntoSortedTilesArray(*neighborTerrainTile);
+                        }
+                    }
+                }
+            }
+        }
     };
 
     //-------------------------------------------------
