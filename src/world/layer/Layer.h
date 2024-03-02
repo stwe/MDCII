@@ -292,6 +292,7 @@ namespace mdcii::world::layer
                 {
                     const auto i{ y * width + x };
 
+                    // regular grid
                     if (y > 0)
                     {
                         tiles.at(i).n = &tiles.at((y - 1) * width + x);
@@ -314,6 +315,31 @@ namespace mdcii::world::layer
                     {
                         tiles.at(i).e = &tiles.at(y * width + (x + 1));
                         tiles.at(i).neighbors.push_back(tiles.at(i).e);
+                    }
+
+                    // connect diagonally
+                    if (y > 0 && x < width - 1)
+                    {
+                        tiles.at(i).ne = &tiles[(y - 1) * width + (x + 1)];
+                        tiles.at(i).neighbors.push_back(tiles.at(i).ne);
+                    }
+
+                    if (y > 0 && x > 0)
+                    {
+                        tiles.at(i).nw = &tiles[(y - 1) * width + (x - 1)];
+                        tiles.at(i).neighbors.push_back(tiles.at(i).nw);
+                    }
+
+                    if (y < height - 1 && x > 0)
+                    {
+                        tiles.at(i).sw = &tiles[(y + 1) * width + (x - 1)];
+                        tiles.at(i).neighbors.push_back(tiles.at(i).sw);
+                    }
+
+                    if (y < height - 1 && x < width - 1)
+                    {
+                        tiles.at(i).se = &tiles[(y + 1) * width + (x + 1)];
+                        tiles.at(i).neighbors.push_back(tiles.at(i).se);
                     }
                 }
             }
@@ -356,6 +382,23 @@ namespace mdcii::world::layer
         // Add tiles
         //-------------------------------------------------
 
+        void HandleTrafficNeighbors(T& t_tile)
+        {
+            for (auto* n : t_tile.neighbors)
+            {
+                if (n)
+                {
+                    auto *nn = static_cast<tile::TerrainTile*>(n); // todo: not applicable with the virtual method
+                    if (nn->HasBuilding() && nn->type == tile::Tile::TileType::TRAFFIC)
+                    {
+                        nn->DetermineTrafficGfx();
+                        ReplaceTileInTilesArray(*nn);
+                        IntoSortedTilesArray(*nn);
+                    }
+                }
+            }
+        }
+
         /**
          * @brief Adds a tile to the layer.
          *
@@ -365,8 +408,34 @@ namespace mdcii::world::layer
         {
             t_tile.CalcRenderPositions(width, height);
 
-            IntoTilesArray(t_tile);
+            // todo: virtual PreInsert() method
+            if (t_tile.type == tile::Tile::TileType::TRAFFIC)
+            {
+                t_tile.neighbors = tiles.at(t_tile.renderIndices[0]).neighbors;
+
+                t_tile.n = tiles.at(t_tile.renderIndices[0]).n;
+                t_tile.s = tiles.at(t_tile.renderIndices[0]).s;
+                t_tile.e = tiles.at(t_tile.renderIndices[0]).e;
+                t_tile.w = tiles.at(t_tile.renderIndices[0]).w;
+
+                t_tile.nw = tiles.at(t_tile.renderIndices[0]).nw;
+                t_tile.ne = tiles.at(t_tile.renderIndices[0]).ne;
+                t_tile.sw = tiles.at(t_tile.renderIndices[0]).sw;
+                t_tile.se = tiles.at(t_tile.renderIndices[0]).se;
+
+                t_tile.DetermineTrafficGfx();
+            }
+
+            // After next step, the tile will be available for all rotations in the layer.
+            ReplaceTileInTilesArray(t_tile);
             IntoSortedTilesArray(t_tile);
+
+            // todo: virtual AfterInsert() method
+            // In case of road the neighbors must be updated after insert.
+            if (t_tile.type == tile::Tile::TileType::TRAFFIC)
+            {
+                HandleTrafficNeighbors(t_tile);
+            }
         }
 
         /**
@@ -401,17 +470,17 @@ namespace mdcii::world::layer
         //-------------------------------------------------
 
         /**
-         * @brief Copies a tile into the `tiles` array.
+         * @brief Replaces a tile in the `tiles` array with the content of a given tile.
          *
-         * @param t_tile The tile to copy.
+         * @param t_tile The tile with the new content.
          */
-        void IntoTilesArray(T& t_tile)
+        void ReplaceTileInTilesArray(T& t_tile)
         {
             tiles.at(t_tile.renderIndices[0]) = t_tile;
         }
 
         /**
-         * @brief Copies a tile into the `sortedTiles` array.
+         * @brief Copies a tile from `tiles`array into the `sortedTiles` array.
          *
          * @param t_tile The tile to copy.
          */
@@ -542,7 +611,7 @@ namespace mdcii::world::layer
 
             if (tile.HasBuilding())
             {
-                tile.CalculateGfx();
+                tile.CalculateGfxValues();
             }
 
             tile.CalcRenderPositions(width, height);
@@ -668,20 +737,6 @@ namespace mdcii::world::layer
         //-------------------------------------------------
         // Count
         //-------------------------------------------------
-
-        /**
-         * @brief Counts the number of figures present.
-         *
-         * @return The number of figure tiles.
-         */
-        [[nodiscard]] int CountFigures()
-        {
-            const auto count{ std::count_if(tiles.begin(), tiles.end(), [](const tile::FigureTile& t_tile) {
-                return t_tile.HasFigure();
-            }) };
-
-            return static_cast<int>(count);
-        }
 
         /**
          * @brief Counts the number of figures of a given FigureId.

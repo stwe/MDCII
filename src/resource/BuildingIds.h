@@ -110,23 +110,35 @@ namespace mdcii::resource
     static constexpr auto ROAD_ID{ 401 };
     static constexpr auto DIRT_ROAD_ID{ 411 };
 
+    /*
+                 -----
+                / N /
+               -----
+         ----- ---- -----
+        / W /      / E /
+       ----- ---- -----
+            -----
+           / S /
+          -----
+    */
+
     enum class RoadGfx
     {
         // ID 401
-        ROAD_V = 1260,
-        ROAD_H = 1261,  // + 1262, 1263 same
+        ROAD_WE = 1260,
+        ROAD_NS = 1261,  // + 1262, 1263 same as 1260, 1261
 
         // ID 402
-        ROAD_C1 = 1264,
-        ROAD_C2 = 1265,
-        ROAD_C3 = 1266,
-        ROAD_C4 = 1267,
+        ROAD_C_NE = 1264,
+        ROAD_C_ES = 1265,
+        ROAD_C_SW = 1266,
+        ROAD_C_WN = 1267,
 
         // ID 403
-        ROAD_T1 = 1268,
-        ROAD_T2 = 1269,
-        ROAD_T3 = 1270,
-        ROAD_T4 = 1271,
+        ROAD_T_NES = 1268,
+        ROAD_T_WES = 1269,
+        ROAD_T_NSW = 1270,
+        ROAD_T_WNE = 1271,
 
         // ID 404
         ROAD_X = 1272,

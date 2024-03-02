@@ -185,7 +185,8 @@ bool mdcii::world::tile::TerrainTile::DetermineTrafficGfx()
     switch (neighbors)
     {
         using enum resource::RoadGfx;
-        case 0: // no neighbors
+        case 0: roadGfx = ROAD_WE;
+            break;
         case 1: roadGfx = ROAD_NS;
             break;
         case 2: roadGfx = ROAD_WE;
@@ -215,7 +216,7 @@ bool mdcii::world::tile::TerrainTile::DetermineTrafficGfx()
             break;
         case 15: roadGfx = ROAD_X;
             break;
-        default: roadGfx = ROAD_NS;
+        default: roadGfx = ROAD_WE;
     }
 
     const auto newGfxInt{ magic_enum::enum_integer(roadGfx) };
