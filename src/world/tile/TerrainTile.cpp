@@ -193,7 +193,12 @@ bool mdcii::world::tile::TerrainTile::DetermineTrafficGfx(const uint8_t t_neighb
         default: roadGfx = ROAD_WE;
     }
 
-    const auto newGfxInt{ magic_enum::enum_integer(roadGfx) };
+    auto newGfxInt{ magic_enum::enum_integer(roadGfx) };
+
+    if (building->id == resource::DIRT_ROAD_ID)
+    {
+        newGfxInt += 20;
+    }
 
     MDCII_ASSERT(!gfxs.empty(), "[TerrainTile::DetermineTrafficGfx()] Invalid gfx values.")
 
