@@ -147,9 +147,9 @@ void mdcii::resource::BshFile::CreateRenderables() const
     {
         texture->sprite = std::make_unique<olc::Sprite>(texture->width, texture->height);
 
-        for (int y{ 0 }; y < texture->height; ++y)
+        for (int y{ 0 }; y < static_cast<int>(texture->height); ++y)
         {
-            for (int x{ 0 }; x < texture->width; ++x)
+            for (int x{ 0 }; x < static_cast<int>(texture->width); ++x)
             {
                 texture->sprite->SetPixel(x, y, texture->pixels[static_cast<size_t>(y) * texture->width + x]);
             }

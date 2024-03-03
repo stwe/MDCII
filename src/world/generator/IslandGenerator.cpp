@@ -549,7 +549,7 @@ void mdcii::world::generator::IslandGenerator::RenderEditMenuImGui()
     ImFontAtlas* atlas = ImGui::GetIO().Fonts;
     ImGui::PushFont(atlas->Fonts[1]);
 
-    for (const auto [tileType, tileChar] : m_tileTypeChars)
+    for (const auto& [tileType, tileChar] : m_tileTypeChars)
     {
         if (m_bitmaskTileTypes.contains(m_selMapType))
         {

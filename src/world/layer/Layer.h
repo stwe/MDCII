@@ -294,7 +294,7 @@ namespace mdcii::world::layer
         //-------------------------------------------------
 
         /**
-         * @brief Stores a pointer to all neighbors for each tile.
+         * @brief Stores the index to all neighbors for each tile.
          */
         void AddTileNeighbors()
         {
@@ -306,59 +306,67 @@ namespace mdcii::world::layer
                 {
                     const auto i{ y * width + x };
 
-                    // regular grid
                     if (y > 0)
                     {
-                        tiles.at(i).n = &tiles.at((y - 1) * width + x);
+                        tiles.at(i).n = (y - 1) * width + x;
                         tiles.at(i).neighbors.push_back(tiles.at(i).n);
                     }
 
                     if (y < height - 1)
                     {
-                        tiles.at(i).s = &tiles.at((y + 1) * width + x);
+                        tiles.at(i).s = (y + 1) * width + x;
                         tiles.at(i).neighbors.push_back(tiles.at(i).s);
                     }
 
                     if (x > 0)
                     {
-                        tiles.at(i).w = &tiles.at(y * width + (x - 1));
+                        tiles.at(i).w = y * width + (x - 1);
                         tiles.at(i).neighbors.push_back(tiles.at(i).w);
                     }
 
                     if (x < width - 1)
                     {
-                        tiles.at(i).e = &tiles.at(y * width + (x + 1));
+                        tiles.at(i).e = y * width + (x + 1);
                         tiles.at(i).neighbors.push_back(tiles.at(i).e);
-                    }
-
-                    // connect diagonally
-                    if (y > 0 && x < width - 1)
-                    {
-                        tiles.at(i).ne = &tiles[(y - 1) * width + (x + 1)];
-                        tiles.at(i).neighbors.push_back(tiles.at(i).ne);
-                    }
-
-                    if (y > 0 && x > 0)
-                    {
-                        tiles.at(i).nw = &tiles[(y - 1) * width + (x - 1)];
-                        tiles.at(i).neighbors.push_back(tiles.at(i).nw);
-                    }
-
-                    if (y < height - 1 && x > 0)
-                    {
-                        tiles.at(i).sw = &tiles[(y + 1) * width + (x - 1)];
-                        tiles.at(i).neighbors.push_back(tiles.at(i).sw);
-                    }
-
-                    if (y < height - 1 && x < width - 1)
-                    {
-                        tiles.at(i).se = &tiles[(y + 1) * width + (x + 1)];
-                        tiles.at(i).neighbors.push_back(tiles.at(i).se);
                     }
                 }
             }
 
             MDCII_LOG_DEBUG("[Layer::AddTileNeighbors()] The neighbors have been saved successfully.");
+        }
+
+        /**
+         * @brief Determines a 8-bit int from the neighbors indices.
+         *
+         * @param t_tile The tile with the neighbors indices.
+         *
+         * @return A 8-bit flag.
+         */
+        [[nodiscard]] uint8_t CalcNeighborFlag(const T& t_tile)
+        {
+            uint8_t neighborFlag{ 0 };
+
+            if (t_tile.n >= 0 && tiles.at(t_tile.n).type == tile::Tile::TileType::TRAFFIC)
+            {
+                neighborFlag = tile::Tile::NORTH;
+            }
+
+            if (t_tile.e >= 0 && tiles.at(t_tile.e).type == tile::Tile::TileType::TRAFFIC)
+            {
+                neighborFlag |= tile::Tile::EAST;
+            }
+
+            if (t_tile.s >= 0 && tiles.at(t_tile.s).type == tile::Tile::TileType::TRAFFIC)
+            {
+                neighborFlag |= tile::Tile::SOUTH;
+            }
+
+            if (t_tile.w >= 0 && tiles.at(t_tile.w).type == tile::Tile::TileType::TRAFFIC)
+            {
+                neighborFlag |= tile::Tile::WEST;
+            }
+
+            return neighborFlag;
         }
 
         //-------------------------------------------------
@@ -608,12 +616,7 @@ namespace mdcii::world::layer
                 t_tile.e = tiles.at(t_tile.renderIndices[0]).e;
                 t_tile.w = tiles.at(t_tile.renderIndices[0]).w;
 
-                t_tile.nw = tiles.at(t_tile.renderIndices[0]).nw;
-                t_tile.ne = tiles.at(t_tile.renderIndices[0]).ne;
-                t_tile.sw = tiles.at(t_tile.renderIndices[0]).sw;
-                t_tile.se = tiles.at(t_tile.renderIndices[0]).se;
-
-                t_tile.DetermineTrafficGfx();
+                t_tile.DetermineTrafficGfx(CalcNeighborFlag(t_tile));
             }
         }
 
@@ -644,17 +647,17 @@ namespace mdcii::world::layer
          */
         void HandleTrafficNeighbors(const tile::TerrainTile& t_tile)
         {
-            for (auto* neighborTile : t_tile.neighbors)
+            for (auto neighborTileIdx : t_tile.neighbors)
             {
-                if (neighborTile)
+                if (neighborTileIdx >= 0)
                 {
-                    auto* neighborTerrainTile{ dynamic_cast<tile::TerrainTile*>(neighborTile) };
-                    if (neighborTerrainTile->HasBuilding() && neighborTerrainTile->type == tile::Tile::TileType::TRAFFIC)
+                    auto& neighborTile{ tiles.at(neighborTileIdx) };
+                    if (neighborTile.HasBuilding() && neighborTile.type == tile::Tile::TileType::TRAFFIC)
                     {
-                        if (neighborTerrainTile->DetermineTrafficGfx())
+                        if (neighborTile.DetermineTrafficGfx(CalcNeighborFlag(neighborTile)))
                         {
-                            ReplaceTileInTilesArray(*neighborTerrainTile);
-                            IntoSortedTilesArray(*neighborTerrainTile);
+                            ReplaceTileInTilesArray(neighborTile);
+                            IntoSortedTilesArray(neighborTile);
                         }
                     }
                 }
@@ -784,7 +787,7 @@ namespace mdcii::world::layer
          */
         [[nodiscard]] int CountFigures(const resource::FigureId t_figureId)
         {
-            const auto count{ std::count_if(tiles.begin(), tiles.end(), [t_figureId](const tile::FigureTile& t_tile) {
+            const auto count{ std::ranges::count_if(tiles, [t_figureId](const tile::FigureTile& t_tile) {
                 return t_tile.HasFigure(t_figureId);
             }) };
 

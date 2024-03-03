@@ -171,9 +171,11 @@ namespace mdcii::world::tile
         /**
          * @brief Determines the correct gfx for this tile depending on the neighbors.
          *
+         * @param t_neighborFlag Possible tile neighbors.
+         *
          * @return True if the gfx has changed.
          */
-        bool DetermineTrafficGfx();
+        bool DetermineTrafficGfx(uint8_t t_neighborFlag);
 
         //-------------------------------------------------
         // Override

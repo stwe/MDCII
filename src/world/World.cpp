@@ -23,10 +23,7 @@
 #include "Gui.h"
 #include "resource/TileAtlas.h"
 #include "resource/AnimalsTileAtlas.h"
-#include "resource/AssetManager.h"
 #include "renderer/Renderer.h"
-#include "camera/Camera.h"
-#include "world/layer/Layer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -116,38 +113,6 @@ void mdcii::world::World::OnUserUpdate(const float t_elapsedTime)
     // update current island && tiles
     SetCurrentIslandUnderMouse();
     SetCurrentTilesUnderMouse();
-
-    // render terrain neighbors
-    if (m_currentIslandUnderMouse.island && m_currentTilesUnderMouse.terrainTile)
-    {
-        for (const auto* neighbor : m_currentTilesUnderMouse.terrainTile->neighbors)
-        {
-            renderer::Renderer::RenderAsset(
-                resource::Asset::BLUE_ISO,
-                m_currentIslandUnderMouse.island->startX,
-                m_currentIslandUnderMouse.island->startY,
-                this,
-                neighbor,
-                true
-            );
-        }
-    }
-
-    // render building neighbors
-    if (m_currentIslandUnderMouse.island && m_currentTilesUnderMouse.buildingTile)
-    {
-        for (const auto* neighbor : m_currentTilesUnderMouse.buildingTile->neighbors)
-        {
-            renderer::Renderer::RenderAsset(
-                resource::Asset::GREEN_ISO,
-                m_currentIslandUnderMouse.island->startX,
-                m_currentIslandUnderMouse.island->startY,
-                this,
-                neighbor,
-                true
-            );
-        }
-    }
 
     // ---------------------------------
     // todo: Rendering depends on ImGui

@@ -130,49 +130,29 @@ namespace mdcii::world::tile
         TileType type{ TileType::NONE };
 
         /**
-         * @brief Pointer the north neighbor.
+         * @brief North neighbor index.
          */
-        Tile* n{ nullptr };
+        int n{ -1 };
 
         /**
-         * @brief Pointer the south neighbor.
+         * @brief South neighbor index.
          */
-        Tile* s{ nullptr };
+        int s{ -1 };
 
         /**
-         * @brief Pointer the east neighbor.
+         * @brief East neighbor index.
          */
-        Tile* e{ nullptr };
+        int e{ -1 };
 
         /**
-         * @brief Pointer the west neighbor.
+         * @brief West neighbor index.
          */
-        Tile* w{ nullptr };
+        int w{ -1 };
 
         /**
-         * @brief Pointer the north-west neighbor.
+         * @brief Contains all indices to the neighbor tiles for iteration.
          */
-        Tile* nw{ nullptr };
-
-        /**
-         * @brief Pointer the north-east neighbor.
-         */
-        Tile* ne{ nullptr };
-
-        /**
-         * @brief Pointer the south-west neighbor.
-         */
-        Tile* sw{ nullptr };
-
-        /**
-         * @brief Pointer the south-east neighbor.
-         */
-        Tile* se{ nullptr };
-
-        /**
-         * @brief Contains all pointers to the neighboring tiles for iteration.
-         */
-        std::vector<Tile*> neighbors;
+        std::vector<int> neighbors;
 
         //-------------------------------------------------
         // Ctors. / Dtor.

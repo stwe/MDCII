@@ -151,38 +151,12 @@ void mdcii::world::tile::TerrainTile::AdjustGfxForBigBuildings(int& t_gfx) const
     t_gfx += offset;
 }
 
-bool mdcii::world::tile::TerrainTile::DetermineTrafficGfx()
+bool mdcii::world::tile::TerrainTile::DetermineTrafficGfx(const uint8_t t_neighborFlag)
 {
     MDCII_ASSERT(HasBuilding(), "[TerrainTile::DetermineTrafficGfx()] Null pointer.")
 
-    uint8_t neighbors{ 0 };
-
-    if (n && n->type == TileType::TRAFFIC)
-    {
-        MDCII_LOG_DEBUG("[TerrainTile::DetermineTrafficGfx()] Found traffic north neighbor.");
-        neighbors = NORTH;
-    }
-
-    if (e && e->type == TileType::TRAFFIC)
-    {
-        MDCII_LOG_DEBUG("[TerrainTile::DetermineTrafficGfx()] Found traffic east neighbor.");
-        neighbors |= EAST;
-    }
-
-    if (s && s->type == TileType::TRAFFIC)
-    {
-        MDCII_LOG_DEBUG("[TerrainTile::DetermineTrafficGfx()] Found traffic south neighbor.");
-        neighbors |= SOUTH;
-    }
-
-    if (w && w->type == TileType::TRAFFIC)
-    {
-        MDCII_LOG_DEBUG("[TerrainTile::DetermineTrafficGfx()] Found traffic west neighbor.");
-        neighbors |= WEST;
-    }
-
     resource::RoadGfx roadGfx;
-    switch (neighbors)
+    switch (t_neighborFlag)
     {
         using enum resource::RoadGfx;
         case 0: roadGfx = ROAD_WE;
