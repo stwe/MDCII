@@ -109,40 +109,40 @@ void mdcii::world::tile::TerrainTile::RenderImGui(const void* t_layer) const
     ImGui::Separator();
     ImGui::PopStyleColor();
 
-    if (n >= 0 && terrainLayer->tiles.at(n).type == TileType::TRAFFIC)
+    if (n >= 0 && terrainLayer->sortedTiles.at(magic_enum::enum_integer(terrainLayer->world->camera->rotation)).at(n).type == TileType::TRAFFIC)
     {
         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
         ImGui::Text("North Traffic Tile");
         ImGui::PopStyleColor();
 
-        RenderImGuiTileInfo(terrainLayer->tiles.at(n));
+        RenderImGuiTileInfo(terrainLayer->sortedTiles.at(magic_enum::enum_integer(terrainLayer->world->camera->rotation)).at(n));
     }
 
-    if (s >= 0 && terrainLayer->tiles.at(s).type == TileType::TRAFFIC)
+    if (s >= 0 && terrainLayer->sortedTiles.at(magic_enum::enum_integer(terrainLayer->world->camera->rotation)).at(s).type == TileType::TRAFFIC)
     {
         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
         ImGui::Text("South Traffic Tile");
         ImGui::PopStyleColor();
 
-        RenderImGuiTileInfo(terrainLayer->tiles.at(s));
+        RenderImGuiTileInfo(terrainLayer->sortedTiles.at(magic_enum::enum_integer(terrainLayer->world->camera->rotation)).at(s));
     }
 
-    if (e >= 0 && terrainLayer->tiles.at(e).type == TileType::TRAFFIC)
+    if (e >= 0 && terrainLayer->sortedTiles.at(magic_enum::enum_integer(terrainLayer->world->camera->rotation)).at(e).type == TileType::TRAFFIC)
     {
         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
         ImGui::Text("East Traffic Tile");
         ImGui::PopStyleColor();
 
-        RenderImGuiTileInfo(terrainLayer->tiles.at(e));
+        RenderImGuiTileInfo(terrainLayer->sortedTiles.at(magic_enum::enum_integer(terrainLayer->world->camera->rotation)).at(e));
     }
 
-    if (w >= 0 && terrainLayer->tiles.at(w).type == TileType::TRAFFIC)
+    if (w >= 0 && terrainLayer->sortedTiles.at(magic_enum::enum_integer(terrainLayer->world->camera->rotation)).at(w).type == TileType::TRAFFIC)
     {
         ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
         ImGui::Text("West Traffic Tile");
         ImGui::PopStyleColor();
 
-        RenderImGuiTileInfo(terrainLayer->tiles.at(w));
+        RenderImGuiTileInfo(terrainLayer->sortedTiles.at(magic_enum::enum_integer(terrainLayer->world->camera->rotation)).at(w));
     }
 }
 
@@ -159,6 +159,7 @@ void mdcii::world::tile::TerrainTile::RenderImGuiTileInfo(const TerrainTile& t_t
     }
 
     ImGui::Text("Building pos xy: %d, %d", t_tile.posX, t_tile.posY);
+    ImGui::Text("Building type: %s", magic_enum::enum_name(t_tile.type).data());
 }
 
 //-------------------------------------------------

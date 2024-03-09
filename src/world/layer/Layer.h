@@ -91,6 +91,11 @@ namespace mdcii::world::layer
         const int height;
 
         /**
+         * @brief Pointer to the parent World object.
+         */
+        const World* world{ nullptr };
+
+        /**
          * @brief Contains all tiles of the layer, sorted as in rotation DEG0.
          */
         std::vector<T> tiles;
@@ -128,11 +133,11 @@ namespace mdcii::world::layer
             : layerType{ t_layerType }
             , width{ t_width }
             , height{ t_height }
-            , m_world{ t_world }
+            , world{ t_world }
         {
             MDCII_ASSERT(width > 0, "[Layer::Layer()] Invalid width given.")
             MDCII_ASSERT(height > 0, "[Layer::Layer()] Invalid height given.")
-            MDCII_ASSERT(m_world, "[Layer::Layer()] Null pointer.")
+            MDCII_ASSERT(world, "[Layer::Layer()] Null pointer.")
         }
 
         Layer(const Layer& t_other) = delete;
@@ -189,9 +194,9 @@ namespace mdcii::world::layer
         /**
          * Does stuff before the tile is add to the layer.
          *
-         * @param t_tile The tile to add.
+         * @param t_tileToAdd The tile to add.
          */
-        virtual void PreTileAdd(T& t_tile) {};
+        virtual void PreTileAdd(T& t_tileToAdd) {};
 
         /**
          * Does stuff after the tile was added to the layer.
@@ -309,25 +314,21 @@ namespace mdcii::world::layer
                     if (y > 0)
                     {
                         tiles.at(i).n = (y - 1) * width + x;
-                        tiles.at(i).neighbors.push_back(tiles.at(i).n);
                     }
 
                     if (y < height - 1)
                     {
                         tiles.at(i).s = (y + 1) * width + x;
-                        tiles.at(i).neighbors.push_back(tiles.at(i).s);
                     }
 
                     if (x > 0)
                     {
                         tiles.at(i).w = y * width + (x - 1);
-                        tiles.at(i).neighbors.push_back(tiles.at(i).w);
                     }
 
                     if (x < width - 1)
                     {
                         tiles.at(i).e = y * width + (x + 1);
-                        tiles.at(i).neighbors.push_back(tiles.at(i).e);
                     }
                 }
             }
@@ -346,22 +347,22 @@ namespace mdcii::world::layer
         {
             uint8_t neighborFlag{ 0 };
 
-            if (t_tile.n >= 0 && tiles.at(t_tile.n).type == tile::Tile::TileType::TRAFFIC)
+            if (t_tile.n >= 0 && sortedTiles.at(magic_enum::enum_integer(world->camera->rotation)).at(t_tile.n).type == tile::Tile::TileType::TRAFFIC)
             {
                 neighborFlag = tile::Tile::NORTH;
             }
 
-            if (t_tile.e >= 0 && tiles.at(t_tile.e).type == tile::Tile::TileType::TRAFFIC)
+            if (t_tile.e >= 0 && sortedTiles.at(magic_enum::enum_integer(world->camera->rotation)).at(t_tile.e).type == tile::Tile::TileType::TRAFFIC)
             {
                 neighborFlag |= tile::Tile::EAST;
             }
 
-            if (t_tile.s >= 0 && tiles.at(t_tile.s).type == tile::Tile::TileType::TRAFFIC)
+            if (t_tile.s >= 0 && sortedTiles.at(magic_enum::enum_integer(world->camera->rotation)).at(t_tile.s).type == tile::Tile::TileType::TRAFFIC)
             {
                 neighborFlag |= tile::Tile::SOUTH;
             }
 
-            if (t_tile.w >= 0 && tiles.at(t_tile.w).type == tile::Tile::TileType::TRAFFIC)
+            if (t_tile.w >= 0 && sortedTiles.at(magic_enum::enum_integer(world->camera->rotation)).at(t_tile.w).type == tile::Tile::TileType::TRAFFIC)
             {
                 neighborFlag |= tile::Tile::WEST;
             }
@@ -384,10 +385,10 @@ namespace mdcii::world::layer
         bool UpdateCurrentTiles(const int t_xOffset, const int t_yOffset)
         {
             std::vector<T>().swap(currentTiles);
-            currentTiles = sortedTiles.at(magic_enum::enum_integer(m_world->camera->rotation));
+            currentTiles = sortedTiles.at(magic_enum::enum_integer(world->camera->rotation));
 
             auto [begin, end]{ std::ranges::remove_if(currentTiles, [&](const T& t_tile) {
-                return m_world->IsWorldPositionOutsideScreen(t_tile.posX + t_xOffset, t_tile.posY + t_yOffset) || t_tile.IsNotRenderable();
+                return world->IsWorldPositionOutsideScreen(t_tile.posX + t_xOffset, t_tile.posY + t_yOffset) || t_tile.IsNotRenderable();
             } )};
 
             currentTiles.erase(begin, end);
@@ -439,15 +440,6 @@ namespace mdcii::world::layer
         }
 
     protected:
-        //-------------------------------------------------
-        // Member
-        //-------------------------------------------------
-
-        /**
-         * @brief Pointer to the parent World object.
-         */
-        const World* m_world{ nullptr };
-
         //-------------------------------------------------
         // Helper
         //-------------------------------------------------
@@ -544,9 +536,9 @@ namespace mdcii::world::layer
 
             if (t_json.count("id") && t_json.at("id") >= 0)
             {
-                if (m_world)
+                if (world)
                 {
-                    const auto& building{ m_world->state->game->originalResourcesManager->GetBuildingById(t_json.at("id")) };
+                    const auto& building{ world->state->game->originalResourcesManager->GetBuildingById(t_json.at("id")) };
                     tile.building = &building;
                 }
                 else
@@ -603,20 +595,18 @@ namespace mdcii::world::layer
         /**
          * Does stuff before the tile is add to the layer.
          *
-         * @param t_tile The tile to add.
+         * @param t_tileToAdd The tile to add.
          */
-        void PreTileAdd(tile::TerrainTile& t_tile) override
+        void PreTileAdd(tile::TerrainTile& t_tileToAdd) override
         {
-            if (t_tile.type == tile::Tile::TileType::TRAFFIC)
+            if (t_tileToAdd.type == tile::Tile::TileType::TRAFFIC)
             {
-                t_tile.neighbors = tiles.at(t_tile.renderIndices[0]).neighbors;
+                t_tileToAdd.n = tiles.at(t_tileToAdd.renderIndices[magic_enum::enum_integer(world->camera->rotation)]).n;
+                t_tileToAdd.s = tiles.at(t_tileToAdd.renderIndices[magic_enum::enum_integer(world->camera->rotation)]).s;
+                t_tileToAdd.e = tiles.at(t_tileToAdd.renderIndices[magic_enum::enum_integer(world->camera->rotation)]).e;
+                t_tileToAdd.w = tiles.at(t_tileToAdd.renderIndices[magic_enum::enum_integer(world->camera->rotation)]).w;
 
-                t_tile.n = tiles.at(t_tile.renderIndices[0]).n;
-                t_tile.s = tiles.at(t_tile.renderIndices[0]).s;
-                t_tile.e = tiles.at(t_tile.renderIndices[0]).e;
-                t_tile.w = tiles.at(t_tile.renderIndices[0]).w;
-
-                t_tile.DetermineTrafficGfx(CalcNeighborFlag(t_tile));
+                t_tileToAdd.DetermineTrafficGfx(CalcNeighborFlag(t_tileToAdd));
             }
         }
 
@@ -647,19 +637,43 @@ namespace mdcii::world::layer
          */
         void HandleTrafficNeighbors(const tile::TerrainTile& t_tile)
         {
-            for (auto neighborTileIdx : t_tile.neighbors)
+            if (t_tile.n >= 0 && sortedTiles.at(magic_enum::enum_integer(world->camera->rotation)).at(t_tile.n).type == tile::Tile::TileType::TRAFFIC)
             {
-                if (neighborTileIdx >= 0)
+                auto& nt{ sortedTiles.at(magic_enum::enum_integer(world->camera->rotation)).at(t_tile.n) };
+                if (nt.DetermineTrafficGfx(CalcNeighborFlag(nt)))
                 {
-                    auto& neighborTile{ tiles.at(neighborTileIdx) };
-                    if (neighborTile.HasBuilding() && neighborTile.type == tile::Tile::TileType::TRAFFIC)
-                    {
-                        if (neighborTile.DetermineTrafficGfx(CalcNeighborFlag(neighborTile)))
-                        {
-                            ReplaceTileInTilesArray(neighborTile);
-                            IntoSortedTilesArray(neighborTile);
-                        }
-                    }
+                    ReplaceTileInTilesArray(nt);
+                    IntoSortedTilesArray(nt);
+                }
+            }
+
+            if (t_tile.e >= 0 && sortedTiles.at(magic_enum::enum_integer(world->camera->rotation)).at(t_tile.e).type == tile::Tile::TileType::TRAFFIC)
+            {
+                auto& nt{ sortedTiles.at(magic_enum::enum_integer(world->camera->rotation)).at(t_tile.e) };
+                if (nt.DetermineTrafficGfx(CalcNeighborFlag(nt)))
+                {
+                    ReplaceTileInTilesArray(nt);
+                    IntoSortedTilesArray(nt);
+                }
+            }
+
+            if (t_tile.s >= 0 && sortedTiles.at(magic_enum::enum_integer(world->camera->rotation)).at(t_tile.s).type == tile::Tile::TileType::TRAFFIC)
+            {
+                auto& nt{ sortedTiles.at(magic_enum::enum_integer(world->camera->rotation)).at(t_tile.s) };
+                if (nt.DetermineTrafficGfx(CalcNeighborFlag(nt)))
+                {
+                    ReplaceTileInTilesArray(nt);
+                    IntoSortedTilesArray(nt);
+                }
+            }
+
+            if (t_tile.w >= 0 && sortedTiles.at(magic_enum::enum_integer(world->camera->rotation)).at(t_tile.w).type == tile::Tile::TileType::TRAFFIC)
+            {
+                auto& nt{ sortedTiles.at(magic_enum::enum_integer(world->camera->rotation)).at(t_tile.w) };
+                if (nt.DetermineTrafficGfx(CalcNeighborFlag(nt)))
+                {
+                    ReplaceTileInTilesArray(nt);
+                    IntoSortedTilesArray(nt);
                 }
             }
         }
@@ -723,9 +737,9 @@ namespace mdcii::world::layer
             if (t_json.count("id") && t_json.at("id") > 0) // 0 = UNSET
             {
                 const auto figureIdOpt{ magic_enum::enum_cast<resource::FigureId>(t_json.at("id")) };
-                if (m_world && figureIdOpt.has_value())
+                if (world && figureIdOpt.has_value())
                 {
-                    const auto& figure{ m_world->state->game->originalResourcesManager->GetFigureById(figureIdOpt.value()) };
+                    const auto& figure{ world->state->game->originalResourcesManager->GetFigureById(figureIdOpt.value()) };
                     tile.figure = &figure;
                 }
                 else
