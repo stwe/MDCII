@@ -209,23 +209,11 @@ msgstr ""
 msgid "Stone road"
 msgstr ""
 
-msgid "Stone road curved"
-msgstr ""
-
-msgid "Stone T-intersection"
-msgstr ""
-
-msgid "Stone crossroad"
-msgstr ""
-
 msgid "Dirt road"
 msgstr ""
 
-msgid "Dirt road curved"
+msgid "Rotate map right"
 msgstr ""
 
-msgid "Dirt T-intersection"
-msgstr ""
-
-msgid "Dirt crossroad"
+msgid "Rotate map left"
 msgstr ""

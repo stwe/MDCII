@@ -171,20 +171,41 @@ void mdcii::world::World::RenderImGui()
 
     ImGui::Separator();
 
-    ImGui::Text("Camera rotation %s", magic_enum::enum_name(camera->rotation).data());
+    if (camera->RenderImGui())
+    {
+        FindVisibleIslands();
+        FindVisibleDeepWaterTiles();
+    }
+
+    ImGui::Begin("Tiles");
 
     if (m_currentIslandUnderMouse.island && m_currentTilesUnderMouse.terrainTile)
     {
         ImGui::Separator();
-        ImGui::Text("Terrain");
-        m_currentTilesUnderMouse.terrainTile->RenderImGui();
+
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
+        ImGui::Text("Terrain Layer");
+        ImGui::Separator();
+        ImGui::PopStyleColor();
+
+        m_currentTilesUnderMouse.terrainTile->RenderImGui(m_currentIslandUnderMouse.island->GetTerrainLayer(layer::LayerType::TERRAIN));
     }
+
     if (m_currentIslandUnderMouse.island && m_currentTilesUnderMouse.buildingTile)
     {
+        ImGui::NewLine();
+
         ImGui::Separator();
-        ImGui::Text("Building");
-        m_currentTilesUnderMouse.buildingTile->RenderImGui();
+
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
+        ImGui::Text("Building Layer");
+        ImGui::Separator();
+        ImGui::PopStyleColor();
+
+        m_currentTilesUnderMouse.buildingTile->RenderImGui(m_currentIslandUnderMouse.island->GetTerrainLayer(layer::LayerType::BUILDINGS));
     }
+
+    ImGui::End();
 
     mousePicker->RenderImGui();
 

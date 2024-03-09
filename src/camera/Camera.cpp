@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -19,6 +19,7 @@
 #include "Camera.h"
 #include "Game.h"
 #include "MdciiAssert.h"
+#include "Intl.h"
 #include "world/World.h"
 #include "state/State.h"
 
@@ -63,20 +64,6 @@ bool mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
         MDCII_LOG_DEBUG("[Camera::OnUserUpdate()] Zoom++ {}", magic_enum::enum_name(zoom));
     }
 
-    // rotation
-    if (m_world->state->game->GetKey(olc::Key::PGUP).bPressed)
-    {
-        ++rotation;
-        dirty = true;
-        MDCII_LOG_DEBUG("[Camera::OnUserUpdate()] World rotation++ {}", magic_enum::enum_name(rotation));
-    }
-    if (m_world->state->game->GetKey(olc::Key::PGDN).bPressed)
-    {
-        --rotation;
-        dirty = true;
-        MDCII_LOG_DEBUG("[Camera::OnUserUpdate()] World rotation-- {}", magic_enum::enum_name(rotation));
-    }
-
     // world
     olc::vf2d vel{ 0.0f, 0.0f };
     if (m_world->state->game->GetKey(olc::Key::UP).bHeld)
@@ -111,6 +98,73 @@ bool mdcii::camera::Camera::OnUserUpdate(const float t_elapsedTime)
 
     m_world->state->game->DrawString(4, 4, fmt::format("Camera world: {}, {}", std::to_string(worldPosition.x), std::to_string(worldPosition.y)), olc::WHITE);
     m_world->state->game->DrawString(4, 14, fmt::format("Camera screen: {}, {}", std::to_string(screenPosition.x), std::to_string(screenPosition.y)), olc::WHITE);
+
+    return dirty;
+}
+
+//-------------------------------------------------
+// ImGui
+//-------------------------------------------------
+
+bool mdcii::camera::Camera::RenderImGui()
+{
+    ImGui::Text("Map rotation %s", magic_enum::enum_name(rotation).data());
+
+    return RotateGui();
+}
+
+//-------------------------------------------------
+// Gui Helper
+//-------------------------------------------------
+
+bool mdcii::camera::Camera::RotateGui()
+{
+    auto dirty{ false };
+
+    static auto r{ false };
+    static auto l{ false };
+    rotation == world::Rotation::DEG270 ? r = true : r = false;
+    rotation == world::Rotation::DEG0 ? l = true : l = false;
+
+    ImGui::BeginDisabled(r);
+    if (ImGui::Button("->##CamRot"))
+    {
+        ++rotation;
+
+        MDCII_LOG_DEBUG("[Camera::RotateGui()] Camera rotation++ {}", magic_enum::enum_name(rotation));
+
+        dirty = true;
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, IM_COL32(66, 104, 188, 255));
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
+        ImGui::SetTooltip(_("Rotate map right"));
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
+    }
+    ImGui::EndDisabled();
+
+    ImGui::SameLine();
+
+    ImGui::BeginDisabled(l);
+    if (ImGui::Button("<-##CamRot"))
+    {
+        --rotation;
+
+        MDCII_LOG_DEBUG("[Camera::RotateGui()] Camera rotation-- {}", magic_enum::enum_name(rotation));
+
+        dirty = true;
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::PushStyleColor(ImGuiCol_PopupBg, IM_COL32(66, 104, 188, 255));
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
+        ImGui::SetTooltip(_("Rotate map left"));
+        ImGui::PopStyleColor();
+        ImGui::PopStyleColor();
+    }
+    ImGui::EndDisabled();
 
     return dirty;
 }

@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -100,11 +100,17 @@ namespace mdcii::camera
 
         [[nodiscard]] bool OnUserUpdate(float t_elapsedTime);
 
+        //-------------------------------------------------
+        // ImGui
+        //-------------------------------------------------
+
+        [[nodiscard]] bool RenderImGui();
+
     protected:
 
     private:
         //-------------------------------------------------
-        // Member
+        // Constants
         //-------------------------------------------------
 
         /**
@@ -120,5 +126,16 @@ namespace mdcii::camera
          * @brief Pointer to the parent World.
          */
         const world::World* m_world{ nullptr };
+
+        //-------------------------------------------------
+        // Gui Helper
+        //-------------------------------------------------
+
+        /**
+         * @brief Shows two buttons that can be used to rotate the map.
+         *
+         * @return True if the rotation has changed; otherwise false.
+         */
+        [[nodiscard]] bool RotateGui();
     };
 }
