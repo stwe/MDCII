@@ -149,11 +149,6 @@ namespace mdcii::world::tile
          */
         int w{ -1 };
 
-        /**
-         * @brief Contains all indices to the neighbor tiles for iteration.
-         */
-        std::vector<int> neighbors;
-
         //-------------------------------------------------
         // Ctors. / Dtor.
         //-------------------------------------------------
