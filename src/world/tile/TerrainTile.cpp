@@ -17,10 +17,7 @@
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
 #include "TerrainTile.h"
-#include "MdciiAssert.h"
-#include "resource/Buildings.h"
-#include "world/Rotation.h"
-#include "vendor/imgui/imgui.h"
+#include "world/layer/Layer.h"
 
 //-------------------------------------------------
 // Ctors. / Dtor.
@@ -96,15 +93,72 @@ void mdcii::world::tile::TerrainTile::UpdateFrame(const std::array<int, NR_OF_AN
     }
 }
 
-void mdcii::world::tile::TerrainTile::RenderImGui() const
+void mdcii::world::tile::TerrainTile::RenderImGui(const void* t_layer) const
 {
-    if (HasBuilding())
+    // this
+
+    RenderImGuiTileInfo(*this);
+
+    // neighbors
+
+    const auto* terrainLayer{ reinterpret_cast<const layer::TerrainLayer<TerrainTile>*>(t_layer) };
+
+    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+    ImGui::Separator();
+    ImGui::Text("Traffic Neighbors: ");
+    ImGui::Separator();
+    ImGui::PopStyleColor();
+
+    if (n >= 0 && terrainLayer->tiles.at(n).type == TileType::TRAFFIC)
     {
-        ImGui::Text("Building Id: %d", building->id);
-        ImGui::Text("Building Gfx: %d", building->gfx);
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+        ImGui::Text("North Traffic Tile");
+        ImGui::PopStyleColor();
+
+        RenderImGuiTileInfo(terrainLayer->tiles.at(n));
     }
-    ImGui::Text("Building x: %d", x);
-    ImGui::Text("Building y: %d", y);
+
+    if (s >= 0 && terrainLayer->tiles.at(s).type == TileType::TRAFFIC)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+        ImGui::Text("South Traffic Tile");
+        ImGui::PopStyleColor();
+
+        RenderImGuiTileInfo(terrainLayer->tiles.at(s));
+    }
+
+    if (e >= 0 && terrainLayer->tiles.at(e).type == TileType::TRAFFIC)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+        ImGui::Text("East Traffic Tile");
+        ImGui::PopStyleColor();
+
+        RenderImGuiTileInfo(terrainLayer->tiles.at(e));
+    }
+
+    if (w >= 0 && terrainLayer->tiles.at(w).type == TileType::TRAFFIC)
+    {
+        ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+        ImGui::Text("West Traffic Tile");
+        ImGui::PopStyleColor();
+
+        RenderImGuiTileInfo(terrainLayer->tiles.at(w));
+    }
+}
+
+void mdcii::world::tile::TerrainTile::RenderImGuiTileInfo(const TerrainTile& t_tile)
+{
+    if (t_tile.HasBuilding())
+    {
+        ImGui::Text("Building Id: %d with Gfx: %d", t_tile.building->id, t_tile.building->gfx);
+
+        if (t_tile.building->IsBig())
+        {
+            ImGui::Text("Building xy: %d, %d", t_tile.x, t_tile.y);
+        }
+    }
+
+    ImGui::Text("Building pos xy: %d, %d", t_tile.posX, t_tile.posY);
 }
 
 //-------------------------------------------------

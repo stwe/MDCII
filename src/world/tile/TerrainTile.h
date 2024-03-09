@@ -148,9 +148,18 @@ namespace mdcii::world::tile
         void UpdateFrame(const std::array<int, NR_OF_ANIM_TIMES>& t_frameValues);
 
         /**
-         * @brief Renders some information about this tile using ImGui.
+         * @brief Renders some information about this tile and its neighbors using ImGui.
+         *
+         * @param t_layer Pointer to a TerrainLayer.
          */
-        void RenderImGui() const;
+        void RenderImGui(const void* t_layer) const;
+
+        /**
+         * @brief Renders some information about a tile.
+         *
+         * @param t_tile The tile from which the information should be output.
+         */
+        static void RenderImGuiTileInfo(const TerrainTile& t_tile);
 
         //-------------------------------------------------
         // Gfx
