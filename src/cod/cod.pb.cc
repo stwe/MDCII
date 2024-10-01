@@ -4,291 +4,364 @@
 #include "cod.pb.h"
 
 #include <algorithm>
-
-#include <google/protobuf/io/coded_stream.h>
-#include <google/protobuf/extension_set.h>
-#include <google/protobuf/wire_format_lite.h>
-#include <google/protobuf/descriptor.h>
-#include <google/protobuf/generated_message_reflection.h>
-#include <google/protobuf/reflection_ops.h>
-#include <google/protobuf/wire_format.h>
+#include "google/protobuf/io/coded_stream.h"
+#include "google/protobuf/extension_set.h"
+#include "google/protobuf/wire_format_lite.h"
+#include "google/protobuf/descriptor.h"
+#include "google/protobuf/generated_message_reflection.h"
+#include "google/protobuf/reflection_ops.h"
+#include "google/protobuf/wire_format.h"
+#include "google/protobuf/generated_message_tctable_impl.h"
 // @@protoc_insertion_point(includes)
-#include <google/protobuf/port_def.inc>
 
+// Must be included last.
+#include "google/protobuf/port_def.inc"
 PROTOBUF_PRAGMA_INIT_SEG
-
-namespace _pb = ::PROTOBUF_NAMESPACE_ID;
-namespace _pbi = _pb::internal;
-
+namespace _pb = ::google::protobuf;
+namespace _pbi = ::google::protobuf::internal;
+namespace _fl = ::google::protobuf::internal::field_layout;
 namespace cod_pb {
-PROTOBUF_CONSTEXPR Value::Value(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.Value_)*/{}
-  , /*decltype(_impl_._cached_size_)*/{}
-  , /*decltype(_impl_._oneof_case_)*/{}} {}
+
+inline constexpr Value::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : Value_{},
+        _cached_size_{0},
+        _oneof_case_{} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR Value::Value(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
 struct ValueDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ValueDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ValueDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~ValueDefaultTypeInternal() {}
   union {
     Value _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ValueDefaultTypeInternal _Value_default_instance_;
-PROTOBUF_CONSTEXPR ArrayValue::ArrayValue(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.value_)*/{}
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ValueDefaultTypeInternal _Value_default_instance_;
+
+inline constexpr ArrayValue::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : value_{},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ArrayValue::ArrayValue(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
 struct ArrayValueDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ArrayValueDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ArrayValueDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~ArrayValueDefaultTypeInternal() {}
   union {
     ArrayValue _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ArrayValueDefaultTypeInternal _ArrayValue_default_instance_;
-PROTOBUF_CONSTEXPR Variable::Variable(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.Value_)*/{}
-  , /*decltype(_impl_._cached_size_)*/{}
-  , /*decltype(_impl_._oneof_case_)*/{}} {}
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ArrayValueDefaultTypeInternal _ArrayValue_default_instance_;
+
+inline constexpr Variable::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        Value_{},
+        _cached_size_{0},
+        _oneof_case_{} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR Variable::Variable(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
 struct VariableDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR VariableDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR VariableDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~VariableDefaultTypeInternal() {}
   union {
     Variable _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 VariableDefaultTypeInternal _Variable_default_instance_;
-PROTOBUF_CONSTEXPR Variables::Variables(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.variable_)*/{}
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 VariableDefaultTypeInternal _Variable_default_instance_;
+
+inline constexpr Variables::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : variable_{},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR Variables::Variables(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
 struct VariablesDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR VariablesDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR VariablesDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~VariablesDefaultTypeInternal() {}
   union {
     Variables _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 VariablesDefaultTypeInternal _Variables_default_instance_;
-PROTOBUF_CONSTEXPR Object::Object(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.objects_)*/{}
-  , /*decltype(_impl_.name_)*/{&::_pbi::fixed_address_empty_string, ::_pbi::ConstantInitialized{}}
-  , /*decltype(_impl_.variables_)*/nullptr
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 VariablesDefaultTypeInternal _Variables_default_instance_;
+
+inline constexpr Object::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        objects_{},
+        name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        variables_{nullptr} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR Object::Object(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
 struct ObjectDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ObjectDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ObjectDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~ObjectDefaultTypeInternal() {}
   union {
     Object _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ObjectDefaultTypeInternal _Object_default_instance_;
-PROTOBUF_CONSTEXPR Objects::Objects(
-    ::_pbi::ConstantInitialized): _impl_{
-    /*decltype(_impl_.object_)*/{}
-  , /*decltype(_impl_._cached_size_)*/{}} {}
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ObjectDefaultTypeInternal _Object_default_instance_;
+
+inline constexpr Objects::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : object_{},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR Objects::Objects(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
 struct ObjectsDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR ObjectsDefaultTypeInternal()
-      : _instance(::_pbi::ConstantInitialized{}) {}
+  PROTOBUF_CONSTEXPR ObjectsDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
   ~ObjectsDefaultTypeInternal() {}
   union {
     Objects _instance;
   };
 };
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ObjectsDefaultTypeInternal _Objects_default_instance_;
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ObjectsDefaultTypeInternal _Objects_default_instance_;
 }  // namespace cod_pb
 static ::_pb::Metadata file_level_metadata_cod_2eproto[6];
-static constexpr ::_pb::EnumDescriptor const** file_level_enum_descriptors_cod_2eproto = nullptr;
-static constexpr ::_pb::ServiceDescriptor const** file_level_service_descriptors_cod_2eproto = nullptr;
-
-const uint32_t TableStruct_cod_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Value, _internal_metadata_),
-  ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Value, _impl_._oneof_case_[0]),
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Value, _impl_.Value_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::cod_pb::ArrayValue, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::cod_pb::ArrayValue, _impl_.value_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Variable, _internal_metadata_),
-  ~0u,  // no _extensions_
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Variable, _impl_._oneof_case_[0]),
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Variable, _impl_.name_),
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  ::_pbi::kInvalidFieldOffsetTag,
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Variable, _impl_.Value_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Variables, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Variables, _impl_.variable_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Object, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Object, _impl_.name_),
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Object, _impl_.variables_),
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Object, _impl_.objects_),
-  ~0u,  // no _has_bits_
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Objects, _internal_metadata_),
-  ~0u,  // no _extensions_
-  ~0u,  // no _oneof_case_
-  ~0u,  // no _weak_field_map_
-  ~0u,  // no _inlined_string_donated_
-  PROTOBUF_FIELD_OFFSET(::cod_pb::Objects, _impl_.object_),
+static constexpr const ::_pb::EnumDescriptor**
+    file_level_enum_descriptors_cod_2eproto = nullptr;
+static constexpr const ::_pb::ServiceDescriptor**
+    file_level_service_descriptors_cod_2eproto = nullptr;
+const ::uint32_t TableStruct_cod_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(
+    protodesc_cold) = {
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Value, _internal_metadata_),
+    ~0u,  // no _extensions_
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Value, _impl_._oneof_case_[0]),
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Value, _impl_.Value_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::cod_pb::ArrayValue, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::cod_pb::ArrayValue, _impl_.value_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Variable, _internal_metadata_),
+    ~0u,  // no _extensions_
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Variable, _impl_._oneof_case_[0]),
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Variable, _impl_.name_),
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    ::_pbi::kInvalidFieldOffsetTag,
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Variable, _impl_.Value_),
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Variables, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Variables, _impl_.variable_),
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Object, _impl_._has_bits_),
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Object, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Object, _impl_.name_),
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Object, _impl_.variables_),
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Object, _impl_.objects_),
+    ~0u,
+    0,
+    ~0u,
+    ~0u,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Objects, _internal_metadata_),
+    ~0u,  // no _extensions_
+    ~0u,  // no _oneof_case_
+    ~0u,  // no _weak_field_map_
+    ~0u,  // no _inlined_string_donated_
+    ~0u,  // no _split_
+    ~0u,  // no sizeof(Split)
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Objects, _impl_.object_),
 };
-static const ::_pbi::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, -1, -1, sizeof(::cod_pb::Value)},
-  { 10, -1, -1, sizeof(::cod_pb::ArrayValue)},
-  { 17, -1, -1, sizeof(::cod_pb::Variable)},
-  { 29, -1, -1, sizeof(::cod_pb::Variables)},
-  { 36, -1, -1, sizeof(::cod_pb::Object)},
-  { 45, -1, -1, sizeof(::cod_pb::Objects)},
+
+static const ::_pbi::MigrationSchema
+    schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+        {0, -1, -1, sizeof(::cod_pb::Value)},
+        {12, -1, -1, sizeof(::cod_pb::ArrayValue)},
+        {21, -1, -1, sizeof(::cod_pb::Variable)},
+        {35, -1, -1, sizeof(::cod_pb::Variables)},
+        {44, 55, -1, sizeof(::cod_pb::Object)},
+        {58, -1, -1, sizeof(::cod_pb::Objects)},
 };
 
 static const ::_pb::Message* const file_default_instances[] = {
-  &::cod_pb::_Value_default_instance_._instance,
-  &::cod_pb::_ArrayValue_default_instance_._instance,
-  &::cod_pb::_Variable_default_instance_._instance,
-  &::cod_pb::_Variables_default_instance_._instance,
-  &::cod_pb::_Object_default_instance_._instance,
-  &::cod_pb::_Objects_default_instance_._instance,
+    &::cod_pb::_Value_default_instance_._instance,
+    &::cod_pb::_ArrayValue_default_instance_._instance,
+    &::cod_pb::_Variable_default_instance_._instance,
+    &::cod_pb::_Variables_default_instance_._instance,
+    &::cod_pb::_Object_default_instance_._instance,
+    &::cod_pb::_Objects_default_instance_._instance,
 };
-
-const char descriptor_table_protodef_cod_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\tcod.proto\022\006cod_pb\"T\n\005Value\022\023\n\tvalue_in"
-  "t\030\001 \001(\005H\000\022\025\n\013value_float\030\002 \001(\002H\000\022\026\n\014valu"
-  "e_string\030\003 \001(\tH\000B\007\n\005Value\"*\n\nArrayValue\022"
-  "\034\n\005value\030\001 \003(\0132\r.cod_pb.Value\"\220\001\n\010Variab"
-  "le\022\014\n\004name\030\001 \001(\t\022\023\n\tvalue_int\030\002 \001(\005H\000\022\025\n"
-  "\013value_float\030\003 \001(\002H\000\022\026\n\014value_string\030\004 \001"
-  "(\tH\000\022)\n\013value_array\030\005 \001(\0132\022.cod_pb.Array"
-  "ValueH\000B\007\n\005Value\"/\n\tVariables\022\"\n\010variabl"
-  "e\030\001 \003(\0132\020.cod_pb.Variable\"]\n\006Object\022\014\n\004n"
-  "ame\030\001 \001(\t\022$\n\tvariables\030\002 \001(\0132\021.cod_pb.Va"
-  "riables\022\037\n\007objects\030\003 \003(\0132\016.cod_pb.Object"
-  "\")\n\007Objects\022\036\n\006object\030\001 \003(\0132\016.cod_pb.Obj"
-  "ectb\006proto3"
-  ;
-static ::_pbi::once_flag descriptor_table_cod_2eproto_once;
+const char descriptor_table_protodef_cod_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
+    "\n\tcod.proto\022\006cod_pb\"T\n\005Value\022\023\n\tvalue_in"
+    "t\030\001 \001(\005H\000\022\025\n\013value_float\030\002 \001(\002H\000\022\026\n\014valu"
+    "e_string\030\003 \001(\tH\000B\007\n\005Value\"*\n\nArrayValue\022"
+    "\034\n\005value\030\001 \003(\0132\r.cod_pb.Value\"\220\001\n\010Variab"
+    "le\022\014\n\004name\030\001 \001(\t\022\023\n\tvalue_int\030\002 \001(\005H\000\022\025\n"
+    "\013value_float\030\003 \001(\002H\000\022\026\n\014value_string\030\004 \001"
+    "(\tH\000\022)\n\013value_array\030\005 \001(\0132\022.cod_pb.Array"
+    "ValueH\000B\007\n\005Value\"/\n\tVariables\022\"\n\010variabl"
+    "e\030\001 \003(\0132\020.cod_pb.Variable\"]\n\006Object\022\014\n\004n"
+    "ame\030\001 \001(\t\022$\n\tvariables\030\002 \001(\0132\021.cod_pb.Va"
+    "riables\022\037\n\007objects\030\003 \003(\0132\016.cod_pb.Object"
+    "\")\n\007Objects\022\036\n\006object\030\001 \003(\0132\016.cod_pb.Obj"
+    "ectb\006proto3"
+};
+static ::absl::once_flag descriptor_table_cod_2eproto_once;
 const ::_pbi::DescriptorTable descriptor_table_cod_2eproto = {
-    false, false, 491, descriptor_table_protodef_cod_2eproto,
+    false,
+    false,
+    491,
+    descriptor_table_protodef_cod_2eproto,
     "cod.proto",
-    &descriptor_table_cod_2eproto_once, nullptr, 0, 6,
-    schemas, file_default_instances, TableStruct_cod_2eproto::offsets,
-    file_level_metadata_cod_2eproto, file_level_enum_descriptors_cod_2eproto,
+    &descriptor_table_cod_2eproto_once,
+    nullptr,
+    0,
+    6,
+    schemas,
+    file_default_instances,
+    TableStruct_cod_2eproto::offsets,
+    file_level_metadata_cod_2eproto,
+    file_level_enum_descriptors_cod_2eproto,
     file_level_service_descriptors_cod_2eproto,
 };
+
+// This function exists to be marked as weak.
+// It can significantly speed up compilation by breaking up LLVM's SCC
+// in the .pb.cc translation units. Large translation units see a
+// reduction of more than 35% of walltime for optimized builds. Without
+// the weak attribute all the messages in the file, including all the
+// vtables and everything they use become part of the same SCC through
+// a cycle like:
+// GetMetadata -> descriptor table -> default instances ->
+//   vtables -> GetMetadata
+// By adding a weak function here we break the connection from the
+// individual vtables back into the descriptor table.
 PROTOBUF_ATTRIBUTE_WEAK const ::_pbi::DescriptorTable* descriptor_table_cod_2eproto_getter() {
   return &descriptor_table_cod_2eproto;
 }
-
 // Force running AddDescriptors() at dynamic initialization time.
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_cod_2eproto(&descriptor_table_cod_2eproto);
+PROTOBUF_ATTRIBUTE_INIT_PRIORITY2
+static ::_pbi::AddDescriptorsRunner dynamic_init_dummy_cod_2eproto(&descriptor_table_cod_2eproto);
 namespace cod_pb {
-
 // ===================================================================
 
 class Value::_Internal {
  public:
+  static constexpr ::int32_t kOneofCaseOffset =
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Value, _impl_._oneof_case_);
 };
 
-Value::Value(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+Value::Value(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:cod_pb.Value)
 }
-Value::Value(const Value& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  Value* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.Value_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , /*decltype(_impl_._oneof_case_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE Value::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : Value_{},
+        _cached_size_{0},
+        _oneof_case_{from._oneof_case_[0]} {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  clear_has_Value();
-  switch (from.Value_case()) {
-    case kValueInt: {
-      _this->_internal_set_value_int(from._internal_value_int());
+Value::Value(
+    ::google::protobuf::Arena* arena,
+    const Value& from)
+    : ::google::protobuf::Message(arena) {
+  Value* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+  switch (Value_case()) {
+    case VALUE_NOT_SET:
       break;
-    }
-    case kValueFloat: {
-      _this->_internal_set_value_float(from._internal_value_float());
-      break;
-    }
-    case kValueString: {
-      _this->_internal_set_value_string(from._internal_value_string());
-      break;
-    }
-    case VALUE_NOT_SET: {
-      break;
-    }
+      case kValueInt:
+        _impl_.Value_.value_int_ = from._impl_.Value_.value_int_;
+        break;
+      case kValueFloat:
+        _impl_.Value_.value_float_ = from._impl_.Value_.value_float_;
+        break;
+      case kValueString:
+        new (&_impl_.Value_.value_string_) decltype(_impl_.Value_.value_string_){arena, from._impl_.Value_.value_string_};
+        break;
   }
+
   // @@protoc_insertion_point(copy_constructor:cod_pb.Value)
 }
+inline PROTOBUF_NDEBUG_INLINE Value::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : Value_{},
+        _cached_size_{0},
+        _oneof_case_{} {}
 
-inline void Value::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.Value_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , /*decltype(_impl_._oneof_case_)*/{}
-  };
-  clear_has_Value();
+inline void Value::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
 }
-
 Value::~Value() {
   // @@protoc_insertion_point(destructor:cod_pb.Value)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void Value::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   if (has_Value()) {
     clear_Value();
   }
-}
-
-void Value::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+  _impl_.~Impl_();
 }
 
 void Value::clear_Value() {
 // @@protoc_insertion_point(one_of_clear_start:cod_pb.Value)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   switch (Value_case()) {
     case kValueInt: {
       // No need to clear
@@ -310,131 +383,124 @@ void Value::clear_Value() {
 }
 
 
-void Value::Clear() {
+PROTOBUF_NOINLINE void Value::Clear() {
 // @@protoc_insertion_point(message_clear_start:cod_pb.Value)
-  uint32_t cached_has_bits = 0;
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   clear_Value();
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
-const char* Value::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  while (!ctx->Done(&ptr)) {
-    uint32_t tag;
-    ptr = ::_pbi::ReadTag(ptr, &tag);
-    switch (tag >> 3) {
-      // int32 value_int = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 8)) {
-          _internal_set_value_int(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr));
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // float value_float = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 21)) {
-          _internal_set_value_float(::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr));
-          ptr += sizeof(float);
-        } else
-          goto handle_unusual;
-        continue;
-      // string value_string = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
-          auto str = _internal_mutable_value_string();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "cod_pb.Value.value_string"));
-        } else
-          goto handle_unusual;
-        continue;
-      default:
-        goto handle_unusual;
-    }  // switch
-  handle_unusual:
-    if ((tag == 0) || ((tag & 7) == 4)) {
-      CHK_(ptr);
-      ctx->SetLastTag(tag);
-      goto message_done;
-    }
-    ptr = UnknownFieldParse(
-        tag,
-        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-        ptr, ctx);
-    CHK_(ptr != nullptr);
-  }  // while
-message_done:
+const char* Value::_InternalParse(
+    const char* ptr, ::_pbi::ParseContext* ctx) {
+  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
   return ptr;
-failure:
-  ptr = nullptr;
-  goto message_done;
-#undef CHK_
 }
 
-uint8_t* Value::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 3, 0, 33, 2> Value::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    3, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967288,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    3,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_Value_default_instance_._instance,
+    ::_pbi::TcParser::GenericFallback,  // fallback
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 value_int = 1;
+    {PROTOBUF_FIELD_OFFSET(Value, _impl_.Value_.value_int_), _Internal::kOneofCaseOffset + 0, 0,
+    (0 | ::_fl::kFcOneof | ::_fl::kInt32)},
+    // float value_float = 2;
+    {PROTOBUF_FIELD_OFFSET(Value, _impl_.Value_.value_float_), _Internal::kOneofCaseOffset + 0, 0,
+    (0 | ::_fl::kFcOneof | ::_fl::kFloat)},
+    // string value_string = 3;
+    {PROTOBUF_FIELD_OFFSET(Value, _impl_.Value_.value_string_), _Internal::kOneofCaseOffset + 0, 0,
+    (0 | ::_fl::kFcOneof | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\14\0\0\14\0\0\0\0"
+    "cod_pb.Value"
+    "value_string"
+  }},
+};
+
+::uint8_t* Value::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:cod_pb.Value)
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
 
-  // int32 value_int = 1;
-  if (_internal_has_value_int()) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteInt32ToArray(1, this->_internal_value_int(), target);
+  switch (Value_case()) {
+    case kValueInt: {
+      target = ::google::protobuf::internal::WireFormatLite::
+          WriteInt32ToArrayWithField<1>(
+              stream, this->_internal_value_int(), target);
+      break;
+    }
+    case kValueFloat: {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          2, this->_internal_value_float(), target);
+      break;
+    }
+    case kValueString: {
+      const std::string& _s = this->_internal_value_string();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "cod_pb.Value.value_string");
+      target = stream->WriteStringMaybeAliased(3, _s, target);
+      break;
+    }
+    default:
+      break;
   }
-
-  // float value_float = 2;
-  if (_internal_has_value_float()) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteFloatToArray(2, this->_internal_value_float(), target);
-  }
-
-  // string value_string = 3;
-  if (_internal_has_value_string()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_value_string().data(), static_cast<int>(this->_internal_value_string().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "cod_pb.Value.value_string");
-    target = stream->WriteStringMaybeAliased(
-        3, this->_internal_value_string(), target);
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:cod_pb.Value)
   return target;
 }
 
-size_t Value::ByteSizeLong() const {
+::size_t Value::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:cod_pb.Value)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   switch (Value_case()) {
     // int32 value_int = 1;
     case kValueInt: {
-      total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_value_int());
+      total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+          this->_internal_value_int());
       break;
     }
     // float value_float = 2;
     case kValueFloat: {
-      total_size += 1 + 4;
+      total_size += 5;
       break;
     }
     // string value_string = 3;
     case kValueString: {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_value_string());
+      total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_value_string());
       break;
     }
     case VALUE_NOT_SET: {
@@ -444,19 +510,20 @@ size_t Value::ByteSizeLong() const {
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Value::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    Value::MergeImpl
+const ::google::protobuf::Message::ClassData Value::_class_data_ = {
+    Value::MergeImpl,
+    nullptr,  // OnDemandRegisterArenaDtor
 };
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Value::GetClassData() const { return &_class_data_; }
+const ::google::protobuf::Message::ClassData* Value::GetClassData() const {
+  return &_class_data_;
+}
 
-
-void Value::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+void Value::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg) {
   auto* const _this = static_cast<Value*>(&to_msg);
   auto& from = static_cast<const Value&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:cod_pb.Value)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   switch (from.Value_case()) {
@@ -476,7 +543,7 @@ void Value::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF
       break;
     }
   }
-  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Value::CopyFrom(const Value& from) {
@@ -486,183 +553,181 @@ void Value::CopyFrom(const Value& from) {
   MergeFrom(from);
 }
 
-bool Value::IsInitialized() const {
+PROTOBUF_NOINLINE bool Value::IsInitialized() const {
   return true;
 }
 
-void Value::InternalSwap(Value* other) {
+::_pbi::CachedSize* Value::AccessCachedSize() const {
+  return &_impl_._cached_size_;
+}
+void Value::InternalSwap(Value* PROTOBUF_RESTRICT other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_.Value_, other->_impl_.Value_);
   swap(_impl_._oneof_case_[0], other->_impl_._oneof_case_[0]);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata Value::GetMetadata() const {
+::google::protobuf::Metadata Value::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_cod_2eproto_getter, &descriptor_table_cod_2eproto_once,
       file_level_metadata_cod_2eproto[0]);
 }
-
 // ===================================================================
 
 class ArrayValue::_Internal {
  public:
 };
 
-ArrayValue::ArrayValue(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+ArrayValue::ArrayValue(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:cod_pb.ArrayValue)
 }
-ArrayValue::ArrayValue(const ArrayValue& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  ArrayValue* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.value_){from._impl_.value_}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE ArrayValue::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : value_{visibility, arena, from.value_},
+        _cached_size_{0} {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+ArrayValue::ArrayValue(
+    ::google::protobuf::Arena* arena,
+    const ArrayValue& from)
+    : ::google::protobuf::Message(arena) {
+  ArrayValue* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+
   // @@protoc_insertion_point(copy_constructor:cod_pb.ArrayValue)
 }
+inline PROTOBUF_NDEBUG_INLINE ArrayValue::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : value_{visibility, arena},
+        _cached_size_{0} {}
 
-inline void ArrayValue::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.value_){arena}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
+inline void ArrayValue::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
 }
-
 ArrayValue::~ArrayValue() {
   // @@protoc_insertion_point(destructor:cod_pb.ArrayValue)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void ArrayValue::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.value_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
 }
 
-void ArrayValue::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
-}
-
-void ArrayValue::Clear() {
+PROTOBUF_NOINLINE void ArrayValue::Clear() {
 // @@protoc_insertion_point(message_clear_start:cod_pb.ArrayValue)
-  uint32_t cached_has_bits = 0;
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   _impl_.value_.Clear();
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
-const char* ArrayValue::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  while (!ctx->Done(&ptr)) {
-    uint32_t tag;
-    ptr = ::_pbi::ReadTag(ptr, &tag);
-    switch (tag >> 3) {
-      // repeated .cod_pb.Value value = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
-          ptr -= 1;
-          do {
-            ptr += 1;
-            ptr = ctx->ParseMessage(_internal_add_value(), ptr);
-            CHK_(ptr);
-            if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
-        } else
-          goto handle_unusual;
-        continue;
-      default:
-        goto handle_unusual;
-    }  // switch
-  handle_unusual:
-    if ((tag == 0) || ((tag & 7) == 4)) {
-      CHK_(ptr);
-      ctx->SetLastTag(tag);
-      goto message_done;
-    }
-    ptr = UnknownFieldParse(
-        tag,
-        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-        ptr, ctx);
-    CHK_(ptr != nullptr);
-  }  // while
-message_done:
+const char* ArrayValue::_InternalParse(
+    const char* ptr, ::_pbi::ParseContext* ctx) {
+  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
   return ptr;
-failure:
-  ptr = nullptr;
-  goto message_done;
-#undef CHK_
 }
 
-uint8_t* ArrayValue::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 1, 0, 2> ArrayValue::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_ArrayValue_default_instance_._instance,
+    ::_pbi::TcParser::GenericFallback,  // fallback
+  }, {{
+    // repeated .cod_pb.Value value = 1;
+    {::_pbi::TcParser::FastMtR1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(ArrayValue, _impl_.value_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated .cod_pb.Value value = 1;
+    {PROTOBUF_FIELD_OFFSET(ArrayValue, _impl_.value_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::cod_pb::Value>()},
+  }}, {{
+  }},
+};
+
+::uint8_t* ArrayValue::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:cod_pb.ArrayValue)
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
 
   // repeated .cod_pb.Value value = 1;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_value_size()); i < n; i++) {
-    const auto& repfield = this->_internal_value(i);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+    const auto& repfield = this->_internal_value().Get(i);
+    target = ::google::protobuf::internal::WireFormatLite::
         InternalWriteMessage(1, repfield, repfield.GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:cod_pb.ArrayValue)
   return target;
 }
 
-size_t ArrayValue::ByteSizeLong() const {
+::size_t ArrayValue::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:cod_pb.ArrayValue)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .cod_pb.Value value = 1;
   total_size += 1UL * this->_internal_value_size();
-  for (const auto& msg : this->_impl_.value_) {
+  for (const auto& msg : this->_internal_value()) {
     total_size +=
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+      ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
   }
-
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData ArrayValue::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    ArrayValue::MergeImpl
+const ::google::protobuf::Message::ClassData ArrayValue::_class_data_ = {
+    ArrayValue::MergeImpl,
+    nullptr,  // OnDemandRegisterArenaDtor
 };
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*ArrayValue::GetClassData() const { return &_class_data_; }
+const ::google::protobuf::Message::ClassData* ArrayValue::GetClassData() const {
+  return &_class_data_;
+}
 
-
-void ArrayValue::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+void ArrayValue::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg) {
   auto* const _this = static_cast<ArrayValue*>(&to_msg);
   auto& from = static_cast<const ArrayValue&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:cod_pb.ArrayValue)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.value_.MergeFrom(from._impl_.value_);
-  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_mutable_value()->MergeFrom(
+      from._internal_value());
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void ArrayValue::CopyFrom(const ArrayValue& from) {
@@ -672,138 +737,118 @@ void ArrayValue::CopyFrom(const ArrayValue& from) {
   MergeFrom(from);
 }
 
-bool ArrayValue::IsInitialized() const {
+PROTOBUF_NOINLINE bool ArrayValue::IsInitialized() const {
   return true;
 }
 
-void ArrayValue::InternalSwap(ArrayValue* other) {
+::_pbi::CachedSize* ArrayValue::AccessCachedSize() const {
+  return &_impl_._cached_size_;
+}
+void ArrayValue::InternalSwap(ArrayValue* PROTOBUF_RESTRICT other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   _impl_.value_.InternalSwap(&other->_impl_.value_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata ArrayValue::GetMetadata() const {
+::google::protobuf::Metadata ArrayValue::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_cod_2eproto_getter, &descriptor_table_cod_2eproto_once,
       file_level_metadata_cod_2eproto[1]);
 }
-
 // ===================================================================
 
 class Variable::_Internal {
  public:
+  static constexpr ::int32_t kOneofCaseOffset =
+    PROTOBUF_FIELD_OFFSET(::cod_pb::Variable, _impl_._oneof_case_);
   static const ::cod_pb::ArrayValue& value_array(const Variable* msg);
 };
 
-const ::cod_pb::ArrayValue&
-Variable::_Internal::value_array(const Variable* msg) {
+const ::cod_pb::ArrayValue& Variable::_Internal::value_array(const Variable* msg) {
   return *msg->_impl_.Value_.value_array_;
 }
 void Variable::set_allocated_value_array(::cod_pb::ArrayValue* value_array) {
-  ::PROTOBUF_NAMESPACE_ID::Arena* message_arena = GetArenaForAllocation();
+  ::google::protobuf::Arena* message_arena = GetArena();
   clear_Value();
   if (value_array) {
-    ::PROTOBUF_NAMESPACE_ID::Arena* submessage_arena =
-      ::PROTOBUF_NAMESPACE_ID::Arena::InternalGetOwningArena(value_array);
+    ::google::protobuf::Arena* submessage_arena = value_array->GetArena();
     if (message_arena != submessage_arena) {
-      value_array = ::PROTOBUF_NAMESPACE_ID::internal::GetOwnedMessage(
-          message_arena, value_array, submessage_arena);
+      value_array = ::google::protobuf::internal::GetOwnedMessage(message_arena, value_array, submessage_arena);
     }
     set_has_value_array();
     _impl_.Value_.value_array_ = value_array;
   }
   // @@protoc_insertion_point(field_set_allocated:cod_pb.Variable.value_array)
 }
-Variable::Variable(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+Variable::Variable(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:cod_pb.Variable)
 }
-Variable::Variable(const Variable& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  Variable* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.name_){}
-    , decltype(_impl_.Value_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , /*decltype(_impl_._oneof_case_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE Variable::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : name_(arena, from.name_),
+        Value_{},
+        _cached_size_{0},
+        _oneof_case_{from._oneof_case_[0]} {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.name_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.name_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_name().empty()) {
-    _this->_impl_.name_.Set(from._internal_name(), 
-      _this->GetArenaForAllocation());
+Variable::Variable(
+    ::google::protobuf::Arena* arena,
+    const Variable& from)
+    : ::google::protobuf::Message(arena) {
+  Variable* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+  switch (Value_case()) {
+    case VALUE_NOT_SET:
+      break;
+      case kValueInt:
+        _impl_.Value_.value_int_ = from._impl_.Value_.value_int_;
+        break;
+      case kValueFloat:
+        _impl_.Value_.value_float_ = from._impl_.Value_.value_float_;
+        break;
+      case kValueString:
+        new (&_impl_.Value_.value_string_) decltype(_impl_.Value_.value_string_){arena, from._impl_.Value_.value_string_};
+        break;
+      case kValueArray:
+        _impl_.Value_.value_array_ = CreateMaybeMessage<::cod_pb::ArrayValue>(arena, *from._impl_.Value_.value_array_);
+        break;
   }
-  clear_has_Value();
-  switch (from.Value_case()) {
-    case kValueInt: {
-      _this->_internal_set_value_int(from._internal_value_int());
-      break;
-    }
-    case kValueFloat: {
-      _this->_internal_set_value_float(from._internal_value_float());
-      break;
-    }
-    case kValueString: {
-      _this->_internal_set_value_string(from._internal_value_string());
-      break;
-    }
-    case kValueArray: {
-      _this->_internal_mutable_value_array()->::cod_pb::ArrayValue::MergeFrom(
-          from._internal_value_array());
-      break;
-    }
-    case VALUE_NOT_SET: {
-      break;
-    }
-  }
+
   // @@protoc_insertion_point(copy_constructor:cod_pb.Variable)
 }
+inline PROTOBUF_NDEBUG_INLINE Variable::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : name_(arena),
+        Value_{},
+        _cached_size_{0},
+        _oneof_case_{} {}
 
-inline void Variable::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.name_){}
-    , decltype(_impl_.Value_){}
-    , /*decltype(_impl_._cached_size_)*/{}
-    , /*decltype(_impl_._oneof_case_)*/{}
-  };
-  _impl_.name_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.name_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  clear_has_Value();
+inline void Variable::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
 }
-
 Variable::~Variable() {
   // @@protoc_insertion_point(destructor:cod_pb.Variable)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void Variable::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.name_.Destroy();
   if (has_Value()) {
     clear_Value();
   }
-}
-
-void Variable::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
+  _impl_.~Impl_();
 }
 
 void Variable::clear_Value() {
 // @@protoc_insertion_point(one_of_clear_start:cod_pb.Variable)
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
   switch (Value_case()) {
     case kValueInt: {
       // No need to clear
@@ -818,7 +863,7 @@ void Variable::clear_Value() {
       break;
     }
     case kValueArray: {
-      if (GetArenaForAllocation() == nullptr) {
+      if (GetArena() == nullptr) {
         delete _impl_.Value_.value_array_;
       }
       break;
@@ -831,181 +876,160 @@ void Variable::clear_Value() {
 }
 
 
-void Variable::Clear() {
+PROTOBUF_NOINLINE void Variable::Clear() {
 // @@protoc_insertion_point(message_clear_start:cod_pb.Variable)
-  uint32_t cached_has_bits = 0;
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   _impl_.name_.ClearToEmpty();
   clear_Value();
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
-const char* Variable::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  while (!ctx->Done(&ptr)) {
-    uint32_t tag;
-    ptr = ::_pbi::ReadTag(ptr, &tag);
-    switch (tag >> 3) {
-      // string name = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
-          auto str = _internal_mutable_name();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "cod_pb.Variable.name"));
-        } else
-          goto handle_unusual;
-        continue;
-      // int32 value_int = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 16)) {
-          _internal_set_value_int(::PROTOBUF_NAMESPACE_ID::internal::ReadVarint32(&ptr));
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // float value_float = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 29)) {
-          _internal_set_value_float(::PROTOBUF_NAMESPACE_ID::internal::UnalignedLoad<float>(ptr));
-          ptr += sizeof(float);
-        } else
-          goto handle_unusual;
-        continue;
-      // string value_string = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 34)) {
-          auto str = _internal_mutable_value_string();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "cod_pb.Variable.value_string"));
-        } else
-          goto handle_unusual;
-        continue;
-      // .cod_pb.ArrayValue value_array = 5;
-      case 5:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 42)) {
-          ptr = ctx->ParseMessage(_internal_mutable_value_array(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      default:
-        goto handle_unusual;
-    }  // switch
-  handle_unusual:
-    if ((tag == 0) || ((tag & 7) == 4)) {
-      CHK_(ptr);
-      ctx->SetLastTag(tag);
-      goto message_done;
-    }
-    ptr = UnknownFieldParse(
-        tag,
-        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-        ptr, ctx);
-    CHK_(ptr != nullptr);
-  }  // while
-message_done:
+const char* Variable::_InternalParse(
+    const char* ptr, ::_pbi::ParseContext* ctx) {
+  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
   return ptr;
-failure:
-  ptr = nullptr;
-  goto message_done;
-#undef CHK_
 }
 
-uint8_t* Variable::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 5, 1, 40, 2> Variable::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    5, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967264,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    5,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_Variable_default_instance_._instance,
+    ::_pbi::TcParser::GenericFallback,  // fallback
+  }, {{
+    // string name = 1;
+    {::_pbi::TcParser::FastUS1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(Variable, _impl_.name_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string name = 1;
+    {PROTOBUF_FIELD_OFFSET(Variable, _impl_.name_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int32 value_int = 2;
+    {PROTOBUF_FIELD_OFFSET(Variable, _impl_.Value_.value_int_), _Internal::kOneofCaseOffset + 0, 0,
+    (0 | ::_fl::kFcOneof | ::_fl::kInt32)},
+    // float value_float = 3;
+    {PROTOBUF_FIELD_OFFSET(Variable, _impl_.Value_.value_float_), _Internal::kOneofCaseOffset + 0, 0,
+    (0 | ::_fl::kFcOneof | ::_fl::kFloat)},
+    // string value_string = 4;
+    {PROTOBUF_FIELD_OFFSET(Variable, _impl_.Value_.value_string_), _Internal::kOneofCaseOffset + 0, 0,
+    (0 | ::_fl::kFcOneof | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // .cod_pb.ArrayValue value_array = 5;
+    {PROTOBUF_FIELD_OFFSET(Variable, _impl_.Value_.value_array_), _Internal::kOneofCaseOffset + 0, 0,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::cod_pb::ArrayValue>()},
+  }}, {{
+    "\17\4\0\0\14\0\0\0"
+    "cod_pb.Variable"
+    "name"
+    "value_string"
+  }},
+};
+
+::uint8_t* Variable::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:cod_pb.Variable)
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
 
   // string name = 1;
   if (!this->_internal_name().empty()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_name().data(), static_cast<int>(this->_internal_name().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "cod_pb.Variable.name");
-    target = stream->WriteStringMaybeAliased(
-        1, this->_internal_name(), target);
+    const std::string& _s = this->_internal_name();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "cod_pb.Variable.name");
+    target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
-  // int32 value_int = 2;
-  if (_internal_has_value_int()) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteInt32ToArray(2, this->_internal_value_int(), target);
+  switch (Value_case()) {
+    case kValueInt: {
+      target = ::google::protobuf::internal::WireFormatLite::
+          WriteInt32ToArrayWithField<2>(
+              stream, this->_internal_value_int(), target);
+      break;
+    }
+    case kValueFloat: {
+      target = stream->EnsureSpace(target);
+      target = ::_pbi::WireFormatLite::WriteFloatToArray(
+          3, this->_internal_value_float(), target);
+      break;
+    }
+    case kValueString: {
+      const std::string& _s = this->_internal_value_string();
+      ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+          _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "cod_pb.Variable.value_string");
+      target = stream->WriteStringMaybeAliased(4, _s, target);
+      break;
+    }
+    case kValueArray: {
+      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+          5, _Internal::value_array(this),
+          _Internal::value_array(this).GetCachedSize(), target, stream);
+      break;
+    }
+    default:
+      break;
   }
-
-  // float value_float = 3;
-  if (_internal_has_value_float()) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteFloatToArray(3, this->_internal_value_float(), target);
-  }
-
-  // string value_string = 4;
-  if (_internal_has_value_string()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_value_string().data(), static_cast<int>(this->_internal_value_string().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "cod_pb.Variable.value_string");
-    target = stream->WriteStringMaybeAliased(
-        4, this->_internal_value_string(), target);
-  }
-
-  // .cod_pb.ArrayValue value_array = 5;
-  if (_internal_has_value_array()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(5, _Internal::value_array(this),
-        _Internal::value_array(this).GetCachedSize(), target, stream);
-  }
-
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:cod_pb.Variable)
   return target;
 }
 
-size_t Variable::ByteSizeLong() const {
+::size_t Variable::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:cod_pb.Variable)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // string name = 1;
   if (!this->_internal_name().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_name());
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_name());
   }
 
   switch (Value_case()) {
     // int32 value_int = 2;
     case kValueInt: {
-      total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(this->_internal_value_int());
+      total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+          this->_internal_value_int());
       break;
     }
     // float value_float = 3;
     case kValueFloat: {
-      total_size += 1 + 4;
+      total_size += 5;
       break;
     }
     // string value_string = 4;
     case kValueString: {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_value_string());
+      total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                      this->_internal_value_string());
       break;
     }
     // .cod_pb.ArrayValue value_array = 5;
     case kValueArray: {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-          *_impl_.Value_.value_array_);
+      total_size +=
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.Value_.value_array_);
       break;
     }
     case VALUE_NOT_SET: {
@@ -1015,19 +1039,20 @@ size_t Variable::ByteSizeLong() const {
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Variable::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    Variable::MergeImpl
+const ::google::protobuf::Message::ClassData Variable::_class_data_ = {
+    Variable::MergeImpl,
+    nullptr,  // OnDemandRegisterArenaDtor
 };
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Variable::GetClassData() const { return &_class_data_; }
+const ::google::protobuf::Message::ClassData* Variable::GetClassData() const {
+  return &_class_data_;
+}
 
-
-void Variable::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+void Variable::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg) {
   auto* const _this = static_cast<Variable*>(&to_msg);
   auto& from = static_cast<const Variable&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:cod_pb.Variable)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
   if (!from._internal_name().empty()) {
@@ -1055,7 +1080,7 @@ void Variable::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTO
       break;
     }
   }
-  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Variable::CopyFrom(const Variable& from) {
@@ -1065,189 +1090,184 @@ void Variable::CopyFrom(const Variable& from) {
   MergeFrom(from);
 }
 
-bool Variable::IsInitialized() const {
+PROTOBUF_NOINLINE bool Variable::IsInitialized() const {
   return true;
 }
 
-void Variable::InternalSwap(Variable* other) {
+::_pbi::CachedSize* Variable::AccessCachedSize() const {
+  return &_impl_._cached_size_;
+}
+void Variable::InternalSwap(Variable* PROTOBUF_RESTRICT other) {
   using std::swap;
-  auto* lhs_arena = GetArenaForAllocation();
-  auto* rhs_arena = other->GetArenaForAllocation();
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.name_, lhs_arena,
-      &other->_impl_.name_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   swap(_impl_.Value_, other->_impl_.Value_);
   swap(_impl_._oneof_case_[0], other->_impl_._oneof_case_[0]);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata Variable::GetMetadata() const {
+::google::protobuf::Metadata Variable::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_cod_2eproto_getter, &descriptor_table_cod_2eproto_once,
       file_level_metadata_cod_2eproto[2]);
 }
-
 // ===================================================================
 
 class Variables::_Internal {
  public:
 };
 
-Variables::Variables(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+Variables::Variables(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:cod_pb.Variables)
 }
-Variables::Variables(const Variables& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  Variables* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.variable_){from._impl_.variable_}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE Variables::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : variable_{visibility, arena, from.variable_},
+        _cached_size_{0} {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+Variables::Variables(
+    ::google::protobuf::Arena* arena,
+    const Variables& from)
+    : ::google::protobuf::Message(arena) {
+  Variables* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+
   // @@protoc_insertion_point(copy_constructor:cod_pb.Variables)
 }
+inline PROTOBUF_NDEBUG_INLINE Variables::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : variable_{visibility, arena},
+        _cached_size_{0} {}
 
-inline void Variables::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.variable_){arena}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
+inline void Variables::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
 }
-
 Variables::~Variables() {
   // @@protoc_insertion_point(destructor:cod_pb.Variables)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void Variables::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.variable_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
 }
 
-void Variables::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
-}
-
-void Variables::Clear() {
+PROTOBUF_NOINLINE void Variables::Clear() {
 // @@protoc_insertion_point(message_clear_start:cod_pb.Variables)
-  uint32_t cached_has_bits = 0;
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   _impl_.variable_.Clear();
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
-const char* Variables::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  while (!ctx->Done(&ptr)) {
-    uint32_t tag;
-    ptr = ::_pbi::ReadTag(ptr, &tag);
-    switch (tag >> 3) {
-      // repeated .cod_pb.Variable variable = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
-          ptr -= 1;
-          do {
-            ptr += 1;
-            ptr = ctx->ParseMessage(_internal_add_variable(), ptr);
-            CHK_(ptr);
-            if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
-        } else
-          goto handle_unusual;
-        continue;
-      default:
-        goto handle_unusual;
-    }  // switch
-  handle_unusual:
-    if ((tag == 0) || ((tag & 7) == 4)) {
-      CHK_(ptr);
-      ctx->SetLastTag(tag);
-      goto message_done;
-    }
-    ptr = UnknownFieldParse(
-        tag,
-        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-        ptr, ctx);
-    CHK_(ptr != nullptr);
-  }  // while
-message_done:
+const char* Variables::_InternalParse(
+    const char* ptr, ::_pbi::ParseContext* ctx) {
+  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
   return ptr;
-failure:
-  ptr = nullptr;
-  goto message_done;
-#undef CHK_
 }
 
-uint8_t* Variables::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 1, 0, 2> Variables::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_Variables_default_instance_._instance,
+    ::_pbi::TcParser::GenericFallback,  // fallback
+  }, {{
+    // repeated .cod_pb.Variable variable = 1;
+    {::_pbi::TcParser::FastMtR1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(Variables, _impl_.variable_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated .cod_pb.Variable variable = 1;
+    {PROTOBUF_FIELD_OFFSET(Variables, _impl_.variable_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::cod_pb::Variable>()},
+  }}, {{
+  }},
+};
+
+::uint8_t* Variables::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:cod_pb.Variables)
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
 
   // repeated .cod_pb.Variable variable = 1;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_variable_size()); i < n; i++) {
-    const auto& repfield = this->_internal_variable(i);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+    const auto& repfield = this->_internal_variable().Get(i);
+    target = ::google::protobuf::internal::WireFormatLite::
         InternalWriteMessage(1, repfield, repfield.GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:cod_pb.Variables)
   return target;
 }
 
-size_t Variables::ByteSizeLong() const {
+::size_t Variables::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:cod_pb.Variables)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .cod_pb.Variable variable = 1;
   total_size += 1UL * this->_internal_variable_size();
-  for (const auto& msg : this->_impl_.variable_) {
+  for (const auto& msg : this->_internal_variable()) {
     total_size +=
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+      ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
   }
-
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Variables::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    Variables::MergeImpl
+const ::google::protobuf::Message::ClassData Variables::_class_data_ = {
+    Variables::MergeImpl,
+    nullptr,  // OnDemandRegisterArenaDtor
 };
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Variables::GetClassData() const { return &_class_data_; }
+const ::google::protobuf::Message::ClassData* Variables::GetClassData() const {
+  return &_class_data_;
+}
 
-
-void Variables::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+void Variables::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg) {
   auto* const _this = static_cast<Variables*>(&to_msg);
   auto& from = static_cast<const Variables&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:cod_pb.Variables)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.variable_.MergeFrom(from._impl_.variable_);
-  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_mutable_variable()->MergeFrom(
+      from._internal_variable());
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Variables::CopyFrom(const Variables& from) {
@@ -1257,269 +1277,260 @@ void Variables::CopyFrom(const Variables& from) {
   MergeFrom(from);
 }
 
-bool Variables::IsInitialized() const {
+PROTOBUF_NOINLINE bool Variables::IsInitialized() const {
   return true;
 }
 
-void Variables::InternalSwap(Variables* other) {
+::_pbi::CachedSize* Variables::AccessCachedSize() const {
+  return &_impl_._cached_size_;
+}
+void Variables::InternalSwap(Variables* PROTOBUF_RESTRICT other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   _impl_.variable_.InternalSwap(&other->_impl_.variable_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata Variables::GetMetadata() const {
+::google::protobuf::Metadata Variables::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_cod_2eproto_getter, &descriptor_table_cod_2eproto_once,
       file_level_metadata_cod_2eproto[3]);
 }
-
 // ===================================================================
 
 class Object::_Internal {
  public:
+  using HasBits = decltype(std::declval<Object>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+    8 * PROTOBUF_FIELD_OFFSET(Object, _impl_._has_bits_);
   static const ::cod_pb::Variables& variables(const Object* msg);
+  static void set_has_variables(HasBits* has_bits) {
+    (*has_bits)[0] |= 1u;
+  }
 };
 
-const ::cod_pb::Variables&
-Object::_Internal::variables(const Object* msg) {
+const ::cod_pb::Variables& Object::_Internal::variables(const Object* msg) {
   return *msg->_impl_.variables_;
 }
-Object::Object(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+Object::Object(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:cod_pb.Object)
 }
-Object::Object(const Object& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  Object* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.objects_){from._impl_.objects_}
-    , decltype(_impl_.name_){}
-    , decltype(_impl_.variables_){nullptr}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE Object::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : _has_bits_{from._has_bits_},
+        _cached_size_{0},
+        objects_{visibility, arena, from.objects_},
+        name_(arena, from.name_) {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
-  _impl_.name_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.name_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  if (!from._internal_name().empty()) {
-    _this->_impl_.name_.Set(from._internal_name(), 
-      _this->GetArenaForAllocation());
-  }
-  if (from._internal_has_variables()) {
-    _this->_impl_.variables_ = new ::cod_pb::Variables(*from._impl_.variables_);
-  }
+Object::Object(
+    ::google::protobuf::Arena* arena,
+    const Object& from)
+    : ::google::protobuf::Message(arena) {
+  Object* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
+  _impl_.variables_ = (cached_has_bits & 0x00000001u)
+                ? CreateMaybeMessage<::cod_pb::Variables>(arena, *from._impl_.variables_)
+                : nullptr;
+
   // @@protoc_insertion_point(copy_constructor:cod_pb.Object)
 }
+inline PROTOBUF_NDEBUG_INLINE Object::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0},
+        objects_{visibility, arena},
+        name_(arena) {}
 
-inline void Object::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.objects_){arena}
-    , decltype(_impl_.name_){}
-    , decltype(_impl_.variables_){nullptr}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
-  _impl_.name_.InitDefault();
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-    _impl_.name_.Set("", GetArenaForAllocation());
-  #endif // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+inline void Object::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.variables_ = {};
 }
-
 Object::~Object() {
   // @@protoc_insertion_point(destructor:cod_pb.Object)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void Object::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.objects_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArena() == nullptr);
   _impl_.name_.Destroy();
-  if (this != internal_default_instance()) delete _impl_.variables_;
+  delete _impl_.variables_;
+  _impl_.~Impl_();
 }
 
-void Object::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
-}
-
-void Object::Clear() {
+PROTOBUF_NOINLINE void Object::Clear() {
 // @@protoc_insertion_point(message_clear_start:cod_pb.Object)
-  uint32_t cached_has_bits = 0;
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   _impl_.objects_.Clear();
   _impl_.name_.ClearToEmpty();
-  if (GetArenaForAllocation() == nullptr && _impl_.variables_ != nullptr) {
-    delete _impl_.variables_;
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    ABSL_DCHECK(_impl_.variables_ != nullptr);
+    _impl_.variables_->Clear();
   }
-  _impl_.variables_ = nullptr;
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  _impl_._has_bits_.Clear();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
-const char* Object::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  while (!ctx->Done(&ptr)) {
-    uint32_t tag;
-    ptr = ::_pbi::ReadTag(ptr, &tag);
-    switch (tag >> 3) {
-      // string name = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
-          auto str = _internal_mutable_name();
-          ptr = ::_pbi::InlineGreedyStringParser(str, ptr, ctx);
-          CHK_(ptr);
-          CHK_(::_pbi::VerifyUTF8(str, "cod_pb.Object.name"));
-        } else
-          goto handle_unusual;
-        continue;
-      // .cod_pb.Variables variables = 2;
-      case 2:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 18)) {
-          ptr = ctx->ParseMessage(_internal_mutable_variables(), ptr);
-          CHK_(ptr);
-        } else
-          goto handle_unusual;
-        continue;
-      // repeated .cod_pb.Object objects = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 26)) {
-          ptr -= 1;
-          do {
-            ptr += 1;
-            ptr = ctx->ParseMessage(_internal_add_objects(), ptr);
-            CHK_(ptr);
-            if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<26>(ptr));
-        } else
-          goto handle_unusual;
-        continue;
-      default:
-        goto handle_unusual;
-    }  // switch
-  handle_unusual:
-    if ((tag == 0) || ((tag & 7) == 4)) {
-      CHK_(ptr);
-      ctx->SetLastTag(tag);
-      goto message_done;
-    }
-    ptr = UnknownFieldParse(
-        tag,
-        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-        ptr, ctx);
-    CHK_(ptr != nullptr);
-  }  // while
-message_done:
+const char* Object::_InternalParse(
+    const char* ptr, ::_pbi::ParseContext* ctx) {
+  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
   return ptr;
-failure:
-  ptr = nullptr;
-  goto message_done;
-#undef CHK_
 }
 
-uint8_t* Object::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<2, 3, 2, 26, 2> Object::_table_ = {
+  {
+    PROTOBUF_FIELD_OFFSET(Object, _impl_._has_bits_),
+    0, // no _extensions_
+    3, 24,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967288,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    3,  // num_field_entries
+    2,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_Object_default_instance_._instance,
+    ::_pbi::TcParser::GenericFallback,  // fallback
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // string name = 1;
+    {::_pbi::TcParser::FastUS1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(Object, _impl_.name_)}},
+    // .cod_pb.Variables variables = 2;
+    {::_pbi::TcParser::FastMtS1,
+     {18, 0, 0, PROTOBUF_FIELD_OFFSET(Object, _impl_.variables_)}},
+    // repeated .cod_pb.Object objects = 3;
+    {::_pbi::TcParser::FastMtR1,
+     {26, 63, 1, PROTOBUF_FIELD_OFFSET(Object, _impl_.objects_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // string name = 1;
+    {PROTOBUF_FIELD_OFFSET(Object, _impl_.name_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // .cod_pb.Variables variables = 2;
+    {PROTOBUF_FIELD_OFFSET(Object, _impl_.variables_), _Internal::kHasBitsOffset + 0, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
+    // repeated .cod_pb.Object objects = 3;
+    {PROTOBUF_FIELD_OFFSET(Object, _impl_.objects_), -1, 1,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::cod_pb::Variables>()},
+    {::_pbi::TcParser::GetTable<::cod_pb::Object>()},
+  }}, {{
+    "\15\4\0\0\0\0\0\0"
+    "cod_pb.Object"
+    "name"
+  }},
+};
+
+::uint8_t* Object::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:cod_pb.Object)
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
 
   // string name = 1;
   if (!this->_internal_name().empty()) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::VerifyUtf8String(
-      this->_internal_name().data(), static_cast<int>(this->_internal_name().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::SERIALIZE,
-      "cod_pb.Object.name");
-    target = stream->WriteStringMaybeAliased(
-        1, this->_internal_name(), target);
+    const std::string& _s = this->_internal_name();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "cod_pb.Object.name");
+    target = stream->WriteStringMaybeAliased(1, _s, target);
   }
 
+  cached_has_bits = _impl_._has_bits_[0];
   // .cod_pb.Variables variables = 2;
-  if (this->_internal_has_variables()) {
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
-      InternalWriteMessage(2, _Internal::variables(this),
+  if (cached_has_bits & 0x00000001u) {
+    target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+        2, _Internal::variables(this),
         _Internal::variables(this).GetCachedSize(), target, stream);
   }
 
   // repeated .cod_pb.Object objects = 3;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_objects_size()); i < n; i++) {
-    const auto& repfield = this->_internal_objects(i);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+    const auto& repfield = this->_internal_objects().Get(i);
+    target = ::google::protobuf::internal::WireFormatLite::
         InternalWriteMessage(3, repfield, repfield.GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:cod_pb.Object)
   return target;
 }
 
-size_t Object::ByteSizeLong() const {
+::size_t Object::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:cod_pb.Object)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .cod_pb.Object objects = 3;
   total_size += 1UL * this->_internal_objects_size();
-  for (const auto& msg : this->_impl_.objects_) {
+  for (const auto& msg : this->_internal_objects()) {
     total_size +=
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+      ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
   }
-
   // string name = 1;
   if (!this->_internal_name().empty()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-        this->_internal_name());
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_name());
   }
 
   // .cod_pb.Variables variables = 2;
-  if (this->_internal_has_variables()) {
-    total_size += 1 +
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(
-        *_impl_.variables_);
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    total_size +=
+        1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.variables_);
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Object::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    Object::MergeImpl
+const ::google::protobuf::Message::ClassData Object::_class_data_ = {
+    Object::MergeImpl,
+    nullptr,  // OnDemandRegisterArenaDtor
 };
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Object::GetClassData() const { return &_class_data_; }
+const ::google::protobuf::Message::ClassData* Object::GetClassData() const {
+  return &_class_data_;
+}
 
-
-void Object::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+void Object::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg) {
   auto* const _this = static_cast<Object*>(&to_msg);
   auto& from = static_cast<const Object&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:cod_pb.Object)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.objects_.MergeFrom(from._impl_.objects_);
+  _this->_internal_mutable_objects()->MergeFrom(
+      from._internal_objects());
   if (!from._internal_name().empty()) {
     _this->_internal_set_name(from._internal_name());
   }
-  if (from._internal_has_variables()) {
+  if ((from._impl_._has_bits_[0] & 0x00000001u) != 0) {
     _this->_internal_mutable_variables()->::cod_pb::Variables::MergeFrom(
         from._internal_variables());
   }
-  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Object::CopyFrom(const Object& from) {
@@ -1529,189 +1540,185 @@ void Object::CopyFrom(const Object& from) {
   MergeFrom(from);
 }
 
-bool Object::IsInitialized() const {
+PROTOBUF_NOINLINE bool Object::IsInitialized() const {
   return true;
 }
 
-void Object::InternalSwap(Object* other) {
+::_pbi::CachedSize* Object::AccessCachedSize() const {
+  return &_impl_._cached_size_;
+}
+void Object::InternalSwap(Object* PROTOBUF_RESTRICT other) {
   using std::swap;
-  auto* lhs_arena = GetArenaForAllocation();
-  auto* rhs_arena = other->GetArenaForAllocation();
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   _impl_.objects_.InternalSwap(&other->_impl_.objects_);
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::InternalSwap(
-      &_impl_.name_, lhs_arena,
-      &other->_impl_.name_, rhs_arena
-  );
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   swap(_impl_.variables_, other->_impl_.variables_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata Object::GetMetadata() const {
+::google::protobuf::Metadata Object::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_cod_2eproto_getter, &descriptor_table_cod_2eproto_once,
       file_level_metadata_cod_2eproto[4]);
 }
-
 // ===================================================================
 
 class Objects::_Internal {
  public:
 };
 
-Objects::Objects(::PROTOBUF_NAMESPACE_ID::Arena* arena,
-                         bool is_message_owned)
-  : ::PROTOBUF_NAMESPACE_ID::Message(arena, is_message_owned) {
-  SharedCtor(arena, is_message_owned);
+Objects::Objects(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:cod_pb.Objects)
 }
-Objects::Objects(const Objects& from)
-  : ::PROTOBUF_NAMESPACE_ID::Message() {
-  Objects* const _this = this; (void)_this;
-  new (&_impl_) Impl_{
-      decltype(_impl_.object_){from._impl_.object_}
-    , /*decltype(_impl_._cached_size_)*/{}};
+inline PROTOBUF_NDEBUG_INLINE Objects::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from)
+      : object_{visibility, arena, from.object_},
+        _cached_size_{0} {}
 
-  _internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+Objects::Objects(
+    ::google::protobuf::Arena* arena,
+    const Objects& from)
+    : ::google::protobuf::Message(arena) {
+  Objects* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_);
+
   // @@protoc_insertion_point(copy_constructor:cod_pb.Objects)
 }
+inline PROTOBUF_NDEBUG_INLINE Objects::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : object_{visibility, arena},
+        _cached_size_{0} {}
 
-inline void Objects::SharedCtor(
-    ::_pb::Arena* arena, bool is_message_owned) {
-  (void)arena;
-  (void)is_message_owned;
-  new (&_impl_) Impl_{
-      decltype(_impl_.object_){arena}
-    , /*decltype(_impl_._cached_size_)*/{}
-  };
+inline void Objects::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
 }
-
 Objects::~Objects() {
   // @@protoc_insertion_point(destructor:cod_pb.Objects)
-  if (auto *arena = _internal_metadata_.DeleteReturnArena<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>()) {
-  (void)arena;
-    return;
-  }
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-
 inline void Objects::SharedDtor() {
-  GOOGLE_DCHECK(GetArenaForAllocation() == nullptr);
-  _impl_.object_.~RepeatedPtrField();
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
 }
 
-void Objects::SetCachedSize(int size) const {
-  _impl_._cached_size_.Set(size);
-}
-
-void Objects::Clear() {
+PROTOBUF_NOINLINE void Objects::Clear() {
 // @@protoc_insertion_point(message_clear_start:cod_pb.Objects)
-  uint32_t cached_has_bits = 0;
+  PROTOBUF_TSAN_WRITE(&_impl_._tsan_detect_race);
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   _impl_.object_.Clear();
-  _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
-const char* Objects::_InternalParse(const char* ptr, ::_pbi::ParseContext* ctx) {
-#define CHK_(x) if (PROTOBUF_PREDICT_FALSE(!(x))) goto failure
-  while (!ctx->Done(&ptr)) {
-    uint32_t tag;
-    ptr = ::_pbi::ReadTag(ptr, &tag);
-    switch (tag >> 3) {
-      // repeated .cod_pb.Object object = 1;
-      case 1:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<uint8_t>(tag) == 10)) {
-          ptr -= 1;
-          do {
-            ptr += 1;
-            ptr = ctx->ParseMessage(_internal_add_object(), ptr);
-            CHK_(ptr);
-            if (!ctx->DataAvailable(ptr)) break;
-          } while (::PROTOBUF_NAMESPACE_ID::internal::ExpectTag<10>(ptr));
-        } else
-          goto handle_unusual;
-        continue;
-      default:
-        goto handle_unusual;
-    }  // switch
-  handle_unusual:
-    if ((tag == 0) || ((tag & 7) == 4)) {
-      CHK_(ptr);
-      ctx->SetLastTag(tag);
-      goto message_done;
-    }
-    ptr = UnknownFieldParse(
-        tag,
-        _internal_metadata_.mutable_unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(),
-        ptr, ctx);
-    CHK_(ptr != nullptr);
-  }  // while
-message_done:
+const char* Objects::_InternalParse(
+    const char* ptr, ::_pbi::ParseContext* ctx) {
+  ptr = ::_pbi::TcParser::ParseLoop(this, ptr, ctx, &_table_.header);
   return ptr;
-failure:
-  ptr = nullptr;
-  goto message_done;
-#undef CHK_
 }
 
-uint8_t* Objects::_InternalSerialize(
-    uint8_t* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const {
+
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 1, 0, 2> Objects::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    1,  // num_aux_entries
+    offsetof(decltype(_table_), aux_entries),
+    &_Objects_default_instance_._instance,
+    ::_pbi::TcParser::GenericFallback,  // fallback
+  }, {{
+    // repeated .cod_pb.Object object = 1;
+    {::_pbi::TcParser::FastMtR1,
+     {10, 63, 0, PROTOBUF_FIELD_OFFSET(Objects, _impl_.object_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // repeated .cod_pb.Object object = 1;
+    {PROTOBUF_FIELD_OFFSET(Objects, _impl_.object_), 0, 0,
+    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+  }}, {{
+    {::_pbi::TcParser::GetTable<::cod_pb::Object>()},
+  }}, {{
+  }},
+};
+
+::uint8_t* Objects::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
   // @@protoc_insertion_point(serialize_to_array_start:cod_pb.Objects)
-  uint32_t cached_has_bits = 0;
-  (void) cached_has_bits;
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
 
   // repeated .cod_pb.Object object = 1;
   for (unsigned i = 0,
       n = static_cast<unsigned>(this->_internal_object_size()); i < n; i++) {
-    const auto& repfield = this->_internal_object(i);
-    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::
+    const auto& repfield = this->_internal_object().Get(i);
+    target = ::google::protobuf::internal::WireFormatLite::
         InternalWriteMessage(1, repfield, repfield.GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
-    target = ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
-        _internal_metadata_.unknown_fields<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(::PROTOBUF_NAMESPACE_ID::UnknownFieldSet::default_instance), target, stream);
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
   // @@protoc_insertion_point(serialize_to_array_end:cod_pb.Objects)
   return target;
 }
 
-size_t Objects::ByteSizeLong() const {
+::size_t Objects::ByteSizeLong() const {
 // @@protoc_insertion_point(message_byte_size_start:cod_pb.Objects)
-  size_t total_size = 0;
+  ::size_t total_size = 0;
 
-  uint32_t cached_has_bits = 0;
+  ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
   // repeated .cod_pb.Object object = 1;
   total_size += 1UL * this->_internal_object_size();
-  for (const auto& msg : this->_impl_.object_) {
+  for (const auto& msg : this->_internal_object()) {
     total_size +=
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::MessageSize(msg);
+      ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
   }
-
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData Objects::_class_data_ = {
-    ::PROTOBUF_NAMESPACE_ID::Message::CopyWithSourceCheck,
-    Objects::MergeImpl
+const ::google::protobuf::Message::ClassData Objects::_class_data_ = {
+    Objects::MergeImpl,
+    nullptr,  // OnDemandRegisterArenaDtor
 };
-const ::PROTOBUF_NAMESPACE_ID::Message::ClassData*Objects::GetClassData() const { return &_class_data_; }
+const ::google::protobuf::Message::ClassData* Objects::GetClassData() const {
+  return &_class_data_;
+}
 
-
-void Objects::MergeImpl(::PROTOBUF_NAMESPACE_ID::Message& to_msg, const ::PROTOBUF_NAMESPACE_ID::Message& from_msg) {
+void Objects::MergeImpl(::google::protobuf::Message& to_msg, const ::google::protobuf::Message& from_msg) {
   auto* const _this = static_cast<Objects*>(&to_msg);
   auto& from = static_cast<const Objects&>(from_msg);
   // @@protoc_insertion_point(class_specific_merge_from_start:cod_pb.Objects)
-  GOOGLE_DCHECK_NE(&from, _this);
-  uint32_t cached_has_bits = 0;
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_impl_.object_.MergeFrom(from._impl_.object_);
-  _this->_internal_metadata_.MergeFrom<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(from._internal_metadata_);
+  _this->_internal_mutable_object()->MergeFrom(
+      from._internal_object());
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
 void Objects::CopyFrom(const Objects& from) {
@@ -1721,50 +1728,29 @@ void Objects::CopyFrom(const Objects& from) {
   MergeFrom(from);
 }
 
-bool Objects::IsInitialized() const {
+PROTOBUF_NOINLINE bool Objects::IsInitialized() const {
   return true;
 }
 
-void Objects::InternalSwap(Objects* other) {
+::_pbi::CachedSize* Objects::AccessCachedSize() const {
+  return &_impl_._cached_size_;
+}
+void Objects::InternalSwap(Objects* PROTOBUF_RESTRICT other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   _impl_.object_.InternalSwap(&other->_impl_.object_);
 }
 
-::PROTOBUF_NAMESPACE_ID::Metadata Objects::GetMetadata() const {
+::google::protobuf::Metadata Objects::GetMetadata() const {
   return ::_pbi::AssignDescriptors(
       &descriptor_table_cod_2eproto_getter, &descriptor_table_cod_2eproto_once,
       file_level_metadata_cod_2eproto[5]);
 }
-
 // @@protoc_insertion_point(namespace_scope)
 }  // namespace cod_pb
-PROTOBUF_NAMESPACE_OPEN
-template<> PROTOBUF_NOINLINE ::cod_pb::Value*
-Arena::CreateMaybeMessage< ::cod_pb::Value >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::cod_pb::Value >(arena);
-}
-template<> PROTOBUF_NOINLINE ::cod_pb::ArrayValue*
-Arena::CreateMaybeMessage< ::cod_pb::ArrayValue >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::cod_pb::ArrayValue >(arena);
-}
-template<> PROTOBUF_NOINLINE ::cod_pb::Variable*
-Arena::CreateMaybeMessage< ::cod_pb::Variable >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::cod_pb::Variable >(arena);
-}
-template<> PROTOBUF_NOINLINE ::cod_pb::Variables*
-Arena::CreateMaybeMessage< ::cod_pb::Variables >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::cod_pb::Variables >(arena);
-}
-template<> PROTOBUF_NOINLINE ::cod_pb::Object*
-Arena::CreateMaybeMessage< ::cod_pb::Object >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::cod_pb::Object >(arena);
-}
-template<> PROTOBUF_NOINLINE ::cod_pb::Objects*
-Arena::CreateMaybeMessage< ::cod_pb::Objects >(Arena* arena) {
-  return Arena::CreateMessageInternal< ::cod_pb::Objects >(arena);
-}
-PROTOBUF_NAMESPACE_CLOSE
-
+namespace google {
+namespace protobuf {
+}  // namespace protobuf
+}  // namespace google
 // @@protoc_insertion_point(global_scope)
-#include <google/protobuf/port_undef.inc>
+#include "google/protobuf/port_undef.inc"
