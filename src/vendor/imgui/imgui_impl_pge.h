@@ -68,7 +68,7 @@ Versions:
 #define OLC_PGEX_IMGUI_IMPL_PGE_H
 
 #include <vector>
-#include "vendor/imgui/imgui.h"
+#include "imgui.h"
 #include "vendor/olc/olcPixelGameEngine.h"
 
 namespace olc
@@ -196,7 +196,7 @@ namespace olc
 			io.KeyMap[ImGuiKey_Space] = olc::SPACE;
 			io.KeyMap[ImGuiKey_Enter] = olc::ENTER;
 			io.KeyMap[ImGuiKey_Escape] = olc::ESCAPE;
-			io.KeyMap[ImGuiKey_KeyPadEnter] = olc::RETURN;
+			io.KeyMap[ImGuiKey_KeypadEnter] = olc::RETURN;
 			io.KeyMap[ImGuiKey_A] = olc::A;
 			io.KeyMap[ImGuiKey_C] = olc::C;
 			io.KeyMap[ImGuiKey_V] = olc::V;
