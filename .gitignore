@@ -37,8 +37,18 @@ cmake
 *.COL
 *.txt
 *.sh
+*.dll
+*.mp3
+*.wav
+*.gad
+*.bk2
+*.scp
+*.SCP
+*.cab
+*.szs
 
 !/config.ini
+!/ep.sh
 !/resources/doc/*
 !/resources/font/*
 !/resources/map/*

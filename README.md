@@ -13,6 +13,42 @@ You must have a copy of the original game installed on your computer.
 
 ## Compiling MDCII
 
+### Docker
+
+You need the original Anno files on the container. The best way to do this is to copy the Anno directory into the
+project and change the (Linux) path in the config.ini.
+
+***Make sure that under no circumstances does any data end up on public servers such as GitHub or Cloud services.***
+
+Allow connections from the Docker container to the X server:
+
+```bash
+xhost +local:docker
+```
+
+Run a build:
+
+```bash
+docker build . -t stwe/mdcii
+```
+
+Starts the container:
+
+```bash
+docker run -it \
+    --device=/dev/dri:/dev/dri \
+    --group-add video \
+    --env="DISPLAY" \
+    --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" \
+    stwe/mdcii
+```
+
+Stop sharing X server access:
+
+```bash
+xhost -local:docker
+```
+
 ### Using Vcpkg with CMake
 
 You can use any package manager. Currently, I'm using [Vcpkg](https://vcpkg.io/en/).
