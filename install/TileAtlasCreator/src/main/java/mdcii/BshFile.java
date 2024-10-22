@@ -1,6 +1,6 @@
 // This file is part of the MDCII project.
 //
-// Copyright (c) 2023. stwe <https://github.com/stwe/MDCII>
+// Copyright (c) 2024. stwe <https://github.com/stwe/MDCII>
 //
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU General Public License
@@ -44,7 +44,7 @@ public class BshFile extends BinaryFile {
      * Possible zoom levels.
      */
     public enum Zoom {
-        SGFX, MGFX, GFX
+        SGFX, MGFX, GFX, NONE
     }
 
     /**
@@ -624,7 +624,11 @@ public class BshFile extends BinaryFile {
         var bshFilename = getPath().getFileName().toString().toLowerCase();
         var preName = bshFilename.substring(0, bshFilename.lastIndexOf("."));
         var outDir = CreatorConfig.PNG_OUT_PATH;
-        outDir += zoom.toString().toLowerCase() + "/" + preName;
+        if (zoom != Zoom.NONE) {
+            outDir += zoom.toString().toLowerCase() + "/" + preName;
+        } else {
+            outDir += "/" + preName;
+        }
 
         Files.createDirectories(Paths.get(outDir));
 

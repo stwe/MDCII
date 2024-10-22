@@ -76,6 +76,9 @@ public class AtlasCreator {
         paletteFile = new PaletteFile(Paths.get(CreatorConfig.ROOT_PATH + "/ToolGfx/STADTFLD.COL"));
         LOGGER.info("The palette was read successfully.");
 
+        // menu
+        createMenuImages();
+
         // animals
         LOGGER.info("Start Tiere Tile Atlas Images creation ...");
         createAnimalsSgfxAtlas();
@@ -89,6 +92,24 @@ public class AtlasCreator {
         createMgfxAtlas();
         createGfxAtlas();
         LOGGER.info("The Stadtfld Tile Atlas Images have been created successfully.");
+    }
+
+    //-------------------------------------------------
+    // Menu
+    //-------------------------------------------------
+
+    private void createMenuImages() throws IOException {
+        LOGGER.info("Menu Images creation ...");
+
+        var bshFile = new BshFile(
+                Paths.get(CreatorConfig.ROOT_PATH + "/ToolGfx/START.BSH"),
+                paletteFile.getPalette(),
+                BshFile.Zoom.NONE,
+                CreatorConfig.CREATE_PNGS,
+                true
+        ).getBshTextures();
+
+        LOGGER.info("{} Menu Images have been created successfully.", bshFile.size());
     }
 
     //-------------------------------------------------
